@@ -1,0 +1,24 @@
+buildscript {
+    ext.kotlin_version = '0.11.91.1'
+
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+apply plugin: 'kotlin'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+}
+
+version = '1.0-SNAPSHOT'
