@@ -1,5 +1,5 @@
 - idea.version – version of IDEA distribution that should be used as a dependency. Default value: 142-SNAPSHOT
-- idea.plugins – list of bundles IDEA plugins that should be used as dependencies. Default value: <empty>
+- idea.plugins – list of bundled IDEA plugins that should be used as dependencies. Default value: <empty>
 
 ```
 buildscript {
