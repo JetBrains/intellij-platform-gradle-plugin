@@ -10,7 +10,13 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.util.PatternSet
+import java.io.BufferedOutputStream
 import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
+import java.util.Enumeration
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
 
 class IntelliJPlugin : Plugin<Project> {
     val logger = Logging.getLogger(this.javaClass)
@@ -80,7 +86,7 @@ class IntelliJPlugin : Plugin<Project> {
         if (!markerFile.exists()) {
             logger.info("Unzipping idea")
             (project as ProjectInternal).copy {
-                it.from(zipFile.path)
+                it.from(project.zipTree(zipFile))
                 it.into(cacheDirectory)
             }
             markerFile.createNewFile()
