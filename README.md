@@ -4,6 +4,16 @@ The plugin adds extra IntelliJ-specific dependencies while compiling tasks.
 
 # Usage
 
+## Gradle >= 2.1
+
+```groovy
+plugins {
+  id "org.jetbrains.intellij" version "1.0-SNAPSHOT"
+}
+```
+
+## Gradle < 2.1
+
 ```groovy
 buildscript {
   repositories {
@@ -28,15 +38,8 @@ Plugin provides following options to configure target IntelliJ SDK
 
 ### build.gradle
 ```groovy
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '1.0-SNAPSHOT'
-  }
+plugins {
+  id "org.jetbrains.intellij" version "1.0-SNAPSHOT"
 }
 
 repositories {
