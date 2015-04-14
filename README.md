@@ -1,17 +1,11 @@
-- idea.version – version of IDEA distribution that should be used as a dependency. Default value: 142-SNAPSHOT
-- idea.plugins – list of bundled IDEA plugins that should be used as dependencies. Default value: <empty>
+### Configuration
+
+`idea.version` defines the version of IDEA distribution that should be used as a dependency. Default value: 142-SNAPSHOT
+`idea.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. Default value: <empty>
 
 ```
 buildscript {
-  ext.kotlin_version = '0.11.91.1'
-  repositories {
-    mavenCentral()
-    maven {
-      url uri('/Users/zolotov/dev/idea-gradle-plugin')
-    }
-  }
   dependencies {
-    classpath "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     classpath group: 'org.jetbrains.intellij', name: 'intellij-gradle-plugin', version: '1.0-SNAPSHOT'
   }
 }
@@ -21,7 +15,7 @@ repositories {
 }
 
 apply plugin: 'java'
-apply plugin: 'intellij-plugin'
+apply plugin: 'org.jetbrains.intellij'
 
 idea {
   version '14.1'
