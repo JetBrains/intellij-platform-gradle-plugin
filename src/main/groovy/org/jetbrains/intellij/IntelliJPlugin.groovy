@@ -43,9 +43,16 @@ class IntelliJPlugin implements Plugin<Project> {
         })
 
         ideaDependencyTask.doLast {
-            if (configuration.dependencies.isEmpty()) {
-                LOG.info("Adding idea dependency")
+            if (configuration.dependencies.empty) {
                 def version = intelliJPluginExtension.version
+                LOG.info("Adding IDEA repository")
+                project.repositories.maven {
+                    def type = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
+                    it.url = "https://www.jetbrains.com/intellij-repository/${type}"
+                }
+
+
+                LOG.info("Adding IDEA dependency")
                 project.dependencies.add(CONFIGURATION_NAME, "com.jetbrains.intellij.idea:ideaIC:${version}@zip")
 
                 LOG.info("IDEA zip: " + configuration.singleFile.path)

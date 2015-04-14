@@ -42,11 +42,6 @@ plugins {
   id "org.jetbrains.intellij" version "1.0-SNAPSHOT"
 }
 
-repositories {
-  maven { url "https://www.jetbrains.com/intellij-repository/releases" }
-}
-
-apply plugin: 'java'
 apply plugin: 'org.jetbrains.intellij'
 
 idea {
