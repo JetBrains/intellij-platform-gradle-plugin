@@ -26,9 +26,9 @@ version = '1.0-SNAPSHOT'
 group = 'org.jetbrains'
 
 pluginBundle {
-    website 'https://jetbrains.com/'
-    vcsUrl 'https://github.com/JetBrains/gradle-intellij-plugin'
-    description 'Plugin for building plugins for IntelliJ IDEs'
+    website = 'https://jetbrains.com/'
+    vcsUrl = 'https://github.com/JetBrains/gradle-intellij-plugin'
+    description = 'Plugin for building plugins for IntelliJ IDEs'
     tags =['intellij', 'jetbrains', 'idea']
     
     plugins {
