@@ -1,15 +1,7 @@
-buildscript {
-  repositories {
-    maven {
-      url 'https://plugins.gradle.org/m2/'
-    }
-  }
-  dependencies {
-    classpath 'com.gradle.publish:plugin-publish-plugin:0.9.0'
-  }
+plugins {
+    id "com.gradle.plugin-publish" version "0.9.0"
 }
 
-apply plugin: 'com.gradle.plugin-publish'
 apply plugin: 'groovy'
 
 compileGroovy {
@@ -27,15 +19,15 @@ dependencies {
     compile 'org.jetbrains:annotations:13.0'
 }
 
-version = '1.0-SNAPSHOT'
+version = '0.0.3'
 group = 'org.jetbrains'
 
 pluginBundle {
     website = 'https://jetbrains.com/'
     vcsUrl = 'https://github.com/JetBrains/gradle-intellij-plugin'
     description = 'Plugin for building plugins for IntelliJ IDEs'
-    tags =['intellij', 'jetbrains', 'idea']
-    
+    tags = ['intellij', 'jetbrains', 'idea']
+
     plugins {
         intellijPlugin {
             id = 'org.jetbrains.intellij'
