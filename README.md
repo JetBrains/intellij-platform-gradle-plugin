@@ -8,7 +8,7 @@ The plugin adds extra IntelliJ-specific dependencies while compiling tasks.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.0-SNAPSHOT"
+  id "org.jetbrains.intellij" version "0.0.2"
 }
 ```
 
