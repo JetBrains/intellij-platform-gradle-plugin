@@ -4,7 +4,7 @@
 
 `idea.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. Default value: <empty>
 
-```
+```groovy
 buildscript {
   dependencies {
     classpath group: 'org.jetbrains.intellij', name: 'intellij-gradle-plugin', version: '1.0-SNAPSHOT'
