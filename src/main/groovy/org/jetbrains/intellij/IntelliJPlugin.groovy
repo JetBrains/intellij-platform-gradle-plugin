@@ -13,18 +13,18 @@ import org.jetbrains.annotations.NotNull
 
 class IntelliJPlugin implements Plugin<Project> {
     private static final def LOG = Logging.getLogger(IntelliJPlugin.class)
-    private static final IDEA_DEPENDENCY_TASK = "ideaDependencyTask"
-    private static final CONFIGURATION_NAME = "idea"
-    private static final EXTENSION_NAME = "idea"
+    private static final IDEA_DEPENDENCY_TASK = "intellijDependencyTask"
+    private static final CONFIGURATION_NAME = "intellij"
+    private static final EXTENSION_NAME = "intellij"
 
     @Override
     def void apply(Project project) {
         project.getPlugins().apply(JavaPlugin.class)
-        def ideaExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension.class)
-        ideaExtension.with {
+        def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension.class)
+        intellijExtension.with {
             version = "142-SNAPSHOT"
         }
-        configureConfigurations(project, ideaExtension)
+        configureConfigurations(project, intellijExtension)
     }
 
     private static def configureConfigurations(@NotNull Project project,

@@ -32,8 +32,8 @@ apply plugin: 'org.jetbrains.intellij'
 ## Configuration
 
 Plugin provides following options to configure target IntelliJ SDK
-- `idea.version` defines the version of IDEA distribution that should be used as a dependency. Default value: 142-SNAPSHOT
-- `idea.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. Default value: <empty>
+- `intellij.version` defines the version of IDEA distribution that should be used as a dependency. Default value: 142-SNAPSHOT
+- `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. Default value: <empty>
 
 
 ### build.gradle
@@ -44,7 +44,7 @@ plugins {
 
 apply plugin: 'org.jetbrains.intellij'
 
-idea {
+intellij {
   version '14.1'
   plugins 'coverage'
 }

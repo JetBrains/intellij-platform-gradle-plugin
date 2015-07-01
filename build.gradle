@@ -19,7 +19,7 @@ dependencies {
     compile 'org.jetbrains:annotations:13.0'
 }
 
-version = '0.0.3'
+version = '0.0.4'
 group = 'org.jetbrains'
 
 pluginBundle {
