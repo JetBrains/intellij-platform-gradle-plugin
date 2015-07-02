@@ -5,7 +5,6 @@ import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.Logging
-import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
@@ -13,7 +12,6 @@ import org.jetbrains.annotations.NotNull
 
 class IntelliJPlugin implements Plugin<Project> {
     private static final def LOG = Logging.getLogger(IntelliJPlugin.class)
-    private static final IDEA_DEPENDENCY_TASK = "intellijDependencyTask"
     private static final CONFIGURATION_NAME = "intellij"
     private static final EXTENSION_NAME = "intellij"
 
@@ -34,25 +32,18 @@ class IntelliJPlugin implements Plugin<Project> {
                 .setTransitive(true)
                 .setDescription("The IntelliJ IDEA Community Edition artifact to be used for this project.")
 
-        LOG.info("Preparing idea dependency")
-        def ideaDependencyTask = project.task(IDEA_DEPENDENCY_TASK, {
-            it.description = "Downloading and preparing IntelliJ IDEA dependency."
-            it.group = BasePlugin.BUILD_GROUP
-            project.tasks.getByName(JavaPlugin.COMPILE_JAVA_TASK_NAME).dependsOn(IDEA_DEPENDENCY_TASK)
-            project.tasks.getByName(JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME).dependsOn(IDEA_DEPENDENCY_TASK)
-        })
-
-        ideaDependencyTask.doLast {
+        LOG.info("Preparing IntelliJ IDEA dependency task")
+        project.dependencies {
             if (configuration.dependencies.empty) {
                 def version = intelliJPluginExtension.version
-                LOG.info("Adding IDEA repository")
+                LOG.info("Adding IntelliJ IDEA repository")
                 project.repositories.maven {
                     def type = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
                     it.url = "https://www.jetbrains.com/intellij-repository/${type}"
                 }
 
 
-                LOG.info("Adding IDEA dependency")
+                LOG.info("Adding IntelliJ IDEA dependency")
                 project.dependencies.add(CONFIGURATION_NAME, "com.jetbrains.intellij.idea:ideaIC:${version}@zip")
 
                 LOG.info("IDEA zip: " + configuration.singleFile.path)
