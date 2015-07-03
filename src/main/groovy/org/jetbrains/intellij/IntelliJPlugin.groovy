@@ -33,7 +33,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 .setDescription("The IntelliJ IDEA Community Edition artifact to be used for this project.")
 
         LOG.info("Preparing IntelliJ IDEA dependency task")
-        project.dependencies {
+        project.afterEvaluate() {
             if (configuration.dependencies.empty) {
                 def version = intelliJPluginExtension.version
                 LOG.info("Adding IntelliJ IDEA repository")
