@@ -4,6 +4,8 @@ import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.tasks.SourceSet
 import org.jetbrains.annotations.NotNull
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -19,6 +21,7 @@ class IntelliJPlugin implements Plugin<Project> {
             version = DEFAULT_IDEA_VERSION
         }
         configureConfigurations(project, intellijExtension)
+        configureSetPluginVersionTask(project)
     }
 
     private static def configureConfigurations(@NotNull Project project,
@@ -39,8 +42,8 @@ class IntelliJPlugin implements Plugin<Project> {
         project.configurations.compile.extendsFrom(configuration) // needed for sources resolving
         project.configurations.compile.extendsFrom(sdkConfiguration)
         project.configurations.runtime.extendsFrom(bundledPluginsConfiguration, toolsConfiguration)
-        
-        project.afterEvaluate() {
+
+        project.afterEvaluate {
             LOG.info("Preparing IntelliJ IDEA dependency task")
             if (configuration.dependencies.empty) {
                 def version = intelliJPluginExtension.version
@@ -74,7 +77,17 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
     }
-    
+
+    private static void configureSetPluginVersionTask(@NotNull Project project) {
+        project.afterEvaluate {
+            JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention.class);
+            SourceSet mainSourceSet = javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+            PluginVersionTask task = project.tasks.create(PluginVersionTask.NAME, PluginVersionTask.class);
+            task.setSourceSet(mainSourceSet);
+            project.getTasksByName(JavaPlugin.JAR_TASK_NAME, false)*.dependsOn(task)
+        }
+    }
+
     @NotNull
     private static File ideaDirectory(@NotNull Project project, @NotNull File zipFile) {
         def directoryName = zipFile.name - ".zip"
