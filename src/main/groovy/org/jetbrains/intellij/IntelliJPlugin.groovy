@@ -11,7 +11,7 @@ import org.jetbrains.annotations.NotNull
 class IntelliJPlugin implements Plugin<Project> {
     private static final def LOG = Logging.getLogger(IntelliJPlugin.class)
     private static final EXTENSION_NAME = "intellij"
-    private static final String DEFAULT_IDEA_VERSION = "142-SNAPSHOT"
+    private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
     @Override
     def void apply(Project project) {
