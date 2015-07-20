@@ -1,12 +1,10 @@
 package org.jetbrains.intellij
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.query.ArtifactResolutionQuery
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
-import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
@@ -40,8 +38,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static def configureConfigurations(@NotNull Project project,
                                                @NotNull IntelliJPluginExtension intelliJPluginExtension) {
-        def configuration = project.configurations.create("intellij")
-                .setVisible(true)
+        def configuration = project.configurations.create("intellij").setVisible(false)
                 .setDescription("The IntelliJ IDEA Community Edition artifact to be used for this project.")
 
         project.afterEvaluate {
@@ -65,15 +62,12 @@ class IntelliJPlugin implements Plugin<Project> {
 
                 project.repositories.ivy { repo ->
                     repo.url = ideaDirectory
+                    repo.artifactPattern("${ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]") // ivy xmls
+                    repo.artifactPattern("${ideaDirectory.path}/[artifact].[ext]") // idea libs
+                    repo.artifactPattern("${System.getProperty("java.home")}/../lib/[artifact].[ext]") // java libs
                     if (sourcesFile != null) {
-                        repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]")
+                        repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]") // sources
                     }
-                    repo.artifactPattern("${ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]")
-                    repo.artifactPattern("${ideaDirectory.path}/lib/[artifact].[ext]")
-                    intelliJPluginExtension.plugins.each {
-                        repo.artifactPattern("${ideaDirectory.path}/plugins/${it}/lib/[artifact].[ext]")
-                    }
-                    repo.artifactPattern("${System.getProperty("java.home")}/../lib/[artifact].[ext]")
                 }
                 project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
                         group: 'com.jetbrains', name: moduleName, version: version, configuration: 'compile'
@@ -86,7 +80,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static File ideaSourcesFile(@NotNull Project project, @NotNull Configuration configuration) {
-        try {
+        if (System.properties.'do.not.load.idea.sources') {
             Collection<ComponentIdentifier> components = new ArrayList<>()
             configuration.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL).each {
                 def id = it.getModuleVersion().getId()
@@ -103,8 +97,6 @@ class IntelliJPlugin implements Plugin<Project> {
                     }
                 }
             }
-        } catch (Throwable ignored) {
-            LOG.info("Cannot download IntelliJ sources")
         }
         return null
     }
@@ -146,41 +138,36 @@ class IntelliJPlugin implements Plugin<Project> {
         generator.addConfiguration(new DefaultIvyConfiguration("sources"))
         generator.addConfiguration(new DefaultIvyConfiguration("runtime"))
 
-        project.fileTree(ideaDirectory).include("lib*/*.jar").files.each {
-            def artifact = new DefaultIvyArtifact(it, it.name - ".jar", "jar", "jar", null)
-            artifact.conf = "compile"
-            generator.addArtifact(artifact)
-        }
+        def ideaLibJars = project.fileTree(ideaDirectory)
+        ideaLibJars.include("lib*/*.jar")
+        ideaLibJars.files.each { generator.addArtifact(createDependency(it, "compile", ideaDirectory)) }
 
         def bundledPluginJars = project.fileTree(ideaDirectory)
-        bundledPlugins.each {
-            bundledPluginJars.include("plugins/${it}/lib/*.jar")
-        }
-        bundledPluginJars.files.each {
-            def artifact = new DefaultIvyArtifact(it, it.name - ".jar", "jar", "jar", null)
-            artifact.conf = "runtime"
+        bundledPlugins.each { bundledPluginJars.include("plugins/${it}/lib/*.jar") }
+        bundledPluginJars.files.each { generator.addArtifact(createDependency(it, "runtime", ideaDirectory)) }
+
+        def javaLibDirectory = new File("${System.getProperty("java.home")}/../lib")
+        def toolsJars = project.fileTree(javaLibDirectory, { tree -> tree.include { "*tools.jar" } })
+        toolsJars.files.each { generator.addArtifact(createDependency(it, "runtime", javaLibDirectory)) }
+
+        if (ideaSourcesFile != null) {
+            // source dependency must be named in the same way as module name
+            def artifact = new DefaultIvyArtifact(ideaSourcesFile, moduleName, "jar", "sources", "sources")
+            artifact.conf = "sources"
             generator.addArtifact(artifact)
         }
-
-        def toolsJars = project.fileTree("${System.getProperty("java.home")}/../lib", {
-            ConfigurableFileTree tree ->
-                tree.include {
-                    "*tools.jar"
-                }
-        })
-        toolsJars.files.each {
-            def artifact = new DefaultIvyArtifact(it, it.name - ".jar", "jar", "jar", null)
-            artifact.conf = "runtime"
-            generator.addArtifact(artifact)
-        }
-
-        def artifact = new DefaultIvyArtifact(ideaSourcesFile, "ideaIC", "jar", "sources", "sources")
-        artifact.conf = "sources"
-        generator.addArtifact(artifact)
 
         def parentDirectory = new File(ideaDirectory, "com.jetbrains/${moduleName}/${version}")
         parentDirectory.mkdirs()
         generator.writeTo(new File(parentDirectory, "ivy-${project.name}.xml"))
         return moduleName
+    }
+
+    @NotNull
+    private static DefaultIvyArtifact createDependency(File file, String configuration, File baseDir) {
+        def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
+        def artifact = new DefaultIvyArtifact(file, relativePath - ".jar", "jar", "jar", null)
+        artifact.conf = configuration
+        artifact
     }
 }
