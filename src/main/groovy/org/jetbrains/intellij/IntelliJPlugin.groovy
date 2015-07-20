@@ -80,7 +80,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static File ideaSourcesFile(@NotNull Project project, @NotNull Configuration configuration) {
-        if (System.properties.'do.not.load.idea.sources') {
+        if (!System.properties.'do.not.load.idea.sources') {
             Collection<ComponentIdentifier> components = new ArrayList<>()
             configuration.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL).each {
                 def id = it.getModuleVersion().getId()
