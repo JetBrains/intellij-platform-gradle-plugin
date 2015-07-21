@@ -107,6 +107,7 @@ class IntelliJPlugin implements Plugin<Project> {
             SourceSet mainSourceSet = javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
             PluginVersionTask task = project.tasks.create(PluginVersionTask.NAME, PluginVersionTask.class);
             task.setSourceSet(mainSourceSet);
+            task.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
             project.getTasksByName(JavaPlugin.JAR_TASK_NAME, false)*.dependsOn(task)
         }
     }

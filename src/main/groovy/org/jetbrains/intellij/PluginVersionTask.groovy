@@ -1,9 +1,7 @@
 package org.jetbrains.intellij
-
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
-import org.gradle.language.base.plugins.LifecycleBasePlugin
 
 class PluginVersionTask extends DefaultTask {
     public static final String NAME = "patchPluginVersion"
@@ -13,7 +11,7 @@ class PluginVersionTask extends DefaultTask {
         super()
         name = NAME
         description = "Set plugin version in plugin.xml."
-        group = LifecycleBasePlugin.BUILD_GROUP;
+        group = "intellij";
     }
 
     @SuppressWarnings("GroovyUnusedDeclaration")
