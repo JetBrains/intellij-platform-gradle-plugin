@@ -1,4 +1,5 @@
 package org.jetbrains.intellij
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -66,12 +67,15 @@ class IntelliJPlugin implements Plugin<Project> {
 
                 project.repositories.ivy { repo ->
                     repo.url = ideaDirectory
-                    repo.artifactPattern("${ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]") // ivy xmls
+                    repo.artifactPattern("${ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]") // ivy xml
                     repo.artifactPattern("${ideaDirectory.path}/[artifact].[ext]") // idea libs
-                    repo.artifactPattern("${System.getProperty("java.home")}/../lib/[artifact].[ext]") // java libs
+
+                    def javaHomeLib = javaHomeLib()
+                    if (javaHomeLib != null) {
+                        repo.artifactPattern("${javaHomeLib}/[artifact].[ext]") // java libs
+                    }
                     if (sourcesFile != null) {
-                        repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]")
-                        // sources
+                        repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]")// sources
                     }
                 }
                 project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
@@ -124,7 +128,7 @@ class IntelliJPlugin implements Plugin<Project> {
         task.filesToIgnore = filesToIgnoreWhileBuilding
         task.configure()
         task.dependsOn(project.getTasksByName(JavaPlugin.JAR_TASK_NAME, true))
-        
+
         ArchivePublishArtifact pluginArtifact = new ArchivePublishArtifact(task);
         project.extensions.getByType(DefaultArtifactPublicationSet.class).addCandidate(pluginArtifact);
     }
@@ -163,14 +167,16 @@ class IntelliJPlugin implements Plugin<Project> {
             filesToIgnoreWhileBuilding.add(it)
         }
 
-        def bundledPluginJars = project.fileTree(ideaDirectory)
-        bundledPlugins.each { bundledPluginJars.include("plugins/${it}/lib/*.jar") }
-        bundledPluginJars.files.each {
-            generator.addArtifact(createDependency(it, "runtime", ideaDirectory))
-            filesToIgnoreWhileBuilding.add(it)
+        if (bundledPlugins.length > 0) {
+            def bundledPluginJars = project.fileTree(ideaDirectory)
+            bundledPlugins.each { bundledPluginJars.include("plugins/${it}/lib/*.jar") }
+            bundledPluginJars.files.each {
+                generator.addArtifact(createDependency(it, "runtime", ideaDirectory))
+                filesToIgnoreWhileBuilding.add(it)
+            }
         }
 
-        def javaLibDirectory = new File("${System.getProperty("java.home")}/../lib")
+        def javaLibDirectory = javaHomeLib()
         def toolsJars = project.fileTree(javaLibDirectory, { tree -> tree.include { "*tools.jar" } })
         toolsJars.files.each {
             generator.addArtifact(createDependency(it, "runtime", javaLibDirectory))
@@ -189,6 +195,11 @@ class IntelliJPlugin implements Plugin<Project> {
         parentDirectory.mkdirs()
         generator.writeTo(new File(parentDirectory, "ivy-${project.name}.xml"))
         return moduleName
+    }
+
+    private static File javaHomeLib() {
+        def javaHome = System.getProperty("java.home")
+        return javaHome != null ? new File("${javaHome}", "/../lib") : null;
     }
 
     @NotNull
