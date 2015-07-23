@@ -5,6 +5,8 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.query.ArtifactResolutionQuery
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
+import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
+import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
@@ -58,7 +60,9 @@ class IntelliJPlugin implements Plugin<Project> {
 
                 def ideaDirectory = ideaDirectory(project, configuration.singleFile)
                 def sourcesFile = ideaSourcesFile(project, configuration)
-                def moduleName = createIvyRepo(project, intelliJPluginExtension.plugins, ideaDirectory, sourcesFile, version)
+                def filesToIgnoreWhileBuilding = new HashSet<File>()
+                def moduleName = createIvyRepo(project, intelliJPluginExtension.plugins, ideaDirectory, sourcesFile,
+                        filesToIgnoreWhileBuilding, version)
 
                 project.repositories.ivy { repo ->
                     repo.url = ideaDirectory
@@ -66,7 +70,8 @@ class IntelliJPlugin implements Plugin<Project> {
                     repo.artifactPattern("${ideaDirectory.path}/[artifact].[ext]") // idea libs
                     repo.artifactPattern("${System.getProperty("java.home")}/../lib/[artifact].[ext]") // java libs
                     if (sourcesFile != null) {
-                        repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]") // sources
+                        repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]")
+                        // sources
                     }
                 }
                 project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
@@ -75,6 +80,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
                         group: 'com.jetbrains', name: moduleName, version: version, configuration: 'runtime'
                 ])
+                configureBuildPluginTask(project, filesToIgnoreWhileBuilding)
             }
         }
     }
@@ -106,10 +112,21 @@ class IntelliJPlugin implements Plugin<Project> {
             JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention.class);
             SourceSet mainSourceSet = javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
             PluginVersionTask task = project.tasks.create(PluginVersionTask.NAME, PluginVersionTask.class);
-            task.setSourceSet(mainSourceSet);
+            task.sourceSet = mainSourceSet;
             task.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
             project.getTasksByName(JavaPlugin.JAR_TASK_NAME, false)*.dependsOn(task)
         }
+    }
+
+    private static void configureBuildPluginTask(@NotNull Project project,
+                                                 @NotNull Collection<File> filesToIgnoreWhileBuilding) {
+        def task = project.tasks.create(BuildPluginTask.NAME, BuildPluginTask.class)
+        task.filesToIgnore = filesToIgnoreWhileBuilding
+        task.configure()
+        task.dependsOn(project.getTasksByName(JavaPlugin.JAR_TASK_NAME, true))
+        
+        ArchivePublishArtifact pluginArtifact = new ArchivePublishArtifact(task);
+        project.extensions.getByType(DefaultArtifactPublicationSet.class).addCandidate(pluginArtifact);
     }
 
     @NotNull
@@ -132,7 +149,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static def createIvyRepo(@NotNull Project project, @NotNull String[] bundledPlugins,
                                      @NotNull File ideaDirectory, @Nullable File ideaSourcesFile,
-                                     @NotNull String version) {
+                                     @NotNull Set<File> filesToIgnoreWhileBuilding, @NotNull String version) {
         def moduleName = "ideaIC"
         def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", moduleName, version))
         generator.addConfiguration(new DefaultIvyConfiguration("compile"))
@@ -141,21 +158,31 @@ class IntelliJPlugin implements Plugin<Project> {
 
         def ideaLibJars = project.fileTree(ideaDirectory)
         ideaLibJars.include("lib*/*.jar")
-        ideaLibJars.files.each { generator.addArtifact(createDependency(it, "compile", ideaDirectory)) }
+        ideaLibJars.files.each {
+            generator.addArtifact(createDependency(it, "compile", ideaDirectory))
+            filesToIgnoreWhileBuilding.add(it)
+        }
 
         def bundledPluginJars = project.fileTree(ideaDirectory)
         bundledPlugins.each { bundledPluginJars.include("plugins/${it}/lib/*.jar") }
-        bundledPluginJars.files.each { generator.addArtifact(createDependency(it, "runtime", ideaDirectory)) }
+        bundledPluginJars.files.each {
+            generator.addArtifact(createDependency(it, "runtime", ideaDirectory))
+            filesToIgnoreWhileBuilding.add(it)
+        }
 
         def javaLibDirectory = new File("${System.getProperty("java.home")}/../lib")
         def toolsJars = project.fileTree(javaLibDirectory, { tree -> tree.include { "*tools.jar" } })
-        toolsJars.files.each { generator.addArtifact(createDependency(it, "runtime", javaLibDirectory)) }
+        toolsJars.files.each {
+            generator.addArtifact(createDependency(it, "runtime", javaLibDirectory))
+            filesToIgnoreWhileBuilding.add(it)
+        }
 
         if (ideaSourcesFile != null) {
             // source dependency must be named in the same way as module name
             def artifact = new DefaultIvyArtifact(ideaSourcesFile, moduleName, "jar", "sources", "sources")
             artifact.conf = "sources"
             generator.addArtifact(artifact)
+            filesToIgnoreWhileBuilding.add(ideaSourcesFile)
         }
 
         def parentDirectory = new File(ideaDirectory, "com.jetbrains/${moduleName}/${version}")

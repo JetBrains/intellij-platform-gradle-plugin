@@ -5,13 +5,13 @@ import org.gradle.api.tasks.TaskAction
 
 class PluginVersionTask extends DefaultTask {
     public static final String NAME = "patchPluginVersion"
-    private SourceSet sourceSet
+    SourceSet sourceSet
 
     PluginVersionTask() {
         super()
         name = NAME
         description = "Set plugin version in plugin.xml."
-        group = "intellij";
+        group = "intellij"
     }
 
     @SuppressWarnings("GroovyUnusedDeclaration")
@@ -29,9 +29,5 @@ class PluginVersionTask extends DefaultTask {
                 printer.print(pluginXml)
             }
         }
-    }
-
-    void setSourceSet(SourceSet sourceSet) {
-        this.sourceSet = sourceSet
     }
 }
