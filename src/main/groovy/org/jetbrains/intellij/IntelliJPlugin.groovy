@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable
 class IntelliJPlugin implements Plugin<Project> {
     private static final def LOG = Logging.getLogger(IntelliJPlugin.class)
     private static final EXTENSION_NAME = "intellij"
+    private static final CONFIGURATION_NAME = "intellij"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
     @Override
@@ -33,62 +34,66 @@ class IntelliJPlugin implements Plugin<Project> {
         project.getPlugins().apply(JavaPlugin.class)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension.class)
         intellijExtension.with {
+            plugins = []
             version = DEFAULT_IDEA_VERSION
         }
-        configureConfigurations(project, intellijExtension)
+        configurePlugin(project, intellijExtension)
         configureSetPluginVersionTask(project)
     }
 
-    private static def configureConfigurations(@NotNull Project project,
-                                               @NotNull IntelliJPluginExtension intelliJPluginExtension) {
-        def configuration = project.configurations.create("intellij").setVisible(false)
-                .setDescription("The IntelliJ IDEA Community Edition artifact to be used for this project.")
-
+    private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         project.afterEvaluate {
             LOG.info("Preparing IntelliJ IDEA dependency task")
-            if (configuration.dependencies.empty) {
-                def version = intelliJPluginExtension.version
-                LOG.info("Adding IntelliJ IDEA repository")
-
-                def releaseType = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
-                project.repositories.maven {
-                    it.url = "https://www.jetbrains.com/intellij-repository/${releaseType}"
-                }
-
-                LOG.info("Adding IntelliJ IDEA dependency")
-                project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:ideaIC:${version}")
-                LOG.info("IDEA zip: " + configuration.singleFile.path)
-
-                def ideaDirectory = ideaDirectory(project, configuration.singleFile)
-                def sourcesFile = ideaSourcesFile(project, configuration)
-                def filesToIgnoreWhileBuilding = new HashSet<File>()
-                def moduleName = createIvyRepo(project, intelliJPluginExtension.plugins, ideaDirectory, sourcesFile,
-                        filesToIgnoreWhileBuilding, version)
-
-                project.repositories.ivy { repo ->
-                    repo.url = ideaDirectory
-                    repo.artifactPattern("${ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]") // ivy xml
-                    repo.artifactPattern("${ideaDirectory.path}/[artifact].[ext]") // idea libs
-
-                    def javaHomeLib = javaHomeLib()
-                    if (javaHomeLib != null) {
-                        repo.artifactPattern("${javaHomeLib}/[artifact].[ext]") // java libs
-                    }
-                    if (sourcesFile != null) {
-                        repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]")// sources
-                    }
-                }
-                project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
-                        group: 'com.jetbrains', name: moduleName, version: version, configuration: 'compile'
-                ])
-                project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
-                        group: 'com.jetbrains', name: moduleName, version: version, configuration: 'runtime'
-                ])
-                configureBuildPluginTask(project, filesToIgnoreWhileBuilding)
-            }
+            def (ideaDirectory, sourcesFile) = configureIntelliJDependency(project, extension.version)
+            def intellijFiles = configurePluginDependencies(project, extension, ideaDirectory, sourcesFile)
+            configureBuildPluginTask(project, intellijFiles)
         }
     }
 
+    private static Tuple configureIntelliJDependency(@NotNull Project project, @NotNull String version) {
+        def configuration = project.configurations.create(CONFIGURATION_NAME).setVisible(false)
+                .setDescription("The IntelliJ IDEA Community Edition artifact to be used for this project.")
+        LOG.info("Adding IntelliJ IDEA repository")
+        def releaseType = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
+        project.repositories.maven { it.url = "https://www.jetbrains.com/intellij-repository/${releaseType}" }
+        LOG.info("Adding IntelliJ IDEA dependency")
+        project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:ideaIC:${version}")
+        LOG.info("IDEA zip: " + configuration.singleFile.path)
+        return new Tuple(ideaDirectory(project, configuration.singleFile), ideaSourcesFile(project, configuration))
+    }
+
+    private static Collection<File> configurePluginDependencies(@NotNull Project project,
+                                                                @NotNull IntelliJPluginExtension extension,
+                                                                @NotNull File ideaDirectory,
+                                                                @Nullable File sourcesFile) {
+
+        def intellijFile = new HashSet<File>()
+        def version = extension.version
+        def moduleName = createIvyRepo(project, extension.plugins, ideaDirectory, sourcesFile, intellijFile, version)
+
+        project.repositories.ivy { repo ->
+            repo.url = ideaDirectory
+            repo.artifactPattern("${ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]") // ivy xml
+            repo.artifactPattern("${ideaDirectory.path}/[artifact].[ext]") // idea libs
+
+            def javaHomeLib = javaHomeLib()
+            if (javaHomeLib != null) {
+                repo.artifactPattern("${javaHomeLib}/[artifact].[ext]") // java libs
+            }
+            if (sourcesFile != null) {
+                repo.artifactPattern("${sourcesFile.parent}/[artifact]-${version}-[classifier].[ext]") // sources
+            }
+        }
+        project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
+                group: 'com.jetbrains', name: moduleName, version: version, configuration: 'compile'
+        ])
+        project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
+                group: 'com.jetbrains', name: moduleName, version: version, configuration: 'runtime'
+        ])
+        return intellijFile
+    }
+
+    @Nullable
     private static File ideaSourcesFile(@NotNull Project project, @NotNull Configuration configuration) {
         if (!System.properties.'do.not.load.idea.sources') {
             Collection<ComponentIdentifier> components = new ArrayList<>()
@@ -124,6 +129,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureBuildPluginTask(@NotNull Project project,
                                                  @NotNull Collection<File> filesToIgnoreWhileBuilding) {
+        LOG.info("Configuring building IntelliJ IDEA plugin task")
         def task = project.tasks.create(BuildPluginTask.NAME, BuildPluginTask.class)
         task.filesToIgnore = filesToIgnoreWhileBuilding
         task.configure()
@@ -147,6 +153,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 it.into(cacheDirectory)
             }
             markerFile.createNewFile()
+            LOG.info("Unzipped")
         }
         return cacheDirectory;
     }
@@ -197,6 +204,7 @@ class IntelliJPlugin implements Plugin<Project> {
         return moduleName
     }
 
+    @Nullable
     private static File javaHomeLib() {
         def javaHome = System.getProperty("java.home")
         return javaHome != null ? new File("${javaHome}", "/../lib") : null;
