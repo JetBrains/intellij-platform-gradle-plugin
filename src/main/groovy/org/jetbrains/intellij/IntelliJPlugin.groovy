@@ -195,7 +195,8 @@ class IntelliJPlugin implements Plugin<Project> {
         }
 
         def javaLibDirectory = javaHomeLib()
-        def toolsJars = project.fileTree(javaLibDirectory, { tree -> tree.include { "*tools.jar" } })
+        def toolsJars = project.fileTree(javaLibDirectory)
+        toolsJars.include("*tools.jar")
         toolsJars.files.each {
             generator.addArtifact(createDependency(it, "runtime", javaLibDirectory))
             filesToIgnoreWhileBuilding.add(it)
@@ -218,7 +219,7 @@ class IntelliJPlugin implements Plugin<Project> {
     @Nullable
     private static File javaHomeLib() {
         def javaHome = System.getProperty("java.home")
-        return javaHome != null ? new File("${javaHome}", "/../lib") : null;
+        return javaHome != null && !javaHome.isEmpty() ? new File("${javaHome}", "/../lib") : null;
     }
 
     @NotNull
