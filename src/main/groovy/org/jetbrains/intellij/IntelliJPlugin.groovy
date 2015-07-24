@@ -1,13 +1,10 @@
 package org.jetbrains.intellij
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.component.ComponentIdentifier
 import org.gradle.api.artifacts.query.ArtifactResolutionQuery
 import org.gradle.api.artifacts.result.ResolvedArtifactResult
-import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
-import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPluginConvention
@@ -17,6 +14,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.bundling.Zip
 import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
 import org.gradle.jvm.JvmLibrary
 import org.gradle.language.base.artifact.SourcesArtifact
@@ -24,7 +22,9 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
 class IntelliJPlugin implements Plugin<Project> {
-    private static final def LOG = Logging.getLogger(IntelliJPlugin.class)
+    public static final GROUP_NAME = "intellij"
+
+    private static final LOG = Logging.getLogger(IntelliJPlugin.class)
     private static final EXTENSION_NAME = "intellij"
     private static final CONFIGURATION_NAME = "intellij"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
@@ -46,7 +46,7 @@ class IntelliJPlugin implements Plugin<Project> {
             LOG.info("Preparing IntelliJ IDEA dependency task")
             def (ideaDirectory, sourcesFile) = configureIntelliJDependency(project, extension.version)
             def intellijFiles = configurePluginDependencies(project, extension, ideaDirectory, sourcesFile)
-            configureBuildPluginTask(project, intellijFiles)
+            configureBuildPluginTask(project, intellijFiles, extension)
         }
     }
 
@@ -128,15 +128,26 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureBuildPluginTask(@NotNull Project project,
-                                                 @NotNull Collection<File> filesToIgnoreWhileBuilding) {
+                                                 @NotNull Collection<File> intellijFiles,
+                                                 @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring building IntelliJ IDEA plugin task")
-        def task = project.tasks.create(BuildPluginTask.NAME, BuildPluginTask.class)
-        task.filesToIgnore = filesToIgnoreWhileBuilding
-        task.configure()
+        def task = project.tasks.create("buildPlugin", Zip.class)
+        task.description = "Bundles the project as a distribution."
+        task.group = GROUP_NAME
+        task.baseName = project.name
+        if (extension.archiveName != null && !extension.archiveName.isEmpty()) {
+            task.archiveName = "${extension.archiveName}.${task.extension}"
+        }
+        def baseDir = { task.archiveName - ".${task.extension}" + "/lib" }
+        task.into(baseDir).from {
+            def files = new HashSet<>()
+            project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).each {
+                if (!intellijFiles.contains(it)) files.add(it)
+            }
+            if (!files.isEmpty()) files.add(project.jar)
+            files
+        }
         task.dependsOn(project.getTasksByName(JavaPlugin.JAR_TASK_NAME, true))
-
-        ArchivePublishArtifact pluginArtifact = new ArchivePublishArtifact(task);
-        project.extensions.getByType(DefaultArtifactPublicationSet.class).addCandidate(pluginArtifact);
     }
 
     @NotNull

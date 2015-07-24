@@ -11,7 +11,7 @@ class PluginVersionTask extends DefaultTask {
         super()
         name = NAME
         description = "Set plugin version in plugin.xml."
-        group = "intellij"
+        group = IntelliJPlugin.GROUP_NAME
     }
 
     @SuppressWarnings("GroovyUnusedDeclaration")
