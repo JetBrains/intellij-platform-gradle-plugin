@@ -13,6 +13,7 @@ class RunIdeaTask extends JavaExec {
         main = "com.intellij.idea.Main"
         
         extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
+        enableAssertions = true
         classpath = project.files(extension.intellijFiles)
     }
     
@@ -20,7 +21,6 @@ class RunIdeaTask extends JavaExec {
     List<String> getJvmArgs() {
         def result = []
         result.addAll(super.jvmArgs)
-        result += '-ea'
         result += '-Didea.is.internal=true'
         result += "-Didea.plugins.path=${extension.sandboxDirectory}/plugins"
         result += "-Didea.config.path=${extension.sandboxDirectory}/config"
