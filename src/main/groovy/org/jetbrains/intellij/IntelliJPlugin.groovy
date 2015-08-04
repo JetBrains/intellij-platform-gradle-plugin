@@ -45,10 +45,8 @@ class IntelliJPlugin implements Plugin<Project> {
     private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         project.afterEvaluate {
             LOG.info("Preparing IntelliJ IDEA dependency task")
-            project.allprojects.each {
-                configureIntelliJDependency(it, extension)
-                configurePluginDependencies(it, extension)
-            }
+            configureIntelliJDependency(it, extension)
+            configurePluginDependencies(it, extension)
             configureSetPluginVersionTask(project)
             configurePrepareSandboxTask(project)
             configureRunIdeaTask(project)
@@ -132,19 +130,19 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configurePrepareSandboxTask(@NotNull Project project) {
         LOG.info("Configuring prepare IntelliJ sandbox task")
         project.tasks.create(PrepareSandboxTask.NAME, PrepareSandboxTask)
-                .dependsOn(project.getTasksByName(PluginVersionTask.NAME, true))
+                .dependsOn(project.getTasksByName(PluginVersionTask.NAME, false))
     }
 
     private static void configureRunIdeaTask(@NotNull Project project) {
         LOG.info("Configuring run IntelliJ task")
         project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
-                .dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, true))
+                .dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
     }
     
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ tests tasks")
         project.tasks.withType(Test).each {
-            it.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, true))
+            it.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
             it.enableAssertions = true
             it.systemProperty("idea.plugins.path", extension.sandboxDirectory)
             it.systemProperty("idea.system.path", "${extension.sandboxDirectory}/system-test")
@@ -160,7 +158,7 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             baseName = extension.pluginName
             with(prepareSandboxTask.plugin)
-            dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, true))
+            dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
         }
     }
 

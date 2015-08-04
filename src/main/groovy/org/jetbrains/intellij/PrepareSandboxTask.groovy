@@ -48,12 +48,8 @@ class PrepareSandboxTask extends Sync {
             }
         }
 
-        def projectJars = new HashSet()
-        project.allprojects.each { p ->
-            classes.from(Utils.mainSourceSet(p).output)
-            libraries.from(projectLibraries(p, extension) - project.files(projectJars))
-            projectJars += p.jar
-        }
+        classes.from(Utils.mainSourceSet(project).output)
+        libraries.from(projectLibraries(project, extension))
     }
 
     static FileCollection projectLibraries(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
