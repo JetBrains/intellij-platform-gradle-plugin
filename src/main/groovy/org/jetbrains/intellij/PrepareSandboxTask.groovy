@@ -27,22 +27,20 @@ class PrepareSandboxTask extends Sync {
         classes = plugin.addChild().into("classes")
         libraries = plugin.addChild().into("lib")
         metaInf = plugin.addChild().into("META-INF")
-        
+
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         destinationDir = new File(extension.sandboxDirectory)
         plugin.into(extension.pluginName)
 
-        Utils.mainSourceSet(project).output.files.each { file ->
-            project.fileTree(file).include("META-INF/plugin.xml").each { File xmlFile ->
-                metaInf.from(xmlFile)
-                def pluginXml = new XmlParser().parse(xmlFile)
-                pluginXml.depends.each {
-                    def configFilePath = it.attribute('config-file')
-                    if (configFilePath != null) {
-                        def configFile = new File(xmlFile.parentFile, configFilePath)
-                        if (configFile.exists()) {
-                            metaInf.from(configFile)
-                        }
+        Utils.pluginXmlFiles(project).files.each { File xmlFile ->
+            metaInf.from(xmlFile)
+            def pluginXml = new XmlParser().parse(xmlFile)
+            pluginXml.depends.each {
+                def configFilePath = it.attribute('config-file')
+                if (configFilePath != null) {
+                    def configFile = new File(xmlFile.parentFile, configFilePath)
+                    if (configFile.exists()) {
+                        metaInf.from(configFile)
                     }
                 }
             }

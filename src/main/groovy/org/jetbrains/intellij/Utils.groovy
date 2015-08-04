@@ -1,12 +1,11 @@
 package org.jetbrains.intellij
-
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.tasks.SourceSet
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-
 
 class Utils {
     @NotNull
@@ -27,5 +26,16 @@ class Utils {
         def artifact = new DefaultIvyArtifact(file, relativePath - ".jar", "jar", "jar", null)
         artifact.conf = configuration
         artifact
+    }
+
+    @NotNull
+    public static FileCollection pluginXmlFiles(@NotNull Project project) {
+        FileCollection result = project.files()
+        mainSourceSet(project).output.files.each {
+            def pluginXml = project.fileTree(it)
+            pluginXml.include("META-INF/plugin.xml")
+            result += pluginXml 
+        }
+        return result;
     }
 }

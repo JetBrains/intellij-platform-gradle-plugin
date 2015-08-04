@@ -47,11 +47,13 @@ class IntelliJPlugin implements Plugin<Project> {
             LOG.info("Preparing IntelliJ IDEA dependency task")
             configureIntelliJDependency(it, extension)
             configurePluginDependencies(it, extension)
-            configureSetPluginVersionTask(project)
-            configurePrepareSandboxTask(project)
-            configureRunIdeaTask(project)
-            configureBuildPluginTask(project, extension)
-            configureTestTasks(project, extension)
+            if (!Utils.pluginXmlFiles(it).files.isEmpty()) {
+                configureSetPluginVersionTask(it)
+                configurePrepareSandboxTask(it)
+                configureRunIdeaTask(it)
+                configureBuildPluginTask(it, extension)
+                configureTestTasks(it, extension)
+            }
         }
     }
 
