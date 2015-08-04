@@ -1,4 +1,6 @@
 package org.jetbrains.intellij
+
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.JavaExec
 
 class RunIdeaTask extends JavaExec {
@@ -14,7 +16,8 @@ class RunIdeaTask extends JavaExec {
         
         extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         enableAssertions = true
-        classpath = project.files(extension.intellijFiles)
+        classpath = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME) - 
+                project.files(extension.intellijFiles) + project.files(extension.runClasspath)
     }
     
     @Override
@@ -26,6 +29,9 @@ class RunIdeaTask extends JavaExec {
         result += "-Didea.config.path=${extension.sandboxDirectory}/config"
         result += "-Didea.system.path=${extension.sandboxDirectory}/system"
         result += "-Dfile.encoding=UTF-8" 
+        result += "-Xmx512m" 
+        result += "-Xms256m" 
+        result += "-XX:MaxPermSize=250m" 
         result += "-Didea.classpath.index.enabled=false"
         result += "-Xbootclasspath/a:${extension.ideaDirectory.absolutePath}/lib/boot.jar"
         return result
