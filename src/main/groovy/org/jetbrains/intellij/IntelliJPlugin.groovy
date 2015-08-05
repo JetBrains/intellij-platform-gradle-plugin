@@ -47,12 +47,12 @@ class IntelliJPlugin implements Plugin<Project> {
             LOG.info("Preparing IntelliJ IDEA dependency task")
             configureIntelliJDependency(it, extension)
             configurePluginDependencies(it, extension)
+            configureTestTasks(it, extension)
             if (!Utils.pluginXmlFiles(it).files.isEmpty()) {
                 configureSetPluginVersionTask(it)
                 configurePrepareSandboxTask(it)
                 configureRunIdeaTask(it)
                 configureBuildPluginTask(it, extension)
-                configureTestTasks(it, extension)
             }
         }
     }
@@ -146,9 +146,14 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.withType(Test).each {
             it.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
             it.enableAssertions = true
-            it.systemProperty("idea.plugins.path", extension.sandboxDirectory)
-            it.systemProperty("idea.system.path", "${extension.sandboxDirectory}/system-test")
-            it.systemProperty("idea.config.path", "${extension.sandboxDirectory}/config-test")
+            it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
+            it.systemProperty("java.system.class.loader", "com.intellij.util.lang.UrlClassLoader")
+            it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
+            
+            def javaHomeLib = Utils.javaHomeLib()
+            if (javaHomeLib != null) it.classpath += project.files("${Utils.javaHomeLib()}/tools.jar")
+            it.classpath += project.files("${extension.ideaDirectory}/lib/resources.jar", 
+                    "${extension.ideaDirectory}/lib/idea.jar");
         }
     }
 
