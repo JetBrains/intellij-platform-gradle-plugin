@@ -30,16 +30,16 @@ class Utils {
 
     @NotNull
     public static Set<File> sourcePluginXmlFiles(@NotNull Project project) {
-        pluginXmlFiles(project, mainSourceSet(project).resources.srcDirs)
+        pluginXmlFiles(mainSourceSet(project).resources.srcDirs)
     }
 
     @NotNull
     public static Set<File> outPluginXmlFiles(@NotNull Project project) {
-        pluginXmlFiles(project, mainSourceSet(project).output.files)
+        pluginXmlFiles(mainSourceSet(project).output.files)
     }
 
     @NotNull
-    private static Set<File> pluginXmlFiles(@NotNull Project project, @NotNull Set<File> roots) {
+    private static Set<File> pluginXmlFiles(@NotNull Set<File> roots) {
         Set<File> result = new HashSet<>()
         roots.each {
             def pluginXml = new File(it, "META-INF/plugin.xml")
