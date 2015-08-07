@@ -32,7 +32,7 @@ class PrepareSandboxTask extends Sync {
         destinationDir = new File(extension.sandboxDirectory)
         plugin.into(extension.pluginName)
 
-        Utils.sourcePluginXmlFiles(project).each { File xmlFile ->
+        Utils.outPluginXmlFiles(project).each { File xmlFile ->
             metaInf.from(xmlFile)
             def pluginXml = new XmlParser().parse(xmlFile)
             pluginXml.depends.each {
