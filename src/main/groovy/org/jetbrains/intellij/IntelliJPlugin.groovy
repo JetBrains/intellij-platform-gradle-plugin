@@ -1,5 +1,4 @@
 package org.jetbrains.intellij
-
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -14,6 +13,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.gradle.api.specs.Specs
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
 import org.gradle.jvm.JvmLibrary
@@ -47,8 +47,9 @@ class IntelliJPlugin implements Plugin<Project> {
             LOG.info("Preparing IntelliJ IDEA dependency task")
             configureIntelliJDependency(it, extension)
             configurePluginDependencies(it, extension)
+            configureInstrumentTask(it, extension)
             configureTestTasks(it, extension)
-            if (!Utils.pluginXmlFiles(it).files.isEmpty()) {
+            if (!Utils.sourcePluginXmlFiles(it).files.isEmpty()) {
                 configureSetPluginVersionTask(it)
                 configurePrepareSandboxTask(it)
                 configureRunIdeaTask(it)
@@ -140,7 +141,33 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
                 .dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
     }
-    
+
+    private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        LOG.info("Configuring IntelliJ compile tasks")
+        def classpath = project.files(
+                "${extension.ideaDirectory}/lib/javac2.jar",
+                "${extension.ideaDirectory}/lib/jdom.jar",
+                "${extension.ideaDirectory}/lib/asm-all.jar",
+                "${extension.ideaDirectory}/lib/jgoodies-forms.jar",
+        )
+        project.ant.taskdef(name: 'instrumentIdeaExtensions',
+                classpath: classpath.asPath,
+                classname: 'com.intellij.ant.InstrumentIdeaExtensions')
+
+        project.tasks.withType(JavaCompile, {
+            it.doLast {
+                LOG.info("Compiling forms and instrumenting code with nullability preconditions")
+                def sourceSet = Utils.mainSourceSet(project)
+                def srcDirs = sourceSet.java.srcDirs.findAll { it.exists() } + sourceSet.resources.findAll { it.exists() }
+                def oldValue = System.setProperty('java.awt.headless', 'true')
+                project.ant.instrumentIdeaExtensions(srcdir: project.files(srcDirs).asPath, 
+                        destdir: sourceSet.output.classesDir,
+                        classpath: it.classpath.asPath);
+                System.setProperty('java.awt.headless', oldValue)
+            }
+        })
+    }
+
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ tests tasks")
         project.tasks.withType(Test).each {
@@ -149,10 +176,10 @@ class IntelliJPlugin implements Plugin<Project> {
             it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
             it.systemProperty("java.system.class.loader", "com.intellij.util.lang.UrlClassLoader")
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
-            
+
             def javaHomeLib = Utils.javaHomeLib()
             if (javaHomeLib != null) it.classpath += project.files("${Utils.javaHomeLib()}/tools.jar")
-            it.classpath += project.files("${extension.ideaDirectory}/lib/resources.jar", 
+            it.classpath += project.files("${extension.ideaDirectory}/lib/resources.jar",
                     "${extension.ideaDirectory}/lib/idea.jar");
         }
     }

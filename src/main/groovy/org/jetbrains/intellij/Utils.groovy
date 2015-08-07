@@ -1,5 +1,4 @@
 package org.jetbrains.intellij
-
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
@@ -29,11 +28,16 @@ class Utils {
         artifact.conf = configuration
         artifact
     }
+    
+    @NotNull
+    public static FileCollection sourcePluginXmlFiles(@NotNull Project project) {
+        mainSourceSet(project).resources.include("META-INF/plugin.xml").files
+    }
 
     @NotNull
     public static FileCollection pluginXmlFiles(@NotNull Project project) {
         FileCollection result = project.files()
-        mainSourceSet(project).output.files.each {
+        mainSourceSet(project).output.each {
             def pluginXml = project.fileTree(it)
             pluginXml.include("META-INF/plugin.xml")
             result += pluginXml
@@ -83,7 +87,7 @@ class Utils {
 
     static def getPluginId(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
-        pluginXmlFiles(project).each {
+        sourcePluginXmlFiles(project).each {
             def pluginXml = new XmlParser().parse(it)
             ids += pluginXml.id.text
         }
