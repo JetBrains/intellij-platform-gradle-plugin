@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 import org.gradle.api.Project
-import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.tasks.SourceSet
@@ -11,8 +10,8 @@ import org.jetbrains.annotations.Nullable
 class Utils {
     @NotNull
     public static SourceSet mainSourceSet(@NotNull Project project) {
-        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
-        return javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME);
+        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention); 
+        javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     }
 
     @Nullable
@@ -28,21 +27,25 @@ class Utils {
         artifact.conf = configuration
         artifact
     }
-    
+
     @NotNull
-    public static FileCollection sourcePluginXmlFiles(@NotNull Project project) {
-        mainSourceSet(project).resources.include("META-INF/plugin.xml").files
+    public static Set<File> sourcePluginXmlFiles(@NotNull Project project) {
+        pluginXmlFiles(project, mainSourceSet(project).resources.srcDirs)
     }
 
     @NotNull
-    public static FileCollection pluginXmlFiles(@NotNull Project project) {
-        FileCollection result = project.files()
-        mainSourceSet(project).output.each {
-            def pluginXml = project.fileTree(it)
-            pluginXml.include("META-INF/plugin.xml")
-            result += pluginXml
+    public static Set<File> outPluginXmlFiles(@NotNull Project project) {
+        pluginXmlFiles(project, mainSourceSet(project).output.files)
+    }
+
+    @NotNull
+    private static Set<File> pluginXmlFiles(@NotNull Project project, @NotNull Set<File> roots) {
+        Set<File> result = new HashSet<>()
+        roots.each {
+            def pluginXml = new File(it, "META-INF/plugin.xml")
+            if (pluginXml.exists()) result += pluginXml
         }
-        return result;
+        result
     }
 
     @NotNull
@@ -87,7 +90,7 @@ class Utils {
 
     static def getPluginId(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
-        sourcePluginXmlFiles(project).each {
+        outPluginXmlFiles(project).each {
             def pluginXml = new XmlParser().parse(it)
             ids += pluginXml.id.text
         }

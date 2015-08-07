@@ -49,7 +49,7 @@ class IntelliJPlugin implements Plugin<Project> {
             configurePluginDependencies(it, extension)
             configureInstrumentTask(it, extension)
             configureTestTasks(it, extension)
-            if (!Utils.sourcePluginXmlFiles(it).files.isEmpty()) {
+            if (!Utils.sourcePluginXmlFiles(it).isEmpty()) {
                 configureSetPluginVersionTask(it)
                 configurePrepareSandboxTask(it)
                 configureRunIdeaTask(it)
@@ -125,7 +125,6 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureSetPluginVersionTask(@NotNull Project project) {
         LOG.info("Configuring patch IntelliJ plugin version task")
         PluginVersionTask task = project.tasks.create(PluginVersionTask.NAME, PluginVersionTask);
-        task.sourceSet = Utils.mainSourceSet(project);
         task.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
         project.getTasksByName(JavaPlugin.JAR_TASK_NAME, false)*.dependsOn(task)
     }
@@ -158,12 +157,17 @@ class IntelliJPlugin implements Plugin<Project> {
             it.doLast {
                 LOG.info("Compiling forms and instrumenting code with nullability preconditions")
                 def sourceSet = Utils.mainSourceSet(project)
-                def srcDirs = sourceSet.java.srcDirs.findAll { it.exists() } + sourceSet.resources.findAll { it.exists() }
+                def srcDirs = sourceSet.java.srcDirs.findAll { it.exists() }
                 def oldValue = System.setProperty('java.awt.headless', 'true')
                 project.ant.instrumentIdeaExtensions(srcdir: project.files(srcDirs).asPath, 
                         destdir: sourceSet.output.classesDir,
                         classpath: it.classpath.asPath);
-                System.setProperty('java.awt.headless', oldValue)
+                if (oldValue != null) {
+                    System.setProperty('java.awt.headless', oldValue)
+                }
+                else {
+                    System.clearProperty('java.awt.headless')
+                }
             }
         })
     }
