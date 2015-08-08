@@ -30,7 +30,12 @@ class PrepareSandboxTask extends Sync {
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         destinationDir = new File(extension.sandboxDirectory, "plugins")
         plugin.into(extension.pluginName)
+        classes.from(Utils.mainSourceSet(project).output)
+        libraries.from(projectLibraries(project, extension))
+    }
 
+    @Override
+    protected void copy() {
         Utils.outPluginXmlFiles(project).each { File xmlFile ->
             metaInf.from(xmlFile)
             def pluginXml = new XmlParser().parse(xmlFile)
@@ -44,9 +49,7 @@ class PrepareSandboxTask extends Sync {
                 }
             }
         }
-
-        classes.from(Utils.mainSourceSet(project).output)
-        libraries.from(projectLibraries(project, extension))
+        super.copy()
     }
 
     static FileCollection projectLibraries(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
