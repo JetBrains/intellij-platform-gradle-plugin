@@ -1,6 +1,9 @@
 # Overview
-This plugin allows you to build plugins for intellij platform using specific IntelliJ SDK and bundled plugins.
-The plugin adds extra IntelliJ-specific dependencies while compiling tasks.
+This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
+
+The plugin adds extra IntelliJ-specific dependencies, patches compile tasks in order to instrument code with 
+nullability assertions and forms classes made with IntelliJ GUI Designer and provides some build steps which might be
+helpful while developing plugins for IntelliJ platform.
 
 # Usage
 
@@ -8,7 +11,7 @@ The plugin adds extra IntelliJ-specific dependencies while compiling tasks.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.2"
+  id "org.jetbrains.intellij" version "0.0.15"
 }
 ```
 
@@ -22,7 +25,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '1.0-SNAPSHOT'
+    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '0.0.15'
   }
 }
 
@@ -31,15 +34,35 @@ apply plugin: 'org.jetbrains.intellij'
 
 ## Configuration
 
-Plugin provides following options to configure target IntelliJ SDK
-- `intellij.version` defines the version of IDEA distribution that should be used as a dependency. Default value: 142-SNAPSHOT
-- `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. Default value: <empty>
+Plugin provides following options to configure target IntelliJ SDK and build archive
 
+- `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
+The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`. 
+**Default value**: LATEST-EAP-SNAPSHOT
+
+- `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. 
+**Default value:** <empty>
+
+- `intellij.pluginName` is used for naming target zip-archive and defines the name of plugin artifact. 
+of bundled IDEA plugins that should be used as dependencies.
+**Default value:** ${project.name}
+
+- `sandboxDirectory` defined path of sandbox directory that is used for running IDEA with developing plugin.
+**Default value**: ${project.buildDir}/idea-sandbox
+
+#### Build steps
+
+Plugin introduces following build steps
+
+- `patchPluginVersion` sets project version in output plugin.xml file
+- `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
+- `buildPlugin` assembles plugin and prepares zip archive for deployment
+- `runIdea` executes IntelliJ IDEA instance with installed the plugin you're developing 
 
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.0-SNAPSHOT"
+  id "org.jetbrains.intellij" version "0.0.15"
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -47,33 +70,9 @@ apply plugin: 'org.jetbrains.intellij'
 intellij {
   version '14.1'
   plugins 'coverage'
+  pluginName 'MyPlugin' 
 }
 
-sourceSets {
-  main {
-    java {
-      srcDirs 'src', 'gen'
-    }
-    resources {
-      srcDir 'resources'
-    }
-  }
-  test {
-    java {
-      srcDir 'tests'
-    }
-    resources {
-      srcDir 'testResources'
-    }
-  }
-}
-
-test {
-  maxHeapSize = '512m'
-  minHeapSize = '256m'
-  enableAssertions = true
-  jvmArgs '-XX:MaxPermSize=250m', '-Didea.system.path=system-test', '-Didea.config.path=config-test'
-} 
 ```
 
 # License
