@@ -22,14 +22,13 @@ class PrepareSandboxTask extends Sync {
         group = IntelliJPlugin.GROUP_NAME
 
         CopySpecInternal plugins = rootSpec.addChild()
-        plugins.into("plugins");
         plugin = plugins.addChild();
         classes = plugin.addChild().into("classes")
         libraries = plugin.addChild().into("lib")
         metaInf = plugin.addChild().into("META-INF")
 
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
-        destinationDir = new File(extension.sandboxDirectory)
+        destinationDir = new File(extension.sandboxDirectory, "plugins")
         plugin.into(extension.pluginName)
 
         Utils.outPluginXmlFiles(project).each { File xmlFile ->
