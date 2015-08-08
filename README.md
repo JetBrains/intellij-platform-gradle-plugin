@@ -68,7 +68,7 @@ plugins {
 apply plugin: 'org.jetbrains.intellij'
 
 intellij {
-  version '14.1'
+  version '14.1.4'
   plugins 'coverage'
   pluginName 'MyPlugin' 
 }
