@@ -38,17 +38,17 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 
 - `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
 The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`. 
-**Default value**: LATEST-EAP-SNAPSHOT
+**Default value**: `LATEST-EAP-SNAPSHOT`
 
 - `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. 
-**Default value:** <empty>
+**Default value:** `<empty>`
 
 - `intellij.pluginName` is used for naming target zip-archive and defines the name of plugin artifact. 
 of bundled IDEA plugins that should be used as dependencies.
-**Default value:** ${project.name}
+**Default value:** `${project.name}`
 
 - `sandboxDirectory` defined path of sandbox directory that is used for running IDEA with developing plugin.
-**Default value**: ${project.buildDir}/idea-sandbox
+**Default value**: `${project.buildDir}/idea-sandbox`
 
 #### Build steps
 
