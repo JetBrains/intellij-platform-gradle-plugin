@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable
 class Utils {
     @NotNull
     public static SourceSet mainSourceSet(@NotNull Project project) {
-        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention); 
+        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
         javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     }
 

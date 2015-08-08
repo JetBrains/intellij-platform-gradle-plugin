@@ -38,6 +38,7 @@ class IntelliJPlugin implements Plugin<Project> {
             version = DEFAULT_IDEA_VERSION
             pluginName = project.name
             sandboxDirectory = new File(project.buildDir, "idea-sandbox").absolutePath
+            instrumentCode = true
         }
         configurePlugin(project, intellijExtension)
     }
@@ -142,13 +143,13 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        if (!extension.instrumentCode) return
         LOG.info("Configuring IntelliJ compile tasks")
         def classpath = project.files(
                 "${extension.ideaDirectory}/lib/javac2.jar",
                 "${extension.ideaDirectory}/lib/jdom.jar",
                 "${extension.ideaDirectory}/lib/asm-all.jar",
-                "${extension.ideaDirectory}/lib/jgoodies-forms.jar",
-        )
+                "${extension.ideaDirectory}/lib/jgoodies-forms.jar")
         project.ant.taskdef(name: 'instrumentIdeaExtensions',
                 classpath: classpath.asPath,
                 classname: 'com.intellij.ant.InstrumentIdeaExtensions')
