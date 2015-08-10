@@ -16,6 +16,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.component.external.model.DefaultModuleComponentIdentifier
+import org.gradle.internal.jvm.Jvm
 import org.gradle.jvm.JvmLibrary
 import org.gradle.language.base.artifact.SourcesArtifact
 import org.jetbrains.annotations.NotNull
@@ -84,9 +85,9 @@ class IntelliJPlugin implements Plugin<Project> {
             repo.artifactPattern("${extension.ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]") // ivy xml
             repo.artifactPattern("${extension.ideaDirectory.path}/[artifact].[ext]") // idea libs
 
-            def javaHomeLib = Utils.javaHomeLib()
-            if (javaHomeLib != null) {
-                repo.artifactPattern("${javaHomeLib}/[artifact].[ext]") // java libs
+            def toolsJar = Jvm.current().toolsJar
+            if (toolsJar != null) {
+                repo.artifactPattern("${toolsJar.parent}/[artifact].[ext]") // java libs
             }
             if (extension.ideaSourcesFile != null) { // sources
                 repo.artifactPattern("${extension.ideaSourcesFile.parent}/[artifact]-${version}-[classifier].[ext]")
@@ -182,8 +183,8 @@ class IntelliJPlugin implements Plugin<Project> {
             it.systemProperty("java.system.class.loader", "com.intellij.util.lang.UrlClassLoader")
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
 
-            def javaHomeLib = Utils.javaHomeLib()
-            if (javaHomeLib != null) it.classpath += project.files("${Utils.javaHomeLib()}/tools.jar")
+            def toolsJar = Jvm.current().getToolsJar()
+            if (toolsJar != null) it.classpath += project.files(toolsJar)
             it.classpath += project.files("${extension.ideaDirectory}/lib/resources.jar",
                     "${extension.ideaDirectory}/lib/idea.jar");
         }
@@ -246,13 +247,11 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
 
-        def javaLibDirectory = Utils.javaHomeLib()
-        def toolsJars = project.fileTree(javaLibDirectory)
-        toolsJars.include("*tools.jar")
-        toolsJars.files.each {
-            generator.addArtifact(Utils.createDependency(it, "runtime", javaLibDirectory))
-            extension.intellijFiles.add(it)
-            extension.runClasspath.add(it)
+        def toolsJar = Jvm.current().toolsJar
+        if (toolsJar != null) {
+            generator.addArtifact(Utils.createDependency(toolsJar, "runtime", toolsJar.parentFile))
+            extension.intellijFiles.add(toolsJar)
+            extension.runClasspath.add(toolsJar)
         }
 
         if (extension.ideaSourcesFile != null) {

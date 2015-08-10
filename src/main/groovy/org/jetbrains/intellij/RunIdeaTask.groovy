@@ -1,6 +1,7 @@
 package org.jetbrains.intellij
 
 import org.gradle.api.tasks.JavaExec
+import org.gradle.internal.jvm.Jvm
 
 class RunIdeaTask extends JavaExec {
     public static String NAME = "runIdea"
@@ -17,8 +18,8 @@ class RunIdeaTask extends JavaExec {
         enableAssertions = true
         workingDir = project.file("${extension.ideaDirectory}/bin/")
 
-        def javaHomeLib = Utils.javaHomeLib()
-        if (javaHomeLib != null) classpath += project.files("${Utils.javaHomeLib()}/tools.jar")
+        def toolsJar = Jvm.current().toolsJar
+        if (toolsJar != null) classpath += project.files(toolsJar)
         classpath += project.files("${extension.ideaDirectory}/lib/idea_rt.jar",
                 "${extension.ideaDirectory}/lib/idea.jar",
                 "${extension.ideaDirectory}/lib/bootstrap.jar",
