@@ -197,7 +197,7 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
             baseName = extension.pluginName
-            with(prepareSandboxTask.plugin)
+            from("${prepareSandboxTask.destinationDir}/${extension.pluginName}")
             dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
         }
     }
