@@ -198,6 +198,7 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             baseName = extension.pluginName
             from("${prepareSandboxTask.destinationDir}/${extension.pluginName}")
+            into(extension.pluginName)
             dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
         }
     }
