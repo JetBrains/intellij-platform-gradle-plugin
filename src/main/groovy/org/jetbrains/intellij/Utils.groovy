@@ -66,10 +66,8 @@ class Utils {
                                               @NotNull IntelliJPluginExtension extension) {
         if (options.maxHeapSize == null) options.maxHeapSize = "512m"
         if (options.minHeapSize == null) options.minHeapSize = "256m"
-        def result = []
-        result.addAll(originalArguments)
-
         boolean hasPermSizeArg = false
+        def result = []
         for (String arg : originalArguments) {
             if (arg.startsWith("-XX:MaxPermSize")) {
                 hasPermSizeArg = true
