@@ -11,7 +11,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.15"
+  id "org.jetbrains.intellij" version "0.0.20"
 }
 ```
 
@@ -25,7 +25,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '0.0.15'
+    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '0.0.20'
   }
 }
 
@@ -47,8 +47,12 @@ The option accepts build numbers, version numbers and two meta values `LATEST-EA
 of bundled IDEA plugins that should be used as dependencies.
 **Default value:** `${project.name}`
 
-- `sandboxDirectory` defined path of sandbox directory that is used for running IDEA with developing plugin.
+- `sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.
 **Default value**: `${project.buildDir}/idea-sandbox`
+
+- `instrumentCode` defines whether plugin should instrument java classes with nullability assertions. 
+Also it might be required for compiling forms created by IntelliJ GUI designer.
+**Default value**: `true`
 
 #### Build steps
 
@@ -62,7 +66,7 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.15"
+  id "org.jetbrains.intellij" version "0.0.20"
 }
 
 apply plugin: 'org.jetbrains.intellij'
