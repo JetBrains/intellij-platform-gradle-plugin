@@ -1,4 +1,5 @@
 package org.jetbrains.intellij
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -146,6 +147,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         if (!extension.instrumentCode) return
         LOG.info("Configuring IntelliJ compile tasks")
+        def loader = "java2.loader"
         def classpath = project.files(
                 "${extension.ideaDirectory}/lib/javac2.jar",
                 "${extension.ideaDirectory}/lib/jdom.jar",
@@ -153,19 +155,25 @@ class IntelliJPlugin implements Plugin<Project> {
                 "${extension.ideaDirectory}/lib/jgoodies-forms.jar")
         project.ant.taskdef(name: 'instrumentIdeaExtensions',
                 classpath: classpath.asPath,
+                loaderref: loader,
                 classname: 'com.intellij.ant.InstrumentIdeaExtensions')
+        project.ant.typedef(name: 'skip',
+                classpath: classpath.asPath,
+                loaderref: loader,
+                classname: 'com.intellij.ant.ClassFilterAnnotationRegexp')
 
-        project.tasks.withType(JavaCompile, {
-            it.doLast {
+        project.tasks.withType(JavaCompile, { JavaCompile task ->
+            task.doLast {
                 LOG.info("Compiling forms and instrumenting code with nullability preconditions")
                 def sourceSet = Utils.mainSourceSet(project)
-                def srcDirs = sourceSet.java.srcDirs.findAll { it.exists() }
-                def oldValue = System.setProperty('java.awt.headless', 'true')
-                project.ant.instrumentIdeaExtensions(srcdir: project.files(srcDirs).asPath, 
-                        destdir: sourceSet.output.classesDir,
-                        classpath: it.classpath.asPath);
-                if (oldValue != null) {
-                    System.setProperty('java.awt.headless', oldValue)
+                def srcDirs = sourceSet.compiledBy(task).java.srcDirs.findAll { it.exists() }
+                def headlessOldValue = System.setProperty('java.awt.headless', 'true')
+                project.ant.instrumentIdeaExtensions(srcdir: project.files(srcDirs).asPath,
+                        destdir: task.destinationDir, classpath: task.classpath.asPath) {
+                    project.ant.skip(pattern: 'kotlin/jvm/internal/.*')
+                }
+                if (headlessOldValue != null) {
+                    System.setProperty('java.awt.headless', headlessOldValue)
                 }
                 else {
                     System.clearProperty('java.awt.headless')
