@@ -47,10 +47,10 @@ The option accepts build numbers, version numbers and two meta values `LATEST-EA
 of bundled IDEA plugins that should be used as dependencies.
 **Default value:** `${project.name}`
 
-- `sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.
+- `intellij.sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.
 **Default value**: `${project.buildDir}/idea-sandbox`
 
-- `instrumentCode` defines whether plugin should instrument java classes with nullability assertions. 
+- `intellij.instrumentCode` defines whether plugin should instrument java classes with nullability assertions. 
 Also it might be required for compiling forms created by IntelliJ GUI designer.
 **Default value**: `true`
 
