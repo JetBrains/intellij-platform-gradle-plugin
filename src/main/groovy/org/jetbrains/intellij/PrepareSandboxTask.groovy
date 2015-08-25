@@ -38,6 +38,7 @@ class PrepareSandboxTask extends Sync {
     protected void copy() {
         Utils.outPluginXmlFiles(project).each { File xmlFile ->
             metaInf.from(xmlFile)
+            classes.exclude("META-INF/" + xmlFile.name)
             def pluginXml = new XmlParser().parse(xmlFile)
             pluginXml.depends.each {
                 def configFilePath = it.attribute('config-file')
@@ -45,6 +46,7 @@ class PrepareSandboxTask extends Sync {
                     def configFile = new File(xmlFile.parentFile, configFilePath)
                     if (configFile.exists()) {
                         metaInf.from(configFile)
+                        classes.exclude("META-INF/" + configFilePath)
                     }
                 }
             }
