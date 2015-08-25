@@ -6,6 +6,7 @@ class IntelliJPluginExtension {
     String pluginName
     String sandboxDirectory
     boolean instrumentCode
+    boolean updateSinceUntilBuild
     
     File ideaDirectory
     File ideaSourcesFile

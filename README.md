@@ -54,11 +54,16 @@ of bundled IDEA plugins that should be used as dependencies.
 Also it might be required for compiling forms created by IntelliJ GUI designer.
 **Default value**: `true`
 
+- `intellij.updateSinceUntilBuild` defines whether plugin should patch `plugin.xml` with since and until build values, 
+if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.9999` will be used as until value.
+Also it might be required for compiling forms created by IntelliJ GUI designer.
+**Default value**: `true`
+
 #### Build steps
 
 Plugin introduces following build steps
 
-- `patchPluginVersion` sets project version in output plugin.xml file
+- `patchPluginXml` sets project version and since/until build numbers in output plugin.xml file
 - `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
 - `buildPlugin` assembles plugin and prepares zip archive for deployment
 - `runIdea` executes IntelliJ IDEA instance with installed the plugin you're developing 

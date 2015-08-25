@@ -26,8 +26,8 @@ import org.jetbrains.annotations.Nullable
 class IntelliJPlugin implements Plugin<Project> {
     public static final GROUP_NAME = "intellij"
     public static final EXTENSION_NAME = "intellij"
+    public static final LOG = Logging.getLogger(IntelliJPlugin)
 
-    private static final LOG = Logging.getLogger(IntelliJPlugin)
     private static final CONFIGURATION_NAME = "intellij"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
@@ -41,6 +41,7 @@ class IntelliJPlugin implements Plugin<Project> {
             pluginName = project.name
             sandboxDirectory = new File(project.buildDir, "idea-sandbox").absolutePath
             instrumentCode = true
+            updateSinceUntilBuild = true
         }
         configurePlugin(project, intellijExtension)
     }
@@ -127,7 +128,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureSetPluginVersionTask(@NotNull Project project) {
         LOG.info("Configuring patch IntelliJ plugin version task")
-        PluginVersionTask task = project.tasks.create(PluginVersionTask.NAME, PluginVersionTask);
+        PatchPluginXmlTask task = project.tasks.create(PatchPluginXmlTask.NAME, PatchPluginXmlTask);
         task.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
         project.getTasksByName(JavaPlugin.JAR_TASK_NAME, false)*.dependsOn(task)
     }
@@ -135,7 +136,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configurePrepareSandboxTask(@NotNull Project project) {
         LOG.info("Configuring prepare IntelliJ sandbox task")
         project.tasks.create(PrepareSandboxTask.NAME, PrepareSandboxTask)
-                .dependsOn(project.getTasksByName(PluginVersionTask.NAME, false))
+                .dependsOn(project.getTasksByName(PatchPluginXmlTask.NAME, false))
     }
 
     private static void configureRunIdeaTask(@NotNull Project project) {
