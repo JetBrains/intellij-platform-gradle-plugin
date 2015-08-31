@@ -56,7 +56,6 @@ Also it might be required for compiling forms created by IntelliJ GUI designer.
 
 - `intellij.updateSinceUntilBuild` defines whether plugin should patch `plugin.xml` with since and until build values, 
 if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.9999` will be used as until value.
-Also it might be required for compiling forms created by IntelliJ GUI designer.
 **Default value**: `true`
 
 #### Build steps
