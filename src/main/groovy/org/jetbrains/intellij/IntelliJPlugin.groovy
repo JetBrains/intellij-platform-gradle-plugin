@@ -54,7 +54,7 @@ class IntelliJPlugin implements Plugin<Project> {
             configureInstrumentTask(it, extension)
             configureTestTasks(it, extension)
             if (!Utils.sourcePluginXmlFiles(it).isEmpty()) {
-                configureSetPluginVersionTask(it)
+                configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
                 configureRunIdeaTask(it)
                 configureBuildPluginTask(it, extension)
@@ -126,8 +126,8 @@ class IntelliJPlugin implements Plugin<Project> {
         return null
     }
 
-    private static void configureSetPluginVersionTask(@NotNull Project project) {
-        LOG.info("Configuring patch IntelliJ plugin version task")
+    private static void configurePatchPluginXmlTask(@NotNull Project project) {
+        LOG.info("Configuring patch plugin.xml task")
         PatchPluginXmlTask task = project.tasks.create(PatchPluginXmlTask.NAME, PatchPluginXmlTask);
         task.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
         project.getTasksByName(JavaPlugin.JAR_TASK_NAME, false)*.dependsOn(task)
