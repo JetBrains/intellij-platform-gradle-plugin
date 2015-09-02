@@ -15,6 +15,12 @@ class Utils {
     }
     
     @NotNull
+    public static SourceSet testSourceSet(@NotNull Project project) {
+        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
+        javaConvention.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
+    }
+    
+    @NotNull
     public static DefaultIvyArtifact createDependency(File file, String configuration, File baseDir) {
         def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
         def artifact = new DefaultIvyArtifact(file, relativePath - ".jar", "jar", "jar", null)

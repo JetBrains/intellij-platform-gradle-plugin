@@ -1,5 +1,6 @@
 plugins {
     id "com.gradle.plugin-publish" version "0.9.0"
+    id 'maven'
 }
 
 apply plugin: 'groovy'
@@ -17,6 +18,9 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'org.jetbrains:annotations:13.0'
+    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3', {
+        exclude module: 'groovy-all'
+    }
 }
 
 version = '0.0.21'
@@ -28,10 +32,25 @@ pluginBundle {
     description = 'Plugin for building plugins for IntelliJ IDEs'
     tags = ['intellij', 'jetbrains', 'idea']
 
+    //noinspection GroovyAssignabilityCheck
     plugins {
         intellijPlugin {
             id = 'org.jetbrains.intellij'
             displayName = 'Gradle IntelliJ Plugin'
+        }
+    }
+}
+
+test {
+    systemProperties['local.repo'] = "${buildDir}/localRepo"
+    systemProperties['test.gradle.home'] = "${buildDir}/testGradleHome"
+    dependsOn install
+}
+
+install {
+    repositories {
+        mavenDeployer {
+            repository(url: new File("${buildDir}/localRepo").toURI())
         }
     }
 }

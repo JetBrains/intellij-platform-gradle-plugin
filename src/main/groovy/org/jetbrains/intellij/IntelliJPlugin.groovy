@@ -148,39 +148,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         if (!extension.instrumentCode) return
         LOG.info("Configuring IntelliJ compile tasks")
-        def loader = "java2.loader"
-        def classpath = project.files(
-                "${extension.ideaDirectory}/lib/javac2.jar",
-                "${extension.ideaDirectory}/lib/jdom.jar",
-                "${extension.ideaDirectory}/lib/asm-all.jar",
-                "${extension.ideaDirectory}/lib/jgoodies-forms.jar")
-        project.ant.taskdef(name: 'instrumentIdeaExtensions',
-                classpath: classpath.asPath,
-                loaderref: loader,
-                classname: 'com.intellij.ant.InstrumentIdeaExtensions')
-        project.ant.typedef(name: 'skip',
-                classpath: classpath.asPath,
-                loaderref: loader,
-                classname: 'com.intellij.ant.ClassFilterAnnotationRegexp')
-
-        project.tasks.withType(JavaCompile, { JavaCompile task ->
-            task.doLast {
-                LOG.info("Compiling forms and instrumenting code with nullability preconditions")
-                def sourceSet = Utils.mainSourceSet(project)
-                def srcDirs = sourceSet.compiledBy(task).java.srcDirs.findAll { it.exists() }
-                def headlessOldValue = System.setProperty('java.awt.headless', 'true')
-                project.ant.instrumentIdeaExtensions(srcdir: project.files(srcDirs).asPath,
-                        destdir: task.destinationDir, classpath: task.classpath.asPath) {
-                    project.ant.skip(pattern: 'kotlin/jvm/internal/.*')
-                }
-                if (headlessOldValue != null) {
-                    System.setProperty('java.awt.headless', headlessOldValue)
-                }
-                else {
-                    System.clearProperty('java.awt.headless')
-                }
-            }
-        })
+        project.tasks.withType(JavaCompile)*.doLast(new IntelliJInstrumentCodeAction())
     }
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
