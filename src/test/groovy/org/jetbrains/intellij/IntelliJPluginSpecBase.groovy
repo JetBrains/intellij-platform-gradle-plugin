@@ -1,5 +1,4 @@
 package org.jetbrains.intellij
-
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
@@ -43,7 +42,8 @@ abstract class IntelliJPluginSpecBase extends Specification {
     private final ByteArrayOutputStream standardOutput = new ByteArrayOutputStream()
 
     protected GradleProject run(boolean infoLogging, String... tasks) {
-        GradleConnector gradleConnector = (GradleConnector.newConnector().useGradleUserHomeDir(new File(gradleHome))
+        GradleConnector gradleConnector = (GradleConnector.newConnector()
+                .useGradleUserHomeDir(new File(gradleHome))
                 .forProjectDirectory(dir.root) as DefaultGradleConnector)
         ProjectConnection connection = gradleConnector.connect()
         try {
