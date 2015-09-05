@@ -7,7 +7,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'intellij-specific tasks'() {
         when:
         buildFile << ""
-        pluginXml << ""
+        pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
 
         then:
         tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', 'patchPluginXml', 'prepareSandbox', 'runIdea']
@@ -74,15 +74,71 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
         then:
         def testCommand = parseCommand(stdout)
-        testCommand.properties.'idea.config.path'.equals "${sandboxPath}/config-test".toString()
-        testCommand.properties.'idea.system.path'.equals "${sandboxPath}/system-test".toString()
-        testCommand.properties.'idea.plugins.path'.equals "${sandboxPath}/plugins".toString()
+        assertPathParameters(testCommand, sandboxPath)
         !testCommand.properties.containsKey('idea.required.plugins.id')
 
-        '256m'.equals(testCommand.xms)
-        '512m'.equals(testCommand.xmx)
         testCommand.xclasspath.endsWith('/lib/boot.jar')
-//        '250m'.equals(testCommand.permGen)
+        testCommand.xms == '256m'
+        testCommand.xmx == '512m'
+        testCommand.permGen == '250m'
+    }
+
+    def 'add require plugin id parameter in test tasks'() {
+        given:
+        writeTestFile()
+        pluginXml << """
+<idea-plugin version="2">
+  <name>Plugin name</name>
+  <id>com.intellij.mytestid</id>
+</idea-plugin>
+"""
+        when:
+        run(true, JavaPlugin.TEST_TASK_NAME)
+
+        then:
+        parseCommand(stdout).properties.'idea.required.plugins.id' == 'com.intellij.mytestid'
+    }
+
+    def 'do not update existing jvm arguments in test tasks'() {
+        given:
+        writeTestFile()
+        buildFile << """
+test {
+    minHeapSize = "200m"
+    maxHeapSize = "500m"
+    jvmArgs '-XX:MaxPermSize=256m'    
+}
+"""
+        when:
+        run(true, JavaPlugin.TEST_TASK_NAME)
+
+        then:
+        def testCommand = parseCommand(stdout)
+        testCommand.xms == '200m'
+        testCommand.xmx == '500m'
+        testCommand.permGen == '256m'
+    }
+
+    def 'custom sandbox directory'() {
+        given:
+        writeTestFile()
+        def sandboxPath = "${dir.root.absolutePath}/customSandbox"
+        buildFile << """
+intellij {
+    sandboxDirectory = '${sandboxPath}'    
+}
+"""
+        when:
+        run(true, JavaPlugin.TEST_TASK_NAME)
+
+        then:
+        assertPathParameters(parseCommand(stdout), sandboxPath)
+    }
+
+    private static void assertPathParameters(@NotNull ProcessProperties testCommand, @NotNull String sandboxPath) {
+        assert testCommand.properties.'idea.config.path' == "${sandboxPath}/config-test".toString()
+        assert testCommand.properties.'idea.system.path' == "${sandboxPath}/system-test".toString()
+        assert testCommand.properties.'idea.plugins.path' == "${sandboxPath}/plugins".toString()
     }
 
     private File writeTestFile() {
@@ -111,9 +167,9 @@ class App {
 """
     }
 
-    private ProcessProperties parseCommand(@NotNull String output) {
+    private static ProcessProperties parseCommand(@NotNull String output) {
         ProcessProperties testCommand = null
-        for (String line : stdout.readLines()) {
+        for (String line : output.readLines()) {
             if (line.startsWith('Starting process ')) {
                 testCommand = ProcessProperties.parse(line.substring(line.indexOf('Command: ') + 'Command: '.length()))
                 break
@@ -147,8 +203,8 @@ class App {
                     result.xms = it.substring(4)
                 } else if (it.startsWith('-Xmx')) {
                     result.xmx = it.substring(4)
-                } else if (it.startsWith('-XX:MaxPermSize')) {
-                    result.permGen = it.substring('-XX:MaxPermSize'.length())
+                } else if (it.startsWith('-XX:MaxPermSize=')) {
+                    result.permGen = it.substring('-XX:MaxPermSize='.length())
                 } else if (it.startsWith('-Xbootclasspath')) {
                     result.xclasspath = it.substring('-Xbootclasspath'.length())
                 } else {

@@ -88,9 +88,9 @@ class Utils {
 
     static def getPluginId(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
-        outPluginXmlFiles(project).each {
+        sourcePluginXmlFiles(project).each {
             def pluginXml = new XmlParser().parse(it)
-            ids += pluginXml.id.text
+            ids += pluginXml.id*.text()
         }
         return ids.size() == 1 ? ids.first() : null;
     }
