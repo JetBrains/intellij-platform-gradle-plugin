@@ -20,6 +20,7 @@ import org.gradle.internal.component.external.model.DefaultModuleComponentIdenti
 import org.gradle.internal.jvm.Jvm
 import org.gradle.jvm.JvmLibrary
 import org.gradle.language.base.artifact.SourcesArtifact
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
@@ -177,6 +178,7 @@ class IntelliJPlugin implements Plugin<Project> {
             from("${prepareSandboxTask.destinationDir}/${extension.pluginName}")
             into(extension.pluginName)
             dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
+            project.getTasksByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME, false)*.dependsOn(it)
         }
     }
 
