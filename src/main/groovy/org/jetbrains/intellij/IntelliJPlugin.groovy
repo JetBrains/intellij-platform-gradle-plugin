@@ -222,7 +222,7 @@ class IntelliJPlugin implements Plugin<Project> {
             def bundledPluginJars = project.fileTree(extension.ideaDirectory)
             bundledPlugins.each { bundledPluginJars.include("plugins/${it}/lib/*.jar") }
             bundledPluginJars.files.each {
-                generator.addArtifact(Utils.createDependency(it, "runtime", extension.ideaDirectory))
+                generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
                 extension.intellijFiles.add(it)
             }
         }
