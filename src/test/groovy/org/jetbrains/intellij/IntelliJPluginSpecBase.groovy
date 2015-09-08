@@ -23,7 +23,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
             buildscript {
                 repositories {
                     maven {
-                        url "${localRepoPath}"
+                        url "${localRepoPath.replaceAll("\\", "/")}"
                     }
                     mavenCentral()
                 }
