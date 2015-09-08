@@ -59,6 +59,8 @@ class IntelliJPlugin implements Plugin<Project> {
                 configurePrepareSandboxTask(it)
                 configureRunIdeaTask(it)
                 configureBuildPluginTask(it, extension)
+            } else {
+                LOG.warn("File not found: plugin.xml. IntelliJ specific tasks will be unavailable.")
             }
         }
     }
