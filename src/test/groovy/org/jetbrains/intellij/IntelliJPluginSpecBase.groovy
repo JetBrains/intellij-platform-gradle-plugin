@@ -15,7 +15,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
     final String gradleHome = System.properties.get('test.gradle.home')
 
     def setup() {
-        def localRepoPath = System.properties.get("local.repo")
+        String localRepoPath = System.properties.get("local.repo")
         assert localRepoPath != null
         assert gradleHome != null
         buildFile << """
@@ -23,7 +23,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
             buildscript {
                 repositories {
                     maven {
-                        url "${localRepoPath.replaceAll("\\\\", "/")}"
+                        url "${adjustWindowsPath(localRepoPath)}"
                     }
                     mavenCentral()
                 }
@@ -107,5 +107,9 @@ abstract class IntelliJPluginSpecBase extends Specification {
         def file = new File(directory, splitted[-1])
         file.createNewFile()
         file
+    }
+
+    protected static String adjustWindowsPath(@NotNull String s) {
+        return s.replaceAll('\\\\', '/');
     }
 }

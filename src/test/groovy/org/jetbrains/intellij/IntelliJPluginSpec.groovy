@@ -71,7 +71,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
         when:
         def project = run(true, JavaPlugin.TEST_TASK_NAME)
-        def sandboxPath = "${project.buildDirectory.absolutePath}/idea-sandbox"
+        def sandboxPath = adjustWindowsPath("${project.buildDirectory.absolutePath}/idea-sandbox")
 
         then:
         def testCommand = parseCommand(stdout)
@@ -123,7 +123,7 @@ test {
     def 'custom sandbox directory'() {
         given:
         writeTestFile()
-        def sandboxPath = "${dir.root.absolutePath}/customSandbox"
+        def sandboxPath = adjustWindowsPath("${dir.root.absolutePath}/customSandbox")
         buildFile << """
 intellij {
     sandboxDirectory = '${sandboxPath}'    
@@ -136,10 +136,11 @@ intellij {
         assertPathParameters(parseCommand(stdout), sandboxPath)
     }
 
+    @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
     private static void assertPathParameters(@NotNull ProcessProperties testCommand, @NotNull String sandboxPath) {
-        assert testCommand.properties.'idea.config.path' == "${sandboxPath}/config-test".toString()
-        assert testCommand.properties.'idea.system.path' == "${sandboxPath}/system-test".toString()
-        assert testCommand.properties.'idea.plugins.path' == "${sandboxPath}/plugins".toString()
+        assert adjustWindowsPath(testCommand.properties.'idea.config.path') == "${sandboxPath}/config-test"
+        assert adjustWindowsPath(testCommand.properties.'idea.system.path') == "${sandboxPath}/system-test"
+        assert adjustWindowsPath(testCommand.properties.'idea.plugins.path') == "${sandboxPath}/plugins"
     }
 
     private File writeTestFile() {
