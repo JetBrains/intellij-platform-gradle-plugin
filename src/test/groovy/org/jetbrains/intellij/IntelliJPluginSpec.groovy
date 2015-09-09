@@ -19,6 +19,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
         then:
         tasks(IntelliJPlugin.GROUP_NAME) == null
+        stdout.contains('specific tasks will be unavailable')
     }
 
     def 'instrument code with nullability annotations'() {
