@@ -11,6 +11,7 @@ compileGroovy {
 }
 
 repositories {
+    maven { url 'http://repo.labs.intellij.net/central-proxy' }
     mavenCentral()
 }
 
