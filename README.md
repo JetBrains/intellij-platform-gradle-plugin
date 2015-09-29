@@ -37,26 +37,31 @@ apply plugin: 'org.jetbrains.intellij'
 Plugin provides following options to configure target IntelliJ SDK and build archive
 
 - `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
-The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`. 
+The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.<br/><br/> 
 **Default value**: `LATEST-EAP-SNAPSHOT`
 
-- `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies. 
+- `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies.<br/><br/> 
 **Default value:** `<empty>`
 
 - `intellij.pluginName` is used for naming target zip-archive and defines the name of plugin artifact. 
-of bundled IDEA plugins that should be used as dependencies.
+of bundled IDEA plugins that should be used as dependencies.<br/><br/>
 **Default value:** `${project.name}`
 
-- `intellij.sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.
+- `intellij.sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.<br/><br/>
 **Default value**: `${project.buildDir}/idea-sandbox`
 
 - `intellij.instrumentCode` defines whether plugin should instrument java classes with nullability assertions. 
-Also it might be required for compiling forms created by IntelliJ GUI designer.
+Also it might be required for compiling forms created by IntelliJ GUI designer.<br/><br/>
 **Default value**: `true`
 
 - `intellij.updateSinceUntilBuild` defines whether plugin should patch `plugin.xml` with since and until build values, 
-if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.9999` will be used as until value.
+if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.9999` will be used as until value.<br/><br/>
 **Default value**: `true`
+
+- `intellij.downloadSources` defines whether plugin should download IntelliJ sources while 
+initializing gradle build. Since sources are not really needed while testing on CI you can set
+it to `false` for particular environment.<br/><br/>
+**Default value: `true`**
 
 #### Build steps
 
