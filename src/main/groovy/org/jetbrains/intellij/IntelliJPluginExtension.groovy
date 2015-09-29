@@ -5,8 +5,10 @@ class IntelliJPluginExtension {
     String version
     String pluginName
     String sandboxDirectory
+    String intellijRepo
     boolean instrumentCode
     boolean updateSinceUntilBuild
+    boolean downloadSources
     
     File ideaDirectory
     File ideaSourcesFile

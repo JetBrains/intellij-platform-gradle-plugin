@@ -17,6 +17,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
     def setup() {
         String localRepoPath = System.properties.get("local.repo")
         assert localRepoPath != null
+        String intellijRepo = System.properties.get('intellij.repo', '')
         assert gradleHome != null
         buildFile << """
             apply plugin: 'org.jetbrains.intellij'
@@ -30,6 +31,10 @@ abstract class IntelliJPluginSpecBase extends Specification {
                 dependencies {
                     classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: 'latest.release'
                 }
+            }
+            intellij {
+                downloadSources = false
+                intellijRepo = '${intellijRepo}'
             }
         """
     }

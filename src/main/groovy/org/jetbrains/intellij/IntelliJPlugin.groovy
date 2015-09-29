@@ -31,6 +31,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static final CONFIGURATION_NAME = "intellij"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
+    private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
 
     @Override
     def void apply(Project project) {
@@ -40,9 +41,11 @@ class IntelliJPlugin implements Plugin<Project> {
             plugins = []
             version = DEFAULT_IDEA_VERSION
             pluginName = project.name
-            sandboxDirectory = new File(project.buildDir, "idea-sandbox").absolutePath
+            sandboxDirectory = new File(project.buildDir, 'idea-sandbox').absolutePath
             instrumentCode = true
             updateSinceUntilBuild = true
+            intellijRepo = DEFAULT_INTELLIJ_REPO
+            downloadSources = true
         }
         configurePlugin(project, intellijExtension)
     }
@@ -70,14 +73,16 @@ class IntelliJPlugin implements Plugin<Project> {
         def configuration = project.configurations.create(CONFIGURATION_NAME).setVisible(false)
                 .setDescription("The IntelliJ IDEA Community Edition artifact to be used for this project.")
         LOG.info("Adding IntelliJ IDEA repository")
-        def version = extension.version
-        def releaseType = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
-        project.repositories.maven { it.url = "https://www.jetbrains.com/intellij-repository/${releaseType}" }
+        def baseUrl = extension.intellijRepo != null && !extension.intellijRepo.isEmpty() ? extension.intellijRepo : DEFAULT_INTELLIJ_REPO
+        def releaseType = extension.version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
+        project.repositories.maven {
+            it.url = "${baseUrl}/${releaseType}"
+        }
         LOG.info("Adding IntelliJ IDEA dependency")
-        project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:ideaIC:${version}")
+        project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:ideaIC:${extension.version}")
         LOG.info("IDEA zip: " + configuration.singleFile.path)
         extension.ideaDirectory = ideaDirectory(project, configuration)
-        extension.ideaSourcesFile = ideaSourcesFile(project, configuration)
+        extension.ideaSourcesFile = extension.downloadSources ? ideaSourcesFile(project, configuration) : null
     }
 
     private static void configurePluginDependencies(@NotNull Project project,
@@ -108,21 +113,19 @@ class IntelliJPlugin implements Plugin<Project> {
 
     @Nullable
     private static File ideaSourcesFile(@NotNull Project project, @NotNull Configuration configuration) {
-        if (!System.properties.'do.not.load.idea.sources') {
-            Collection<ComponentIdentifier> components = new ArrayList<>()
-            configuration.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL).each {
-                def id = it.getModuleVersion().getId()
-                components.add(new DefaultModuleComponentIdentifier(id.getGroup(), id.getName(), id.getVersion()))
-            }
+        Collection<ComponentIdentifier> components = new ArrayList<>()
+        configuration.getResolvedConfiguration().getLenientConfiguration().getArtifacts(Specs.SATISFIES_ALL).each {
+            def id = it.getModuleVersion().getId()
+            components.add(new DefaultModuleComponentIdentifier(id.getGroup(), id.getName(), id.getVersion()))
+        }
 
-            ArtifactResolutionQuery query = project.dependencies.createArtifactResolutionQuery();
-            query.forComponents(components);
-            query.withArtifacts(JvmLibrary, SourcesArtifact);
-            for (def component : query.execute().getResolvedComponents()) {
-                for (def artifact : component.getArtifacts(SourcesArtifact)) {
-                    if (artifact instanceof ResolvedArtifactResult) {
-                        return ((ResolvedArtifactResult) artifact).getFile();
-                    }
+        ArtifactResolutionQuery query = project.dependencies.createArtifactResolutionQuery();
+        query.forComponents(components);
+        query.withArtifacts(JvmLibrary, SourcesArtifact);
+        for (def component : query.execute().getResolvedComponents()) {
+            for (def artifact : component.getArtifacts(SourcesArtifact)) {
+                if (artifact instanceof ResolvedArtifactResult) {
+                    return ((ResolvedArtifactResult) artifact).getFile();
                 }
             }
         }
