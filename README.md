@@ -61,7 +61,7 @@ if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `Inte
 - `intellij.downloadSources` defines whether plugin should download IntelliJ sources while 
 initializing gradle build. Since sources are not really needed while testing on CI you can set
 it to `false` for particular environment.<br/><br/>
-**Default value: `true`**
+**Default value**: `true`
 
 #### Build steps
 
