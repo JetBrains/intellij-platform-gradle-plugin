@@ -22,17 +22,17 @@ abstract class IntelliJPluginSpecBase extends Specification {
         buildFile << """
             apply plugin: 'org.jetbrains.intellij'
             buildscript {
-                repositories {
-                    maven {
-                        url "${adjustWindowsPath(localRepoPath)}"
-                    }
+                repositories { 
+                    maven { url "${adjustWindowsPath(localRepoPath)}" } 
                     mavenCentral()
                 }
                 dependencies {
                     classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: 'latest.release'
                 }
             }
+            repositories { mavenCentral() }
             intellij {
+                version = '14.1.3'
                 downloadSources = false
                 intellijRepo = '${intellijRepo}'
             }

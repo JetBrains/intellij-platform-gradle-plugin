@@ -137,6 +137,63 @@ intellij {
     }
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
+    def 'prepare sandbox task'() {
+        given:
+        writeJavaFile()
+        file('src/main/resources/META-INF/other.xml') << ''
+        file('src/main/resources/META-INF/nonIncluded.xml') << ''
+        pluginXml << """<idea-plugin version="2">
+<depends config-file="other.xml"/>
+</idea-plugin>"""
+        buildFile << """version='0.42.123'
+intellij { 
+    version = '14.1.4'
+    pluginName = 'myPluginName' 
+    plugins = ['copyright'] 
+}
+dependencies { 
+    compile 'joda-time:joda-time:2.8.1'
+}
+
+"""
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        assert sandbox.list() == ['plugins']
+        assert list(sandbox, 'plugins') == ['myPluginName']
+        assert list(sandbox, 'plugins/myPluginName') == ['classes', 'lib', 'META-INF']
+        assert list(sandbox, 'plugins/myPluginName/lib') == ['joda-time-2.8.1.jar'] // "should contains only non-IDEA dependencies"
+        assert list(sandbox, 'plugins/myPluginName/classes') == ['App.class', 'META-INF']
+        assert list(sandbox, 'plugins/myPluginName/classes/META-INF') == ['nonIncluded.xml']
+        assert list(sandbox, 'plugins/myPluginName/META-INF') == ['other.xml', 'plugin.xml']
+        assert new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml').text.trim() == """<idea-plugin version="2">
+  <depends config-file="other.xml"/>
+  <version>0.42.123</version>
+  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+</idea-plugin>"""
+    }
+
+    private static String[] list(File parent, String path) {
+        new File(parent, path).list()
+    }
+
+    @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
+    def 'use gradle project name if plugin name is not defined'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        File pluginDir = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        assert pluginDir.exists()
+        assert pluginDir.list() == ['classes', 'META-INF']
+    }
+
+    @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
     private static void assertPathParameters(@NotNull ProcessProperties testCommand, @NotNull String sandboxPath) {
         assert adjustWindowsPath(testCommand.properties.'idea.config.path') == "${sandboxPath}/config-test"
         assert adjustWindowsPath(testCommand.properties.'idea.system.path') == "${sandboxPath}/system-test"

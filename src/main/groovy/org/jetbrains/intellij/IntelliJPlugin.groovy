@@ -32,6 +32,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final CONFIGURATION_NAME = "intellij"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
+    public static final String DEFAULT_SANDBOX = 'idea-sandbox'
 
     @Override
     def void apply(Project project) {
@@ -41,7 +42,7 @@ class IntelliJPlugin implements Plugin<Project> {
             plugins = []
             version = DEFAULT_IDEA_VERSION
             pluginName = project.name
-            sandboxDirectory = new File(project.buildDir, 'idea-sandbox').absolutePath
+            sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
             instrumentCode = true
             updateSinceUntilBuild = true
             intellijRepo = DEFAULT_INTELLIJ_REPO
