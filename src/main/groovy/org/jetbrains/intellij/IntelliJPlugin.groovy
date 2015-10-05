@@ -33,6 +33,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
     public static final String DEFAULT_SANDBOX = 'idea-sandbox'
+    public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
 
     @Override
     def void apply(Project project) {
@@ -177,7 +178,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureBuildPluginTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring building IntelliJ IDEA plugin task")
         def prepareSandboxTask = project.tasks.findByName(PrepareSandboxTask.NAME) as PrepareSandboxTask
-        project.tasks.create("buildPlugin", Zip).with {
+        project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
             baseName = extension.pluginName

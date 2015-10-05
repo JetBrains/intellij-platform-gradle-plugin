@@ -1,7 +1,10 @@
 package org.jetbrains.intellij
 
+import groovy.io.FileType
 import org.gradle.api.plugins.JavaPlugin
 import org.jetbrains.annotations.NotNull
+
+import java.util.zip.ZipFile
 
 class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'intellij-specific tasks'() {
@@ -142,9 +145,7 @@ intellij {
         writeJavaFile()
         file('src/main/resources/META-INF/other.xml') << ''
         file('src/main/resources/META-INF/nonIncluded.xml') << ''
-        pluginXml << """<idea-plugin version="2">
-<depends config-file="other.xml"/>
-</idea-plugin>"""
+        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
         buildFile << """version='0.42.123'
 intellij { 
     version = '14.1.4'
@@ -161,18 +162,60 @@ dependencies {
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert sandbox.list() == ['plugins']
-        assert list(sandbox, 'plugins') == ['myPluginName']
-        assert list(sandbox, 'plugins/myPluginName') == ['classes', 'lib', 'META-INF']
-        assert list(sandbox, 'plugins/myPluginName/lib') == ['joda-time-2.8.1.jar'] // "should contains only non-IDEA dependencies"
-        assert list(sandbox, 'plugins/myPluginName/classes') == ['App.class', 'META-INF']
-        assert list(sandbox, 'plugins/myPluginName/classes/META-INF') == ['nonIncluded.xml']
-        assert list(sandbox, 'plugins/myPluginName/META-INF') == ['other.xml', 'plugin.xml']
+        assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
+                                         '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
+                                         '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                         '/plugins/myPluginName/META-INF/other.xml',
+                                         '/plugins/myPluginName/META-INF/plugin.xml']
         assert new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml').text.trim() == """<idea-plugin version="2">
   <depends config-file="other.xml"/>
   <version>0.42.123</version>
   <idea-version since-build="141.1532.4" until-build="141.9999"/>
 </idea-plugin>"""
+    }
+
+    def 'prepare custom sandbox task'() {
+        given:
+        writeJavaFile()
+        file('src/main/resources/META-INF/other.xml') << ''
+        file('src/main/resources/META-INF/nonIncluded.xml') << ''
+        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
+        def sandboxPath = adjustWindowsPath("${dir.root.absolutePath}/customSandbox")
+        buildFile << """version='0.42.123'
+intellij { 
+    version = '14.1.4'
+    pluginName = 'myPluginName' 
+    plugins = ['copyright'] 
+    sandboxDirectory = '${sandboxPath}'
+}
+dependencies { 
+    compile 'joda-time:joda-time:2.8.1'
+}
+
+"""
+        when:
+        run(PrepareSandboxTask.NAME)
+
+        then:
+        assert collectPaths(new File(sandboxPath)) == ['/plugins/myPluginName/classes/App.class',
+                                                       '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
+                                                       '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                                       '/plugins/myPluginName/META-INF/other.xml',
+                                                       '/plugins/myPluginName/META-INF/plugin.xml']
+        assert new File(sandboxPath, 'plugins/myPluginName/META-INF/plugin.xml').text.trim() == """<idea-plugin version="2">
+  <depends config-file="other.xml"/>
+  <version>0.42.123</version>
+  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+</idea-plugin>"""
+    }
+
+    private static ArrayList collectPaths(File directory) {
+        assert directory.exists()
+        def paths = []
+        directory.eachFileRecurse(FileType.FILES) {
+            paths << adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length()))
+        }
+        paths
     }
 
     private static String[] list(File parent, String path) {
@@ -188,10 +231,110 @@ dependencies {
         def project = run(PrepareSandboxTask.NAME)
 
         then:
-        File pluginDir = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert pluginDir.exists()
-        assert pluginDir.list() == ['classes', 'META-INF']
+        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/${project.name}/META-INF/plugin.xml"]
     }
+
+    @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
+    def 'build plugin distribution'() {
+        given:
+        writeJavaFile()
+        file('src/main/resources/META-INF/other.xml') << ''
+        file('src/main/resources/META-INF/nonIncluded.xml') << ''
+        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
+        buildFile << """version='0.42.123'
+intellij { 
+    version = '14.1.4'
+    pluginName = 'myPluginName' 
+    plugins = ['copyright'] 
+}
+dependencies { 
+    compile 'joda-time:joda-time:2.8.1'
+}
+
+"""
+        when:
+        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        assert distribution.exists()
+
+        def zipFile = new ZipFile(distribution)
+        assert zipFile.entries().collect { it.name } == ['myPluginName/',
+                                                         'myPluginName/classes/',
+                                                         'myPluginName/classes/App.class',
+                                                         'myPluginName/classes/META-INF/',
+                                                         'myPluginName/classes/META-INF/nonIncluded.xml',
+                                                         'myPluginName/lib/',
+                                                         'myPluginName/lib/joda-time-2.8.1.jar',
+                                                         'myPluginName/META-INF/',
+                                                         'myPluginName/META-INF/other.xml',
+                                                         'myPluginName/META-INF/plugin.xml']
+        zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """<idea-plugin version="2">
+  <depends config-file="other.xml"/>
+  <version>0.42.123</version>
+  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+</idea-plugin>"""
+    }
+
+    @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
+    def 'use custom sandbox for distribution'() {
+        given:
+        writeJavaFile()
+        file('src/main/resources/META-INF/other.xml') << ''
+        file('src/main/resources/META-INF/nonIncluded.xml') << ''
+        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
+        def sandboxPath = adjustWindowsPath("${dir.root.absolutePath}/customSandbox")
+        buildFile << """version='0.42.123'
+intellij { 
+    version = '14.1.4'
+    pluginName = 'myPluginName' 
+    plugins = ['copyright'] 
+    sandboxDirectory = '${sandboxPath}'
+}
+dependencies { 
+    compile 'joda-time:joda-time:2.8.1'
+}
+
+"""
+        when:
+        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        assert distribution.exists()
+
+        def zipFile = new ZipFile(distribution)
+        assert zipFile.entries().collect { it.name } == ['myPluginName/',
+                                                         'myPluginName/classes/',
+                                                         'myPluginName/classes/App.class',
+                                                         'myPluginName/classes/META-INF/',
+                                                         'myPluginName/classes/META-INF/nonIncluded.xml',
+                                                         'myPluginName/lib/',
+                                                         'myPluginName/lib/joda-time-2.8.1.jar',
+                                                         'myPluginName/META-INF/',
+                                                         'myPluginName/META-INF/other.xml',
+                                                         'myPluginName/META-INF/plugin.xml']
+        zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """<idea-plugin version="2">
+  <depends config-file="other.xml"/>
+  <version>0.42.123</version>
+  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+</idea-plugin>"""
+    }
+
+    @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
+    def 'use gradle project name for distribution if plugin name is not defined'() {
+        given:
+        buildFile << 'version="0.42.123"'
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+
+        when:
+        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        assert list(project.buildDirectory, "distributions") == ["${project.name}-0.42.123.zip"]
+    }
+
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
     private static void assertPathParameters(@NotNull ProcessProperties testCommand, @NotNull String sandboxPath) {
