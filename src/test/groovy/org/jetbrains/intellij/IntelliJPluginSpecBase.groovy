@@ -1,4 +1,5 @@
 package org.jetbrains.intellij
+
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
@@ -114,7 +115,24 @@ abstract class IntelliJPluginSpecBase extends Specification {
         file
     }
 
+    protected File writeJavaFile() {
+        file('src/main/java/App.java') << """  
+import java.lang.String;
+import org.jetbrains.annotations.NotNull;
+class App {
+    public static void main(@NotNull String[] strings) {
+        System.out.println(strings);    
+    }
+}
+"""
+    }
+
     protected static String adjustWindowsPath(@NotNull String s) {
         return s.replaceAll('\\\\', '/');
     }
+
+    protected static void assertFileContent(File file, String expectedContent) {
+        assert file.text.trim() == expectedContent
+    }
+
 }
