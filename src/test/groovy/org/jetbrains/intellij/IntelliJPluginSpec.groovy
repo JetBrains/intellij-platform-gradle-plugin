@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.jetbrains.annotations.NotNull
 
@@ -58,6 +59,22 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     }
 
     def 'do not instrument code on empty source sets'() {
+        when:
+        run(true, JavaPlugin.COMPILE_JAVA_TASK_NAME)
+
+        then:
+        !stdout.contains('Compiling forms and instrumenting code')
+    }
+    
+    def 'idea dependencies'() {
+        when:
+        run(BasePlugin.ASSEMBLE_TASK_NAME)
+
+        then:
+        !stdout.contains('Compiling forms and instrumenting code')
+    }
+    
+    def 'do not download sources if option is disabled'() {
         when:
         run(true, JavaPlugin.COMPILE_JAVA_TASK_NAME)
 

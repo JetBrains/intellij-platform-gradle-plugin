@@ -9,9 +9,8 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/other.xml') << ''
         file('src/main/resources/META-INF/nonIncluded.xml') << ''
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
-        buildFile << """version='0.42.123'
+        buildFile <<  """version='0.42.123'
 intellij { 
-    version = '14.1.4'
     pluginName = 'myPluginName' 
     plugins = ['copyright'] 
 }
@@ -29,11 +28,11 @@ dependencies {
                                          '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
                                          '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
                                          '/plugins/myPluginName/META-INF/other.xml',
-                                         '/plugins/myPluginName/META-INF/plugin.xml']
+                                         '/plugins/myPluginName/META-INF/plugin.xml'] as Set
         assertFileContent(new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml'), """<idea-plugin version="2">
   <depends config-file="other.xml"/>
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1010.3" until-build="141.9999"/>
 </idea-plugin>""");
     }
 
@@ -46,7 +45,6 @@ dependencies {
         def sandboxPath = adjustWindowsPath("${dir.root.absolutePath}/customSandbox")
         buildFile << """version='0.42.123'
 intellij { 
-    version = '14.1.4'
     pluginName = 'myPluginName' 
     plugins = ['copyright'] 
     sandboxDirectory = '${sandboxPath}'
@@ -64,11 +62,11 @@ dependencies {
                                                        '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
                                                        '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
                                                        '/plugins/myPluginName/META-INF/other.xml',
-                                                       '/plugins/myPluginName/META-INF/plugin.xml']
+                                                       '/plugins/myPluginName/META-INF/plugin.xml'] as Set
         assertFileContent(new File(sandboxPath, 'plugins/myPluginName/META-INF/plugin.xml'), """<idea-plugin version="2">
   <depends config-file="other.xml"/>
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1010.3" until-build="141.9999"/>
 </idea-plugin>""")
     }
 
@@ -80,12 +78,12 @@ dependencies {
         def project = run(PrepareSandboxTask.NAME)
 
         then:
-        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/${project.name}/META-INF/plugin.xml"]
+        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/${project.name}/META-INF/plugin.xml"] as Set
     }
 
-    private static ArrayList collectPaths(File directory) {
+    private static Set collectPaths(File directory) {
         assert directory.exists()
-        def paths = []
+        def paths = new HashSet()
         directory.eachFileRecurse(FileType.FILES) {
             paths << adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length()))
         }
