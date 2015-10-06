@@ -13,7 +13,7 @@ import spock.lang.Specification
 abstract class IntelliJPluginSpecBase extends Specification {
     @Rule
     final TemporaryFolder dir = new TemporaryFolder()
-    final String gradleHome = System.properties.get('test.gradle.home')
+    protected final String gradleHome = System.properties.get('test.gradle.home')
 
     def setup() {
         String localRepoPath = System.properties.get("local.repo")
