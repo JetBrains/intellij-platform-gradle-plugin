@@ -22,20 +22,19 @@ class PatchPluginXmlTask extends DefaultTask {
         Utils.outPluginXmlFiles(project).each { file ->
             def pluginXml = new XmlParser().parse(file)
             def version = pluginXml.version
-            if (version.isEmpty()) {
-                pluginXml.appendNode("version", project.version)
-            } else {
+            if (version) {
                 version*.value = project.version
+            } else {
+                pluginXml.appendNode("version", project.version)
             }
 
             if (since != null && until != null) {
                 def ideaVersionTag = pluginXml.'idea-version'
-                if (ideaVersionTag.isEmpty()) {
-                    pluginXml.appendNode("idea-version", ['since-build': since, 'until-build': until])
-                }
-                else {
+                if (ideaVersionTag) {
                     ideaVersionTag*.'@since-build' = since
                     ideaVersionTag*.'@until-build' = until
+                } else {
+                    pluginXml.appendNode("idea-version", ['since-build': since, 'until-build': until])
                 }
             }
 

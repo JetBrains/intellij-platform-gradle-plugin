@@ -35,7 +35,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
             intellij {
                 version = '14.1.3'
                 downloadSources = false
-                intellijRepo = '${intellijRepo}'
+                intellijRepo = '$intellijRepo'
             }
         """
     }
@@ -91,7 +91,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
             if (!targetGroupAppeared) {
                 targetGroupAppeared = line.equalsIgnoreCase(groupName + " tasks")
             } else if (!line.equals("-" * (groupName + " tasks").length())) {
-                if (line.isEmpty()) break
+                if (!line) break
                 def spaceIndex = line.indexOf(' ')
                 result.add(spaceIndex > 0 ? line.substring(0, spaceIndex) : line)
             }

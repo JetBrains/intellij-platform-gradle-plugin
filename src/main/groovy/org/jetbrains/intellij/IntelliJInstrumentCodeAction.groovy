@@ -11,10 +11,10 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
         def extension = task.project.extensions.getByType(IntelliJPluginExtension)
         def loader = "java2.loader"
         def classpath = task.project.files(
-                "${extension.ideaDirectory}/lib/javac2.jar",
-                "${extension.ideaDirectory}/lib/jdom.jar",
-                "${extension.ideaDirectory}/lib/asm-all.jar",
-                "${extension.ideaDirectory}/lib/jgoodies-forms.jar")
+                "$extension.ideaDirectory/lib/javac2.jar",
+                "$extension.ideaDirectory/lib/jdom.jar",
+                "$extension.ideaDirectory/lib/asm-all.jar",
+                "$extension.ideaDirectory/lib/jgoodies-forms.jar")
         task.project.ant.taskdef(name: 'instrumentIdeaExtensions',
                 classpath: classpath.asPath,
                 loaderref: loader,

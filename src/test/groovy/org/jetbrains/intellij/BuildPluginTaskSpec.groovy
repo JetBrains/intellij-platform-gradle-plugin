@@ -51,12 +51,12 @@ dependencies {
         file('src/main/resources/META-INF/other.xml') << ''
         file('src/main/resources/META-INF/nonIncluded.xml') << ''
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
-        def sandboxPath = adjustWindowsPath("${dir.root.absolutePath}/customSandbox")
+        def sandboxPath = adjustWindowsPath("$dir.root.absolutePath/customSandbox")
         buildFile << """version='0.42.123'
 intellij { 
     pluginName = 'myPluginName' 
     plugins = ['copyright'] 
-    sandboxDirectory = '${sandboxPath}'
+    sandboxDirectory = '$sandboxPath'
 }
 dependencies { 
     compile 'joda-time:joda-time:2.8.1'
@@ -98,6 +98,6 @@ dependencies {
 
         then:
         //noinspection GrEqualsBetweenInconvertibleTypes
-        assert new File(project.buildDirectory, "distributions").list() == ["${project.name}-0.42.123.zip"]
+        assert new File(project.buildDirectory, "distributions").list() == ["$project.name-0.42.123.zip"]
     }
 }

@@ -16,19 +16,19 @@ class RunIdeaTask extends JavaExec {
 
         extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         enableAssertions = true
-        workingDir = project.file("${extension.ideaDirectory}/bin/")
+        workingDir = project.file("$extension.ideaDirectory/bin/")
 
         def toolsJar = Jvm.current().toolsJar
         if (toolsJar != null) classpath += project.files(toolsJar)
-        classpath += project.files("${extension.ideaDirectory}/lib/idea_rt.jar",
-                "${extension.ideaDirectory}/lib/idea.jar",
-                "${extension.ideaDirectory}/lib/bootstrap.jar",
-                "${extension.ideaDirectory}/lib/extensions.jar",
-                "${extension.ideaDirectory}/lib/util.jar",
-                "${extension.ideaDirectory}/lib/openapi.jar",
-                "${extension.ideaDirectory}/lib/trove4j.jar",
-                "${extension.ideaDirectory}/lib/jdom.jar",
-                "${extension.ideaDirectory}/lib/log4j.jar")
+        classpath += project.files("$extension.ideaDirectory/lib/idea_rt.jar",
+                "$extension.ideaDirectory/lib/idea.jar",
+                "$extension.ideaDirectory/lib/bootstrap.jar",
+                "$extension.ideaDirectory/lib/extensions.jar",
+                "$extension.ideaDirectory/lib/util.jar",
+                "$extension.ideaDirectory/lib/openapi.jar",
+                "$extension.ideaDirectory/lib/trove4j.jar",
+                "$extension.ideaDirectory/lib/jdom.jar",
+                "$extension.ideaDirectory/lib/log4j.jar")
         systemProperties = patchSystemProperties()
     }
 

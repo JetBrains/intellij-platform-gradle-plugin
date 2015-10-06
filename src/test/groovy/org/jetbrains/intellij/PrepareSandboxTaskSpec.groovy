@@ -42,12 +42,12 @@ dependencies {
         file('src/main/resources/META-INF/other.xml') << ''
         file('src/main/resources/META-INF/nonIncluded.xml') << ''
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
-        def sandboxPath = adjustWindowsPath("${dir.root.absolutePath}/customSandbox")
+        def sandboxPath = adjustWindowsPath("$dir.root.absolutePath/customSandbox")
         buildFile << """version='0.42.123'
 intellij { 
     pluginName = 'myPluginName' 
     plugins = ['copyright'] 
-    sandboxDirectory = '${sandboxPath}'
+    sandboxDirectory = '$sandboxPath'
 }
 dependencies { 
     compile 'joda-time:joda-time:2.8.1'
@@ -78,7 +78,7 @@ dependencies {
         def project = run(PrepareSandboxTask.NAME)
 
         then:
-        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/${project.name}/META-INF/plugin.xml"] as Set
+        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/$project.name/META-INF/plugin.xml"] as Set
     }
 
     private static Set collectPaths(File directory) {

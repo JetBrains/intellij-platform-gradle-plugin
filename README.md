@@ -45,10 +45,10 @@ The option accepts build numbers, version numbers and two meta values `LATEST-EA
 
 - `intellij.pluginName` is used for naming target zip-archive and defines the name of plugin artifact. 
 of bundled IDEA plugins that should be used as dependencies.<br/><br/>
-**Default value:** `${project.name}`
+**Default value:** `$project.name`
 
 - `intellij.sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.<br/><br/>
-**Default value**: `${project.buildDir}/idea-sandbox`
+**Default value**: `$project.buildDir/idea-sandbox`
 
 - `intellij.instrumentCode` defines whether plugin should instrument java classes with nullability assertions. 
 Also it might be required for compiling forms created by IntelliJ GUI designer.<br/><br/>
