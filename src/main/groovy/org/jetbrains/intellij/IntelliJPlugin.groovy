@@ -48,6 +48,7 @@ class IntelliJPlugin implements Plugin<Project> {
             updateSinceUntilBuild = true
             intellijRepo = DEFAULT_INTELLIJ_REPO
             downloadSources = true
+            publish = new IntelliJPluginExtension.Publish()
         }
         configurePlugin(project, intellijExtension)
     }
@@ -59,11 +60,12 @@ class IntelliJPlugin implements Plugin<Project> {
             configurePluginDependencies(it, extension)
             configureInstrumentTask(it, extension)
             configureTestTasks(it, extension)
-            if (!Utils.sourcePluginXmlFiles(it).isEmpty()) {
+            if (Utils.sourcePluginXmlFiles(it)) {
                 configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
                 configureRunIdeaTask(it)
                 configureBuildPluginTask(it, extension)
+                configurePublishPluginTask(it)
             } else {
                 LOG.warn("File not found: plugin.xml. IntelliJ specific tasks will be unavailable.")
             }
@@ -75,13 +77,13 @@ class IntelliJPlugin implements Plugin<Project> {
         def configuration = project.configurations.create(CONFIGURATION_NAME).setVisible(false)
                 .setDescription("The IntelliJ IDEA Community Edition artifact to be used for this project.")
         LOG.info("Adding IntelliJ IDEA repository")
-        def baseUrl = extension.intellijRepo != null && !extension.intellijRepo.isEmpty() ? extension.intellijRepo : DEFAULT_INTELLIJ_REPO
+        def baseUrl = extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO
         def releaseType = extension.version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
         project.repositories.maven {
-            it.url = "${baseUrl}/${releaseType}"
+            it.url = "${baseUrl}/$releaseType"
         }
         LOG.info("Adding IntelliJ IDEA dependency")
-        project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:ideaIC:${extension.version}")
+        project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:ideaIC:$extension.version")
         LOG.info("IDEA zip: " + configuration.singleFile.path)
         extension.ideaDirectory = ideaDirectory(project, configuration)
         extension.ideaSourcesFile = extension.downloadSources ? ideaSourcesFile(project, configuration) : null
@@ -94,15 +96,15 @@ class IntelliJPlugin implements Plugin<Project> {
 
         project.repositories.ivy { repo ->
             repo.url = extension.ideaDirectory
-            repo.artifactPattern("${extension.ideaDirectory.path}/com.jetbrains/${moduleName}/${version}/[artifact]-${project.name}.[ext]") // ivy xml
-            repo.artifactPattern("${extension.ideaDirectory.path}/[artifact].[ext]") // idea libs
+            repo.artifactPattern("$extension.ideaDirectory.path/com.jetbrains/$moduleName/$version/[artifact]-$project.name.[ext]") // ivy xml
+            repo.artifactPattern("$extension.ideaDirectory.path/[artifact].[ext]") // idea libs
 
             def toolsJar = Jvm.current().toolsJar
             if (toolsJar != null) {
-                repo.artifactPattern("${toolsJar.parent}/[artifact].[ext]") // java libs
+                repo.artifactPattern("$toolsJar.parent/[artifact].[ext]") // java libs
             }
             if (extension.ideaSourcesFile != null) { // sources
-                repo.artifactPattern("${extension.ideaSourcesFile.parent}/[artifact]-${version}-[classifier].[ext]")
+                repo.artifactPattern("$extension.ideaSourcesFile.parent/[artifact]-$version-[classifier].[ext]")
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
@@ -170,8 +172,8 @@ class IntelliJPlugin implements Plugin<Project> {
 
             def toolsJar = Jvm.current().getToolsJar()
             if (toolsJar != null) it.classpath += project.files(toolsJar)
-            it.classpath += project.files("${extension.ideaDirectory}/lib/resources.jar",
-                    "${extension.ideaDirectory}/lib/idea.jar");
+            it.classpath += project.files("$extension.ideaDirectory/lib/resources.jar",
+                    "$extension.ideaDirectory/lib/idea.jar");
         }
     }
 
@@ -182,11 +184,17 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
             baseName = extension.pluginName
-            from("${prepareSandboxTask.destinationDir}/${extension.pluginName}")
+            from("$prepareSandboxTask.destinationDir/$extension.pluginName")
             into(extension.pluginName)
             dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
             project.getTasksByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME, false)*.dependsOn(it)
         }
+    }
+
+    private static void configurePublishPluginTask(@NotNull Project project) {
+        LOG.info("Configuring publishing IntelliJ IDEA plugin task")
+        project.tasks.create(PublishTask.NAME, PublishTask)
+                .dependsOn(project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false))
     }
 
     @NotNull
@@ -227,7 +235,7 @@ class IntelliJPlugin implements Plugin<Project> {
         def bundledPlugins = extension.plugins
         if (bundledPlugins.length > 0) {
             def bundledPluginJars = project.fileTree(extension.ideaDirectory)
-            bundledPlugins.each { bundledPluginJars.include("plugins/${it}/lib/*.jar") }
+            bundledPlugins.each { bundledPluginJars.include("plugins/$it/lib/*.jar") }
             bundledPluginJars.files.each {
                 generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
                 extension.intellijFiles.add(it)
@@ -249,7 +257,7 @@ class IntelliJPlugin implements Plugin<Project> {
             extension.intellijFiles.add(extension.ideaSourcesFile)
         }
 
-        def parentDirectory = new File(extension.ideaDirectory, "com.jetbrains/${moduleName}/${extension.version}")
+        def parentDirectory = new File(extension.ideaDirectory, "com.jetbrains/$moduleName/$extension.version")
         parentDirectory.mkdirs()
         generator.writeTo(new File(parentDirectory, "ivy-${project.name}.xml"))
         return moduleName

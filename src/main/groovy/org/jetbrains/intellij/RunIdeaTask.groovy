@@ -10,8 +10,8 @@ class RunIdeaTask extends JavaExec {
 
     public RunIdeaTask() {
         name = NAME
-        description = "Runs Intellij IDEA with installed plugin."
         group = IntelliJPlugin.GROUP_NAME
+        description = "Runs Intellij IDEA with installed plugin."
         setMain("com.intellij.idea.Main")
 
         extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension

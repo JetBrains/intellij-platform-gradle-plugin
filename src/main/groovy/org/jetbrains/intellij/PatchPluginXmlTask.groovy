@@ -11,8 +11,8 @@ class PatchPluginXmlTask extends DefaultTask {
 
     PatchPluginXmlTask() {
         name = NAME
-        description = "Set plugin version, since-build and until-build values in plugin.xml."
         group = IntelliJPlugin.GROUP_NAME
+        description = "Set plugin version, since-build and until-build values in plugin.xml."
     }
 
     @SuppressWarnings("GroovyUnusedDeclaration")

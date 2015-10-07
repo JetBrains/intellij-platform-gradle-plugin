@@ -18,8 +18,8 @@ class PrepareSandboxTask extends Sync {
 
     public PrepareSandboxTask() {
         name = NAME
-        description = "Creates a folder containing the plugins to run Intellij IDEA with."
         group = IntelliJPlugin.GROUP_NAME
+        description = "Creates a folder containing the plugins to run Intellij IDEA with."
 
         CopySpecInternal plugins = rootSpec.addChild()
         plugin = plugins.addChild();

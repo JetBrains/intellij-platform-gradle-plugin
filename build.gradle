@@ -19,12 +19,14 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'org.jetbrains:annotations:13.0'
-    testCompile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.3', {
+    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
+    compile 'org.apache.httpcomponents:httpmime:4.5.1'
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.3', {
         exclude module: 'groovy-all'
     }
 }
 
-version = '0.0.22'
+version = '0.0.23'
 group = 'org.jetbrains'
 
 pluginBundle {
@@ -43,15 +45,15 @@ pluginBundle {
 }
 
 test {
-    systemProperties['local.repo'] = "${buildDir}/localRepo"
-    systemProperties['test.gradle.home'] = "${buildDir}/testGradleHome"
+    systemProperties['local.repo'] = "$buildDir/localRepo"
+    systemProperties['test.gradle.home'] = "$buildDir/testGradleHome"
     dependsOn install
 }
 
 install {
     repositories {
         mavenDeployer {
-            repository(url: new File("${buildDir}/localRepo").toURI())
+            repository(url: new File("$buildDir/localRepo").toURI())
         }
     }
 }

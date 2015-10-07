@@ -56,9 +56,9 @@ class Utils {
         def properties = new HashMap<String, Object>()
         properties.putAll(originalProperties)
         def suffix = inTests ? "-test" : ""
-        properties.put("idea.config.path", "${extension.sandboxDirectory}/config${suffix}")
-        properties.put("idea.system.path", "${extension.sandboxDirectory}/system${suffix}")
-        properties.put("idea.plugins.path", "${extension.sandboxDirectory}/plugins")
+        properties.put("idea.config.path", "$extension.sandboxDirectory/config$suffix")
+        properties.put("idea.system.path", "$extension.sandboxDirectory/system$suffix")
+        properties.put("idea.plugins.path", "$extension.sandboxDirectory/plugins")
         def pluginId = getPluginId(project)
         if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
             properties.put("idea.required.plugins.id", pluginId)
@@ -81,7 +81,7 @@ class Utils {
             result += arg
         }
 
-        result += "-Xbootclasspath/a:${extension.ideaDirectory.absolutePath}/lib/boot.jar"
+        result += "-Xbootclasspath/a:$extension.ideaDirectory.absolutePath/lib/boot.jar"
         if (!hasPermSizeArg) result += "-XX:MaxPermSize=250m"
         return result
     }

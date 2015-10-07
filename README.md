@@ -11,7 +11,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.20"
+  id "org.jetbrains.intellij" version "0.0.23"
 }
 ```
 
@@ -25,7 +25,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '0.0.20'
+    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '0.0.23'
   }
 }
 
@@ -63,6 +63,15 @@ initializing gradle build. Since sources are not really needed while testing on 
 it to `false` for particular environment.<br/><br/>
 **Default value**: `true`
 
+### Publishing plugin
+
+- `intellij.publish.pluginId` defines plugin id at JetBrains plugin repository, you can find it in url of you plugin page there.
+- `intellij.publish.username` your login at JetBrains plugin repository.
+- `intellij.publish.password` your password at JetBrains plugin repository.
+- `intellij.publish.channgel` defines channel to upload, you may use any string here, empty string means default channel.
+<br/><br/>
+**Default value**: `<empty>`
+
 #### Build steps
 
 Plugin introduces following build steps
@@ -75,7 +84,7 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.20"
+  id "org.jetbrains.intellij" version "0.0.23"
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -83,7 +92,14 @@ apply plugin: 'org.jetbrains.intellij'
 intellij {
   version '14.1.4'
   plugins 'coverage'
-  pluginName 'MyPlugin' 
+  pluginName 'MyPlugin'
+  
+  publish {
+    username 'zolotov'
+    password 'password'
+    pluginId '5047'
+    channel 'nightly'
+  } 
 }
 
 ```
