@@ -80,6 +80,7 @@ Plugin introduces following build steps
 - `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
 - `buildPlugin` assembles plugin and prepares zip archive for deployment
 - `runIdea` executes IntelliJ IDEA instance with installed the plugin you're developing 
+- `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com 
 
 ### build.gradle
 ```groovy
