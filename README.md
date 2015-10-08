@@ -65,7 +65,7 @@ initializing gradle build. Since sources are not really needed while testing on 
 it to `false` for particular environment.<br/><br/>
 **Default value**: `true`
 
-### Publishing plugin
+#### Publishing plugin
 
 - `intellij.publish.pluginId` defines plugin id at JetBrains plugin repository, you can find it in url of you plugin page there.
 - `intellij.publish.username` your login at JetBrains plugin repository.
