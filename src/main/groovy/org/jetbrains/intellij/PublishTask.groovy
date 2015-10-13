@@ -1,10 +1,10 @@
 package org.jetbrains.intellij
-
 import groovyx.net.http.HTTPBuilder
 import groovyx.net.http.Method
 import org.apache.http.entity.mime.MultipartEntityBuilder
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.api.tasks.bundling.Zip
 
 class PublishTask extends DefaultTask {
@@ -60,17 +60,17 @@ class PublishTask extends DefaultTask {
                     response.success = { resp ->
                         if (resp.status != 200 && resp.status != 302) {
                             IntelliJPlugin.LOG.error("Failed to upoad plugin: $resp.statusLine")
-                            return
+                            throw new TaskExecutionException(this, new RuntimeException("Failed to upoad plugin: $resp.statusLine\n\n"))
                         }
                         IntelliJPlugin.LOG.info("Uploaded successfully")
                     }
                     response.failure = { resp ->
-                        IntelliJPlugin.LOG.error("Failed to upoad plugin: $resp.statusLine")
+                        throw new TaskExecutionException(this, new RuntimeException("Failed to upoad plugin: $resp.statusLine\n\n"))
                     }
                 }
             }
             catch (exception) {
-                IntelliJPlugin.LOG.error("Failed to upload plugin", exception)
+                throw new TaskExecutionException(this, new RuntimeException("Failed to upload plugin", exception))
             }
         }
     }
