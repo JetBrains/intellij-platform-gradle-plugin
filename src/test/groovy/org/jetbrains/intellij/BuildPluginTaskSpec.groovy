@@ -39,9 +39,9 @@ dependencies {
                                                                 'myPluginName/META-INF/other.xml',
                                                                 'myPluginName/META-INF/plugin.xml'] as Set
         zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """<idea-plugin version="2">
-  <depends config-file="other.xml"/>
   <version>0.42.123</version>
   <idea-version since-build="141.1010.3" until-build="141.9999"/>
+  <depends config-file="other.xml"/>
 </idea-plugin>"""
     }
 
@@ -82,9 +82,9 @@ dependencies {
                                                                 'myPluginName/META-INF/other.xml',
                                                                 'myPluginName/META-INF/plugin.xml'] as Set
         zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """<idea-plugin version="2">
-  <depends config-file="other.xml"/>
   <version>0.42.123</version>
   <idea-version since-build="141.1010.3" until-build="141.9999"/>
+  <depends config-file="other.xml"/>
 </idea-plugin>"""
     }
 

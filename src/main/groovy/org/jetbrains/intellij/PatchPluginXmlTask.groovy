@@ -21,23 +21,24 @@ class PatchPluginXmlTask extends DefaultTask {
         def (since, until) = sinceUntilBuild
         Utils.outPluginXmlFiles(project).each { file ->
             def pluginXml = new XmlParser().parse(file)
-            def version = pluginXml.version
-            if (version) {
-                version*.value = project.version
-            } else {
-                pluginXml.appendNode("version", project.version)
-            }
-
+            
             if (since != null && until != null) {
                 def ideaVersionTag = pluginXml.'idea-version'
                 if (ideaVersionTag) {
                     ideaVersionTag*.'@since-build' = since
                     ideaVersionTag*.'@until-build' = until
                 } else {
-                    pluginXml.appendNode("idea-version", ['since-build': since, 'until-build': until])
+                    pluginXml.children().add(0, new Node(null, 'idea-version', ['since-build': since, 'until-build': until]))
                 }
             }
-
+            
+            def version = pluginXml.version
+            if (version) {
+                version*.value = project.version
+            } else {
+                pluginXml.children().add(0, new Node(null, 'version', project.version));
+            }
+            
             def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(file)))
             printer.preserveWhitespace = true
             printer.print(pluginXml)

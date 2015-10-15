@@ -17,6 +17,22 @@ class PatchPluginXmlTaskSpec extends IntelliJPluginSpecBase {
 """
     }
 
+    def 'add version tags in the beginning of file'() {
+        given:
+        pluginXml << "<idea-plugin version=\"2\">\n<id>org.jetbrains.erlang</id>\n</idea-plugin>"
+        buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
+        when:
+        def project = run(PatchPluginXmlTask.NAME)
+        then:
+        println(ouputPluginXml(project).text)
+        ouputPluginXml(project).text == """<idea-plugin version="2">
+  <version>0.42.123</version>
+  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <id>org.jetbrains.erlang</id>
+</idea-plugin>
+"""
+    }
+
     def 'override version and since until builds'() {
         given:
         pluginXml << """<idea-plugin version="2">

@@ -30,9 +30,9 @@ dependencies {
                                          '/plugins/myPluginName/META-INF/other.xml',
                                          '/plugins/myPluginName/META-INF/plugin.xml'] as Set
         assertFileContent(new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml'), """<idea-plugin version="2">
-  <depends config-file="other.xml"/>
   <version>0.42.123</version>
   <idea-version since-build="141.1010.3" until-build="141.9999"/>
+  <depends config-file="other.xml"/>
 </idea-plugin>""");
     }
 
@@ -64,9 +64,9 @@ dependencies {
                                                        '/plugins/myPluginName/META-INF/other.xml',
                                                        '/plugins/myPluginName/META-INF/plugin.xml'] as Set
         assertFileContent(new File(sandboxPath, 'plugins/myPluginName/META-INF/plugin.xml'), """<idea-plugin version="2">
-  <depends config-file="other.xml"/>
   <version>0.42.123</version>
   <idea-version since-build="141.1010.3" until-build="141.9999"/>
+  <depends config-file="other.xml"/>
 </idea-plugin>""")
     }
 
