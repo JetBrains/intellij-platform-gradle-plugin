@@ -59,7 +59,6 @@ class IntelliJPlugin implements Plugin<Project> {
             configureIntelliJDependency(it, extension)
             configurePluginDependencies(it, extension)
             configureInstrumentTask(it, extension)
-            configureTestTasks(it, extension)
             if (Utils.sourcePluginXmlFiles(it)) {
                 configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
@@ -69,6 +68,7 @@ class IntelliJPlugin implements Plugin<Project> {
             } else {
                 LOG.warn("File not found: plugin.xml. IntelliJ specific tasks will be unavailable.")
             }
+            configureTestTasks(it, extension)
         }
     }
 
