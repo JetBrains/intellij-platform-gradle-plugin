@@ -1,6 +1,7 @@
 package org.jetbrains.intellij
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
 import java.util.regex.Pattern
@@ -31,12 +32,15 @@ class PatchPluginXmlTask extends DefaultTask {
                     pluginXml.children().add(0, new Node(null, 'idea-version', ['since-build': since, 'until-build': until]))
                 }
             }
-            
-            def version = pluginXml.version
-            if (version) {
-                version*.value = project.version
-            } else {
-                pluginXml.children().add(0, new Node(null, 'version', project.version));
+
+            def versionToSet = project.version
+            if (versionToSet && versionToSet != Project.DEFAULT_VERSION) {
+                def version = pluginXml.version
+                if (version) {
+                    version*.value = versionToSet
+                } else {
+                    pluginXml.children().add(0, new Node(null, 'version', versionToSet));
+                }
             }
             
             def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(file)))

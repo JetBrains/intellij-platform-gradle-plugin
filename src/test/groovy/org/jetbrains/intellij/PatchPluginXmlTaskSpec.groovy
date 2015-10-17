@@ -72,6 +72,20 @@ intellij {
 """
     }
 
+    def 'do not update version tag if project.version is undefined'() {
+        given:
+        pluginXml << "<idea-plugin version=\"2\">\n  <version>0.10.0</version>\n</idea-plugin>"
+        buildFile << "intellij { version = '14.1.4' }"
+        when:
+        def project = run(PatchPluginXmlTask.NAME)
+        then:
+        ouputPluginXml(project).text == """<idea-plugin version="2">
+  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <version>0.10.0</version>
+</idea-plugin>
+"""
+    }
+
     private static File ouputPluginXml(GradleProject project) {
         new File(project.buildDirectory, "resources/main/META-INF/plugin.xml")
     }
