@@ -3,6 +3,7 @@ package org.jetbrains.intellij
 class IntelliJPluginExtension {
     String[] plugins
     String version
+    String type
     String pluginName
     String sandboxDirectory
     String intellijRepo
@@ -15,6 +16,14 @@ class IntelliJPluginExtension {
     File ideaSourcesFile
     private final Set<File> intellijFiles = new HashSet<>();
     private final Set<File> runClasspath = new HashSet<>();
+
+    String getType() {
+        return version.startsWith("IU-") || "IU".equals(type) ? "IU" : "IC"
+    }
+
+    String getVersion() {
+        return version.startsWith("IU-") || version.startsWith("IC-") ? version.substring(3) : version
+    }
 
     Set<File> getIntellijFiles() {
         return intellijFiles

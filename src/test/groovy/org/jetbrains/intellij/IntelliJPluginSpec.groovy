@@ -75,10 +75,34 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         then:
         if (cacheDir.exists()) {
             return // it was already cached. test is senseless until gradle clean
-        } 
+        }
         assert cacheDir.list() as Set == ['b52fd6ecd1178b17bbebe338a9efe975c95f7037', 'e71057c345e163250c544ee6b56411ce9ac7e23'] as Set
         assert new File(cacheDir, 'b52fd6ecd1178b17bbebe338a9efe975c95f7037').list() as Set == ['ideaIC-14.1.3.pom'] as Set
         assert new File(cacheDir, 'e71057c345e163250c544ee6b56411ce9ac7e23').list() as Set == ['ideaIC-14.1.3', 'ideaIC-14.1.3.zip'] as Set
+    }
+
+    def 'download ultimate idea dependencies'() {
+        given:
+        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU/14.1.5')
+        def ideaCommunityCacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.5')
+        buildFile << """intellij { 
+            version 'IU-14.1.5'
+            downloadSources true 
+}"""
+        when:
+        run(BasePlugin.ASSEMBLE_TASK_NAME)
+
+        then:
+        if (cacheDir.exists() || ideaCommunityCacheDir.exists()) {
+            return // it was already cached. test is senseless until gradle clean
+        }
+        assert cacheDir.list() as Set == ['af6b922431b0283c8bfe6bca871978f9d734d9c7', 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0'] as Set
+        assert new File(cacheDir, 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0').list() as Set == ['ideaIC-14.1.5.pom'] as Set
+        assert new File(cacheDir, 'af6b922431b0283c8bfe6bca871978f9d734d9c7').list() as Set == ['ideaIC-14.1.5', 'ideaIC-14.1.5.zip'] as Set
+        
+        // do not download ideaIC dist
+        assert ideaCommunityCacheDir.list() as Set == ['f58943066d699049a2e802660d554190e613a403'] as Set
+        assert new File(cacheDir, 'f58943066d699049a2e802660d554190e613a403').list() as Set == ['ideaIC-14.1.5-sources.jar'] as Set
     }
 
     def 'download sources if option is enabled'() {

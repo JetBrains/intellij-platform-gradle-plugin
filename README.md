@@ -11,7 +11,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.25"
+  id "org.jetbrains.intellij" version "0.0.26"
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -27,7 +27,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '0.0.25'
+    classpath group: 'org.jetbrains', name: 'gradle-intellij-plugin', version: '0.0.26'
   }
 }
 
@@ -39,8 +39,14 @@ apply plugin: 'org.jetbrains.intellij'
 Plugin provides following options to configure target IntelliJ SDK and build archive
 
 - `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
-The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.<br/><br/> 
+The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.
+<br/>
+Value may have `IC-` or `IU-` prefix in order to define IDEA distribution type. 
+<br/><br/> 
 **Default value**: `LATEST-EAP-SNAPSHOT`
+
+- `intellij.type` defines the type of IDEA distribution: `IC` for community version and `IU` for ultimate.<br/><br/> 
+**Default value**: `IC`
 
 - `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies.<br/><br/> 
 **Default value:** `<empty>`
@@ -87,13 +93,13 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.25"
+  id "org.jetbrains.intellij" version "0.0.26"
 }
 
 apply plugin: 'org.jetbrains.intellij'
 
 intellij {
-  version '14.1.4'
+  version 'IC-14.1.4'
   plugins 'coverage'
   pluginName 'MyPlugin'
   
