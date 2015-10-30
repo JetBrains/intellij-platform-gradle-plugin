@@ -153,7 +153,6 @@ class IntelliJPlugin implements Plugin<Project> {
             it.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
             it.enableAssertions = true
             it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
-            it.systemProperty("java.system.class.loader", "com.intellij.util.lang.UrlClassLoader")
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
 
             def toolsJar = Jvm.current().getToolsJar()

@@ -59,7 +59,6 @@ class Utils {
         properties.put("idea.config.path", "$extension.sandboxDirectory/config$suffix")
         properties.put("idea.system.path", "$extension.sandboxDirectory/system$suffix")
         properties.put("idea.plugins.path", "$extension.sandboxDirectory/plugins")
-        properties.put("idea.classpath.index.enabled", false)
         def pluginId = getPluginId(project)
         if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
             properties.put("idea.required.plugins.id", pluginId)

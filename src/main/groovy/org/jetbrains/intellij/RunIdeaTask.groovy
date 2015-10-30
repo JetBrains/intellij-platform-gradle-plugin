@@ -41,6 +41,7 @@ class RunIdeaTask extends JavaExec {
         else if (isUnix() && !properties.containsKey("sun.awt.disablegrab")) {
             properties.put("sun.awt.disablegrab", true);
         }
+        properties.put("idea.classpath.index.enabled", false)
         properties.put("idea.is.internal", true)
         return properties
     }
