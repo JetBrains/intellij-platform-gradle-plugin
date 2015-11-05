@@ -137,8 +137,11 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureRunIdeaTask(@NotNull Project project) {
         LOG.info("Configuring run IntelliJ task")
-        project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
-                .dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
+        def task = project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
+        task.name = RunIdeaTask.NAME
+        task.group = GROUP_NAME
+        task.description = "Runs Intellij IDEA with installed plugin."
+        task.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
     }
 
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
