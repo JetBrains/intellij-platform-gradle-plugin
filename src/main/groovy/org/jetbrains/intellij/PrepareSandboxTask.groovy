@@ -11,7 +11,6 @@ import org.jetbrains.annotations.NotNull
 class PrepareSandboxTask extends Sync {
     public static String NAME = "prepareSandbox"
 
-    CopySpec plugin
     CopySpec classes
     CopySpec libraries
     CopySpec metaInf
@@ -21,15 +20,13 @@ class PrepareSandboxTask extends Sync {
         group = IntelliJPlugin.GROUP_NAME
         description = "Creates a folder containing the plugins to run Intellij IDEA with."
 
-        CopySpecInternal plugins = rootSpec.addChild()
-        plugin = plugins.addChild();
+        CopySpecInternal plugin = rootSpec.addChild()
         classes = plugin.addChild().into("classes")
         libraries = plugin.addChild().into("lib")
         metaInf = plugin.addChild().into("META-INF")
 
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
-        destinationDir = new File(extension.sandboxDirectory, "plugins")
-        plugin.into(extension.pluginName)
+        destinationDir = new File(extension.sandboxDirectory, "plugins/$extension.pluginName")
         classes.from(Utils.mainSourceSet(project).output)
         libraries.from(projectLibraries(project, extension))
     }
