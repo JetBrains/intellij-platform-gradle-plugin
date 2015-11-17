@@ -13,13 +13,13 @@ class Utils {
         JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
         javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     }
-    
+
     @NotNull
     public static SourceSet testSourceSet(@NotNull Project project) {
         JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
         javaConvention.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
     }
-    
+
     @NotNull
     public static DefaultIvyArtifact createDependency(File file, String configuration, File baseDir) {
         def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
@@ -55,15 +55,24 @@ class Utils {
                                                               boolean inTests) {
         def properties = new HashMap<String, Object>()
         properties.putAll(originalProperties)
-        def suffix = inTests ? "-test" : ""
-        properties.put("idea.config.path", "$extension.sandboxDirectory/config$suffix")
-        properties.put("idea.system.path", "$extension.sandboxDirectory/system$suffix")
+        properties.put("idea.config.path", configDir(extension, inTests))
+        properties.put("idea.system.path", systemDir(extension, inTests))
         properties.put("idea.plugins.path", "$extension.sandboxDirectory/plugins")
         def pluginId = getPluginId(project)
         if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
             properties.put("idea.required.plugins.id", pluginId)
         }
         return properties;
+    }
+
+    public static def configDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+        def suffix = inTests ? "-test" : ""
+        "$extension.sandboxDirectory/config$suffix"
+    }
+
+    public static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+        def suffix = inTests ? "-test" : ""
+        "$extension.sandboxDirectory/system$suffix"
     }
 
     @NotNull

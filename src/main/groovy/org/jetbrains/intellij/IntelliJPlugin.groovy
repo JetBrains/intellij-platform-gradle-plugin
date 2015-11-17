@@ -1,4 +1,5 @@
 package org.jetbrains.intellij
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -55,7 +56,7 @@ class IntelliJPlugin implements Plugin<Project> {
             if (Utils.sourcePluginXmlFiles(it)) {
                 configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
-                configureRunIdeaTask(it)
+                configureRunIdeaTask(it, extension)
                 configureBuildPluginTask(it, extension)
                 configurePublishPluginTask(it)
             } else {
@@ -78,7 +79,7 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Adding IntelliJ IDEA dependency")
         project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:idea$extension.type:$extension.version")
         extension.ideaDirectory = ideaDirectory(project, configuration)
-        
+
         if (extension.downloadSources) {
             def sourcesConfiguration = project.configurations.create(SOURCES_CONFIGURATION_NAME).setVisible(false)
                     .setDescription("The IntelliJ IDEA Community Edition source artifact to be used for this project.")
@@ -89,8 +90,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 def sourcesFile = sourcesFiles.first()
                 LOG.info("IDEA sources jar: " + sourcesFile.path)
                 extension.ideaSourcesFile = sourcesFile
-            }
-            else {
+            } else {
                 LOG.warn("Cannot attach IDEA sources. Found files: " + sourcesFiles)
             }
         }
@@ -135,13 +135,14 @@ class IntelliJPlugin implements Plugin<Project> {
                 .dependsOn(project.getTasksByName(PatchPluginXmlTask.NAME, false))
     }
 
-    private static void configureRunIdeaTask(@NotNull Project project) {
+    private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
         def task = project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
         task.name = RunIdeaTask.NAME
         task.group = GROUP_NAME
         task.description = "Runs Intellij IDEA with installed plugin."
         task.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
+        task.outputs.files(Utils.systemDir(extension, false), Utils.configDir(extension, false))
     }
 
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
@@ -162,6 +163,8 @@ class IntelliJPlugin implements Plugin<Project> {
             if (toolsJar != null) it.classpath += project.files(toolsJar)
             it.classpath += project.files("$extension.ideaDirectory/lib/resources.jar",
                     "$extension.ideaDirectory/lib/idea.jar");
+
+            it.outputs.files(Utils.systemDir(extension, true), Utils.configDir(extension, true))
         }
     }
 
