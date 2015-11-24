@@ -1,8 +1,7 @@
 package org.jetbrains.intellij
 
-import org.gradle.api.Project
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.CopySpec
-import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Sync
@@ -26,9 +25,8 @@ class PrepareSandboxTask extends Sync {
         metaInf = plugin.addChild().into("META-INF")
 
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
-        destinationDir = new File(extension.sandboxDirectory, "plugins/$extension.pluginName")
-        classes.from(Utils.mainSourceSet(project).output)
-        libraries.from(projectLibraries(project, extension))
+        configureClasses(extension)
+        configureLibraries(extension)
     }
 
     @Override
@@ -51,10 +49,25 @@ class PrepareSandboxTask extends Sync {
         super.copy()
     }
 
-    static FileCollection projectLibraries(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).filter {
-            !extension.intellijFiles.contains(it)
-        }
+    private void configureClasses(@NotNull IntelliJPluginExtension extension) {
+        destinationDir = new File(extension.sandboxDirectory, "plugins/$extension.pluginName")
+        classes.from(Utils.mainSourceSet(project).output)
     }
 
+    private void configureLibraries(@NotNull IntelliJPluginExtension extension) {
+        def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
+        runtimeConfiguration.getAllDependencies().each {
+            if (it instanceof ProjectDependency) {
+                def dependencyProject = it.dependencyProject
+                def intelliJPlugin = dependencyProject.plugins.findPlugin(IntelliJPlugin)
+                if (intelliJPlugin != null) {
+                    if (Utils.sourcePluginXmlFiles(dependencyProject)) {
+                        // skip other plugin projects
+                        return
+                    }
+                }
+            }
+            libraries.from(runtimeConfiguration.fileCollection(it).filter { !extension.intellijFiles.contains(it) })
+        }
+    }
 }
