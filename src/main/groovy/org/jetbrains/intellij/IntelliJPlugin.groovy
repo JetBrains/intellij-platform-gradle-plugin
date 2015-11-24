@@ -143,6 +143,7 @@ class IntelliJPlugin implements Plugin<Project> {
         task.description = "Runs Intellij IDEA with installed plugin."
         task.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
         task.outputs.files(Utils.systemDir(extension, false), Utils.configDir(extension, false))
+        task.outputs.upToDateWhen { false }
     }
 
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
