@@ -60,7 +60,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 configureBuildPluginTask(it, extension)
                 configurePublishPluginTask(it)
             } else {
-                LOG.warn("File not found: plugin.xml. IntelliJ specific tasks will be unavailable for :$project.name.")
+                LOG.warn("plugin.xml with 'idea-plugin' root is not found. IntelliJ specific tasks will be unavailable for :$project.name.")
             }
             configureTestTasks(it, extension)
         }

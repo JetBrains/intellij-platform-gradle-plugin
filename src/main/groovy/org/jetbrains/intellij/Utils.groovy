@@ -43,7 +43,15 @@ class Utils {
         Set<File> result = new HashSet<>()
         roots.each {
             def pluginXml = new File(it, "META-INF/plugin.xml")
-            if (pluginXml.exists()) result += pluginXml
+            if (pluginXml.exists()) {
+                 try {
+                     if (new XmlParser().parse(pluginXml).name() == 'idea-plugin') {
+                         result += pluginXml
+                     }
+                 } catch (Exception ignore) {
+                     IntelliJPlugin.LOG.warn("Cannot read ${plugin.xml}. Skipping.")
+                 }
+            }
         }
         result
     }
