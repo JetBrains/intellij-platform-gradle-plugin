@@ -11,7 +11,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.29"
+  id "org.jetbrains.intellij" version "0.0.30"
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -27,7 +27,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.0.29'
+    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.0.30'
   }
 }
 
@@ -93,7 +93,7 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.29"
+  id "org.jetbrains.intellij" version "0.0.30"
 }
 
 apply plugin: 'org.jetbrains.intellij'
