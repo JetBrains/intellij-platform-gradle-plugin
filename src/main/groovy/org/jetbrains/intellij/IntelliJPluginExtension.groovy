@@ -16,6 +16,7 @@ class IntelliJPluginExtension {
     File ideaSourcesFile
     private final Set<File> intellijFiles = new HashSet<>();
     private final Set<File> runClasspath = new HashSet<>();
+    private final Map<String, Object> systemProperties = new HashMap<>();
 
     String getType() {
         return version.startsWith("IU-") || "IU".equals(type) ? "IU" : "IC"
@@ -65,4 +66,22 @@ class IntelliJPluginExtension {
         }
     }
 
+    Map<String, Object> getSystemProperties() {
+        systemProperties
+    }
+
+    void setSystemProperties(Map<String, ?> properties) {
+        systemProperties.clear()
+        systemProperties.putAll(properties)
+    }
+
+    IntelliJPluginExtension systemProperties(Map<String, ?> properties) {
+        systemProperties.putAll(properties)
+        this
+    }
+
+    IntelliJPluginExtension systemProperty(String name, Object value) {
+        systemProperties.put(name, value)
+        this
+    }
 }

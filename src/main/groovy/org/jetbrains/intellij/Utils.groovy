@@ -63,6 +63,7 @@ class Utils {
                                                               boolean inTests) {
         def properties = new HashMap<String, Object>()
         properties.putAll(originalProperties)
+        properties.putAll(extension.systemProperties)
         properties.put("idea.config.path", configDir(extension, inTests))
         properties.put("idea.system.path", systemDir(extension, inTests))
         properties.put("idea.plugins.path", "$extension.sandboxDirectory/plugins")

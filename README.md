@@ -11,7 +11,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.31"
+  id "org.jetbrains.intellij" version "0.0.32"
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -27,7 +27,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.0.31'
+    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.0.32'
   }
 }
 
@@ -71,6 +71,12 @@ initializing gradle build. Since sources are not really needed while testing on 
 it to `false` for particular environment.<br/><br/>
 **Default value**: `true`
 
+- `intellij.systemProperties` defines the map of system properties which will be passed to IDEA instance on
+executing `runIdea` task and tests.<br/>
+Also you can use `intellij.systemProperty(name, value)` method in order to set single system property.
+<br/><br/>
+**Default value**: `[]`
+
 #### Publishing plugin
 
 - `intellij.publish.pluginId` defines plugin id at JetBrains plugin repository, you can find it in url of you plugin page there.
@@ -93,7 +99,7 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.31"
+  id "org.jetbrains.intellij" version "0.0.32"
 }
 
 apply plugin: 'org.jetbrains.intellij'
