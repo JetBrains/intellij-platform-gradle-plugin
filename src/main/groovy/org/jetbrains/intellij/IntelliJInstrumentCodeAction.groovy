@@ -60,7 +60,7 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
         def headlessOldValue = System.setProperty('java.awt.headless', 'true')
         compileTask.project.ant.instrumentIdeaExtensions(srcdir: compileTask.project.files(srcDirs).asPath,
                 destdir: compileTask.destinationDir, classpath: compileTask.classpath.asPath,
-                instrumentNotNull: instrumentNotNull) {
+                includeantruntime: false, instrumentNotNull: instrumentNotNull) {
             if (instrumentNotNull) {
                 compileTask.project.ant.skip(pattern: 'kotlin/jvm/internal/.*')
             }
