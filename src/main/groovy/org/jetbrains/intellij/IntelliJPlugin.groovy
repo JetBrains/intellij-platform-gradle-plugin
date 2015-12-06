@@ -111,7 +111,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 repo.artifactPattern("$toolsJar.parent/[artifact].[ext]") // java libs
             }
             if (extension.ideaSourcesFile != null) { // sources
-                repo.artifactPattern("$extension.ideaSourcesFile.parent/[artifact]-$version-[classifier].[ext]")
+                repo.artifactPattern("$extension.ideaSourcesFile.parent/[artifact]IC-$version-[classifier].[ext]")
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
@@ -211,7 +211,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static def createIvyRepo(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        def moduleName = "idea$extension.type"
+        def moduleName = "idea"
         def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", moduleName, extension.version))
         generator.addConfiguration(new DefaultIvyConfiguration("compile"))
         generator.addConfiguration(new DefaultIvyConfiguration("sources"))
