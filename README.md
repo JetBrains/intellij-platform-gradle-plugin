@@ -77,6 +77,11 @@ Also you can use `intellij.systemProperty(name, value)` method in order to set s
 <br/><br/>
 **Default value**: `[]`
 
+- `intellij.alternativeIdePath` – absolute path to locally installed JetBrains IDE.
+It make sense to use this property if you want to test your plugin in WebStorm or any other non-IDEA JetBrains IDE.
+Empty value means that the IDE that was used for compiling will be used for running/debugging as well.<br/><br/>
+**Default value**: ``
+
 #### Publishing plugin
 
 - `intellij.publish.pluginId` defines plugin id at JetBrains plugin repository, you can find it in url of you plugin page there.
