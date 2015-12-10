@@ -11,7 +11,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', 'patchPluginXml', 'prepareSandbox', 'publishPlugin', 'runIdea']
+        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', 'prepareSandbox', 'publishPlugin', 'runIdea']
     }
 
     def 'do not add intellij-specific tasks for project without plugin.xml'() {

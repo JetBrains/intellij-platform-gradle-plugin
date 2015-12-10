@@ -1,7 +1,8 @@
 # Overview
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
-The plugin adds extra IntelliJ-specific dependencies, patches compile tasks in order to instrument code with 
+The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks in order to fill some tags 
+(name, version) in `plugin.xml` with appropriate values, patches compile tasks in order to instrument code with 
 nullability assertions and forms classes made with IntelliJ GUI Designer and provides some build steps which might be
 helpful while developing plugins for IntelliJ platform.
 
@@ -95,7 +96,6 @@ Empty value means that the IDE that was used for compiling will be used for runn
 
 Plugin introduces following build steps
 
-- `patchPluginXml` sets project version and since/until build numbers in output plugin.xml file
 - `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
 - `buildPlugin` assembles plugin and prepares zip archive for deployment
 - `runIdea` executes IntelliJ IDEA instance with installed the plugin you're developing 

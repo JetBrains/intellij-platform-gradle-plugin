@@ -1,23 +1,15 @@
 package org.jetbrains.intellij
 
-import org.gradle.api.DefaultTask
+import org.gradle.api.Action
 import org.gradle.api.Project
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.Task
+import org.jetbrains.annotations.NotNull
 
-class PatchPluginXmlTask extends DefaultTask {
-    public static final String NAME = "patchPluginXml"
-
-    PatchPluginXmlTask() {
-        name = NAME
-        group = IntelliJPlugin.GROUP_NAME
-        description = "Set plugin version, since-build and until-build values in plugin.xml."
-    }
-
-    @SuppressWarnings("GroovyUnusedDeclaration")
-    @TaskAction
-    public def patchPluginXml() {
-        def (since, until) = sinceUntilBuild
-        Utils.outPluginXmlFiles(project).each { file ->
+class PatchPluginXmlTask implements Action<Task> {
+    @Override
+    void execute(Task task) {
+        def (since, until) = sinceUntilBuild(task.project)
+        Utils.outPluginXmlFiles(task.project).each { file ->
             def pluginXml = new XmlParser().parse(file)
             
             if (since != null && until != null) {
@@ -30,7 +22,7 @@ class PatchPluginXmlTask extends DefaultTask {
                 }
             }
 
-            def versionToSet = project.version
+            def versionToSet = task.project.version
             if (versionToSet && versionToSet != Project.DEFAULT_VERSION) {
                 def version = pluginXml.version
                 if (version) {
@@ -46,7 +38,7 @@ class PatchPluginXmlTask extends DefaultTask {
         }
     }
 
-    def getSinceUntilBuild() {
+    static def sinceUntilBuild(@NotNull Project project) {
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         if (extension != null && extension.updateSinceUntilBuild) {
             try {

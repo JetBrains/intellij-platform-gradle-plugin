@@ -14,6 +14,7 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.language.base.plugins.LifecycleBasePlugin
+import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.annotations.NotNull
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -124,15 +125,14 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePatchPluginXmlTask(@NotNull Project project) {
         LOG.info("Configuring patch plugin.xml task")
-        PatchPluginXmlTask task = project.tasks.create(PatchPluginXmlTask.NAME, PatchPluginXmlTask);
-        task.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
-        project.getTasksByName(JavaPlugin.JAR_TASK_NAME, false)*.dependsOn(task)
+        project.tasks.withType(ProcessResources.class)*.doLast(new PatchPluginXmlTask())
     }
 
     private static void configurePrepareSandboxTask(@NotNull Project project) {
         LOG.info("Configuring prepare IntelliJ sandbox task")
         project.tasks.create(PrepareSandboxTask.NAME, PrepareSandboxTask)
-                .dependsOn(project.getTasksByName(PatchPluginXmlTask.NAME, false))
+                .dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
+                .dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
     }
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
