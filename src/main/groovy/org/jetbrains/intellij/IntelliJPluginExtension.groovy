@@ -7,6 +7,7 @@ class IntelliJPluginExtension {
     String pluginName
     String sandboxDirectory
     String intellijRepo
+    String alternativeIdePath
     boolean instrumentCode
     boolean updateSinceUntilBuild
     boolean downloadSources

@@ -7,7 +7,11 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.annotations.NotNull
 
+import java.util.regex.Pattern
+
 class Utils {
+    public static final Pattern VERSION_PATTERN = Pattern.compile('^([A-Z]{2})-([0-9.A-z]+)\\s*$')
+
     @NotNull
     public static SourceSet mainSourceSet(@NotNull Project project) {
         JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
@@ -44,13 +48,13 @@ class Utils {
         roots.each {
             def pluginXml = new File(it, "META-INF/plugin.xml")
             if (pluginXml.exists()) {
-                 try {
-                     if (new XmlParser().parse(pluginXml).name() == 'idea-plugin') {
-                         result += pluginXml
-                     }
-                 } catch (Exception ignore) {
-                     IntelliJPlugin.LOG.warn("Cannot read ${plugin.xml}. Skipping.")
-                 }
+                try {
+                    if (new XmlParser().parse(pluginXml).name() == 'idea-plugin') {
+                        result += pluginXml
+                    }
+                } catch (Exception ignore) {
+                    IntelliJPlugin.LOG.warn("Cannot read ${plugin.xml}. Skipping.")
+                }
             }
         }
         result
@@ -99,9 +103,41 @@ class Utils {
             result += arg
         }
 
-        result += "-Xbootclasspath/a:$extension.ideaDirectory.absolutePath/lib/boot.jar"
+        result += "-Xbootclasspath/a:${ideaSdkDirectory(extension).absolutePath}/lib/boot.jar"
         if (!hasPermSizeArg) result += "-XX:MaxPermSize=250m"
         return result
+    }
+
+    @NotNull
+    public static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
+        def path = extension.alternativeIdePath
+        if (path) {
+            def dir = new File(path);
+            if (dir.getName().endsWith(".app")) {
+                dir = new File(dir, "Contents")
+            }
+            if (!dir.exists()) {
+                IntelliJPlugin.LOG.error("Cannot find alternate SDK path: $dir. Default IDEA will be used : $extension.ideaDirectory")
+                return extension.ideaDirectory
+            }
+            return dir
+        }
+        return extension.ideaDirectory
+    }
+
+    @NotNull
+    public static String ideaBuildNumber(@NotNull File ideaDirectory) {
+        if (isMac()) {
+            def file = new File(ideaDirectory, "Resources/build.txt")
+            if (file.exists()) {
+                return file.getText('UTF-8').trim()
+            }
+        }
+        return new File(ideaDirectory, "build.txt").getText('UTF-8').trim()
+    }
+
+    public static boolean isMac() {
+        return System.getProperty("os.name").toLowerCase(Locale.US).startsWith("mac")
     }
 
     static def getPluginId(@NotNull Project project) {

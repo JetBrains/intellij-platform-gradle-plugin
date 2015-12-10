@@ -4,11 +4,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 
-import java.util.regex.Pattern
-
 class PatchPluginXmlTask extends DefaultTask {
     public static final String NAME = "patchPluginXml"
-    private static final Pattern VERSION_PATTERN = Pattern.compile('^[A-Z]{2}-([0-9.A-z]+)\\s*$')
 
     PatchPluginXmlTask() {
         name = NAME
@@ -53,9 +50,9 @@ class PatchPluginXmlTask extends DefaultTask {
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         if (extension != null && extension.updateSinceUntilBuild) {
             try {
-                def matcher = VERSION_PATTERN.matcher(new File(extension.ideaDirectory, "build.txt").getText('UTF-8'))
+                def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(extension.ideaDirectory))
                 if (matcher.find()) {
-                    def since = matcher.group(1)
+                    def since = matcher.group(2)
                     def dotPosition = since.indexOf('.')
                     if (dotPosition > 0) {
                         return new Tuple(since, since.substring(0, dotPosition) + ".9999")

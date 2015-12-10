@@ -2,44 +2,71 @@ package org.jetbrains.intellij
 
 import org.gradle.api.tasks.JavaExec
 import org.gradle.internal.jvm.Jvm
+import org.jetbrains.annotations.NotNull
 
 class RunIdeaTask extends JavaExec {
     public static String NAME = "runIdea"
 
     private IntelliJPluginExtension extension
+    private Map<String, String> prefixTable = new HashMap<String, String>() {
+        {
+            put('IU', null);
+            put('IC', 'Idea');
+            put('RM', 'Ruby');
+            put('PY', 'Python');
+            put('PC', 'PyCharmCore');
+            put('PE', 'PyCharmEdu');
+            put('PS', 'PhpStorm');
+            put('WS', 'WebStorm');
+            put('OC', 'AppCode');
+            put('CL', 'CLion');
+            put('DB', '0xDBE');
+            put('AI', 'AndroidStudio');
+        }
+    }
 
     public RunIdeaTask() {
         setMain("com.intellij.idea.Main")
 
         extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         enableAssertions = true
-        workingDir = project.file("$extension.ideaDirectory/bin/")
+        def ideaDirectory = Utils.ideaSdkDirectory(extension)
+        workingDir = project.file("$ideaDirectory/bin/")
 
         def toolsJar = Jvm.current().toolsJar
         if (toolsJar != null) classpath += project.files(toolsJar)
-        classpath += project.files("$extension.ideaDirectory/lib/idea_rt.jar",
-                "$extension.ideaDirectory/lib/idea.jar",
-                "$extension.ideaDirectory/lib/bootstrap.jar",
-                "$extension.ideaDirectory/lib/extensions.jar",
-                "$extension.ideaDirectory/lib/util.jar",
-                "$extension.ideaDirectory/lib/openapi.jar",
-                "$extension.ideaDirectory/lib/trove4j.jar",
-                "$extension.ideaDirectory/lib/jdom.jar",
-                "$extension.ideaDirectory/lib/log4j.jar")
-        systemProperties = patchSystemProperties()
+        classpath += project.files("$ideaDirectory/lib/idea_rt.jar",
+                "$ideaDirectory/lib/idea.jar",
+                "$ideaDirectory/lib/bootstrap.jar",
+                "$ideaDirectory/lib/extensions.jar",
+                "$ideaDirectory/lib/util.jar",
+                "$ideaDirectory/lib/openapi.jar",
+                "$ideaDirectory/lib/trove4j.jar",
+                "$ideaDirectory/lib/jdom.jar",
+                "$ideaDirectory/lib/log4j.jar")
+        systemProperties = patchSystemProperties(ideaDirectory)
     }
 
-    def patchSystemProperties() {
+    def patchSystemProperties(@NotNull File ideaDirectory) {
         def properties = Utils.getIdeaSystemProperties(project, super.systemProperties, extension, false)
-        if (isMac()) {
+        if (Utils.isMac()) {
             properties.put("idea.smooth.progress", false);
             properties.put("apple.laf.useScreenMenuBar", true);
-        }
-        else if (isUnix() && !properties.containsKey("sun.awt.disablegrab")) {
+        } else if (isUnix() && !properties.containsKey("sun.awt.disablegrab")) {
             properties.put("sun.awt.disablegrab", true);
         }
         properties.put("idea.classpath.index.enabled", false)
         properties.put("idea.is.internal", true)
+
+        if (!properties.containsKey('idea.platform.prefix')) {
+            def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(ideaDirectory))
+            if (matcher.find()) {
+                def prefix = prefixTable.get(matcher.group(1))
+                if (prefix) {
+                    properties.put('idea.platform.prefix', prefix)
+                }
+            }
+        }
         return properties
     }
 
@@ -47,11 +74,7 @@ class RunIdeaTask extends JavaExec {
     List<String> getJvmArgs() {
         return Utils.getIdeaJvmArgs(this, super.jvmArgs, extension);
     }
-
-    static boolean isMac() {
-        return System.getProperty("os.name").toLowerCase(Locale.US).startsWith("mac")
-    }
-
+    
     static boolean isUnix() {
         def osName = System.getProperty("os.name").toLowerCase(Locale.US)
         def isWindows = osName.startsWith("windows")
