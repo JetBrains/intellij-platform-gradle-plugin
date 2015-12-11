@@ -133,9 +133,10 @@ As examples of using this plugin you can check out following projects:
 - [Rust plugin](https://github.com/intellij-rust/intellij-rust) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_Rust&tab=projectOverview)
 - [AWS CloudFormation plugin](https://github.com/shalupov/idea-cloudformation) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaAwsCloudFormation&tab=projectOverview)
 - [Bash plugin](https://github.com/jansorg/BashSupport) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_BashSupport&tab=projectOverview) 
-- [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
-- [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
+- [Android Drawable Importer plugin](https://github.com/winterDroid/android-drawable-importer-intellij-plugin)
 - [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
+- [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
+- [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
 - https://github.com/breandan/idear
 - https://github.com/pedrovgs/AndroidWiFiADB
 - https://github.com/SonarSource/sonar-intellij
