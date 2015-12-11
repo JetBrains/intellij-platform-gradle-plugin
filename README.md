@@ -124,5 +124,22 @@ intellij {
 
 ```
 
+# Examples
+
+As examples of using this plugin you can check out following projects:
+
+- [Go plugin](https://github.com/go-lang-plugin-org/go-lang-idea-plugin) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_Go&tab=projectOverview)
+- [Erlang plugin](https://github.com/ignatov/intellij-erlang) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_Erlang&tab=projectOverview)
+- [Rust plugin](https://github.com/intellij-rust/intellij-rust) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_Rust&tab=projectOverview)
+- [AWS CloudFormation plugin](https://github.com/shalupov/idea-cloudformation) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaAwsCloudFormation&tab=projectOverview)
+- [Bash plugin](https://github.com/jansorg/BashSupport) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_BashSupport&tab=projectOverview) 
+- [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
+- [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
+- [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
+- https://github.com/breandan/idear
+- https://github.com/pedrovgs/AndroidWiFiADB
+- https://github.com/SonarSource/sonar-intellij
+
+
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
