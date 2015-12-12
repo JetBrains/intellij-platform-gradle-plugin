@@ -14,8 +14,6 @@ helpful while developing plugins for IntelliJ platform.
 plugins {
   id "org.jetbrains.intellij" version "0.0.34"
 }
-
-apply plugin: 'org.jetbrains.intellij'
 ```
 
 ## Gradle < 2.1
