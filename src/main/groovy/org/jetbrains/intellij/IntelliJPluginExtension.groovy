@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+@SuppressWarnings("GroovyUnusedDeclaration")
 class IntelliJPluginExtension {
     String[] plugins
     String version
@@ -35,7 +36,6 @@ class IntelliJPluginExtension {
         return runClasspath
     }
 
-    @SuppressWarnings("GroovyUnusedDeclaration")
     def publish(Closure c) {
         publish.with(c)
     }
@@ -46,22 +46,18 @@ class IntelliJPluginExtension {
         String password
         String channel
 
-        @SuppressWarnings("GroovyUnusedDeclaration")
         def pluginId(String pluginId) {
             this.pluginId = pluginId
         }
 
-        @SuppressWarnings("GroovyUnusedDeclaration")
         def username(String username) {
             this.username = username
         }
 
-        @SuppressWarnings("GroovyUnusedDeclaration")
         def password(String password) {
             this.password = password
         }
 
-        @SuppressWarnings("GroovyUnusedDeclaration")
         def channel(String channel) {
             this.channel = channel
         }
