@@ -6,24 +6,20 @@ import org.jetbrains.annotations.NotNull
 
 class RunIdeaTask extends JavaExec {
     public static String NAME = "runIdea"
-
+    
+    private static final def prefixTable = [IU: null,
+                                            IC: 'Idea',
+                                            RM: 'Ruby',
+                                            PY: 'Python',
+                                            PC: 'PyCharmCore',
+                                            PE: 'PyCharmEdu',
+                                            PS: 'PhpStorm',
+                                            WS: 'WebStorm',
+                                            OC: 'AppCode',
+                                            CL: 'CLion',
+                                            DB: '0xDBE',
+                                            AI: 'AndroidStudio']
     private IntelliJPluginExtension extension
-    private Map<String, String> prefixTable = new HashMap<String, String>() {
-        {
-            put('IU', null);
-            put('IC', 'Idea');
-            put('RM', 'Ruby');
-            put('PY', 'Python');
-            put('PC', 'PyCharmCore');
-            put('PE', 'PyCharmEdu');
-            put('PS', 'PhpStorm');
-            put('WS', 'WebStorm');
-            put('OC', 'AppCode');
-            put('CL', 'CLion');
-            put('DB', '0xDBE');
-            put('AI', 'AndroidStudio');
-        }
-    }
 
     public RunIdeaTask() {
         setMain("com.intellij.idea.Main")
@@ -74,7 +70,7 @@ class RunIdeaTask extends JavaExec {
     List<String> getJvmArgs() {
         return Utils.getIdeaJvmArgs(this, super.jvmArgs, extension);
     }
-    
+
     static boolean isUnix() {
         def osName = System.getProperty("os.name").toLowerCase(Locale.US)
         def isWindows = osName.startsWith("windows")
