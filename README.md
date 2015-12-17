@@ -105,8 +105,6 @@ plugins {
   id "org.jetbrains.intellij" version "0.0.34"
 }
 
-apply plugin: 'org.jetbrains.intellij'
-
 intellij {
   version 'IC-14.1.4'
   plugins 'coverage'
