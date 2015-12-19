@@ -9,7 +9,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/other.xml') << ''
         file('src/main/resources/META-INF/nonIncluded.xml') << ''
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
-        buildFile <<  """version='0.42.123'
+        buildFile << """version='0.42.123'
 intellij { 
     pluginName = 'myPluginName' 
     plugins = ['copyright'] 
@@ -27,6 +27,7 @@ dependencies {
         assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
                                          '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
                                          '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                         '/config/options/updates.xml',
                                          '/plugins/myPluginName/META-INF/other.xml',
                                          '/plugins/myPluginName/META-INF/plugin.xml'] as Set
         assertFileContent(new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml'), """<idea-plugin version="2">
@@ -61,6 +62,7 @@ dependencies {
         assert collectPaths(new File(sandboxPath)) == ['/plugins/myPluginName/classes/App.class',
                                                        '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
                                                        '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                                       '/config/options/updates.xml',
                                                        '/plugins/myPluginName/META-INF/other.xml',
                                                        '/plugins/myPluginName/META-INF/plugin.xml'] as Set
         assertFileContent(new File(sandboxPath, 'plugins/myPluginName/META-INF/plugin.xml'), """<idea-plugin version="2">
@@ -78,7 +80,110 @@ dependencies {
         def project = run(PrepareSandboxTask.NAME)
 
         then:
-        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/$project.name/META-INF/plugin.xml"] as Set
+        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/$project.name/META-INF/plugin.xml", '/config/options/updates.xml'] as Set
+    }
+
+    def 'disable ide update without updates.xml'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''<application>
+  <component name="UpdatesConfigurable">
+    <option name="CHECK_NEEDED" value="false"/>
+  </component>
+</application>''')
+    }
+
+    def 'disable ide update without updates component'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        def updatesFile = new File(directory("build/$IntelliJPlugin.DEFAULT_SANDBOX/config/options"), 'updates.xml')
+        updatesFile.text = '''<application>
+  <component name="SomeOtherComponent">
+    <option name="SomeOption" value="false"/>
+  </component>
+</application>'''
+
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''<application>
+  <component name="SomeOtherComponent">
+    <option name="SomeOption" value="false"/>
+  </component>
+  <component name="UpdatesConfigurable">
+    <option name="CHECK_NEEDED" value="false"/>
+  </component>
+</application>''')
+    }
+
+    def 'disable ide update without check_needed option'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        def updatesFile = new File(directory("build/$IntelliJPlugin.DEFAULT_SANDBOX/config/options"), 'updates.xml')
+        updatesFile.text = '''<application>
+  <component name="UpdatesConfigurable">
+    <option name="SomeOption" value="false"/>
+  </component>
+</application>'''
+
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''<application>
+  <component name="UpdatesConfigurable">
+    <option name="SomeOption" value="false"/>
+    <option name="CHECK_NEEDED" value="false"/>
+  </component>
+</application>''')
+    }
+
+    def 'disable ide update without value attribute'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        def updatesFile = new File(directory("build/$IntelliJPlugin.DEFAULT_SANDBOX/config/options"), 'updates.xml')
+        updatesFile.text = '''<application>
+  <component name="UpdatesConfigurable">
+    <option name="CHECK_NEEDED"/>
+  </component>
+</application>'''
+
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''<application>
+  <component name="UpdatesConfigurable">
+    <option name="CHECK_NEEDED" value="false"/>
+  </component>
+</application>''')
+    }
+
+    def 'disable ide update'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        def updatesFile = new File(directory("build/$IntelliJPlugin.DEFAULT_SANDBOX/config/options"), 'updates.xml')
+        updatesFile.text = '''<application>
+  <component name="UpdatesConfigurable">
+    <option name="CHECK_NEEDED" value="true"/>
+  </component>
+</application>'''
+
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''<application>
+  <component name="UpdatesConfigurable">
+    <option name="CHECK_NEEDED" value="false"/>
+  </component>
+</application>''')
     }
 
     private static Set collectPaths(File directory) {

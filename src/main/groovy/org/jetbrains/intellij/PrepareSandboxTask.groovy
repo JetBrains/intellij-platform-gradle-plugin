@@ -6,6 +6,7 @@ import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Sync
 import org.jetbrains.annotations.NotNull
+import org.xml.sax.SAXParseException
 
 class PrepareSandboxTask extends Sync {
     public static String NAME = "prepareSandbox"
@@ -46,7 +47,58 @@ class PrepareSandboxTask extends Sync {
                 }
             }
         }
+        disableIdeUpdate()
         super.copy()
+    }
+
+    private void disableIdeUpdate() {
+        def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
+        def optionsDir = new File(Utils.configDir(extension, false), "options")
+        if (!optionsDir.exists() && !optionsDir.mkdirs()) {
+            IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")
+            return
+        }
+
+        def updatesConfig = new File(optionsDir, "updates.xml")
+        if (!updatesConfig.exists() && !updatesConfig.createNewFile()) {
+            IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")
+            return
+        }
+        def parse
+        try {
+            parse = new XmlParser().parse(updatesConfig)
+        }
+        catch (SAXParseException ignore) {
+            updatesConfig.text = "<application></application>"
+            parse = new XmlParser().parse(updatesConfig)
+        }
+
+        def component = null
+        for (Node c : parse.component) {
+            if (c.attribute('name') == 'UpdatesConfigurable') {
+                component = c
+                break
+            }
+        }
+        if (!component) {
+            component = new Node(null, 'component', ['name': 'UpdatesConfigurable'])
+            parse.append(component)
+        }
+        def option = null
+        for (Node o : component.option) {
+            if (o.attribute('name') == 'CHECK_NEEDED') {
+                option = o
+                break
+            }
+        }
+        if (!option) {
+            option = new Node(null, 'option', ['name': 'CHECK_NEEDED'])
+            component.append(option)
+        }
+        option.'@value' = 'false'
+        def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(updatesConfig)))
+        printer.preserveWhitespace = true
+        printer.print(parse)
     }
 
     private void configureClasses(@NotNull IntelliJPluginExtension extension) {
