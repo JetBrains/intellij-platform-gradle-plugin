@@ -219,6 +219,9 @@ class IntelliJPlugin implements Plugin<Project> {
 
         def ideaLibJars = project.fileTree(extension.ideaDirectory)
         ideaLibJars.include("lib*/*.jar")
+        if (hasKotlinRuntimeDependency(project)) {
+            ideaLibJars.exclude("lib/kotlin-runtime.jar")
+        }
         ideaLibJars.files.each {
             generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
             extension.intellijFiles.add(it)
@@ -254,5 +257,13 @@ class IntelliJPlugin implements Plugin<Project> {
         parentDirectory.mkdirs()
         generator.writeTo(new File(parentDirectory, "ivy-${project.name}.xml"))
         return moduleName
+    }
+
+    private static def hasKotlinRuntimeDependency(@NotNull Project project) {
+        def filter = { return "kotlin-runtime".equals(it.name) && "org.jetbrains.kotlin".equals(it.group) }
+        def configurations = project.configurations
+        configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().find(filter) != null ||
+                configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().find(filter) != null
+
     }
 }
