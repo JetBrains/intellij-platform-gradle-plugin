@@ -55,7 +55,7 @@ class Utils {
                     if (parseXml(pluginXml).name() == 'idea-plugin') {
                         result += pluginXml
                     }
-                } catch (Exception ignore) {
+                } catch (SAXParseException ignore) {
                     IntelliJPlugin.LOG.warn("Cannot read ${plugin.xml}. Skipping.")
                 }
             }
@@ -153,21 +153,23 @@ class Utils {
     }
 
     static Node parseXml(File file) {
-        return new XmlParser().setErrorHandler(new ErrorHandler() {
-         @Override
-         void warning(SAXParseException e) throws SAXException {
+        def parser = new XmlParser()
+        parser.setErrorHandler(new ErrorHandler() {
+            @Override
+            void warning(SAXParseException e) throws SAXException {
 
-         }
+            }
 
-         @Override
-         void error(SAXParseException e) throws SAXException {
-             throw e
-         }
+            @Override
+            void error(SAXParseException e) throws SAXException {
+                throw e
+            }
 
-         @Override
-         void fatalError(SAXParseException e) throws SAXException {
-             throw e
-         }
-     }).parse(file)
+            @Override
+            void fatalError(SAXParseException e) throws SAXException {
+                throw e
+            }
+        })
+        return parser.parse(file)
     }
 }
