@@ -3,6 +3,7 @@ package org.jetbrains.intellij
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
@@ -219,9 +220,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
         def ideaLibJars = project.fileTree(extension.ideaDirectory)
         ideaLibJars.include("lib*/*.jar")
-        if (hasKotlinRuntimeDependency(project)) {
-            ideaLibJars.exclude("lib/kotlin-runtime.jar")
-        }
+        excludeKotlinDependenciesIfNeeded(project, ideaLibJars)
         ideaLibJars.files.each {
             generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
             extension.intellijFiles.add(it)
@@ -259,11 +258,19 @@ class IntelliJPlugin implements Plugin<Project> {
         return moduleName
     }
 
-    private static def hasKotlinRuntimeDependency(@NotNull Project project) {
-        def filter = { return "kotlin-runtime".equals(it.name) && "org.jetbrains.kotlin".equals(it.group) }
+    private static def excludeKotlinDependenciesIfNeeded(@NotNull Project project, @NotNull ConfigurableFileTree tree) {
         def configurations = project.configurations
-        configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().find(filter) != null ||
-                configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().find(filter) != null
+        def closure = {
+            if ("org.jetbrains.kotlin".equals(it.group)) {
+                if ("kotlin-runtime".equals(it.name)) {
+                    tree.exclude("lib/kotlin-runtime.jar")
+                } else if ("kotlin-reflect".equals(it.name)) {
+                    tree.exclude("lib/kotlin-reflect.jar")
+                }
+            }
+        }
+        configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().each closure
+        configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().each closure
 
     }
 }
