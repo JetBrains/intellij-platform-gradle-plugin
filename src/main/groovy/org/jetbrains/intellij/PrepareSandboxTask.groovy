@@ -35,7 +35,7 @@ class PrepareSandboxTask extends Sync {
         Utils.outPluginXmlFiles(project).each { File xmlFile ->
             metaInf.from(xmlFile)
             classes.exclude("META-INF/" + xmlFile.name)
-            def pluginXml = new XmlParser().parse(xmlFile)
+            def pluginXml = Utils.parseXml(xmlFile)
             pluginXml.depends.each {
                 def configFilePath = it.attribute('config-file')
                 if (configFilePath != null) {
@@ -66,11 +66,11 @@ class PrepareSandboxTask extends Sync {
         }
         def parse
         try {
-            parse = new XmlParser().parse(updatesConfig)
+            parse = Utils.parseXml(updatesConfig)
         }
         catch (SAXParseException ignore) {
             updatesConfig.text = "<application></application>"
-            parse = new XmlParser().parse(updatesConfig)
+            parse = Utils.parseXml(updatesConfig)
         }
 
         def component = null

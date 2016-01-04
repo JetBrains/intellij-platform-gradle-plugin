@@ -10,7 +10,7 @@ class PatchPluginXmlTask implements Action<Task> {
     void execute(Task task) {
         def (since, until) = sinceUntilBuild(task.project)
         Utils.outPluginXmlFiles(task.project).each { file ->
-            def pluginXml = new XmlParser().parse(file)
+            def pluginXml = Utils.parseXml(file)
             
             if (since != null && until != null) {
                 def ideaVersionTag = pluginXml.'idea-version'

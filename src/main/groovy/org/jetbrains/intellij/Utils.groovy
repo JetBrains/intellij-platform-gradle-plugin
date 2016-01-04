@@ -6,6 +6,9 @@ import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.tasks.SourceSet
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.annotations.NotNull
+import org.xml.sax.ErrorHandler
+import org.xml.sax.SAXException
+import org.xml.sax.SAXParseException
 
 import java.util.regex.Pattern
 
@@ -49,7 +52,7 @@ class Utils {
             def pluginXml = new File(it, "META-INF/plugin.xml")
             if (pluginXml.exists()) {
                 try {
-                    if (new XmlParser().parse(pluginXml).name() == 'idea-plugin') {
+                    if (parseXml(pluginXml).name() == 'idea-plugin') {
                         result += pluginXml
                     }
                 } catch (Exception ignore) {
@@ -143,9 +146,28 @@ class Utils {
     static def getPluginId(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
         sourcePluginXmlFiles(project).each {
-            def pluginXml = new XmlParser().parse(it)
+            def pluginXml = parseXml(it)
             ids += pluginXml.id*.text()
         }
         return ids.size() == 1 ? ids.first() : null;
+    }
+
+    static Node parseXml(File file) {
+        return new XmlParser().setErrorHandler(new ErrorHandler() {
+         @Override
+         void warning(SAXParseException e) throws SAXException {
+
+         }
+
+         @Override
+         void error(SAXParseException e) throws SAXException {
+             throw e
+         }
+
+         @Override
+         void fatalError(SAXParseException e) throws SAXException {
+             throw e
+         }
+     }).parse(file)
     }
 }
