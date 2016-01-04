@@ -12,7 +12,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.36"
+  id "org.jetbrains.intellij" version "0.0.37"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.0.36'
+    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.0.37'
   }
 }
 
@@ -102,7 +102,7 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.36"
+  id "org.jetbrains.intellij" version "0.0.37"
 }
 
 intellij {
