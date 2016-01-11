@@ -3,6 +3,7 @@ package org.jetbrains.intellij
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
@@ -87,13 +88,17 @@ class IntelliJPlugin implements Plugin<Project> {
                     .setDescription("The IntelliJ IDEA Community Edition source artifact to be used for this project.")
             LOG.info("Adding IntelliJ IDEA sources repository")
             project.dependencies.add(sourcesConfiguration.name, "com.jetbrains.intellij.idea:ideaIC:$extension.version:sources@jar")
-            def sourcesFiles = sourcesConfiguration.files
-            if (sourcesFiles.size() == 1) {
-                def sourcesFile = sourcesFiles.first()
-                LOG.info("IDEA sources jar: " + sourcesFile.path)
-                extension.ideaSourcesFile = sourcesFile
-            } else {
-                LOG.warn("Cannot attach IDEA sources. Found files: " + sourcesFiles)
+            try {
+                def sourcesFiles = sourcesConfiguration.files
+                if (sourcesFiles.size() == 1) {
+                    def sourcesFile = sourcesFiles.first()
+                    LOG.info("IDEA sources jar: " + sourcesFile.path)
+                    extension.ideaSourcesFile = sourcesFile
+                } else {
+                    LOG.warn("Cannot attach IDEA sources. Found files: " + sourcesFiles)
+                }
+            } catch (ResolveException e) {
+                LOG.warn("Cannot resolve IDEA sources dependency", e)
             }
         }
     }
