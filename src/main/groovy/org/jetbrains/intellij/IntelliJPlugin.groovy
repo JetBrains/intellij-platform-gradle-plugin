@@ -114,10 +114,10 @@ class IntelliJPlugin implements Plugin<Project> {
             repo.artifactPattern("$extension.ideaDirectory.path/[artifact].[ext]") // idea libs
 
             def toolsJar = Jvm.current().toolsJar
-            if (toolsJar != null) {
+            if (toolsJar) {
                 repo.artifactPattern("$toolsJar.parent/[artifact].[ext]") // java libs
             }
-            if (extension.ideaSourcesFile != null) { // sources
+            if (extension.ideaSourcesFile) { // sources
                 repo.artifactPattern("$extension.ideaSourcesFile.parent/[artifact]IC-$version-[classifier].[ext]")
             }
         }
@@ -243,13 +243,13 @@ class IntelliJPlugin implements Plugin<Project> {
         }
 
         def toolsJar = Jvm.current().toolsJar
-        if (toolsJar != null) {
+        if (toolsJar) {
             generator.addArtifact(Utils.createDependency(toolsJar, "runtime", toolsJar.parentFile))
             extension.intellijFiles.add(toolsJar)
             extension.runClasspath.add(toolsJar)
         }
 
-        if (extension.ideaSourcesFile != null) {
+        if (extension.ideaSourcesFile) {
             // source dependency must be named in the same way as module name
             def artifact = new DefaultIvyArtifact(extension.ideaSourcesFile, moduleName, "jar", "sources", "sources")
             artifact.conf = "sources"
