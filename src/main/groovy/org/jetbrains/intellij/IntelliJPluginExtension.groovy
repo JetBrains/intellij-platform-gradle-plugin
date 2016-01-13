@@ -11,6 +11,7 @@ class IntelliJPluginExtension {
     String alternativeIdePath
     boolean instrumentCode
     boolean updateSinceUntilBuild
+    boolean sameSinceUntilBuild
     boolean downloadSources
     Publish publish
 

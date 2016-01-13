@@ -62,8 +62,13 @@ Also it might be required for compiling forms created by IntelliJ GUI designer.<
 **Default value**: `true`
 
 - `intellij.updateSinceUntilBuild` defines whether plugin should patch `plugin.xml` with since and until build values, 
-if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.9999` will be used as until value.<br/><br/>
+if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.9999` will be used as an until value.<br/><br/>
 **Default value**: `true`
+
+- `intellij.sameSinceUntilBuild` defines whether plugin should patch `plugin.xml` with "open" until build. 
+if true then the same `IntelliJIDEABuildNumber` will be used as a `since` value and as an until value, 
+which is useful for building plugins against EAP IDEA builds.<br/><br/>
+**Default value**: `false`
 
 - `intellij.downloadSources` defines whether plugin should download IntelliJ sources while 
 initializing gradle build. Since sources are not really needed while testing on CI you can set

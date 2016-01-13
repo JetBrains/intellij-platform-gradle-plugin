@@ -47,7 +47,8 @@ class PatchPluginXmlTask implements Action<Task> {
                     def since = matcher.group(2)
                     def dotPosition = since.indexOf('.')
                     if (dotPosition > 0) {
-                        return new Tuple(since, since.substring(0, dotPosition) + ".9999")
+                        def until = extension.sameSinceUntilBuild ? since : since.substring(0, dotPosition) + ".9999"
+                        return new Tuple(since, until)
                     }
                 }
             } catch (IOException e) {

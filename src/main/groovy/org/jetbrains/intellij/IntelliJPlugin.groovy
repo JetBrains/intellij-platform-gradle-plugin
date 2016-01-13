@@ -43,6 +43,7 @@ class IntelliJPlugin implements Plugin<Project> {
             sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
             instrumentCode = true
             updateSinceUntilBuild = true
+            sameSinceUntilBuild = false
             intellijRepo = DEFAULT_INTELLIJ_REPO
             downloadSources = true
             publish = new IntelliJPluginExtension.Publish()
