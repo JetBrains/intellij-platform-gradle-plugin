@@ -138,6 +138,7 @@ As examples of using this plugin you can check out following projects:
 - [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
 - [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
 - [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
+- [Robot plugin](https://github.com/AmailP/robot-plugin)
 - [TOML plugin](https://github.com/stuartcarnie/toml-plugin)
 - https://github.com/breandan/idear
 - https://github.com/pedrovgs/AndroidWiFiADB
