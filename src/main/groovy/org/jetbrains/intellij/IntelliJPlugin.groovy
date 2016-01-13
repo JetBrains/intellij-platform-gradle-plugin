@@ -60,6 +60,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
                 configureRunIdeaTask(it, extension)
+                configureDebugIdeaTask(it, extension)
                 configureBuildPluginTask(it, extension)
                 configurePublishPluginTask(it)
             } else {
@@ -147,6 +148,17 @@ class IntelliJPlugin implements Plugin<Project> {
         task.name = RunIdeaTask.NAME
         task.group = GROUP_NAME
         task.description = "Runs Intellij IDEA with installed plugin."
+        task.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
+        task.outputs.files(Utils.systemDir(extension, false), Utils.configDir(extension, false))
+        task.outputs.upToDateWhen { false }
+    }
+
+    private static void configureDebugIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        LOG.info("Configuring debug IntelliJ task")
+        def task = project.tasks.create(DebugIdeaTask.NAME, DebugIdeaTask)
+        task.name = DebugIdeaTask.NAME
+        task.group = GROUP_NAME
+        task.description = "Runs Intellij IDEA with installed plugin and remote debug enabled on the 5050 port."
         task.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
         task.outputs.files(Utils.systemDir(extension, false), Utils.configDir(extension, false))
         task.outputs.upToDateWhen { false }
