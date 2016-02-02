@@ -111,7 +111,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
         project.repositories.ivy { repo ->
             repo.url = extension.ideaDirectory
-            repo.artifactPattern("$extension.ideaDirectory.path/com.jetbrains/$moduleName/$version/[artifact]-$project.name.[ext]") // ivy xml
+            repo.artifactPattern("${project.buildDir}/tmp/[artifact]-$moduleName-$version.[ext]") // ivy xml
             repo.artifactPattern("$extension.ideaDirectory.path/[artifact].[ext]") // idea libs
 
             def toolsJar = Jvm.current().toolsJar
@@ -258,9 +258,9 @@ class IntelliJPlugin implements Plugin<Project> {
             extension.intellijFiles.add(extension.ideaSourcesFile)
         }
 
-        def parentDirectory = new File(extension.ideaDirectory, "com.jetbrains/$moduleName/$extension.version")
+        def parentDirectory = new File(project.buildDir, "tmp")
         parentDirectory.mkdirs()
-        generator.writeTo(new File(parentDirectory, "ivy-${project.name}.xml"))
+        generator.writeTo(new File(parentDirectory, "ivy-$moduleName-${extension.version}.xml"))
         return moduleName
     }
 
