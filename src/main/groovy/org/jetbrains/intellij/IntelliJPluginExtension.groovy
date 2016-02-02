@@ -18,7 +18,6 @@ class IntelliJPluginExtension {
     File ideaDirectory
     File ideaSourcesFile
     private final Set<File> intellijFiles = new HashSet<>();
-    private final Set<File> runClasspath = new HashSet<>();
     private final Map<String, Object> systemProperties = new HashMap<>();
 
     String getType() {
@@ -31,10 +30,6 @@ class IntelliJPluginExtension {
 
     Set<File> getIntellijFiles() {
         return intellijFiles
-    }
-
-    Set<File> getRunClasspath() {
-        return runClasspath
     }
 
     def publish(Closure c) {

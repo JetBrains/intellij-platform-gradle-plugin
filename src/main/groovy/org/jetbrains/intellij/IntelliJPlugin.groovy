@@ -230,7 +230,6 @@ class IntelliJPlugin implements Plugin<Project> {
         ideaLibJars.files.each {
             generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
             extension.intellijFiles.add(it)
-            extension.runClasspath.add(it)
         }
 
         def bundledPlugins = extension.plugins
@@ -247,7 +246,6 @@ class IntelliJPlugin implements Plugin<Project> {
         if (toolsJar) {
             generator.addArtifact(Utils.createDependency(toolsJar, "runtime", toolsJar.parentFile))
             extension.intellijFiles.add(toolsJar)
-            extension.runClasspath.add(toolsJar)
         }
 
         if (extension.ideaSourcesFile) {
