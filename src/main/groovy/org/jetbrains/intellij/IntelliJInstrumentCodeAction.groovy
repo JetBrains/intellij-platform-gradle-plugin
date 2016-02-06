@@ -31,8 +31,10 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
         assert task instanceof AbstractCompile && task instanceof HasConvention
         def mainSourceSet = Utils.mainSourceSet(task.project).compiledBy(task)
         def testSourceSet = Utils.testSourceSet(task.project).compiledBy(task)
-        def srcDirs = existingDirs(mainSourceSet.allSource) - existingDirs(mainSourceSet.resources)
-            + existingDirs(testSourceSet.allSource) - existingDirs(testSourceSet.resources)
+        def srcDirs = existingDirs(mainSourceSet.allSource) + existingDirs(mainSourceSet.allSource)
+        def resourcesDirs = existingDirs(mainSourceSet.resources) + existingDirs(testSourceSet.resources)
+        srcDirs.removeAll(resourcesDirs)
+        println("SRC: $srcDirs")
         if (!srcDirs.empty) {
             instrumentCode(task, srcDirs, instrumentNotNull)
         }
