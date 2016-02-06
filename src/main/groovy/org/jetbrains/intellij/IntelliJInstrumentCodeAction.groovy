@@ -4,6 +4,8 @@ import org.apache.tools.ant.BuildException
 import org.gradle.api.Action
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.internal.HasConvention
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.annotations.NotNull
 
@@ -26,20 +28,24 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
 
         IntelliJPlugin.LOG.info("Compiling forms and instrumenting code with nullability preconditions")
         boolean instrumentNotNull = prepareNotNullInstrumenting(task, classpath)
-        assert task instanceof AbstractCompile
-        def srcDirs = Utils.mainSourceSet(task.project).compiledBy(task).java.srcDirs.findAll { it.exists() } +
-                Utils.testSourceSet(task.project).compiledBy(task).java.srcDirs.findAll { it.exists() };
+        assert task instanceof AbstractCompile && task instanceof HasConvention
+        def mainSourceSet = Utils.mainSourceSet(task.project).compiledBy(task)
+        def testSourceSet = Utils.testSourceSet(task.project).compiledBy(task)
+        def srcDirs = existingDirs(mainSourceSet.allSource) - existingDirs(mainSourceSet.resources)
+            + existingDirs(testSourceSet.allSource) - existingDirs(testSourceSet.resources)
         if (!srcDirs.empty) {
             instrumentCode(task, srcDirs, instrumentNotNull)
         }
     }
 
+    private static HashSet<File> existingDirs(SourceDirectorySet sourceDirectorySet) {
+        return sourceDirectorySet.srcDirs.findAll { it.exists() }
+    }
+
     private static boolean prepareNotNullInstrumenting(@NotNull Task task,
                                                        @NotNull ConfigurableFileCollection classpath) {
         try {
-            task.project.ant.typedef(name: 'skip',
-                    classpath: classpath.asPath,
-                    loaderref: LOADER_REF,
+            task.project.ant.typedef(name: 'skip', classpath: classpath.asPath, loaderref: LOADER_REF,
                     classname: FILTER_ANNOTATION_REGEXP_CLASS)
         } catch (BuildException e) {
             def cause = e.getCause()
