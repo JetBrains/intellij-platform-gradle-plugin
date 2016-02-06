@@ -12,7 +12,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.language.base.plugins.LifecycleBasePlugin
@@ -30,6 +30,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final SOURCES_CONFIGURATION_NAME = "intellij-sources"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
+    public static final IDEA_MODULE_NAME = "idea"
 
     @Override
     def void apply(Project project) {
@@ -106,12 +107,12 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePluginDependencies(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
-        def moduleName = createIvyRepo(project, extension)
+        def ivyFile = createIvyRepo(project, extension)
         def version = extension.version
 
         project.repositories.ivy { repo ->
             repo.url = extension.ideaDirectory
-            repo.artifactPattern("${project.buildDir}/tmp/[artifact]-$moduleName-$version.[ext]") // ivy xml
+            repo.ivyPattern(ivyFile.getAbsolutePath()) // ivy xml
             repo.artifactPattern("$extension.ideaDirectory.path/[artifact].[ext]") // idea libs
 
             def toolsJar = Jvm.current().toolsJar
@@ -123,10 +124,10 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: moduleName, version: version, configuration: 'compile'
+                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'compile'
         ])
         project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: moduleName, version: version, configuration: 'runtime'
+                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'runtime'
         ])
     }
 
@@ -156,7 +157,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         if (!extension.instrumentCode) return
         LOG.info("Configuring IntelliJ compile tasks")
-        project.tasks.withType(JavaCompile)*.doLast(new IntelliJInstrumentCodeAction())
+        project.tasks.withType(AbstractCompile)*.doLast(new IntelliJInstrumentCodeAction())
     }
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
@@ -217,9 +218,8 @@ class IntelliJPlugin implements Plugin<Project> {
         return cacheDirectory;
     }
 
-    private static def createIvyRepo(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        def moduleName = "idea"
-        def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", moduleName, extension.version))
+    private static File createIvyRepo(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", IDEA_MODULE_NAME, extension.version))
         generator.addConfiguration(new DefaultIvyConfiguration("compile"))
         generator.addConfiguration(new DefaultIvyConfiguration("sources"))
         generator.addConfiguration(new DefaultIvyConfiguration("runtime"))
@@ -250,16 +250,15 @@ class IntelliJPlugin implements Plugin<Project> {
 
         if (extension.ideaSourcesFile) {
             // source dependency must be named in the same way as module name
-            def artifact = new DefaultIvyArtifact(extension.ideaSourcesFile, moduleName, "jar", "sources", "sources")
+            def artifact = new DefaultIvyArtifact(extension.ideaSourcesFile, IDEA_MODULE_NAME, "jar", "sources", "sources")
             artifact.conf = "sources"
             generator.addArtifact(artifact)
             extension.intellijFiles.add(extension.ideaSourcesFile)
         }
 
-        def parentDirectory = new File(project.buildDir, "tmp")
-        parentDirectory.mkdirs()
-        generator.writeTo(new File(parentDirectory, "ivy-$moduleName-${extension.version}.xml"))
-        return moduleName
+        def ivyFile = File.createTempFile("ivy-idea", ".xml")
+        generator.writeTo(ivyFile)
+        return ivyFile
     }
 
     private static def excludeKotlinDependenciesIfNeeded(@NotNull Project project, @NotNull ConfigurableFileTree tree) {
