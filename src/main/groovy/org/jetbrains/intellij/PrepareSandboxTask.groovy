@@ -114,7 +114,7 @@ class PrepareSandboxTask extends Sync {
                 def intelliJPlugin = dependencyProject.plugins.findPlugin(IntelliJPlugin)
                 if (intelliJPlugin != null) {
                     if (Utils.sourcePluginXmlFiles(dependencyProject)) {
-                        // skip other plugin projects
+                        IntelliJPlugin.LOG.info(":${dependencyProject.name} project is IntelliJ-plugin project and won't be packed into the target distribution")
                         return
                     }
                 }
