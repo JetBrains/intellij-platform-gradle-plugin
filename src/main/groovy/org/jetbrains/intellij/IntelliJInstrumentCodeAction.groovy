@@ -5,7 +5,6 @@ import org.gradle.api.Action
 import org.gradle.api.Task
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.internal.HasConvention
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.annotations.NotNull
 
@@ -28,13 +27,12 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
 
         IntelliJPlugin.LOG.info("Compiling forms and instrumenting code with nullability preconditions")
         boolean instrumentNotNull = prepareNotNullInstrumenting(task, classpath)
-        assert task instanceof AbstractCompile && task instanceof HasConvention
+        assert task instanceof AbstractCompile
         def mainSourceSet = Utils.mainSourceSet(task.project).compiledBy(task)
         def testSourceSet = Utils.testSourceSet(task.project).compiledBy(task)
-        def srcDirs = existingDirs(mainSourceSet.allSource) + existingDirs(mainSourceSet.allSource)
+        def srcDirs = existingDirs(mainSourceSet.allSource) + existingDirs(testSourceSet.allSource)
         def resourcesDirs = existingDirs(mainSourceSet.resources) + existingDirs(testSourceSet.resources)
         srcDirs.removeAll(resourcesDirs)
-        println("SRC: $srcDirs")
         if (!srcDirs.empty) {
             instrumentCode(task, srcDirs, instrumentNotNull)
         }
