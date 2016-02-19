@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.file.ConfigurableFileTree
@@ -165,7 +166,14 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         if (!extension.instrumentCode) return
         LOG.info("Configuring IntelliJ compile tasks")
-        project.tasks.withType(AbstractCompile)*.doLast(new IntelliJInstrumentCodeAction())
+        def cl = { Task task ->
+            def action = new IntelliJInstrumentCodeAction()
+            task.taskDependencies.getDependencies(task)
+                    .findAll { it instanceof AbstractCompile }
+                    .forEach { action.execute(it) }
+        }
+        project.tasks.findByName("classes")*.doLast cl
+        project.tasks.findByName("testClasses")*.doLast cl
     }
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
