@@ -16,7 +16,11 @@ class PrepareSandboxTask extends Sync {
     CopySpec metaInf
 
     public PrepareSandboxTask() {
-        name = NAME
+        this(NAME, false)
+    }
+
+    protected PrepareSandboxTask(String name, boolean inTests) {
+        this.name = name
         group = IntelliJPlugin.GROUP_NAME
         description = "Creates a folder containing the plugins to run Intellij IDEA with."
 
@@ -26,7 +30,7 @@ class PrepareSandboxTask extends Sync {
         metaInf = plugin.addChild().into("META-INF")
 
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
-        configureClasses(extension)
+        configureClasses(extension, inTests)
         configureLibraries(extension)
     }
 
@@ -101,8 +105,8 @@ class PrepareSandboxTask extends Sync {
         printer.print(parse)
     }
 
-    private void configureClasses(@NotNull IntelliJPluginExtension extension) {
-        destinationDir = new File(extension.sandboxDirectory, "plugins/$extension.pluginName")
+    private void configureClasses(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+        destinationDir = new File(Utils.pluginsDir(extension, inTests), "$extension.pluginName")
         classes.from(Utils.mainSourceSet(project).output)
     }
 

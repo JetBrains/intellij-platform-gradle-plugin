@@ -61,6 +61,7 @@ class IntelliJPlugin implements Plugin<Project> {
             if (Utils.sourcePluginXmlFiles(it)) {
                 configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
+                configurePrepareTestsSandboxTask(it)
                 configureRunIdeaTask(it, extension)
                 configureBuildPluginTask(it, extension)
                 configurePublishPluginTask(it)
@@ -143,6 +144,13 @@ class IntelliJPlugin implements Plugin<Project> {
                 .dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
     }
 
+    private static void configurePrepareTestsSandboxTask(@NotNull Project project) {
+        LOG.info("Configuring prepare IntelliJ sandbox for tests task")
+        project.tasks.create(PrepareTestsSandboxTask.NAME, PrepareTestsSandboxTask)
+                .dependsOn(project.getTasksByName(JavaPlugin.TEST_CLASSES_TASK_NAME, false))
+                .dependsOn(project.getTasksByName(JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, false))
+    }
+
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
         def task = project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
@@ -163,7 +171,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ tests tasks")
         project.tasks.withType(Test).each {
-            it.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
+            it.dependsOn(project.getTasksByName(PrepareTestsSandboxTask.NAME, false))
             it.enableAssertions = true
             it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
