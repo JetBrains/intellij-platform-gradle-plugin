@@ -73,7 +73,7 @@ class Utils {
         properties.putAll(extension.systemProperties)
         properties.put("idea.config.path", configDir(extension, inTests))
         properties.put("idea.system.path", systemDir(extension, inTests))
-        properties.put("idea.plugins.path", "$extension.sandboxDirectory/plugins")
+        properties.put("idea.plugins.path", pluginsDir(extension, inTests))
         def pluginId = getPluginId(project)
         if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
             properties.put("idea.required.plugins.id", pluginId)
@@ -89,6 +89,11 @@ class Utils {
     public static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$extension.sandboxDirectory/system$suffix"
+    }
+
+    public static def pluginsDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+        def suffix = inTests ? "-test" : ""
+        "$extension.sandboxDirectory/plugins$suffix"
     }
 
     @NotNull
