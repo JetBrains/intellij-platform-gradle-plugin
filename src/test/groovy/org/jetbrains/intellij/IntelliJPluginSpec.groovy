@@ -11,7 +11,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', 'prepareSandbox', 'publishPlugin', 'runIdea']
+        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', 'prepareSandbox', 'prepareTestsSandbox', 'publishPlugin', 'runIdea']
     }
 
     def 'do not add intellij-specific tasks for project without plugin.xml'() {
@@ -195,7 +195,7 @@ intellij {
     private static void assertPathParameters(@NotNull ProcessProperties testCommand, @NotNull String sandboxPath) {
         assert adjustWindowsPath(testCommand.properties.'idea.config.path') == "$sandboxPath/config-test"
         assert adjustWindowsPath(testCommand.properties.'idea.system.path') == "$sandboxPath/system-test"
-        assert adjustWindowsPath(testCommand.properties.'idea.plugins.path') == "$sandboxPath/plugins"
+        assert adjustWindowsPath(testCommand.properties.'idea.plugins.path') == "$sandboxPath/plugins-test"
     }
 
     private File writeTestFile() {
