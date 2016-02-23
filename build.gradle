@@ -13,6 +13,7 @@ compileGroovy {
 repositories {
     maven { url 'http://repo.labs.intellij.net/central-proxy' }
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -21,7 +22,7 @@ dependencies {
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
     compile 'org.apache.httpcomponents:httpmime:4.5.1'
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.3', {
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
     }
 }
