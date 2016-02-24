@@ -132,7 +132,7 @@ class App {
     }
 
     protected static void assertFileContent(File file, String expectedContent) {
-        assert file.text.trim() == expectedContent
+        assert file.text.trim() == expectedContent.stripIndent()
     }
 
 }
