@@ -19,6 +19,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 compile 'joda-time:joda-time:2.8.1'
             }\
             """.stripIndent()
+        
         when:
         def project = run(PrepareSandboxTask.NAME)
 
@@ -53,11 +54,12 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 </xi:include>
             </idea-plugin>\
             '''.stripIndent()
-        buildFile << """version='0.42.123'
-intellij { 
-    pluginName = 'myPluginName'  
-}
-"""
+        buildFile << """\
+            version='0.42.123'
+            intellij { 
+                pluginName = 'myPluginName'  
+            }""".stripIndent()
+        
         when:
         def project = run(PrepareSandboxTask.NAME)
 
@@ -79,6 +81,40 @@ intellij {
                 </xi:fallback>
               </xi:include>
             </idea-plugin>""");
+    }
+    
+    def 'test transitive xml dependencies'() {
+        given:
+        writeJavaFile()
+        file('src/main/resources/META-INF/other.xml') << '''\
+            <idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
+                <depends config-file="transitiveDepends.xml"/>
+                <xi:include href="transitiveInclude.xml" xpointer="xpointer(/idea-plugin/*)"/>
+            </idea-plugin>'''
+        file('src/main/resources/META-INF/transitiveDepends.xml') << '<idea-plugin></idea-plugin>'
+        file('src/main/resources/META-INF/transitiveInclude.xml') << '<idea-plugin></idea-plugin>'
+        pluginXml << '''\
+            <idea-plugin version="2">
+                <depends config-file="other.xml"/>                
+            </idea-plugin>\
+            '''.stripIndent()
+        buildFile << """\
+            version='0.42.123'
+            intellij { 
+                pluginName = 'myPluginName'  
+            }""".stripIndent()
+        
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
+                                         '/plugins/myPluginName/classes/META-INF/transitiveDepends.xml',
+                                         '/config/options/updates.xml',
+                                         '/plugins/myPluginName/META-INF/other.xml',
+                                         '/plugins/myPluginName/META-INF/transitiveInclude.xml',
+                                         '/plugins/myPluginName/META-INF/plugin.xml'] as Set
     }
 
     def 'prepare custom sandbox task'() {

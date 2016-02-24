@@ -37,27 +37,29 @@ class PrepareSandboxTask extends Sync {
     @Override
     protected void copy() {
         Utils.outPluginXmlFiles(project).each { File xmlFile ->
-            processIdeaXml(xmlFile.parentFile, xmlFile.name)
+            processIdeaXml(xmlFile.parentFile, xmlFile.name, true)
         }
         disableIdeUpdate()
         super.copy()
     }
 
-    def processIdeaXml(File rootFile, String filePath) {
+    def processIdeaXml(File rootFile, String filePath, boolean processDepends) {
         if (rootFile != null && filePath != null) {
             def configFile = new File(rootFile, filePath)
             if (configFile.exists()) {
                 metaInf.from(configFile)
                 classes.exclude("META-INF/$filePath")
                 def pluginXml = Utils.parseXml(configFile)
-                pluginXml.depends.each {
-                    processIdeaXml(configFile.parentFile, it.attribute('config-file'))
+                if (processDepends) {
+                    pluginXml.depends.each {
+                        processIdeaXml(configFile.parentFile, it.attribute('config-file'), false)
+                    }
                 }
                 pluginXml.'xi:include'.each {
-                    processIdeaXml(configFile.parentFile, it.attribute('href'))
+                    processIdeaXml(configFile.parentFile, it.attribute('href'), processDepends)
                     it.'xi:fallback'.each {
                         it.'xi:include'.each {
-                            processIdeaXml(configFile.parentFile, it.attribute('href'))
+                            processIdeaXml(configFile.parentFile, it.attribute('href'), processDepends)
                         }
                     }
                 }
