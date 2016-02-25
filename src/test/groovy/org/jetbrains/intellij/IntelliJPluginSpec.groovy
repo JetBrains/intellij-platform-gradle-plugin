@@ -29,7 +29,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
 
         when:
-        run(true, JavaPlugin.COMPILE_JAVA_TASK_NAME)
+        run(true, JavaPlugin.CLASSES_TASK_NAME)
 
         then:
         stdout.contains('Added @NotNull assertions to 1 files')
@@ -40,7 +40,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeTestFile()
 
         when:
-        run(true, JavaPlugin.COMPILE_TEST_JAVA_TASK_NAME)
+        run(true, JavaPlugin.TEST_CLASSES_TASK_NAME)
 
         then:
         stdout.contains('Added @NotNull assertions to 1 files')

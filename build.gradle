@@ -45,6 +45,10 @@ pluginBundle {
 }
 
 test {
+    doFirst {
+        new File("$buildDir/localRepo").mkdir()
+        new File("$buildDir/testGradleHome").mkdir()
+    }
     systemProperties['local.repo'] = "$buildDir/localRepo"
     systemProperties['test.gradle.home'] = "$buildDir/testGradleHome"
     dependsOn install
