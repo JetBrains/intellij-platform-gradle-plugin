@@ -5,6 +5,8 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.file.ConfigurableFileTree
+import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
+import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
@@ -187,15 +189,21 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureBuildPluginTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring building IntelliJ IDEA plugin task")
         def prepareSandboxTask = project.tasks.findByName(PrepareSandboxTask.NAME) as PrepareSandboxTask
-        project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
+        Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip)
+        zip.with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
             baseName = extension.pluginName
             from("$prepareSandboxTask.destinationDir")
             into(extension.pluginName)
-            dependsOn(prepareSandboxTask)
-            project.getTasksByName(LifecycleBasePlugin.ASSEMBLE_TASK_NAME, false)*.dependsOn(it)
+            dependsOn(prepareSandboxTask) 
         }
+        
+        ArchivePublishArtifact zipArtifact = new ArchivePublishArtifact(zip);
+        Configuration runtimeConfiguration = project.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
+        runtimeConfiguration.getArtifacts().add(zipArtifact);
+        project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(zipArtifact);
+        project.getComponents().add(new IntelliJPluginLibrary());
     }
 
     private static void configurePublishPluginTask(@NotNull Project project) {
