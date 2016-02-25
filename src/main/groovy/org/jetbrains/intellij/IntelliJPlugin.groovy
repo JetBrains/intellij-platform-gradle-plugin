@@ -2,7 +2,6 @@ package org.jetbrains.intellij
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.file.ConfigurableFileTree
@@ -13,10 +12,8 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
-import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.annotations.NotNull
 
@@ -166,14 +163,8 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         if (!extension.instrumentCode) return
         LOG.info("Configuring IntelliJ compile tasks")
-        def cl = { Task task ->
-            def action = new IntelliJInstrumentCodeAction()
-            task.taskDependencies.getDependencies(task)
-                    .findAll { it instanceof AbstractCompile }
-                    .forEach { action.execute(it) }
-        }
-        project.tasks.findByName("classes")*.doLast cl
-        project.tasks.findByName("testClasses")*.doLast cl
+        project.tasks.findByName(JavaPlugin.CLASSES_TASK_NAME)*.doLast(new IntelliJInstrumentCodeAction(false))
+        project.tasks.findByName(JavaPlugin.TEST_CLASSES_TASK_NAME)*.doLast(new IntelliJInstrumentCodeAction(true))
     }
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
