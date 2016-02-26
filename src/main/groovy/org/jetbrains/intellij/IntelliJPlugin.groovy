@@ -112,6 +112,14 @@ class IntelliJPlugin implements Plugin<Project> {
         def ivyFile = createIvyRepo(project, extension)
         def version = extension.version
 
+        project.configurations.create("provided")
+
+        project.sourceSets.configure {
+            main.compileClasspath += project.configurations.getByName("provided")
+            test.compileClasspath += project.configurations.getByName("provided")
+            test.runtimeClasspath += project.configurations.getByName("provided")
+        }
+
         project.repositories.ivy { repo ->
             repo.url = extension.ideaDirectory
             repo.ivyPattern(ivyFile.getAbsolutePath()) // ivy xml
@@ -133,8 +141,7 @@ class IntelliJPlugin implements Plugin<Project> {
         ])
 
         extension.externalPlugins.each {
-            //TODO use provided configuration
-            project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, project.files(downloadExternalPlugin(project, it)))
+            project.dependencies.add("provided", project.files(downloadExternalPlugin(project, it)))
         }
     }
 
