@@ -130,6 +130,11 @@ class IntelliJPlugin implements Plugin<Project> {
         project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
                 group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'runtime'
         ])
+
+        extension.externalPlugins.each {
+            //TODO use provided configuration
+            project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, project.files(downloadExternalPlugin(project, it)))
+        }
     }
 
     private static void configurePatchPluginXmlTask(@NotNull Project project) {
@@ -290,5 +295,32 @@ class IntelliJPlugin implements Plugin<Project> {
         configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().each closure
         configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().each closure
 
+    }
+
+    private static def downloadExternalPlugin(@NotNull Project project, @NotNull Map<String, String> plugin) {
+        def host = "http://plugins.jetbrains.com"
+
+        new File("$project.projectDir/externalPluginsLibs/").mkdirs()
+
+        new AntBuilder().get(src:"$host/plugin/download?pluginId=$plugin.id&version=$plugin.version", dest:"$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", skipexisting:true)
+
+        return extractExternalPluginJars(project, plugin)
+    }
+
+    private static def extractExternalPluginJars(@NotNull Project project, @NotNull Map<String, String> plugin) {
+        if ("jar".equals(plugin.type)) {
+            return [new File("$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type")]
+        }
+
+        new AntBuilder().unzip(src: "$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", dest: "$project.projectDir/externalPluginsLibs/", overwrite: "false")
+
+        def libsDir = new File("$project.projectDir/externalPluginsLibs/$plugin.unzipTarget/lib")
+
+        return libsDir.listFiles(new FilenameFilter() {
+            @Override
+            boolean accept(File dir, String name) {
+                return name.endsWith("jar");
+            }
+        });
     }
 }

@@ -3,6 +3,7 @@ package org.jetbrains.intellij
 @SuppressWarnings("GroovyUnusedDeclaration")
 class IntelliJPluginExtension {
     String[] plugins
+    Map[] externalPlugins
     String version
     String type
     String pluginName
