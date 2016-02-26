@@ -38,6 +38,7 @@ class IntelliJPlugin implements Plugin<Project> {
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension)
         intellijExtension.with {
             plugins = []
+            externalPlugins = []
             version = DEFAULT_IDEA_VERSION
             type = 'IC'
             pluginName = project.name
