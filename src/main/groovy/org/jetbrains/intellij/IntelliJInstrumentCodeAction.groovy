@@ -11,6 +11,11 @@ import org.jetbrains.annotations.NotNull
 class IntelliJInstrumentCodeAction implements Action<Task> {
     private static final String FILTER_ANNOTATION_REGEXP_CLASS = 'com.intellij.ant.ClassFilterAnnotationRegexp'
     private static final LOADER_REF = "java2.loader"
+    private final boolean myTestInstrumentation
+
+    IntelliJInstrumentCodeAction(boolean testInstrumentation) {
+        myTestInstrumentation = testInstrumentation
+    }
 
     @Override
     void execute(Task task) {
@@ -26,15 +31,18 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
                 classname: 'com.intellij.ant.InstrumentIdeaExtensions')
 
         IntelliJPlugin.LOG.info("Compiling forms and instrumenting code with nullability preconditions")
-        boolean instrumentNotNull = prepareNotNullInstrumenting(task, classpath)
-        assert task instanceof AbstractCompile
-        def mainSourceSet = Utils.mainSourceSet(task.project).compiledBy(task)
-        def testSourceSet = Utils.testSourceSet(task.project).compiledBy(task)
-        def srcDirs = existingDirs(mainSourceSet.allSource) + existingDirs(testSourceSet.allSource)
-        def resourcesDirs = existingDirs(mainSourceSet.resources) + existingDirs(testSourceSet.resources)
-        srcDirs.removeAll(resourcesDirs)
-        if (!srcDirs.empty) {
-            instrumentCode(task, srcDirs, instrumentNotNull)
+        //noinspection GroovyAssignabilityCheck
+        task.taskDependencies.getDependencies(task).findAll { it instanceof AbstractCompile }.each {
+            AbstractCompile compileTask ->
+                boolean instrumentNotNull = prepareNotNullInstrumenting(compileTask, classpath)
+                def sourceSet = myTestInstrumentation ?
+                        Utils.testSourceSet(compileTask.project).compiledBy(compileTask) :
+                        Utils.mainSourceSet(compileTask.project).compiledBy(compileTask)
+                def srcDirs = existingDirs(sourceSet.allSource)
+                srcDirs.removeAll(existingDirs(sourceSet.resources))
+                if (!srcDirs.empty) {
+                    instrumentCode(compileTask, srcDirs, instrumentNotNull)
+                }
         }
     }
 
@@ -42,10 +50,10 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
         return sourceDirectorySet.srcDirs.findAll { it.exists() }
     }
 
-    private static boolean prepareNotNullInstrumenting(@NotNull Task task,
+    private static boolean prepareNotNullInstrumenting(@NotNull Task compileTask,
                                                        @NotNull ConfigurableFileCollection classpath) {
         try {
-            task.project.ant.typedef(name: 'skip', classpath: classpath.asPath, loaderref: LOADER_REF,
+            compileTask.project.ant.typedef(name: 'skip', classpath: classpath.asPath, loaderref: LOADER_REF,
                     classname: FILTER_ANNOTATION_REGEXP_CLASS)
         } catch (BuildException e) {
             def cause = e.getCause()

@@ -27,7 +27,7 @@ dependencies {
     }
 }
 
-version = '0.0.40'
+version = '0.0.42'
 group = 'org.jetbrains'
 
 pluginBundle {
@@ -46,6 +46,10 @@ pluginBundle {
 }
 
 test {
+    doFirst {
+        new File("$buildDir/localRepo").mkdir()
+        new File("$buildDir/testGradleHome").mkdir()
+    }
     systemProperties['local.repo'] = "$buildDir/localRepo"
     systemProperties['test.gradle.home'] = "$buildDir/testGradleHome"
     dependsOn install
