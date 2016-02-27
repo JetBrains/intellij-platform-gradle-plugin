@@ -26,7 +26,7 @@ class PrepareSandboxTask extends Sync {
         group = IntelliJPlugin.GROUP_NAME
         description = "Creates a folder containing the plugins to run Intellij IDEA with."
 
-        def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
+        def extension = project.extensions.getByType(IntelliJPluginExtension)
 
         CopySpecInternal plugin = rootSpec.addChild()
         classes = plugin.addChild().into("$extension.pluginName/classes")
@@ -73,7 +73,7 @@ class PrepareSandboxTask extends Sync {
     }
 
     private void disableIdeUpdate() {
-        def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
+        def extension = project.extensions.getByType(IntelliJPluginExtension)
         def optionsDir = new File(Utils.configDir(extension, false), "options")
         if (!optionsDir.exists() && !optionsDir.mkdirs()) {
             IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")

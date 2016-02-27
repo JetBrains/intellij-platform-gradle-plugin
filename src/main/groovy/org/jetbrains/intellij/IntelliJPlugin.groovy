@@ -112,12 +112,12 @@ class IntelliJPlugin implements Plugin<Project> {
         def ivyFile = createIvyRepo(project, extension)
         def version = extension.version
 
-        project.configurations.create("provided")
+        def externalPluginScope = project.configurations.create("externalPluginScope")
 
         project.sourceSets.configure {
-            main.compileClasspath += project.configurations.getByName("provided")
-            test.compileClasspath += project.configurations.getByName("provided")
-            test.runtimeClasspath += project.configurations.getByName("provided")
+            main.compileClasspath += externalPluginScope
+            test.compileClasspath += externalPluginScope
+            test.runtimeClasspath += externalPluginScope
         }
 
         project.repositories.ivy { repo ->
@@ -141,7 +141,7 @@ class IntelliJPlugin implements Plugin<Project> {
         ])
 
         extension.externalPlugins.each {
-            project.dependencies.add("provided", project.files(downloadExternalPlugin(project, it)))
+            project.dependencies.add("externalPluginScope", project.files(downloadExternalPlugin(project, it)))
         }
     }
 
@@ -310,7 +310,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
         new File("$project.projectDir/externalPluginsLibs/").mkdirs()
 
-        new AntBuilder().get(src:"$host/plugin/download?pluginId=$plugin.id&version=$plugin.version", dest:"$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", skipexisting:true)
+        project.ant.get(src:"$host/plugin/download?pluginId=$plugin.id&version=$plugin.version", dest:"$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", skipexisting:true)
 
         return extractExternalPluginJars(project, plugin)
     }
@@ -320,7 +320,7 @@ class IntelliJPlugin implements Plugin<Project> {
             return [new File("$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type")]
         }
 
-        new AntBuilder().unzip(src: "$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", dest: "$project.projectDir/externalPluginsLibs/", overwrite: "false")
+        project.ant.unzip(src: "$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", dest: "$project.projectDir/externalPluginsLibs/", overwrite: "false")
 
         def libsDir = new File("$project.projectDir/externalPluginsLibs/$plugin.unzipTarget/lib")
 
