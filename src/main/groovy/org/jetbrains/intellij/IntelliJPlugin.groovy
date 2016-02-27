@@ -30,6 +30,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final SOURCES_CONFIGURATION_NAME = "intellij-sources"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
+    private static final String INTELLIJ_PLUGINS_REPO = 'http://plugins.jetbrains.com'
     public static final IDEA_MODULE_NAME = "idea"
 
     @Override
@@ -306,13 +307,22 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static def downloadExternalPlugin(@NotNull Project project, @NotNull Map<String, String> plugin) {
-        def host = "http://plugins.jetbrains.com"
-
         new File("$project.projectDir/externalPluginsLibs/").mkdirs()
 
-        project.ant.get(src:"$host/plugin/download?pluginId=$plugin.id&version=$plugin.version", dest:"$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", skipexisting:true)
+        project.ant.get(src: downloadLink(project, plugin), dest:"$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", skipexisting:false)
 
         return extractExternalPluginJars(project, plugin)
+    }
+
+    private static def downloadLink(@NotNull Project project, @NotNull Map<String, String> plugin) {
+        if (plugin.containsKey("version")) {
+            return "$INTELLIJ_PLUGINS_REPO/plugin/download?pluginId=$plugin.id&version=$plugin.version"
+        }
+
+        def extension = project.extensions.getByType(IntelliJPluginExtension)
+        def build = Utils.ideaBuildNumber(extension.ideaDirectory)
+
+        return "$INTELLIJ_PLUGINS_REPO/pluginManager?action=download&id=$plugin.id&build=$build"
     }
 
     private static def extractExternalPluginJars(@NotNull Project project, @NotNull Map<String, String> plugin) {
