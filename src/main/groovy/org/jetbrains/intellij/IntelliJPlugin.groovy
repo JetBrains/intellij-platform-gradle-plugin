@@ -1,5 +1,8 @@
 package org.jetbrains.intellij
 
+import groovyx.net.http.HTTPBuilder
+import groovyx.net.http.HttpResponseDecorator
+import groovyx.net.http.Method
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -31,6 +34,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
     private static final String INTELLIJ_PLUGINS_REPO = 'http://plugins.jetbrains.com'
+    private static final String GRADLE_CACHE_DIR = 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/'
     public static final IDEA_MODULE_NAME = "idea"
 
     @Override
@@ -142,7 +146,7 @@ class IntelliJPlugin implements Plugin<Project> {
         ])
 
         extension.externalPlugins.each {
-            project.dependencies.add("externalPluginScope", project.files(downloadExternalPlugin(project, extension, it)))
+            project.dependencies.add("externalPluginScope", project.files(externalPluginJars(project, extension, it)))
         }
     }
 
@@ -306,7 +310,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     }
 
-    private static def downloadExternalPlugin(
+    private static def externalPluginJars(
             @NotNull Project project,
             @NotNull IntelliJPluginExtension extension,
             @NotNull Map<String, String> plugin
@@ -316,20 +320,52 @@ class IntelliJPlugin implements Plugin<Project> {
 
         def version = plugin.get("version")
         if (version == null) {
-            version = 'LATEST';
+            version = 'LATEST'
+        }
+
+        def cachedJars = extractExternalPluginJars(project, plugin)
+        if (cachedJars.size() > 0) {
+            return cachedJars;
         }
 
         def tmpDir = File.createTempDir();
-        def cacheDir = new File(project.gradle.gradleUserHomeDir, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/")
-        def pluginCacheDir = new File(cacheDir, "$plugin.id/$version")
 
-        project.ant.get(src: downloadLink(project, plugin), dest:"$tmpDir/$plugin.id.$plugin.type", skipexisting:true)
-        project.copy {
-            it.from("$tmpDir/$plugin.id.$plugin.type")
-            it.into(pluginCacheDir)
+        def gradleCacheDir = new File(project.gradle.gradleUserHomeDir, GRADLE_CACHE_DIR)
+
+        new HTTPBuilder(downloadLink(project, plugin)).request(Method.GET) {
+            response.success = { resp, stream ->
+                def name = guessName(resp, plugin)
+
+                new File(tmpDir, name).newOutputStream() << stream
+
+                project.copy {
+                    it.from("$tmpDir/$name")
+                    it.into("$gradleCacheDir/$plugin.id/$version")
+                }
+
+                if (name.endsWith("zip")) {
+                    project.copy {
+                        it.from(project.zipTree("$gradleCacheDir/$plugin.id/$version/$name"))
+                        it.into("$gradleCacheDir/$plugin.id/$version")
+                    }
+                }
+            }
         }
 
-        return extractExternalPluginJars(project, extension, plugin)
+        return extractExternalPluginJars(project, plugin)
+    }
+
+    private static def guessName(@NotNull HttpResponseDecorator resp, @NotNull Map<String, String> plugin) {
+        resp.getHeaders("Content-Type").each {
+            plugin.put("type", it.getValue())
+        }
+        resp.getHeaders("Content-Disposition").each {
+            plugin.put("name", it.getValue())
+        }
+        def name = plugin.containsKey("name") ? plugin.get("name") : plugin.get("id")
+        def extension = plugin.get("type").equals("application/zip") ? 'zip' : 'jar'
+
+        return name + "." + extension
     }
 
     private static def downloadLink(@NotNull Project project, @NotNull Map<String, String> plugin) {
@@ -345,22 +381,45 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static def extractExternalPluginJars(
             @NotNull Project project,
-            @NotNull IntelliJPluginExtension extension,
             @NotNull Map<String, String> plugin
     ) {
-        if ("jar".equals(plugin.type)) {
-            return [new File("$extension.ideaDirectory/externalPluginsLibs/$plugin.id.$plugin.type")]
+        def version = plugin.get("version")
+        if (version == null) {
+            version = 'LATEST'
+        }
+        def externalPluginInCache = new File("$project.gradle.gradleUserHomeDir/$GRADLE_CACHE_DIR/$plugin.id/$version");
+
+        if (!externalPluginInCache.exists()) {
+            return NO_FILES
         }
 
-        project.ant.unzip(src: "$extension.ideaDirectory/externalPluginsLibs/$plugin.id.$plugin.type", dest: "$extension.ideaDirectory/externalPluginsLibs/", overwrite: "false")
+        def jarFiles = externalPluginInCache.listFiles(JARS)
 
-        def libsDir = new File("$extension.ideaDirectory/externalPluginsLibs/$plugin.unzipTarget/lib")
+        if (jarFiles.size() == 1) {
+            return jarFiles
+        }
 
-        return libsDir.listFiles(new FilenameFilter() {
-            @Override
-            boolean accept(File dir, String name) {
-                return name.endsWith("jar");
-            }
-        });
+        def directories = externalPluginInCache.listFiles(DIRECTORIES)
+        if (directories.size() == 1) {
+            return new File(externalPluginInCache.getPath() + "/" + directories[0].getName() + "/lib").listFiles(JARS)
+        }
+
+        return NO_FILES
     }
+
+    private static final FileFilter JARS = new FileFilter() {
+        @Override
+        boolean accept(File pathname) {
+            return pathname.getName().endsWith(".jar")
+        }
+    }
+
+    private static final FileFilter DIRECTORIES = new FileFilter() {
+        @Override
+        boolean accept(File pathname) {
+            return pathname.isDirectory()
+        }
+    }
+
+    private static final File[] NO_FILES = new File[0];
 }
