@@ -142,7 +142,7 @@ class IntelliJPlugin implements Plugin<Project> {
         ])
 
         extension.externalPlugins.each {
-            project.dependencies.add("externalPluginScope", project.files(downloadExternalPlugin(project, it)))
+            project.dependencies.add("externalPluginScope", project.files(downloadExternalPlugin(project, extension, it)))
         }
     }
 
@@ -306,12 +306,30 @@ class IntelliJPlugin implements Plugin<Project> {
 
     }
 
-    private static def downloadExternalPlugin(@NotNull Project project, @NotNull Map<String, String> plugin) {
-        new File("$project.projectDir/externalPluginsLibs/").mkdirs()
+    private static def downloadExternalPlugin(
+            @NotNull Project project,
+            @NotNull IntelliJPluginExtension extension,
+            @NotNull Map<String, String> plugin
+    ) {
 
-        project.ant.get(src: downloadLink(project, plugin), dest:"$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", skipexisting:false)
+        new File("$extension.ideaDirectory/externalPluginsLibs/").mkdirs()
 
-        return extractExternalPluginJars(project, plugin)
+        def version = plugin.get("version")
+        if (version == null) {
+            version = 'LATEST';
+        }
+
+        def tmpDir = File.createTempDir();
+        def cacheDir = new File(project.gradle.gradleUserHomeDir, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/")
+        def pluginCacheDir = new File(cacheDir, "$plugin.id/$version")
+
+        project.ant.get(src: downloadLink(project, plugin), dest:"$tmpDir/$plugin.id.$plugin.type", skipexisting:true)
+        project.copy {
+            it.from("$tmpDir/$plugin.id.$plugin.type")
+            it.into(pluginCacheDir)
+        }
+
+        return extractExternalPluginJars(project, extension, plugin)
     }
 
     private static def downloadLink(@NotNull Project project, @NotNull Map<String, String> plugin) {
@@ -325,14 +343,18 @@ class IntelliJPlugin implements Plugin<Project> {
         return "$INTELLIJ_PLUGINS_REPO/pluginManager?action=download&id=$plugin.id&build=$build"
     }
 
-    private static def extractExternalPluginJars(@NotNull Project project, @NotNull Map<String, String> plugin) {
+    private static def extractExternalPluginJars(
+            @NotNull Project project,
+            @NotNull IntelliJPluginExtension extension,
+            @NotNull Map<String, String> plugin
+    ) {
         if ("jar".equals(plugin.type)) {
-            return [new File("$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type")]
+            return [new File("$extension.ideaDirectory/externalPluginsLibs/$plugin.id.$plugin.type")]
         }
 
-        project.ant.unzip(src: "$project.projectDir/externalPluginsLibs/$plugin.id.$plugin.type", dest: "$project.projectDir/externalPluginsLibs/", overwrite: "false")
+        project.ant.unzip(src: "$extension.ideaDirectory/externalPluginsLibs/$plugin.id.$plugin.type", dest: "$extension.ideaDirectory/externalPluginsLibs/", overwrite: "false")
 
-        def libsDir = new File("$project.projectDir/externalPluginsLibs/$plugin.unzipTarget/lib")
+        def libsDir = new File("$extension.ideaDirectory/externalPluginsLibs/$plugin.unzipTarget/lib")
 
         return libsDir.listFiles(new FilenameFilter() {
             @Override
