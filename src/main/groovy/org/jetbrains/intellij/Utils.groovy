@@ -13,6 +13,7 @@ import org.xml.sax.SAXParseException
 import java.util.regex.Pattern
 
 class Utils {
+    public static final String GRADLE_CACHE_DIR = 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea'
     public static final Pattern VERSION_PATTERN = Pattern.compile('^([A-Z]{2})-([0-9.A-z]+)\\s*$')
 
     @NotNull
@@ -177,4 +178,29 @@ class Utils {
         })
         return parser.parse(file)
     }
+
+    @NotNull
+    public static String cachedPluginDirectory(@NotNull Project project, @NotNull Map<String, String> plugin) {
+        def version = plugin.get("version")
+        if (version == null) {
+            version = 'LATEST'
+        }
+        return "$project.gradle.gradleUserHomeDir/$GRADLE_CACHE_DIR/$plugin.id/$version"
+    }
+
+    public static final FileFilter JARS = new FileFilter() {
+        @Override
+        boolean accept(File pathname) {
+            return pathname.getName().endsWith(".jar")
+        }
+    }
+
+    public static final FileFilter DIRECTORIES = new FileFilter() {
+        @Override
+        boolean accept(File pathname) {
+            return pathname.isDirectory()
+        }
+    }
+
+    public static final File[] NO_FILES = new File[0];
 }

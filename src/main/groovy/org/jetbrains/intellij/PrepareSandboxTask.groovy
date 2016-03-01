@@ -15,7 +15,7 @@ class PrepareSandboxTask extends Sync {
     CopySpec libraries
     CopySpec metaInf
 
-    CopySpec externalPlugins
+    def externalPlugins = []
 
     public PrepareSandboxTask() {
         this(NAME, false)
@@ -33,7 +33,12 @@ class PrepareSandboxTask extends Sync {
         libraries = plugin.addChild().into("$extension.pluginName/lib")
         metaInf = plugin.addChild().into("$extension.pluginName/META-INF")
 
-        externalPlugins = rootSpec.into(Utils.pluginsDir(extension, inTests)).from("externalPluginsLibs").exclude("*.zip")
+        extension.externalPlugins.each {
+            externalPlugins << rootSpec
+                    .into(Utils.pluginsDir(extension, inTests))
+                    .from(Utils.cachedPluginDirectory(project, it))
+                    .exclude("*.zip")
+        }
 
         configureClasses(extension, inTests)
         configureLibraries(extension)

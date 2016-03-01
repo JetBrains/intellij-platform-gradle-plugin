@@ -34,7 +34,6 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
     private static final String INTELLIJ_PLUGINS_REPO = 'http://plugins.jetbrains.com'
-    private static final String GRADLE_CACHE_DIR = 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/'
     public static final IDEA_MODULE_NAME = "idea"
 
     @Override
@@ -318,19 +317,14 @@ class IntelliJPlugin implements Plugin<Project> {
 
         new File("$extension.ideaDirectory/externalPluginsLibs/").mkdirs()
 
-        def version = plugin.get("version")
-        if (version == null) {
-            version = 'LATEST'
-        }
+        def cachedPluginDir = Utils.cachedPluginDirectory(project, plugin)
 
-        def cachedJars = extractExternalPluginJars(project, plugin)
+        def cachedJars = extractExternalPluginJars(cachedPluginDir)
         if (cachedJars.size() > 0) {
             return cachedJars;
         }
 
         def tmpDir = File.createTempDir();
-
-        def gradleCacheDir = new File(project.gradle.gradleUserHomeDir, GRADLE_CACHE_DIR)
 
         new HTTPBuilder(downloadLink(project, plugin)).request(Method.GET) {
             response.success = { resp, stream ->
@@ -340,19 +334,19 @@ class IntelliJPlugin implements Plugin<Project> {
 
                 project.copy {
                     it.from("$tmpDir/$name")
-                    it.into("$gradleCacheDir/$plugin.id/$version")
+                    it.into(cachedPluginDir)
                 }
 
                 if (name.endsWith("zip")) {
                     project.copy {
-                        it.from(project.zipTree("$gradleCacheDir/$plugin.id/$version/$name"))
-                        it.into("$gradleCacheDir/$plugin.id/$version")
+                        it.from(project.zipTree("$cachedPluginDir/$name"))
+                        it.into("$cachedPluginDir")
                     }
                 }
             }
         }
 
-        return extractExternalPluginJars(project, plugin)
+        return extractExternalPluginJars(cachedPluginDir)
     }
 
     private static def guessName(@NotNull HttpResponseDecorator resp, @NotNull Map<String, String> plugin) {
@@ -380,46 +374,25 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static def extractExternalPluginJars(
-            @NotNull Project project,
-            @NotNull Map<String, String> plugin
+            @NotNull String chachedPluginDir
     ) {
-        def version = plugin.get("version")
-        if (version == null) {
-            version = 'LATEST'
-        }
-        def externalPluginInCache = new File("$project.gradle.gradleUserHomeDir/$GRADLE_CACHE_DIR/$plugin.id/$version");
+        def externalPluginInCache = new File(chachedPluginDir);
 
         if (!externalPluginInCache.exists()) {
-            return NO_FILES
+            return Utils.NO_FILES
         }
 
-        def jarFiles = externalPluginInCache.listFiles(JARS)
+        def jarFiles = externalPluginInCache.listFiles(Utils.JARS)
 
         if (jarFiles.size() == 1) {
             return jarFiles
         }
 
-        def directories = externalPluginInCache.listFiles(DIRECTORIES)
+        def directories = externalPluginInCache.listFiles(Utils.DIRECTORIES)
         if (directories.size() == 1) {
-            return new File(externalPluginInCache.getPath() + "/" + directories[0].getName() + "/lib").listFiles(JARS)
+            return new File(externalPluginInCache.getPath() + "/" + directories[0].getName() + "/lib").listFiles(Utils.JARS)
         }
 
-        return NO_FILES
+        return Utils.NO_FILES
     }
-
-    private static final FileFilter JARS = new FileFilter() {
-        @Override
-        boolean accept(File pathname) {
-            return pathname.getName().endsWith(".jar")
-        }
-    }
-
-    private static final FileFilter DIRECTORIES = new FileFilter() {
-        @Override
-        boolean accept(File pathname) {
-            return pathname.isDirectory()
-        }
-    }
-
-    private static final File[] NO_FILES = new File[0];
 }
