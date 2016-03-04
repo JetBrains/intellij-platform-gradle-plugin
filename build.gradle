@@ -27,7 +27,7 @@ dependencies {
     }
 }
 
-version = '0.0.42-SNAPSHOT'
+version = '0.0.43'
 group = 'org.jetbrains'
 
 pluginBundle {

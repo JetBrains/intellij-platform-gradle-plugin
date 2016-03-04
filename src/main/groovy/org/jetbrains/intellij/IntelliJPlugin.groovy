@@ -297,9 +297,8 @@ class IntelliJPlugin implements Plugin<Project> {
         def configurations = project.configurations
         def closure = {
             if ("org.jetbrains.kotlin".equals(it.group)) {
-                if ("kotlin-runtime".equals(it.name)) {
+                if ("kotlin-runtime".equals(it.name) || "kotlin-stdlib".equals(it.name) || "kotlin-reflect".equals(it.name)) {
                     tree.exclude("lib/kotlin-runtime.jar")
-                } else if ("kotlin-reflect".equals(it.name)) {
                     tree.exclude("lib/kotlin-reflect.jar")
                 }
             }
