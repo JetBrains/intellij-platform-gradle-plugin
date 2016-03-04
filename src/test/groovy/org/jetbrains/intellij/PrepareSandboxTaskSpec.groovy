@@ -82,6 +82,49 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
               </xi:include>
             </idea-plugin>""");
     }
+
+    def 'prepare sandbox with external plugin'() {
+        given:
+        writeJavaFile()
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << """\
+            intellij {
+                externalPlugins = [[id: 'org.intellij.plugins.markdown']]
+            }
+            """.stripIndent()
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        assert collectPaths(sandbox).contains('/plugins/markdown/lib/markdown.jar')
+    }
+
+    def 'prepare sandbox with external plugin with specific version'() {
+        given:
+        writeJavaFile()
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << """\
+            intellij {
+                externalPlugins = [[id: 'org.intellij.plugins.markdown', version: '8.5.0.20160208']]
+            }
+            """.stripIndent()
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        assert collectPaths(sandbox).containsAll([
+                '/plugins/markdown/lib/default.css',
+                '/plugins/markdown/lib/darcula.css',
+                '/plugins/markdown/lib/processLinks.js',
+                '/plugins/markdown/lib/scrollToElement.js',
+                '/plugins/markdown/lib/markdown.jar',
+                '/plugins/markdown/lib/markdown-javafx-preview.jar',
+                '/plugins/markdown/lib/intellij-markdown.jar',
+                '/plugins/markdown/lib/Loboevolution.jar'
+        ])
+    }
     
     def 'test transitive xml dependencies'() {
         given:
