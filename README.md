@@ -135,6 +135,7 @@ As examples of using this plugin you can check out following projects:
 - [AWS CloudFormation plugin](https://github.com/shalupov/idea-cloudformation) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaAwsCloudFormation&tab=projectOverview)
 - [Bash plugin](https://github.com/jansorg/BashSupport) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_BashSupport&tab=projectOverview) 
 - [Android Drawable Importer plugin](https://github.com/winterDroid/android-drawable-importer-intellij-plugin)
+- [Android Material Design Icon Generator plugin](https://github.com/konifar/android-material-design-icon-generator-plugin)
 - [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
 - [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
 - [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
