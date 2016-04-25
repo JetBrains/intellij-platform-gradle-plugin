@@ -6,8 +6,8 @@ plugins {
 apply plugin: 'groovy'
 
 compileGroovy {
-    sourceCompatibility = 1.6
-    targetCompatibility = 1.6
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 }
 
 repositories {
@@ -20,15 +20,17 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
     compile 'org.jetbrains:annotations:13.0'
-    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
-    compile 'org.apache.httpcomponents:httpmime:4.5.1'
+
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.16'
+    compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.14'
+    compile 'org.jetbrains.intellij.plugins:common-utils:1.18'
+    
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.3', {
         exclude module: 'groovy-all'
     }
 }
 
-version = '0.0.43'
+version = '0.1.0'
 group = 'org.jetbrains'
 
 pluginBundle {
