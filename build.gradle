@@ -12,7 +12,7 @@ compileGroovy {
 
 repositories {
     maven { url 'http://repo.labs.intellij.net/central-proxy' }
-    maven { url "http://dl.bintray.com/jetbrains/plugin-repository-rest-client" }
+    maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
     mavenCentral()
 }
 
@@ -22,7 +22,7 @@ dependencies {
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
     compile 'org.apache.httpcomponents:httpmime:4.5.1'
-    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.1.15'
+    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.16'
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.3', {
         exclude module: 'groovy-all'
     }

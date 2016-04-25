@@ -21,8 +21,13 @@ class PublishTask extends DefaultTask {
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         if (extension != null) {
             boolean misconfigurated = false
-            if (!extension.publish.pluginId) {
-                IntelliJPlugin.LOG.error("intellij.publish.pluginId is empty")
+            if (extension.publish.pluginId) {
+                IntelliJPlugin.LOG.warn("intellij.publish.pluginId property is deprecated. " +
+                        "id-tag from plugin.xml will be used for uploading")
+            }
+            def pluginId = Utils.getPluginId(project)
+            if (!pluginId) {
+                IntelliJPlugin.LOG.warn("id tag is missing in plugin.xml")
                 misconfigurated = true
             }
             if (!extension.publish.username) {
@@ -48,7 +53,7 @@ class PublishTask extends DefaultTask {
             IntelliJPlugin.LOG.info("Uploading plugin $extension.publish.pluginId from $distributionFile.absolutePath to $host")
             try {
                 def repoClient = new PluginRepositoryInstance(host, extension.publish.username, extension.publish.password)
-                repoClient.uploadPlugin(extension.publish.pluginId.toInteger(), distributionFile, extension.publish.channel ?: '')
+                repoClient.uploadPlugin(pluginId, distributionFile, extension.publish.channel ?: '')
                 IntelliJPlugin.LOG.info("Uploaded successfully")
             }
             catch (exception) {
