@@ -1,11 +1,10 @@
 package org.jetbrains.intellij
-import groovyx.net.http.HTTPBuilder
-import groovyx.net.http.Method
-import org.apache.http.entity.mime.MultipartEntityBuilder
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.api.tasks.bundling.Zip
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class PublishTask extends DefaultTask {
     public static String NAME = "publishPlugin"
@@ -48,26 +47,9 @@ class PublishTask extends DefaultTask {
             def host = "http://plugins.jetbrains.com"
             IntelliJPlugin.LOG.info("Uploading plugin $extension.publish.pluginId from $distributionFile.absolutePath to $host")
             try {
-                new HTTPBuilder().request("$host/plugin/uploadPlugin", Method.POST, 'multipart/form-data') { request ->
-                    def content = MultipartEntityBuilder.create().addBinaryBody('file', distributionFile)
-                            .addTextBody('pluginId', extension.publish.pluginId)
-                            .addTextBody('userName', extension.publish.username)
-                            .addTextBody('password', extension.publish.password)
-                            .addTextBody('channel', extension.publish.channel ?: '')
-                            .build()
-                    
-                    request.setEntity(content)
-                    response.success = { resp ->
-                        if (resp.status != 200 && resp.status != 302) {
-                            IntelliJPlugin.LOG.error("Failed to upoad plugin: $resp.statusLine")
-                            throw new TaskExecutionException(this, new RuntimeException("Failed to upoad plugin: $resp.statusLine\n\n"))
-                        }
-                        IntelliJPlugin.LOG.info("Uploaded successfully")
-                    }
-                    response.failure = { resp ->
-                        throw new TaskExecutionException(this, new RuntimeException("Failed to upoad plugin: $resp.statusLine\n\n"))
-                    }
-                }
+                def repoClient = new PluginRepositoryInstance(host, extension.publish.username, extension.publish.password)
+                repoClient.uploadPlugin(extension.publish.pluginId.toInteger(), distributionFile, extension.publish.channel ?: '')
+                IntelliJPlugin.LOG.info("Uploaded successfully")
             }
             catch (exception) {
                 throw new TaskExecutionException(this, new RuntimeException("Failed to upload plugin", exception))
