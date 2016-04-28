@@ -1,4 +1,7 @@
 # Overview
+
+[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
 The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks in order to fill some tags 
@@ -133,8 +136,10 @@ As examples of using this plugin you can check out following projects:
 - [Erlang plugin](https://github.com/ignatov/intellij-erlang) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_Erlang&tab=projectOverview)
 - [Rust plugin](https://github.com/intellij-rust/intellij-rust) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_Rust&tab=projectOverview)
 - [AWS CloudFormation plugin](https://github.com/shalupov/idea-cloudformation) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaAwsCloudFormation&tab=projectOverview)
-- [Bash plugin](https://github.com/jansorg/BashSupport) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_BashSupport&tab=projectOverview) 
+- [Bash plugin](https://github.com/jansorg/BashSupport) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_BashSupport&tab=projectOverview)
+- [Perl5 plugin](https://github.com/hurricup/Perl5-IDEA) and its [Travis configuration file](https://github.com/hurricup/Perl5-IDEA/blob/master/.travis.yml)
 - [Android Drawable Importer plugin](https://github.com/winterDroid/android-drawable-importer-intellij-plugin)
+- [Android Material Design Icon Generator plugin](https://github.com/konifar/android-material-design-icon-generator-plugin)
 - [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
 - [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
 - [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)

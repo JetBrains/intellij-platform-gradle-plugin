@@ -24,7 +24,8 @@ abstract class IntelliJPluginSpecBase extends Specification {
             apply plugin: 'org.jetbrains.intellij'
             buildscript {
                 repositories { 
-                    maven { url "${adjustWindowsPath(localRepoPath)}" } 
+                    maven { url "${adjustWindowsPath(localRepoPath)}" }
+                    maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' } 
                     mavenCentral()
                 }
                 dependencies {
@@ -90,7 +91,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
         for (String line : stdout.readLines()) {
             if (!targetGroupAppeared) {
                 targetGroupAppeared = line.equalsIgnoreCase(groupName + " tasks")
-            } else if (!line.equals("-" * (groupName + " tasks").length())) {
+            } else if (line != ("-" * (groupName + " tasks").length())) {
                 if (!line) break
                 def spaceIndex = line.indexOf(' ')
                 result.add(spaceIndex > 0 ? line.substring(0, spaceIndex) : line)

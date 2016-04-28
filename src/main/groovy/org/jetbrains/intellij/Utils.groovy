@@ -1,5 +1,7 @@
 package org.jetbrains.intellij
 
+import com.intellij.structure.domain.IdeVersion
+import com.intellij.structure.impl.utils.StringUtil
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
@@ -134,6 +136,12 @@ class Utils {
         return extension.ideaDirectory
     }
 
+    public static IdeVersion ideVersion(@NotNull Project project) {
+        def extension = project.extensions.getByType(IntelliJPluginExtension.class)
+        return extension != null && extension.ideaDirectory != null ?
+                IdeVersion.createIdeVersion(ideaBuildNumber(extension.ideaDirectory)) : null
+    }
+
     @NotNull
     public static String ideaBuildNumber(@NotNull File ideaDirectory) {
         if (isMac()) {
@@ -178,6 +186,15 @@ class Utils {
         })
         return parser.parse(file)
     }
+
+    public static boolean isJarFile(@NotNull File file) {
+        return StringUtil.endsWithIgnoreCase(file.name, ".jar")
+    }
+
+    public static boolean isZipFile(@NotNull File file) {
+        return StringUtil.endsWithIgnoreCase(file.name, ".zip")
+    }
+
 
     @NotNull
     public static String cachedPluginDirectory(@NotNull Project project, @NotNull Map<String, String> plugin) {

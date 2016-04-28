@@ -1,11 +1,10 @@
 package org.jetbrains.intellij
-import groovyx.net.http.HTTPBuilder
-import groovyx.net.http.Method
-import org.apache.http.entity.mime.MultipartEntityBuilder
+
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.api.tasks.bundling.Zip
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class PublishTask extends DefaultTask {
     public static String NAME = "publishPlugin"
@@ -22,8 +21,13 @@ class PublishTask extends DefaultTask {
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         if (extension != null) {
             boolean misconfigurated = false
-            if (!extension.publish.pluginId) {
-                IntelliJPlugin.LOG.error("intellij.publish.pluginId is empty")
+            if (extension.publish.pluginId) {
+                IntelliJPlugin.LOG.warn("intellij.publish.pluginId property is deprecated. " +
+                        "id-tag from plugin.xml will be used for uploading")
+            }
+            def pluginId = Utils.getPluginId(project)
+            if (!pluginId) {
+                IntelliJPlugin.LOG.warn("id tag is missing in plugin.xml")
                 misconfigurated = true
             }
             if (!extension.publish.username) {
@@ -48,26 +52,9 @@ class PublishTask extends DefaultTask {
             def host = "http://plugins.jetbrains.com"
             IntelliJPlugin.LOG.info("Uploading plugin $extension.publish.pluginId from $distributionFile.absolutePath to $host")
             try {
-                new HTTPBuilder().request("$host/plugin/uploadPlugin", Method.POST, 'multipart/form-data') { request ->
-                    def content = MultipartEntityBuilder.create().addBinaryBody('file', distributionFile)
-                            .addTextBody('pluginId', extension.publish.pluginId)
-                            .addTextBody('userName', extension.publish.username)
-                            .addTextBody('password', extension.publish.password)
-                            .addTextBody('channel', extension.publish.channel ?: '')
-                            .build()
-                    
-                    request.setEntity(content)
-                    response.success = { resp ->
-                        if (resp.status != 200 && resp.status != 302) {
-                            IntelliJPlugin.LOG.error("Failed to upoad plugin: $resp.statusLine")
-                            throw new TaskExecutionException(this, new RuntimeException("Failed to upoad plugin: $resp.statusLine\n\n"))
-                        }
-                        IntelliJPlugin.LOG.info("Uploaded successfully")
-                    }
-                    response.failure = { resp ->
-                        throw new TaskExecutionException(this, new RuntimeException("Failed to upoad plugin: $resp.statusLine\n\n"))
-                    }
-                }
+                def repoClient = new PluginRepositoryInstance(host, extension.publish.username, extension.publish.password)
+                repoClient.uploadPlugin(pluginId, distributionFile, extension.publish.channel ?: '')
+                IntelliJPlugin.LOG.info("Uploaded successfully")
             }
             catch (exception) {
                 throw new TaskExecutionException(this, new RuntimeException("Failed to upload plugin", exception))
