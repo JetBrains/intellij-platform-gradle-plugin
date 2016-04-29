@@ -83,13 +83,13 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             </idea-plugin>""");
     }
 
-    def 'prepare sandbox with external plugin'() {
+    def 'prepare sandbox with external jar-type plugin'() {
         given:
         writeJavaFile()
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
         buildFile << """\
             intellij {
-                externalPlugins = [[id: 'org.intellij.plugins.markdown']]
+                externalPlugins = [[id: 'org.jetbrains.postfixCompletion', version: '0.8-beta']]
             }
             """.stripIndent()
         when:
@@ -97,10 +97,12 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox).contains('/plugins/markdown/lib/markdown.jar')
+        assert collectPaths(sandbox).containsAll([
+                '/plugins/intellij-postfix.jar'
+        ])
     }
 
-    def 'prepare sandbox with external plugin with specific version'() {
+    def 'prepare sandbox with external zip-type plugin'() {
         given:
         writeJavaFile()
         pluginXml << '<idea-plugin version="2"></idea-plugin>'

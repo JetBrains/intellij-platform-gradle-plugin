@@ -1,8 +1,5 @@
 package org.jetbrains.intellij
 
-import groovyx.net.http.HTTPBuilder
-import groovyx.net.http.HttpResponseDecorator
-import groovyx.net.http.Method
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -20,6 +17,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -33,7 +31,6 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final SOURCES_CONFIGURATION_NAME = "intellij-sources"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
-    private static final String INTELLIJ_PLUGINS_REPO = 'http://plugins.jetbrains.com'
     public static final IDEA_MODULE_NAME = "idea"
 
     @Override
@@ -144,8 +141,14 @@ class IntelliJPlugin implements Plugin<Project> {
                 group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'runtime'
         ])
 
+        def repository = new ExternalPluginRepository(project)
+
         extension.externalPlugins.each {
-            project.dependencies.add("externalPluginScope", project.files(externalPluginJars(project, extension, it)))
+            def plugin = repository.findPlugin(it.id, it.version, null)
+            if (plugin == null) {
+                throw new BuildException("Failed to resolve plugin $it", null)
+            }
+            project.dependencies.add("externalPluginScope", project.files(plugin.jarFiles))
         }
     }
 
@@ -306,92 +309,5 @@ class IntelliJPlugin implements Plugin<Project> {
         configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().each closure
         configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().each closure
 
-    }
-
-    private static def externalPluginJars(
-            @NotNull Project project,
-            @NotNull IntelliJPluginExtension extension,
-            @NotNull Map<String, String> plugin
-    ) {
-
-        new File("$extension.ideaDirectory/externalPluginsLibs/").mkdirs()
-
-        def cachedPluginDir = Utils.cachedPluginDirectory(project, plugin)
-
-        def cachedJars = extractExternalPluginJars(cachedPluginDir)
-        if (cachedJars.size() > 0) {
-            return cachedJars;
-        }
-
-        def tmpDir = File.createTempDir();
-
-        new HTTPBuilder(downloadLink(project, plugin)).request(Method.GET) {
-            response.success = { resp, stream ->
-                def name = guessName(resp, plugin)
-
-                new File(tmpDir, name).newOutputStream() << stream
-
-                project.copy {
-                    it.from("$tmpDir/$name")
-                    it.into(cachedPluginDir)
-                }
-
-                if (name.endsWith("zip")) {
-                    project.copy {
-                        it.from(project.zipTree("$cachedPluginDir/$name"))
-                        it.into("$cachedPluginDir")
-                    }
-                }
-            }
-        }
-
-        return extractExternalPluginJars(cachedPluginDir)
-    }
-
-    private static def guessName(@NotNull HttpResponseDecorator resp, @NotNull Map<String, String> plugin) {
-        resp.getHeaders("Content-Type").each {
-            plugin.put("type", it.getValue())
-        }
-        resp.getHeaders("Content-Disposition").each {
-            plugin.put("name", it.getValue())
-        }
-        def name = plugin.containsKey("name") ? plugin.get("name") : plugin.get("id")
-        def extension = plugin.get("type").equals("application/zip") ? 'zip' : 'jar'
-
-        return name + "." + extension
-    }
-
-    private static def downloadLink(@NotNull Project project, @NotNull Map<String, String> plugin) {
-        if (plugin.containsKey("version")) {
-            return "$INTELLIJ_PLUGINS_REPO/plugin/download?pluginId=$plugin.id&version=$plugin.version"
-        }
-
-        def extension = project.extensions.getByType(IntelliJPluginExtension)
-        def build = Utils.ideaBuildNumber(extension.ideaDirectory)
-
-        return "$INTELLIJ_PLUGINS_REPO/pluginManager?action=download&id=$plugin.id&build=$build"
-    }
-
-    private static def extractExternalPluginJars(
-            @NotNull String chachedPluginDir
-    ) {
-        def externalPluginInCache = new File(chachedPluginDir);
-
-        if (!externalPluginInCache.exists()) {
-            return Utils.NO_FILES
-        }
-
-        def jarFiles = externalPluginInCache.listFiles(Utils.JARS)
-
-        if (jarFiles.size() == 1) {
-            return jarFiles
-        }
-
-        def directories = externalPluginInCache.listFiles(Utils.DIRECTORIES)
-        if (directories.size() == 1) {
-            return new File(externalPluginInCache.getPath() + "/" + directories[0].getName() + "/lib").listFiles(Utils.JARS)
-        }
-
-        return Utils.NO_FILES
     }
 }

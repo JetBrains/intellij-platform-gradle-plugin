@@ -5,6 +5,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Sync
+import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.xml.sax.SAXParseException
 
@@ -33,11 +34,16 @@ class PrepareSandboxTask extends Sync {
         libraries = plugin.addChild().into("$extension.pluginName/lib")
         metaInf = plugin.addChild().into("$extension.pluginName/META-INF")
 
+        def repository = new ExternalPluginRepository(project)
+
         extension.externalPlugins.each {
+            def externalPlugin = repository.findPlugin(it.id, it.version, null)
+            if (externalPlugin == null || externalPlugin.artifact == null) {
+                throw new BuildException("Failed to resolve plugin $it", null)
+            }
+            def artifact = externalPlugin.artifact
             externalPlugins << rootSpec
-                    .into(Utils.pluginsDir(extension, inTests))
-                    .from(Utils.cachedPluginDirectory(project, it))
-                    .exclude("*.zip")
+                    .from(project.files(artifact.isDirectory() ? artifact.getParentFile() : artifact))
         }
 
         configureClasses(extension, inTests)

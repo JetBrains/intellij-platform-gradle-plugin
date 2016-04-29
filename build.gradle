@@ -22,7 +22,6 @@ dependencies {
     compile localGroovy()
     compile 'org.jetbrains:annotations:13.0'
 
-    compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.7.1'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.16'
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.14'
     compile 'org.jetbrains.intellij.plugins:common-utils:1.18'
