@@ -149,6 +149,7 @@ As examples of using this plugin you can check out following projects:
 - https://github.com/breandan/idear
 - https://github.com/pedrovgs/AndroidWiFiADB
 - https://github.com/SonarSource/sonar-intellij
+- [IdeaVim plugin](https://github.com/JetBrains/ideavim) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaVim&guest=1)
 
 
 # License
