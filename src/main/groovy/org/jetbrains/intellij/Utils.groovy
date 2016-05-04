@@ -58,7 +58,8 @@ class Utils {
                         result += pluginXml
                     }
                 } catch (SAXParseException ignore) {
-                    IntelliJPlugin.LOG.warn("Cannot read ${plugin.xml}. Skipping.")
+                    IntelliJPlugin.LOG.warn("Cannot read ${pluginXml}. Skipping.")
+                    IntelliJPlugin.LOG.debug("Cannot read ${pluginXml}", ignore)
                 }
             }
         }
@@ -166,7 +167,8 @@ class Utils {
     }
 
     static Node parseXml(File file) {
-        def parser = new XmlParser()
+        def parser = new XmlParser(false, true, true)
+        parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
         parser.setErrorHandler(new ErrorHandler() {
             @Override
             void warning(SAXParseException e) throws SAXException {

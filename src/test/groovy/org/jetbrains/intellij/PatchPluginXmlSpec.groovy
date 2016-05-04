@@ -39,7 +39,6 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        println(ouputPluginXml(project).text)
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532.4" until-build="141.9999"/>
@@ -80,7 +79,6 @@ intellij {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        println ouputPluginXml(project).text
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="1" until-build="2">my_version</idea-version>
@@ -128,6 +126,22 @@ intellij {
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
         !stdout.contains(":processResources UP-TO-DATE")
+        ouputPluginXml(project).text == """<idea-plugin version="2">
+  <version>0.42.123</version>
+  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+</idea-plugin>
+"""
+    }
+
+    def 'patch plugin xml with doctype'() {
+        given:
+        pluginXml << """<!DOCTYPE idea-plugin PUBLIC \"Plugin/DTD\" \"http://plugins.jetbrains.com/plugin.dtd\">
+<idea-plugin version=\"2\"></idea-plugin>
+"""
+        buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
+        when:
+        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        then:
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532.4" until-build="141.9999"/>
