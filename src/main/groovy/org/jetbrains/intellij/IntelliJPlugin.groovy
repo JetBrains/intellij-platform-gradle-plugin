@@ -85,6 +85,7 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Adding IntelliJ IDEA dependency")
         project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:idea$extension.type:$extension.version")
         extension.ideaDirectory = ideaDirectory(project, configuration)
+        LOG.info("IntelliJ IDEA " + Utils.ideaBuildNumber(extension.ideaDirectory) + " is used for building")
 
         if (extension.downloadSources) {
             def sourcesConfiguration = project.configurations.create(SOURCES_CONFIGURATION_NAME).setVisible(false)
