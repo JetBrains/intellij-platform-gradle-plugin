@@ -134,7 +134,10 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePatchPluginXmlTask(@NotNull Project project) {
         LOG.info("Configuring patch plugin.xml task")
-        project.tasks.withType(ProcessResources.class)*.doLast(new PatchPluginXmlTask())
+        def processResourcesTasks = project.tasks.withType(ProcessResources.class)
+        def patchPluginXmlAction = new PatchPluginXmlAction(project)
+        processResourcesTasks*.doLast(patchPluginXmlAction)
+        processResourcesTasks*.inputs*.properties(patchPluginXmlAction.properties)
     }
 
     private static void configurePrepareSandboxTask(@NotNull Project project) {
@@ -196,9 +199,9 @@ class IntelliJPlugin implements Plugin<Project> {
             baseName = extension.pluginName
             from("$prepareSandboxTask.destinationDir")
             into(extension.pluginName)
-            dependsOn(prepareSandboxTask) 
+            dependsOn(prepareSandboxTask)
         }
-        
+
         ArchivePublishArtifact zipArtifact = new ArchivePublishArtifact(zip);
         Configuration runtimeConfiguration = project.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
         runtimeConfiguration.getArtifacts().add(zipArtifact);
