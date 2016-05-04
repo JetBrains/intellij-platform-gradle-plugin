@@ -14,6 +14,7 @@ repositories {
     maven { url 'http://repo.labs.intellij.net/central-proxy' }
     maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -24,8 +25,8 @@ dependencies {
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.16'
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.14'
     compile 'org.jetbrains.intellij.plugins:common-utils:1.18'
-    
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.3', {
+
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
     }
 }

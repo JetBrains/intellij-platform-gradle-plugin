@@ -17,6 +17,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -38,6 +39,7 @@ class IntelliJPlugin implements Plugin<Project> {
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension)
         intellijExtension.with {
             plugins = []
+            externalPlugins = []
             version = DEFAULT_IDEA_VERSION
             type = 'IC'
             pluginName = project.name
@@ -112,6 +114,14 @@ class IntelliJPlugin implements Plugin<Project> {
         def ivyFile = createIvyRepo(project, extension)
         def version = extension.version
 
+        def externalPluginScope = project.configurations.create("externalPluginScope")
+
+        project.sourceSets.configure {
+            main.compileClasspath += externalPluginScope
+            test.compileClasspath += externalPluginScope
+            test.runtimeClasspath += externalPluginScope
+        }
+
         project.repositories.ivy { repo ->
             repo.url = extension.ideaDirectory
             repo.ivyPattern(ivyFile.getAbsolutePath()) // ivy xml
@@ -131,6 +141,16 @@ class IntelliJPlugin implements Plugin<Project> {
         project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
                 group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'runtime'
         ])
+
+        def repository = new ExternalPluginRepository(project)
+
+        extension.externalPlugins.each {
+            def plugin = repository.findPlugin(it.id, it.version, null)
+            if (plugin == null) {
+                throw new BuildException("Failed to resolve plugin $it", null)
+            }
+            project.dependencies.add("externalPluginScope", project.files(plugin.jarFiles))
+        }
     }
 
     private static void configurePatchPluginXmlTask(@NotNull Project project) {
@@ -198,7 +218,7 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
             baseName = extension.pluginName
-            from("$prepareSandboxTask.destinationDir")
+            from("$prepareSandboxTask.destinationDir/$extension.pluginName")
             into(extension.pluginName)
             dependsOn(prepareSandboxTask)
         }
