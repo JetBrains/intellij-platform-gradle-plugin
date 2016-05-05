@@ -20,11 +20,14 @@ import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 
 class ExternalPluginRepository {
+
+    private static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'http://plugins.jetbrains.com'
+
     private final String gradleHome
     private final String repositoryHost
 
-    ExternalPluginRepository(String repositoryHost, Project project) {
-        this(repositoryHost, project.gradle.gradleUserHomeDir.absolutePath)
+    ExternalPluginRepository(Project project) {
+        this(DEFAULT_INTELLIJ_PLUGINS_REPO, project.gradle.gradleUserHomeDir.absolutePath)
     }
     
     ExternalPluginRepository(@NotNull String repositoryHost, @NotNull String gradleHomePath) {
@@ -45,13 +48,16 @@ class ExternalPluginRepository {
             }
 
             if (Utils.isJarFile(download)) {
-                def targetFile = pathToPluginCache(pluginId, version, channel, true)
+                def targetFile = pathToPluginCache(pluginId, version, channel).resolve(download.name)
+                targetFile.toFile().mkdirs()
                 def move = Files.move(download.toPath(), targetFile, StandardCopyOption.REPLACE_EXISTING)
                 plugin = new ExternalPlugin(move.toFile())
             } else if (Utils.isZipFile(download)) {
-                def targetDirectory = pathToPluginCache(pluginId, version, channel, false).toFile()
+                def targetDirectory = pathToPluginCache(pluginId, version, channel).toFile()
                 extractZip(pluginId, version, download, targetDirectory)
                 plugin = new ExternalPlugin(targetDirectory)
+            } else {
+                throw new BuildException("Invalid type of downloaded plugin: $download", null)
             }
         }
         return plugin
@@ -62,7 +68,7 @@ class ExternalPluginRepository {
         def entries = zipFile.entries
         while (entries.hasMoreElements()) {
             def entry = entries.nextElement()
-            def path = StringUtil.substringAfter(entry.name, "/")
+            def path = entry.name
             if (!path) {
                 continue
             }
@@ -98,12 +104,7 @@ class ExternalPluginRepository {
     ExternalPlugin findCachedPlugin(String pluginId, String version, String channel) {
         def cache = null
         try {
-            cache = pathToPluginCache(pluginId, version, channel, false)
-            if (Files.exists(cache)) {
-                return new ExternalPlugin(cache.toFile())
-            }
-
-            cache = pathToPluginCache(pluginId, version, channel, true)
+            cache = pathToPluginCache(pluginId, version, channel)
             if (Files.exists(cache)) {
                 return new ExternalPlugin(cache.toFile())
             }
@@ -114,20 +115,20 @@ class ExternalPluginRepository {
         return null
     }
 
-    private Path pathToPluginCache(String pluginId, String version, String channel, boolean jar) {
+    private Path pathToPluginCache(String pluginId, String version, String channel) {
         def cache = getCacheDirectory()
         def host = StringUtil.trimStart(StringUtil.trimStart(StringUtil.trimStart(repositoryHost, 'http://'), 'https://'), 'www')
-        return Paths.get(cache.getAbsolutePath(), host, "$pluginId-${channel ?: 'master'}-$version${jar ? '.jar' : ''}")
+        return Paths.get(cache.getAbsolutePath(), host, "$pluginId-${channel ?: 'master'}-$version/")
     }
 }
 
 public class ExternalPlugin {
     private final Plugin plugin
-    private final File file
+    private final File artifact
 
     ExternalPlugin(@NotNull File file) {
-        plugin = PluginManager.instance.createPluginWithEmptyResolver(file)
-        this.file = file
+        this.artifact = Utils.singleChildIn(file)
+        this.plugin = PluginManager.instance.createPluginWithEmptyResolver(artifact)
     }
 
     def isCompatible(@NotNull IdeVersion ideVersion) {
@@ -135,11 +136,11 @@ public class ExternalPlugin {
     }
 
     def getJarFiles() {
-        if (Utils.isJarFile(file)) {
-            return Collections.singletonList(file)
+        if (Utils.isJarFile(artifact)) {
+            return Collections.singletonList(artifact)
         }
-        if (file.isDirectory()) {
-            File lib = new File(file, "lib");
+        if (artifact.isDirectory()) {
+            File lib = new File(artifact, "lib");
             if (lib.isDirectory()) {
                 return JarsUtils.collectJars(lib, Predicates.<File> alwaysTrue(), true)
             }
@@ -147,8 +148,7 @@ public class ExternalPlugin {
         return Collections.emptySet()
     }
 
-
-    def getFile() {
-        return file
+    def getArtifact() {
+        return artifact
     }
 }

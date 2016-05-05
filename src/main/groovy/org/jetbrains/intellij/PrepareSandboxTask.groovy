@@ -5,6 +5,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Sync
+import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.xml.sax.SAXParseException
 
@@ -15,6 +16,8 @@ class PrepareSandboxTask extends Sync {
     CopySpec libraries
     CopySpec metaInf
 
+    def externalPlugins = []
+
     public PrepareSandboxTask() {
         this(NAME, false)
     }
@@ -24,12 +27,25 @@ class PrepareSandboxTask extends Sync {
         group = IntelliJPlugin.GROUP_NAME
         description = "Creates a folder containing the plugins to run Intellij IDEA with."
 
-        CopySpecInternal plugin = rootSpec.addChild()
-        classes = plugin.addChild().into("classes")
-        libraries = plugin.addChild().into("lib")
-        metaInf = plugin.addChild().into("META-INF")
+        def extension = project.extensions.getByType(IntelliJPluginExtension)
 
-        def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
+        CopySpecInternal plugin = rootSpec.addChild()
+        classes = plugin.addChild().into("$extension.pluginName/classes")
+        libraries = plugin.addChild().into("$extension.pluginName/lib")
+        metaInf = plugin.addChild().into("$extension.pluginName/META-INF")
+
+        def repository = new ExternalPluginRepository(project)
+
+        extension.externalPlugins.each {
+            def externalPlugin = repository.findPlugin(it.id, it.version, null)
+            if (externalPlugin == null || externalPlugin.artifact == null) {
+                throw new BuildException("Failed to resolve plugin $it", null)
+            }
+            def artifact = externalPlugin.artifact
+            externalPlugins << rootSpec
+                    .from(project.files(artifact.isDirectory() ? artifact.getParentFile() : artifact))
+        }
+
         configureClasses(extension, inTests)
         configureLibraries(extension)
     }
@@ -68,7 +84,7 @@ class PrepareSandboxTask extends Sync {
     }
 
     private void disableIdeUpdate() {
-        def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
+        def extension = project.extensions.getByType(IntelliJPluginExtension)
         def optionsDir = new File(Utils.configDir(extension, false), "options")
         if (!optionsDir.exists() && !optionsDir.mkdirs()) {
             IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")
@@ -118,7 +134,7 @@ class PrepareSandboxTask extends Sync {
     }
 
     private void configureClasses(@NotNull IntelliJPluginExtension extension, boolean inTests) {
-        destinationDir = new File(Utils.pluginsDir(extension, inTests), "$extension.pluginName")
+        destinationDir = new File(Utils.pluginsDir(extension, inTests))
         classes.from(Utils.mainSourceSet(project).output)
     }
 

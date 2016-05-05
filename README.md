@@ -53,6 +53,9 @@ Value may have `IC-` or `IU-` prefix in order to define IDEA distribution type.
 - `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies.<br/><br/> 
 **Default value:** `<empty>`
 
+- `intellij.externalPlugins` defines list of pairs (id and version) of plugins from [idea repository](https://plugins.jetbrains.com/) in format `[[id: 'org.intellij.plugins.markdown', version: '8.5.0.20160208'],...]`<br/><br/>
+**Default value:** `<empty>`
+
 - `intellij.pluginName` is used for naming target zip-archive and defines the name of plugin artifact. 
 of bundled IDEA plugins that should be used as dependencies.<br/><br/>
 **Default value:** `$project.name`
