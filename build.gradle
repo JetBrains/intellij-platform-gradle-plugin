@@ -25,7 +25,7 @@ dependencies {
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.14'
     compile 'org.jetbrains.intellij.plugins:common-utils:1.18'
     
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.3', {
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
     }
 }
