@@ -195,4 +195,12 @@ class Utils {
     public static boolean isZipFile(@NotNull File file) {
         return StringUtil.endsWithIgnoreCase(file.name, ".zip")
     }
+
+    public static File singleChildIn(File directory) {
+        def files = directory.listFiles()
+        if (files == null || files.length != 1) {
+            throw new RuntimeException("Single child expected in $directory");
+        }
+        return files[0]
+    }
 }

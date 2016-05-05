@@ -10,9 +10,9 @@ class ExternalPluginRepositorySpec extends IntelliJPluginSpecBase {
 
         then:
         assert plugin != null
-        assert plugin.file.name == 'org.jetbrains.postfixCompletion-master-0.8-beta.jar'
+        assert plugin.artifact.name == 'intellij-postfix.jar'
         assert collectFilePaths(plugin.jarFiles, repository.cacheDirectory.absolutePath) ==
-                ['/plugins.jetbrains.com/org.jetbrains.postfixCompletion-master-0.8-beta.jar'] as Set
+                ['/plugins.jetbrains.com/org.jetbrains.postfixCompletion-master-0.8-beta/intellij-postfix.jar'] as Set
     }
 
     def 'find zip-type plugin'() {
@@ -24,12 +24,12 @@ class ExternalPluginRepositorySpec extends IntelliJPluginSpecBase {
 
         then:
         assert plugin != null
-        assert plugin.file.name == 'org.intellij.plugins.markdown-master-8.5.0.20160208'
+        assert plugin.artifact.name == 'markdown'
         assert collectFilePaths(plugin.jarFiles, repository.cacheDirectory.absolutePath) ==
-                ['/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/lib/markdown-javafx-preview.jar',
-                 '/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/lib/Loboevolution.jar',
-                 '/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/lib/intellij-markdown.jar',
-                 '/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/lib/markdown.jar'] as Set
+                ['/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/markdown-javafx-preview.jar',
+                 '/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/Loboevolution.jar',
+                 '/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/intellij-markdown.jar',
+                 '/plugins.jetbrains.com/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/markdown.jar'] as Set
     }
 
     def collectFilePaths(Collection<File> files, String cacheDir) {
