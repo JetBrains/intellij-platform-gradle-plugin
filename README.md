@@ -153,7 +153,7 @@ As examples of using this plugin you can check out following projects:
 - https://github.com/pedrovgs/AndroidWiFiADB
 - https://github.com/SonarSource/sonar-intellij
 - [IdeaVim plugin](https://github.com/JetBrains/ideavim) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaVim&guest=1)
-
+- [Adb Idea](https://github.com/pbreault/adb-idea)
 
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
