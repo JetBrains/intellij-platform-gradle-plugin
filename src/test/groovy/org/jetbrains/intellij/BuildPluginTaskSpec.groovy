@@ -100,4 +100,36 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         //noinspection GrEqualsBetweenInconvertibleTypes
         assert new File(project.buildDirectory, "distributions").list() == ["$project.name-0.42.123.zip"]
     }
+
+
+    def 'can compile classes that depends on external plugins'() {
+        given:
+        file('src/main/java/App.java') << """
+import java.lang.String;
+import org.jetbrains.annotations.NotNull;
+import org.intellij.plugins.markdown.lang.MarkdownLanguage;
+class App {
+    public static void main(@NotNull String[] strings) {
+        System.out.println(MarkdownLanguage.INSTANCE.getDisplayName());
+    }
+}
+"""
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << """\
+            version='0.42.123'
+            intellij {
+                pluginName = 'myPluginName'
+                externalPlugins = [[id: 'org.intellij.plugins.markdown', version: '8.5.0.20160208']]
+            }
+            """.stripIndent()
+        when:
+        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        assert distribution.exists()
+        assert (new ZipFile(distribution).entries().collect { it.name }).contains(
+                'myPluginName/classes/App.class'
+        )
+    }
 }
