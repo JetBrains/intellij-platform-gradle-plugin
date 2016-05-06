@@ -196,11 +196,20 @@ class Utils {
         return StringUtil.endsWithIgnoreCase(file.name, ".zip")
     }
 
-    public static File singleChildIn(File directory) {
-        def files = directory.listFiles()
-        if (files == null || files.length != 1) {
-            throw new RuntimeException("Single child expected in $directory");
+    @NotNull
+    public static parsePluginDependencyString(@NotNull String s) {
+        def id = null, version = null, channel = null
+        def idAndVersion = s.split('[:]', 2)
+        if (idAndVersion.length == 1) {
+            def idAndChannel = idAndVersion[0].split('[@]', 2)
+            id = idAndChannel[0]
+            channel = idAndChannel.length > 1 ? idAndChannel[1] : null
+        } else if (idAndVersion.length == 2) {
+            def versionAndChannel = idAndVersion[1].split('[@]', 2)
+            id = idAndVersion[0]
+            version = versionAndChannel[0]
+            channel = versionAndChannel.length > 1 ? versionAndChannel[1] : null
         }
-        return files[0]
+        return new Tuple(id ?: null, version ?: null, channel ?: null)
     }
 }
