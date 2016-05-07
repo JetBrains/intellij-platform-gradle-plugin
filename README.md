@@ -155,5 +155,7 @@ As examples of using this plugin you can check out following projects:
 - [IdeaVim plugin](https://github.com/JetBrains/ideavim) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaVim&guest=1)
 - [Adb Idea](https://github.com/pbreault/adb-idea)
 
+The Adb Idea was configured to build and run against stable, beta or preview (canary) releases of Android Studio. Its set up can potentially be reused for creating plugins for other Idea based tools as well.
+
 # License
 This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
