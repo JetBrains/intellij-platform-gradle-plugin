@@ -74,9 +74,9 @@ class Utils {
         def properties = new HashMap<String, Object>()
         properties.putAll(originalProperties)
         properties.putAll(extension.systemProperties)
-        properties.put("idea.config.path", configDir(extension, inTests))
-        properties.put("idea.system.path", systemDir(extension, inTests))
-        properties.put("idea.plugins.path", pluginsDir(extension, inTests))
+        properties.put("idea.config.path", project.file(configDir(extension, inTests)).path)
+        properties.put("idea.system.path", project.file(systemDir(extension, inTests)).path)
+        properties.put("idea.plugins.path", project.file(pluginsDir(extension, inTests)).path)
         def pluginId = getPluginId(project)
         if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
             properties.put("idea.required.plugins.id", pluginId)
