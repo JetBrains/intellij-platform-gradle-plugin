@@ -5,6 +5,7 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Sync
+import org.gradle.internal.jvm.Jvm
 import org.jetbrains.annotations.NotNull
 import org.xml.sax.SAXParseException
 
@@ -131,6 +132,8 @@ class PrepareSandboxTask extends Sync {
 
     private void configureLibraries(@NotNull IntelliJPluginExtension extension) {
         def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
+        def intellijFiles = new HashSet<>(extension.ideaDependency.jarFiles)
+        intellijFiles.add(Jvm.current().toolsJar)
         def pluginFiles = extension.pluginDependencies*.jarFiles.flatten()
         runtimeConfiguration.getAllDependencies().each {
             if (it instanceof ProjectDependency) {
@@ -144,7 +147,7 @@ class PrepareSandboxTask extends Sync {
                 }
             }
             libraries.from(runtimeConfiguration.fileCollection(it).filter {
-                !extension.intellijFiles.contains(it) && !pluginFiles.contains(it)
+                !intellijFiles.contains(it) && !pluginFiles.contains(it)
             })
         }
     }

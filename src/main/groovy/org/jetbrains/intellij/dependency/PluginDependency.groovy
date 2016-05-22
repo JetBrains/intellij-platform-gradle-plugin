@@ -26,7 +26,7 @@ public class PluginDependency implements Serializable {
     private File artifact
     @NotNull
     private Collection<File> jarFiles
-    
+
     boolean builtin
 
     PluginDependency(@NotNull String id, @NotNull String version, @NotNull File artifact, boolean builtin = false) {

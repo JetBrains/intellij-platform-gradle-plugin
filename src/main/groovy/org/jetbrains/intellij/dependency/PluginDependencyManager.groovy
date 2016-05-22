@@ -11,7 +11,6 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
-import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
@@ -25,19 +24,19 @@ class PluginDependencyManager {
 
     private final String cacheDirectoryPath
     private final String repositoryHost
-    private final File ideaDirectory
+    private final IdeaDependency ideaDependency
 
-    PluginDependencyManager(@NotNull String gradleHomePath, @Nullable File ideaDirectory) {
+    PluginDependencyManager(@NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency) {
         this.repositoryHost = DEFAULT_INTELLIJ_PLUGINS_REPO
-        this.ideaDirectory = ideaDirectory
+        this.ideaDependency = ideaDependency
 
         def host = StringUtil.trimStart(StringUtil.trimStart(StringUtil.trimStart(repositoryHost, 'http://'), 'https://'), 'www')
         // todo: a better way to define cache directory
         cacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea', host).toString()
     }
 
-    PluginDependencyManager(@NotNull Project project) {
-        this(project.gradle.gradleUserHomeDir.absolutePath, projectIdeaDir(project))
+    PluginDependencyManager(@NotNull Project project, @Nullable IdeaDependency ideaDependency) {
+        this(project.gradle.gradleUserHomeDir.absolutePath, ideaDependency)
     }
 
     @NotNull
@@ -45,16 +44,15 @@ class PluginDependencyManager {
         if (!version && !channel) {
             if (Paths.get(id).absolute) {
                 return externalPluginDependency(new File(id), null)
-            }
-            else if (ideaDirectory) {
-                IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDirectory.absolutePath")
-                def pluginDirectory = new File(ideaDirectory, "plugins/$id")
+            } else if (ideaDependency) {
+                IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
+                def pluginDirectory = new File(ideaDependency.classes, "plugins/$id")
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    return new PluginDependency(id, Utils.ideaBuildNumber(ideaDirectory), pluginDirectory, true)
+                    return new PluginDependency(id, ideaDependency.buildNumber, pluginDirectory, true)
                 }
             }
             // todo: implement downloading last compatible plugin version
-            throw new BuildException("Cannot find builtin plugin $id for IDE: $ideaDirectory.absolutePath", null)
+            throw new BuildException("Cannot find builtin plugin $id for IDE: $ideaDependency.classes.absolutePath", null)
         }
         return findCachedPlugin(id, version, channel) ?: downloadPlugin(id, version, channel)
     }
@@ -74,11 +72,6 @@ class PluginDependencyManager {
 
     String getCacheDirectoryPath() {
         return cacheDirectoryPath
-    }
-
-    private static File projectIdeaDir(@NotNull Project project) {
-        def extension = project.extensions.getByType(IntelliJPluginExtension.class)
-        return extension ? extension.ideaDirectory : null
     }
 
     @NotNull
@@ -190,8 +183,8 @@ class PluginDependencyManager {
         pluginDependency.untilBuild = intellijPlugin.untilBuild?.asString(false, false)
         return pluginDependency
     }
-    
-     private static void copyInputStream(InputStream input, OutputStream output) throws IOException {
+
+    private static void copyInputStream(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[1024];
         int len;
         while ((len = input.read(buffer)) >= 0) {

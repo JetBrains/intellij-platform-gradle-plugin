@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 
-import com.intellij.structure.domain.IdeVersion
 import com.intellij.structure.impl.utils.StringUtil
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginConvention
@@ -128,18 +127,13 @@ class Utils {
                 dir = new File(dir, "Contents")
             }
             if (!dir.exists()) {
-                IntelliJPlugin.LOG.error("Cannot find alternate SDK path: $dir. Default IDEA will be used : $extension.ideaDirectory")
-                return extension.ideaDirectory
+                def ideaDirectory = extension.ideaDependency.classes
+                IntelliJPlugin.LOG.error("Cannot find alternate SDK path: $dir. Default IDEA will be used : $ideaDirectory")
+                return ideaDirectory
             }
             return dir
         }
-        return extension.ideaDirectory
-    }
-
-    public static IdeVersion ideVersion(@NotNull Project project) {
-        def extension = project.extensions.getByType(IntelliJPluginExtension.class)
-        return extension != null && extension.ideaDirectory != null ?
-                IdeVersion.createIdeVersion(ideaBuildNumber(extension.ideaDirectory)) : null
+        return extension.ideaDependency.classes
     }
 
     @NotNull

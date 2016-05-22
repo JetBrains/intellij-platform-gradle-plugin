@@ -13,7 +13,7 @@ class PatchPluginXmlAction implements Action<Task> {
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         if (extension != null && extension.updateSinceUntilBuild) {
             try {
-                def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(extension.ideaDirectory))
+                def matcher = Utils.VERSION_PATTERN.matcher(extension.ideaDependency.buildNumber)
                 if (matcher.find()) {
                     def since = matcher.group(2)
                     def dotPosition = since.indexOf('.')

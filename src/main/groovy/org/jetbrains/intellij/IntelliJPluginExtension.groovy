@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 
 @SuppressWarnings("GroovyUnusedDeclaration")
@@ -17,9 +18,7 @@ class IntelliJPluginExtension {
     boolean downloadSources
     Publish publish
 
-    File ideaDirectory
-    File ideaSourcesFile
-    private final Set<File> intellijFiles = new HashSet<>();
+    IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>();
     private final Map<String, Object> systemProperties = new HashMap<>();
 
@@ -29,10 +28,6 @@ class IntelliJPluginExtension {
 
     String getVersion() {
         return version.startsWith("IU-") || version.startsWith("IC-") ? version.substring(3) : version
-    }
-
-    Set<File> getIntellijFiles() {
-        return intellijFiles
     }
 
     Set<PluginDependency> getPluginDependencies() {

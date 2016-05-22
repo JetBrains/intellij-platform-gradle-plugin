@@ -1,24 +1,20 @@
 package org.jetbrains.intellij
 
+import com.intellij.structure.domain.IdeVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ResolveException
-import org.gradle.api.file.ConfigurableFileTree
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
-import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
-import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
-import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -28,11 +24,8 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     public static final LOG = Logging.getLogger(IntelliJPlugin)
 
-    private static final CONFIGURATION_NAME = "intellij"
-    private static final SOURCES_CONFIGURATION_NAME = "intellij-sources"
-    private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-    private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
-    private static final IDEA_MODULE_NAME = "idea"
+    public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
+    public static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
 
     @Override
     def void apply(Project project) {
@@ -57,7 +50,6 @@ class IntelliJPlugin implements Plugin<Project> {
     private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         project.afterEvaluate {
             LOG.info("Configuring IntelliJ IDEA gradle plugin")
-            initializeIntellijArtifacts(it, extension)
             configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
             configureInstrumentTask(it, extension)
@@ -75,73 +67,29 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void initializeIntellijArtifacts(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension) {
-        def configuration = project.configurations.create(CONFIGURATION_NAME).setVisible(false)
-                .setDescription("The IntelliJ IDEA distribution artifact to be used for this project.")
-        LOG.info("Adding IntelliJ IDEA repository")
-        def baseUrl = extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO
-        def releaseType = extension.version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
-        project.repositories.maven {
-            it.url = "${baseUrl}/$releaseType"
-        }
-        LOG.info("Adding IntelliJ IDEA dependency")
-        project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:idea$extension.type:$extension.version")
-        extension.ideaDirectory = ideaDirectory(project, configuration)
-        LOG.info("IntelliJ IDEA " + Utils.ideaBuildNumber(extension.ideaDirectory) + " is used for building")
-
-        if (extension.downloadSources) {
-            def sourcesConfiguration = project.configurations.create(SOURCES_CONFIGURATION_NAME).setVisible(false)
-                    .setDescription("The IntelliJ IDEA Community Edition source artifact to be used for this project.")
-            LOG.info("Adding IntelliJ IDEA sources repository")
-            project.dependencies.add(sourcesConfiguration.name, "com.jetbrains.intellij.idea:ideaIC:$extension.version:sources@jar")
-            try {
-                def sourcesFiles = sourcesConfiguration.files
-                if (sourcesFiles.size() == 1) {
-                    def sourcesFile = sourcesFiles.first()
-                    LOG.debug("IDEA sources jar: " + sourcesFile.path)
-                    extension.ideaSourcesFile = sourcesFile
-                } else {
-                    LOG.warn("Cannot attach IDEA sources. Found files: " + sourcesFiles)
-                }
-            } catch (ResolveException e) {
-                LOG.warn("Cannot resolve IDEA sources dependency", e)
-            }
-        }
-    }
-
     private static void configureIntellijDependency(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
-        def ivyFile = createIntelliJIvyRepo(project, extension)
-        def version = extension.version
-
-        project.repositories.ivy { repo ->
-            repo.url = extension.ideaDirectory
-            repo.ivyPattern(ivyFile.absolutePath) // ivy xml
-            repo.artifactPattern("$extension.ideaDirectory.path/[artifact].[ext]") // idea libs
-            if (extension.ideaSourcesFile) { // sources
-                repo.artifactPattern("$extension.ideaSourcesFile.parent/[artifact]IC-$version-[classifier].[ext]")
-            }
+        LOG.info("Configuring IntelliJ IDEA dependency")
+        def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
+        def ideaDependency = resolver.resolve(project, extension.version, extension.type, extension.downloadSources)
+        if (ideaDependency == null) {
+            throw new BuildException("Failed to resolve IntelliJ IDEA ${extension.version}", null)
         }
-        project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'compile'
-        ])
+        extension.ideaDependency = ideaDependency
+        LOG.debug("IntelliJ IDEA ${ideaDependency.buildNumber} is used for building")
+        resolver.register(project, ideaDependency)
+
         def toolsJar = Jvm.current().toolsJar
         if (toolsJar) {
             project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, project.files(toolsJar))
-            project.dependencies.add(JavaPlugin.TEST_RUNTIME_CONFIGURATION_NAME, project.files(toolsJar))
-            extension.intellijFiles.add(toolsJar)
         }
-        project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'runtime'
-        ])
     }
 
     private static void configurePluginDependencies(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA plugin dependencies")
-        def ideVersion = Utils.ideVersion(project)
-        def resolver = new PluginDependencyManager(project)
+        def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+        def resolver = new PluginDependencyManager(project, extension.ideaDependency)
         extension.plugins.each {
             LOG.warn("Configuring IntelliJ plugin $it")
             def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it)
@@ -155,7 +103,6 @@ class IntelliJPlugin implements Plugin<Project> {
             if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
                 throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString(true, true)}", null)
             }
-
             extension.pluginDependencies.add(plugin)
             resolver.register(project, plugin)
         }
@@ -208,8 +155,8 @@ class IntelliJPlugin implements Plugin<Project> {
             it.enableAssertions = true
             it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
-            it.classpath += project.files("$extension.ideaDirectory/lib/resources.jar",
-                    "$extension.ideaDirectory/lib/idea.jar");
+            it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
+                    "$extension.ideaDependency.classes/lib/idea.jar");
 
             it.outputs.files(Utils.systemDir(extension, true), Utils.configDir(extension, true))
         }
@@ -239,66 +186,5 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Configuring publishing IntelliJ IDEA plugin task")
         project.tasks.create(PublishTask.NAME, PublishTask)
                 .dependsOn(project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false))
-    }
-
-    @NotNull
-    private static File ideaDirectory(@NotNull Project project, @NotNull Configuration configuration) {
-        File zipFile = configuration.singleFile
-        LOG.debug("IDEA zip: " + zipFile.path)
-        def directoryName = zipFile.name - ".zip"
-        def cacheDirectory = new File(zipFile.parent, directoryName)
-        def markerFile = new File(cacheDirectory, "markerFile")
-        if (!markerFile.exists()) {
-            if (cacheDirectory.exists()) cacheDirectory.deleteDir()
-            cacheDirectory.mkdir()
-            LOG.debug("Unzipping idea")
-            project.copy {
-                it.from(project.zipTree(zipFile))
-                it.into(cacheDirectory)
-            }
-            markerFile.createNewFile()
-            LOG.debug("Unzipped")
-        }
-        return cacheDirectory;
-    }
-
-    private static File createIntelliJIvyRepo(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", IDEA_MODULE_NAME, extension.version))
-        generator.addConfiguration(new DefaultIvyConfiguration("compile"))
-        generator.addConfiguration(new DefaultIvyConfiguration("sources"))
-        generator.addConfiguration(new DefaultIvyConfiguration("runtime"))
-
-        def ideaLibJars = project.fileTree(extension.ideaDirectory)
-        ideaLibJars.include("lib*/*.jar")
-        excludeKotlinDependenciesIfNeeded(project, ideaLibJars)
-        ideaLibJars.files.each {
-            generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
-            extension.intellijFiles.add(it)
-        }
-        if (extension.ideaSourcesFile) {
-            // source dependency must be named in the same way as module name
-            def artifact = new DefaultIvyArtifact(extension.ideaSourcesFile, IDEA_MODULE_NAME, "jar", "sources", "sources")
-            artifact.conf = "sources"
-            generator.addArtifact(artifact)
-            extension.intellijFiles.add(extension.ideaSourcesFile)
-        }
-
-        def ivyFile = File.createTempFile("ivy-idea", ".xml")
-        generator.writeTo(ivyFile)
-        return ivyFile
-    }
-
-    private static def excludeKotlinDependenciesIfNeeded(@NotNull Project project, @NotNull ConfigurableFileTree tree) {
-        def configurations = project.configurations
-        def closure = {
-            if ("org.jetbrains.kotlin".equals(it.group)) {
-                if ("kotlin-runtime".equals(it.name) || "kotlin-stdlib".equals(it.name) || "kotlin-reflect".equals(it.name)) {
-                    tree.exclude("lib/kotlin-runtime.jar")
-                    tree.exclude("lib/kotlin-reflect.jar")
-                }
-            }
-        }
-        configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().each closure
-        configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().each closure
     }
 }
