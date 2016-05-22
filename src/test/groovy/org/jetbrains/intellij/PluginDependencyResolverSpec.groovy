@@ -20,7 +20,6 @@ class PluginDependencyResolverSpec extends IntelliJPluginSpecBase {
     def 'find zip-type plugin'() {
         given:
         def manager = new PluginDependencyManager(gradleHome, null)
-        println manager.cacheDirectoryPath
 
         when:
         def plugin = manager.resolve('org.intellij.plugins.markdown', '8.5.0.20160208', null)
