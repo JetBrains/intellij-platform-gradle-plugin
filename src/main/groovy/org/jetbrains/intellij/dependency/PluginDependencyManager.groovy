@@ -32,6 +32,7 @@ class PluginDependencyManager {
         this.ideaDirectory = ideaDirectory
 
         def host = StringUtil.trimStart(StringUtil.trimStart(StringUtil.trimStart(repositoryHost, 'http://'), 'https://'), 'www')
+        // todo: a better way to define cache directory
         cacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea', host).toString()
     }
 
