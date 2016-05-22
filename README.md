@@ -15,7 +15,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.43"
+  id "org.jetbrains.intellij" version "0.1.0"
 }
 ```
 
@@ -29,7 +29,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.0.43'
+    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.0'
   }
 }
 
@@ -51,7 +51,7 @@ Value may have `IC-` or `IU-` prefix in order to define IDEA distribution type.
 **Default value**: `IC`
 
 - `intellij.plugins` defines the list of bundled IDEA plugins and plugins from [idea repository](https://plugins.jetbrains.com/) 
-that should be used as dependencies in format `org.plugin.id:version`. E.g. `plugins ='org.intellij.plugins.markdown:8.5.0.20160208'`.
+that should be used as dependencies in format `org.plugin.id:version`. E.g. `plugins = ['org.intellij.plugins.markdown:8.5.0.20160208']`.
 If version is not set then bundled plugin will be used.<br/><br/> 
 **Default value:** `<empty>`
 
@@ -112,12 +112,12 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.0.43"
+  id "org.jetbrains.intellij" version "0.1.0"
 }
 
 intellij {
   version 'IC-14.1.4'
-  plugins 'coverage'
+  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
   pluginName 'MyPlugin'
 
   publish {
