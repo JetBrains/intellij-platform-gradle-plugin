@@ -50,10 +50,9 @@ Value may have `IC-` or `IU-` prefix in order to define IDEA distribution type.
 - `intellij.type` defines the type of IDEA distribution: `IC` for community version and `IU` for ultimate.<br/><br/> 
 **Default value**: `IC`
 
-- `intellij.plugins` defines the list of bundled IDEA plugins that should be used as dependencies.<br/><br/> 
-**Default value:** `<empty>`
-
-- `intellij.externalPlugins` defines list of pairs (id and version) of plugins from [idea repository](https://plugins.jetbrains.com/) in format `[[id: 'org.intellij.plugins.markdown', version: '8.5.0.20160208'],...]`<br/><br/>
+- `intellij.plugins` defines the list of bundled IDEA plugins and plugins from [idea repository](https://plugins.jetbrains.com/) 
+that should be used as dependencies in format `org.plugin.id:version`. E.g. `plugins ='org.intellij.plugins.markdown:8.5.0.20160208'`.
+If version is not set then bundled plugin will be used.<br/><br/> 
 **Default value:** `<empty>`
 
 - `intellij.pluginName` is used for naming target zip-archive and defines the name of plugin artifact. 

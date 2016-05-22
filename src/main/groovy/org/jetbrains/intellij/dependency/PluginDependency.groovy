@@ -1,0 +1,161 @@
+package org.jetbrains.intellij.dependency
+
+import com.google.common.base.Predicates
+import com.intellij.structure.domain.IdeVersion
+import com.intellij.structure.impl.utils.JarsUtils
+import groovy.transform.ToString
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
+import org.jetbrains.intellij.Utils
+
+@ToString
+public class PluginDependency implements Serializable {
+    @NotNull
+    private String id
+    @NotNull
+    private String version
+    @Nullable
+    private String channel
+
+    @Nullable
+    private String sinceBuild
+    @Nullable
+    private String untilBuild
+
+    @NotNull
+    private File artifact
+    @NotNull
+    private Collection<File> jarFiles
+    
+    boolean builtin
+
+    PluginDependency(@NotNull String id, @NotNull String version, @NotNull File artifact, boolean builtin = false) {
+        this.id = id
+        this.version = version
+        this.artifact = artifact
+        this.jarFiles = collectJarFiles()
+        this.builtin = builtin
+    }
+
+    private def collectJarFiles() {
+        if (Utils.isJarFile(artifact)) {
+            return Collections.singletonList(artifact)
+        }
+        if (artifact.isDirectory()) {
+            File lib = new File(artifact, "lib");
+            if (lib.isDirectory()) {
+                return JarsUtils.collectJars(lib, Predicates.<File> alwaysTrue(), true)
+            }
+        }
+        return Collections.emptySet()
+    }
+
+    def boolean isCompatible(@NotNull IdeVersion ideVersion) {
+        return sinceBuild == null ||
+                IdeVersion.createIdeVersion(sinceBuild) <= ideVersion &&
+                (untilBuild == null || ideVersion <= IdeVersion.createIdeVersion(untilBuild));
+    }
+
+    def String getFqn() {
+        return pluginFqn(id, version, channel)
+    }
+
+    def static pluginFqn(@NotNull String id, @NotNull String version, @Nullable String channel) {
+        "$id-${channel ?: 'master'}-$version"
+    }
+
+    String getId() {
+        return id
+    }
+
+    void setId(String id) {
+        this.id = id
+    }
+
+    String getVersion() {
+        return version
+    }
+
+    void setVersion(String version) {
+        this.version = version
+    }
+
+    String getChannel() {
+        return channel
+    }
+
+    void setChannel(String channel) {
+        this.channel = channel
+    }
+
+    String getSinceBuild() {
+        return sinceBuild
+    }
+
+    void setSinceBuild(String sinceBuild) {
+        this.sinceBuild = sinceBuild
+    }
+
+    String getUntilBuild() {
+        return untilBuild
+    }
+
+    void setUntilBuild(String untilBuild) {
+        this.untilBuild = untilBuild
+    }
+
+    File getArtifact() {
+        return artifact
+    }
+
+    void setArtifact(File artifact) {
+        this.artifact = artifact
+    }
+
+    Collection<File> getJarFiles() {
+        return jarFiles
+    }
+
+    void setJarFiles(Collection<File> jarFiles) {
+        this.jarFiles = jarFiles
+    }
+
+    boolean getBuiltin() {
+        return builtin
+    }
+
+    void setBuiltin(boolean builtin) {
+        this.builtin = builtin
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof PluginDependency)) return false
+
+        PluginDependency that = (PluginDependency) o
+
+        if (builtin != that.builtin) return false
+        if (artifact != that.artifact) return false
+        if (channel != that.channel) return false
+        if (id != that.id) return false
+        if (jarFiles != that.jarFiles) return false
+        if (sinceBuild != that.sinceBuild) return false
+        if (untilBuild != that.untilBuild) return false
+        if (version != that.version) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = id.hashCode()
+        result = 31 * result + version.hashCode()
+        result = 31 * result + (channel != null ? channel.hashCode() : 0)
+        result = 31 * result + (sinceBuild != null ? sinceBuild.hashCode() : 0)
+        result = 31 * result + (untilBuild != null ? untilBuild.hashCode() : 0)
+        result = 31 * result + artifact.hashCode()
+        result = 31 * result + jarFiles.hashCode()
+        result = 31 * result + (builtin ? 1 : 0)
+        return result
+    }
+}

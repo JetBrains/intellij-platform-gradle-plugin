@@ -24,10 +24,11 @@ dependencies {
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.16'
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.14'
     compile 'org.jetbrains.intellij.plugins:common-utils:1.18'
-    
+
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
     }
+    testCompile 'junit:junit:4.12'
 }
 
 version = '0.1.0'

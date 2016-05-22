@@ -19,6 +19,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.dependency.PluginDependencyManager
 
 class IntelliJPlugin implements Plugin<Project> {
     public static final GROUP_NAME = "intellij"
@@ -31,7 +32,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static final SOURCES_CONFIGURATION_NAME = "intellij-sources"
     private static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     private static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
-    public static final IDEA_MODULE_NAME = "idea"
+    private static final IDEA_MODULE_NAME = "idea"
 
     @Override
     def void apply(Project project) {
@@ -39,7 +40,6 @@ class IntelliJPlugin implements Plugin<Project> {
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension)
         intellijExtension.with {
             plugins = []
-            externalPlugins = []
             version = DEFAULT_IDEA_VERSION
             type = 'IC'
             pluginName = project.name
@@ -56,8 +56,9 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         project.afterEvaluate {
-            LOG.info("Preparing IntelliJ IDEA dependency task")
-            configureIntelliJDependency(it, extension)
+            LOG.info("Configuring IntelliJ IDEA gradle plugin")
+            initializeIntellijArtifacts(it, extension)
+            configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
             configureInstrumentTask(it, extension)
             if (Utils.sourcePluginXmlFiles(it)) {
@@ -74,7 +75,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureIntelliJDependency(@NotNull Project project,
+    private static void initializeIntellijArtifacts(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
         def configuration = project.configurations.create(CONFIGURATION_NAME).setVisible(false)
                 .setDescription("The IntelliJ IDEA distribution artifact to be used for this project.")
@@ -98,7 +99,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 def sourcesFiles = sourcesConfiguration.files
                 if (sourcesFiles.size() == 1) {
                     def sourcesFile = sourcesFiles.first()
-                    LOG.info("IDEA sources jar: " + sourcesFile.path)
+                    LOG.debug("IDEA sources jar: " + sourcesFile.path)
                     extension.ideaSourcesFile = sourcesFile
                 } else {
                     LOG.warn("Cannot attach IDEA sources. Found files: " + sourcesFiles)
@@ -109,22 +110,14 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configurePluginDependencies(@NotNull Project project,
+    private static void configureIntellijDependency(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
-        def ivyFile = createIvyRepo(project, extension)
+        def ivyFile = createIntelliJIvyRepo(project, extension)
         def version = extension.version
-
-        def externalPluginScope = project.configurations.create("externalPluginScope")
-
-        project.sourceSets.configure {
-            main.compileClasspath += externalPluginScope
-            test.compileClasspath += externalPluginScope
-            test.runtimeClasspath += externalPluginScope
-        }
 
         project.repositories.ivy { repo ->
             repo.url = extension.ideaDirectory
-            repo.ivyPattern(ivyFile.getAbsolutePath()) // ivy xml
+            repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$extension.ideaDirectory.path/[artifact].[ext]") // idea libs
 
             def toolsJar = Jvm.current().toolsJar
@@ -141,15 +134,29 @@ class IntelliJPlugin implements Plugin<Project> {
         project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
                 group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'runtime'
         ])
+    }
 
-        def repository = new ExternalPluginRepository(project)
-
-        extension.externalPlugins.each {
-            def plugin = repository.findPlugin(it.id, it.version, null)
+    private static void configurePluginDependencies(@NotNull Project project,
+                                                    @NotNull IntelliJPluginExtension extension) {
+        LOG.info("Configuring IntelliJ IDEA plugin dependencies")
+        def ideVersion = Utils.ideVersion(project)
+        def resolver = new PluginDependencyManager(project)
+        extension.plugins.each {
+            LOG.warn("Configuring IntelliJ plugin $it")
+            def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it)
+            if (!pluginId) {
+                throw new BuildException("Failed to resolve plugin $it", null)
+            }
+            def plugin = resolver.resolve(pluginId, pluginVersion, channel)
             if (plugin == null) {
                 throw new BuildException("Failed to resolve plugin $it", null)
             }
-            project.dependencies.add("externalPluginScope", project.files(plugin.jarFiles))
+            if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
+                throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString(true, true)}", null)
+            }
+
+            extension.pluginDependencies.add(plugin)
+            resolver.register(project, plugin)
         }
     }
 
@@ -239,25 +246,25 @@ class IntelliJPlugin implements Plugin<Project> {
     @NotNull
     private static File ideaDirectory(@NotNull Project project, @NotNull Configuration configuration) {
         File zipFile = configuration.singleFile
-        LOG.info("IDEA zip: " + zipFile.path)
+        LOG.debug("IDEA zip: " + zipFile.path)
         def directoryName = zipFile.name - ".zip"
         def cacheDirectory = new File(zipFile.parent, directoryName)
         def markerFile = new File(cacheDirectory, "markerFile")
         if (!markerFile.exists()) {
             if (cacheDirectory.exists()) cacheDirectory.deleteDir()
             cacheDirectory.mkdir()
-            LOG.info("Unzipping idea")
+            LOG.debug("Unzipping idea")
             project.copy {
                 it.from(project.zipTree(zipFile))
                 it.into(cacheDirectory)
             }
             markerFile.createNewFile()
-            LOG.info("Unzipped")
+            LOG.debug("Unzipped")
         }
         return cacheDirectory;
     }
 
-    private static File createIvyRepo(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    private static File createIntelliJIvyRepo(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", IDEA_MODULE_NAME, extension.version))
         generator.addConfiguration(new DefaultIvyConfiguration("compile"))
         generator.addConfiguration(new DefaultIvyConfiguration("sources"))
@@ -269,16 +276,6 @@ class IntelliJPlugin implements Plugin<Project> {
         ideaLibJars.files.each {
             generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
             extension.intellijFiles.add(it)
-        }
-
-        def bundledPlugins = extension.plugins
-        if (bundledPlugins.length > 0) {
-            def bundledPluginJars = project.fileTree(extension.ideaDirectory)
-            bundledPlugins.each { bundledPluginJars.include("plugins/$it/lib/*.jar") }
-            bundledPluginJars.files.each {
-                generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
-                extension.intellijFiles.add(it)
-            }
         }
 
         def toolsJar = Jvm.current().toolsJar
@@ -312,6 +309,5 @@ class IntelliJPlugin implements Plugin<Project> {
         }
         configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().each closure
         configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().each closure
-
     }
 }

@@ -5,7 +5,6 @@ import org.gradle.api.file.CopySpec
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.Sync
-import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.xml.sax.SAXParseException
 
@@ -15,8 +14,7 @@ class PrepareSandboxTask extends Sync {
     CopySpec classes
     CopySpec libraries
     CopySpec metaInf
-
-    def externalPlugins = []
+    CopySpec externalPlugins
 
     public PrepareSandboxTask() {
         this(NAME, false)
@@ -30,24 +28,18 @@ class PrepareSandboxTask extends Sync {
         def extension = project.extensions.getByType(IntelliJPluginExtension)
 
         CopySpecInternal plugin = rootSpec.addChild()
+        externalPlugins = plugin.addChild()
         classes = plugin.addChild().into("$extension.pluginName/classes")
+        classes.includeEmptyDirs = false
         libraries = plugin.addChild().into("$extension.pluginName/lib")
         metaInf = plugin.addChild().into("$extension.pluginName/META-INF")
 
-        def repository = new ExternalPluginRepository(project)
-
-        extension.externalPlugins.each {
-            def externalPlugin = repository.findPlugin(it.id, it.version, null)
-            if (externalPlugin == null || externalPlugin.artifact == null) {
-                throw new BuildException("Failed to resolve plugin $it", null)
-            }
-            def artifact = externalPlugin.artifact
-            externalPlugins << rootSpec
-                    .from(project.files(artifact.isDirectory() ? artifact.getParentFile() : artifact))
-        }
-
-        configureClasses(extension, inTests)
+        destinationDir = project.file(Utils.pluginsDir(extension, inTests))
+        configureClasses()
         configureLibraries(extension)
+        configureExternalPlugins(extension)
+
+        inputs.property('pluginDependencies', extension.pluginDependencies)
     }
 
     @Override
@@ -133,25 +125,40 @@ class PrepareSandboxTask extends Sync {
         printer.print(parse)
     }
 
-    private void configureClasses(@NotNull IntelliJPluginExtension extension, boolean inTests) {
-        destinationDir = new File(Utils.pluginsDir(extension, inTests))
+    private void configureClasses() {
         classes.from(Utils.mainSourceSet(project).output)
     }
 
     private void configureLibraries(@NotNull IntelliJPluginExtension extension) {
         def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
+        def pluginFiles = extension.pluginDependencies*.jarFiles.flatten()
         runtimeConfiguration.getAllDependencies().each {
             if (it instanceof ProjectDependency) {
                 def dependencyProject = it.dependencyProject
                 def intelliJPlugin = dependencyProject.plugins.findPlugin(IntelliJPlugin)
                 if (intelliJPlugin != null) {
                     if (Utils.sourcePluginXmlFiles(dependencyProject)) {
-                        IntelliJPlugin.LOG.info(":${dependencyProject.name} project is IntelliJ-plugin project and won't be packed into the target distribution")
+                        IntelliJPlugin.LOG.debug(":${dependencyProject.name} project is IntelliJ-plugin project and won't be packed into the target distribution")
                         return
                     }
                 }
             }
-            libraries.from(runtimeConfiguration.fileCollection(it).filter { !extension.intellijFiles.contains(it) })
+            libraries.from(runtimeConfiguration.fileCollection(it).filter {
+                !extension.intellijFiles.contains(it) && !pluginFiles.contains(it)
+            })
+        }
+    }
+
+    private void configureExternalPlugins(@NotNull IntelliJPluginExtension extension) {
+        extension.pluginDependencies.each {
+            if (!it.builtin) {
+                def artifact = it.artifact
+                if (artifact.isDirectory()) {
+                    externalPlugins.into(artifact.getName()) { it.from(artifact) }
+                } else {
+                    externalPlugins.from(artifact)
+                }
+            }
         }
     }
 }

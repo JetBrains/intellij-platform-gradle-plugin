@@ -119,7 +119,7 @@ class App {
             version='0.42.123'
             intellij {
                 pluginName = 'myPluginName'
-                externalPlugins = [[id: 'org.intellij.plugins.markdown', version: '8.5.0.20160208']]
+                plugins = ['org.intellij.plugins.markdown:8.0.0.20150929']
             }
             """.stripIndent()
         when:

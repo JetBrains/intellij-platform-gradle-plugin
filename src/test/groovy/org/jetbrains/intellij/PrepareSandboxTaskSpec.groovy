@@ -19,7 +19,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 compile 'joda-time:joda-time:2.8.1'
             }\
             """.stripIndent()
-        
+
         when:
         def project = run(PrepareSandboxTask.NAME)
 
@@ -59,7 +59,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             intellij { 
                 pluginName = 'myPluginName'  
             }""".stripIndent()
-        
+
         when:
         def project = run(PrepareSandboxTask.NAME)
 
@@ -89,7 +89,8 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
         buildFile << """\
             intellij {
-                externalPlugins = [[id: 'org.jetbrains.postfixCompletion', version: '0.8-beta']]
+                plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
+                pluginName = 'myPluginName'
             }
             """.stripIndent()
         when:
@@ -97,9 +98,12 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox).containsAll([
-                '/plugins/intellij-postfix.jar'
-        ])
+        assert collectPaths(sandbox) == [
+                '/plugins/intellij-postfix.jar',
+                '/plugins/myPluginName/META-INF/plugin.xml',
+                '/plugins/myPluginName/classes/App.class',
+                '/config/options/updates.xml'
+        ] as Set
     }
 
     def 'prepare sandbox with external zip-type plugin'() {
@@ -108,7 +112,8 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
         buildFile << """\
             intellij {
-                externalPlugins = [[id: 'org.intellij.plugins.markdown', version: '8.5.0.20160208']]
+                plugins = ['org.intellij.plugins.markdown:8.0.0.20150929']
+                pluginName = 'myPluginName'
             }
             """.stripIndent()
         when:
@@ -116,18 +121,20 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox).containsAll([
+        assert collectPaths(sandbox) == [
                 '/plugins/markdown/lib/default.css',
-                '/plugins/markdown/lib/darcula.css',
-                '/plugins/markdown/lib/processLinks.js',
-                '/plugins/markdown/lib/scrollToElement.js',
+                '/plugins/myPluginName/classes/App.class',
                 '/plugins/markdown/lib/markdown.jar',
-                '/plugins/markdown/lib/markdown-javafx-preview.jar',
+                '/plugins/markdown/lib/darcula.css',
+                '/plugins/myPluginName/META-INF/plugin.xml',
+                '/config/options/updates.xml',
+                '/plugins/markdown/lib/kotlin-runtime.jar',
+                '/plugins/markdown/lib/Loboevolution.jar',
                 '/plugins/markdown/lib/intellij-markdown.jar',
-                '/plugins/markdown/lib/Loboevolution.jar'
-        ])
+                '/plugins/markdown/lib/kotlin-reflect.jar'
+        ] as Set
     }
-    
+
     def 'test transitive xml dependencies'() {
         given:
         writeJavaFile()
@@ -148,7 +155,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             intellij { 
                 pluginName = 'myPluginName'  
             }""".stripIndent()
-        
+
         when:
         def project = run(PrepareSandboxTask.NAME)
 

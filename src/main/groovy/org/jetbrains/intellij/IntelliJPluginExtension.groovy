@@ -1,9 +1,10 @@
 package org.jetbrains.intellij
 
+import org.jetbrains.intellij.dependency.PluginDependency
+
 @SuppressWarnings("GroovyUnusedDeclaration")
 class IntelliJPluginExtension {
     String[] plugins
-    Map[] externalPlugins
     String version
     String type
     String pluginName
@@ -19,6 +20,7 @@ class IntelliJPluginExtension {
     File ideaDirectory
     File ideaSourcesFile
     private final Set<File> intellijFiles = new HashSet<>();
+    private final Set<PluginDependency> pluginDependencies = new HashSet<>();
     private final Map<String, Object> systemProperties = new HashMap<>();
 
     String getType() {
@@ -31,6 +33,10 @@ class IntelliJPluginExtension {
 
     Set<File> getIntellijFiles() {
         return intellijFiles
+    }
+
+    Set<PluginDependency> getPluginDependencies() {
+        return pluginDependencies
     }
 
     def publish(Closure c) {
