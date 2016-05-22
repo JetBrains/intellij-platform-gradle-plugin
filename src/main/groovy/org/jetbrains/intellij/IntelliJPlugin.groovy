@@ -119,11 +119,6 @@ class IntelliJPlugin implements Plugin<Project> {
             repo.url = extension.ideaDirectory
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$extension.ideaDirectory.path/[artifact].[ext]") // idea libs
-
-            def toolsJar = Jvm.current().toolsJar
-            if (toolsJar) {
-                repo.artifactPattern("$toolsJar.parent/[artifact].[ext]") // java libs
-            }
             if (extension.ideaSourcesFile) { // sources
                 repo.artifactPattern("$extension.ideaSourcesFile.parent/[artifact]IC-$version-[classifier].[ext]")
             }
@@ -131,6 +126,12 @@ class IntelliJPlugin implements Plugin<Project> {
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
                 group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'compile'
         ])
+        def toolsJar = Jvm.current().toolsJar
+        if (toolsJar) {
+            project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, project.files(toolsJar))
+            project.dependencies.add(JavaPlugin.TEST_RUNTIME_CONFIGURATION_NAME, project.files(toolsJar))
+            extension.intellijFiles.add(toolsJar)
+        }
         project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, [
                 group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'runtime'
         ])
@@ -207,9 +208,6 @@ class IntelliJPlugin implements Plugin<Project> {
             it.enableAssertions = true
             it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
-
-            def toolsJar = Jvm.current().getToolsJar()
-            if (toolsJar != null) it.classpath += project.files(toolsJar)
             it.classpath += project.files("$extension.ideaDirectory/lib/resources.jar",
                     "$extension.ideaDirectory/lib/idea.jar");
 
@@ -277,13 +275,6 @@ class IntelliJPlugin implements Plugin<Project> {
             generator.addArtifact(Utils.createDependency(it, "compile", extension.ideaDirectory))
             extension.intellijFiles.add(it)
         }
-
-        def toolsJar = Jvm.current().toolsJar
-        if (toolsJar) {
-            generator.addArtifact(Utils.createDependency(toolsJar, "runtime", toolsJar.parentFile))
-            extension.intellijFiles.add(toolsJar)
-        }
-
         if (extension.ideaSourcesFile) {
             // source dependency must be named in the same way as module name
             def artifact = new DefaultIvyArtifact(extension.ideaSourcesFile, IDEA_MODULE_NAME, "jar", "sources", "sources")
