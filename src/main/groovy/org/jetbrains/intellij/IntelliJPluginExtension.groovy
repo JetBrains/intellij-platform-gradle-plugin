@@ -3,6 +3,9 @@ package org.jetbrains.intellij
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 
+/**
+ * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
+ */
 @SuppressWarnings("GroovyUnusedDeclaration")
 class IntelliJPluginExtension {
     String[] plugins

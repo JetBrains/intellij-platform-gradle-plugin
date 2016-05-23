@@ -16,7 +16,6 @@ import static org.jetbrains.intellij.IntelliJPlugin.LOG
 
 class IdeaDependencyManager {
     private static final IDEA_MODULE_NAME = "idea"
-    private static final CONFIGURATION_NAME = "intellij"
     private static final SOURCES_CONFIGURATION_NAME = "intellij-sources"
 
     private final String repoUrl
@@ -27,13 +26,13 @@ class IdeaDependencyManager {
 
     @NotNull
     IdeaDependency resolve(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources) {
-        def configuration = project.configurations.create(CONFIGURATION_NAME).setVisible(false)
-                .setDescription("The IntelliJ IDEA distribution artifact to be used for this project.")
         LOG.debug("Adding IntelliJ IDEA repository")
         def releaseType = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
         project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
+
         LOG.debug("Adding IntelliJ IDEA dependency")
-        project.dependencies.add(configuration.name, "com.jetbrains.intellij.idea:idea$type:$version")
+        def dependency = project.dependencies.create("com.jetbrains.intellij.idea:idea$type:$version")
+        def configuration = project.configurations.detachedConfiguration(dependency);
 
         def classesDirectory = getClassesDirectory(project, configuration)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
