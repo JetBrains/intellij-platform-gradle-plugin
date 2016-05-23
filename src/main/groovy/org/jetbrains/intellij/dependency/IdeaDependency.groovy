@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable
 
 class IdeaDependency {
     @NotNull
+    private final String version
+    @NotNull
     private final String buildNumber
     @NotNull
     private final File classes
@@ -16,7 +18,8 @@ class IdeaDependency {
     private final Collection<File> jarFiles
     private final boolean withKotlin
 
-    IdeaDependency(@NotNull String buildNumber, @NotNull File classes, @Nullable File sources, boolean withKotlin) {
+    IdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes, @Nullable File sources, boolean withKotlin) {
+        this.version = version
         this.buildNumber = buildNumber
         this.classes = classes
         this.sources = sources
@@ -40,6 +43,11 @@ class IdeaDependency {
     }
 
     @NotNull
+    String getVersion() {
+        return version
+    }
+
+    @NotNull
     String getBuildNumber() {
         return buildNumber
     }
@@ -60,7 +68,7 @@ class IdeaDependency {
     }
 
     String getFqn() {
-        def fqn = "idea$buildNumber"
+        def fqn = "idea$version"
         if (withKotlin) {
             fqn += '-withKotlin'
         }

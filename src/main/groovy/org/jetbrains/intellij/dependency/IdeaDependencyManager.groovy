@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.dependency
 
-import com.intellij.structure.domain.IdeVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
@@ -37,7 +36,7 @@ class IdeaDependencyManager {
         def classesDirectory = getClassesDirectory(project, configuration)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
-        return new IdeaDependency(buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project))
+        return new IdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project))
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency) {
@@ -47,12 +46,11 @@ class IdeaDependencyManager {
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$dependency.classes.path/[artifact].[ext]") // idea libs
             if (dependency.sources) {
-                def sourcesVersion = IdeVersion.createIdeVersion(dependency.buildNumber).asString(false, true)
-                repo.artifactPattern("$dependency.sources.parent/[artifact]IC-$sourcesVersion-[classifier].[ext]")
+                repo.artifactPattern("$dependency.sources.parent/[artifact]IC-$dependency.version-[classifier].[ext]")
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: dependency.buildNumber, configuration: 'compile'
+                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: dependency.version, configuration: 'compile'
         ])
     }
 
@@ -100,7 +98,7 @@ class IdeaDependencyManager {
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
         def ivyFile = new File(dependency.classes, "${dependency.fqn}.xml")
         if (!ivyFile.exists()) {
-            def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", IDEA_MODULE_NAME, dependency.buildNumber))
+            def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", IDEA_MODULE_NAME, dependency.version))
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             dependency.jarFiles.each {
