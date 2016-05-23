@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import com.intellij.structure.domain.IdeVersion
 import com.intellij.structure.domain.PluginManager
 import com.intellij.structure.impl.utils.StringUtil
 import org.gradle.api.Project
@@ -48,7 +49,8 @@ class PluginDependencyManager {
                 IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
                 def pluginDirectory = new File(ideaDependency.classes, "plugins/$id")
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    return new PluginDependency(id, ideaDependency.buildNumber, pluginDirectory, true)
+                    def pluginVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber).asString(false, true)
+                    return new PluginDependency(id, pluginVersion, pluginDirectory, true)
                 }
             }
             // todo: implement downloading last compatible plugin version

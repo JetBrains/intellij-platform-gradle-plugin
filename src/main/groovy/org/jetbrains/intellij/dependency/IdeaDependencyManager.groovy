@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import com.intellij.structure.domain.IdeVersion
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
@@ -16,7 +17,6 @@ import static org.jetbrains.intellij.IntelliJPlugin.LOG
 
 class IdeaDependencyManager {
     private static final IDEA_MODULE_NAME = "idea"
-    private static final SOURCES_CONFIGURATION_NAME = "intellij-sources"
 
     private final String repoUrl
 
@@ -37,32 +37,31 @@ class IdeaDependencyManager {
         def classesDirectory = getClassesDirectory(project, configuration)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
-        return new IdeaDependency(buildNumber, type, classesDirectory, sourcesDirectory, !hasKotlinDependency(project))
+        return new IdeaDependency(buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project))
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency) {
-        def version = dependency.buildNumber
         def ivyFile = getOrCreateIvyXml(dependency)
         project.repositories.ivy { repo ->
             repo.url = dependency.classes
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$dependency.classes.path/[artifact].[ext]") // idea libs
             if (dependency.sources) {
-                repo.artifactPattern("$dependency.sources.parent/[artifact]IC-$version-[classifier].[ext]") // sources
+                def sourcesVersion = IdeVersion.createIdeVersion(dependency.buildNumber).asString(false, true)
+                repo.artifactPattern("$dependency.sources.parent/[artifact]IC-$sourcesVersion-[classifier].[ext]")
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: version, configuration: 'compile'
+                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: dependency.buildNumber, configuration: 'compile'
         ])
     }
 
     @Nullable
     private static File resolveSources(@NotNull Project project, @NotNull String version) {
-        def sourcesConfiguration = project.configurations.create(SOURCES_CONFIGURATION_NAME).setVisible(false)
-                .setDescription("The IntelliJ IDEA Community Edition source artifact to be used for this project.")
         LOG.info("Adding IntelliJ IDEA sources repository")
         try {
-            project.dependencies.add(sourcesConfiguration.name, "com.jetbrains.intellij.idea:ideaIC:$version:sources@jar")
+            def dependency = project.dependencies.create("com.jetbrains.intellij.idea:ideaIC:$version:sources@jar")
+            def sourcesConfiguration = project.configurations.detachedConfiguration(dependency)
             def sourcesFiles = sourcesConfiguration.files
             if (sourcesFiles.size() == 1) {
                 File sourcesDirectory = sourcesFiles.first()

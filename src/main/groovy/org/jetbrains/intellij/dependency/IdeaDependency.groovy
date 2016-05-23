@@ -9,8 +9,6 @@ class IdeaDependency {
     @NotNull
     private final String buildNumber
     @NotNull
-    private final String type
-    @NotNull
     private final File classes
     @Nullable
     private final File sources
@@ -18,10 +16,8 @@ class IdeaDependency {
     private final Collection<File> jarFiles
     private final boolean withKotlin
 
-    IdeaDependency(@NotNull String buildNumber, @NotNull String type,
-                   @NotNull File classes, @Nullable File sources, boolean withKotlin) {
+    IdeaDependency(@NotNull String buildNumber, @NotNull File classes, @Nullable File sources, boolean withKotlin) {
         this.buildNumber = buildNumber
-        this.type = type
         this.classes = classes
         this.sources = sources
         this.withKotlin = withKotlin
@@ -49,11 +45,6 @@ class IdeaDependency {
     }
 
     @NotNull
-    String getType() {
-        return type
-    }
-
-    @NotNull
     File getClasses() {
         return classes
     }
@@ -69,7 +60,7 @@ class IdeaDependency {
     }
 
     String getFqn() {
-        def fqn = "idea$type"
+        def fqn = "idea$buildNumber"
         if (withKotlin) {
             fqn += '-withKotlin'
         }
