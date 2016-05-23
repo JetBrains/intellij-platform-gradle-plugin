@@ -14,8 +14,15 @@ helpful while developing plugins for IntelliJ platform.
 ## Gradle >= 2.1
 
 ```groovy
+
+buildscript {
+  repositories {
+    maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+  }
+}
+
 plugins {
-  id "org.jetbrains.intellij" version "0.1.0"
+  id "org.jetbrains.intellij" version "0.1.1"
 }
 ```
 
@@ -27,9 +34,13 @@ buildscript {
     maven {
       url "https://plugins.gradle.org/m2/"
     }
+    maven { 
+      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' 
+    }
+    
   }
   dependencies {
-    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.0'
+    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.1'
   }
 }
 
@@ -112,7 +123,7 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.1.0"
+  id "org.jetbrains.intellij" version "0.1.1"
 }
 
 intellij {
