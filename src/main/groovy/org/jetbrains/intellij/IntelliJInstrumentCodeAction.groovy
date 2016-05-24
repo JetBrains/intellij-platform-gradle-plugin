@@ -76,7 +76,7 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
                 destdir: compileTask.destinationDir, classpath: compileTask.classpath.asPath,
                 includeantruntime: false, instrumentNotNull: instrumentNotNull) {
             if (instrumentNotNull) {
-                compileTask.project.ant.skip(pattern: 'kotlin/jvm/internal/.*')
+                compileTask.project.ant.skip(pattern: 'kotlin/Metadata')
             }
         }
         if (headlessOldValue != null) {
