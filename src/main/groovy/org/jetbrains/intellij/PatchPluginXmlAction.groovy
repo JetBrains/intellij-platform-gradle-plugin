@@ -9,7 +9,7 @@ class PatchPluginXmlAction implements Action<Task> {
     private final Map<String, String> myProperties = new HashMap()
 
     PatchPluginXmlAction(@NotNull Project project) {
-        myProperties.version = project.version
+        myProperties.version = project.version?.toString()
         def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         if (extension != null && extension.updateSinceUntilBuild) {
             try {
