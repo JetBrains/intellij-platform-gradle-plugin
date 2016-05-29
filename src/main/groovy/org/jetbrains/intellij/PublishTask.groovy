@@ -23,7 +23,7 @@ class PublishTask extends DefaultTask {
             boolean misconfigurated = false
             if (extension.publish.pluginId) {
                 IntelliJPlugin.LOG.warn("intellij.publish.pluginId property is deprecated. " +
-                        "id-tag from plugin.xml will be used for uploading")
+                        "Tag 'id' from plugin.xml will be used for uploading.")
             }
             def pluginId = Utils.getPluginId(project)
             if (!pluginId) {
@@ -50,7 +50,7 @@ class PublishTask extends DefaultTask {
             }
 
             def host = "http://plugins.jetbrains.com"
-            IntelliJPlugin.LOG.info("Uploading plugin $extension.publish.pluginId from $distributionFile.absolutePath to $host")
+            IntelliJPlugin.LOG.info("Uploading plugin $pluginId from $distributionFile.absolutePath to $host")
             try {
                 def repoClient = new PluginRepositoryInstance(host, extension.publish.username, extension.publish.password)
                 repoClient.uploadPlugin(pluginId, distributionFile, extension.publish.channel ?: '')

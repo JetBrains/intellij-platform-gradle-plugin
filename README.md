@@ -104,7 +104,6 @@ Empty value means that the IDE that was used for compiling will be used for runn
 
 #### Publishing plugin
 
-- `intellij.publish.pluginId` defines plugin id at JetBrains plugin repository, you can find it in url of you plugin page there.
 - `intellij.publish.username` your login at JetBrains plugin repository.
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
@@ -134,7 +133,6 @@ intellij {
   publish {
     username 'zolotov'
     password 'password'
-    pluginId '5047'
     channel 'nightly'
   } 
 }
