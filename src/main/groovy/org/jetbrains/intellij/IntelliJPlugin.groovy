@@ -91,7 +91,7 @@ class IntelliJPlugin implements Plugin<Project> {
         def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
         def resolver = new PluginDependencyManager(project, extension.ideaDependency)
         extension.plugins.each {
-            LOG.warn("Configuring IntelliJ plugin $it")
+            LOG.info("Configuring IntelliJ plugin $it")
             def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it)
             if (!pluginId) {
                 throw new BuildException("Failed to resolve plugin $it", null)
