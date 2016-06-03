@@ -134,7 +134,7 @@ class PrepareSandboxTask extends Sync {
         def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
         def intellijFiles = new HashSet<>(extension.ideaDependency.jarFiles)
         intellijFiles.add(Jvm.current().toolsJar)
-        def pluginFiles = extension.pluginDependencies*.jarFiles.flatten() + 
+        def pluginFiles = (extension.pluginDependencies*.jarFiles.flatten() as Collection<File>) + 
                 extension.pluginDependencies*.classesDirectory +
                 extension.pluginDependencies*.metaInfDirectory
         runtimeConfiguration.getAllDependencies().each {
