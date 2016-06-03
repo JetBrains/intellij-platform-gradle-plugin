@@ -82,7 +82,13 @@ class PluginDependencyManager {
             def generator = new IvyDescriptorFileGenerator(identity)
             def configuration = new DefaultIvyConfiguration("compile")
             generator.addConfiguration(configuration)
-            plugin.jarFiles.each { generator.addArtifact(Utils.createDependency(it, configuration.name, baseDir)) }
+            plugin.jarFiles.each { generator.addArtifact(Utils.createJarDependency(it, configuration.name, baseDir)) }
+            if (plugin.classesDirectory) {
+                generator.addArtifact(Utils.createDirectoryDependency(plugin.classesDirectory, configuration.name, baseDir))
+            }
+            if (plugin.metaInfDirectory) {
+                generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir))
+            }
             generator.writeTo(ivyFile)
         }
         return ivyFile

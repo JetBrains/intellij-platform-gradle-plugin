@@ -102,7 +102,7 @@ class IdeaDependencyManager {
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             dependency.jarFiles.each {
-                generator.addArtifact(Utils.createDependency(it, "compile", dependency.classes))
+                generator.addArtifact(Utils.createJarDependency(it, "compile", dependency.classes))
             }
             if (dependency.sources) {
                 // source dependency must be named in the same way as module name

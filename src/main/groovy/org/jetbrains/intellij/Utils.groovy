@@ -29,11 +29,22 @@ class Utils {
     }
 
     @NotNull
-    public static DefaultIvyArtifact createDependency(File file, String configuration, File baseDir) {
+    public static DefaultIvyArtifact createJarDependency(File file, String configuration, File baseDir) {
+        return createDependency(baseDir, file, configuration, "jar", "jar")
+    }
+
+    @NotNull
+    public static DefaultIvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
+        return createDependency(baseDir, file, configuration, "", "directory")
+    }
+
+    private static DefaultIvyArtifact createDependency(File baseDir, File file, String configuration, 
+                                                       String extension, String type) {
         def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
-        def artifact = new DefaultIvyArtifact(file, relativePath - ".jar", "jar", "jar", null)
+        def name = extension ? relativePath - ".$extension" : relativePath
+        def artifact = new DefaultIvyArtifact(file, name, extension, type, null)
         artifact.conf = configuration
-        artifact
+        return artifact
     }
 
     @NotNull

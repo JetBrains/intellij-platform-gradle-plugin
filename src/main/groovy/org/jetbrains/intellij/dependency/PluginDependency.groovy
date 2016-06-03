@@ -22,10 +22,14 @@ public class PluginDependency implements Serializable {
     @Nullable
     private String untilBuild
 
+    @Nullable
+    private File classesDirectory
+    @Nullable
+    private File metaInfDirectory
     @NotNull
     private File artifact
     @NotNull
-    private Collection<File> jarFiles
+    private Collection<File> jarFiles = Collections.emptySet()
 
     boolean builtin
 
@@ -33,21 +37,28 @@ public class PluginDependency implements Serializable {
         this.id = id
         this.version = version
         this.artifact = artifact
-        this.jarFiles = collectJarFiles()
         this.builtin = builtin
+        initFiles()
     }
 
-    private def collectJarFiles() {
+    private def initFiles() {
         if (Utils.isJarFile(artifact)) {
-            return Collections.singletonList(artifact)
+            jarFiles = Collections.singletonList(artifact)
         }
         if (artifact.isDirectory()) {
             File lib = new File(artifact, "lib");
             if (lib.isDirectory()) {
-                return JarsUtils.collectJars(lib, Predicates.<File> alwaysTrue(), true)
+                jarFiles = JarsUtils.collectJars(lib, Predicates.<File> alwaysTrue(), true)
+            }
+            File classes = new File(artifact, "classes");
+            if (classes.isDirectory()) {
+                classesDirectory = classes
+            }
+            File metaInf = new File(artifact, "META-INF");
+            if (metaInf.isDirectory()) {
+                metaInfDirectory = metaInf
             }
         }
-        return Collections.emptySet()
     }
 
     def boolean isCompatible(@NotNull IdeVersion ideVersion) {
@@ -120,6 +131,24 @@ public class PluginDependency implements Serializable {
         this.jarFiles = jarFiles
     }
 
+    @Nullable
+    File getClassesDirectory() {
+        return classesDirectory
+    }
+
+    void setClassesDirectory(@Nullable File classesDirectory) {
+        this.classesDirectory = classesDirectory
+    }
+
+    @Nullable
+    File getMetaInfDirectory() {
+        return metaInfDirectory
+    }
+
+    void setMetaInfDirectory(@Nullable File metaInfDirectory) {
+        this.metaInfDirectory = metaInfDirectory
+    }
+
     boolean getBuiltin() {
         return builtin
     }
@@ -137,8 +166,10 @@ public class PluginDependency implements Serializable {
         if (builtin != that.builtin) return false
         if (artifact != that.artifact) return false
         if (channel != that.channel) return false
+        if (classesDirectory != that.classesDirectory) return false
         if (id != that.id) return false
         if (jarFiles != that.jarFiles) return false
+        if (metaInfDirectory != that.metaInfDirectory) return false
         if (sinceBuild != that.sinceBuild) return false
         if (untilBuild != that.untilBuild) return false
         if (version != that.version) return false
@@ -153,6 +184,8 @@ public class PluginDependency implements Serializable {
         result = 31 * result + (channel != null ? channel.hashCode() : 0)
         result = 31 * result + (sinceBuild != null ? sinceBuild.hashCode() : 0)
         result = 31 * result + (untilBuild != null ? untilBuild.hashCode() : 0)
+        result = 31 * result + (classesDirectory != null ? classesDirectory.hashCode() : 0)
+        result = 31 * result + (metaInfDirectory != null ? metaInfDirectory.hashCode() : 0)
         result = 31 * result + artifact.hashCode()
         result = 31 * result + jarFiles.hashCode()
         result = 31 * result + (builtin ? 1 : 0)
