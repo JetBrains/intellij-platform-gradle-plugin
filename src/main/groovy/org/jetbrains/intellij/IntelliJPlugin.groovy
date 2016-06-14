@@ -118,26 +118,32 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePrepareSandboxTask(@NotNull Project project) {
         LOG.info("Configuring prepare IntelliJ sandbox task")
-        project.tasks.create(PrepareSandboxTask.NAME, PrepareSandboxTask)
-                .dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
-                .dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
+        project.tasks.create(PrepareSandboxTask.NAME, PrepareSandboxTask).with {
+            group = GROUP_NAME
+            description = "Creates a folder containing the plugins to run Intellij IDEA with."
+            dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
+            dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
+        }
     }
 
     private static void configurePrepareTestsSandboxTask(@NotNull Project project) {
         LOG.info("Configuring prepare IntelliJ sandbox for tests task")
-        project.tasks.create(PrepareTestsSandboxTask.NAME, PrepareTestsSandboxTask)
-                .dependsOn(project.getTasksByName(JavaPlugin.TEST_CLASSES_TASK_NAME, false))
-                .dependsOn(project.getTasksByName(JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, false))
+        project.tasks.create(PrepareTestsSandboxTask.NAME, PrepareTestsSandboxTask).with {
+            group = GROUP_NAME
+            description = "Creates a folder containing the plugins to run IntelliJ plugin tests with."
+            dependsOn(project.getTasksByName(JavaPlugin.TEST_CLASSES_TASK_NAME, false))
+            dependsOn(project.getTasksByName(JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, false))
+        }
     }
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
         def task = project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
-        task.name = RunIdeaTask.NAME
         task.group = GROUP_NAME
         task.description = "Runs Intellij IDEA with installed plugin."
         task.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
-        task.outputs.files(Utils.systemDir(extension, false), Utils.configDir(extension, false))
+        task.outputs.dir(Utils.systemDir(extension, false))
+        task.outputs.dir(Utils.configDir(extension, false))
         task.outputs.upToDateWhen { false }
     }
 
@@ -157,8 +163,8 @@ class IntelliJPlugin implements Plugin<Project> {
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
                     "$extension.ideaDependency.classes/lib/idea.jar");
-
-            it.outputs.files(Utils.systemDir(extension, true), Utils.configDir(extension, true))
+            it.outputs.dir(Utils.systemDir(extension, true))
+            it.outputs.dir(Utils.configDir(extension, true))
         }
     }
 
@@ -184,7 +190,10 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePublishPluginTask(@NotNull Project project) {
         LOG.info("Configuring publishing IntelliJ IDEA plugin task")
-        project.tasks.create(PublishTask.NAME, PublishTask)
-                .dependsOn(project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false))
+        project.tasks.create(PublishTask.NAME, PublishTask).with {
+            group = GROUP_NAME
+            description = "Publish plugin distribution on plugins.jetbrains.com."
+            dependsOn(project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false))
+        }
     }
 }

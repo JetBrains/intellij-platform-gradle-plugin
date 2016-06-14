@@ -9,12 +9,6 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 class PublishTask extends DefaultTask {
     public static String NAME = "publishPlugin"
 
-    public PublishTask() {
-        name = NAME
-        group = IntelliJPlugin.GROUP_NAME
-        description = "Publish plugin distribution on plugins.jetbrains.com."
-    }
-
     @SuppressWarnings("GroovyUnusedDeclaration")
     @TaskAction
     protected void publishPlugin() {

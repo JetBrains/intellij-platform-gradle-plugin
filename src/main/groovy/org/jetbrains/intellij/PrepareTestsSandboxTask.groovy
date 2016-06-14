@@ -19,6 +19,6 @@ class PrepareTestsSandboxTask extends PrepareSandboxTask {
     public static String NAME = "prepareTestsSandbox"
 
     PrepareTestsSandboxTask() {
-        super(NAME, true)
+        super(true)
     }
 }

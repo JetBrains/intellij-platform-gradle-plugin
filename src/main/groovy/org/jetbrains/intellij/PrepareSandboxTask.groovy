@@ -18,14 +18,10 @@ class PrepareSandboxTask extends Sync {
     CopySpec externalPlugins
 
     public PrepareSandboxTask() {
-        this(NAME, false)
+        this(false)
     }
 
-    protected PrepareSandboxTask(String name, boolean inTests) {
-        this.name = name
-        group = IntelliJPlugin.GROUP_NAME
-        description = "Creates a folder containing the plugins to run Intellij IDEA with."
-
+    protected PrepareSandboxTask(boolean inTests) {
         def extension = project.extensions.getByType(IntelliJPluginExtension)
 
         CopySpecInternal plugin = rootSpec.addChild()
