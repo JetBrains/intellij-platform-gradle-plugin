@@ -2,7 +2,6 @@ package org.jetbrains.intellij
 
 import java.util.zip.ZipFile
 
-
 class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
     def 'build plugin distribution'() {
         given:
@@ -37,10 +36,10 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
                                                                 'myPluginName/META-INF/',
                                                                 'myPluginName/META-INF/other.xml',
                                                                 'myPluginName/META-INF/plugin.xml'] as Set
-        zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """\
+        assert zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="141.1010.3" until-build="141.9999"/>
+              <idea-version since-build="141.1010" until-build="141.*"/>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
     }
@@ -80,10 +79,10 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
                                                                 'myPluginName/META-INF/',
                                                                 'myPluginName/META-INF/other.xml',
                                                                 'myPluginName/META-INF/plugin.xml'] as Set
-        zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """\
+        assert zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="141.1010.3" until-build="141.9999"/>
+              <idea-version since-build="141.1010" until-build="141.*"/>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
     }

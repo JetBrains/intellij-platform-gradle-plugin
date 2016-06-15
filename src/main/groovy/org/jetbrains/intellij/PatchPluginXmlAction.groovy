@@ -1,8 +1,10 @@
 package org.jetbrains.intellij
 
+import com.intellij.structure.domain.IdeVersion
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.tasks.Input
 import org.jetbrains.annotations.NotNull
 
 class PatchPluginXmlAction implements Action<Task> {
@@ -10,25 +12,15 @@ class PatchPluginXmlAction implements Action<Task> {
 
     PatchPluginXmlAction(@NotNull Project project) {
         myProperties.version = project.version?.toString()
-        def extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
+        def extension = project.extensions.findByType(IntelliJPluginExtension)
         if (extension != null && extension.updateSinceUntilBuild) {
-            try {
-                def matcher = Utils.VERSION_PATTERN.matcher(extension.ideaDependency.buildNumber)
-                if (matcher.find()) {
-                    def since = matcher.group(2)
-                    def dotPosition = since.indexOf('.')
-                    if (dotPosition > 0) {
-                        def until = extension.sameSinceUntilBuild ? since : since.substring(0, dotPosition) + ".9999"
-                        myProperties.since = since
-                        myProperties.until = until
-                    }
-                }
-            } catch (IOException e) {
-                IntelliJPlugin.LOG.warn("Cannot read build.txt file", e)
-            }
+            def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+            myProperties.since = ideVersion.asString(false, false)
+            myProperties.until = extension.sameSinceUntilBuild ? "${myProperties.since}.*" : "$ideVersion.baselineVersion.*"
         }
     }
 
+    @Input
     @NotNull
     public Map<String, String> getProperties() {
         return myProperties

@@ -34,7 +34,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         assertFileContent(new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml'), """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="141.1010.3" until-build="141.9999"/>
+              <idea-version since-build="141.1010" until-build="141.*"/>
               <depends config-file="other.xml"/>
             </idea-plugin>""");
     }
@@ -74,7 +74,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         assertFileContent(new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml'), """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="141.1010.3" until-build="141.9999"/>
+              <idea-version since-build="141.1010" until-build="141.*"/>
               <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="other.xml" xpointer="xpointer(/idea-plugin/*)">
                 <xi:fallback>
                   <xi:include href="otherFallback.xml" xpointer="xpointer(/idea-plugin/*)"/>
@@ -200,7 +200,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         assertFileContent(new File(sandboxPath, 'plugins/myPluginName/META-INF/plugin.xml'), """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="141.1010.3" until-build="141.9999"/>
+              <idea-version since-build="141.1010" until-build="141.*"/>
               <depends config-file="other.xml"/>
             </idea-plugin>""")
     }

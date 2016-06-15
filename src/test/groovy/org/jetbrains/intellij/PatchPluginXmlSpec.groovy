@@ -13,7 +13,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         then:
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
     }
@@ -27,7 +27,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         then:
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.1532.4"/>
+  <idea-version since-build="141.1532" until-build="141.1532.*"/>
 </idea-plugin>
 """
     }
@@ -41,7 +41,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         then:
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1532" until-build="141.*"/>
   <id>org.jetbrains.erlang</id>
 </idea-plugin>
 """
@@ -59,7 +59,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         then:
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999">my_version</idea-version>
+  <idea-version since-build="141.1532" until-build="141.*">my_version</idea-version>
 </idea-plugin>
 """
     }
@@ -94,7 +94,7 @@ intellij {
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
         ouputPluginXml(project).text == """<idea-plugin version="2">
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1532" until-build="141.*"/>
   <version>0.10.0</version>
 </idea-plugin>
 """
@@ -111,7 +111,7 @@ intellij {
         stdout.contains(":processResources UP-TO-DATE")
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
     }
@@ -128,7 +128,7 @@ intellij {
         !stdout.contains(":processResources UP-TO-DATE")
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
     }
@@ -144,7 +144,7 @@ intellij {
         then:
         ouputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <idea-version since-build="141.1532.4" until-build="141.9999"/>
+  <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
     }
