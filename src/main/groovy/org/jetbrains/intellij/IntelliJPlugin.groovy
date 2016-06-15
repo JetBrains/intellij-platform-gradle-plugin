@@ -76,7 +76,7 @@ class IntelliJPlugin implements Plugin<Project> {
             throw new BuildException("Failed to resolve IntelliJ IDEA ${extension.version}", null)
         }
         extension.ideaDependency = ideaDependency
-        LOG.debug("IntelliJ IDEA ${ideaDependency.buildNumber} is used for building")
+        LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} is used for building")
         resolver.register(project, ideaDependency)
 
         def toolsJar = Jvm.current().toolsJar
