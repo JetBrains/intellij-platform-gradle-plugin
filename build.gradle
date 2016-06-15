@@ -29,7 +29,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.1.7'
+version = '0.1.8'
 group = 'org.jetbrains'
 
 pluginBundle {
