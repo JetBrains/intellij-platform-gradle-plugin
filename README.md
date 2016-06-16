@@ -4,8 +4,8 @@
 
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
-The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks in order to fill some tags 
-(name, version) in `plugin.xml` with appropriate values, patches compile tasks in order to instrument code with 
+The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks to fill some tags 
+(name, version) in `plugin.xml` with appropriate values, patches compile tasks to instrument code with 
 nullability assertions and forms classes made with IntelliJ GUI Designer and provides some build steps which might be
 helpful while developing plugins for IntelliJ platform.
 
@@ -73,7 +73,7 @@ of bundled IDEA plugins that should be used as dependencies.<br/><br/>
 - `intellij.sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.<br/><br/>
 **Default value**: `$project.buildDir/idea-sandbox`
 
-- `intellij.instrumentCode` defines whether plugin should instrument java classes with nullability assertions. 
+- `intellij.instrumentCode` defines whether plugin should instrument java classes with nullability assertions.
 Also it might be required for compiling forms created by IntelliJ GUI designer.<br/><br/>
 **Default value**: `true`
 
@@ -87,7 +87,7 @@ which is useful for building plugins against EAP IDEA builds.<br/><br/>
 **Default value**: `false`
 
 - `intellij.downloadSources` defines whether plugin should download IntelliJ sources while 
-initializing gradle build. Since sources are not really needed while testing on CI you can set
+initializing Gradle build. Since sources are no needed while testing on CI, you can set
 it to `false` for particular environment.<br/><br/>
 **Default value**: `true`
 
@@ -97,8 +97,8 @@ Also you can use `intellij.systemProperty(name, value)` method in order to set s
 <br/><br/>
 **Default value**: `[]`
 
-- `intellij.alternativeIdePath` – absolute path to locally installed JetBrains IDE.
-It make sense to use this property if you want to test your plugin in WebStorm or any other non-IDEA JetBrains IDE.
+- `intellij.alternativeIdePath` – absolute path to the locally installed JetBrains IDE.
+It makes sense to use this property if you want to test your plugin in WebStorm or any other non-IDEA JetBrains IDE.
 Empty value means that the IDE that was used for compiling will be used for running/debugging as well.<br/><br/>
 **Default value**: `<empty>`
 
@@ -116,7 +116,7 @@ Plugin introduces following build steps
 
 - `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
 - `buildPlugin` assembles plugin and prepares zip archive for deployment
-- `runIdea` executes IntelliJ IDEA instance with installed the plugin you're developing 
+- `runIdea` executes IntelliJ IDEA instance with the plugin you are developing installed in 
 - `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com 
 
 ### build.gradle
