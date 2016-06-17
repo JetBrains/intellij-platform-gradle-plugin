@@ -13,7 +13,7 @@ compileGroovy {
 
 repositories {
     maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
-    mavenCentral()
+    maven { url mavenCentralUrl }
 }
 
 dependencies {
