@@ -15,7 +15,7 @@ class PatchPluginXmlAction implements Action<Task> {
         def extension = project.extensions.findByType(IntelliJPluginExtension)
         if (extension != null && extension.updateSinceUntilBuild) {
             def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-            myProperties.since = ideVersion.asString(false, false)
+            myProperties.since = "$ideVersion.baselineVersion.$ideVersion.build"
             myProperties.until = extension.sameSinceUntilBuild ? "${myProperties.since}.*" : "$ideVersion.baselineVersion.*"
         }
     }

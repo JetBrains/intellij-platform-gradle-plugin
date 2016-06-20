@@ -182,11 +182,11 @@ class PluginDependencyManager {
     }
 
     private static def externalPluginDependency(@NotNull File artifact, @Nullable String channel) {
-        def intellijPlugin = PluginManager.instance.createPluginWithEmptyResolver(artifact)
+        def intellijPlugin = PluginManager.instance.createPlugin(artifact)
         def pluginDependency = new PluginDependency(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
         pluginDependency.channel = channel
-        pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asString(false, false)
-        pluginDependency.untilBuild = intellijPlugin.untilBuild?.asString(false, false)
+        pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCodeAndSnapshot()
+        pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCodeAndSnapshot()
         return pluginDependency
     }
 

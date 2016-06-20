@@ -101,7 +101,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 throw new BuildException("Failed to resolve plugin $it", null)
             }
             if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
-                throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString(true, true)}", null)
+                throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
             }
             extension.pluginDependencies.add(plugin)
             resolver.register(project, plugin)
