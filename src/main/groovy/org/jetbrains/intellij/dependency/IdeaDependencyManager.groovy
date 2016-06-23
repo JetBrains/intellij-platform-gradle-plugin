@@ -99,6 +99,7 @@ class IdeaDependencyManager {
         def ivyFile = new File(dependency.classes, "${dependency.fqn}.xml")
         if (!ivyFile.exists()) {
             def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", IDEA_MODULE_NAME, dependency.version))
+            generator.addConfiguration(new DefaultIvyConfiguration("default"))
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             dependency.jarFiles.each {
