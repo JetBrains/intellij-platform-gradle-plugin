@@ -22,7 +22,7 @@ buildscript {
 }
 
 plugins {
-  id "org.jetbrains.intellij" version "0.1.9"
+  id "org.jetbrains.intellij" version "0.1.10"
 }
 ```
 
@@ -40,7 +40,7 @@ buildscript {
     
   }
   dependencies {
-    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.9'
+    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.10'
   }
 }
 
@@ -122,7 +122,7 @@ Plugin introduces following build steps
 ### build.gradle
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.1.9"
+  id "org.jetbrains.intellij" version "0.1.10"
 }
 
 intellij {

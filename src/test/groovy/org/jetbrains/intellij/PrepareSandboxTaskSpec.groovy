@@ -3,6 +3,38 @@ package org.jetbrains.intellij
 import groovy.io.FileType
 
 class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
+    def 'prepare sandbox for two plugins'() {
+        given:
+        writeJavaFile()
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << """\
+            version='0.42.123'
+            intellij.pluginName = 'myPluginName'
+            """.stripIndent()
+        file('settings.gradle') << "include 'nestedProject'"
+
+        file('nestedProject/build.gradle') << buildFile.text
+        file('nestedProject/build.gradle') << """\
+            intellij.pluginName = 'myNestedPluginName'
+            intellij.sandboxDirectory = "\${rootProject.buildDir}/idea-sandbox" 
+            """.stripIndent()
+
+        file('nestedProject/src/main/java/NestedAppFile.java') << "class NestedAppFile{}"
+        file('nestedProject/src/main/resources/META-INF/plugin.xml') << pluginXml.text
+
+        when:
+        def project = run(PrepareSandboxTask.NAME)
+
+        then:
+        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        println collectPaths(sandbox.parentFile.parentFile)
+        assert collectPaths(sandbox) == ['/plugins/myNestedPluginName/META-INF/plugin.xml',
+                                         '/plugins/myNestedPluginName/classes/NestedAppFile.class',
+                                         '/plugins/myPluginName/classes/App.class',
+                                         '/plugins/myPluginName/META-INF/plugin.xml',
+                                         '/config/options/updates.xml'] as Set
+    }
+
     def 'prepare sandbox task'() {
         given:
         writeJavaFile()

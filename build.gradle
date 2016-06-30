@@ -18,6 +18,7 @@ repositories {
 
 dependencies {
     compile localGroovy()
+    compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.16'
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.23'
@@ -28,7 +29,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.1.9'
+version = '0.1.10'
 group = 'org.jetbrains'
 
 pluginBundle {

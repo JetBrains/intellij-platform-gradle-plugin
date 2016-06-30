@@ -4,12 +4,12 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.CopySpec
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.Sync
+import org.gradle.api.tasks.Copy
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.annotations.NotNull
 import org.xml.sax.SAXParseException
 
-class PrepareSandboxTask extends Sync {
+class PrepareSandboxTask extends Copy {
     public static String NAME = "prepareSandbox"
 
     CopySpec classes
