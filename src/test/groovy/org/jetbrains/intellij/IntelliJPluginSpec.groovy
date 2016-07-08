@@ -66,6 +66,19 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         !stdout.contains('Compiling forms and instrumenting code')
     }
 
+    def 'instrumentation does not invalidate compile tasks'() {
+        given:
+        buildFile << 'intellij { instrumentCode = true }'
+        writeJavaFile()
+
+        when:
+        run(true, JavaPlugin.CLASSES_TASK_NAME)
+        run(true, JavaPlugin.CLASSES_TASK_NAME)
+
+        then:
+        stdout.contains(':classes UP-TO-DATE')
+    }
+
     def 'download idea dependencies'() {
         given:
         def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.3')
