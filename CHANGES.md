@@ -8,7 +8,7 @@
 
 **Avoid using this version unless you have several plugin project which use the very same sandbox directory**
 
-- Do not override plugins directory content (temporary fix of #17) 
+- Do not override plugins directory content (temporary fix of https://github.com/JetBrains/gradle-intellij-plugin/issues/17) 
 
 ### 0.1.9
 
