@@ -1,0 +1,51 @@
+{
+  "context": {
+    "pluginId": "org.jetbrains.intellij"
+  },
+  "templates": [
+    {
+      "type": "markup",
+      "value": "[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) "
+    },
+    {
+      "type": "inbuilt",
+      "value": "badge-shield-io-gradle-plugin"
+    },
+    {
+      "type": "inbuilt",
+      "value": "jvm-compatability"
+    },
+    {
+      "type": "inbuilt",
+      "value": "project-name"
+    },
+    {
+      "type": "inbuilt",
+      "value": "project-description"
+    },
+    {
+      "type": "template",
+      "value": "src/docs/usage.md.templar"
+    },
+    {
+      "type": "file",
+      "value": "src/docs/tasks.md"
+    },
+    {
+      "type": "file",
+      "value": "src/docs/configuration.md"
+    },
+    {
+      "type": "template",
+      "value": "src/docs/build.gradle.md.templar"
+    },
+    {
+      "type": "file",
+      "value": "src/docs/examples.md"
+    },
+    {
+      "type": "inbuilt",
+      "value": "license-apache-2.0"
+    }
+  ]
+}

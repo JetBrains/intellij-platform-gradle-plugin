@@ -1,0 +1,19 @@
+### build.gradle{\n}
+{\n}
+```groovy{\n}
+plugins {{{\n}
+  id "org.jetbrains.intellij" version "{version}"{\n}
+}{\n}
+{\n}
+intellij {{{\n}
+  version 'IC-2016.1'{\n}
+  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']{\n}
+  pluginName 'MyPlugin'{\n}
+{\n}
+  publish {{{\n}
+    username 'zolotov'{\n}
+    password 'password'{\n}
+    channel 'nightly'{\n}
+  } {\n}
+}{\n}
+```{\n}

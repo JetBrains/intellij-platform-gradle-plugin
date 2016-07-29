@@ -1,7 +1,15 @@
-# Overview
+[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.1.10-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
 
-[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+> **This project requires JVM version of at least 1.8**
 
+
+
+
+# gradle-intellij-plugin
+
+
+
+> 
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
 The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks to fill some tags 
@@ -9,12 +17,13 @@ The plugin adds extra IntelliJ-specific dependencies, patches processResources t
 nullability assertions and forms classes made with IntelliJ GUI Designer and provides some build steps which might be
 helpful while developing plugins for IntelliJ platform.
 
+
+
 # Usage
 
 ## Gradle >= 2.1
 
 ```groovy
-
 buildscript {
   repositories {
     maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
@@ -40,13 +49,20 @@ buildscript {
     
   }
   dependencies {
-    classpath 'gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.10'
+    classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.10"
   }
 }
 
 apply plugin: 'org.jetbrains.intellij'
 ```
+#### Tasks
 
+Plugin introduces following tasks
+
+- `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
+- `buildPlugin` assembles plugin and prepares zip archive for deployment
+- `runIdea` executes IntelliJ IDEA instance with the plugin you are developing installed in 
+- `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com
 ## Configuration
 
 Plugin provides following options to configure target IntelliJ SDK and build archive
@@ -108,25 +124,15 @@ Empty value means that the IDE that was used for compiling will be used for runn
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
 <br/><br/>
-**Default value**: `<empty>`
+**Default value**: `<empty>`### build.gradle
 
-#### Build steps
-
-Plugin introduces following build steps
-
-- `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
-- `buildPlugin` assembles plugin and prepares zip archive for deployment
-- `runIdea` executes IntelliJ IDEA instance with the plugin you are developing installed in 
-- `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com 
-
-### build.gradle
 ```groovy
 plugins {
   id "org.jetbrains.intellij" version "0.1.10"
 }
 
 intellij {
-  version 'IC-14.1.4'
+  version 'IC-2016.1'
   plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
   pluginName 'MyPlugin'
 
@@ -136,9 +142,7 @@ intellij {
     channel 'nightly'
   } 
 }
-
 ```
-
 # Examples
 
 As examples of using this plugin you can check out following projects:
@@ -167,4 +171,22 @@ As examples of using this plugin you can check out following projects:
 - [Minecraft Development](https://github.com/DemonWav/MinecraftDevIntelliJ) and its [TeamCity build configuration](https://ci.demonwav.com/viewType.html?buildTypeId=MinecraftDevIntelliJ_Build)
 
 # License
-This plugin is available under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+
+
+```
+Copyright 2016 org.jetbrains.intellij.plugins
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+```
+
