@@ -7,9 +7,13 @@ plugins {
 
 apply plugin: 'groovy'
 
-compileGroovy {
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+plugins.withType(JavaPlugin) {
+    project.tasks.withType(GroovyCompile) { task ->
+        task.sourceCompatibility = project.sourceCompatibility
+        task.targetCompatibility = project.targetCompatibility
+    }
 }
 
 repositories {
