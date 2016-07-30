@@ -174,7 +174,7 @@ As examples of using this plugin you can check out following projects:
 
 
 ```
-Copyright 2016 org.jetbrains.intellij.plugins
+Copyright 2016 org.jetbrains
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

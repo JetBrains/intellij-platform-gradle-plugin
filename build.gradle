@@ -35,7 +35,7 @@ dependencies {
 }
 
 version = '0.1.10'
-group = 'org.jetbrains.intellij.plugins'
+group = 'org.jetbrains'
 description = """
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
