@@ -1,8 +1,9 @@
 plugins {
     id 'com.gradle.plugin-publish' version '0.9.4'
     id 'synapticloop.documentr' version '1.3.4'
-    id 'maven'
     id 'java-gradle-plugin'
+    id 'maven'
+    id 'signing'
 }
 
 apply plugin: 'groovy'
@@ -34,8 +35,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.1.10'
-group = 'org.jetbrains'
+version = '0.2.0-SNAPSHOT'
+group = 'org.jetbrains.intellij.plugins'
 description = """
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
@@ -74,6 +75,64 @@ install {
     repositories {
         mavenDeployer {
             repository(url: new File("$buildDir/localRepo").toURI())
+        }
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: ossrhUsername, password: ossrhPassword)
+            }
+
+            pom.project {
+                artifactId project.name
+                name 'Gradle IntelliJ Plugin'
+                description project.description
+                url 'https://github.com/JetBrains/gradle-intellij-plugin'
+                packaging 'jar'
+
+                scm {
+                    connection 'scm:git:https://github.com/JetBrains/gradle-intellij-plugin/'
+                    developerConnection 'scm:git:https://github.com/JetBrains/gradle-intellij-plugin/'
+                    url 'https://github.com/JetBrains/gradle-intellij-plugin/'
+                }
+
+                licenses {
+                    license {
+                        name 'The Apache License, Version 2.0'
+                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'zolotov'
+                        name 'Alexander Zolotov'
+                        email 'zolotov@jetbrains.com'
+                    }
+                }
+            }
         }
     }
 }

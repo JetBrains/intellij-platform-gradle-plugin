@@ -28,7 +28,7 @@ buildscript {{{\n}
     {\n}
   }{\n}
   dependencies {{{\n}
-    classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:{version}"{\n}
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:{version}"{\n}
   }{\n}
 }{\n}
 {\n}
