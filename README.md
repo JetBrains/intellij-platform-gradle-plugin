@@ -55,6 +55,7 @@ buildscript {
 
 apply plugin: 'org.jetbrains.intellij'
 ```
+
 ### Tasks
 
 Plugin introduces following tasks
@@ -146,6 +147,7 @@ intellij {
   } 
 }
 ```
+
 # Examples
 
 As examples of using this plugin you can check out following projects:
