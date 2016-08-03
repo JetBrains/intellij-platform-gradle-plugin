@@ -24,3 +24,4 @@ As examples of using this plugin you can check out following projects:
 - [Gerrit](https://github.com/uwolfer/gerrit-intellij-plugin) uses Travis CI inclusive automated publishing of releases to GitHub and JetBrains plugin repository (triggered by version tag creation)
 - [.ignore](https://github.com/hsz/idea-gitignore)
 - [Minecraft Development](https://github.com/DemonWav/MinecraftDevIntelliJ) and its [TeamCity build configuration](https://ci.demonwav.com/viewType.html?buildTypeId=MinecraftDevIntelliJ_Build)
+

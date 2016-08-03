@@ -53,10 +53,11 @@ It makes sense to use this property if you want to test your plugin in WebStorm 
 Empty value means that the IDE that was used for compiling will be used for running/debugging as well.<br/><br/>
 **Default value**: `<empty>`
 
-#### Publishing plugin
+### Publishing plugin
 
 - `intellij.publish.username` your login at JetBrains plugin repository.
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
 <br/><br/>
 **Default value**: `<empty>`
+

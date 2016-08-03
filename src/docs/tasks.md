@@ -1,4 +1,4 @@
-#### Tasks
+### Tasks
 
 Plugin introduces following tasks
 
@@ -6,3 +6,4 @@ Plugin introduces following tasks
 - `buildPlugin` assembles plugin and prepares zip archive for deployment
 - `runIdea` executes IntelliJ IDEA instance with the plugin you are developing installed in 
 - `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com
+

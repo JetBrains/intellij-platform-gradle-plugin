@@ -55,7 +55,7 @@ buildscript {
 
 apply plugin: 'org.jetbrains.intellij'
 ```
-#### Tasks
+### Tasks
 
 Plugin introduces following tasks
 
@@ -119,17 +119,19 @@ It makes sense to use this property if you want to test your plugin in WebStorm 
 Empty value means that the IDE that was used for compiling will be used for running/debugging as well.<br/><br/>
 **Default value**: `<empty>`
 
-#### Publishing plugin
+### Publishing plugin
 
 - `intellij.publish.username` your login at JetBrains plugin repository.
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
 <br/><br/>
-**Default value**: `<empty>`### build.gradle
+**Default value**: `<empty>`
+
+### build.gradle
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.1.10"
+  id "org.jetbrains.intellij" version "0.2.0-SNAPSHOT"
 }
 
 intellij {
@@ -171,11 +173,12 @@ As examples of using this plugin you can check out following projects:
 - [.ignore](https://github.com/hsz/idea-gitignore)
 - [Minecraft Development](https://github.com/DemonWav/MinecraftDevIntelliJ) and its [TeamCity build configuration](https://ci.demonwav.com/viewType.html?buildTypeId=MinecraftDevIntelliJ_Build)
 
+
 # License
 
 
 ```
-Copyright 2016 org.jetbrains
+Copyright 2016 org.jetbrains.intellij.plugins
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
