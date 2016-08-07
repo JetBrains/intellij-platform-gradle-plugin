@@ -76,6 +76,10 @@ abstract class IntelliJPluginSpecBase extends Specification {
         standardOutput.toString()
     }
 
+    protected String getStderr() {
+        standardError.toString()
+    }
+
     protected File getBuildFile() {
         file('build.gradle')
     }

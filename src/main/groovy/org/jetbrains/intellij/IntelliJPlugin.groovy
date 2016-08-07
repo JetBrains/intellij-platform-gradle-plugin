@@ -23,8 +23,9 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final EXTENSION_NAME = "intellij"
     public static final String DEFAULT_SANDBOX = 'idea-sandbox'
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
-    public static final LOG = Logging.getLogger(IntelliJPlugin)
+    public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
+    public static final LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
 
@@ -192,7 +193,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configurePublishPluginTask(@NotNull Project project, 
                                                    @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring publishing IntelliJ IDEA plugin task")
-        def publishTask = project.tasks.create("publishPlugin", PublishTask)
+        def publishTask = project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask)
         publishTask.group = GROUP_NAME
         publishTask.description = "Publish plugin distribution on plugins.jetbrains.com."
         publishTask.conventionMapping('username', { extension.publish.username })

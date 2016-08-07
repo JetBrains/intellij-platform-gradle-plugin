@@ -3,6 +3,7 @@ package org.jetbrains.intellij
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.tasks.PublishTask
 
 class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'intellij-specific tasks'() {
@@ -19,7 +20,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << ""
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == null
+        tasks(IntelliJPlugin.GROUP_NAME) == [PublishTask.TASK_NAME]
         stdout.contains('specific tasks will be unavailable')
     }
 
