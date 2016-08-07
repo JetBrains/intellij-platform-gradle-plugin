@@ -3,7 +3,6 @@ plugins {
     id 'synapticloop.documentr' version '1.3.4'
     id 'java-gradle-plugin'
     id 'maven'
-    id 'signing'
 }
 
 apply plugin: 'groovy'
