@@ -7,6 +7,7 @@
   - it's allowed to run task without plugin.xml
   - task is configured task before project evaluation, `project.afterEvaluate` is not require anymore
   - add ability to set several channels to upload (fixes [#117](../../issues/117))
+- fix incremental compiling after instrumenting code (fixes [#116](../../issues/116))
 
 ## 0.1
 
