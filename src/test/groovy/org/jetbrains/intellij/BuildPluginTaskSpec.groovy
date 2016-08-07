@@ -131,4 +131,23 @@ class App {
                 'myPluginName/classes/App.class'
         )
     }
+
+    def 'build plugin without sources'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << """\
+            version='0.42.123'
+            intellij { pluginName = 'myPluginName' }
+            """.stripIndent()
+
+        when:
+        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        assert distribution.exists()
+        assert new ZipFile(distribution).entries().collect {
+            it.name
+        } == ['myPluginName/', 'myPluginName/META-INF/', 'myPluginName/META-INF/plugin.xml']
+    }
 }
