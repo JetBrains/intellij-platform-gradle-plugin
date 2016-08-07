@@ -42,13 +42,20 @@ class IntelliJPluginExtension {
     }
 
     public static class Publish {
+        /**
+         * @deprecated intellij.publish.pluginId property is deprecated. Tag 'id' from plugin.xml will be used for uploading. 
+         */
         String pluginId
         String username
         String password
-        String channel
+        private String[] channels
 
-        def pluginId(String pluginId) {
-            this.pluginId = pluginId
+        /**
+         * @deprecated 
+         */
+        static def pluginId(String pluginId) {
+            IntelliJPlugin.LOG.warn("intellij.publish.pluginId property is deprecated. " +
+                    "Tag 'id' from plugin.xml will be used for uploading.")
         }
 
         def username(String username) {
@@ -58,9 +65,21 @@ class IntelliJPluginExtension {
         def password(String password) {
             this.password = password
         }
+        
+        def setChannel(String channel) {
+            this.channels = [channel]
+        }
 
         def channel(String channel) {
-            this.channel = channel
+            channels(channel)
+        }
+        
+        def channels(String... channels) {
+            this.channels = channels
+        }
+        
+        def setChannels(String... channels) {
+            this.channels = channels
         }
     }
 

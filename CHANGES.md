@@ -2,6 +2,12 @@
 
 ## 0.2.0-SNAPSHOT
 
+- publishTask is reimplemented
+  - it's possible to reuse it in client's code
+  - it's allowed to run task without plugin.xml
+  - task is configured task before project evaluation, `project.afterEvaluate` is not require anymore
+  - add ability to set several channels to upload (fixes [#117](../../issues/117))
+
 ## 0.1
 
 ### 0.1.10

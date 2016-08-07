@@ -16,6 +16,7 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyManager
+import org.jetbrains.intellij.tasks.PublishTask
 
 class IntelliJPlugin implements Plugin<Project> {
     public static final GROUP_NAME = "intellij"
@@ -48,6 +49,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        configurePublishPluginTask(project, extension)
         project.afterEvaluate {
             LOG.info("Configuring IntelliJ IDEA gradle plugin")
             configureIntellijDependency(it, extension)
@@ -59,7 +61,6 @@ class IntelliJPlugin implements Plugin<Project> {
                 configurePrepareTestsSandboxTask(it)
                 configureRunIdeaTask(it, extension)
                 configureBuildPluginTask(it, extension)
-                configurePublishPluginTask(it)
             } else {
                 LOG.warn("plugin.xml with 'idea-plugin' root is not found. IntelliJ specific tasks will be unavailable for :$project.name.")
             }
@@ -188,12 +189,19 @@ class IntelliJPlugin implements Plugin<Project> {
         project.getComponents().add(new IntelliJPluginLibrary());
     }
 
-    private static void configurePublishPluginTask(@NotNull Project project) {
+    private static void configurePublishPluginTask(@NotNull Project project, 
+                                                   @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring publishing IntelliJ IDEA plugin task")
-        project.tasks.create(PublishTask.NAME, PublishTask).with {
-            group = GROUP_NAME
-            description = "Publish plugin distribution on plugins.jetbrains.com."
-            dependsOn(project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false))
-        }
+        def publishTask = project.tasks.create("publishPlugin", PublishTask)
+        publishTask.group = GROUP_NAME
+        publishTask.description = "Publish plugin distribution on plugins.jetbrains.com."
+        publishTask.conventionMapping('username', { extension.publish.username })
+        publishTask.conventionMapping('password', { extension.publish.password })
+        publishTask.conventionMapping('distributionFile', {
+            def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
+            def distributionFile = buildPluginTask?.archivePath
+            return distributionFile?.exists() ? distributionFile : null
+        })
+        publishTask.dependsOn(project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false))
     }
 }

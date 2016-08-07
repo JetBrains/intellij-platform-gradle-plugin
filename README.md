@@ -70,7 +70,7 @@ buildscript {
     
   }
   dependencies {
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2-SNAPSHOT"
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.0-SNAPSHOT"
   }
 }
 
@@ -146,6 +146,9 @@ Empty value means that the IDE that was used for compiling will be used for runn
 - `intellij.publish.username` your login at JetBrains plugin repository.
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
+
+*Available in SNAPSHOT only*
+- `intellij.publish.channels` defines several channels to upload, you may use any string here, `default` string means default channel.
 <br/><br/>
 **Default value**: `<empty>`
 
