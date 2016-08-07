@@ -49,7 +49,7 @@ buildscript {{{\n}
     {\n}
   }{\n}
   dependencies {{{\n}
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:{snapshotVersion}-SNAPSHOT"{\n}
+    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:{snapshotVersion}-SNAPSHOT"{\n}
   }{\n}
 }{\n}
 {\n}
