@@ -56,6 +56,27 @@ buildscript {
 apply plugin: 'org.jetbrains.intellij'
 ```
 
+## Snapshot
+
+```groovy
+buildscript {
+  repositories {
+    maven {
+      url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
+    maven { 
+      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' 
+    }
+    
+  }
+  dependencies {
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2-SNAPSHOT"
+  }
+}
+
+apply plugin: 'org.jetbrains.intellij'
+```
+
 ### Tasks
 
 Plugin introduces following tasks
@@ -132,7 +153,7 @@ Empty value means that the IDE that was used for compiling will be used for runn
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.2.0-SNAPSHOT"
+  id "org.jetbrains.intellij" version "0.1.10"
 }
 
 intellij {

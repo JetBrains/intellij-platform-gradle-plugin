@@ -28,7 +28,28 @@ buildscript {{{\n}
     {\n}
   }{\n}
   dependencies {{{\n}
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:{version}"{\n}
+    classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:{version}"{\n}
+  }{\n}
+}{\n}
+{\n}
+apply plugin: 'org.jetbrains.intellij'{\n}
+```{\n}
+{\n}
+## Snapshot{\n}
+{\n}
+```groovy{\n}
+buildscript {{{\n}
+  repositories {{{\n}
+    maven {{{\n}
+      url "https://oss.sonatype.org/content/repositories/snapshots/"{\n}
+    }{\n}
+    maven {{ {\n}
+      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' {\n}
+    }{\n}
+    {\n}
+  }{\n}
+  dependencies {{{\n}
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:{snapshotVersion}-SNAPSHOT"{\n}
   }{\n}
 }{\n}
 {\n}
