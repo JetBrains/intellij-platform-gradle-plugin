@@ -8,7 +8,7 @@ import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.annotations.NotNull
 
-class IntelliJInstrumentCodeAction implements Action<Task> {
+class IntelliJInstrumentCodeAction implements Action<AbstractCompile> {
     private static final String FILTER_ANNOTATION_REGEXP_CLASS = 'com.intellij.ant.ClassFilterAnnotationRegexp'
     private static final LOADER_REF = "java2.loader"
     private final boolean myTestInstrumentation
@@ -18,7 +18,7 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
     }
 
     @Override
-    void execute(Task task) {
+    void execute(AbstractCompile task) {
         def extension = task.project.extensions.getByType(IntelliJPluginExtension)
         def classpath = task.project.files(
                 "$extension.ideaDependency.classes/lib/javac2.jar",
@@ -32,17 +32,14 @@ class IntelliJInstrumentCodeAction implements Action<Task> {
 
         IntelliJPlugin.LOG.info("Compiling forms and instrumenting code with nullability preconditions")
         //noinspection GroovyAssignabilityCheck
-        task.taskDependencies.getDependencies(task).findAll { it instanceof AbstractCompile }.each {
-            AbstractCompile compileTask ->
-                boolean instrumentNotNull = prepareNotNullInstrumenting(compileTask, classpath)
-                def sourceSet = myTestInstrumentation ?
-                        Utils.testSourceSet(compileTask.project).compiledBy(compileTask) :
-                        Utils.mainSourceSet(compileTask.project).compiledBy(compileTask)
-                def srcDirs = existingDirs(sourceSet.allSource)
-                srcDirs.removeAll(existingDirs(sourceSet.resources))
-                if (!srcDirs.empty) {
-                    instrumentCode(compileTask, srcDirs, instrumentNotNull)
-                }
+        boolean instrumentNotNull = prepareNotNullInstrumenting(task, classpath)
+        def sourceSet = myTestInstrumentation ?
+                Utils.testSourceSet(task.project).compiledBy(task) :
+                Utils.mainSourceSet(task.project).compiledBy(task)
+        def srcDirs = existingDirs(sourceSet.allSource)
+        srcDirs.removeAll(existingDirs(sourceSet.resources))
+        if (!srcDirs.empty) {
+            instrumentCode(task, srcDirs, instrumentNotNull)
         }
     }
 
