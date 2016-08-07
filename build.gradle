@@ -35,7 +35,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = project.version
+version = '0.1.10'
 group = 'org.jetbrains.intellij.plugins'
 description = """
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
@@ -104,6 +104,7 @@ uploadArchives {
                 artifactId project.name
                 name 'Gradle IntelliJ Plugin'
                 description project.description
+                version "$snapshotVersion-SNAPSHOT"
                 url 'https://github.com/JetBrains/gradle-intellij-plugin'
                 packaging 'jar'
 

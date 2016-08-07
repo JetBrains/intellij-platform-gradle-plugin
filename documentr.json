@@ -1,7 +1,6 @@
 {
   "context": {
-    "pluginId": "org.jetbrains.intellij",
-    "snapshotVersion": "0.2.0"
+    "pluginId": "org.jetbrains.intellij"
   },
   "templates": [
     {
