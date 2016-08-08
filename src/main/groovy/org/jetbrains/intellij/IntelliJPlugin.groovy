@@ -211,6 +211,6 @@ class IntelliJPlugin implements Plugin<Project> {
             def distributionFile = buildPluginTask?.archivePath
             return distributionFile?.exists() ? distributionFile : null
         })
-        publishTask.dependsOn(BUILD_PLUGIN_TASK_NAME)
+        publishTask.dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
     }
 }
