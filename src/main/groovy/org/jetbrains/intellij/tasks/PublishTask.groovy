@@ -12,7 +12,7 @@ class PublishTask extends ConventionTask {
     private File distributionFile;
     private Object username;
     private Object password;
-    private List<Object> channels;
+    private List<Object> channels = new ArrayList<Object>();
 
     @InputFile
     @SkipWhenEmpty
