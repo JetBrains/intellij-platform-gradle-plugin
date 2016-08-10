@@ -71,13 +71,15 @@ class PublishTask extends ConventionTask {
     @SuppressWarnings("GroovyUnusedDeclaration")
     @TaskAction
     protected void publishPlugin() {
-        if (channels.isEmpty()) {
-            channels.add('default')
+        def channels = getChannels()
+        if (channels.length == 0) {
+            channels = ['default']
         }
 
         def host = PluginDependencyManager.DEFAULT_INTELLIJ_PLUGINS_REPO
+        def distributionFile = getDistributionFile()
         def pluginId = PluginManager.instance.createPlugin(distributionFile).pluginId
-        for (String channel : getChannels()) {
+        for (String channel : channels) {
             IntelliJPlugin.LOG.info("Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
             try {
                 def repoClient = new PluginRepositoryInstance(host, getUsername(), getPassword())
