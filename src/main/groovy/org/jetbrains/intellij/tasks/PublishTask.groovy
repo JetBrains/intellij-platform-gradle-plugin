@@ -25,6 +25,10 @@ class PublishTask extends ConventionTask {
         this.host = host
     }
 
+    void host(Object host) {
+        this.host = host
+    }
+
     @InputFile
     @SkipWhenEmpty
     File getDistributionFile() {
