@@ -10,9 +10,20 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class PublishTask extends ConventionTask {
     private File distributionFile;
+    private Object host = PluginDependencyManager.DEFAULT_INTELLIJ_PLUGINS_REPO;
     private Object username;
     private Object password;
     private List<Object> channels = new ArrayList<Object>();
+
+    @Input
+    @SkipWhenEmpty
+    String getHost() {
+        return host.toString()
+    }
+
+    void setHost(Object host) {
+        this.host = host
+    }
 
     @InputFile
     @SkipWhenEmpty
@@ -76,7 +87,7 @@ class PublishTask extends ConventionTask {
             channels = ['default']
         }
 
-        def host = PluginDependencyManager.DEFAULT_INTELLIJ_PLUGINS_REPO
+        def host = getHost()
         def distributionFile = getDistributionFile()
         def pluginId = PluginManager.instance.createPlugin(distributionFile).pluginId
         for (String channel : channels) {
