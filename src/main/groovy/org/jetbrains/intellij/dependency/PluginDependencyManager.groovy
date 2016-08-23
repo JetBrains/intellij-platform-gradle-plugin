@@ -186,8 +186,8 @@ class PluginDependencyManager {
         def intellijPlugin = PluginManager.instance.createPlugin(artifact)
         def pluginDependency = new PluginDependency(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
         pluginDependency.channel = channel
-        pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCodeAndSnapshot()
-        pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCodeAndSnapshot()
+        pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
+        pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
         return pluginDependency
     }
 
