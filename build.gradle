@@ -19,6 +19,7 @@ plugins.withType(JavaPlugin) {
 repositories {
     maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
     maven { url mavenCentralUrl }
+    mavenCentral()
 }
 
 dependencies {
@@ -26,7 +27,7 @@ dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.16'
-    compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.23'
+    compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.29'
 
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
