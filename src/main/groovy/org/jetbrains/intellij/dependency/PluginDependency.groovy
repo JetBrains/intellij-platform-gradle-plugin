@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.Utils
 
-@ToString
+@ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 public class PluginDependency implements Serializable {
     @NotNull
     private String id
@@ -31,7 +31,7 @@ public class PluginDependency implements Serializable {
     @NotNull
     private Collection<File> jarFiles = Collections.emptySet()
 
-    boolean builtin
+    private boolean builtin
 
     PluginDependency(@NotNull String id, @NotNull String version, @NotNull File artifact, boolean builtin = false) {
         this.id = id
@@ -149,7 +149,7 @@ public class PluginDependency implements Serializable {
         this.metaInfDirectory = metaInfDirectory
     }
 
-    boolean getBuiltin() {
+    boolean isBuiltin() {
         return builtin
     }
 
