@@ -48,7 +48,7 @@ class IntelliJPluginExtension {
         String pluginId
         String username
         String password
-        private String[] channels
+        String[] channels
 
         /**
          * @deprecated 

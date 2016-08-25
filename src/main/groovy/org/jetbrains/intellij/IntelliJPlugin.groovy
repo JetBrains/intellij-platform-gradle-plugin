@@ -206,6 +206,7 @@ class IntelliJPlugin implements Plugin<Project> {
         publishTask.description = "Publish plugin distribution on plugins.jetbrains.com."
         publishTask.conventionMapping('username', { extension.publish.username })
         publishTask.conventionMapping('password', { extension.publish.password })
+        publishTask.conventionMapping('channels', { extension.publish.channels })
         publishTask.conventionMapping('distributionFile', {
             def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
             def distributionFile = buildPluginTask?.archivePath
