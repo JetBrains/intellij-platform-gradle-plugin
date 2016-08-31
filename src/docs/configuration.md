@@ -53,6 +53,10 @@ It makes sense to use this property if you want to test your plugin in WebStorm 
 Empty value means that the IDE that was used for compiling will be used for running/debugging as well.<br/><br/>
 **Default value**: `<empty>`
 
+- `intellij.ideaDependencyCachePath` – absolute path to the local directory that should be used for storing IDEA
+distributions. If empty – Gradle cache directory will be used.
+**Default value**: `<empty>`
+
 ### Publishing plugin
 
 - `intellij.publish.username` your login at JetBrains plugin repository.

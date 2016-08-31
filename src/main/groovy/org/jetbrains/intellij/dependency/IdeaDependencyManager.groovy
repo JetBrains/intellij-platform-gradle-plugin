@@ -10,6 +10,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
+import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 
 import static org.jetbrains.intellij.IntelliJPlugin.LOG
@@ -79,7 +80,16 @@ class IdeaDependencyManager {
         File zipFile = configuration.singleFile
         LOG.debug("IDEA zip: " + zipFile.path)
         def directoryName = zipFile.name - ".zip"
-        def cacheDirectory = new File(zipFile.parent, directoryName)
+
+        def cacheParentDirectoryPath = zipFile.parent
+        def intellijExtension = project.extensions.findByType(IntelliJPluginExtension.class)
+        if (intellijExtension && intellijExtension.ideaDependencyCachePath) {
+            def customCacheParent = new File(intellijExtension.ideaDependencyCachePath)
+            if (customCacheParent.exists()) {
+                cacheParentDirectoryPath = customCacheParent.absolutePath
+            }
+        }
+        def cacheDirectory = new File(cacheParentDirectoryPath, directoryName)
         def markerFile = new File(cacheDirectory, "markerFile")
         if (!markerFile.exists()) {
             if (cacheDirectory.exists()) cacheDirectory.deleteDir()

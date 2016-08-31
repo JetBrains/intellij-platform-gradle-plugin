@@ -15,6 +15,7 @@ class IntelliJPluginExtension {
     String sandboxDirectory
     String intellijRepo
     String alternativeIdePath
+    String ideaDependencyCachePath
     boolean instrumentCode
     boolean updateSinceUntilBuild
     boolean sameSinceUntilBuild
