@@ -64,7 +64,8 @@ distributions. If empty – Gradle cache directory will be used.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
 
 *Available in SNAPSHOT only*
-- `intellij.publish.channels` defines several channels to upload, you may use any string here, `default` string means default channel.
+- `intellij.publish.channels` defines several channels to upload, you may use any comma-separated strings here, 
+`default` string means default channel.
 <br/><br/>
 **Default value**: `<empty>`
 

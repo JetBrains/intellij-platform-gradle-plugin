@@ -141,6 +141,10 @@ It makes sense to use this property if you want to test your plugin in WebStorm 
 Empty value means that the IDE that was used for compiling will be used for running/debugging as well.<br/><br/>
 **Default value**: `<empty>`
 
+- `intellij.ideaDependencyCachePath` – absolute path to the local directory that should be used for storing IDEA
+distributions. If empty – Gradle cache directory will be used.
+**Default value**: `<empty>`
+
 ### Publishing plugin
 
 - `intellij.publish.username` your login at JetBrains plugin repository.
@@ -148,7 +152,8 @@ Empty value means that the IDE that was used for compiling will be used for runn
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
 
 *Available in SNAPSHOT only*
-- `intellij.publish.channels` defines several channels to upload, you may use any string here, `default` string means default channel.
+- `intellij.publish.channels` defines several channels to upload, you may use any comma-separated strings here, 
+`default` string means default channel.
 <br/><br/>
 **Default value**: `<empty>`
 
