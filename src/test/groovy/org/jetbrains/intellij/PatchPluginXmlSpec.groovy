@@ -11,7 +11,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
@@ -25,7 +25,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.1532.*"/>
 </idea-plugin>
@@ -39,7 +39,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
   <id>org.jetbrains.erlang</id>
@@ -57,7 +57,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*">my_version</idea-version>
 </idea-plugin>
@@ -79,7 +79,7 @@ intellij {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="1" until-build="2">my_version</idea-version>
 </idea-plugin>
@@ -93,7 +93,7 @@ intellij {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <idea-version since-build="141.1532" until-build="141.*"/>
   <version>0.10.0</version>
 </idea-plugin>
@@ -109,7 +109,7 @@ intellij {
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
         stdout.contains(":processResources UP-TO-DATE")
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
@@ -126,7 +126,7 @@ intellij {
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
         !stdout.contains(":processResources UP-TO-DATE")
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
@@ -142,14 +142,14 @@ intellij {
         when:
         def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
         then:
-        ouputPluginXml(project).text == """<idea-plugin version="2">
+        outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
     }
 
-    private static File ouputPluginXml(GradleProject project) {
+    private static File outputPluginXml(GradleProject project) {
         new File(project.buildDirectory, "resources/main/META-INF/plugin.xml")
     }
 }
