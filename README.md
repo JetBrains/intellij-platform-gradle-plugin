@@ -61,6 +61,7 @@ apply plugin: 'org.jetbrains.intellij'
 ```groovy
 buildscript {
   repositories {
+    mavenCentral()
     maven {
       url "https://oss.sonatype.org/content/repositories/snapshots/"
     }

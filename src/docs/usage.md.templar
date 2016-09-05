@@ -40,6 +40,7 @@ apply plugin: 'org.jetbrains.intellij'{\n}
 ```groovy{\n}
 buildscript {{{\n}
   repositories {{{\n}
+    mavenCentral(){\n}
     maven {{{\n}
       url "https://oss.sonatype.org/content/repositories/snapshots/"{\n}
     }{\n}
