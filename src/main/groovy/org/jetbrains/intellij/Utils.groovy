@@ -8,6 +8,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.annotations.NotNull
 import org.xml.sax.ErrorHandler
+import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import org.xml.sax.SAXParseException
 
@@ -190,7 +191,15 @@ class Utils {
                 throw e
             }
         })
-        return parser.parse(file)
+        InputStream inputStream = new FileInputStream(file)
+        InputSource input = new InputSource(new InputStreamReader(inputStream,"UTF-8"))
+        input.setEncoding("UTF-8")
+        try {
+            return parser.parse(input)
+        }
+        finally {
+            inputStream.close()
+        }
     }
 
     public static boolean isJarFile(@NotNull File file) {
