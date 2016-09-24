@@ -2,10 +2,12 @@ package org.jetbrains.intellij.dependency
 
 import com.google.common.base.Predicate
 import com.intellij.structure.impl.utils.JarsUtils
+import groovy.transform.ToString
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
-class IdeaDependency {
+@ToString(includeNames = true, includeFields = true, ignoreNulls = true)
+ class IdeaDependency implements Serializable {
     @NotNull
     private final String version
     @NotNull
@@ -18,7 +20,8 @@ class IdeaDependency {
     private final Collection<File> jarFiles
     private final boolean withKotlin
 
-    IdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes, @Nullable File sources, boolean withKotlin) {
+    IdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes, @Nullable File sources, 
+                   boolean withKotlin) {
         this.version = version
         this.buildNumber = buildNumber
         this.classes = classes
@@ -29,7 +32,7 @@ class IdeaDependency {
 
     private def collectJarFiles() {
         if (classes.isDirectory()) {
-            File lib = new File(classes, "lib");
+            File lib = new File(classes, "lib")
             if (lib.isDirectory()) {
                 return JarsUtils.collectJars(lib, new Predicate<File>() {
                     @Override
@@ -76,5 +79,29 @@ class IdeaDependency {
             fqn += '-withSources'
         }
         return fqn
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (!(o instanceof IdeaDependency)) return false
+        IdeaDependency that = (IdeaDependency) o
+        if (withKotlin != that.withKotlin) return false
+        if (buildNumber != that.buildNumber) return false
+        if (classes != that.classes) return false
+        if (jarFiles != that.jarFiles) return false
+        if (sources != that.sources) return false
+        if (version != that.version) return false
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = version.hashCode()
+        result = 31 * result + buildNumber.hashCode()
+        result = 31 * result + classes.hashCode()
+        result = 31 * result + (sources != null ? sources.hashCode() : 0)
+        result = 31 * result + jarFiles.hashCode()
+        result = 31 * result + (withKotlin ? 1 : 0)
+        return result
     }
 }

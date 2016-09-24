@@ -31,7 +31,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
 
     @Override
-    def void apply(Project project) {
+     void apply(Project project) {
         project.getPlugins().apply(JavaPlugin)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension)
         intellijExtension.with {
@@ -54,9 +54,9 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePublishPluginTask(project, extension)
         project.afterEvaluate {
             LOG.info("Configuring IntelliJ IDEA gradle plugin")
+            configureInstrumentation(project)
             configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
-            configureInstrumentTask(it, extension)
             if (Utils.sourcePluginXmlFiles(it)) {
                 configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
@@ -150,10 +150,8 @@ class IntelliJPlugin implements Plugin<Project> {
         task.outputs.upToDateWhen { false }
     }
 
-    private static void configureInstrumentTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        if (!extension.instrumentCode) return
+    private static void configureInstrumentation(@NotNull Project project) {
         LOG.info("Configuring IntelliJ compile tasks")
-
         def abstractCompileDependencies = { String taskName ->
             project.tasks.findByName(taskName).collect { task ->
                 task.taskDependencies.getDependencies(task).findAll { it instanceof AbstractCompile }
@@ -172,7 +170,7 @@ class IntelliJPlugin implements Plugin<Project> {
             it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
-                    "$extension.ideaDependency.classes/lib/idea.jar");
+                    "$extension.ideaDependency.classes/lib/idea.jar")
             it.outputs.dir(Utils.systemDir(extension, true))
             it.outputs.dir(Utils.configDir(extension, true))
         }
@@ -191,14 +189,14 @@ class IntelliJPlugin implements Plugin<Project> {
             dependsOn(prepareSandboxTask)
         }
 
-        ArchivePublishArtifact zipArtifact = new ArchivePublishArtifact(zip);
-        Configuration runtimeConfiguration = project.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME);
-        runtimeConfiguration.getArtifacts().add(zipArtifact);
-        project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(zipArtifact);
-        project.getComponents().add(new IntelliJPluginLibrary());
+        ArchivePublishArtifact zipArtifact = new ArchivePublishArtifact(zip)
+        Configuration runtimeConfiguration = project.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
+        runtimeConfiguration.getArtifacts().add(zipArtifact)
+        project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(zipArtifact)
+        project.getComponents().add(new IntelliJPluginLibrary())
     }
 
-    private static void configurePublishPluginTask(@NotNull Project project, 
+    private static void configurePublishPluginTask(@NotNull Project project,
                                                    @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring publishing IntelliJ IDEA plugin task")
         def publishTask = project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask)

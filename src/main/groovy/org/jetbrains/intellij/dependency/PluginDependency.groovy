@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.Utils
 
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
-public class PluginDependency implements Serializable {
+ class PluginDependency implements Serializable {
     @NotNull
     private String id
     @NotNull
@@ -46,28 +46,28 @@ public class PluginDependency implements Serializable {
             jarFiles = Collections.singletonList(artifact)
         }
         if (artifact.isDirectory()) {
-            File lib = new File(artifact, "lib");
+            File lib = new File(artifact, "lib")
             if (lib.isDirectory()) {
                 jarFiles = JarsUtils.collectJars(lib, Predicates.<File> alwaysTrue(), true)
             }
-            File classes = new File(artifact, "classes");
+            File classes = new File(artifact, "classes")
             if (classes.isDirectory()) {
                 classesDirectory = classes
             }
-            File metaInf = new File(artifact, "META-INF");
+            File metaInf = new File(artifact, "META-INF")
             if (metaInf.isDirectory()) {
                 metaInfDirectory = metaInf
             }
         }
     }
 
-    def boolean isCompatible(@NotNull IdeVersion ideVersion) {
+    boolean isCompatible(@NotNull IdeVersion ideVersion) {
         return sinceBuild == null ||
                 IdeVersion.createIdeVersion(sinceBuild) <= ideVersion &&
-                (untilBuild == null || ideVersion <= IdeVersion.createIdeVersion(untilBuild));
+                (untilBuild == null || ideVersion <= IdeVersion.createIdeVersion(untilBuild))
     }
 
-    def String getFqn() {
+    String getFqn() {
         return pluginFqn(id, version, channel)
     }
 
