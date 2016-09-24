@@ -20,6 +20,10 @@ class IntelliJInstrumentCodeAction implements Action<AbstractCompile> {
     @Override
     void execute(AbstractCompile task) {
         def extension = task.project.extensions.getByType(IntelliJPluginExtension)
+        if (extension == null || !extension.instrumentCode) {
+            return
+        }
+        task.inputs.property("intellijIdeaDependency", extension.ideaDependency)
         def classpath = task.project.files(
                 "$extension.ideaDependency.classes/lib/javac2.jar",
                 "$extension.ideaDependency.classes/lib/jdom.jar",
