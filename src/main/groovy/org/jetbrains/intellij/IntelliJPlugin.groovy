@@ -54,7 +54,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePublishPluginTask(project, extension)
         project.afterEvaluate {
             LOG.info("Configuring IntelliJ IDEA gradle plugin")
-            configureInstrumentation(project)
+            configureInstrumentation(it, extension)
             configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
             if (Utils.sourcePluginXmlFiles(it)) {
@@ -150,16 +150,21 @@ class IntelliJPlugin implements Plugin<Project> {
         task.outputs.upToDateWhen { false }
     }
 
-    private static void configureInstrumentation(@NotNull Project project) {
+    private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ compile tasks")
         def abstractCompileDependencies = { String taskName ->
             project.tasks.findByName(taskName).collect { task ->
                 task.taskDependencies.getDependencies(task).findAll { it instanceof AbstractCompile }
             }.flatten()
         }
-
-        abstractCompileDependencies(JavaPlugin.CLASSES_TASK_NAME)*.doLast(new IntelliJInstrumentCodeAction(false))
-        abstractCompileDependencies(JavaPlugin.TEST_CLASSES_TASK_NAME)*.doLast(new IntelliJInstrumentCodeAction(true))
+        abstractCompileDependencies(JavaPlugin.CLASSES_TASK_NAME).each {
+            it.inputs.property("intellijIdeaDependency", extension.ideaDependency)
+            it.doLast(new IntelliJInstrumentCodeAction(false))
+        }
+        abstractCompileDependencies(JavaPlugin.TEST_CLASSES_TASK_NAME).each {
+            it.inputs.property("intellijIdeaDependency", extension.ideaDependency)
+            it.doLast(new IntelliJInstrumentCodeAction(true))
+        }
     }
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {

@@ -23,7 +23,6 @@ class IntelliJInstrumentCodeAction implements Action<AbstractCompile> {
         if (extension == null || !extension.instrumentCode) {
             return
         }
-        task.inputs.property("intellijIdeaDependency", extension.ideaDependency)
         def classpath = task.project.files(
                 "$extension.ideaDependency.classes/lib/javac2.jar",
                 "$extension.ideaDependency.classes/lib/jdom.jar",
