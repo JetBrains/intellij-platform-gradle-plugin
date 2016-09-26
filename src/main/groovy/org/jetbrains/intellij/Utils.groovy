@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import com.intellij.structure.impl.utils.StringUtil
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.tasks.SourceSet
@@ -18,24 +19,24 @@ class Utils {
     public static final Pattern VERSION_PATTERN = Pattern.compile('^([A-Z]{2})-([0-9.A-z]+)\\s*$')
 
     @NotNull
-    public static SourceSet mainSourceSet(@NotNull Project project) {
-        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
+     static SourceSet mainSourceSet(@NotNull Project project) {
+        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention)
         javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     }
 
     @NotNull
-    public static SourceSet testSourceSet(@NotNull Project project) {
-        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention);
+     static SourceSet testSourceSet(@NotNull Project project) {
+        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention)
         javaConvention.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
     }
 
     @NotNull
-    public static DefaultIvyArtifact createJarDependency(File file, String configuration, File baseDir) {
+     static DefaultIvyArtifact createJarDependency(File file, String configuration, File baseDir) {
         return createDependency(baseDir, file, configuration, "jar", "jar")
     }
 
     @NotNull
-    public static DefaultIvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
+     static DefaultIvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
         return createDependency(baseDir, file, configuration, "", "directory")
     }
 
@@ -49,13 +50,13 @@ class Utils {
     }
 
     @NotNull
-    public static Set<File> sourcePluginXmlFiles(@NotNull Project project) {
+     static Set<File> sourcePluginXmlFiles(@NotNull Project project) {
         pluginXmlFiles(mainSourceSet(project).resources.srcDirs)
     }
 
     @NotNull
-    public static Set<File> outPluginXmlFiles(@NotNull Project project) {
-        pluginXmlFiles(mainSourceSet(project).output.files)
+     static FileCollection outPluginXmlFiles(@NotNull Project project) {
+        project.files(pluginXmlFiles(mainSourceSet(project).output.files))
     }
 
     @NotNull
@@ -78,7 +79,7 @@ class Utils {
     }
 
     @NotNull
-    public static Map<String, Object> getIdeaSystemProperties(@NotNull Project project,
+     static Map<String, Object> getIdeaSystemProperties(@NotNull Project project,
                                                               @NotNull Map<String, Object> originalProperties,
                                                               @NotNull IntelliJPluginExtension extension,
                                                               boolean inTests) {
@@ -92,26 +93,26 @@ class Utils {
         if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
             properties.put("idea.required.plugins.id", pluginId)
         }
-        return properties;
+        return properties
     }
 
-    public static def configDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+     static def configDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$extension.sandboxDirectory/config$suffix"
     }
 
-    public static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+     static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$extension.sandboxDirectory/system$suffix"
     }
 
-    public static def pluginsDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+     static def pluginsDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$extension.sandboxDirectory/plugins$suffix"
     }
 
     @NotNull
-    public static List<String> getIdeaJvmArgs(@NotNull JavaForkOptions options,
+     static List<String> getIdeaJvmArgs(@NotNull JavaForkOptions options,
                                               @NotNull List<String> originalArguments,
                                               @NotNull IntelliJPluginExtension extension) {
         if (options.maxHeapSize == null) options.maxHeapSize = "512m"
@@ -131,10 +132,10 @@ class Utils {
     }
 
     @NotNull
-    public static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
+     static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
         def path = extension.alternativeIdePath
         if (path) {
-            def dir = new File(path);
+            def dir = new File(path)
             if (dir.getName().endsWith(".app")) {
                 dir = new File(dir, "Contents")
             }
@@ -149,7 +150,7 @@ class Utils {
     }
 
     @NotNull
-    public static String ideaBuildNumber(@NotNull File ideaDirectory) {
+     static String ideaBuildNumber(@NotNull File ideaDirectory) {
         if (isMac()) {
             def file = new File(ideaDirectory, "Resources/build.txt")
             if (file.exists()) {
@@ -159,7 +160,7 @@ class Utils {
         return new File(ideaDirectory, "build.txt").getText('UTF-8').trim()
     }
 
-    public static boolean isMac() {
+     static boolean isMac() {
         return System.getProperty("os.name").toLowerCase(Locale.US).startsWith("mac")
     }
 
@@ -169,12 +170,12 @@ class Utils {
             def pluginXml = parseXml(it)
             ids += pluginXml.id*.text()
         }
-        return ids.size() == 1 ? ids.first() : null;
+        return ids.size() == 1 ? ids.first() : null
     }
 
     static Node parseXml(File file) {
         def parser = new XmlParser(false, true, true)
-        parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
         parser.setErrorHandler(new ErrorHandler() {
             @Override
             void warning(SAXParseException e) throws SAXException {
@@ -202,16 +203,16 @@ class Utils {
         }
     }
 
-    public static boolean isJarFile(@NotNull File file) {
+     static boolean isJarFile(@NotNull File file) {
         return StringUtil.endsWithIgnoreCase(file.name, ".jar")
     }
 
-    public static boolean isZipFile(@NotNull File file) {
+     static boolean isZipFile(@NotNull File file) {
         return StringUtil.endsWithIgnoreCase(file.name, ".zip")
     }
 
     @NotNull
-    public static parsePluginDependencyString(@NotNull String s) {
+     static parsePluginDependencyString(@NotNull String s) {
         def id = null, version = null, channel = null
         def idAndVersion = s.split('[:]', 2)
         if (idAndVersion.length == 1) {

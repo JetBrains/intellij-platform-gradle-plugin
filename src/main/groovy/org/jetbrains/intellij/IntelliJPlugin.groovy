@@ -25,13 +25,15 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_SANDBOX = 'idea-sandbox'
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
+    public static final String PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
+    public static final String PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
 
     public static final LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/intellij-repository'
 
     @Override
-     void apply(Project project) {
+    void apply(Project project) {
         project.getPlugins().apply(JavaPlugin)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension)
         intellijExtension.with {
@@ -51,14 +53,14 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        LOG.info("Configuring IntelliJ IDEA gradle plugin")
+        configurePatchPluginXmlTask(project, extension)
         configurePublishPluginTask(project, extension)
         project.afterEvaluate {
-            LOG.info("Configuring IntelliJ IDEA gradle plugin")
             configureInstrumentation(it, extension)
             configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
             if (Utils.sourcePluginXmlFiles(it)) {
-                configurePatchPluginXmlTask(it)
                 configurePrepareSandboxTask(it)
                 configurePrepareTestsSandboxTask(it)
                 configureRunIdeaTask(it, extension)
@@ -111,12 +113,29 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configurePatchPluginXmlTask(@NotNull Project project) {
+    private static void configurePatchPluginXmlTask(@NotNull Project project,
+                                                    @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring patch plugin.xml task")
-        def processResourcesTasks = project.tasks.withType(ProcessResources.class)
-        def patchPluginXmlAction = new PatchPluginXmlAction(project)
-        processResourcesTasks*.doLast(patchPluginXmlAction)
-        processResourcesTasks*.inputs*.properties(patchPluginXmlAction.properties)
+        def patchPluginXmlTask = project.tasks.create(PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask)
+        patchPluginXmlTask.group = GROUP_NAME
+        patchPluginXmlTask.description = "Patch plugin xml files with corresponding since/until build numbers and version attributes"
+        patchPluginXmlTask.conventionMapping('version', { project.version?.toString() })
+        patchPluginXmlTask.conventionMapping('pluginXmlFiles', { Utils.outPluginXmlFiles(project) })
+        patchPluginXmlTask.conventionMapping('destinationDir', { new File(project.buildDir, PLUGIN_XML_DIR_NAME) })
+        patchPluginXmlTask.conventionMapping('sinceBuild', {
+            if (extension.updateSinceUntilBuild) {
+                def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                return "$ideVersion.baselineVersion.$ideVersion.build".toString()
+            }
+        })
+        patchPluginXmlTask.conventionMapping('untilBuild', {
+            if (extension.updateSinceUntilBuild) {
+                def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                return extension.sameSinceUntilBuild ? "${patchPluginXmlTask.getSinceBuild()}.*".toString()
+                        : "$ideVersion.baselineVersion.*".toString()
+            }
+        })
+        patchPluginXmlTask.dependsOn { project.getTasks().withType(ProcessResources) }
     }
 
     private static void configurePrepareSandboxTask(@NotNull Project project) {
@@ -126,6 +145,7 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Creates a folder containing the plugins to run Intellij IDEA with."
             dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
             dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
+            dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
         }
     }
 
@@ -136,6 +156,7 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Creates a folder containing the plugins to run IntelliJ plugin tests with."
             dependsOn(project.getTasksByName(JavaPlugin.TEST_CLASSES_TASK_NAME, false))
             dependsOn(project.getTasksByName(JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, false))
+            dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
         }
     }
 

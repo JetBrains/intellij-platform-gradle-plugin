@@ -17,7 +17,7 @@ class PrepareSandboxTask extends Copy {
     CopySpec metaInf
     CopySpec externalPlugins
 
-    public PrepareSandboxTask() {
+    PrepareSandboxTask() {
         this(false)
     }
 
@@ -43,6 +43,10 @@ class PrepareSandboxTask extends Copy {
     protected void copy() {
         Utils.outPluginXmlFiles(project).each { File xmlFile ->
             processIdeaXml(xmlFile.parentFile, xmlFile.name, true)
+        }
+        def patchTask = project.tasks.getByName(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME) as PatchPluginXmlTask
+        if (patchTask != null) {
+            metaInf.from(patchTask.destinationDir.listFiles())
         }
         disableIdeUpdate()
         super.copy()

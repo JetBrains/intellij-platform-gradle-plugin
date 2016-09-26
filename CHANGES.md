@@ -2,11 +2,12 @@
 
 ## 0.2.0-SNAPSHOT
 
-- publishTask is reimplemented
-  - it's possible to reuse it in client's code
-  - it's allowed to run task without plugin.xml
-  - task is configured task before project evaluation, `project.afterEvaluate` is not require anymore
-  - add ability to set several channels to upload (fixes [#117](../../issues/117))
+- patchXml action is reimplemented, now it's possible to freely customize input files, destination directory, since/until builds and version
+- publishTask is reimplemented, now it's possible to set several channels to upload (fixes [#117](../../issues/117))
+- reimplementation tasks also includes following improvements for all of them:
+  - it's possible to reuse reimplemented tasks in client's code
+  - it's allowed to run tasks without plugin.xml
+  - tasks are configured before project evaluation, `project.afterEvaluate` is not require anymore
 - fix incremental compiling after instrumenting code (fixes [#116](../../issues/116))
 - added `intellij.ideaDependencyCachePath` option (fixes [#127](../../issues/127))
 

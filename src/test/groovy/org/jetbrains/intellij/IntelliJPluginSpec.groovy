@@ -11,7 +11,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', 'prepareSandbox', 'prepareTestsSandbox', 'publishPlugin', 'runIdea']
+        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME, 'prepareSandbox', 
+                                             'prepareTestsSandbox', 'publishPlugin', 'runIdea']
     }
 
     def 'do not add intellij-specific tasks for project without plugin.xml'() {
@@ -19,7 +20,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << ""
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME]
+        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME, 
+                                             IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME]
         stdout.contains('specific tasks will be unavailable')
     }
 
@@ -245,7 +247,7 @@ public class AppTest {
         String permGen = null
         def jvmArgs = new HashSet<String>()
 
-        public static ProcessProperties parse(@NotNull String commandLine) {
+         static ProcessProperties parse(@NotNull String commandLine) {
             boolean first = true
             def result = new ProcessProperties()
             commandLine.split('\\s+').each {

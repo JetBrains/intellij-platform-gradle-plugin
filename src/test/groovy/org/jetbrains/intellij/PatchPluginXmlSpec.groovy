@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.tooling.model.GradleProject
 
 class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
@@ -9,7 +8,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
@@ -23,7 +22,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4'; sameSinceUntilBuild = true }"
         when:
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
@@ -37,7 +36,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\">\n<id>org.jetbrains.erlang</id>\n</idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
@@ -55,7 +54,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
 </idea-plugin>"""
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
@@ -77,7 +76,7 @@ intellij {
     updateSinceUntilBuild = false 
 }"""
         when:
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
@@ -91,7 +90,7 @@ intellij {
         pluginXml << "<idea-plugin version=\"2\">\n  <version>0.10.0</version>\n</idea-plugin>"
         buildFile << "intellij { version = '14.1.4' }"
         when:
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <idea-version since-build="141.1532" until-build="141.*"/>
@@ -105,10 +104,10 @@ intellij {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
-        stdout.contains(":processResources UP-TO-DATE")
+        stdout.contains(":" + IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME + " UP-TO-DATE")
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
@@ -121,11 +120,11 @@ intellij {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.3' }"
         when:
-        run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         buildFile << "\nintellij { version = '14.1.4' }"
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
-        !stdout.contains(":processResources UP-TO-DATE")
+        !stdout.contains(":" + IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME + " UP-TO-DATE")
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
@@ -140,7 +139,7 @@ intellij {
 """
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        def project = run(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
@@ -150,6 +149,6 @@ intellij {
     }
 
     private static File outputPluginXml(GradleProject project) {
-        new File(project.buildDirectory, "resources/main/META-INF/plugin.xml")
+        new File(project.buildDirectory, IntelliJPlugin.PLUGIN_XML_DIR_NAME).listFiles().first()
     }
 }
