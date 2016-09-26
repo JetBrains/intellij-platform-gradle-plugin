@@ -57,6 +57,32 @@ Empty value means that the IDE that was used for compiling will be used for runn
 distributions. If empty – Gradle cache directory will be used.
 **Default value**: `<empty>`
 
+### Patching plugin.xml
+
+*Available in SNAPSHOT only*
+
+The `patchPluginXmlFiles` task supports following properties:
+
+- `version` is a value for `<idea until-build="">` attribute.
+<br/>
+**Default value**: `<project.version>`
+
+- `sinceBuild` is a value for `<idea-version since-build="">` attribute.
+<br/>
+**Default value**: `<IntelliJIDEABuildNumber>`
+
+- `untilBuild` is a value for `<idea-version until-build="">` attribute.
+<br/>
+**Default value**: `<IntelliJIDEABranch.*>`
+
+- `pluginXmlFiles` is a collections of xml files to patch.
+<br/>
+**Default value**: `<all plugin.xml files with idea-plugin root tag in resources>`
+
+- `destinationDir` is a directory to store patched xml files.
+<br/>
+**Default value**: `<project.buildDir>/patchedPluginXmlFiles`
+
 ### Publishing plugin
 
 - `intellij.publish.username` your login at JetBrains plugin repository.
@@ -68,4 +94,23 @@ distributions. If empty – Gradle cache directory will be used.
 `default` string means default channel.
 <br/><br/>
 **Default value**: `<empty>`
+
+*Available in SNAPSHOT only*
+
+Since `0.2-SNAPSHOT` `publishPlugin` task supports following properties:
+
+- `username` is a login at JetBrains plugin repository.
+- `password` is a password at JetBrains plugin repository.
+- `channels` are channels names to upload the plugin to.
+<br/>
+**Default value**: `[default]`
+
+- `host` host of plugin repository.
+<br/>
+**Default value**: `http://plugins.jetbrains.com`
+
+- `distributionFile` is a file to upload.
+<br/>
+**Default value**: `<output of buildPlugin task>`
+
 
