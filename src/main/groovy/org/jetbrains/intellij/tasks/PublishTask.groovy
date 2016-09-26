@@ -2,21 +2,23 @@ package org.jetbrains.intellij.tasks
 
 import com.intellij.structure.domain.PluginManager
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class PublishTask extends ConventionTask {
-    private File distributionFile;
-    private Object host = PluginDependencyManager.DEFAULT_INTELLIJ_PLUGINS_REPO;
-    private Object username;
-    private Object password;
-    private List<Object> channels = new ArrayList<Object>();
+    private File distributionFile
+    private Object host = PluginDependencyManager.DEFAULT_INTELLIJ_PLUGINS_REPO
+    private Object username
+    private Object password
+    private List<Object> channels = new ArrayList<Object>()
 
     @Input
-    @SkipWhenEmpty
     String getHost() {
         return host.toString()
     }
@@ -30,7 +32,6 @@ class PublishTask extends ConventionTask {
     }
 
     @InputFile
-    @SkipWhenEmpty
     File getDistributionFile() {
         return distributionFile
     }
@@ -40,7 +41,6 @@ class PublishTask extends ConventionTask {
     }
 
     @Input
-    @SkipWhenEmpty
     String getUsername() {
         return username != null ? username.toString() : null
     }
@@ -54,7 +54,6 @@ class PublishTask extends ConventionTask {
     }
 
     @Input
-    @SkipWhenEmpty
     String getPassword() {
         return password != null ? password.toString() : null
     }
