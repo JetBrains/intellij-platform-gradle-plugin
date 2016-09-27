@@ -52,13 +52,14 @@ class IntelliJPlugin implements Plugin<Project> {
             downloadSources = true
             publish = new IntelliJPluginExtension.Publish()
         }
-        configurePlugin(project, intellijExtension)
+        configureTasks(project, intellijExtension)
     }
 
-    private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA gradle plugin")
-        def patchPluginXmlTask = configurePatchPluginXmlTask(project, extension)
-        configurePrepareSandboxTask(project, extension, patchPluginXmlTask)
+        configurePatchPluginXmlTask(project, extension)
+        configurePrepareSandboxTasks(project, extension)
+        configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
         project.afterEvaluate {
             configureInstrumentation(it, extension)
@@ -66,7 +67,6 @@ class IntelliJPlugin implements Plugin<Project> {
             configurePluginDependencies(it, extension)
             if (Utils.sourcePluginXmlFiles(it)) {
                 configureRunIdeaTask(it, extension)
-                configureBuildPluginTask(it, extension)
             } else {
                 LOG.warn("plugin.xml with 'idea-plugin' root is not found. IntelliJ specific tasks will be unavailable for :$project.name.")
             }
@@ -115,35 +115,35 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static PatchPluginXmlTask configurePatchPluginXmlTask(@NotNull Project project,
-                                                                  @NotNull IntelliJPluginExtension extension) {
+    private static void configurePatchPluginXmlTask(@NotNull Project project,
+                                                    @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring patch plugin.xml task")
-        def patchPluginXmlTask = project.tasks.create(PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask)
-        patchPluginXmlTask.group = GROUP_NAME
-        patchPluginXmlTask.description = "Patch plugin xml files with corresponding since/until build numbers and version attributes"
-        patchPluginXmlTask.conventionMapping('version', { project.version?.toString() })
-        patchPluginXmlTask.conventionMapping('pluginXmlFiles', { Utils.outPluginXmlFiles(project) })
-        patchPluginXmlTask.conventionMapping('destinationDir', { new File(project.buildDir, PLUGIN_XML_DIR_NAME) })
-        patchPluginXmlTask.conventionMapping('sinceBuild', {
-            if (extension.updateSinceUntilBuild) {
-                def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-                return "$ideVersion.baselineVersion.$ideVersion.build".toString()
-            }
-        })
-        patchPluginXmlTask.conventionMapping('untilBuild', {
-            if (extension.updateSinceUntilBuild) {
-                def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-                return extension.sameSinceUntilBuild ? "${patchPluginXmlTask.getSinceBuild()}.*".toString()
-                        : "$ideVersion.baselineVersion.*".toString()
-            }
-        })
-        patchPluginXmlTask.dependsOn { project.getTasks().withType(ProcessResources) }
-        return patchPluginXmlTask
+        project.tasks.create(PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask).with {
+            group = GROUP_NAME
+            description = "Patch plugin xml files with corresponding since/until build numbers and version attributes"
+            conventionMapping('version', { project.version?.toString() })
+            conventionMapping('pluginXmlFiles', { Utils.outPluginXmlFiles(project) })
+            conventionMapping('destinationDir', { new File(project.buildDir, PLUGIN_XML_DIR_NAME) })
+            conventionMapping('sinceBuild', {
+                if (extension.updateSinceUntilBuild) {
+                    def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                    return "$ideVersion.baselineVersion.$ideVersion.build".toString()
+                }
+            })
+            conventionMapping('untilBuild', {
+                if (extension.updateSinceUntilBuild) {
+                    def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                    return extension.sameSinceUntilBuild ? "${getSinceBuild()}.*".toString()
+                            : "$ideVersion.baselineVersion.*".toString()
+                }
+            })
+            dependsOn { project.getTasks().withType(ProcessResources) }
+        }
     }
 
-    private static void configurePrepareSandboxTask(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension,
-                                                    @NotNull PatchPluginXmlTask patchPluginXmlTask) {
+    private static void configurePrepareSandboxTasks(@NotNull Project project,
+                                                     @NotNull IntelliJPluginExtension extension) {
+        def patchPluginXmlTask = project.tasks.findByName(PATCH_PLUGIN_XML_TASK_NAME) as PatchPluginXmlTask
         configurePrepareSandboxTask(project, extension, patchPluginXmlTask, false)
         configurePrepareSandboxTask(project, extension, patchPluginXmlTask, true)
     }
@@ -154,38 +154,38 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     boolean inTest) {
         LOG.info("Configuring prepare IntelliJ sandbox task")
         def taskName = inTest ? PREPARE_TESTING_SANDBOX_TASK_NAME : PREPARE_SANDBOX_TASK_NAME
-        def prepareSandboxTask = project.tasks.create(taskName, PrepareSandboxTask)
-        prepareSandboxTask.group = GROUP_NAME
-        prepareSandboxTask.description = "Prepare sandbox directory with installed plugin and its dependencies."
-        prepareSandboxTask.conventionMapping('pluginName', { extension.pluginName })
-        prepareSandboxTask.conventionMapping('destinationDir', {
-            project.file(Utils.pluginsDir(extension.sandboxDirectory, inTest))
-        })
-        prepareSandboxTask.conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
-        prepareSandboxTask.conventionMapping('pluginDependencies', { extension.pluginDependencies })
-        prepareSandboxTask.conventionMapping('patchedPluginXmlDirectory', { patchPluginXmlTask.getDestinationDir() })
-        prepareSandboxTask.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
-        prepareSandboxTask.dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
-        prepareSandboxTask.dependsOn(patchPluginXmlTask)
+        project.tasks.create(taskName, PrepareSandboxTask).with {
+            group = GROUP_NAME
+            description = "Prepare sandbox directory with installed plugin and its dependencies."
+            conventionMapping('pluginName', { extension.pluginName })
+            conventionMapping('destinationDir', { project.file(Utils.pluginsDir(extension.sandboxDirectory, inTest)) })
+            conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
+            conventionMapping('pluginDependencies', { extension.pluginDependencies })
+            conventionMapping('patchedPluginXmlDirectory', { patchPluginXmlTask.getDestinationDir() })
+            dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
+            dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
+            dependsOn(patchPluginXmlTask)
+        }
     }
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
-        def task = project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
-        task.group = GROUP_NAME
-        task.description = "Runs Intellij IDEA with installed plugin."
-        task.dependsOn(project.getTasksByName(PREPARE_SANDBOX_TASK_NAME, false))
-        task.outputs.dir(Utils.systemDir(extension, false))
-        task.outputs.dir(Utils.configDir(extension.sandboxDirectory, false))
-        task.outputs.upToDateWhen { false }
+        project.tasks.create(RunIdeaTask.NAME, RunIdeaTask).with {
+            group = GROUP_NAME
+            description = "Runs Intellij IDEA with installed plugin."
+            dependsOn(project.getTasksByName(PREPARE_SANDBOX_TASK_NAME, false))
+            outputs.dir(Utils.systemDir(extension, false))
+            outputs.dir(Utils.configDir(extension.sandboxDirectory, false))
+            outputs.upToDateWhen { false }
+        }
     }
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ compile tasks")
         def abstractCompileDependencies = { String taskName ->
-            project.tasks.findByName(taskName).collect { task ->
-                task.taskDependencies.getDependencies(task).findAll { it instanceof AbstractCompile }
-            }.flatten()
+            project.tasks.findByName(taskName).collect {
+                it.taskDependencies.getDependencies(it).findAll { it instanceof AbstractCompile }
+            }.flatten() as Collection<AbstractCompile>
         }
         abstractCompileDependencies(JavaPlugin.CLASSES_TASK_NAME).each {
             it.inputs.property("intellijIdeaDependency", extension.ideaDependency)
@@ -211,21 +211,20 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureBuildPluginTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    private static void configureBuildPluginTask(@NotNull Project project) {
         LOG.info("Configuring building IntelliJ IDEA plugin task")
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-        Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip)
-        zip.with {
+        Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
-            baseName = extension.pluginName
-            from("$prepareSandboxTask.destinationDir/$extension.pluginName")
-            into(extension.pluginName)
+            from { "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}" }
+            into { prepareSandboxTask.getPluginName() }
             dependsOn(prepareSandboxTask)
+            conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
+            it
         }
-
         ArchivePublishArtifact zipArtifact = new ArchivePublishArtifact(zip)
-        Configuration runtimeConfiguration = project.getConfigurations().getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
+        Configuration runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
         runtimeConfiguration.getArtifacts().add(zipArtifact)
         project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(zipArtifact)
         project.getComponents().add(new IntelliJPluginLibrary())
@@ -234,17 +233,18 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configurePublishPluginTask(@NotNull Project project,
                                                    @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring publishing IntelliJ IDEA plugin task")
-        def publishTask = project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask)
-        publishTask.group = GROUP_NAME
-        publishTask.description = "Publish plugin distribution on plugins.jetbrains.com."
-        publishTask.conventionMapping('username', { extension.publish.username })
-        publishTask.conventionMapping('password', { extension.publish.password })
-        publishTask.conventionMapping('channels', { extension.publish.channels })
-        publishTask.conventionMapping('distributionFile', {
-            def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
-            def distributionFile = buildPluginTask?.archivePath
-            return distributionFile?.exists() ? distributionFile : null
-        })
-        publishTask.dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
+        project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask).with {
+            group = GROUP_NAME
+            description = "Publish plugin distribution on plugins.jetbrains.com."
+            conventionMapping('username', { extension.publish.username })
+            conventionMapping('password', { extension.publish.password })
+            conventionMapping('channels', { extension.publish.channels })
+            conventionMapping('distributionFile', {
+                def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
+                def distributionFile = buildPluginTask?.archivePath
+                return distributionFile?.exists() ? distributionFile : null
+            })
+            dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
+        }
     }
 }

@@ -11,7 +11,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
+        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.BUILD_PLUGIN_TASK_NAME,
+                                             IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
                                              IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME, 'runIdea']
@@ -22,7 +23,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << ""
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
+        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.BUILD_PLUGIN_TASK_NAME,
+                                             IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
                                              IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME]
