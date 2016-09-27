@@ -2,57 +2,173 @@ package org.jetbrains.intellij
 
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.Copy
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
-import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.dependency.PluginDependency
 import org.xml.sax.SAXParseException
 
+@SuppressWarnings("GroovyUnusedDeclaration")
 class PrepareSandboxTask extends Copy {
-    public static String NAME = "prepareSandbox"
-
-    CopySpec classes
-    CopySpec libraries
-    CopySpec metaInf
-    CopySpec externalPlugins
+    Object pluginName
+    Object patchedPluginXmlDirectory
+    List<Object> librariesToIgnore = []
+    List<Object> pluginDependencies = []
 
     PrepareSandboxTask() {
-        this(false)
-    }
-
-    protected PrepareSandboxTask(boolean inTests) {
-        def extension = project.extensions.getByType(IntelliJPluginExtension)
-
-        CopySpecInternal plugin = rootSpec.addChild()
-        externalPlugins = plugin.addChild()
-        classes = plugin.addChild().into("$extension.pluginName/classes")
-        classes.includeEmptyDirs = false
-        libraries = plugin.addChild().into("$extension.pluginName/lib")
-        metaInf = plugin.addChild().into("$extension.pluginName/META-INF")
-
-        destinationDir = project.file(Utils.pluginsDir(extension, inTests))
+        pluginSpec = rootSpec.addChild()
         configureClasses()
-        configureLibraries(extension)
-        configureExternalPlugins(extension)
-
-        inputs.property('pluginDependencies', extension.pluginDependencies)
+        configureMetaInf()
+        configureExternalPlugins()
+        configureLibraries()
     }
+
+    @InputFiles
+    FileCollection getClasses() {
+        Utils.mainSourceSet(project).output
+    }
+
+    @Input
+    String getPluginName() {
+        Utils.stringInput(pluginName)
+    }
+
+    void setPluginName(Object pluginName) {
+        this.pluginName = pluginName
+    }
+
+    void pluginName(Object pluginName) {
+        this.pluginName = pluginName
+    }
+
+    @InputDirectory
+    @Optional
+    File getPatchedPluginXmlDirectory() {
+        patchedPluginXmlDirectory != null ? project.file(patchedPluginXmlDirectory) : null
+    }
+
+    void setPatchedPluginXmlDirectory(File patchedPluginXmlDirectory) {
+        this.patchedPluginXmlDirectory = patchedPluginXmlDirectory
+    }
+
+    void patchedPluginXmlDirectory(File patchedPluginXmlDirectory) {
+        this.patchedPluginXmlDirectory = patchedPluginXmlDirectory
+    }
+
+    @Input
+    @Optional
+    Collection<PluginDependency> getPluginDependencies() {
+        this.pluginDependencies.collect { it instanceof Closure ? (it as Closure).call() : it }.flatten().findAll {
+            it instanceof PluginDependency
+        } as Collection<PluginDependency>
+    }
+
+    void setPluginDependencies(Object... pluginDependencies) {
+        this.pluginDependencies.clear()
+        this.pluginDependencies.addAll(pluginDependencies as List)
+    }
+
+    void pluginDependencies(Object... pluginDependencies) {
+        this.pluginDependencies.addAll(pluginDependencies as List)
+    }
+
+    @InputFiles
+    @Optional
+    FileCollection getLibrariesToIgnore() {
+        project.files(librariesToIgnore)
+    }
+
+    void setLibrariesToIgnore(Object... librariesToIgnore) {
+        this.librariesToIgnore.clear()
+        this.librariesToIgnore.addAll(librariesToIgnore as List)
+    }
+
+    void librariesToIgnore(Object... librariesToIgnore) {
+        this.librariesToIgnore.addAll(librariesToIgnore as List)
+    }
+
+    private CopySpecInternal pluginSpec
+    private CopySpec classes
+    private CopySpec metaInf
 
     @Override
     protected void copy() {
-        Utils.outPluginXmlFiles(project).each { File xmlFile ->
-            processIdeaXml(xmlFile.parentFile, xmlFile.name, true)
-        }
-        def patchTask = project.tasks.getByName(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME) as PatchPluginXmlTask
-        if (patchTask != null) {
-            metaInf.from(patchTask.destinationDir.listFiles())
-        }
+        processLinkedXmlFiles()
         disableIdeUpdate()
         super.copy()
     }
 
-    def processIdeaXml(File rootFile, String filePath, boolean processDepends) {
+    private void configureClasses() {
+        classes = pluginSpec.addChild().into { "${getPluginName()}/classes" }
+        classes.from { getClasses() }
+        classes.includeEmptyDirs = false
+    }
+
+    private void configureMetaInf() {
+        metaInf = pluginSpec.addChild().into { "${getPluginName()}/META-INF" }
+        metaInf.from {
+            getPatchedPluginXmlDirectory()?.listFiles()
+        }
+        metaInf.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+    }
+
+    private void configureLibraries() {
+        CopySpec libraries = pluginSpec.addChild().into { "${getPluginName()}/lib" }
+        libraries.from {
+            def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
+            def librariesToIgnore = getLibrariesToIgnore().toSet()
+            librariesToIgnore.add(Jvm.current().toolsJar)
+            def pluginDependencies = getPluginDependencies()
+            librariesToIgnore.addAll((pluginDependencies*.jarFiles.flatten() as Collection<File>))
+            librariesToIgnore.addAll(pluginDependencies*.classesDirectory)
+            librariesToIgnore.addAll(pluginDependencies*.metaInfDirectory)
+
+            def result = []
+            runtimeConfiguration.getAllDependencies().each {
+                if (it instanceof ProjectDependency) {
+                    def dependencyProject = it.dependencyProject
+                    def intelliJPlugin = dependencyProject.plugins.findPlugin(IntelliJPlugin)
+                    if (intelliJPlugin != null) {
+                        if (Utils.sourcePluginXmlFiles(dependencyProject)) {
+                            IntelliJPlugin.LOG.debug(":${dependencyProject.name} project is IntelliJ-plugin project and won't be packed into the target distribution")
+                            return
+                        }
+                    }
+                }
+                result.addAll(runtimeConfiguration.fileCollection(it).filter { !librariesToIgnore.contains(it) })
+            }
+            result
+        }
+    }
+
+    private void configureExternalPlugins() {
+        def externalPlugins = pluginSpec.addChild()
+        externalPlugins.from {
+            def result = []
+            getPluginDependencies().each {
+                if (!it.builtin) {
+                    def artifact = it.artifact
+                    if (artifact.isDirectory()) {
+                        externalPlugins.into(artifact.getName()) { it.from(artifact) }
+                    } else {
+                        result.add(artifact)
+                    }
+                }
+            }
+            result
+        }
+    }
+
+    private void processLinkedXmlFiles() {
+        for (def xmlFile : Utils.outPluginXmlFiles(project)) {
+            processIdeaXml(xmlFile.parentFile, xmlFile.name, true)
+        }
+    }
+
+    private void processIdeaXml(File rootFile, String filePath, boolean processDepends) {
         if (rootFile != null && filePath != null) {
             def configFile = new File(rootFile, filePath)
             if (configFile.exists()) {
@@ -60,15 +176,15 @@ class PrepareSandboxTask extends Copy {
                 classes.exclude("META-INF/$filePath")
                 def pluginXml = Utils.parseXml(configFile)
                 if (processDepends) {
-                    pluginXml.depends.each {
-                        processIdeaXml(configFile.parentFile, it.attribute('config-file'), false)
+                    for (def dependsTag : pluginXml.depends) {
+                        processIdeaXml(configFile.parentFile, dependsTag.attribute('config-file'), false)
                     }
                 }
-                pluginXml.'xi:include'.each {
-                    processIdeaXml(configFile.parentFile, it.attribute('href'), processDepends)
-                    it.'xi:fallback'.each {
-                        it.'xi:include'.each {
-                            processIdeaXml(configFile.parentFile, it.attribute('href'), processDepends)
+                for (def includeTag : pluginXml.'xi:include') {
+                    processIdeaXml(configFile.parentFile, includeTag.attribute('href'), processDepends)
+                    for (def fallbackTag : includeTag.'xi:fallback') {
+                        for (def innerIncludeTag : fallbackTag.'xi:include') {
+                            processIdeaXml(configFile.parentFile, innerIncludeTag.attribute('href'), processDepends)
                         }
                     }
                 }
@@ -77,8 +193,7 @@ class PrepareSandboxTask extends Copy {
     }
 
     private void disableIdeUpdate() {
-        def extension = project.extensions.getByType(IntelliJPluginExtension)
-        def optionsDir = new File(Utils.configDir(extension, false), "options")
+        def optionsDir = new File(Utils.configDir(destinationDir.parentFile.absolutePath, false), "options")
         if (!optionsDir.exists() && !optionsDir.mkdirs()) {
             IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")
             return
@@ -124,46 +239,5 @@ class PrepareSandboxTask extends Copy {
         def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(updatesConfig)))
         printer.preserveWhitespace = true
         printer.print(parse)
-    }
-
-    private void configureClasses() {
-        classes.from(Utils.mainSourceSet(project).output)
-    }
-
-    private void configureLibraries(@NotNull IntelliJPluginExtension extension) {
-        def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
-        def intellijFiles = new HashSet<>(extension.ideaDependency.jarFiles)
-        intellijFiles.add(Jvm.current().toolsJar)
-        def pluginFiles = (extension.pluginDependencies*.jarFiles.flatten() as Collection<File>) + 
-                extension.pluginDependencies*.classesDirectory +
-                extension.pluginDependencies*.metaInfDirectory
-        runtimeConfiguration.getAllDependencies().each {
-            if (it instanceof ProjectDependency) {
-                def dependencyProject = it.dependencyProject
-                def intelliJPlugin = dependencyProject.plugins.findPlugin(IntelliJPlugin)
-                if (intelliJPlugin != null) {
-                    if (Utils.sourcePluginXmlFiles(dependencyProject)) {
-                        IntelliJPlugin.LOG.debug(":${dependencyProject.name} project is IntelliJ-plugin project and won't be packed into the target distribution")
-                        return
-                    }
-                }
-            }
-            libraries.from(runtimeConfiguration.fileCollection(it).filter {
-                !intellijFiles.contains(it) && !pluginFiles.contains(it)
-            })
-        }
-    }
-
-    private void configureExternalPlugins(@NotNull IntelliJPluginExtension extension) {
-        extension.pluginDependencies.each {
-            if (!it.builtin) {
-                def artifact = it.artifact
-                if (artifact.isDirectory()) {
-                    externalPlugins.into(artifact.getName()) { it.from(artifact) }
-                } else {
-                    externalPlugins.from(artifact)
-                }
-            }
-        }
     }
 }

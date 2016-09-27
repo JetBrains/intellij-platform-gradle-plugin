@@ -86,9 +86,9 @@ class Utils {
         def properties = new HashMap<String, Object>()
         properties.putAll(originalProperties)
         properties.putAll(extension.systemProperties)
-        properties.put("idea.config.path", project.file(configDir(extension, inTests)).path)
+        properties.put("idea.config.path", project.file(configDir(extension.sandboxDirectory, inTests)).path)
         properties.put("idea.system.path", project.file(systemDir(extension, inTests)).path)
-        properties.put("idea.plugins.path", project.file(pluginsDir(extension, inTests)).path)
+        properties.put("idea.plugins.path", project.file(pluginsDir(extension.sandboxDirectory, inTests)).path)
         def pluginId = getPluginId(project)
         if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
             properties.put("idea.required.plugins.id", pluginId)
@@ -96,9 +96,9 @@ class Utils {
         return properties
     }
 
-    static def configDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+    static def configDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
-        "$extension.sandboxDirectory/config$suffix"
+        "${sandboxDirectoryPath}/config$suffix"
     }
 
     static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
@@ -106,9 +106,9 @@ class Utils {
         "$extension.sandboxDirectory/system$suffix"
     }
 
-    static def pluginsDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+    static def pluginsDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
-        "$extension.sandboxDirectory/plugins$suffix"
+        "$sandboxDirectoryPath/plugins$suffix"
     }
 
     @NotNull

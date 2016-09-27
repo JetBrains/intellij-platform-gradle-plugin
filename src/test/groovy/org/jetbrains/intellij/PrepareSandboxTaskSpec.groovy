@@ -23,11 +23,10 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('nestedProject/src/main/resources/META-INF/plugin.xml') << pluginXml.text
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        println collectPaths(sandbox.parentFile.parentFile)
         assert collectPaths(sandbox) == ['/plugins/myNestedPluginName/META-INF/plugin.xml',
                                          '/plugins/myNestedPluginName/classes/NestedAppFile.class',
                                          '/plugins/myPluginName/classes/App.class',
@@ -53,7 +52,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             """.stripIndent()
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(true, IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
@@ -68,7 +67,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
               <version>0.42.123</version>
               <idea-version since-build="141.1010" until-build="141.*"/>
               <depends config-file="other.xml"/>
-            </idea-plugin>""");
+            </idea-plugin>""")
     }
 
     def 'prepare sandbox with x:include'() {
@@ -93,7 +92,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             }""".stripIndent()
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
@@ -112,7 +111,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                   <xi:include href="otherFallback.xml" xpointer="xpointer(/idea-plugin/*)"/>
                 </xi:fallback>
               </xi:include>
-            </idea-plugin>""");
+            </idea-plugin>""")
     }
 
     def 'prepare sandbox with external jar-type plugin'() {
@@ -126,7 +125,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             }
             """.stripIndent()
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
@@ -149,7 +148,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             }
             """.stripIndent()
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
@@ -189,7 +188,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             }""".stripIndent()
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
@@ -220,7 +219,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             }\
             """.stripIndent()
         when:
-        run(PrepareSandboxTask.NAME)
+        run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         assert collectPaths(new File(sandboxPath)) == ['/plugins/myPluginName/classes/App.class',
@@ -242,7 +241,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/$project.name/META-INF/plugin.xml", '/config/options/updates.xml'] as Set
@@ -253,7 +252,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''\
@@ -276,7 +275,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             </application>'''.stripIndent()
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''\
@@ -302,7 +301,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             </application>'''.stripIndent()
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''\
@@ -326,7 +325,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             </application>'''.stripIndent()
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''\
@@ -349,7 +348,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             </application>'''.stripIndent()
 
         when:
-        def project = run(PrepareSandboxTask.NAME)
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         assertFileContent(new File(project.buildDirectory, "$IntelliJPlugin.DEFAULT_SANDBOX/config/options/updates.xml"), '''\

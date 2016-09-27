@@ -11,8 +11,10 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME, 'prepareSandbox', 
-                                             'prepareTestsSandbox', 'publishPlugin', 'runIdea']
+        tasks(IntelliJPlugin.GROUP_NAME) == ['buildPlugin', IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
+                                             IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
+                                             IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
+                                             IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME, 'runIdea']
     }
 
     def 'do not add intellij-specific tasks for project without plugin.xml'() {
@@ -20,7 +22,9 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << ""
 
         then:
-        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME, 
+        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
+                                             IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
+                                             IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME]
         stdout.contains('specific tasks will be unavailable')
     }
@@ -114,7 +118,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         assert cacheDir.list() as Set == ['af6b922431b0283c8bfe6bca871978f9d734d9c7', 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0'] as Set
         assert new File(cacheDir, 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0').list() as Set == ['ideaIC-14.1.5.pom'] as Set
         assert new File(cacheDir, 'af6b922431b0283c8bfe6bca871978f9d734d9c7').list() as Set == ['ideaIC-14.1.5', 'ideaIC-14.1.5.zip'] as Set
-        
+
         // do not download ideaIC dist
         assert ideaCommunityCacheDir.list() as Set == ['f58943066d699049a2e802660d554190e613a403'] as Set
         assert new File(cacheDir, 'f58943066d699049a2e802660d554190e613a403').list() as Set == ['ideaIC-14.1.5-sources.jar'] as Set
@@ -247,7 +251,7 @@ public class AppTest {
         String permGen = null
         def jvmArgs = new HashSet<String>()
 
-         static ProcessProperties parse(@NotNull String commandLine) {
+        static ProcessProperties parse(@NotNull String commandLine) {
             boolean first = true
             def result = new ProcessProperties()
             commandLine.split('\\s+').each {

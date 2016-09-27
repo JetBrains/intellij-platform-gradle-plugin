@@ -23,10 +23,13 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final GROUP_NAME = "intellij"
     public static final EXTENSION_NAME = "intellij"
     public static final String DEFAULT_SANDBOX = 'idea-sandbox'
-    public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
-    public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
     public static final String PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
     public static final String PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
+    public static final String PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
+    public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
+    public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
+    public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
+
 
     public static final LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
@@ -54,15 +57,14 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static def configurePlugin(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA gradle plugin")
-        configurePatchPluginXmlTask(project, extension)
+        def patchPluginXmlTask = configurePatchPluginXmlTask(project, extension)
+        configurePrepareSandboxTask(project, extension, patchPluginXmlTask)
         configurePublishPluginTask(project, extension)
         project.afterEvaluate {
             configureInstrumentation(it, extension)
             configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
             if (Utils.sourcePluginXmlFiles(it)) {
-                configurePrepareSandboxTask(it)
-                configurePrepareTestsSandboxTask(it)
                 configureRunIdeaTask(it, extension)
                 configureBuildPluginTask(it, extension)
             } else {
@@ -113,8 +115,8 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configurePatchPluginXmlTask(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension) {
+    private static PatchPluginXmlTask configurePatchPluginXmlTask(@NotNull Project project,
+                                                                  @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring patch plugin.xml task")
         def patchPluginXmlTask = project.tasks.create(PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask)
         patchPluginXmlTask.group = GROUP_NAME
@@ -136,28 +138,35 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         })
         patchPluginXmlTask.dependsOn { project.getTasks().withType(ProcessResources) }
+        return patchPluginXmlTask
     }
 
-    private static void configurePrepareSandboxTask(@NotNull Project project) {
+    private static void configurePrepareSandboxTask(@NotNull Project project,
+                                                    @NotNull IntelliJPluginExtension extension,
+                                                    @NotNull PatchPluginXmlTask patchPluginXmlTask) {
+        configurePrepareSandboxTask(project, extension, patchPluginXmlTask, false)
+        configurePrepareSandboxTask(project, extension, patchPluginXmlTask, true)
+    }
+
+    private static void configurePrepareSandboxTask(@NotNull Project project,
+                                                    @NotNull IntelliJPluginExtension extension,
+                                                    @NotNull PatchPluginXmlTask patchPluginXmlTask,
+                                                    boolean inTest) {
         LOG.info("Configuring prepare IntelliJ sandbox task")
-        project.tasks.create(PrepareSandboxTask.NAME, PrepareSandboxTask).with {
-            group = GROUP_NAME
-            description = "Creates a folder containing the plugins to run Intellij IDEA with."
-            dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
-            dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
-            dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
-        }
-    }
-
-    private static void configurePrepareTestsSandboxTask(@NotNull Project project) {
-        LOG.info("Configuring prepare IntelliJ sandbox for tests task")
-        project.tasks.create(PrepareTestsSandboxTask.NAME, PrepareTestsSandboxTask).with {
-            group = GROUP_NAME
-            description = "Creates a folder containing the plugins to run IntelliJ plugin tests with."
-            dependsOn(project.getTasksByName(JavaPlugin.TEST_CLASSES_TASK_NAME, false))
-            dependsOn(project.getTasksByName(JavaPlugin.PROCESS_TEST_RESOURCES_TASK_NAME, false))
-            dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
-        }
+        def taskName = inTest ? PREPARE_TESTING_SANDBOX_TASK_NAME : PREPARE_SANDBOX_TASK_NAME
+        def prepareSandboxTask = project.tasks.create(taskName, PrepareSandboxTask)
+        prepareSandboxTask.group = GROUP_NAME
+        prepareSandboxTask.description = "Prepare sandbox directory with installed plugin and its dependencies."
+        prepareSandboxTask.conventionMapping('pluginName', { extension.pluginName })
+        prepareSandboxTask.conventionMapping('destinationDir', {
+            project.file(Utils.pluginsDir(extension.sandboxDirectory, inTest))
+        })
+        prepareSandboxTask.conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
+        prepareSandboxTask.conventionMapping('pluginDependencies', { extension.pluginDependencies })
+        prepareSandboxTask.conventionMapping('patchedPluginXmlDirectory', { patchPluginXmlTask.getDestinationDir() })
+        prepareSandboxTask.dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
+        prepareSandboxTask.dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
+        prepareSandboxTask.dependsOn(patchPluginXmlTask)
     }
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
@@ -165,9 +174,9 @@ class IntelliJPlugin implements Plugin<Project> {
         def task = project.tasks.create(RunIdeaTask.NAME, RunIdeaTask)
         task.group = GROUP_NAME
         task.description = "Runs Intellij IDEA with installed plugin."
-        task.dependsOn(project.getTasksByName(PrepareSandboxTask.NAME, false))
+        task.dependsOn(project.getTasksByName(PREPARE_SANDBOX_TASK_NAME, false))
         task.outputs.dir(Utils.systemDir(extension, false))
-        task.outputs.dir(Utils.configDir(extension, false))
+        task.outputs.dir(Utils.configDir(extension.sandboxDirectory, false))
         task.outputs.upToDateWhen { false }
     }
 
@@ -191,20 +200,20 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ tests tasks")
         project.tasks.withType(Test).each {
-            it.dependsOn(project.getTasksByName(PrepareTestsSandboxTask.NAME, false))
+            it.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
             it.enableAssertions = true
             it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
                     "$extension.ideaDependency.classes/lib/idea.jar")
             it.outputs.dir(Utils.systemDir(extension, true))
-            it.outputs.dir(Utils.configDir(extension, true))
+            it.outputs.dir(Utils.configDir(extension.sandboxDirectory, true))
         }
     }
 
     private static void configureBuildPluginTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring building IntelliJ IDEA plugin task")
-        def prepareSandboxTask = project.tasks.findByName(PrepareSandboxTask.NAME) as PrepareSandboxTask
+        def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
         Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip)
         zip.with {
             description = "Bundles the project as a distribution."
