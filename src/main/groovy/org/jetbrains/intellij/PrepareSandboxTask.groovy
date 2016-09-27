@@ -7,6 +7,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.*
+import org.gradle.internal.FileUtils
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.xml.sax.SAXParseException
@@ -33,7 +34,8 @@ class PrepareSandboxTask extends Copy {
 
     @Input
     String getPluginName() {
-        Utils.stringInput(pluginName)
+        def pluginName = Utils.stringInput(pluginName)
+        pluginName != null ? FileUtils.toSafeFileName(pluginName) : null
     }
 
     void setPluginName(Object pluginName) {
