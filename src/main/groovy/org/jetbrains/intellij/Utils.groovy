@@ -19,28 +19,28 @@ class Utils {
     public static final Pattern VERSION_PATTERN = Pattern.compile('^([A-Z]{2})-([0-9.A-z]+)\\s*$')
 
     @NotNull
-     static SourceSet mainSourceSet(@NotNull Project project) {
+    static SourceSet mainSourceSet(@NotNull Project project) {
         JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention)
         javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
     }
 
     @NotNull
-     static SourceSet testSourceSet(@NotNull Project project) {
+    static SourceSet testSourceSet(@NotNull Project project) {
         JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention)
         javaConvention.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
     }
 
     @NotNull
-     static DefaultIvyArtifact createJarDependency(File file, String configuration, File baseDir) {
+    static DefaultIvyArtifact createJarDependency(File file, String configuration, File baseDir) {
         return createDependency(baseDir, file, configuration, "jar", "jar")
     }
 
     @NotNull
-     static DefaultIvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
+    static DefaultIvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
         return createDependency(baseDir, file, configuration, "", "directory")
     }
 
-    private static DefaultIvyArtifact createDependency(File baseDir, File file, String configuration, 
+    private static DefaultIvyArtifact createDependency(File baseDir, File file, String configuration,
                                                        String extension, String type) {
         def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
         def name = extension ? relativePath - ".$extension" : relativePath
@@ -50,12 +50,12 @@ class Utils {
     }
 
     @NotNull
-     static Set<File> sourcePluginXmlFiles(@NotNull Project project) {
+    static Set<File> sourcePluginXmlFiles(@NotNull Project project) {
         pluginXmlFiles(mainSourceSet(project).resources.srcDirs)
     }
 
     @NotNull
-     static FileCollection outPluginXmlFiles(@NotNull Project project) {
+    static FileCollection outPluginXmlFiles(@NotNull Project project) {
         project.files(pluginXmlFiles(mainSourceSet(project).output.files))
     }
 
@@ -79,10 +79,10 @@ class Utils {
     }
 
     @NotNull
-     static Map<String, Object> getIdeaSystemProperties(@NotNull Project project,
-                                                              @NotNull Map<String, Object> originalProperties,
-                                                              @NotNull IntelliJPluginExtension extension,
-                                                              boolean inTests) {
+    static Map<String, Object> getIdeaSystemProperties(@NotNull Project project,
+                                                       @NotNull Map<String, Object> originalProperties,
+                                                       @NotNull IntelliJPluginExtension extension,
+                                                       boolean inTests) {
         def properties = new HashMap<String, Object>()
         properties.putAll(originalProperties)
         properties.putAll(extension.systemProperties)
@@ -96,25 +96,25 @@ class Utils {
         return properties
     }
 
-     static def configDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+    static def configDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$extension.sandboxDirectory/config$suffix"
     }
 
-     static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+    static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$extension.sandboxDirectory/system$suffix"
     }
 
-     static def pluginsDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+    static def pluginsDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$extension.sandboxDirectory/plugins$suffix"
     }
 
     @NotNull
-     static List<String> getIdeaJvmArgs(@NotNull JavaForkOptions options,
-                                              @NotNull List<String> originalArguments,
-                                              @NotNull IntelliJPluginExtension extension) {
+    static List<String> getIdeaJvmArgs(@NotNull JavaForkOptions options,
+                                       @NotNull List<String> originalArguments,
+                                       @NotNull IntelliJPluginExtension extension) {
         if (options.maxHeapSize == null) options.maxHeapSize = "512m"
         if (options.minHeapSize == null) options.minHeapSize = "256m"
         boolean hasPermSizeArg = false
@@ -132,7 +132,7 @@ class Utils {
     }
 
     @NotNull
-     static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
+    static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
         def path = extension.alternativeIdePath
         if (path) {
             def dir = new File(path)
@@ -150,7 +150,7 @@ class Utils {
     }
 
     @NotNull
-     static String ideaBuildNumber(@NotNull File ideaDirectory) {
+    static String ideaBuildNumber(@NotNull File ideaDirectory) {
         if (isMac()) {
             def file = new File(ideaDirectory, "Resources/build.txt")
             if (file.exists()) {
@@ -160,7 +160,7 @@ class Utils {
         return new File(ideaDirectory, "build.txt").getText('UTF-8').trim()
     }
 
-     static boolean isMac() {
+    static boolean isMac() {
         return System.getProperty("os.name").toLowerCase(Locale.US).startsWith("mac")
     }
 
@@ -193,7 +193,7 @@ class Utils {
             }
         })
         InputStream inputStream = new FileInputStream(file)
-        InputSource input = new InputSource(new InputStreamReader(inputStream,"UTF-8"))
+        InputSource input = new InputSource(new InputStreamReader(inputStream, "UTF-8"))
         input.setEncoding("UTF-8")
         try {
             return parser.parse(input)
@@ -203,16 +203,16 @@ class Utils {
         }
     }
 
-     static boolean isJarFile(@NotNull File file) {
+    static boolean isJarFile(@NotNull File file) {
         return StringUtil.endsWithIgnoreCase(file.name, ".jar")
     }
 
-     static boolean isZipFile(@NotNull File file) {
+    static boolean isZipFile(@NotNull File file) {
         return StringUtil.endsWithIgnoreCase(file.name, ".zip")
     }
 
     @NotNull
-     static parsePluginDependencyString(@NotNull String s) {
+    static parsePluginDependencyString(@NotNull String s) {
         def id = null, version = null, channel = null
         def idAndVersion = s.split('[:]', 2)
         if (idAndVersion.length == 1) {
@@ -226,5 +226,10 @@ class Utils {
             channel = versionAndChannel.length > 1 ? versionAndChannel[1] : null
         }
         return new Tuple(id ?: null, version ?: null, channel ?: null)
+    }
+
+    static String stringInput(input) {
+        input = input instanceof Closure ? (input as Closure).call() : input
+        return input?.toString()
     }
 }

@@ -8,11 +8,12 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class PublishTask extends ConventionTask {
-    private File distributionFile
+    private Object distributionFile
     private Object host = PluginDependencyManager.DEFAULT_INTELLIJ_PLUGINS_REPO
     private Object username
     private Object password
@@ -24,7 +25,7 @@ class PublishTask extends ConventionTask {
 
     @Input
     String getHost() {
-        return host.toString()
+        Utils.stringInput(host)
     }
 
     void setHost(Object host) {
@@ -37,16 +38,20 @@ class PublishTask extends ConventionTask {
 
     @InputFile
     File getDistributionFile() {
-        return distributionFile
+        distributionFile != null ? project.file(distributionFile) : null
     }
 
-    void setDistributionFile(File distributionFile) {
+    void setDistributionFile(Object distributionFile) {
+        this.distributionFile = distributionFile
+    }
+
+    void distributionFile(Object distributionFile) {
         this.distributionFile = distributionFile
     }
 
     @Input
     String getUsername() {
-        return username != null ? username.toString() : null
+        Utils.stringInput(username)
     }
 
     void setUsername(Object username) {
@@ -59,7 +64,7 @@ class PublishTask extends ConventionTask {
 
     @Input
     String getPassword() {
-        return password != null ? password.toString() : null
+        Utils.stringInput(password)
     }
 
     void setPassword(Object password) {
@@ -72,7 +77,7 @@ class PublishTask extends ConventionTask {
 
     @Input
     String[] getChannels() {
-        return CollectionUtils.stringize(channels.collect {
+        CollectionUtils.stringize(channels.collect {
             it instanceof Closure ? (it as Closure).call() : it
         }.flatten())
     }

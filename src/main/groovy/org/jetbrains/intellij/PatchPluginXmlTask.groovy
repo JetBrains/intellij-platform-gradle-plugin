@@ -7,7 +7,7 @@ import org.gradle.api.tasks.*
 
 @SuppressWarnings("GroovyUnusedDeclaration")
 class PatchPluginXmlTask extends ConventionTask {
-    private File destinationDir
+    private Object destinationDir
     private List<Object> pluginXmlFiles = []
     private Object version
     private Object sinceBuild
@@ -15,14 +15,14 @@ class PatchPluginXmlTask extends ConventionTask {
 
     @OutputDirectory
     File getDestinationDir() {
-        destinationDir
+        destinationDir != null ? project.file(destinationDir) : null
     }
 
-    void setDestinationDir(File destinationDir) {
+    void setDestinationDir(Object destinationDir) {
         this.destinationDir = destinationDir
     }
 
-    void destinationDir(File destinationDir) {
+    void destinationDir(Object destinationDir) {
         this.destinationDir = destinationDir
     }
 
@@ -44,7 +44,7 @@ class PatchPluginXmlTask extends ConventionTask {
     @Input
     @Optional
     String getVersion() {
-        version.toString()
+        Utils.stringInput(version)
     }
 
     void setVersion(Object version) {
@@ -58,7 +58,7 @@ class PatchPluginXmlTask extends ConventionTask {
     @Input
     @Optional
     String getSinceBuild() {
-        sinceBuild.toString()
+        Utils.stringInput(sinceBuild)
     }
 
     void setSinceBuild(Object sinceBuild) {
@@ -72,7 +72,7 @@ class PatchPluginXmlTask extends ConventionTask {
     @Input
     @Optional
     String getUntilBuild() {
-        untilBuild.toString()
+        Utils.stringInput(untilBuild)
     }
 
     void setUntilBuild(Object untilBuild) {
