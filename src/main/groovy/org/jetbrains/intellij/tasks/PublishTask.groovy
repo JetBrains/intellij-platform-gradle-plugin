@@ -18,6 +18,10 @@ class PublishTask extends ConventionTask {
     private Object password
     private List<Object> channels = new ArrayList<Object>()
 
+    PublishTask() {
+        enabled = !project.gradle.startParameter.offline
+    }
+
     @Input
     String getHost() {
         return host.toString()
