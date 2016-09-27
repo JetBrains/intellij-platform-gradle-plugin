@@ -23,8 +23,8 @@ class IntelliJPluginExtension {
     Publish publish
 
     IdeaDependency ideaDependency
-    private final Set<PluginDependency> pluginDependencies = new HashSet<>();
-    private final Map<String, Object> systemProperties = new HashMap<>();
+    private final Set<PluginDependency> pluginDependencies = new HashSet<>()
+    private final Map<String, Object> systemProperties = new HashMap<>()
 
     String getType() {
         return version.startsWith("IU-") || "IU".equals(type) ? "IU" : "IC"
@@ -42,7 +42,7 @@ class IntelliJPluginExtension {
         publish.with(c)
     }
 
-    public static class Publish {
+    static class Publish {
         /**
          * @deprecated intellij.publish.pluginId property is deprecated. Tag 'id' from plugin.xml will be used for uploading. 
          */
@@ -52,7 +52,7 @@ class IntelliJPluginExtension {
         String[] channels
 
         /**
-         * @deprecated 
+         * @deprecated
          */
         static def pluginId(String pluginId) {
             IntelliJPlugin.LOG.warn("intellij.publish.pluginId property is deprecated. " +
@@ -66,7 +66,7 @@ class IntelliJPluginExtension {
         def password(String password) {
             this.password = password
         }
-        
+
         def setChannel(String channel) {
             this.channels = [channel]
         }
@@ -74,11 +74,11 @@ class IntelliJPluginExtension {
         def channel(String channel) {
             channels(channel)
         }
-        
+
         def channels(String... channels) {
             this.channels = channels
         }
-        
+
         def setChannels(String... channels) {
             this.channels = channels
         }
