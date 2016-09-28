@@ -188,11 +188,11 @@ class IntelliJPlugin implements Plugin<Project> {
             }.flatten() as Collection<AbstractCompile>
         }
         abstractCompileDependencies(JavaPlugin.CLASSES_TASK_NAME).each {
-            it.inputs.property("intellijIdeaDependency", extension.ideaDependency)
+            it.inputs.property("intellijIdeaDependency", extension.ideaDependency.toString())
             it.doLast(new IntelliJInstrumentCodeAction(false))
         }
         abstractCompileDependencies(JavaPlugin.TEST_CLASSES_TASK_NAME).each {
-            it.inputs.property("intellijIdeaDependency", extension.ideaDependency)
+            it.inputs.property("intellijIdeaDependency", extension.ideaDependency.toString())
             it.doLast(new IntelliJInstrumentCodeAction(true))
         }
     }
