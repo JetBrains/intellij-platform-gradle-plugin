@@ -1,34 +1,114 @@
 package org.jetbrains.intellij
 
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.internal.jvm.Jvm
-import org.jetbrains.annotations.NotNull
+import org.gradle.internal.os.OperatingSystem
+import org.gradle.util.CollectionUtils
 
 class RunIdeaTask extends JavaExec {
-    public static String NAME = "runIdea"
-    
-    private static final def prefixTable = [IU: null,
-                                            IC: 'Idea',
-                                            RM: 'Ruby',
-                                            PY: 'Python',
-                                            PC: 'PyCharmCore',
-                                            PE: 'PyCharmEdu',
-                                            PS: 'PhpStorm',
-                                            WS: 'WebStorm',
-                                            OC: 'AppCode',
-                                            CL: 'CLion',
-                                            DB: '0xDBE',
-                                            AI: 'AndroidStudio']
-    private IntelliJPluginExtension extension
+    private static final def PREFIXES = [IU: null,
+                                         IC: 'Idea',
+                                         RM: 'Ruby',
+                                         PY: 'Python',
+                                         PC: 'PyCharmCore',
+                                         PE: 'PyCharmEdu',
+                                         PS: 'PhpStorm',
+                                         WS: 'WebStorm',
+                                         OC: 'AppCode',
+                                         CL: 'CLion',
+                                         DB: '0xDBE',
+                                         AI: 'AndroidStudio']
+    private List<Object> requiredPluginIds = []
+    private Object ideaDirectory
+    private Object configDirectory
+    private Object systemDirectory
+    private Object pluginsDirectory
 
-    public RunIdeaTask() {
+    List<String> getRequiredPluginIds() {
+        CollectionUtils.stringize(requiredPluginIds.collect {
+            it instanceof Closure ? (it as Closure).call() : it
+        }.flatten())
+    }
+
+    void setRequiredPluginIds(Object... requiredPluginIds) {
+        this.requiredPluginIds.clear()
+        this.requiredPluginIds.addAll(requiredPluginIds as List)
+    }
+
+    void requiredPluginIds(Object... requiredPluginIds) {
+        this.requiredPluginIds.addAll(requiredPluginIds as List)
+    }
+
+    @InputDirectory
+    File getIdeaDirectory() {
+        ideaDirectory != null ? project.file(ideaDirectory) : null
+    }
+
+    void setIdeaDirectory(Object ideaDirectory) {
+        this.ideaDirectory = ideaDirectory
+    }
+
+    void ideaDirectory(Object ideaDirectory) {
+        this.ideaDirectory = ideaDirectory
+    }
+
+    @OutputDirectory
+    File getConfigDirectory() {
+        configDirectory != null ? project.file(configDirectory) : null
+    }
+
+    void setConfigDirectory(Object configDirectory) {
+        this.configDirectory = configDirectory
+    }
+
+    void configDirectory(Object configDirectory) {
+        this.configDirectory = configDirectory
+    }
+
+    @OutputDirectory
+    File getSystemDirectory() {
+        systemDirectory != null ? project.file(systemDirectory) : null
+    }
+
+    void setSystemDirectory(Object systemDirectory) {
+        this.systemDirectory = systemDirectory
+    }
+
+    void systemDirectory(Object systemDirectory) {
+        this.systemDirectory = systemDirectory
+    }
+
+    File getPluginsDirectory() {
+        pluginsDirectory != null ? project.file(pluginsDirectory) : null
+    }
+
+    void setPluginsDirectory(Object pluginsDirectory) {
+        this.pluginsDirectory = pluginsDirectory
+    }
+
+    void pluginsDirectory(Object pluginsDirectory) {
+        this.pluginsDirectory = pluginsDirectory
+    }
+
+    RunIdeaTask() {
         setMain("com.intellij.idea.Main")
-
-        extension = project.extensions.findByName(IntelliJPlugin.EXTENSION_NAME) as IntelliJPluginExtension
         enableAssertions = true
-        def ideaDirectory = Utils.ideaSdkDirectory(extension)
-        workingDir = project.file("$ideaDirectory/bin/")
+        outputs.upToDateWhen { false }
+    }
 
+    @Override
+    void exec() {
+        workingDir = project.file("${getIdeaDirectory()}/bin/")
+        configureClasspath()
+        configureSystemProperties()
+        configureJvmArgs()
+        super.exec()
+    }
+
+    private void configureClasspath() {
+        File ideaDirectory = getIdeaDirectory()
         def toolsJar = Jvm.current().toolsJar
         if (toolsJar != null) classpath += project.files(toolsJar)
         classpath += project.files("$ideaDirectory/lib/idea_rt.jar",
@@ -40,41 +120,32 @@ class RunIdeaTask extends JavaExec {
                 "$ideaDirectory/lib/trove4j.jar",
                 "$ideaDirectory/lib/jdom.jar",
                 "$ideaDirectory/lib/log4j.jar")
-        systemProperties = patchSystemProperties(ideaDirectory)
     }
 
-    def patchSystemProperties(@NotNull File ideaDirectory) {
-        def properties = Utils.getIdeaSystemProperties(project, super.systemProperties, extension, false)
-        if (Utils.isMac()) {
-            properties.put("idea.smooth.progress", false);
-            properties.put("apple.laf.useScreenMenuBar", true);
-        } else if (isUnix() && !properties.containsKey("sun.awt.disablegrab")) {
-            properties.put("sun.awt.disablegrab", true);
+    def configureSystemProperties() {
+        systemProperties(Utils.getIdeaSystemProperties(getConfigDirectory(), getSystemDirectory(), getPluginsDirectory(), getRequiredPluginIds()))
+        def operatingSystem = OperatingSystem.current()
+        if (operatingSystem.isMacOsX()) {
+            systemProperty("idea.smooth.progress", false)
+            systemProperty("apple.laf.useScreenMenuBar", true)
+        } else if (operatingSystem.isUnix() && !getSystemProperties().containsKey("sun.awt.disablegrab")) {
+            systemProperty("sun.awt.disablegrab", true)
         }
-        properties.put("idea.classpath.index.enabled", false)
-        properties.put("idea.is.internal", true)
+        systemProperty("idea.classpath.index.enabled", false)
+        systemProperty("idea.is.internal", true)
 
-        if (!properties.containsKey('idea.platform.prefix')) {
-            def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(ideaDirectory))
+        if (!getSystemProperties().containsKey('idea.platform.prefix')) {
+            def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(getIdeaDirectory()))
             if (matcher.find()) {
-                def prefix = prefixTable.get(matcher.group(1))
+                def prefix = PREFIXES.get(matcher.group(1))
                 if (prefix) {
-                    properties.put('idea.platform.prefix', prefix)
+                    systemProperty('idea.platform.prefix', prefix)
                 }
             }
         }
-        return properties
     }
 
-    @Override
-    List<String> getJvmArgs() {
-        return Utils.getIdeaJvmArgs(this, super.jvmArgs, extension);
-    }
-
-    static boolean isUnix() {
-        def osName = System.getProperty("os.name").toLowerCase(Locale.US)
-        def isWindows = osName.startsWith("windows")
-        def isOS2 = osName.startsWith("os/2") || osName.startsWith("os2")
-        return !isWindows && !isOS2
+    def configureJvmArgs() {
+        jvmArgs(Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory()))
     }
 }

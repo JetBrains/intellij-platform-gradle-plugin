@@ -6,6 +6,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.tasks.SourceSet
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.annotations.NotNull
 import org.xml.sax.ErrorHandler
@@ -79,31 +80,27 @@ class Utils {
     }
 
     @NotNull
-    static Map<String, Object> getIdeaSystemProperties(@NotNull Project project,
-                                                       @NotNull Map<String, Object> originalProperties,
-                                                       @NotNull IntelliJPluginExtension extension,
-                                                       boolean inTests) {
-        def properties = new HashMap<String, Object>()
-        properties.putAll(originalProperties)
-        properties.putAll(extension.systemProperties)
-        properties.put("idea.config.path", project.file(configDir(extension.sandboxDirectory, inTests)).path)
-        properties.put("idea.system.path", project.file(systemDir(extension, inTests)).path)
-        properties.put("idea.plugins.path", project.file(pluginsDir(extension.sandboxDirectory, inTests)).path)
-        def pluginId = getPluginId(project)
-        if (!properties.containsKey("idea.required.plugins.id") && pluginId != null) {
-            properties.put("idea.required.plugins.id", pluginId)
+    static Map<String, Object> getIdeaSystemProperties(@NotNull File configDirectory,
+                                                       @NotNull File systemDirectory,
+                                                       @NotNull File pluginsDirectory,
+                                                       @NotNull List<String> requirePluginIds) {
+        def result = ["idea.config.path" : configDirectory.absolutePath,
+                      "idea.system.path" : systemDirectory.absolutePath,
+                      "idea.plugins.path": pluginsDirectory.absolutePath]
+        if (!requirePluginIds.empty) {
+            result.put("idea.required.plugins.id", requirePluginIds.join(","))
         }
-        return properties
+        result
     }
 
     static def configDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
-        "${sandboxDirectoryPath}/config$suffix"
+        "$sandboxDirectoryPath/config$suffix"
     }
 
-    static def systemDir(@NotNull IntelliJPluginExtension extension, boolean inTests) {
+    static def systemDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
-        "$extension.sandboxDirectory/system$suffix"
+        "$sandboxDirectoryPath/system$suffix"
     }
 
     static def pluginsDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
@@ -114,7 +111,7 @@ class Utils {
     @NotNull
     static List<String> getIdeaJvmArgs(@NotNull JavaForkOptions options,
                                        @NotNull List<String> originalArguments,
-                                       @NotNull IntelliJPluginExtension extension) {
+                                       @NotNull File ideaDirectory) {
         if (options.maxHeapSize == null) options.maxHeapSize = "512m"
         if (options.minHeapSize == null) options.minHeapSize = "256m"
         boolean hasPermSizeArg = false
@@ -126,7 +123,7 @@ class Utils {
             result += arg
         }
 
-        result += "-Xbootclasspath/a:${ideaSdkDirectory(extension).absolutePath}/lib/boot.jar"
+        result += "-Xbootclasspath/a:${ideaDirectory.absolutePath}/lib/boot.jar"
         if (!hasPermSizeArg) result += "-XX:MaxPermSize=250m"
         return result
     }
@@ -151,7 +148,7 @@ class Utils {
 
     @NotNull
     static String ideaBuildNumber(@NotNull File ideaDirectory) {
-        if (isMac()) {
+        if (OperatingSystem.current().isMacOsX()) {
             def file = new File(ideaDirectory, "Resources/build.txt")
             if (file.exists()) {
                 return file.getText('UTF-8').trim()
@@ -160,17 +157,14 @@ class Utils {
         return new File(ideaDirectory, "build.txt").getText('UTF-8').trim()
     }
 
-    static boolean isMac() {
-        return System.getProperty("os.name").toLowerCase(Locale.US).startsWith("mac")
-    }
-
-    static def getPluginId(@NotNull Project project) {
+    // todo: collect all ids for multiproject configuration
+    static def getPluginIds(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
         sourcePluginXmlFiles(project).each {
             def pluginXml = parseXml(it)
             ids += pluginXml.id*.text()
         }
-        return ids.size() == 1 ? ids.first() : null
+        return ids.size() == 1 ? [ids.first()] : Collections.emptyList()
     }
 
     static Node parseXml(File file) {

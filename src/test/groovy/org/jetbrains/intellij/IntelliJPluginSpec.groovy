@@ -8,27 +8,14 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'intellij-specific tasks'() {
         when:
         buildFile << ""
-        pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
 
         then:
         tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.BUILD_PLUGIN_TASK_NAME,
                                              IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
                                              IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
-                                             IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME, 'runIdea']
-    }
-
-    def 'do not add intellij-specific tasks for project without plugin.xml'() {
-        when:
-        buildFile << ""
-
-        then:
-        tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.BUILD_PLUGIN_TASK_NAME,
-                                             IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
-                                             IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
-                                             IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
-                                             IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME]
-        stdout.contains('specific tasks will be unavailable')
+                                             IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME,
+                                             IntelliJPlugin.RUN_IDEA_TASK_NAME]
     }
 
     def 'instrument code with nullability annotations'() {

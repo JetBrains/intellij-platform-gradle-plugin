@@ -27,6 +27,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
     public static final String PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
+    public static final String RUN_IDEA_TASK_NAME = "runIdea"
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
@@ -59,6 +60,7 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Configuring IntelliJ IDEA gradle plugin")
         configurePatchPluginXmlTask(project, extension)
         configurePrepareSandboxTasks(project, extension)
+        configureRunIdeaTask(project, extension)
         configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
         project.afterEvaluate {
@@ -168,13 +170,19 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
-        project.tasks.create(RunIdeaTask.NAME, RunIdeaTask).with {
+        def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
+        project.tasks.create(RUN_IDEA_TASK_NAME, RunIdeaTask).with {
             group = GROUP_NAME
             description = "Runs Intellij IDEA with installed plugin."
-            dependsOn(project.getTasksByName(PREPARE_SANDBOX_TASK_NAME, false))
-            outputs.dir(Utils.systemDir(extension, false))
-            outputs.dir(Utils.configDir(extension.sandboxDirectory, false))
-            outputs.upToDateWhen { false }
+            conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
+            conventionMapping.map("systemProperties", { extension.systemProperties })
+            conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
+            conventionMapping.map("configDirectory", { prepareSandboxTask.getConfigDirectory() })
+            conventionMapping.map("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
+            conventionMapping.map("systemDirectory", {
+                project.file(Utils.systemDir(extension.sandboxDirectory, false))
+            })
+            dependsOn(prepareSandboxTask)
         }
     }
 
@@ -198,14 +206,19 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ tests tasks")
         project.tasks.withType(Test).each {
-            it.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
+            def configDirectory = project.file(Utils.configDir(extension.sandboxDirectory, true))
+            def systemDirectory = project.file(Utils.systemDir(extension.sandboxDirectory, true))
+            def pluginsDirectory = project.file(Utils.pluginsDir(extension.sandboxDirectory, true))
+
             it.enableAssertions = true
-            it.systemProperties = Utils.getIdeaSystemProperties(project, it.systemProperties, extension, true)
-            it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, extension)
+            it.systemProperties(extension.systemProperties)
+            it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
+            it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, Utils.ideaSdkDirectory(extension))
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
                     "$extension.ideaDependency.classes/lib/idea.jar")
-            it.outputs.dir(Utils.systemDir(extension, true))
-            it.outputs.dir(Utils.configDir(extension.sandboxDirectory, true))
+            it.outputs.dir(systemDirectory)
+            it.outputs.dir(configDirectory)
+            it.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
         }
     }
 
