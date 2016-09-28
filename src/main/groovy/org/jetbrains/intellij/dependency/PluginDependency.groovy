@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.Utils
 
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
- class PluginDependency implements Serializable {
+class PluginDependency implements Serializable {
     @NotNull
     private String id
     @NotNull

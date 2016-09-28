@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
- class IdeaDependency implements Serializable {
+class IdeaDependency implements Serializable {
     @NotNull
     private final String version
     @NotNull
@@ -20,7 +20,7 @@ import org.jetbrains.annotations.Nullable
     private final Collection<File> jarFiles
     private final boolean withKotlin
 
-    IdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes, @Nullable File sources, 
+    IdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes, @Nullable File sources,
                    boolean withKotlin) {
         this.version = version
         this.buildNumber = buildNumber
