@@ -16,6 +16,7 @@ import org.xml.sax.SAXParseException
 class PrepareSandboxTask extends Copy {
     Object pluginName
     Object patchedPluginXmlDirectory
+    Object configDirectory
     List<Object> librariesToIgnore = []
     List<Object> pluginDependencies = []
 
@@ -44,6 +45,19 @@ class PrepareSandboxTask extends Copy {
 
     void pluginName(Object pluginName) {
         this.pluginName = pluginName
+    }
+
+    @Input
+    File getConfigDirectory() {
+        configDirectory != null ? project.file(configDirectory) : null
+    }
+
+    void setConfigDirectory(File configDirectory) {
+        this.configDirectory = configDirectory
+    }
+
+    void configDirectory(File configDirectory) {
+        this.configDirectory = configDirectory
     }
 
     @InputDirectory
@@ -195,7 +209,7 @@ class PrepareSandboxTask extends Copy {
     }
 
     private void disableIdeUpdate() {
-        def optionsDir = new File(Utils.configDir(destinationDir.parentFile.absolutePath, false), "options")
+        def optionsDir = new File(getConfigDirectory(), "options")
         if (!optionsDir.exists() && !optionsDir.mkdirs()) {
             IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")
             return

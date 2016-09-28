@@ -156,6 +156,7 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             conventionMapping('pluginName', { extension.pluginName })
             conventionMapping('destinationDir', { project.file(Utils.pluginsDir(extension.sandboxDirectory, inTest)) })
+            conventionMapping('configDirectory', { project.file(Utils.configDir(extension.sandboxDirectory, inTest)) })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             conventionMapping('patchedPluginXmlDirectory', { patchPluginXmlTask.getDestinationDir() })
