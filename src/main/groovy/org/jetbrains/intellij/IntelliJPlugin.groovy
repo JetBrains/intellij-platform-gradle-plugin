@@ -62,15 +62,12 @@ class IntelliJPlugin implements Plugin<Project> {
         configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
         project.afterEvaluate {
-            configureInstrumentation(it, extension)
             configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
-            if (Utils.sourcePluginXmlFiles(it)) {
-                configureRunIdeaTask(it, extension)
-            } else {
-                LOG.warn("plugin.xml with 'idea-plugin' root is not found. IntelliJ specific tasks will be unavailable for :$project.name.")
-            }
-            configureTestTasks(it, extension)
+        }
+        project.gradle.taskGraph.whenReady {
+            configureInstrumentation(project, extension)
+            configureTestTasks(project, extension)
         }
     }
 
