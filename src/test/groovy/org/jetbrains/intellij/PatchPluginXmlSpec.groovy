@@ -23,9 +23,8 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }\n"
         buildFile << "patchPluginXml { pluginDescription = 'Plugin pluginDescription' }"
         when:
-        def project = run(true, IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
-        println(stdout)
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <description>Plugin pluginDescription</description>

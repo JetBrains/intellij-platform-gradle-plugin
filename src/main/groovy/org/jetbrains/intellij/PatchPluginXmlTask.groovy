@@ -125,7 +125,6 @@ class PatchPluginXmlTask extends ConventionTask {
     }
 
     static void patchDescription(String pluginDescription, Node pluginXml) {
-        IntelliJPlugin.LOG.info("Updating pluginDescription: " + pluginDescription)
         if (pluginDescription != null) {
             def version = pluginXml.description
             if (version) {
