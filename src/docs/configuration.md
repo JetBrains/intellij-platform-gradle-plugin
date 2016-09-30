@@ -75,6 +75,10 @@ The `patchPluginXmlFiles` task supports following properties:
 <br/>
 **Default value**: `<IntelliJIDEABranch.*>`
 
+- `pluginDescription` is a value for `<description>` tag.
+<br/>
+**Default value**: null
+
 - `pluginXmlFiles` is a collections of xml files to patch.
 <br/>
 **Default value**: `<all plugin.xml files with idea-plugin root tag in resources>`

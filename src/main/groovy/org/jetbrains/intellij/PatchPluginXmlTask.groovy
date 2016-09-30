@@ -9,6 +9,7 @@ import org.gradle.api.tasks.*
 class PatchPluginXmlTask extends ConventionTask {
     private Object destinationDir
     private List<Object> pluginXmlFiles = []
+    private Object pluginDescription
     private Object version
     private Object sinceBuild
     private Object untilBuild
@@ -57,6 +58,20 @@ class PatchPluginXmlTask extends ConventionTask {
 
     @Input
     @Optional
+    String getPluginDescription() {
+        Utils.stringInput(pluginDescription)
+    }
+
+    void setPluginDescription(Object pluginDescription) {
+        this.pluginDescription = pluginDescription
+    }
+
+    void pluginDescription(Object pluginDescription) {
+        this.pluginDescription = pluginDescription
+    }
+
+    @Input
+    @Optional
     String getSinceBuild() {
         Utils.stringInput(sinceBuild)
     }
@@ -89,9 +104,10 @@ class PatchPluginXmlTask extends ConventionTask {
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
             patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
+            patchDescription(getPluginDescription(), pluginXml)
             patchPluginVersion(getVersion(), pluginXml)
 
-            def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(new File(destinationDir, file.getName()))))
+            def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(new File(getDestinationDir(), file.getName()))))
             printer.preserveWhitespace = true
             printer.print(pluginXml)
         }
@@ -104,6 +120,18 @@ class PatchPluginXmlTask extends ConventionTask {
                 version*.value = pluginVersion
             } else {
                 pluginXml.children().add(0, new Node(null, 'version', pluginVersion))
+            }
+        }
+    }
+
+    static void patchDescription(String pluginDescription, Node pluginXml) {
+        IntelliJPlugin.LOG.info("Updating pluginDescription: " + pluginDescription)
+        if (pluginDescription != null) {
+            def version = pluginXml.description
+            if (version) {
+                version*.value = pluginDescription
+            } else {
+                pluginXml.children().add(0, new Node(null, 'description', pluginDescription))
             }
         }
     }
