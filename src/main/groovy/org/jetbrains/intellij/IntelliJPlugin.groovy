@@ -66,8 +66,6 @@ class IntelliJPlugin implements Plugin<Project> {
         project.afterEvaluate {
             configureIntellijDependency(it, extension)
             configurePluginDependencies(it, extension)
-        }
-        project.gradle.taskGraph.whenReady {
             configureInstrumentation(project, extension)
             configureTestTasks(project, extension)
         }
