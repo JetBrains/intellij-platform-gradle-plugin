@@ -34,6 +34,30 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                                          '/config/options/updates.xml'] as Set
     }
 
+    def 'prepare sandbox task without plugin_xml'() {
+        given:
+        writeJavaFile()
+        buildFile << """\
+            version='0.42.123'
+            intellij { 
+                pluginName = 'myPluginName' 
+                plugins = ['copyright'] 
+            }
+            dependencies { 
+                compile 'joda-time:joda-time:2.8.1'
+            }\
+            """.stripIndent()
+
+        when:
+        def project = run(true, IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+
+        then:
+        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
+                                         '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                         '/config/options/updates.xml'] as Set 
+    }
+
     def 'prepare sandbox task'() {
         given:
         writeJavaFile()

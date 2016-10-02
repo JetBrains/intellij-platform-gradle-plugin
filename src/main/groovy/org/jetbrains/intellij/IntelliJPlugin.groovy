@@ -159,7 +159,10 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping('configDirectory', { project.file(Utils.configDir(extension.sandboxDirectory, inTest)) })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
-            conventionMapping('patchedPluginXmlDirectory', { patchPluginXmlTask.getDestinationDir() })
+            conventionMapping('patchedPluginXmlDirectory', {
+                def pluginXmlDir = patchPluginXmlTask.getDestinationDir()
+                pluginXmlDir.exists() ? pluginXmlDir : null 
+            })
             dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
             dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
             dependsOn(patchPluginXmlTask)
