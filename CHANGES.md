@@ -2,6 +2,7 @@
 
 ## 0.2.0-SNAPSHOT
 
+- added JPS-type for intellij dependency (fixes [#106](../../issues/106))
 - patchXml action is reimplemented, now it's possible to freely customize input files, destination directory, since/until builds, plugin description and version
 - publishTask is reimplemented, now it's possible to set several channels to upload (fixes [#117](../../issues/117))
 - reimplementation tasks also includes following improvements for all of them:

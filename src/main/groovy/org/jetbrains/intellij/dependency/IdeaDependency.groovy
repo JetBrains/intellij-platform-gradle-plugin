@@ -27,10 +27,10 @@ class IdeaDependency implements Serializable {
         this.classes = classes
         this.sources = sources
         this.withKotlin = withKotlin
-        jarFiles = collectJarFiles()
+        this.jarFiles = collectJarFiles()
     }
 
-    private def collectJarFiles() {
+    protected Collection<File> collectJarFiles() {
         if (classes.isDirectory()) {
             File lib = new File(classes, "lib")
             if (lib.isDirectory()) {
@@ -68,6 +68,10 @@ class IdeaDependency implements Serializable {
     @NotNull
     Collection<File> getJarFiles() {
         return jarFiles
+    }
+
+    boolean isWithKotlin() {
+        return withKotlin
     }
 
     String getFqn() {

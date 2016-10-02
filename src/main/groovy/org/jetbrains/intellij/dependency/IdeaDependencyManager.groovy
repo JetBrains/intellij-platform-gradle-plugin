@@ -31,13 +31,19 @@ class IdeaDependencyManager {
         project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
 
         LOG.debug("Adding IntelliJ IDEA dependency")
-        def dependency = project.dependencies.create("com.jetbrains.intellij.idea:idea$type:$version")
-        def configuration = project.configurations.detachedConfiguration(dependency);
+        def libraryType = type == 'IU' ? 'IU' : 'IC'
+        def dependency = project.dependencies.create("com.jetbrains.intellij.idea:idea$libraryType:$version")
+        def configuration = project.configurations.detachedConfiguration(dependency)
 
         def classesDirectory = getClassesDirectory(project, configuration)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
-        return new IdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project))
+        if (type == 'JPS') {
+            return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
+                    !hasKotlinDependency(project))
+        }
+        return new IdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, 
+                !hasKotlinDependency(project))
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency) {
@@ -102,7 +108,7 @@ class IdeaDependencyManager {
             markerFile.createNewFile()
             LOG.debug("Unzipped")
         }
-        return cacheDirectory;
+        return cacheDirectory
     }
 
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {

@@ -27,11 +27,22 @@ class IntelliJPluginExtension {
     private final Map<String, Object> systemProperties = new HashMap<>()
 
     String getType() {
-        return version.startsWith("IU-") || "IU".equals(type) ? "IU" : "IC"
+        if (version.startsWith("IU-") || "IU" == type) {
+            return "IU"
+        } 
+        else if (version.startsWith("JPS-") || "JPS" == type) {
+            return "JPS"
+        } 
+        else {
+            return "IC"
+        }
     }
 
     String getVersion() {
-        return version.startsWith("IU-") || version.startsWith("IC-") ? version.substring(3) : version
+        if (version.startsWith('JPS-')) {
+            return version.substring(4)
+        }
+        return version.startsWith('IU-') || version.startsWith('IC-') ? version.substring(3) : version
     }
 
     Set<PluginDependency> getPluginDependencies() {

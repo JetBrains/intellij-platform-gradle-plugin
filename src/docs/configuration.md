@@ -5,11 +5,11 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 - `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
 The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.
 <br/>
-Value may have `IC-` or `IU-` prefix in order to define IDEA distribution type. 
+Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. 
 <br/><br/> 
 **Default value**: `LATEST-EAP-SNAPSHOT`
 
-- `intellij.type` defines the type of IDEA distribution: `IC` for community version and `IU` for ultimate.<br/><br/> 
+- `intellij.type` defines the type of IDEA distribution: `IC` for community version, `IU` for ultimate and `JPS` for jps-only dependencies.<br/><br/> 
 **Default value**: `IC`
 
 - `intellij.plugins` defines the list of bundled IDEA plugins and plugins from [idea repository](https://plugins.jetbrains.com/) 
