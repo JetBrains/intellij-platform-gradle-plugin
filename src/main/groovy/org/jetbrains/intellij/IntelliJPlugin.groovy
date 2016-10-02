@@ -63,12 +63,21 @@ class IntelliJPlugin implements Plugin<Project> {
         configureRunIdeaTask(project, extension)
         configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
-        project.afterEvaluate {
-            configureIntellijDependency(it, extension)
-            configurePluginDependencies(it, extension)
-            configureInstrumentation(project, extension)
-            configureTestTasks(project, extension)
+        project.afterEvaluate { configureProjectAfterEvaluate(it, extension) }
+    }
+    
+    private static void configureProjectAfterEvaluate(@NotNull Project project, 
+                                                      @NotNull IntelliJPluginExtension extension) {
+        for (def subproject : project.subprojects) {
+            def subprojectExtension = subproject.extensions.findByType(IntelliJPluginExtension)
+            if (subprojectExtension) {
+                configureProjectAfterEvaluate(subproject, subprojectExtension)
+            }
         }
+        configureIntellijDependency(project, extension)
+        configurePluginDependencies(project, extension)
+        configureInstrumentation(project, extension)
+        configureTestTasks(project, extension)
     }
 
     private static void configureIntellijDependency(@NotNull Project project,
