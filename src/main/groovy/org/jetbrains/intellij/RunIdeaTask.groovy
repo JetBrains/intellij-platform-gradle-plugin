@@ -146,6 +146,6 @@ class RunIdeaTask extends JavaExec {
     }
 
     def configureJvmArgs() {
-        jvmArgs(Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory()))
+        jvmArgs = Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory())
     }
 }
