@@ -82,7 +82,8 @@ apply plugin: 'org.jetbrains.intellij'
 
 Plugin introduces following tasks
 
-- `prepareSandbox` creates proper structure of plugin and fills sandbox directory with it
+- `patchPluginXml` collects all plugin.xml files in sources and fill since/until build and version attributes (*Available in SNAPSHOT only*)
+- `prepareSandbox` creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it
 - `buildPlugin` assembles plugin and prepares zip archive for deployment
 - `runIdea` executes IntelliJ IDEA instance with the plugin you are developing installed in 
 - `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com
@@ -94,11 +95,11 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 - `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
 The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.
 <br/>
-Value may have `IC-` or `IU-` prefix in order to define IDEA distribution type. 
+Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. 
 <br/><br/> 
 **Default value**: `LATEST-EAP-SNAPSHOT`
 
-- `intellij.type` defines the type of IDEA distribution: `IC` for community version and `IU` for ultimate.<br/><br/> 
+- `intellij.type` defines the type of IDEA distribution: `IC` for community version, `IU` for ultimate and `JPS` for jps-only dependencies.<br/><br/> 
 **Default value**: `IC`
 
 - `intellij.plugins` defines the list of bundled IDEA plugins and plugins from [idea repository](https://plugins.jetbrains.com/) 
@@ -118,7 +119,7 @@ Also it might be required for compiling forms created by IntelliJ GUI designer.<
 **Default value**: `true`
 
 - `intellij.updateSinceUntilBuild` defines whether plugin should patch `plugin.xml` with since and until build values, 
-if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.9999` will be used as an until value.<br/><br/>
+if true then `IntelliJIDEABuildNumber` will be used as a `since` value and `IntelliJIDEABranch.*` will be used as an until value.<br/><br/>
 **Default value**: `true`
 
 - `intellij.sameSinceUntilBuild` defines whether plugin should patch `plugin.xml` with "open" until build. 
@@ -146,6 +147,36 @@ Empty value means that the IDE that was used for compiling will be used for runn
 distributions. If empty – Gradle cache directory will be used.
 **Default value**: `<empty>`
 
+### Patching plugin.xml
+
+*Available in SNAPSHOT only*
+
+The `patchPluginXmlFiles` task supports following properties:
+
+- `version` is a value for `<idea until-build="">` attribute.
+<br/>
+**Default value**: `<project.version>`
+
+- `sinceBuild` is a value for `<idea-version since-build="">` attribute.
+<br/>
+**Default value**: `<IntelliJIDEABuildNumber>`
+
+- `untilBuild` is a value for `<idea-version until-build="">` attribute.
+<br/>
+**Default value**: `<IntelliJIDEABranch.*>`
+
+- `pluginDescription` is a value for `<description>` tag.
+<br/>
+**Default value**: null
+
+- `pluginXmlFiles` is a collections of xml files to patch.
+<br/>
+**Default value**: `<all plugin.xml files with idea-plugin root tag in resources>`
+
+- `destinationDir` is a directory to store patched xml files.
+<br/>
+**Default value**: `<project.buildDir>/patchedPluginXmlFiles`
+
 ### Publishing plugin
 
 - `intellij.publish.username` your login at JetBrains plugin repository.
@@ -157,6 +188,25 @@ distributions. If empty – Gradle cache directory will be used.
 `default` string means default channel.
 <br/><br/>
 **Default value**: `<empty>`
+
+*Available in SNAPSHOT only*
+
+Since `0.2-SNAPSHOT` `publishPlugin` task supports following properties:
+
+- `username` is a login at JetBrains plugin repository.
+- `password` is a password at JetBrains plugin repository.
+- `channels` are channels names to upload the plugin to.
+<br/>
+**Default value**: `[default]`
+
+- `host` host of plugin repository.
+<br/>
+**Default value**: `http://plugins.jetbrains.com`
+
+- `distributionFile` is a file to upload.
+<br/>
+**Default value**: `<output of buildPlugin task>`
+
 
 ### build.gradle
 
