@@ -9,6 +9,7 @@ import org.jetbrains.intellij.dependency.PluginDependency
 @SuppressWarnings("GroovyUnusedDeclaration")
 class IntelliJPluginExtension {
     String[] plugins
+    String localPath
     String version
     String type
     String pluginName
