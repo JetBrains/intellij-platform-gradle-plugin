@@ -1,6 +1,9 @@
 package org.jetbrains.intellij
 
 import groovy.io.FileType
+import org.gradle.tooling.model.GradleProject
+
+import java.util.zip.ZipFile
 
 class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
     def 'prepare sandbox for two plugins'() {
@@ -26,12 +29,17 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == ['/plugins/myNestedPluginName/META-INF/plugin.xml',
-                                         '/plugins/myNestedPluginName/classes/NestedAppFile.class',
-                                         '/plugins/myPluginName/classes/App.class',
-                                         '/plugins/myPluginName/META-INF/plugin.xml',
+        File sandbox = sandbox(project)
+        assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
+                                         '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar',
                                          '/config/options/updates.xml'] as Set
+
+        assert new ZipFile(new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar')).entries().collect {
+            it.name
+        } == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/plugin.xml']
+        assert new ZipFile(new File(sandbox, '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar')).entries().collect {
+            it.name
+        } == ['META-INF/', 'META-INF/MANIFEST.MF', 'NestedAppFile.class', 'META-INF/plugin.xml']
     }
 
     def 'prepare sandbox task without plugin_xml'() {
@@ -53,9 +61,9 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
+        assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
                                          '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
-                                         '/config/options/updates.xml'] as Set 
+                                         '/config/options/updates.xml'] as Set
     }
 
     def 'prepare sandbox task'() {
@@ -80,62 +88,19 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
-                                         '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
+        assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
                                          '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
-                                         '/config/options/updates.xml',
-                                         '/plugins/myPluginName/META-INF/other.xml',
-                                         '/plugins/myPluginName/META-INF/plugin.xml'] as Set
-        assertFileContent(new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml'), """\
+                                         '/config/options/updates.xml'] as Set
+        def jar = new ZipFile(new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar'))
+        assert jar.entries().collect {
+            it.name
+        } == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/nonIncluded.xml', 'META-INF/other.xml', 'META-INF/plugin.xml']
+        assert jar.getInputStream(jar.getEntry('META-INF/plugin.xml')).text.trim() == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
               <idea-version since-build="141.1010" until-build="141.*"/>
               <depends config-file="other.xml"/>
-            </idea-plugin>""")
-    }
-
-    def 'prepare sandbox with x:include'() {
-        given:
-        writeJavaFile()
-        file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
-        file('src/main/resources/META-INF/otherFallback.xml') << '<idea-plugin></idea-plugin>'
-        file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
-        pluginXml << '''\
-            <idea-plugin version="2" xmlns:xi="http://www.w3.org/2001/XInclude">
-                <xi:include href="other.xml" xpointer="xpointer(/idea-plugin/*)">
-                    <xi:fallback>
-                        <xi:include href="otherFallback.xml" xpointer="xpointer(/idea-plugin/*)"/>
-                    </xi:fallback>
-                </xi:include>
-            </idea-plugin>\
-            '''.stripIndent()
-        buildFile << """\
-            version='0.42.123'
-            intellij { 
-                pluginName = 'myPluginName'  
-            }""".stripIndent()
-
-        when:
-        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
-
-        then:
-        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
-                                         '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
-                                         '/config/options/updates.xml',
-                                         '/plugins/myPluginName/META-INF/other.xml',
-                                         '/plugins/myPluginName/META-INF/otherFallback.xml',
-                                         '/plugins/myPluginName/META-INF/plugin.xml'] as Set
-        assertFileContent(new File(sandbox, 'plugins/myPluginName/META-INF/plugin.xml'), """\
-            <idea-plugin version="2">
-              <version>0.42.123</version>
-              <idea-version since-build="141.1010" until-build="141.*"/>
-              <xi:include xmlns:xi="http://www.w3.org/2001/XInclude" href="other.xml" xpointer="xpointer(/idea-plugin/*)">
-                <xi:fallback>
-                  <xi:include href="otherFallback.xml" xpointer="xpointer(/idea-plugin/*)"/>
-                </xi:fallback>
-              </xi:include>
-            </idea-plugin>""")
+            </idea-plugin>""".stripIndent()
     }
 
     def 'prepare sandbox with external jar-type plugin'() {
@@ -152,11 +117,9 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == [
+        assert collectPaths(sandbox(project)) == [
                 '/plugins/intellij-postfix.jar',
-                '/plugins/myPluginName/META-INF/plugin.xml',
-                '/plugins/myPluginName/classes/App.class',
+                '/plugins/myPluginName/lib/projectName.jar',
                 '/config/options/updates.xml'
         ] as Set
     }
@@ -175,53 +138,17 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == [
+        assert collectPaths(sandbox(project)) == [
+                '/plugins/myPluginName/lib/projectName.jar',
                 '/plugins/markdown/lib/default.css',
-                '/plugins/myPluginName/classes/App.class',
                 '/plugins/markdown/lib/markdown.jar',
                 '/plugins/markdown/lib/darcula.css',
-                '/plugins/myPluginName/META-INF/plugin.xml',
                 '/config/options/updates.xml',
                 '/plugins/markdown/lib/kotlin-runtime.jar',
                 '/plugins/markdown/lib/Loboevolution.jar',
                 '/plugins/markdown/lib/intellij-markdown.jar',
                 '/plugins/markdown/lib/kotlin-reflect.jar'
         ] as Set
-    }
-
-    def 'test transitive xml dependencies'() {
-        given:
-        writeJavaFile()
-        file('src/main/resources/META-INF/other.xml') << '''\
-            <idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
-                <depends config-file="transitiveDepends.xml"/>
-                <xi:include href="transitiveInclude.xml" xpointer="xpointer(/idea-plugin/*)"/>
-            </idea-plugin>'''
-        file('src/main/resources/META-INF/transitiveDepends.xml') << '<idea-plugin></idea-plugin>'
-        file('src/main/resources/META-INF/transitiveInclude.xml') << '<idea-plugin></idea-plugin>'
-        pluginXml << '''\
-            <idea-plugin version="2">
-                <depends config-file="other.xml"/>                
-            </idea-plugin>\
-            '''.stripIndent()
-        buildFile << """\
-            version='0.42.123'
-            intellij { 
-                pluginName = 'myPluginName'  
-            }""".stripIndent()
-
-        when:
-        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
-
-        then:
-        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == ['/plugins/myPluginName/classes/App.class',
-                                         '/plugins/myPluginName/classes/META-INF/transitiveDepends.xml',
-                                         '/config/options/updates.xml',
-                                         '/plugins/myPluginName/META-INF/other.xml',
-                                         '/plugins/myPluginName/META-INF/transitiveInclude.xml',
-                                         '/plugins/myPluginName/META-INF/plugin.xml'] as Set
     }
 
     def 'prepare custom sandbox task'() {
@@ -245,19 +172,11 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         when:
         run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
+        def sandbox = new File(sandboxPath)
         then:
-        assert collectPaths(new File(sandboxPath)) == ['/plugins/myPluginName/classes/App.class',
-                                                       '/plugins/myPluginName/classes/META-INF/nonIncluded.xml',
-                                                       '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
-                                                       '/config/options/updates.xml',
-                                                       '/plugins/myPluginName/META-INF/other.xml',
-                                                       '/plugins/myPluginName/META-INF/plugin.xml'] as Set
-        assertFileContent(new File(sandboxPath, 'plugins/myPluginName/META-INF/plugin.xml'), """\
-            <idea-plugin version="2">
-              <version>0.42.123</version>
-              <idea-version since-build="141.1010" until-build="141.*"/>
-              <depends config-file="other.xml"/>
-            </idea-plugin>""")
+        assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
+                                         '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                         '/config/options/updates.xml'] as Set
     }
 
     def 'use gradle project name if plugin name is not defined'() {
@@ -268,7 +187,9 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == ["/plugins/$project.name/META-INF/plugin.xml", '/config/options/updates.xml'] as Set
+        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == [
+                "/plugins/$project.name/lib/projectName.jar",
+                '/config/options/updates.xml'] as Set
     }
 
     def 'disable ide update without updates.xml'() {
@@ -390,5 +311,9 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             paths << adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length()))
         }
         paths
+    }
+
+    private static File sandbox(GradleProject project) {
+        return new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
     }
 }

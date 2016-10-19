@@ -2,9 +2,7 @@ package org.jetbrains.intellij
 
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.CopySpec
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.file.copy.CopySpecInternal
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.*
 import org.gradle.internal.FileUtils
@@ -15,22 +13,27 @@ import org.xml.sax.SAXParseException
 @SuppressWarnings("GroovyUnusedDeclaration")
 class PrepareSandboxTask extends Copy {
     Object pluginName
-    Object patchedPluginXmlDirectory
+    Object pluginJar
     Object configDirectory
     List<Object> librariesToIgnore = []
     List<Object> pluginDependencies = []
 
     PrepareSandboxTask() {
-        pluginSpec = rootSpec.addChild()
-        configureClasses()
-        configureMetaInf()
         configureExternalPlugins()
-        configureLibraries()
+        configurePlugin()
     }
 
-    @InputFiles
-    FileCollection getClasses() {
-        Utils.mainSourceSet(project).output
+    @InputFile
+    File getPluginJar() {
+        pluginJar != null ? project.file(pluginJar) : null
+    }
+
+    void setPluginJar(Object pluginJar) {
+        this.pluginJar = pluginJar
+    }
+
+    void pluginJar(Object pluginJar) {
+        this.pluginJar = pluginJar
     }
 
     @Input
@@ -58,20 +61,6 @@ class PrepareSandboxTask extends Copy {
 
     void configDirectory(File configDirectory) {
         this.configDirectory = configDirectory
-    }
-
-    @InputDirectory
-    @Optional
-    File getPatchedPluginXmlDirectory() {
-        patchedPluginXmlDirectory != null ? project.file(patchedPluginXmlDirectory) : null
-    }
-
-    void setPatchedPluginXmlDirectory(File patchedPluginXmlDirectory) {
-        this.patchedPluginXmlDirectory = patchedPluginXmlDirectory
-    }
-
-    void patchedPluginXmlDirectory(File patchedPluginXmlDirectory) {
-        this.patchedPluginXmlDirectory = patchedPluginXmlDirectory
     }
 
     @Input
@@ -106,34 +95,15 @@ class PrepareSandboxTask extends Copy {
         this.librariesToIgnore.addAll(librariesToIgnore as List)
     }
 
-    private CopySpecInternal pluginSpec
-    private CopySpec classes
-    private CopySpec metaInf
-
     @Override
     protected void copy() {
-        processLinkedXmlFiles()
         disableIdeUpdate()
         super.copy()
     }
 
-    private void configureClasses() {
-        classes = pluginSpec.addChild().into { "${getPluginName()}/classes" }
-        classes.from { getClasses() }
-        classes.includeEmptyDirs = false
-    }
-
-    private void configureMetaInf() {
-        metaInf = pluginSpec.addChild().into { "${getPluginName()}/META-INF" }
-        metaInf.from {
-            getPatchedPluginXmlDirectory()?.listFiles()
-        }
-        metaInf.setDuplicatesStrategy(DuplicatesStrategy.EXCLUDE)
-    }
-
-    private void configureLibraries() {
-        CopySpec libraries = pluginSpec.addChild().into { "${getPluginName()}/lib" }
-        libraries.from {
+    private void configurePlugin() {
+        CopySpec plugin = mainSpec.addChild().into { "${getPluginName()}/lib" }
+        plugin.from {
             def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
             def librariesToIgnore = getLibrariesToIgnore().toSet()
             librariesToIgnore.add(Jvm.current().toolsJar)
@@ -142,13 +112,13 @@ class PrepareSandboxTask extends Copy {
             librariesToIgnore.addAll(pluginDependencies*.classesDirectory)
             librariesToIgnore.addAll(pluginDependencies*.metaInfDirectory)
 
-            def result = []
+            def result = [getPluginJar()]
             runtimeConfiguration.getAllDependencies().each {
                 if (it instanceof ProjectDependency) {
                     def dependencyProject = it.dependencyProject
                     def intelliJPlugin = dependencyProject.plugins.findPlugin(IntelliJPlugin)
                     if (intelliJPlugin != null) {
-                        if (Utils.sourcePluginXmlFiles(dependencyProject)) {
+                        if (!Utils.sourcePluginXmlFiles(dependencyProject).isEmpty()) {
                             IntelliJPlugin.LOG.debug(":${dependencyProject.name} project is IntelliJ-plugin project and won't be packed into the target distribution")
                             return
                         }
@@ -161,7 +131,7 @@ class PrepareSandboxTask extends Copy {
     }
 
     private void configureExternalPlugins() {
-        def externalPlugins = pluginSpec.addChild()
+        def externalPlugins = mainSpec.addChild()
         externalPlugins.from {
             def result = []
             getPluginDependencies().each {
@@ -175,36 +145,6 @@ class PrepareSandboxTask extends Copy {
                 }
             }
             result
-        }
-    }
-
-    private void processLinkedXmlFiles() {
-        for (def xmlFile : Utils.outPluginXmlFiles(project)) {
-            processIdeaXml(xmlFile.parentFile, xmlFile.name, true)
-        }
-    }
-
-    private void processIdeaXml(File rootFile, String filePath, boolean processDepends) {
-        if (rootFile != null && filePath != null) {
-            def configFile = new File(rootFile, filePath)
-            if (configFile.exists()) {
-                metaInf.from(configFile)
-                classes.exclude("META-INF/$filePath")
-                def pluginXml = Utils.parseXml(configFile)
-                if (processDepends) {
-                    for (def dependsTag : pluginXml.depends) {
-                        processIdeaXml(configFile.parentFile, dependsTag.attribute('config-file'), false)
-                    }
-                }
-                for (def includeTag : pluginXml.'xi:include') {
-                    processIdeaXml(configFile.parentFile, includeTag.attribute('href'), processDepends)
-                    for (def fallbackTag : includeTag.'xi:fallback') {
-                        for (def innerIncludeTag : fallbackTag.'xi:include') {
-                            processIdeaXml(configFile.parentFile, innerIncludeTag.attribute('href'), processDepends)
-                        }
-                    }
-                }
-            }
         }
     }
 

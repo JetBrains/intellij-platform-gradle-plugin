@@ -20,6 +20,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
         assert localRepoPath != null
         String intellijRepo = System.properties.get('intellij.repo', '')
         assert gradleHome != null
+        file("settings.gradle") << "rootProject.name='projectName'\n"
         buildFile << """
             apply plugin: 'org.jetbrains.intellij'
             buildscript {
@@ -69,7 +70,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
     }
 
     protected GradleProject run(String... tasks) {
-        return run(false, tasks);
+        return run(false, tasks)
     }
 
     protected String getStdout() {
@@ -133,7 +134,7 @@ class App {
     }
 
     protected static String adjustWindowsPath(@NotNull String s) {
-        return s.replaceAll('\\\\', '/');
+        return s.replaceAll('\\\\', '/')
     }
 
     protected static void assertFileContent(File file, String expectedContent) {

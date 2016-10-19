@@ -5,7 +5,7 @@ import org.gradle.tooling.BuildException
 class PublishTaskSpec extends IntelliJPluginSpecBase {
     def 'skip publishing plugin is distribution file is missing'() {
         given:
-        buildFile << "intellij { publish { username = 'username'; password = 'password' } }"
+        buildFile << "publishPlugin { username = 'username'; password = 'password'; distributionFile = null; }"
 
         when:
         run(true, IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)
@@ -17,7 +17,7 @@ class PublishTaskSpec extends IntelliJPluginSpecBase {
 
     def 'skip publishing if username is missing'() {
         given:
-        buildFile << "intellij { publish { password = 'pass' } }"
+        buildFile << "publishPlugin { password = 'pass' }"
 
         when:
         run(true, IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)
@@ -29,7 +29,7 @@ class PublishTaskSpec extends IntelliJPluginSpecBase {
 
     def 'skip publishing if password is missing'() {
         given:
-        buildFile << "intellij { publish { username = 'username' } }"
+        buildFile << "publishPlugin { username = 'username' }"
 
         when:
         run(true, IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)

@@ -27,16 +27,24 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
 
         def zipFile = new ZipFile(distribution)
         assert zipFile.entries().collect { it.name } as Set == ['myPluginName/',
-                                                                'myPluginName/classes/',
-                                                                'myPluginName/classes/App.class',
-                                                                'myPluginName/classes/META-INF/',
-                                                                'myPluginName/classes/META-INF/nonIncluded.xml',
                                                                 'myPluginName/lib/',
                                                                 'myPluginName/lib/joda-time-2.8.1.jar',
-                                                                'myPluginName/META-INF/',
-                                                                'myPluginName/META-INF/other.xml',
-                                                                'myPluginName/META-INF/plugin.xml'] as Set
-        assert zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """\
+                                                                'myPluginName/lib/projectName-0.42.123.jar'] as Set
+
+        def tmp = File.createTempFile("gradle-test", "jar")
+        tmp.deleteOnExit()
+        tmp << zipFile.getInputStream(zipFile.getEntry('myPluginName/lib/projectName-0.42.123.jar'))
+
+        def jar = new ZipFile(tmp)
+        assert jar.entries().collect { it.name } as Set == ['META-INF/',
+                                                            'META-INF/MANIFEST.MF',
+                                                            'App.class',
+                                                            'META-INF/nonIncluded.xml',
+                                                            'META-INF/other.xml',
+                                                            'META-INF/plugin.xml'] as Set
+
+
+        assert jar.getInputStream(jar.getEntry('META-INF/plugin.xml')).text.trim() == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
               <idea-version since-build="141.1010" until-build="141.*"/>
@@ -70,21 +78,9 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
 
         def zipFile = new ZipFile(distribution)
         assert zipFile.entries().collect { it.name } as Set == ['myPluginName/',
-                                                                'myPluginName/classes/',
-                                                                'myPluginName/classes/App.class',
-                                                                'myPluginName/classes/META-INF/',
-                                                                'myPluginName/classes/META-INF/nonIncluded.xml',
                                                                 'myPluginName/lib/',
                                                                 'myPluginName/lib/joda-time-2.8.1.jar',
-                                                                'myPluginName/META-INF/',
-                                                                'myPluginName/META-INF/other.xml',
-                                                                'myPluginName/META-INF/plugin.xml'] as Set
-        assert zipFile.getInputStream(zipFile.getEntry('myPluginName/META-INF/plugin.xml')).text.trim() == """\
-            <idea-plugin version="2">
-              <version>0.42.123</version>
-              <idea-version since-build="141.1010" until-build="141.*"/>
-              <depends config-file="other.xml"/>
-            </idea-plugin>""".stripIndent()
+                                                                'myPluginName/lib/projectName-0.42.123.jar'] as Set
     }
 
     def 'use gradle project name for distribution if plugin name is not defined'() {
@@ -127,9 +123,12 @@ class App {
         then:
         File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
         assert distribution.exists()
-        assert (new ZipFile(distribution).entries().collect { it.name }).contains(
-                'myPluginName/classes/App.class'
-        )
+
+        def zip = new ZipFile(distribution)
+        def tmp = File.createTempFile("gradle-test", "jar")
+        tmp.deleteOnExit()
+        tmp << zip.getInputStream(zip.getEntry('myPluginName/lib/projectName-0.42.123.jar'))
+        assert (new ZipFile(tmp).entries().collect { it.name }).contains('App.class')
     }
 
     def 'build plugin without sources'() {
@@ -146,8 +145,16 @@ class App {
         then:
         File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
         assert distribution.exists()
-        assert new ZipFile(distribution).entries().collect {
-            it.name
-        } == ['myPluginName/', 'myPluginName/META-INF/', 'myPluginName/META-INF/plugin.xml']
+        
+        def zip = new ZipFile(distribution)
+        assert zip.entries().collect { it.name } == ['myPluginName/', 
+                                                     'myPluginName/lib/', 
+                                                     'myPluginName/lib/projectName-0.42.123.jar'] 
+        def tmp = File.createTempFile("gradle-test", "jar")
+        tmp.deleteOnExit()
+        tmp << zip.getInputStream(zip.getEntry('myPluginName/lib/projectName-0.42.123.jar'))
+        assert new ZipFile(tmp).entries().collect { it.name } == ['META-INF/', 
+                                                                  'META-INF/MANIFEST.MF', 
+                                                                  'META-INF/plugin.xml']
     }
 }

@@ -5,6 +5,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
@@ -13,6 +14,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
+import org.gradle.jvm.tasks.Jar
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
@@ -64,10 +66,11 @@ class IntelliJPlugin implements Plugin<Project> {
         configureRunIdeaTask(project, extension)
         configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
+        configureProcessResources(project)
         project.afterEvaluate { configureProjectAfterEvaluate(it, extension) }
     }
-    
-    private static void configureProjectAfterEvaluate(@NotNull Project project, 
+
+    private static void configureProjectAfterEvaluate(@NotNull Project project,
                                                       @NotNull IntelliJPluginExtension extension) {
         for (def subproject : project.subprojects) {
             def subprojectExtension = subproject.extensions.findByType(IntelliJPluginExtension)
@@ -129,7 +132,7 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             description = "Patch plugin xml files with corresponding since/until build numbers and version attributes"
             conventionMapping('version', { project.version?.toString() })
-            conventionMapping('pluginXmlFiles', { Utils.outPluginXmlFiles(project) })
+            conventionMapping('pluginXmlFiles', { Utils.sourcePluginXmlFiles(project) })
             conventionMapping('destinationDir', { new File(project.buildDir, PLUGIN_XML_DIR_NAME) })
             conventionMapping('sinceBuild', {
                 if (extension.updateSinceUntilBuild) {
@@ -144,20 +147,17 @@ class IntelliJPlugin implements Plugin<Project> {
                             : "$ideVersion.baselineVersion.*".toString()
                 }
             })
-            dependsOn { project.getTasks().withType(ProcessResources) }
         }
     }
 
     private static void configurePrepareSandboxTasks(@NotNull Project project,
                                                      @NotNull IntelliJPluginExtension extension) {
-        def patchPluginXmlTask = project.tasks.findByName(PATCH_PLUGIN_XML_TASK_NAME) as PatchPluginXmlTask
-        configurePrepareSandboxTask(project, extension, patchPluginXmlTask, false)
-        configurePrepareSandboxTask(project, extension, patchPluginXmlTask, true)
+        configurePrepareSandboxTask(project, extension, false)
+        configurePrepareSandboxTask(project, extension, true)
     }
 
     private static void configurePrepareSandboxTask(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension,
-                                                    @NotNull PatchPluginXmlTask patchPluginXmlTask,
                                                     boolean inTest) {
         LOG.info("Configuring prepare IntelliJ sandbox task")
         def taskName = inTest ? PREPARE_TESTING_SANDBOX_TASK_NAME : PREPARE_SANDBOX_TASK_NAME
@@ -165,35 +165,33 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             conventionMapping('pluginName', { extension.pluginName })
+            conventionMapping('pluginJar', { (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath })
             conventionMapping('destinationDir', { project.file(Utils.pluginsDir(extension.sandboxDirectory, inTest)) })
             conventionMapping('configDirectory', { project.file(Utils.configDir(extension.sandboxDirectory, inTest)) })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
-            conventionMapping('patchedPluginXmlDirectory', {
-                def pluginXmlDir = patchPluginXmlTask.getDestinationDir()
-                pluginXmlDir.exists() ? pluginXmlDir : null 
-            })
-            dependsOn(project.getTasksByName(JavaPlugin.CLASSES_TASK_NAME, false))
-            dependsOn(project.getTasksByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME, false))
-            dependsOn(patchPluginXmlTask)
+            dependsOn(JavaPlugin.JAR_TASK_NAME)
         }
     }
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
-        def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
         project.tasks.create(RUN_IDEA_TASK_NAME, RunIdeaTask).with {
             group = GROUP_NAME
             description = "Runs Intellij IDEA with installed plugin."
             conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
             conventionMapping.map("systemProperties", { extension.systemProperties })
             conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
-            conventionMapping.map("configDirectory", { prepareSandboxTask.getConfigDirectory() })
-            conventionMapping.map("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
+            conventionMapping.map("configDirectory", {
+                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getConfigDirectory() 
+            })
+            conventionMapping.map("pluginsDirectory", {
+                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getDestinationDir() 
+            })
             conventionMapping.map("systemDirectory", {
                 project.file(Utils.systemDir(extension.sandboxDirectory, false))
             })
-            dependsOn(prepareSandboxTask)
+            dependsOn(PREPARE_SANDBOX_TASK_NAME)
         }
     }
 
@@ -269,6 +267,20 @@ class IntelliJPlugin implements Plugin<Project> {
                 return distributionFile?.exists() ? distributionFile : null
             })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
+        }
+    }
+
+    private static void configureProcessResources(@NotNull Project project) {
+        LOG.info("Configuring IntelliJ resources task")
+        def processResourcesTask = project.tasks.findByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) as ProcessResources
+        if (processResourcesTask) {
+            processResourcesTask.from({
+                (project.tasks.findByName(PATCH_PLUGIN_XML_TASK_NAME) as PatchPluginXmlTask).destinationDir
+            }, {
+                into("META-INF")
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            })
+            processResourcesTask.dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
         }
     }
 }

@@ -51,19 +51,9 @@ class Utils {
     }
 
     @NotNull
-    static Set<File> sourcePluginXmlFiles(@NotNull Project project) {
-        pluginXmlFiles(mainSourceSet(project).resources.srcDirs)
-    }
-
-    @NotNull
-    static FileCollection outPluginXmlFiles(@NotNull Project project) {
-        project.files(pluginXmlFiles(mainSourceSet(project).output.files))
-    }
-
-    @NotNull
-    private static Set<File> pluginXmlFiles(@NotNull Set<File> roots) {
+    static FileCollection sourcePluginXmlFiles(@NotNull Project project) {
         Set<File> result = new HashSet<>()
-        roots.each {
+        mainSourceSet(project).resources.srcDirs.each {
             def pluginXml = new File(it, "META-INF/plugin.xml")
             if (pluginXml.exists()) {
                 try {
@@ -76,7 +66,7 @@ class Utils {
                 }
             }
         }
-        result
+        project.files(result)
     }
 
     @NotNull
@@ -160,7 +150,7 @@ class Utils {
     // todo: collect all ids for multiproject configuration
     static def getPluginIds(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
-        sourcePluginXmlFiles(project).each {
+        sourcePluginXmlFiles(project).files.each {
             def pluginXml = parseXml(it)
             ids += pluginXml.id*.text()
         }
