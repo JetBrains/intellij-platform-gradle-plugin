@@ -2,10 +2,7 @@ package org.jetbrains.intellij.tasks
 
 import com.intellij.structure.domain.PluginManager
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.tasks.*
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
@@ -76,6 +73,7 @@ class PublishTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String[] getChannels() {
         CollectionUtils.stringize(channels.collect {
             it instanceof Closure ? (it as Closure).call() : it
@@ -95,7 +93,7 @@ class PublishTask extends ConventionTask {
     @TaskAction
     protected void publishPlugin() {
         def channels = getChannels()
-        if (channels.length == 0) {
+        if (!channels || channels.length == 0) {
             channels = ['default']
         }
 
