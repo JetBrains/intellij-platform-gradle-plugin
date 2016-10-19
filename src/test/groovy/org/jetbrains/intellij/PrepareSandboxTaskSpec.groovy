@@ -36,10 +36,10 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
 
         assert new ZipFile(new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar')).entries().collect {
             it.name
-        } == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/plugin.xml']
+        } as Set == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/plugin.xml'] as Set
         assert new ZipFile(new File(sandbox, '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar')).entries().collect {
             it.name
-        } == ['META-INF/', 'META-INF/MANIFEST.MF', 'NestedAppFile.class', 'META-INF/plugin.xml']
+        } as Set == ['META-INF/', 'META-INF/MANIFEST.MF', 'NestedAppFile.class', 'META-INF/plugin.xml'] as Set
     }
 
     def 'prepare sandbox task without plugin_xml'() {
@@ -94,7 +94,8 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def jar = new ZipFile(new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar'))
         assert jar.entries().collect {
             it.name
-        } == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/nonIncluded.xml', 'META-INF/other.xml', 'META-INF/plugin.xml']
+        } as Set == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/nonIncluded.xml',
+                     'META-INF/other.xml', 'META-INF/plugin.xml'] as Set
         assert jar.getInputStream(jar.getEntry('META-INF/plugin.xml')).text.trim() == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
