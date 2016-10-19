@@ -4,6 +4,7 @@ import com.intellij.structure.domain.IdeVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
@@ -244,11 +245,13 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
             it
         }
-        ArchivePublishArtifact zipArtifact = new ArchivePublishArtifact(zip)
-        Configuration runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
-        runtimeConfiguration.getArtifacts().add(zipArtifact)
-        project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(zipArtifact)
-        project.getComponents().add(new IntelliJPluginLibrary())
+        Configuration archivesConfiguration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
+        if (archivesConfiguration) {
+            ArchivePublishArtifact zipArtifact = new ArchivePublishArtifact(zip)
+            archivesConfiguration.getArtifacts().add(zipArtifact)
+            project.getExtensions().getByType(DefaultArtifactPublicationSet.class).addCandidate(zipArtifact)
+            project.getComponents().add(new IntelliJPluginLibrary())
+        }
     }
 
     private static void configurePublishPluginTask(@NotNull Project project,
