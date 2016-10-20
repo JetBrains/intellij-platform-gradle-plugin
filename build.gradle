@@ -27,7 +27,7 @@ dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.17'
-    compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.29'
+    compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.34'
 
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
