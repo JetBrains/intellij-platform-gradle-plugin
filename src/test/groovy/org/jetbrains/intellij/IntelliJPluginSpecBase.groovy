@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+import groovy.io.FileType
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.tooling.GradleConnector
 import org.gradle.tooling.ProjectConnection
@@ -9,6 +10,8 @@ import org.jetbrains.annotations.NotNull
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+
+import java.util.zip.ZipFile
 
 abstract class IntelliJPluginSpecBase extends Specification {
     @Rule
@@ -141,4 +144,27 @@ class App {
         assert file.text.trim() == expectedContent.stripIndent()
     }
 
+    protected static File extractFile(ZipFile zipFile, String path) {
+        def tmp = File.createTempFile("gradle-test", "")
+        tmp.deleteOnExit()
+        tmp << zipFile.getInputStream(zipFile.getEntry(path))
+        return tmp
+    }
+
+    protected static String fileText(ZipFile zipFile, String path) {
+        zipFile.getInputStream(zipFile.getEntry(path)).text.trim()
+    }
+
+    protected static Set<String> collectPaths(ZipFile zipFile) {
+        return zipFile.entries().collect { it.name } as Set
+    }
+
+    protected static Set collectPaths(File directory) {
+        assert directory.exists()
+        def paths = new HashSet()
+        directory.eachFileRecurse(FileType.FILES) {
+            paths << adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length()))
+        }
+        paths
+    }
 }

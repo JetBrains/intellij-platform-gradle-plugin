@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 
-import groovy.io.FileType
 import org.gradle.tooling.model.GradleProject
 
 import java.util.zip.ZipFile
@@ -34,12 +33,10 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                                          '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar',
                                          '/config/options/updates.xml'] as Set
 
-        assert new ZipFile(new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar')).entries().collect {
-            it.name
-        } as Set == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/plugin.xml'] as Set
-        assert new ZipFile(new File(sandbox, '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar')).entries().collect {
-            it.name
-        } as Set == ['META-INF/', 'META-INF/MANIFEST.MF', 'NestedAppFile.class', 'META-INF/plugin.xml'] as Set
+        def jar = new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar')
+        assert collectPaths(new ZipFile(jar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/plugin.xml'] as Set
+        def nestedProjectJar = new File(sandbox, '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar')
+        assert collectPaths(new ZipFile(nestedProjectJar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'NestedAppFile.class', 'META-INF/plugin.xml'] as Set
     }
 
     def 'prepare sandbox task without plugin_xml'() {
@@ -91,12 +88,11 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
                                          '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
                                          '/config/options/updates.xml'] as Set
+
         def jar = new ZipFile(new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar'))
-        assert jar.entries().collect {
-            it.name
-        } as Set == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/nonIncluded.xml',
-                     'META-INF/other.xml', 'META-INF/plugin.xml'] as Set
-        assert jar.getInputStream(jar.getEntry('META-INF/plugin.xml')).text.trim() == """\
+        assert collectPaths(jar) == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/nonIncluded.xml',
+                                     'META-INF/other.xml', 'META-INF/plugin.xml'] as Set
+        assert fileText(jar, 'META-INF/plugin.xml') == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
               <idea-version since-build="141.1010" until-build="141.*"/>
@@ -118,11 +114,9 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        assert collectPaths(sandbox(project)) == [
-                '/plugins/intellij-postfix.jar',
-                '/plugins/myPluginName/lib/projectName.jar',
-                '/config/options/updates.xml'
-        ] as Set
+        assert collectPaths(sandbox(project)) == ['/plugins/intellij-postfix.jar',
+                                                  '/plugins/myPluginName/lib/projectName.jar',
+                                                  '/config/options/updates.xml'] as Set
     }
 
     def 'prepare sandbox with external zip-type plugin'() {
@@ -139,17 +133,15 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        assert collectPaths(sandbox(project)) == [
-                '/plugins/myPluginName/lib/projectName.jar',
-                '/plugins/markdown/lib/default.css',
-                '/plugins/markdown/lib/markdown.jar',
-                '/plugins/markdown/lib/darcula.css',
-                '/config/options/updates.xml',
-                '/plugins/markdown/lib/kotlin-runtime.jar',
-                '/plugins/markdown/lib/Loboevolution.jar',
-                '/plugins/markdown/lib/intellij-markdown.jar',
-                '/plugins/markdown/lib/kotlin-reflect.jar'
-        ] as Set
+        assert collectPaths(sandbox(project)) == ['/plugins/myPluginName/lib/projectName.jar',
+                                                  '/plugins/markdown/lib/default.css',
+                                                  '/plugins/markdown/lib/markdown.jar',
+                                                  '/plugins/markdown/lib/darcula.css',
+                                                  '/config/options/updates.xml',
+                                                  '/plugins/markdown/lib/kotlin-runtime.jar',
+                                                  '/plugins/markdown/lib/Loboevolution.jar',
+                                                  '/plugins/markdown/lib/intellij-markdown.jar',
+                                                  '/plugins/markdown/lib/kotlin-reflect.jar'] as Set
     }
 
     def 'prepare custom sandbox task'() {
@@ -170,10 +162,12 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 compile 'joda-time:joda-time:2.8.1'
             }\
             """.stripIndent()
+
         when:
         run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         def sandbox = new File(sandboxPath)
+
         then:
         assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
                                          '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
@@ -303,15 +297,6 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 <option name="CHECK_NEEDED" value="false"/>
               </component>
             </application>''')
-    }
-
-    private static Set collectPaths(File directory) {
-        assert directory.exists()
-        def paths = new HashSet()
-        directory.eachFileRecurse(FileType.FILES) {
-            paths << adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length()))
-        }
-        paths
     }
 
     private static File sandbox(GradleProject project) {
