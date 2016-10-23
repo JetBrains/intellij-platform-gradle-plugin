@@ -183,10 +183,10 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping.map("systemProperties", { extension.systemProperties })
             conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
             conventionMapping.map("configDirectory", {
-                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getConfigDirectory() 
+                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getConfigDirectory()
             })
             conventionMapping.map("pluginsDirectory", {
-                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getDestinationDir() 
+                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getDestinationDir()
             })
             conventionMapping.map("systemDirectory", {
                 project.file(Utils.systemDir(extension.sandboxDirectory, false))
@@ -274,13 +274,10 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Configuring IntelliJ resources task")
         def processResourcesTask = project.tasks.findByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) as ProcessResources
         if (processResourcesTask) {
-            processResourcesTask.from({
-                (project.tasks.findByName(PATCH_PLUGIN_XML_TASK_NAME) as PatchPluginXmlTask).destinationDir
-            }, {
+            processResourcesTask.from(project.tasks.findByName(PATCH_PLUGIN_XML_TASK_NAME)) {
                 into("META-INF")
                 duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            })
-            processResourcesTask.dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
+            }
         }
     }
 }
