@@ -8,6 +8,7 @@ import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
+import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPluginExtension
@@ -25,7 +26,7 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    IdeaDependency resolve(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources) {
+    IdeaDependency resolveRemote(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources) {
         LOG.debug("Adding IntelliJ IDEA repository")
         def releaseType = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
         project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
@@ -38,12 +39,18 @@ class IdeaDependencyManager {
         def classesDirectory = getClassesDirectory(project, configuration)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
-        if (type == 'JPS') {
-            return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
-                    !hasKotlinDependency(project))
+        return createDependency(type, version, buildNumber, classesDirectory, sourcesDirectory, project)
+    }
+
+    @NotNull
+    IdeaDependency resolveLocal(@NotNull Project project, @NotNull String localPath) {
+        LOG.debug("Adding local IDE dependency")
+        def ideaDir = new File(localPath)
+        if (!ideaDir.exists() || !ideaDir.isDirectory()) {
+            throw new BuildException("Specified localPath '$localPath' is not path to IntelliJ IDE", null)
         }
-        return new IdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, 
-                !hasKotlinDependency(project))
+        def buildNumber = Utils.ideaBuildNumber(ideaDir)
+        return createDependency(null, buildNumber, buildNumber, ideaDir, null, project)
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency) {
@@ -59,6 +66,17 @@ class IdeaDependencyManager {
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
                 group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: dependency.version, configuration: 'compile'
         ])
+    }
+
+    @NotNull
+    private static IdeaDependency createDependency(String type, String version, String buildNumber,
+                                                   File classesDirectory, File sourcesDirectory, Project project) {
+        if (type == 'JPS') {
+            return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
+                    !hasKotlinDependency(project))
+        }
+        return new IdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
+                !hasKotlinDependency(project))
     }
 
     @Nullable

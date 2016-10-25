@@ -9,6 +9,13 @@ Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distributio
 <br/><br/> 
 **Default value**: `LATEST-EAP-SNAPSHOT`
 
+- `intellij.localPath` defines path to locally installed IDEA distribution that should be used as a dependency. 
+The option accepts path, e.g. `/Applications/IntelliJIDEA.app`
+<br/>
+`intellij.version` and `intellij.localPath` should not be specified at the same time.
+<br/><br/> 
+**Default value**: `null`
+
 - `intellij.type` defines the type of IDEA distribution: `IC` for community version, `IU` for ultimate and `JPS` for jps-only dependencies.<br/><br/> 
 **Default value**: `IC`
 

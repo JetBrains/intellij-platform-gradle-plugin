@@ -88,9 +88,16 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA dependency")
         def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
-        def ideaDependency = resolver.resolve(project, extension.version, extension.type, extension.downloadSources)
-        if (ideaDependency == null) {
-            throw new BuildException("Failed to resolve IntelliJ IDEA ${extension.version}", null)
+        def ideaDependency
+        if (extension.localPath != null) {
+            if (extension.version != null) {
+                LOG.warn("Both `localPath` and `version` specified, second would be ignored")
+            }
+            LOG.info("Using path to locally installed IDE: '${extension.localPath}'")
+            ideaDependency = resolver.resolveLocal(project, extension.localPath)
+        } else {
+            LOG.info("Using IDE from remote repository")
+            ideaDependency = resolver.resolveRemote(project, extension.version, extension.type, extension.downloadSources)
         }
         extension.ideaDependency = ideaDependency
         LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} is used for building")
