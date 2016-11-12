@@ -21,6 +21,7 @@ class IntelliJPluginExtension {
     boolean updateSinceUntilBuild
     boolean sameSinceUntilBuild
     boolean downloadSources
+    boolean addToolsJar
     Publish publish
 
     IdeaDependency ideaDependency

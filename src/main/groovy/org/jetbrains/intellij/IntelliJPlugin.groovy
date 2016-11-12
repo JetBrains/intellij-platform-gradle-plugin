@@ -54,6 +54,7 @@ class IntelliJPlugin implements Plugin<Project> {
             sameSinceUntilBuild = false
             intellijRepo = DEFAULT_INTELLIJ_REPO
             downloadSources = true
+            addToolsJar = true
             publish = new IntelliJPluginExtension.Publish()
         }
         configureTasks(project, intellijExtension)
@@ -104,7 +105,7 @@ class IntelliJPlugin implements Plugin<Project> {
         resolver.register(project, ideaDependency)
 
         def toolsJar = Jvm.current().toolsJar
-        if (toolsJar) {
+        if (extension.addToolsJar && toolsJar) {
             project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, project.files(toolsJar))
         }
     }
