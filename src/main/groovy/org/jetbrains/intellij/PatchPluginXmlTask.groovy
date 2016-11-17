@@ -13,6 +13,7 @@ class PatchPluginXmlTask extends ConventionTask {
     private Object version
     private Object sinceBuild
     private Object untilBuild
+    private Object changeNotes
 
     @OutputDirectory
     File getDestinationDir() {
@@ -98,6 +99,16 @@ class PatchPluginXmlTask extends ConventionTask {
         this.untilBuild = untilBuild
     }
 
+    @Input
+    @Optional
+    String getChangeNotes() {
+        Utils.stringInput(releaseNotes)
+    }
+
+    void setChangeNotes(Object changeNotes) {
+        this.changeNotes = changeNotes
+    }
+
     @TaskAction
     void patchPluginXmlFiles() {
         def files = getPluginXmlFiles()
@@ -106,6 +117,7 @@ class PatchPluginXmlTask extends ConventionTask {
             patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
             patchDescription(getPluginDescription(), pluginXml)
             patchPluginVersion(getVersion(), pluginXml)
+            patchChangeNotes(getChangeNotes(), pluginXml)
 
             def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(new File(getDestinationDir(), file.getName()))))
             printer.preserveWhitespace = true
@@ -144,6 +156,17 @@ class PatchPluginXmlTask extends ConventionTask {
             } else {
                 pluginXml.children().add(0, new Node(null, 'idea-version',
                         ['since-build': sinceBuild, 'until-build': untilBuild]))
+            }
+        }
+    }
+
+    static void patchChangeNotes(String changeNotes, Node pluginXml) {
+        if (changeNotes != null) {
+            def changeNotesTag = pluginXml.'change-notes'
+            if(changeNotesTag) {
+                changeNotesTag*.value = changeNotes
+            } else {
+                pluginXml.children().add(0, new Node(null, 'change-notes', changeNotes))
             }
         }
     }
