@@ -123,9 +123,18 @@ class PatchPluginXmlTask extends ConventionTask {
             patchNode("change-notes", getChangeNotes(), pluginXml)
             patchPluginVersion(getVersion(), pluginXml)
 
-            def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(new File(getDestinationDir(), file.getName()))))
-            printer.preserveWhitespace = true
-            printer.print(pluginXml)
+            def writer
+            try {
+                writer = new PrintWriter(new FileWriter(new File(getDestinationDir(), file.getName())))
+                def printer = new XmlNodePrinter(writer)
+                printer.preserveWhitespace = true
+                printer.print(pluginXml)
+            }
+            finally {
+                if (writer) {
+                    writer.close()
+                }
+            }
         }
     }
 

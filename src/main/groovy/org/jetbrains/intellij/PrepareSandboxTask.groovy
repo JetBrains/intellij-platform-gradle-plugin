@@ -192,8 +192,17 @@ class PrepareSandboxTask extends Copy {
             component.append(option)
         }
         option.'@value' = 'false'
-        def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(updatesConfig)))
-        printer.preserveWhitespace = true
-        printer.print(parse)
+        def writer
+        try {
+            writer = new PrintWriter(new FileWriter(updatesConfig))
+            def printer = new XmlNodePrinter(writer)
+            printer.preserveWhitespace = true
+            printer.print(parse)
+        }
+        finally {
+            if (writer) {
+                writer.close()
+            }
+        }
     }
 }
