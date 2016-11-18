@@ -43,7 +43,6 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         then:
         outputPluginXml(project).text == """<idea-plugin version="2">
   <version>0.42.123</version>
-  <description>Plugin pluginDescription</description>
   <change-notes>change notes</change-notes>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>

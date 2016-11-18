@@ -102,10 +102,14 @@ class PatchPluginXmlTask extends ConventionTask {
     @Input
     @Optional
     String getChangeNotes() {
-        Utils.stringInput(releaseNotes)
+        Utils.stringInput(changeNotes)
     }
 
     void setChangeNotes(Object changeNotes) {
+        this.changeNotes = changeNotes
+    }
+
+    void changeNotes(Object changeNotes) {
         this.changeNotes = changeNotes
     }
 
@@ -115,9 +119,9 @@ class PatchPluginXmlTask extends ConventionTask {
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
             patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
-            patchDescription(getPluginDescription(), pluginXml)
+            patchNode("description", getPluginDescription(), pluginXml)
+            patchNode("change-notes", getChangeNotes(), pluginXml)
             patchPluginVersion(getVersion(), pluginXml)
-            patchChangeNotes(getChangeNotes(), pluginXml)
 
             def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(new File(getDestinationDir(), file.getName()))))
             printer.preserveWhitespace = true
@@ -136,17 +140,6 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchDescription(String pluginDescription, Node pluginXml) {
-        if (pluginDescription != null) {
-            def version = pluginXml.description
-            if (version) {
-                version*.value = pluginDescription
-            } else {
-                pluginXml.children().add(0, new Node(null, 'description', pluginDescription))
-            }
-        }
-    }
-
     static void patchSinceUntilBuild(String sinceBuild, String untilBuild, Node pluginXml) {
         if (sinceBuild && untilBuild) {
             def ideaVersionTag = pluginXml.'idea-version'
@@ -160,13 +153,13 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchChangeNotes(String changeNotes, Node pluginXml) {
-        if (changeNotes != null) {
-            def changeNotesTag = pluginXml.'change-notes'
-            if(changeNotesTag) {
-                changeNotesTag*.value = changeNotes
+    static void patchNode(String name, String value, Node pluginXml) {
+        if (value != null) {
+            def tag = pluginXml."$name"
+            if(tag) {
+                tag*.value = value
             } else {
-                pluginXml.children().add(0, new Node(null, 'change-notes', changeNotes))
+                pluginXml.children().add(0, new Node(null, name, value))
             }
         }
     }
