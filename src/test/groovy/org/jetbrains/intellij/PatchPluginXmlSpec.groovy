@@ -33,6 +33,22 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
 """
     }
 
+    def 'patch change notes'() {
+        given:
+        pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
+        buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }\n"
+        buildFile << "patchPluginXml { changeNotes = 'change notes' }"
+        when:
+        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        then:
+        outputPluginXml(project).text == """<idea-plugin version="2">
+  <version>0.42.123</version>
+  <change-notes>change notes</change-notes>
+  <idea-version since-build="141.1532" until-build="141.*"/>
+</idea-plugin>
+"""
+    }
+
     def 'same since and until builds'() {
         given:
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"

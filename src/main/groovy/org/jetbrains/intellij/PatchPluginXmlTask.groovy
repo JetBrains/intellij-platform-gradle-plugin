@@ -13,6 +13,7 @@ class PatchPluginXmlTask extends ConventionTask {
     private Object version
     private Object sinceBuild
     private Object untilBuild
+    private Object changeNotes
 
     @OutputDirectory
     File getDestinationDir() {
@@ -98,13 +99,28 @@ class PatchPluginXmlTask extends ConventionTask {
         this.untilBuild = untilBuild
     }
 
+    @Input
+    @Optional
+    String getChangeNotes() {
+        Utils.stringInput(changeNotes)
+    }
+
+    void setChangeNotes(Object changeNotes) {
+        this.changeNotes = changeNotes
+    }
+
+    void changeNotes(Object changeNotes) {
+        this.changeNotes = changeNotes
+    }
+
     @TaskAction
     void patchPluginXmlFiles() {
         def files = getPluginXmlFiles()
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
             patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
-            patchDescription(getPluginDescription(), pluginXml)
+            patchNode("description", getPluginDescription(), pluginXml)
+            patchNode("change-notes", getChangeNotes(), pluginXml)
             patchPluginVersion(getVersion(), pluginXml)
 
             def printer = new XmlNodePrinter(new PrintWriter(new FileWriter(new File(getDestinationDir(), file.getName()))))
@@ -124,17 +140,6 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchDescription(String pluginDescription, Node pluginXml) {
-        if (pluginDescription != null) {
-            def version = pluginXml.description
-            if (version) {
-                version*.value = pluginDescription
-            } else {
-                pluginXml.children().add(0, new Node(null, 'description', pluginDescription))
-            }
-        }
-    }
-
     static void patchSinceUntilBuild(String sinceBuild, String untilBuild, Node pluginXml) {
         if (sinceBuild && untilBuild) {
             def ideaVersionTag = pluginXml.'idea-version'
@@ -144,6 +149,17 @@ class PatchPluginXmlTask extends ConventionTask {
             } else {
                 pluginXml.children().add(0, new Node(null, 'idea-version',
                         ['since-build': sinceBuild, 'until-build': untilBuild]))
+            }
+        }
+    }
+
+    static void patchNode(String name, String value, Node pluginXml) {
+        if (value != null) {
+            def tag = pluginXml."$name"
+            if(tag) {
+                tag*.value = value
+            } else {
+                pluginXml.children().add(0, new Node(null, name, value))
             }
         }
     }
