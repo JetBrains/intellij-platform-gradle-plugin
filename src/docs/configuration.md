@@ -68,7 +68,7 @@ distributions. If empty – Gradle cache directory will be used.
 
 *Available in SNAPSHOT only*
 
-The `patchPluginXmlFiles` task supports following properties:
+The `patchPluginXml` task supports following properties:
 
 - `version` is a value for `<idea until-build="">` attribute.
 <br/>
