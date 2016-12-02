@@ -41,6 +41,10 @@
     },
     {
       "type": "file",
+      "value": "src/docs/getting_started.md"
+    },
+    {
+      "type": "file",
       "value": "src/docs/examples.md"
     },
     {
