@@ -14,6 +14,7 @@ class PatchPluginXmlTask extends ConventionTask {
     private Object sinceBuild
     private Object untilBuild
     private Object changeNotes
+    private Object pluginId
 
     @OutputDirectory
     File getDestinationDir() {
@@ -113,6 +114,20 @@ class PatchPluginXmlTask extends ConventionTask {
         this.changeNotes = changeNotes
     }
 
+    @Input
+    @Optional
+    String getPluginId() {
+        Utils.stringInput(pluginId)
+    }
+
+    void setPluginId(Object pluginId) {
+        this.pluginId = pluginId
+    }
+
+    void pluginId(Object pluginId) {
+        this.pluginId = pluginId
+    }
+
     @TaskAction
     void patchPluginXmlFiles() {
         def files = getPluginXmlFiles()
@@ -122,6 +137,7 @@ class PatchPluginXmlTask extends ConventionTask {
             patchNode("description", getPluginDescription(), pluginXml)
             patchNode("change-notes", getChangeNotes(), pluginXml)
             patchPluginVersion(getVersion(), pluginXml)
+            patchNode("id", getPluginId(), pluginXml)
 
             def writer
             try {
