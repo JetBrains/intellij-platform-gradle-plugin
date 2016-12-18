@@ -1,4 +1,4 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.BuildException
 import org.gradle.api.Action
@@ -7,6 +7,9 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.Utils
 
 class IntelliJInstrumentCodeAction implements Action<AbstractCompile> {
     private static final String FILTER_ANNOTATION_REGEXP_CLASS = 'com.intellij.ant.ClassFilterAnnotationRegexp'

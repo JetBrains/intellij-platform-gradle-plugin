@@ -20,7 +20,11 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyManager
+import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeAction
+import org.jetbrains.intellij.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.intellij.tasks.RunIdeaTask
 
 class IntelliJPlugin implements Plugin<Project> {
     public static final GROUP_NAME = "intellij"

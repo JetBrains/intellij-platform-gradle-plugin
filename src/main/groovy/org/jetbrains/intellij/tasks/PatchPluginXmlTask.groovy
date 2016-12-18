@@ -1,9 +1,10 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
+import org.jetbrains.intellij.Utils
 
 @SuppressWarnings("GroovyUnusedDeclaration")
 class PatchPluginXmlTask extends ConventionTask {

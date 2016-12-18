@@ -1,4 +1,4 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.CopySpec
@@ -7,6 +7,8 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.*
 import org.gradle.internal.FileUtils
 import org.gradle.internal.jvm.Jvm
+import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.xml.sax.SAXParseException
 

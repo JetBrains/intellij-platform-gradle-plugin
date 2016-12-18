@@ -1,4 +1,4 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.JavaExec
@@ -6,6 +6,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
+import org.jetbrains.intellij.Utils
 
 class RunIdeaTask extends JavaExec {
     private static final def PREFIXES = [IU: null,
