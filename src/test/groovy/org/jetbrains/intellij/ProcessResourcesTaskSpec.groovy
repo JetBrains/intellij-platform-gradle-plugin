@@ -49,7 +49,7 @@ class ProcessResourcesTaskSpec extends IntelliJPluginSpecBase {
 """
     }
 
-    def outputPluginXml(GradleProject project) {
+    static outputPluginXml(GradleProject project) {
         new File(project.buildDirectory, "resources/main/META-INF/").listFiles().first()
     }
 }

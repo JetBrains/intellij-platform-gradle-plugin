@@ -34,7 +34,7 @@ class PluginDependencyResolverSpec extends IntelliJPluginSpecBase {
                  '/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/markdown.jar'] as Set
     }
 
-    def collectFilePaths(Collection<File> files, String cacheDir) {
+    static collectFilePaths(Collection<File> files, String cacheDir) {
         def paths = new HashSet()
         files.each {
             paths << adjustWindowsPath(it.absolutePath.substring(cacheDir.length()))
