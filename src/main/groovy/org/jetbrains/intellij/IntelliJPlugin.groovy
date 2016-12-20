@@ -20,11 +20,8 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyManager
-import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeAction
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.PublishTask
-import org.jetbrains.intellij.tasks.RunIdeaTask
+import org.jetbrains.intellij.dependency.PluginProjectDependency
+import org.jetbrains.intellij.tasks.*
 
 class IntelliJPlugin implements Plugin<Project> {
     public static final GROUP_NAME = "intellij"
@@ -120,19 +117,31 @@ class IntelliJPlugin implements Plugin<Project> {
         def resolver = new PluginDependencyManager(project, extension.ideaDependency)
         extension.plugins.each {
             LOG.info("Configuring IntelliJ plugin $it")
-            def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it)
-            if (!pluginId) {
-                throw new BuildException("Failed to resolve plugin $it", null)
+            if (it instanceof Project) {
+                it.afterEvaluate {
+                    if (it.plugins.findPlugin(IntelliJPlugin) == null) {
+                        throw new BuildException("Cannot use $it as a plugin dependency. IntelliJ Plugin is not found." + it.plugins, null)
+                    }
+                    extension.pluginDependencies.add(new PluginProjectDependency(it))
+                    project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, it)
+                    project.tasks.withType(PrepareSandboxTask)*.dependsOn(it.tasks.findByName(PREPARE_SANDBOX_TASK_NAME))
+                }
             }
-            def plugin = resolver.resolve(pluginId, pluginVersion, channel)
-            if (plugin == null) {
-                throw new BuildException("Failed to resolve plugin $it", null)
+            else {
+                def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
+                if (!pluginId) {
+                    throw new BuildException("Failed to resolve plugin $it", null)
+                }
+                def plugin = resolver.resolve(pluginId, pluginVersion, channel)
+                if (plugin == null) {
+                    throw new BuildException("Failed to resolve plugin $it", null)
+                }
+                if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
+                    throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
+                }
+                resolver.register(project, plugin)
+                extension.pluginDependencies.add(plugin)
             }
-            if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
-                throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
-            }
-            extension.pluginDependencies.add(plugin)
-            resolver.register(project, plugin)
         }
     }
 

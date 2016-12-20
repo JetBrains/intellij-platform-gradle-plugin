@@ -24,8 +24,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
         String intellijRepo = System.properties.get('intellij.repo', '')
         assert gradleHome != null
         file("settings.gradle") << "rootProject.name='projectName'\n"
-        buildFile << """
-            apply plugin: 'org.jetbrains.intellij'
+        buildFile << """\
             buildscript {
                 repositories { 
                     maven { url "${adjustWindowsPath(localRepoPath)}" }
@@ -36,13 +35,14 @@ abstract class IntelliJPluginSpecBase extends Specification {
                     classpath group: 'org.jetbrains.intellij.plugins', name: 'gradle-intellij-plugin', version: 'latest.release'
                 }
             }
+            apply plugin: 'org.jetbrains.intellij'
             repositories { mavenCentral() }
             intellij {
                 version = '14.1.3'
                 downloadSources = false
                 intellijRepo = '$intellijRepo'
             }
-        """
+        """.stripIndent()
     }
 
     def cleanup() {

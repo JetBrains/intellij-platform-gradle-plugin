@@ -48,7 +48,7 @@ class PluginDependencyManager {
                 IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
                 def pluginDirectory = new File(ideaDependency.classes, "plugins/$id")
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    return new PluginDependency(id, ideaDependency.version, pluginDirectory, true)
+                    return new PluginDependencyImpl(id, ideaDependency.version, pluginDirectory, true)
                 }
             }
             // todo: implement downloading last compatible plugin version
@@ -140,11 +140,11 @@ class PluginDependencyManager {
                     if (!dest.getParentFile().exists() && !dest.getParentFile().mkdirs()) {
                         throw new BuildException("Cannot unzip plugin $pluginId:$version: $pluginZip.absolutePath", null)
                     }
-                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest));
+                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest))
                     try {
-                        copyInputStream(zipFile.getInputStream(entry), outputStream);
+                        copyInputStream(zipFile.getInputStream(entry), outputStream)
                     } finally {
-                        outputStream.close();
+                        outputStream.close()
                     }
                 }
             }
@@ -170,21 +170,21 @@ class PluginDependencyManager {
     }
 
     private File pluginCache(@NotNull String pluginId, @NotNull String version, @Nullable String channel) {
-        return new File(cacheDirectoryPath, PluginDependency.pluginFqn(pluginId, version, channel))
+        return new File(cacheDirectoryPath, PluginDependencyImpl.pluginFqn(pluginId, version, channel))
     }
 
     @NotNull
     private static File findArtifact(File directory) {
         def files = directory.listFiles()
         if (files == null || files.length != 1) {
-            throw new AssertionError("Single child expected in $directory");
+            throw new AssertionError("Single child expected in $directory")
         }
         return files[0]
     }
 
-    private static def externalPluginDependency(@NotNull File artifact, @Nullable String channel) {
+    private static externalPluginDependency(@NotNull File artifact, @Nullable String channel) {
         def intellijPlugin = PluginManager.instance.createPlugin(artifact)
-        def pluginDependency = new PluginDependency(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
+        def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
         pluginDependency.channel = channel
         pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
         pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
@@ -192,13 +192,13 @@ class PluginDependencyManager {
     }
 
     private static void copyInputStream(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[1024];
-        int len;
+        byte[] buffer = new byte[1024]
+        int len
         while ((len = input.read(buffer)) >= 0) {
-            output.write(buffer, 0, len);
+            output.write(buffer, 0, len)
         }
-        input.close();
-        output.close();
+        input.close()
+        output.close()
     }
 }
 

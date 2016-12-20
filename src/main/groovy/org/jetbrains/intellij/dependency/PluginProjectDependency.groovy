@@ -1,0 +1,73 @@
+package org.jetbrains.intellij.dependency
+
+import com.intellij.structure.domain.PluginManager
+import com.intellij.structure.errors.IncorrectPluginException
+import groovy.transform.ToString
+import org.gradle.api.Project
+import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
+import org.jetbrains.intellij.IntelliJPlugin
+
+@ToString(includeNames = true, includeFields = true, ignoreNulls = true)
+class PluginProjectDependency implements PluginDependency, Serializable {
+    @NotNull
+    private transient Project project
+
+    @Lazy
+    private File pluginDirectory = {
+        def prepareSandboxTask = project?.tasks?.findByName(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        //noinspection GroovyAssignabilityCheck
+        return prepareSandboxTask != null ?
+                new File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName) : null
+    }()
+
+    @Lazy
+    private transient PluginDependencyImpl pluginDependency = {
+        if (pluginDirectory.exists()) {
+            try {
+                def intellijPlugin = PluginManager.instance.createPlugin(pluginDirectory)
+                def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, pluginDirectory)
+                pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
+                pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
+                return pluginDependency
+            }
+            catch (IncorrectPluginException e) {
+                IntelliJPlugin.LOG.error("Cannot use $pluginDirectory as a plugin dependency", e)
+            }
+        }
+        return null
+    }()
+
+    PluginProjectDependency(@NotNull Project project) {
+        this.project = project
+    }
+
+    @NotNull
+    @Override
+    File getArtifact() {
+        return this.pluginDirectory
+    }
+
+    @NotNull
+    @Override
+    Collection<File> getJarFiles() {
+        return pluginDependency ? pluginDependency.jarFiles : Collections.emptyList()
+    }
+
+    @Nullable
+    @Override
+    File getClassesDirectory() {
+        return pluginDependency?.classesDirectory
+    }
+
+    @Nullable
+    @Override
+    File getMetaInfDirectory() {
+        return pluginDependency?.metaInfDirectory
+    }
+
+    @Override
+    boolean isBuiltin() {
+        return false
+    }
+}

@@ -8,24 +8,40 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
     def 'prepare sandbox for two plugins'() {
         given:
         writeJavaFile()
-        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        pluginXml << """\
+            <idea-plugin>
+              <id>org.intellij.test.plugin</id>
+              <name>Test Plugin</name>
+              <version>1.0</version>
+              <vendor url="https://jetbrains.com">JetBrains</vendor>
+              <description>test plugin</description>
+              <change-notes/>
+            </idea-plugin>""".stripIndent()
+        
+        def commonBuildFileText = buildFile.text
         buildFile << """\
             version='0.42.123'
             intellij.pluginName = 'myPluginName'
+            intellij.plugins = [project('nestedProject')]
             """.stripIndent()
         file('settings.gradle') << "include 'nestedProject'"
 
-        file('nestedProject/build.gradle') << buildFile.text
-        file('nestedProject/build.gradle') << """\
+        file('nestedProject/build.gradle') << commonBuildFileText
+        file('nestedProject/build.gradle') << """
+            version='0.42.123'
             intellij.pluginName = 'myNestedPluginName'
-            intellij.sandboxDirectory = "\${rootProject.buildDir}/idea-sandbox" 
             """.stripIndent()
-
         file('nestedProject/src/main/java/NestedAppFile.java') << "class NestedAppFile{}"
         file('nestedProject/src/main/resources/META-INF/plugin.xml') << pluginXml.text
 
         when:
-        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        def project
+        try {
+            project = run(true, ":" + IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        } finally {
+            println stdout
+            println stderr
+        }
 
         then:
         File sandbox = sandbox(project)
