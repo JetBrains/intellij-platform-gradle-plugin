@@ -1,0 +1,4 @@
+include 'simple-plugin', 'composite-plugin'
+include 'composite-plugin:subplugin'
+includeBuild '..'
+
