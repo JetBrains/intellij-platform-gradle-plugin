@@ -17,7 +17,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
               <description>test plugin</description>
               <change-notes/>
             </idea-plugin>""".stripIndent()
-        
+
         def commonBuildFileText = buildFile.text
         buildFile << """\
             version='0.42.123'
@@ -35,13 +35,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('nestedProject/src/main/resources/META-INF/plugin.xml') << pluginXml.text
 
         when:
-        def project
-        try {
-            project = run(true, ":" + IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
-        } finally {
-            println stdout
-            println stderr
-        }
+        def project = run(true, ":" + IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
         File sandbox = sandbox(project)
@@ -73,10 +67,9 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(true, IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
-        assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
-                                         '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
-                                         '/config/options/updates.xml'] as Set
+        assert collectPaths(sandbox(project)) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
+                                                  '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                                  '/config/options/updates.xml'] as Set
     }
 
     def 'prepare sandbox task'() {
@@ -100,7 +93,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(true, IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        File sandbox = new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+        File sandbox = sandbox(project)
         assert collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
                                          '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
                                          '/config/options/updates.xml'] as Set
@@ -198,9 +191,8 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        assert collectPaths(new File(project.buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)) == [
-                "/plugins/$project.name/lib/projectName.jar",
-                '/config/options/updates.xml'] as Set
+        assert collectPaths(sandbox(project)) == ["/plugins/$project.name/lib/projectName.jar",
+                                                  '/config/options/updates.xml'] as Set
     }
 
     def 'disable ide update without updates.xml'() {
@@ -313,6 +305,21 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 <option name="CHECK_NEEDED" value="false"/>
               </component>
             </application>''')
+    }
+
+    def 'replace jar on version changing'() {
+        given:
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << 'version=\'0.42.123\'\n'
+        run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        buildFile << 'version=\'0.42.124\'\n'
+
+        when:
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+
+        then:
+        assert collectPaths(sandbox(project)) == ['/plugins/projectName/lib/projectName-0.42.124.jar',
+                                                  '/config/options/updates.xml'] as Set
     }
 
     private static File sandbox(GradleProject project) {

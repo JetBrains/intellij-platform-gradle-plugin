@@ -13,7 +13,7 @@ import org.jetbrains.intellij.dependency.PluginDependency
 import org.xml.sax.SAXParseException
 
 @SuppressWarnings("GroovyUnusedDeclaration")
-class PrepareSandboxTask extends Copy {
+class PrepareSandboxTask extends Sync {
     Object pluginName
     Object pluginJar
     Object configDirectory
