@@ -1,14 +1,16 @@
-package org.intellij.examples.simple.plugin;
+package org.intellij.examples.dependencies.plugin;
 
+import com.intellij.coverage.CoverageExecutor;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.ui.Messages;
 
-public class HelloAction extends AnAction {
+public class CoverageHelloAction extends AnAction {
   @Override
   public void actionPerformed(AnActionEvent e) {
-    Messages.showInfoMessage("Hello World!", "Hello");
+    Messages.showInfoMessage("Hello Coverage Plugin!\n" +
+        "I know about " + CoverageExecutor.EXECUTOR_ID, "Hello");
   }
 
   @Override

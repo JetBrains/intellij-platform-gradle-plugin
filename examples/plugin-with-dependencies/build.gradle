@@ -1,0 +1,3 @@
+intellij {
+    plugins = ['coverage', 'org.jetbrains.kotlin:1.0.6-release-IJ2016.3-1']
+}
