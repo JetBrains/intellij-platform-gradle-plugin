@@ -26,6 +26,8 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
     private File classesDirectory
     @Nullable
     private File metaInfDirectory
+    @Nullable
+    private File sourcesDirectory
     @NotNull
     private File artifact
     @NotNull
@@ -33,10 +35,15 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
 
     private boolean builtin
 
-    PluginDependencyImpl(@NotNull String id, @NotNull String version, @NotNull File artifact, boolean builtin = false) {
+    PluginDependencyImpl(@NotNull String id,
+                         @NotNull String version,
+                         @NotNull File artifact,
+                         @Nullable File sourcesDirectory = null,
+                         boolean builtin = false) {
         this.id = id
         this.version = version
         this.artifact = artifact
+        this.sourcesDirectory = sourcesDirectory
         this.builtin = builtin
         initFiles()
     }
@@ -65,14 +72,6 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         return sinceBuild == null ||
                 IdeVersion.createIdeVersion(sinceBuild) <= ideVersion &&
                 (untilBuild == null || ideVersion <= IdeVersion.createIdeVersion(untilBuild))
-    }
-
-    String getFqn() {
-        return pluginFqn(id, version, channel)
-    }
-
-    static pluginFqn(@NotNull String id, @NotNull String version, @Nullable String channel) {
-        "$id-${channel ?: 'master'}-$version"
     }
 
     String getId() {
@@ -131,6 +130,7 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         this.jarFiles = jarFiles
     }
 
+    @Override
     @Nullable
     File getClassesDirectory() {
         return classesDirectory
@@ -140,6 +140,7 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         this.classesDirectory = classesDirectory
     }
 
+    @Override
     @Nullable
     File getMetaInfDirectory() {
         return metaInfDirectory
@@ -147,6 +148,16 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
 
     void setMetaInfDirectory(@Nullable File metaInfDirectory) {
         this.metaInfDirectory = metaInfDirectory
+    }
+
+    @Override
+    @Nullable
+    File getSourcesDirectory() {
+        return sourcesDirectory
+    }
+
+    void setSourcesDirectory(@Nullable File sourcesDirectory) {
+        this.sourcesDirectory = sourcesDirectory
     }
 
     boolean isBuiltin() {
@@ -167,6 +178,7 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         if (artifact != that.artifact) return false
         if (channel != that.channel) return false
         if (classesDirectory != that.classesDirectory) return false
+        if (sourcesDirectory != that.sourcesDirectory) return false
         if (id != that.id) return false
         if (jarFiles != that.jarFiles) return false
         if (metaInfDirectory != that.metaInfDirectory) return false
@@ -185,6 +197,7 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         result = 31 * result + (sinceBuild != null ? sinceBuild.hashCode() : 0)
         result = 31 * result + (untilBuild != null ? untilBuild.hashCode() : 0)
         result = 31 * result + (classesDirectory != null ? classesDirectory.hashCode() : 0)
+        result = 31 * result + (sourcesDirectory != null ? sourcesDirectory.hashCode() : 0)
         result = 31 * result + (metaInfDirectory != null ? metaInfDirectory.hashCode() : 0)
         result = 31 * result + artifact.hashCode()
         result = 31 * result + jarFiles.hashCode()

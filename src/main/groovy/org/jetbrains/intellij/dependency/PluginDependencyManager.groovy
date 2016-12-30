@@ -4,6 +4,7 @@ import com.intellij.structure.domain.PluginManager
 import com.intellij.structure.impl.utils.StringUtil
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
@@ -48,7 +49,7 @@ class PluginDependencyManager {
                 IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
                 def pluginDirectory = new File(ideaDependency.classes, "plugins/$id")
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    return new PluginDependencyImpl(id, ideaDependency.version, pluginDirectory, true)
+                    return new PluginDependencyImpl(id, ideaDependency.version, pluginDirectory, ideaDependency.sources, true)
                 }
             }
             // todo: implement downloading last compatible plugin version
@@ -64,6 +65,9 @@ class PluginDependencyManager {
             repo.url = baseDir
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$baseDir.absolutePath/[artifact].[ext]") // jars
+            if (plugin.sourcesDirectory) {
+                repo.artifactPattern("$plugin.sourcesDirectory.parent/[artifact]IC-$plugin.version-[classifier].[ext]")
+            }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
                 group: 'org.jetbrains.plugins', name: plugin.id, version: plugin.version, configuration: 'compile'
@@ -76,12 +80,14 @@ class PluginDependencyManager {
 
     @NotNull
     private File getOrCreateIvyXml(@NotNull PluginDependency plugin, @NotNull File baseDir) {
-        def ivyFile = new File(cacheDirectoryPath, "${plugin.fqn}.xml")
+        def pluginFqn = pluginFqn(plugin.id, plugin.version, plugin.channel)
+        def ivyFile = new File(cacheDirectoryPath, "${pluginFqn}${plugin.sourcesDirectory ? '-sources' : ''}.xml")
         if (!ivyFile.exists()) {
             def identity = new DefaultIvyPublicationIdentity("org.jetbrains.plugins", plugin.id, plugin.version)
             def generator = new IvyDescriptorFileGenerator(identity)
             def configuration = new DefaultIvyConfiguration("compile")
             generator.addConfiguration(configuration)
+            generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
             plugin.jarFiles.each { generator.addArtifact(Utils.createJarDependency(it, configuration.name, baseDir)) }
             if (plugin.classesDirectory) {
@@ -89,6 +95,12 @@ class PluginDependencyManager {
             }
             if (plugin.metaInfDirectory) {
                 generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir))
+            }
+            if (plugin.sourcesDirectory) {
+                // source dependency must be named in the same way as module name
+                def artifact = new DefaultIvyArtifact(plugin.sourcesDirectory, plugin.id, "jar", "sources", "sources")
+                artifact.conf = "sources"
+                generator.addArtifact(artifact)
             }
             generator.writeTo(ivyFile)
         }
@@ -170,7 +182,7 @@ class PluginDependencyManager {
     }
 
     private File pluginCache(@NotNull String pluginId, @NotNull String version, @Nullable String channel) {
-        return new File(cacheDirectoryPath, PluginDependencyImpl.pluginFqn(pluginId, version, channel))
+        return new File(cacheDirectoryPath, pluginFqn(pluginId, version, channel))
     }
 
     @NotNull
@@ -199,6 +211,10 @@ class PluginDependencyManager {
         }
         input.close()
         output.close()
+    }
+
+    private static pluginFqn(@NotNull String id, @NotNull String version, @Nullable String channel) {
+        "$id-${channel ?: 'master'}-$version"
     }
 }
 

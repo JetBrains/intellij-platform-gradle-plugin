@@ -5,6 +5,15 @@ import org.jetbrains.annotations.Nullable
 
 interface PluginDependency {
     @NotNull
+    String getId()
+
+    @NotNull
+    String getVersion()
+
+    @Nullable
+    String getChannel()
+
+    @NotNull
     File getArtifact()
 
     @NotNull
@@ -15,6 +24,9 @@ interface PluginDependency {
 
     @Nullable
     File getMetaInfDirectory()
+
+    @Nullable
+    File getSourcesDirectory()
 
     boolean isBuiltin()
 }

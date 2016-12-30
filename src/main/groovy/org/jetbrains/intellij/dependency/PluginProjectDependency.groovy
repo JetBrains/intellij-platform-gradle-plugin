@@ -44,6 +44,24 @@ class PluginProjectDependency implements PluginDependency, Serializable {
 
     @NotNull
     @Override
+    String getId() {
+        return pluginDependency ? pluginDependency.id : "<unknown plugin id>"
+    }
+
+    @NotNull
+    @Override
+    String getVersion() {
+        return pluginDependency ? pluginDependency.version : "<unknown plugin version>"
+    }
+
+    @Nullable
+    @Override
+    String getChannel() {
+        return pluginDependency?.channel
+    }
+
+    @NotNull
+    @Override
     File getArtifact() {
         return this.pluginDirectory
     }
@@ -64,6 +82,11 @@ class PluginProjectDependency implements PluginDependency, Serializable {
     @Override
     File getMetaInfDirectory() {
         return pluginDependency?.metaInfDirectory
+    }
+
+    @Override
+    File getSourcesDirectory() {
+        return pluginDependency?.sourcesDirectory
     }
 
     @Override
