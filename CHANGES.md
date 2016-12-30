@@ -14,6 +14,7 @@
 - fix incremental compiling after instrumenting code (fixes [#116](../../issues/116))
 - added `intellij.ideaDependencyCachePath` option (fixes [#127](../../issues/127))
 - `project()` reference can be used as a plugin-dependency (fixes [#17](../../issues/17))
+- fix attaching sources of builtin plugins (fixes [#153](../../issues/153))
 
 ## 0.1
 
