@@ -1,4 +1,4 @@
-[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.1.10-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
+[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.2.0-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
 
 > **This project requires JVM version of at least 1.7**
 
@@ -31,7 +31,7 @@ buildscript {
 }
 
 plugins {
-  id "org.jetbrains.intellij" version "0.1.10"
+  id "org.jetbrains.intellij" version "0.2.0"
 }
 ```
 
@@ -49,7 +49,7 @@ buildscript {
     
   }
   dependencies {
-    classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.1.10"
+    classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.2.0"
   }
 }
 
@@ -219,7 +219,7 @@ Since `0.2-SNAPSHOT` `publishPlugin` task supports following properties:
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.1.10"
+  id "org.jetbrains.intellij" version "0.2.0"
 }
 
 intellij {
@@ -272,7 +272,7 @@ As examples of using this plugin you can check out following projects:
 
 
 ```
-Copyright 2016 org.jetbrains.intellij.plugins
+Copyright 2017 org.jetbrains.intellij.plugins
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.2.0-SNAPSHOT
+## 0.2.0
 
 - added an ability to use local IDE installation for compiling
 - result zip archive is added to `archives` configuration, built-in `assemble` task now builds the plugin distribution
