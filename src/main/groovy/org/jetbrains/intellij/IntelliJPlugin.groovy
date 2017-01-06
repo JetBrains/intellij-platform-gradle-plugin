@@ -54,7 +54,7 @@ class IntelliJPlugin implements Plugin<Project> {
             updateSinceUntilBuild = true
             sameSinceUntilBuild = false
             intellijRepo = DEFAULT_INTELLIJ_REPO
-            downloadSources = true
+            downloadSources = !System.getenv().containsKey('CI')
             publish = new IntelliJPluginExtension.Publish()
         }
         configureTasks(project, intellijExtension)

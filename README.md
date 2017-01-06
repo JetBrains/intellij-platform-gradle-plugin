@@ -137,7 +137,7 @@ which is useful for building plugins against EAP IDEA builds.<br/><br/>
 - `intellij.downloadSources` defines whether plugin should download IntelliJ sources while 
 initializing Gradle build. Since sources are no needed while testing on CI, you can set
 it to `false` for particular environment.<br/><br/>
-**Default value**: `true`
+**Default value**: `true` unless the `CI` environment variable is set
 
 - `intellij.systemProperties` defines the map of system properties which will be passed to IDEA instance on
 executing `runIdea` task and tests.<br/>
