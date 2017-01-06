@@ -154,6 +154,9 @@ Empty value means that the IDE that was used for compiling will be used for runn
 distributions. If empty – Gradle cache directory will be used.
 **Default value**: `<empty>`
 
+- `intellij.addToolsJar` – whether to add tools.jar from the current JDK to the dependencies.
+**Default value**: `true`
+
 ### Patching plugin.xml
 
 *Available in SNAPSHOT only*
