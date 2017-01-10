@@ -252,6 +252,7 @@ As examples of using this plugin you can check out following projects:
 - [Perl5 plugin](https://github.com/hurricup/Perl5-IDEA) and its [Travis configuration file](https://github.com/hurricup/Perl5-IDEA/blob/master/.travis.yml)
 - [Android Drawable Importer plugin](https://github.com/winterDroid/android-drawable-importer-intellij-plugin)
 - [Android Material Design Icon Generator plugin](https://github.com/konifar/android-material-design-icon-generator-plugin)
+- [AceJump plugin](https://github.com/johnlindquist/AceJump)
 - [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
 - [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
 - [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
