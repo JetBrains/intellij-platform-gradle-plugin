@@ -249,15 +249,18 @@ As examples of using this plugin you can check out following projects:
 - [Perl5 plugin](https://github.com/hurricup/Perl5-IDEA) and its [Travis configuration file](https://github.com/hurricup/Perl5-IDEA/blob/master/.travis.yml)
 - [Android Drawable Importer plugin](https://github.com/winterDroid/android-drawable-importer-intellij-plugin)
 - [Android Material Design Icon Generator plugin](https://github.com/konifar/android-material-design-icon-generator-plugin)
+- [AceJump plugin](https://github.com/johnlindquist/AceJump)  
+	- Uses Gradle Script Kotlin
 - [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
 - [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
 - [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
 - [Robot plugin](https://github.com/AmailP/robot-plugin)
 - [TOML plugin](https://github.com/stuartcarnie/toml-plugin)
 - [SQLDelight Android Studio Plugin](https://github.com/square/sqldelight/tree/master/sqldelight-studio-plugin)
-- https://github.com/breandan/idear
-- https://github.com/pedrovgs/AndroidWiFiADB
-- https://github.com/SonarSource/sonar-intellij
+- [idear plugin](https://github.com/breandan/idear)
+  - Uses Gradle Script Kotlin
+- [Android WiFi ADB plugin](https://github.com/pedrovgs/AndroidWiFiADB)
+- [SonarLint plugin](https://github.com/SonarSource/sonar-intellij)
 - [IdeaVim plugin](https://github.com/JetBrains/ideavim) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaVim&guest=1)
 - [Adb Idea](https://github.com/pbreault/adb-idea) is configured to build and run against stable, beta or preview (canary) releases of Android Studio
 - [Gerrit](https://github.com/uwolfer/gerrit-intellij-plugin) uses Travis CI inclusive automated publishing of releases to GitHub and JetBrains plugin repository (triggered by version tag creation)
