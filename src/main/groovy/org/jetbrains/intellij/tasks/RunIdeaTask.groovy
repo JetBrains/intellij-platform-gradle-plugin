@@ -105,6 +105,7 @@ class RunIdeaTask extends JavaExec {
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
+        configureArgs()
         super.exec()
     }
 
@@ -148,5 +149,9 @@ class RunIdeaTask extends JavaExec {
 
     def configureJvmArgs() {
         jvmArgs = Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory())
+    }
+
+    def configureArgs() {
+        args = ["${project.projectDir.path}"]
     }
 }
