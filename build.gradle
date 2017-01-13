@@ -89,8 +89,18 @@ task sourcesJar(type: Jar) {
     from sourceSets.main.allSource
 }
 
+task fatJar(type: Jar) {
+    baseName = project.name + '-all'
+    from (configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }) {
+        exclude "META-INF/*.SF"
+        exclude "META-INF/*.DSA"
+        exclude "META-INF/*.RSA"
+    }
+    with jar
+}
+
 artifacts {
-    archives javadocJar, sourcesJar
+    archives javadocJar, sourcesJar, fatJar
 }
 
 uploadArchives {
