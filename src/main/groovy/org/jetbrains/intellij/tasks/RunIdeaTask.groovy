@@ -167,7 +167,6 @@ class RunIdeaTask extends JavaExec {
     }
 
     def configureArgs() {
-        IntelliJPlugin.LOG.warn("Reading from: $projectDirectory")
         def projectDirectory = getProjectDirectory()
         if (projectDirectory) {
             args = ["$projectDirectory"]
