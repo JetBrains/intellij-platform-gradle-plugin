@@ -124,7 +124,7 @@ class Utils {
 
         if (path) {
             if (!dir.exists()) {
-                IntelliJPlugin.LOG.error("Cannot find IntelliJ project: $dir.")
+                IntelliJPlugin.LOG.error("Cannot find IntelliJ project: $dir")
             } else {
                 return dir
             }
