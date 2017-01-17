@@ -118,9 +118,26 @@ class Utils {
         return result
     }
 
+    static File projectDirectory(@NotNull IntelliJPluginExtension extension) {
+        def path = extension.projectDirectory
+        IntelliJPlugin.LOG.warn("Trying to assign project path: $path")
+        def dir = new File(path)
+
+        if (path) {
+            if (!dir.exists()) {
+                IntelliJPlugin.LOG.error("Cannot find IntelliJ project: $dir.")
+            } else {
+                return dir
+            }
+        }
+
+        return null
+    }
+
     @NotNull
     static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
         def path = extension.alternativeIdePath
+        IntelliJPlugin.LOG.warn("Trying to assign alternative IDE path: $path")
         if (path) {
             def dir = new File(path)
             if (dir.getName().endsWith(".app")) {
