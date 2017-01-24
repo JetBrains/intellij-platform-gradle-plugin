@@ -160,7 +160,7 @@ distributions. If empty – Gradle cache directory will be used.
 
 The `patchPluginXml` task supports following properties:
 
-- `version` is a value for `<idea until-build="">` attribute.
+- `version` is a value for `<version>` tag.
 <br/>
 **Default value**: `<project.version>`
 
