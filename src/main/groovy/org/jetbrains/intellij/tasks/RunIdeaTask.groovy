@@ -20,7 +20,10 @@ class RunIdeaTask extends JavaExec {
                                          OC: 'AppCode',
                                          CL: 'CLion',
                                          DB: '0xDBE',
-                                         AI: 'AndroidStudio']
+                                         AI: 'AndroidStudio',
+                                         GO: 'Gogland',
+                                         RS: 'Rider']
+
     private List<Object> requiredPluginIds = []
     private Object ideaDirectory
     private Object configDirectory
