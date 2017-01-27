@@ -17,8 +17,6 @@ import org.jetbrains.intellij.Utils
 import static org.jetbrains.intellij.IntelliJPlugin.LOG
 
 class IdeaDependencyManager {
-    private static final IDEA_MODULE_NAME = "idea"
-
     private final String repoUrl
 
     IdeaDependencyManager(@NotNull String repoUrl) {
@@ -32,14 +30,21 @@ class IdeaDependencyManager {
         project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
 
         LOG.debug("Adding IntelliJ IDEA dependency")
-        def libraryType = type == 'IU' ? 'IU' : 'IC'
-        def dependency = project.dependencies.create("com.jetbrains.intellij.idea:idea$libraryType:$version")
+        def dependencyGroup = 'com.jetbrains.intellij.idea'
+        def dependencyName = 'ideaIC'
+        if (type == 'IU') {
+            dependencyName = 'ideaIU'
+        } else if (type == 'RS') {
+            dependencyGroup = 'com.jetbrains.intellij.rider'
+            dependencyName = 'riderRS'
+        }
+        def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
         def configuration = project.configurations.detachedConfiguration(dependency)
 
         def classesDirectory = getClassesDirectory(project, configuration)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
-        return createDependency(type, version, buildNumber, classesDirectory, sourcesDirectory, project)
+        return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project)
     }
 
     @NotNull
@@ -50,7 +55,7 @@ class IdeaDependencyManager {
             throw new BuildException("Specified localPath '$localPath' is not path to IntelliJ IDE", null)
         }
         def buildNumber = Utils.ideaBuildNumber(ideaDir)
-        return createDependency(null, buildNumber, buildNumber, ideaDir, null, project)
+        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, null, project)
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency) {
@@ -64,18 +69,19 @@ class IdeaDependencyManager {
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: IDEA_MODULE_NAME, version: dependency.version, configuration: 'compile'
+                group: 'com.jetbrains', name: dependency.name, version: dependency.version, configuration: 'compile'
         ])
     }
 
     @NotNull
-    private static IdeaDependency createDependency(String type, String version, String buildNumber,
+    private static IdeaDependency createDependency(String name, String type, String version,
+                                                   String buildNumber,
                                                    File classesDirectory, File sourcesDirectory, Project project) {
         if (type == 'JPS') {
             return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
                     !hasKotlinDependency(project))
         }
-        return new IdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
+        return new IdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
                 !hasKotlinDependency(project))
     }
 
@@ -132,7 +138,7 @@ class IdeaDependencyManager {
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
         def ivyFile = new File(dependency.classes, "${dependency.fqn}.xml")
         if (!ivyFile.exists()) {
-            def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", IDEA_MODULE_NAME, dependency.version))
+            def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
@@ -141,7 +147,7 @@ class IdeaDependencyManager {
             }
             if (dependency.sources) {
                 // source dependency must be named in the same way as module name
-                def artifact = new DefaultIvyArtifact(dependency.sources, IDEA_MODULE_NAME, "jar", "sources", "sources")
+                def artifact = new DefaultIvyArtifact(dependency.sources, dependency.name, "jar", "sources", "sources")
                 artifact.conf = "sources"
                 generator.addArtifact(artifact)
             }

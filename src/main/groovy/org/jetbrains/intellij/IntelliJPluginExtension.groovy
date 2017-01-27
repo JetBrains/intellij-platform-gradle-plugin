@@ -32,6 +32,8 @@ class IntelliJPluginExtension {
             return "IU"
         } else if (version.startsWith("JPS-") || "JPS" == type) {
             return "JPS"
+        } else if (version.startsWith("RS-") || "RS" == type) {
+            return "RS"
         } else {
             return "IC"
         }
@@ -41,7 +43,7 @@ class IntelliJPluginExtension {
         if (version.startsWith('JPS-')) {
             return version.substring(4)
         }
-        return version.startsWith('IU-') || version.startsWith('IC-') ? version.substring(3) : version
+        return version.startsWith('IU-') || version.startsWith('IC-') || version.startsWith('RS-') ? version.substring(3) : version
     }
 
     Set<PluginDependency> getPluginDependencies() {

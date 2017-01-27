@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- added Rider support (fixes [#167](../../issues/167))
+- fix unresolved builtin plugins on case-insensitive file systems
+
 ## 0.2.0
 
 - added an ability to use local IDE installation for compiling

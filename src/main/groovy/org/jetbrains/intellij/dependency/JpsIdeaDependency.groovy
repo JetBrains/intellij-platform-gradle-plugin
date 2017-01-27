@@ -8,20 +8,11 @@ class JpsIdeaDependency extends IdeaDependency {
 
     JpsIdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes,
                       @Nullable File sources, boolean withKotlin) {
-        super(version, buildNumber, classes, sources, withKotlin)
+        super("ideaJPS", version, buildNumber, classes, sources, withKotlin)
     }
 
     @Override
     protected Collection<File> collectJarFiles() {
         return super.collectJarFiles().findAll { ALLOWED_JAR_NAMES.contains(it.name) }
-    }
-
-    @Override
-    String getFqn() {
-        def fqn = "ideaJPS$version"
-        if (sources) {
-            fqn += '-withSources'
-        }
-        return fqn
     }
 }

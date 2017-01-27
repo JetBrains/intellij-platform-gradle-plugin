@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 class IdeaDependency implements Serializable {
     @NotNull
+    private final String name
+    @NotNull
     private final String version
     @NotNull
     private final String buildNumber
@@ -20,8 +22,9 @@ class IdeaDependency implements Serializable {
     private final Collection<File> jarFiles
     private final boolean withKotlin
 
-    IdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes, @Nullable File sources,
-                   boolean withKotlin) {
+    IdeaDependency(@NotNull String name, @NotNull String version, @NotNull String buildNumber, @NotNull File classes,
+                   @Nullable File sources, boolean withKotlin) {
+        this.name = name
         this.version = version
         this.buildNumber = buildNumber
         this.classes = classes
@@ -43,6 +46,11 @@ class IdeaDependency implements Serializable {
             }
         }
         return Collections.emptySet()
+    }
+
+    @NotNull
+    String getName() {
+        return name
     }
 
     @NotNull
@@ -75,7 +83,7 @@ class IdeaDependency implements Serializable {
     }
 
     String getFqn() {
-        def fqn = "idea$version"
+        def fqn = "$name-$version"
         if (withKotlin) {
             fqn += '-withKotlin'
         }
@@ -95,12 +103,14 @@ class IdeaDependency implements Serializable {
         if (jarFiles != that.jarFiles) return false
         if (sources != that.sources) return false
         if (version != that.version) return false
+        if (name != that.name) return false
         return true
     }
 
     int hashCode() {
         int result
         result = version.hashCode()
+        result = 31 * result + name.hashCode()
         result = 31 * result + buildNumber.hashCode()
         result = 31 * result + classes.hashCode()
         result = 31 * result + (sources != null ? sources.hashCode() : 0)

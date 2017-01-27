@@ -23,7 +23,7 @@ class IntelliJInstrumentCodeAction implements Action<AbstractCompile> {
     @Override
     void execute(AbstractCompile task) {
         def extension = task.project.extensions.getByType(IntelliJPluginExtension)
-        if (extension == null || !extension.instrumentCode) {
+        if (extension == null || !extension.instrumentCode || extension.type == 'RS') {
             return
         }
         def classpath = task.project.files(

@@ -1,4 +1,4 @@
-include 'simple-plugin', 'composite-plugin', 'plugin-with-dependencies'
+include 'simple-plugin', 'composite-plugin', 'plugin-with-dependencies', 'rider-plugin'
 include 'composite-plugin:subplugin'
 includeBuild '..'
 
