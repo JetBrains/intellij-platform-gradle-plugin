@@ -30,11 +30,9 @@ class IntelliJPluginExtension {
     String getType() {
         if (version.startsWith("IU-") || "IU" == type) {
             return "IU"
-        } 
-        else if (version.startsWith("JPS-") || "JPS" == type) {
+        } else if (version.startsWith("JPS-") || "JPS" == type) {
             return "JPS"
-        } 
-        else {
+        } else {
             return "IC"
         }
     }
@@ -54,6 +52,9 @@ class IntelliJPluginExtension {
         publish.with(c)
     }
 
+    /**
+     * @deprecated
+     */
     static class Publish {
         /**
          * @deprecated intellij.publish.pluginId property is deprecated. Tag 'id' from plugin.xml will be used for uploading. 
@@ -63,35 +64,44 @@ class IntelliJPluginExtension {
         String password
         String[] channels
 
-        /**
-         * @deprecated
-         */
         static def pluginId(String pluginId) {
             IntelliJPlugin.LOG.warn("intellij.publish.pluginId property is deprecated. " +
                     "Tag 'id' from plugin.xml will be used for uploading.")
         }
 
         def username(String username) {
+            IntelliJPlugin.LOG.warn("intellij.publish.username property is deprecated. " +
+                    "Use `publishPlugin { username 'username' }` instead.")
             this.username = username
         }
 
         def password(String password) {
+            IntelliJPlugin.LOG.warn("intellij.publish.password property is deprecated. " +
+                    "Use `publishPlugin { password 'password' }` instead.")
             this.password = password
         }
 
         def setChannel(String channel) {
+            IntelliJPlugin.LOG.warn("intellij.publish.channel property is deprecated. " +
+                    "Use `publishPlugin { channel 'channel' }` instead.")
             this.channels = [channel]
         }
 
         def channel(String channel) {
+            IntelliJPlugin.LOG.warn("intellij.publish.channel property is deprecated. " +
+                    "Use `publishPlugin { channel 'channel' }` instead.")
             channels(channel)
         }
 
         def channels(String... channels) {
+            IntelliJPlugin.LOG.warn("intellij.publish.channels property is deprecated. " +
+                    "Use `publishPlugin { channels 'channels' }` instead.")
             this.channels = channels
         }
 
         def setChannels(String... channels) {
+            IntelliJPlugin.LOG.warn("intellij.publish.channels property is deprecated. " +
+                    "Use `publishPlugin { channels 'channels' }` instead.")
             this.channels = channels
         }
     }

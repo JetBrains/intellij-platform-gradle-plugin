@@ -66,8 +66,6 @@ distributions. If empty – Gradle cache directory will be used.
 
 ### Patching plugin.xml
 
-*Available in SNAPSHOT only*
-
 The `patchPluginXml` task supports following properties:
 
 - `version` is a value for `<version>` tag.
@@ -96,19 +94,16 @@ The `patchPluginXml` task supports following properties:
 
 ### Publishing plugin
 
+*`intellij.publish.\* properties are deprecated*
 - `intellij.publish.username` your login at JetBrains plugin repository.
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
-
-*Available in SNAPSHOT only*
 - `intellij.publish.channels` defines several channels to upload, you may use any comma-separated strings here, 
 `default` string means default channel.
 <br/><br/>
 **Default value**: `<empty>`
 
-*Available in SNAPSHOT only*
-
-Since `0.2-SNAPSHOT` `publishPlugin` task supports following properties:
+`publishPlugin` task supports following properties:
 
 - `username` is a login at JetBrains plugin repository.
 - `password` is a password at JetBrains plugin repository.
