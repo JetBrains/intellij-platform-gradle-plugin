@@ -47,9 +47,9 @@ class PluginDependencyManager {
                 return externalPluginDependency(new File(id), null)
             } else if (ideaDependency) {
                 IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
-                def pluginDirectory = new File(ideaDependency.classes, "plugins/$id")
+                def pluginDirectory = new File(ideaDependency.classes, "plugins/$id").canonicalFile
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    return new PluginDependencyImpl(id, ideaDependency.version, pluginDirectory, ideaDependency.sources, true)
+                    return new PluginDependencyImpl(pluginDirectory.name, ideaDependency.version, pluginDirectory, ideaDependency.sources, true)
                 }
             }
             // todo: implement downloading last compatible plugin version
