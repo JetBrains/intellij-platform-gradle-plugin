@@ -7,6 +7,7 @@
 
 ## 0.2.0
 
+- result artifact format is changed: now it's always a ZIP archive even if plugin has no extra dependencies. *Note that this may change classloading (see [#170](../../issues/170))*
 - added an ability to use local IDE installation for compiling
 - result zip archive is added to `archives` configuration, built-in `assemble` task now builds the plugin distribution
 - added JPS-type for intellij dependency (fixes [#106](../../issues/106))
