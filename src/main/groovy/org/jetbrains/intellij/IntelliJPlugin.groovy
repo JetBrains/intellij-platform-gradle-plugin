@@ -199,6 +199,7 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(RUN_IDEA_TASK_NAME, RunIdeaTask).with {
             group = GROUP_NAME
             description = "Runs Intellij IDEA with installed plugin."
+            conventionMapping.map("projectDirectory", { Utils.projectDirectory(extension) })
             conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
             conventionMapping.map("systemProperties", { extension.systemProperties })
             conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })

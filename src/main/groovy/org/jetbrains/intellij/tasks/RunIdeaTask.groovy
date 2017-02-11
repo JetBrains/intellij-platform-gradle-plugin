@@ -6,6 +6,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
+import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
 class RunIdeaTask extends JavaExec {
@@ -25,6 +26,7 @@ class RunIdeaTask extends JavaExec {
                                          RS: 'Rider']
 
     private List<Object> requiredPluginIds = []
+    private Object projectDirectory
     private Object ideaDirectory
     private Object configDirectory
     private Object systemDirectory
@@ -43,6 +45,19 @@ class RunIdeaTask extends JavaExec {
 
     void requiredPluginIds(Object... requiredPluginIds) {
         this.requiredPluginIds.addAll(requiredPluginIds as List)
+    }
+
+    @OutputDirectory
+    File getProjectDirectory() {
+        projectDirectory != null ? project.file(projectDirectory) : null
+    }
+
+    void setProjectDirectory(Object projectDirectory) {
+        this.projectDirectory = projectDirectory
+    }
+
+    void projectDirectory(Object projectDirectory) {
+        this.projectDirectory = projectDirectory
     }
 
     @InputDirectory
@@ -108,6 +123,7 @@ class RunIdeaTask extends JavaExec {
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
+        configureArgs()
         super.exec()
     }
 
@@ -151,5 +167,12 @@ class RunIdeaTask extends JavaExec {
 
     def configureJvmArgs() {
         jvmArgs = Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory())
+    }
+
+    def configureArgs() {
+        def projectDirectory = getProjectDirectory()
+        if (projectDirectory) {
+            args = ["$projectDirectory"]
+        }
     }
 }

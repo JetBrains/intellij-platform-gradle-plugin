@@ -118,6 +118,21 @@ class Utils {
         return result
     }
 
+    static File projectDirectory(@NotNull IntelliJPluginExtension extension) {
+        def path = extension.projectDirectory
+        def dir = new File(path)
+
+        if (path) {
+            if (!dir.exists()) {
+                IntelliJPlugin.LOG.error("Cannot find IntelliJ project: $dir")
+            } else {
+                return dir
+            }
+        }
+
+        return null
+    }
+
     @NotNull
     static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
         def path = extension.alternativeIdePath

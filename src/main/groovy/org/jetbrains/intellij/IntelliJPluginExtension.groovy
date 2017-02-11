@@ -13,6 +13,7 @@ class IntelliJPluginExtension {
     String version
     String type
     String pluginName
+    String projectDirectory
     String sandboxDirectory
     String intellijRepo
     String alternativeIdePath
