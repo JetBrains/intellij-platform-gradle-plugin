@@ -108,21 +108,39 @@ class IntelliJPluginExtension {
         }
     }
 
+    /**
+     * @deprecated
+     */
     Map<String, Object> getSystemProperties() {
         systemProperties
     }
 
+    /**
+     * @deprecated
+     */
     void setSystemProperties(Map<String, ?> properties) {
+        IntelliJPlugin.LOG.warn("intellij.systemProperties property is deprecated. " +
+                "Use systemProperties property of a particular task like `runIde` or `test`.")
         systemProperties.clear()
         systemProperties.putAll(properties)
     }
 
+    /**
+     * @deprecated
+     */
     IntelliJPluginExtension systemProperties(Map<String, ?> properties) {
+        IntelliJPlugin.LOG.warn("intellij.systemProperties method is deprecated. " +
+                "Use systemProperties method of a particular task like `runIde` or `test`.")
         systemProperties.putAll(properties)
         this
     }
 
+    /**
+     * @deprecated
+     */
     IntelliJPluginExtension systemProperty(String name, Object value) {
+        IntelliJPlugin.LOG.warn("intellij.systemProperty method is deprecated. " +
+                "Use systemProperty method of a particular task like `runIde` or `test`.")
         systemProperties.put(name, value)
         this
     }

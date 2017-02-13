@@ -5,6 +5,7 @@
 - added `runIde` task. `runIdea` is deprecated now (fixes [#169](../../issues/169))
 - fixed kotlin forms instrumentation (fixes [#171](../../issues/171))
 - fixed filtering out all resources of dependent plugins (fixes [#172](../../issues/172))
+- fix intellij.systemProperties extension (fixes [#173](../../issues/173)) 
 
 ## 0.2.1
 

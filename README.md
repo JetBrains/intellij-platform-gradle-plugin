@@ -144,6 +144,7 @@ it to `false` for particular environment.<br/><br/>
 executing `runIdea` task and tests.<br/>
 Also you can use `intellij.systemProperty(name, value)` method in order to set single system property.
 <br/><br/>
+**Deprecated**. Use `systemProperties` methods of a particular tasks like `runIde` or `test`.<br/><br/>
 **Default value**: `[]`
 
 - `intellij.alternativeIdePath` – absolute path to the locally installed JetBrains IDE.
@@ -185,7 +186,7 @@ The `patchPluginXml` task supports following properties:
 
 ### Publishing plugin
 
-*`intellij.publish.\* properties are deprecated*
+**`intellij.publish.\* properties are deprecated**
 - `intellij.publish.username` your login at JetBrains plugin repository.
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
