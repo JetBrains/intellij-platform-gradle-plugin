@@ -242,9 +242,9 @@ class IntelliJPlugin implements Plugin<Project> {
         def result = new HashSet<Task>()
         if (task instanceof AbstractCompile) {
             result.add(task)
-        }
-        task.taskDependencies.getDependencies(task).each {
-            result.addAll(collectCompileTasks(it))
+            task.taskDependencies.getDependencies(task).each {
+                result.addAll(collectCompileTasks(it))
+            }
         }
         return result
     }
