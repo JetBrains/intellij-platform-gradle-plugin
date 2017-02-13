@@ -33,6 +33,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
     public static final String RUN_IDEA_TASK_NAME = "runIdea"
+    public static final String RUN_IDE_TASK_NAME = "runIde"
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
@@ -197,22 +198,26 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
-        project.tasks.create(RUN_IDEA_TASK_NAME, RunIdeaTask).with {
-            group = GROUP_NAME
-            description = "Runs Intellij IDEA with installed plugin."
-            conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
-            conventionMapping.map("systemProperties", { extension.systemProperties })
-            conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
-            conventionMapping.map("configDirectory", {
+        def configureTask = { RunIdeaTask it ->
+            it.group = GROUP_NAME
+            it.description = "Runs Intellij IDEA with installed plugin."
+            it.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
+            it.conventionMapping.map("systemProperties", { extension.systemProperties })
+            it.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
+            it.conventionMapping.map("configDirectory", {
                 (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getConfigDirectory()
             })
-            conventionMapping.map("pluginsDirectory", {
+            it.conventionMapping.map("pluginsDirectory", {
                 (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getDestinationDir()
             })
-            conventionMapping.map("systemDirectory", {
+            it.conventionMapping.map("systemDirectory", {
                 project.file(Utils.systemDir(extension.sandboxDirectory, false))
             })
-            dependsOn(PREPARE_SANDBOX_TASK_NAME)
+            it.dependsOn(PREPARE_SANDBOX_TASK_NAME)
+        }
+        project.tasks.create(RUN_IDE_TASK_NAME, RunIdeaTask).with(configureTask)
+        project.tasks.create(RUN_IDEA_TASK_NAME, RunIdeaTask).with(configureTask).doLast {
+            LOG.warn("'runIdea' task is deprecated and will be removed in 0.3.0. Use 'runIde' task instead")
         }
     }
 

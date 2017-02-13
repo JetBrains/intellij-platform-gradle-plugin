@@ -15,6 +15,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
                                              IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME,
+                                             IntelliJPlugin.RUN_IDE_TASK_NAME,
                                              IntelliJPlugin.RUN_IDEA_TASK_NAME]
     }
 
