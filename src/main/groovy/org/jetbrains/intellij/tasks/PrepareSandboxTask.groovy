@@ -109,10 +109,9 @@ class PrepareSandboxTask extends Sync {
             def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
             def librariesToIgnore = getLibrariesToIgnore().toSet()
             librariesToIgnore.add(Jvm.current().toolsJar)
-            def pluginDependencies = getPluginDependencies()
-            librariesToIgnore.addAll((pluginDependencies*.jarFiles.flatten() as Collection<File>))
-            librariesToIgnore.addAll(pluginDependencies*.classesDirectory)
-            librariesToIgnore.addAll(pluginDependencies*.metaInfDirectory)
+
+            def pluginDirectories = []
+            getPluginDependencies().collect { pluginDirectories.add(it.artifact.absolutePath) }
 
             def result = [getPluginJar()]
             runtimeConfiguration.getAllDependencies().each {
@@ -126,7 +125,18 @@ class PrepareSandboxTask extends Sync {
                         }
                     }
                 }
-                result.addAll(runtimeConfiguration.fileCollection(it).filter { !librariesToIgnore.contains(it) })
+                result.addAll(runtimeConfiguration.fileCollection(it).filter {
+                    if (librariesToIgnore.contains(it)) {
+                        return false
+                    }
+                    def path = it.absolutePath
+                    for (def p : pluginDirectories) {
+                        if (path == p || path.startsWith("$p$File.separator")) {
+                            return false
+                        }
+                    }
+                    return true
+                })
             }
             result
         }

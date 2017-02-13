@@ -153,6 +153,49 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                                                   '/plugins/markdown/lib/kotlin-reflect.jar'] as Set
     }
 
+    def 'prepare sandbox with plugin dependency with classes directory'() {
+        given:
+        def plugin = createPlugin()
+        writeJavaFile()
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+
+        buildFile << """\
+            intellij {
+                plugins = ['${plugin.absolutePath}']
+                pluginName = 'myPluginName'
+            }
+            """.stripIndent()
+        when:
+        def project = run(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        println(stderr)
+
+        then:
+        assert collectPaths(sandbox(project)) == ['/plugins/myPluginName/lib/projectName.jar',
+                                                  '/config/options/updates.xml',
+                                                  "/plugins/$plugin.name/classes/A.class",
+                                                  "/plugins/$plugin.name/classes/someResources.properties",
+                                                  "/plugins/$plugin.name/META-INF/plugin.xml"] as Set
+    }
+
+    static def createPlugin() {
+        def plugin = File.createTempDir()
+        new File(plugin, 'classes/').mkdir()
+        new File(plugin, 'META-INF/').mkdir()
+        new File(plugin, 'classes/A.class').createNewFile()
+        new File(plugin, 'classes/someResources.properties').createNewFile()
+        new File(plugin, 'META-INF/plugin.xml') << """\
+            <idea-plugin>
+              <id>$plugin.name</id>
+              <name>Test Plugin</name>
+              <version>1.0</version>
+              <idea-version since-build="141.1010" until-build="141.*"/>
+              <vendor url="https://jetbrains.com">JetBrains</vendor>
+              <description>test plugin</description>
+              <change-notes/>
+            </idea-plugin>""".stripIndent()
+        return plugin
+    }
+
     def 'prepare custom sandbox task'() {
         given:
         writeJavaFile()

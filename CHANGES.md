@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.2
+
+- fixed filtering out all resources of dependent plugins (fixes [#172](../../issues/172))
+
 ## 0.2.1
 
 - added Rider support (fixes [#167](../../issues/167))
