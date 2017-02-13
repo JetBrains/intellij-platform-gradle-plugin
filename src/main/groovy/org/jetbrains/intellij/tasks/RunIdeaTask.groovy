@@ -127,6 +127,7 @@ class RunIdeaTask extends JavaExec {
     }
 
     def configureSystemProperties() {
+        systemProperties(getSystemProperties())
         systemProperties(Utils.getIdeaSystemProperties(getConfigDirectory(), getSystemDirectory(), getPluginsDirectory(), getRequiredPluginIds()))
         def operatingSystem = OperatingSystem.current()
         if (operatingSystem.isMacOsX()) {
