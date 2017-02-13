@@ -3,6 +3,7 @@ package org.jetbrains.intellij
 import com.intellij.structure.domain.IdeVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.file.DuplicatesStrategy
@@ -219,7 +220,7 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Configuring IntelliJ compile tasks")
         def abstractCompileDependencies = { String taskName ->
             project.tasks.findByName(taskName).collect {
-                it.taskDependencies.getDependencies(it).findAll { it instanceof AbstractCompile }
+                collectCompileTasks(it)
             }.flatten() as Collection<AbstractCompile>
         }
         abstractCompileDependencies(JavaPlugin.CLASSES_TASK_NAME).each {
@@ -230,6 +231,17 @@ class IntelliJPlugin implements Plugin<Project> {
             it.inputs.property("intellijIdeaDependency", extension.ideaDependency.toString())
             it.doLast(new IntelliJInstrumentCodeAction(true))
         }
+    }
+
+    private static Set<? extends Task> collectCompileTasks(Task task) {
+        def result = new HashSet<Task>()
+        if (task instanceof AbstractCompile) {
+            result.add(task)
+        }
+        task.taskDependencies.getDependencies(task).each {
+            result.addAll(collectCompileTasks(it))
+        }
+        return result
     }
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {

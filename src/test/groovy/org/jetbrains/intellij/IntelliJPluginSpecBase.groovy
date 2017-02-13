@@ -33,8 +33,10 @@ abstract class IntelliJPluginSpecBase extends Specification {
                 }
                 dependencies {
                     classpath group: 'org.jetbrains.intellij.plugins', name: 'gradle-intellij-plugin', version: 'latest.release'
+                    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6"
                 }
             }
+            apply plugin: 'kotlin'
             apply plugin: 'org.jetbrains.intellij'
             repositories { mavenCentral() }
             intellij {
