@@ -2,6 +2,7 @@
 
 ## 0.2.2
 
+- fix kotlin forms instrumentation (fixes [#171](../../issues/171))
 - fixed filtering out all resources of dependent plugins (fixes [#172](../../issues/172))
 
 ## 0.2.1
