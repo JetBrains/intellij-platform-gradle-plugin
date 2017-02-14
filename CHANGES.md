@@ -1,11 +1,19 @@
 # Changelog
 
+## 0.2.4
+
+- fixed attaching sources for IDEA Ultimate and bundled plugins
+
+## 0.2.3
+
+- fixed compilation for multi-module layout
+ 
 ## 0.2.2
 
 - added `runIde` task. `runIdea` is deprecated now (fixes [#169](../../issues/169))
 - fixed kotlin forms instrumentation (fixes [#171](../../issues/171))
 - fixed filtering out all resources of dependent plugins (fixes [#172](../../issues/172))
-- fix intellij.systemProperties extension (fixes [#173](../../issues/173)) 
+- fixed intellij.systemProperties extension (fixes [#173](../../issues/173)) 
 
 ## 0.2.1
 

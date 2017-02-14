@@ -65,7 +65,7 @@ class IdeaDependencyManager {
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$dependency.classes.path/[artifact].[ext]") // idea libs
             if (dependency.sources) {
-                repo.artifactPattern("$dependency.sources.parent/ideaIC-$dependency.version-[classifier].[ext]")
+                repo.artifactPattern("$dependency.sources.parent/[artifact]-$dependency.version-[classifier].[ext]")
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
@@ -146,8 +146,7 @@ class IdeaDependencyManager {
                 generator.addArtifact(Utils.createJarDependency(it, "compile", dependency.classes))
             }
             if (dependency.sources) {
-                // source dependency must be named in the same way as module name
-                def artifact = new DefaultIvyArtifact(dependency.sources, dependency.name, "jar", "sources", "sources")
+                def artifact = new DefaultIvyArtifact(dependency.sources, 'ideaIC', "jar", "sources", "sources")
                 artifact.conf = "sources"
                 generator.addArtifact(artifact)
             }

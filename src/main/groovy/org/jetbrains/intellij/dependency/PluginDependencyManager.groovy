@@ -66,7 +66,7 @@ class PluginDependencyManager {
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$baseDir.absolutePath/[artifact].[ext]") // jars
             if (plugin.sourcesDirectory) {
-                repo.artifactPattern("$plugin.sourcesDirectory.parent/[artifact]IC-$plugin.version-[classifier].[ext]")
+                repo.artifactPattern("$plugin.sourcesDirectory.parent/[artifact]-$plugin.version-[classifier].[ext]")
             }
         }
         project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
@@ -97,8 +97,7 @@ class PluginDependencyManager {
                 generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir))
             }
             if (plugin.sourcesDirectory) {
-                // source dependency must be named in the same way as module name
-                def artifact = new DefaultIvyArtifact(plugin.sourcesDirectory, plugin.id, "jar", "sources", "sources")
+                def artifact = new DefaultIvyArtifact(plugin.sourcesDirectory, "ideaIC", "jar", "sources", "sources")
                 artifact.conf = "sources"
                 generator.addArtifact(artifact)
             }
