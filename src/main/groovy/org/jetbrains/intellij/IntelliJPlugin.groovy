@@ -120,12 +120,12 @@ class IntelliJPlugin implements Plugin<Project> {
         extension.plugins.each {
             LOG.info("Configuring IntelliJ plugin $it")
             if (it instanceof Project) {
+                project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, it)
                 it.afterEvaluate {
                     if (it.plugins.findPlugin(IntelliJPlugin) == null) {
                         throw new BuildException("Cannot use $it as a plugin dependency. IntelliJ Plugin is not found." + it.plugins, null)
                     }
                     extension.pluginDependencies.add(new PluginProjectDependency(it))
-                    project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, it)
                     project.tasks.withType(PrepareSandboxTask)*.dependsOn(it.tasks.findByName(PREPARE_SANDBOX_TASK_NAME))
                 }
             }
