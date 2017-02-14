@@ -62,39 +62,6 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         !stdout.contains('Compiling forms and instrumenting code')
     }
 
-    def 'instrument kotlin forms'() {
-        given:
-        buildFile << 'intellij { instrumentCode = true }'
-        file('src/main/kotlin/pack/App.form') << """<?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="pack.App">
-  <grid id="27dc6" binding="panel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-    <margin top="0" left="0" bottom="0" right="0"/>
-    <constraints>
-      <xy x="20" y="20" width="500" height="400"/>
-    </constraints>
-    <properties/>
-    <border type="none"/>
-    <children/>
-  </grid>
-</form>
-"""
-        file('src/main/kotlin/pack/App.kt') << """package pack
-import javax.swing.JPanel
-class App {
-    private lateinit var panel: JPanel
-
-    init {
-        panel.toString()
-    }
-}"""
-
-        when:
-        run(true, 'compileKotlin')
-
-        then:
-        stdout.contains('Compiling forms and instrumenting code')
-    }
-
     def 'instrumentation does not invalidate compile tasks'() {
         given:
         buildFile << 'intellij { instrumentCode = true }'
