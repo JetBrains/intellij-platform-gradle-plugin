@@ -70,6 +70,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
         configureProcessResources(project)
+        configureInstrumentation(project, extension)
         project.afterEvaluate { configureProjectAfterEvaluate(it, extension) }
     }
 
@@ -83,7 +84,6 @@ class IntelliJPlugin implements Plugin<Project> {
         }
         configureIntellijDependency(project, extension)
         configurePluginDependencies(project, extension)
-        configureInstrumentation(project, extension)
         configureTestTasks(project, extension)
     }
 
@@ -223,24 +223,21 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ compile tasks")
-        def instrumentCode = extension.instrumentCode || extension.type == 'RS'
-
         project.sourceSets.all { SourceSet set ->
-            IntelliJInstrumentCodeTask task = project.task(set.getTaskName('instrument', 'classes'),
-                    type: IntelliJInstrumentCodeTask, dependsOn: set.classesTaskName)
-
-            task.with {
-                enabled = instrumentCode
+            def task = project.tasks.create(set.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask).with {
+                dependsOn set.classesTaskName
+                onlyIf { extension.instrumentCode && extension.type != 'RS' }
 
                 sourceSet = set
-                ideaDependency = extension.ideaDependency
 
-                def oldClassesDir = sourceSet.output.classesDir
-                output = new File(oldClassesDir.getParent(), "${set.name}-instrumented")
+                conventionMapping('ideaDependency', { extension.ideaDependency })
+                conventionMapping('outputDir', { new File(set.output.classesDir.getParent(), "${set.name}-instrumented") })
 
                 doLast {
+                    def oldClassesDir = sourceSet.output.classesDir
+
                     // Set the classes dir to the new one with the instrumented classes
-                    sourceSet.output.classesDir = output
+                    sourceSet.output.classesDir = outputDir
 
                     if (set.name == SourceSet.MAIN_SOURCE_SET_NAME) {
                         // When we change the output classes directory, Gradle will automatically configure
@@ -257,7 +254,7 @@ class IntelliJPlugin implements Plugin<Project> {
                         // classes from the "friendly directory" to the compile classpath.
                         AbstractCompile testCompile = project.tasks.findByName('compileTestKotlin')
                         if (testCompile) {
-                            testCompile.classpath = project.files(oldClassesDir) + testCompile.classpath
+                            testCompile.classpath = project.files(oldClassesDir, testCompile.classpath)
                         }
                     }
                 }

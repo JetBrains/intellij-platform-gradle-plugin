@@ -1,16 +1,16 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.BuildException
-import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.file.SourceDirectorySet
+import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.IdeaDependency
 
-class IntelliJInstrumentCodeTask extends DefaultTask {
+class IntelliJInstrumentCodeTask extends ConventionTask {
     private static final String FILTER_ANNOTATION_REGEXP_CLASS = 'com.intellij.ant.ClassFilterAnnotationRegexp'
     private static final LOADER_REF = "java2.loader"
 
@@ -20,7 +20,7 @@ class IntelliJInstrumentCodeTask extends DefaultTask {
     IdeaDependency ideaDependency
 
     @OutputDirectory
-    File output
+    File outputDir
 
     @InputFiles
     @SkipWhenEmpty
@@ -37,8 +37,10 @@ class IntelliJInstrumentCodeTask extends DefaultTask {
 
     @TaskAction
     void instrumentClasses() {
-        copyOriginalClasses()
+        def outputDir = getOutputDir()
+        copyOriginalClasses(outputDir)
 
+        def ideaDependency = getIdeaDependency()
         def classpath = project.files(
                 "$ideaDependency.classes/lib/javac2.jar",
                 "$ideaDependency.classes/lib/jdom.jar",
@@ -52,20 +54,20 @@ class IntelliJInstrumentCodeTask extends DefaultTask {
 
         logger.info("Compiling forms and instrumenting code with nullability preconditions")
         boolean instrumentNotNull = prepareNotNullInstrumenting(classpath)
-        instrumentCode(sourceDirs, instrumentNotNull)
+        instrumentCode(sourceDirs, outputDir, instrumentNotNull)
     }
 
     private static HashSet<File> existingDirs(@NotNull SourceDirectorySet sourceDirectorySet) {
         return sourceDirectorySet.srcDirs.findAll { it.exists() }
     }
 
-    private void copyOriginalClasses() {
-        output.deleteDir()
+    private void copyOriginalClasses(@NotNull File outputDir) {
+        outputDir.deleteDir()
 
         // Copy original classes
         project.copy {
             from originalClasses
-            into output
+            into outputDir
         }
     }
 
@@ -86,10 +88,10 @@ class IntelliJInstrumentCodeTask extends DefaultTask {
         return true
     }
 
-    private void instrumentCode(@NotNull FileCollection srcDirs, boolean instrumentNotNull) {
+    private void instrumentCode(@NotNull FileCollection srcDirs, @NotNull File outputDir, boolean instrumentNotNull) {
         def headlessOldValue = System.setProperty('java.awt.headless', 'true')
         project.ant.instrumentIdeaExtensions(srcdir: srcDirs.asPath,
-                destdir: output, classpath: sourceSet.compileClasspath.asPath,
+                destdir: outputDir, classpath: sourceSet.compileClasspath.asPath,
                 includeantruntime: false, instrumentNotNull: instrumentNotNull) {
             if (instrumentNotNull) {
                 project.ant.skip(pattern: 'kotlin/Metadata')
