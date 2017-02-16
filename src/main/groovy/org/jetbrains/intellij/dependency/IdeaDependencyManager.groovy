@@ -41,7 +41,7 @@ class IdeaDependencyManager {
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
         def configuration = project.configurations.detachedConfiguration(dependency)
 
-        def classesDirectory = getClassesDirectory(project, configuration)
+        def classesDirectory = getClassesDirectory(project, configuration, type)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
         return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project)
@@ -106,7 +106,8 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    private static File getClassesDirectory(@NotNull Project project, @NotNull Configuration configuration) {
+    private static File getClassesDirectory(
+            @NotNull Project project, @NotNull Configuration configuration, @NotNull String type) {
         File zipFile = configuration.singleFile
         LOG.debug("IDEA zip: " + zipFile.path)
         def directoryName = zipFile.name - ".zip"
@@ -118,6 +119,8 @@ class IdeaDependencyManager {
             if (customCacheParent.exists()) {
                 cacheParentDirectoryPath = customCacheParent.absolutePath
             }
+        } else if (type == 'RS') {
+            cacheParentDirectoryPath = project.buildDir
         }
         def cacheDirectory = new File(cacheParentDirectoryPath, directoryName)
         def markerFile = new File(cacheDirectory, "markerFile")

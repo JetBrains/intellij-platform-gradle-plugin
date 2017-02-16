@@ -21,10 +21,12 @@ class IntelliJPluginExtension {
     boolean updateSinceUntilBuild
     boolean sameSinceUntilBuild
     boolean downloadSources
+    @Deprecated
     Publish publish
 
     IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
+    @Deprecated
     private final Map<String, Object> systemProperties = new HashMap<>()
 
     String getType() {
