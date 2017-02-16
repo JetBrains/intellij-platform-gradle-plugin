@@ -10,6 +10,7 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.testing.Test
@@ -69,6 +70,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
         configureProcessResources(project)
+        configureInstrumentation(project, extension)
         project.afterEvaluate { configureProjectAfterEvaluate(it, extension) }
     }
 
@@ -82,7 +84,6 @@ class IntelliJPlugin implements Plugin<Project> {
         }
         configureIntellijDependency(project, extension)
         configurePluginDependencies(project, extension)
-        configureInstrumentation(project, extension)
         configureTestTasks(project, extension)
     }
 
@@ -222,18 +223,53 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ compile tasks")
-        def abstractCompileDependencies = { String taskName ->
-            project.tasks.findByName(taskName).collect {
-                it.taskDependencies.getDependencies(it).findAll { it instanceof AbstractCompile }
-            }.flatten() as Collection<AbstractCompile>
-        }
-        abstractCompileDependencies(JavaPlugin.CLASSES_TASK_NAME).each {
-            it.inputs.property("intellijIdeaDependency", extension.ideaDependency.toString())
-            it.doLast(new IntelliJInstrumentCodeAction(false))
-        }
-        abstractCompileDependencies(JavaPlugin.TEST_CLASSES_TASK_NAME).each {
-            it.inputs.property("intellijIdeaDependency", extension.ideaDependency.toString())
-            it.doLast(new IntelliJInstrumentCodeAction(true))
+        def instrumentCode = { extension.instrumentCode && extension.type != 'RS' }
+        project.sourceSets.all { SourceSet sourceSet ->
+            def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
+            instrumentTask.sourceSet = sourceSet
+
+            instrumentTask.with {
+                dependsOn sourceSet.classesTaskName
+                onlyIf instrumentCode
+
+                conventionMapping('ideaDependency', { extension.ideaDependency })
+                conventionMapping('outputDir', { new File(sourceSet.output.classesDir.getParent(), "${sourceSet.name}-instrumented") })
+            }
+
+            def updateTask = project.tasks.create('post' + instrumentTask.name.capitalize())
+            updateTask.with {
+                dependsOn instrumentTask
+                onlyIf instrumentCode
+
+                doLast {
+                    def oldClassesDir = sourceSet.output.classesDir
+
+                    // Set the classes dir to the new one with the instrumented classes
+                    sourceSet.output.classesDir = instrumentTask.outputDir
+
+                    if (sourceSet.name == SourceSet.MAIN_SOURCE_SET_NAME) {
+                        // When we change the output classes directory, Gradle will automatically configure
+                        // the test compile tasks to use the instrumented classes. Normally this is fine,
+                        // however, it causes problems for Kotlin projects:
+
+                        // The "internal" modifier can be used to restrict access to the same module.
+                        // To make it possible to use internal methods from the main source set in test classes,
+                        // the Kotlin Gradle plugin adds the original output directory of the Java task
+                        // as "friendly directory" which makes it possible to access internal members
+                        // of the main module.
+
+                        // This fails when we change the classes dir. The easiest fix is to prepend the
+                        // classes from the "friendly directory" to the compile classpath.
+                        AbstractCompile testCompile = project.tasks.findByName('compileTestKotlin')
+                        if (testCompile) {
+                            testCompile.classpath = project.files(oldClassesDir, testCompile.classpath)
+                        }
+                    }
+                }
+            }
+
+            // Ensure that our task is invoked when the source set is built
+            sourceSet.compiledBy(updateTask)
         }
     }
 

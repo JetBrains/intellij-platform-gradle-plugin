@@ -44,6 +44,12 @@ abstract class IntelliJPluginSpecBase extends Specification {
                 downloadSources = false
                 intellijRepo = '$intellijRepo'
             }
+
+            // Define tasks with a minmal set of tasks required to build a source set
+            sourceSets.all {
+                task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
+            }
+
         """.stripIndent()
     }
 

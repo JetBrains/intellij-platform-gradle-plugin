@@ -25,7 +25,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
 
         when:
-        run(true, JavaPlugin.CLASSES_TASK_NAME)
+        run(true, 'buildSourceSet')
 
         then:
         stdout.contains('Added @NotNull assertions to 1 files')
@@ -36,7 +36,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeTestFile()
 
         when:
-        run(true, JavaPlugin.TEST_CLASSES_TASK_NAME)
+        run(true, 'buildTestSourceSet')
 
         then:
         stdout.contains('Added @NotNull assertions to 1 files')
@@ -48,7 +48,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
 
         when:
-        run(true, JavaPlugin.COMPILE_JAVA_TASK_NAME)
+        run(true, 'buildSourceSet')
 
         then:
         !stdout.contains('Added @NotNull')
@@ -56,10 +56,42 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
     def 'do not instrument code on empty source sets'() {
         when:
-        run(true, JavaPlugin.COMPILE_JAVA_TASK_NAME)
+        run(true, 'buildSourceSet')
 
         then:
         !stdout.contains('Compiling forms and instrumenting code')
+    }
+
+    def 'instrument kotlin forms'() {
+        given:
+        buildFile << 'intellij { instrumentCode = true }'
+        file('src/main/kotlin/pack/App.form') << """<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="pack.App">
+  <grid id="27dc6" binding="panel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children/>
+  </grid>
+</form>
+"""
+        file('src/main/kotlin/pack/App.kt') << """package pack
+import javax.swing.JPanel
+class App {
+    private lateinit var panel: JPanel
+    init {
+        panel.toString()
+    }
+}"""
+
+        when:
+        run(true, 'buildSourceSet')
+
+        then:
+        stdout.contains('Compiling forms and instrumenting code')
     }
 
     def 'instrumentation does not invalidate compile tasks'() {
@@ -68,8 +100,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
 
         when:
-        run(true, JavaPlugin.CLASSES_TASK_NAME)
-        run(true, JavaPlugin.CLASSES_TASK_NAME)
+        run(true, 'buildSourceSet')
+        run(true, 'buildSourceSet')
 
         then:
         stdout.contains(':classes UP-TO-DATE')
