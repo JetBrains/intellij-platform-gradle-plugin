@@ -47,7 +47,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
                 "$ideaDependency.classes/lib/asm-all.jar",
                 "$ideaDependency.classes/lib/jgoodies-forms.jar")
 
-        project.ant.taskdef(name: 'instrumentIdeaExtensions',
+        ant.taskdef(name: 'instrumentIdeaExtensions',
                 classpath: classpath.asPath,
                 loaderref: LOADER_REF,
                 classname: 'com.intellij.ant.InstrumentIdeaExtensions')
@@ -73,7 +73,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
 
     private boolean prepareNotNullInstrumenting(@NotNull ConfigurableFileCollection classpath) {
         try {
-            project.ant.typedef(name: 'skip', classpath: classpath.asPath, loaderref: LOADER_REF,
+            ant.typedef(name: 'skip', classpath: classpath.asPath, loaderref: LOADER_REF,
                     classname: FILTER_ANNOTATION_REGEXP_CLASS)
         } catch (BuildException e) {
             def cause = e.getCause()
@@ -90,11 +90,11 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
 
     private void instrumentCode(@NotNull FileCollection srcDirs, @NotNull File outputDir, boolean instrumentNotNull) {
         def headlessOldValue = System.setProperty('java.awt.headless', 'true')
-        project.ant.instrumentIdeaExtensions(srcdir: srcDirs.asPath,
+        ant.instrumentIdeaExtensions(srcdir: srcDirs.asPath,
                 destdir: outputDir, classpath: sourceSet.compileClasspath.asPath,
                 includeantruntime: false, instrumentNotNull: instrumentNotNull) {
             if (instrumentNotNull) {
-                project.ant.skip(pattern: 'kotlin/Metadata')
+                ant.skip(pattern: 'kotlin/Metadata')
             }
         }
         if (headlessOldValue != null) {

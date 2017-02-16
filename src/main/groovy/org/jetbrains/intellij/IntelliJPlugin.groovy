@@ -223,23 +223,31 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ compile tasks")
-        project.sourceSets.all { SourceSet set ->
-            def task = project.tasks.create(set.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask).with {
-                dependsOn set.classesTaskName
-                onlyIf { extension.instrumentCode && extension.type != 'RS' }
+        def instrumentCode = { extension.instrumentCode && extension.type != 'RS' }
+        project.sourceSets.all { SourceSet sourceSet ->
+            def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
+            instrumentTask.sourceSet = sourceSet
 
-                sourceSet = set
+            instrumentTask.with {
+                dependsOn sourceSet.classesTaskName
+                onlyIf instrumentCode
 
                 conventionMapping('ideaDependency', { extension.ideaDependency })
-                conventionMapping('outputDir', { new File(set.output.classesDir.getParent(), "${set.name}-instrumented") })
+                conventionMapping('outputDir', { new File(sourceSet.output.classesDir.getParent(), "${sourceSet.name}-instrumented") })
+            }
+
+            def updateTask = project.tasks.create('post' + instrumentTask.name.capitalize())
+            updateTask.with {
+                dependsOn instrumentTask
+                onlyIf instrumentCode
 
                 doLast {
                     def oldClassesDir = sourceSet.output.classesDir
 
                     // Set the classes dir to the new one with the instrumented classes
-                    sourceSet.output.classesDir = outputDir
+                    sourceSet.output.classesDir = instrumentTask.outputDir
 
-                    if (set.name == SourceSet.MAIN_SOURCE_SET_NAME) {
+                    if (sourceSet.name == SourceSet.MAIN_SOURCE_SET_NAME) {
                         // When we change the output classes directory, Gradle will automatically configure
                         // the test compile tasks to use the instrumented classes. Normally this is fine,
                         // however, it causes problems for Kotlin projects:
@@ -261,7 +269,7 @@ class IntelliJPlugin implements Plugin<Project> {
             }
 
             // Ensure that our task is invoked when the source set is built
-            set.compiledBy(task)
+            sourceSet.compiledBy(updateTask)
         }
     }
 
