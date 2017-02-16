@@ -26,12 +26,6 @@ class Utils {
     }
 
     @NotNull
-    static SourceSet testSourceSet(@NotNull Project project) {
-        JavaPluginConvention javaConvention = project.convention.getPlugin(JavaPluginConvention)
-        javaConvention.sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME)
-    }
-
-    @NotNull
     static DefaultIvyArtifact createJarDependency(File file, String configuration, File baseDir) {
         return createDependency(baseDir, file, configuration, "jar", "jar")
     }

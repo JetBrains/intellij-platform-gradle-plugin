@@ -4,7 +4,6 @@ import org.apache.tools.ant.BuildException
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
-import org.gradle.api.file.SourceDirectorySet
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.jetbrains.annotations.NotNull
@@ -30,11 +29,10 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
 
     @InputFiles
     FileCollection getSourceDirs() {
-        def sourceDirs = existingDirs(sourceSet.allSource)
-        sourceDirs.removeAll(sourceSet.resources)
-        return project.files(sourceDirs)
+        return project.files(sourceSet.allSource.srcDirs.findAll { !sourceSet.resources.contains(it) && it.exists() })
     }
 
+    @SuppressWarnings("GroovyUnusedDeclaration")
     @TaskAction
     void instrumentClasses() {
         def outputDir = getOutputDir()
@@ -54,19 +52,14 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
 
         logger.info("Compiling forms and instrumenting code with nullability preconditions")
         boolean instrumentNotNull = prepareNotNullInstrumenting(classpath)
-        instrumentCode(sourceDirs, outputDir, instrumentNotNull)
+        instrumentCode(getSourceDirs(), outputDir, instrumentNotNull)
     }
 
-    private static HashSet<File> existingDirs(@NotNull SourceDirectorySet sourceDirectorySet) {
-        return sourceDirectorySet.srcDirs.findAll { it.exists() }
-    }
 
     private void copyOriginalClasses(@NotNull File outputDir) {
         outputDir.deleteDir()
-
-        // Copy original classes
         project.copy {
-            from originalClasses
+            from getOriginalClasses()
             into outputDir
         }
     }
@@ -77,7 +70,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
                     classname: FILTER_ANNOTATION_REGEXP_CLASS)
         } catch (BuildException e) {
             def cause = e.getCause()
-            if (cause instanceof ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS.equals(cause.getMessage())) {
+            if (cause instanceof ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.getMessage()) {
                 logger.info("Old version of Javac2 is used, " +
                         "instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
                 return false

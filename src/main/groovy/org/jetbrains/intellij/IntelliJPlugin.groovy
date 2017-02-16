@@ -227,7 +227,6 @@ class IntelliJPlugin implements Plugin<Project> {
         project.sourceSets.all { SourceSet sourceSet ->
             def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
             instrumentTask.sourceSet = sourceSet
-
             instrumentTask.with {
                 dependsOn sourceSet.classesTaskName
                 onlyIf instrumentCode
@@ -260,7 +259,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
                         // This fails when we change the classes dir. The easiest fix is to prepend the
                         // classes from the "friendly directory" to the compile classpath.
-                        AbstractCompile testCompile = project.tasks.findByName('compileTestKotlin')
+                        AbstractCompile testCompile = project.tasks.findByName('compileTestKotlin') as AbstractCompile
                         if (testCompile) {
                             testCompile.classpath = project.files(oldClassesDir, testCompile.classpath)
                         }
