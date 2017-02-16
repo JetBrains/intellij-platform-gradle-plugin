@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.5
+
+- set `buildDir` as a default cache for IDE dependencies in case of Rider-plugin
+- fix Kotlin instrumentation
+
 ## 0.2.4
 
 - fixed attaching sources for IDEA Ultimate and bundled plugins
