@@ -159,7 +159,7 @@ class IdeaDependencyManager {
         def configurations = project.configurations
         def closure = {
             if ("org.jetbrains.kotlin" == it.group) {
-                return "kotlin-runtime" == it.name || "kotlin-stdlib" == it.name || "kotlin-reflect" == it.name
+                return "kotlin-runtime" == it.name || it.name.startsWith('kotlin-stdlib') || "kotlin-reflect" == it.name
             }
             return false
         }
