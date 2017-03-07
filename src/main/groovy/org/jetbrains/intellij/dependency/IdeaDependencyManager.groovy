@@ -58,7 +58,7 @@ class IdeaDependencyManager {
         return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, null, project)
     }
 
-    static void register(@NotNull Project project, @NotNull IdeaDependency dependency) {
+    static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull Configuration configuration) {
         def ivyFile = getOrCreateIvyXml(dependency)
         project.repositories.ivy { repo ->
             repo.url = dependency.classes
@@ -68,8 +68,8 @@ class IdeaDependencyManager {
                 repo.artifactPattern("$dependency.sources.parent/[artifact]-$dependency.version-[classifier].[ext]")
             }
         }
-        project.dependencies.add(JavaPlugin.COMPILE_CONFIGURATION_NAME, [
-                group: 'com.jetbrains', name: dependency.name, version: dependency.version, configuration: 'compile'
+        project.dependencies.add(configuration.name, [
+            group: 'com.jetbrains', name: dependency.name, version: dependency.version, configuration: 'compile'
         ])
     }
 
