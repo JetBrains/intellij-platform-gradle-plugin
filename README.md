@@ -270,6 +270,7 @@ As examples of using this plugin you can check out following projects:
   - Mixes Java, Kotlin, and Groovy code
   - Uses Grammar Kit
   - Uses a Kotlin version not bundled with IntelliJ
+- [IntelliJ Elixir](https://github.com/KronicDeth/intellij-elixir)
 
 # License
 
