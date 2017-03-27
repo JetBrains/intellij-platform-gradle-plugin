@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.6
+
+- prefer `compileOnly` configuration for IDEA dependencies
+
 ## 0.2.5
 
 - set `buildDir` as a default cache for IDE dependencies in case of Rider-plugin
