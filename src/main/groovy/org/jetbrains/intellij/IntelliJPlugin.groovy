@@ -37,6 +37,8 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
+    public static final String IDEA_CONFIGURATION_NAME = "idea"
+    public static final String IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
 
     public static final LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
@@ -59,7 +61,20 @@ class IntelliJPlugin implements Plugin<Project> {
             downloadSources = !System.getenv().containsKey('CI')
             publish = new IntelliJPluginExtension.Publish()
         }
+        configureConfigurations(project)
         configureTasks(project, intellijExtension)
+    }
+
+    private static void configureConfigurations(@NotNull Project project) {
+        def idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
+        def ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
+
+        if (JavaPlugin.hasProperty('COMPILE_ONLY_CONFIGURATION_NAME')) {
+            project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
+            project.configurations.getByName(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
+        } else {
+            project.configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
+        }
     }
 
     private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
@@ -83,18 +98,8 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
 
-        Configuration idea = project.configurations.create('idea')
-        Configuration ideaPlugins = project.configurations.create('ideaPlugins')
-
-        if (JavaPlugin.hasProperty('COMPILE_ONLY_CONFIGURATION_NAME')) {
-            project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-            project.configurations.getByName(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-        } else {
-            project.configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-        }
-
-        configureIntellijDependency(project, extension, idea)
-        configurePluginDependencies(project, extension, ideaPlugins)
+        configureIntellijDependency(project, extension, project.configurations[IDEA_CONFIGURATION_NAME])
+        configurePluginDependencies(project, extension, project.configurations[IDEA_PLUGINS_CONFIGURATION_NAME])
         configureTestTasks(project, extension)
     }
 
