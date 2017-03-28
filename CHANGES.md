@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.7
+
+- avoid exception due to adding duplicated configurations
+
 ## 0.2.6
 
 - prefer `compileOnly` configuration for IDEA dependencies
