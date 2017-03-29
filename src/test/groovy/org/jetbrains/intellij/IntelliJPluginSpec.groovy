@@ -221,7 +221,7 @@ test {
     def 'custom sandbox directory'() {
         given:
         writeTestFile()
-        def sandboxPath = adjustWindowsPath("$dir.root.absolutePath/customSandbox")
+        def sandboxPath = adjustWindowsPath("$dir.root.canonicalPath/customSandbox")
         buildFile << """
 intellij {
     sandboxDirectory = '$sandboxPath'    
