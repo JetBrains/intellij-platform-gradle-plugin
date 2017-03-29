@@ -6,6 +6,7 @@ plugins {
 }
 
 apply plugin: 'groovy'
+apply plugin: 'java-gradle-plugin'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
@@ -29,6 +30,7 @@ dependencies {
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.17'
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.34'
 
+    testCompile gradleTestKit()
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
     }
@@ -62,12 +64,13 @@ pluginBundle {
 }
 
 test {
+    def testGradleHomePath = "$buildDir/testGradleHome"
     doFirst {
-        new File("$buildDir/localRepo").mkdir()
-        new File("$buildDir/testGradleHome").mkdir()
+        new File(testGradleHomePath).mkdir()
     }
-    systemProperties['local.repo'] = "$buildDir/localRepo"
-    systemProperties['test.gradle.home'] = "$buildDir/testGradleHome"
+    systemProperties['test.gradle.home'] = testGradleHomePath
+    outputs.dir(testGradleHomePath)
+
     systemProperties['intellij.repo'] = System.getProperty('intellij.repo')
     try {
       if (!systemProperties['intellij.repo'] && InetAddress.getByName("jetbrains-com-mirror.labs.intellij.net").isReachable(300)) {
@@ -75,15 +78,6 @@ test {
       }
     }
     catch (UnknownHostException ignore) {
-    }
-    dependsOn install
-}
-
-install {
-    repositories {
-        mavenDeployer {
-            repository(url: new File("$buildDir/localRepo").toURI())
-        }
     }
 }
 

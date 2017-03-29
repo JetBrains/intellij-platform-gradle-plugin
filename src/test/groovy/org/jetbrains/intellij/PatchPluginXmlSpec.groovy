@@ -1,16 +1,18 @@
 package org.jetbrains.intellij
 
-import org.gradle.tooling.model.GradleProject
+import org.gradle.testkit.runner.TaskOutcome
 
 class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
     def 'patch version and since until builds'() {
         given:
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
@@ -22,10 +24,12 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }\n"
         buildFile << "patchPluginXml { pluginDescription = 'Plugin pluginDescription' }"
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <description>Plugin pluginDescription</description>
   <idea-version since-build="141.1532" until-build="141.*"/>
@@ -38,10 +42,12 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }\n"
         buildFile << "patchPluginXml { changeNotes = 'change notes' }"
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <change-notes>change notes</change-notes>
   <idea-version since-build="141.1532" until-build="141.*"/>
@@ -54,10 +60,12 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }\n"
         buildFile << "patchPluginXml { pluginId = 'my.plugin.id' }"
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <id>my.plugin.id</id>
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
@@ -69,10 +77,12 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         given:
         pluginXml << "<idea-plugin version=\"2\"><id>my.plugin.id</id></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }\n"
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
   <id>my.plugin.id</id>
@@ -85,9 +95,9 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4'; sameSinceUntilBuild = true }"
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.1532.*"/>
 </idea-plugin>
@@ -99,9 +109,9 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\">\n<id>org.jetbrains.erlang</id>\n</idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
   <id>org.jetbrains.erlang</id>
@@ -117,9 +127,9 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
 </idea-plugin>"""
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*">my_version</idea-version>
 </idea-plugin>
@@ -138,10 +148,12 @@ intellij {
     version = '14.1.4'
     updateSinceUntilBuild = false 
 }"""
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="1" until-build="2">my_version</idea-version>
 </idea-plugin>
@@ -152,10 +164,12 @@ intellij {
         given:
         pluginXml << "<idea-plugin version=\"2\">\n  <version>0.10.0</version>\n</idea-plugin>"
         buildFile << "intellij { version = '14.1.4' }"
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <idea-version since-build="141.1532" until-build="141.*"/>
   <version>0.10.0</version>
 </idea-plugin>
@@ -166,12 +180,14 @@ intellij {
         given:
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
+
         when:
-        run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def result = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        stdout.contains(":" + IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME + " UP-TO-DATE")
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        result.task(":$IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME").outcome == TaskOutcome.UP_TO_DATE
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
@@ -182,13 +198,15 @@ intellij {
         given:
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.3' }"
+
         when:
-        run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
         buildFile << "\nintellij { version = '14.1.4' }"
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def result = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        !stdout.contains(":" + IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME + " UP-TO-DATE")
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        result.task(":$IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME").outcome != TaskOutcome.UP_TO_DATE
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
@@ -197,21 +215,23 @@ intellij {
 
     def 'patch plugin xml with doctype'() {
         given:
+        buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         pluginXml << """<!DOCTYPE idea-plugin PUBLIC \"Plugin/DTD\" \"http://plugins.jetbrains.com/plugin.dtd\">
 <idea-plugin version=\"2\"></idea-plugin>
 """
-        buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
+
         when:
-        def project = run(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+
         then:
-        outputPluginXml(project).text == """<idea-plugin version="2">
+        patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
     }
 
-    private static File outputPluginXml(GradleProject project) {
-        new File(project.buildDirectory, IntelliJPlugin.PLUGIN_XML_DIR_NAME).listFiles().first()
+    private File getPatchedPluginXml() {
+        new File(buildDirectory, IntelliJPlugin.PLUGIN_XML_DIR_NAME).listFiles().first()
     }
 }

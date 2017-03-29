@@ -18,22 +18,23 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
             dependencies { 
                 compile 'joda-time:joda-time:2.8.1'
             }""".stripIndent()
+
         when:
-        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
-        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
-        assert distribution.exists()
+        File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        distribution.exists()
 
         def zipFile = new ZipFile(distribution)
-        assert collectPaths(zipFile) == ['myPluginName/', 'myPluginName/lib/', 'myPluginName/lib/joda-time-2.8.1.jar',
-                                         'myPluginName/lib/projectName-0.42.123.jar'] as Set
+        collectPaths(zipFile) == ['myPluginName/', 'myPluginName/lib/', 'myPluginName/lib/joda-time-2.8.1.jar',
+                                  'myPluginName/lib/projectName-0.42.123.jar'] as Set
 
         def jar = new ZipFile(extractFile(zipFile, 'myPluginName/lib/projectName-0.42.123.jar'))
-        assert collectPaths(jar) == ['App.class', 'META-INF/', 'META-INF/MANIFEST.MF',
-                                     'META-INF/nonIncluded.xml', 'META-INF/other.xml', 'META-INF/plugin.xml'] as Set
+        collectPaths(jar) == ['App.class', 'META-INF/', 'META-INF/MANIFEST.MF',
+                              'META-INF/nonIncluded.xml', 'META-INF/other.xml', 'META-INF/plugin.xml'] as Set
 
-        assert fileText(jar, 'META-INF/plugin.xml') == """\
+        fileText(jar, 'META-INF/plugin.xml') == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
               <idea-version since-build="141.1010" until-build="141.*"/>
@@ -59,16 +60,17 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
             dependencies { 
                 compile 'joda-time:joda-time:2.8.1'
             }""".stripIndent()
+
         when:
-        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
-        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
-        assert distribution.exists()
-        assert collectPaths(new ZipFile(distribution)) as Set == ['myPluginName/',
-                                                                  'myPluginName/lib/',
-                                                                  'myPluginName/lib/joda-time-2.8.1.jar',
-                                                                  'myPluginName/lib/projectName-0.42.123.jar'] as Set
+        File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        distribution.exists()
+        collectPaths(new ZipFile(distribution)) as Set == ['myPluginName/',
+                                                           'myPluginName/lib/',
+                                                           'myPluginName/lib/joda-time-2.8.1.jar',
+                                                           'myPluginName/lib/projectName-0.42.123.jar'] as Set
     }
 
     def 'use gradle project name for distribution if plugin name is not defined'() {
@@ -77,11 +79,11 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
 
         when:
-        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
         //noinspection GrEqualsBetweenInconvertibleTypes
-        assert new File(project.buildDirectory, "distributions").list() == ["$project.name-0.42.123.zip"]
+        new File(buildDirectory, "distributions").list() == ['projectName-0.42.123.zip']
     }
 
 
@@ -105,14 +107,15 @@ class App {
                 plugins = ['org.intellij.plugins.markdown:8.0.0.20150929']
             }
             """.stripIndent()
+
         when:
-        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
-        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
-        assert distribution.exists()
+        File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        distribution.exists()
         def jar = extractFile(new ZipFile(distribution), 'myPluginName/lib/projectName-0.42.123.jar')
-        assert (new ZipFile(jar).entries().collect { it.name }).contains('App.class')
+        (new ZipFile(jar).entries().collect { it.name }).contains('App.class')
     }
 
     def 'build plugin without sources'() {
@@ -124,17 +127,17 @@ class App {
             """.stripIndent()
 
         when:
-        def project = run(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
-        File distribution = new File(project.buildDirectory, 'distributions/myPluginName-0.42.123.zip')
-        assert distribution.exists()
+        File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        distribution.exists()
 
         def zip = new ZipFile(distribution)
-        assert zip.entries().collect { it.name } == ['myPluginName/',
-                                                     'myPluginName/lib/',
-                                                     'myPluginName/lib/projectName-0.42.123.jar']
+        zip.entries().collect { it.name } == ['myPluginName/',
+                                              'myPluginName/lib/',
+                                              'myPluginName/lib/projectName-0.42.123.jar']
         def jar = extractFile(zip, 'myPluginName/lib/projectName-0.42.123.jar')
-        assert collectPaths(new ZipFile(jar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
+        collectPaths(new ZipFile(jar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
     }
 }

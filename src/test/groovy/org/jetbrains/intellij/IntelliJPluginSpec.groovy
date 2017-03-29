@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.annotations.NotNull
 
 class IntelliJPluginSpec extends IntelliJPluginSpecBase {
@@ -25,10 +26,10 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
 
         when:
-        run(true, 'buildSourceSet')
+        def result = build('buildSourceSet', '--info')
 
         then:
-        stdout.contains('Added @NotNull assertions to 1 files')
+        result.output.contains('Added @NotNull assertions to 1 files')
     }
 
     def 'instrument tests with nullability annotations'() {
@@ -36,10 +37,10 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeTestFile()
 
         when:
-        run(true, 'buildTestSourceSet')
+        def result = build('buildTestSourceSet', '--info')
 
         then:
-        stdout.contains('Added @NotNull assertions to 1 files')
+        result.output.contains('Added @NotNull assertions to 1 files')
     }
 
     def 'do not instrument code if option is set to false'() {
@@ -48,18 +49,18 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
 
         when:
-        run(true, 'buildSourceSet')
+        def result = build('buildSourceSet', '--info')
 
         then:
-        !stdout.contains('Added @NotNull')
+        !result.output.contains('Added @NotNull')
     }
 
     def 'do not instrument code on empty source sets'() {
         when:
-        run(true, 'buildSourceSet')
+        def result = build('buildSourceSet', '--info')
 
         then:
-        !stdout.contains('Compiling forms and instrumenting code')
+        !result.output.contains('Compiling forms and instrumenting code')
     }
 
     def 'instrument kotlin forms'() {
@@ -88,10 +89,10 @@ class App {
 }"""
 
         when:
-        run(true, 'buildSourceSet')
+        def result = build('buildSourceSet', '--info')
 
         then:
-        stdout.contains('Compiling forms and instrumenting code')
+        result.output.contains('Compiling forms and instrumenting code')
     }
 
     def 'instrumentation does not invalidate compile tasks'() {
@@ -100,26 +101,27 @@ class App {
         writeJavaFile()
 
         when:
-        run(true, 'buildSourceSet')
-        run(true, 'buildSourceSet')
+        build('buildSourceSet')
+        def result = build('buildSourceSet')
 
         then:
-        stdout.contains(':classes UP-TO-DATE')
+        result.task(":$JavaPlugin.CLASSES_TASK_NAME").outcome == TaskOutcome.UP_TO_DATE
     }
 
     def 'download idea dependencies'() {
         given:
         def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.3')
+
         when:
-        run(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
         if (cacheDir.exists()) {
             return // it was already cached. test is senseless until gradle clean
         }
-        assert cacheDir.list() as Set == ['b52fd6ecd1178b17bbebe338a9efe975c95f7037', 'e71057c345e163250c544ee6b56411ce9ac7e23'] as Set
-        assert new File(cacheDir, 'b52fd6ecd1178b17bbebe338a9efe975c95f7037').list() as Set == ['ideaIC-14.1.3.pom'] as Set
-        assert new File(cacheDir, 'e71057c345e163250c544ee6b56411ce9ac7e23').list() as Set == ['ideaIC-14.1.3', 'ideaIC-14.1.3.zip'] as Set
+        cacheDir.list() as Set == ['b52fd6ecd1178b17bbebe338a9efe975c95f7037', 'e71057c345e163250c544ee6b56411ce9ac7e23'] as Set
+        new File(cacheDir, 'b52fd6ecd1178b17bbebe338a9efe975c95f7037').list() as Set == ['ideaIC-14.1.3.pom'] as Set
+        new File(cacheDir, 'e71057c345e163250c544ee6b56411ce9ac7e23').list() as Set == ['ideaIC-14.1.3', 'ideaIC-14.1.3.zip'] as Set
     }
 
     def 'download ultimate idea dependencies'() {
@@ -131,19 +133,19 @@ class App {
             downloadSources true 
 }"""
         when:
-        run(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
         if (cacheDir.exists() || ideaCommunityCacheDir.exists()) {
             return // it was already cached. test is senseless until gradle clean
         }
-        assert cacheDir.list() as Set == ['af6b922431b0283c8bfe6bca871978f9d734d9c7', 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0'] as Set
-        assert new File(cacheDir, 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0').list() as Set == ['ideaIC-14.1.5.pom'] as Set
-        assert new File(cacheDir, 'af6b922431b0283c8bfe6bca871978f9d734d9c7').list() as Set == ['ideaIC-14.1.5', 'ideaIC-14.1.5.zip'] as Set
+        cacheDir.list() as Set == ['af6b922431b0283c8bfe6bca871978f9d734d9c7', 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0'] as Set
+        new File(cacheDir, 'dc34a10b97955d320d1b7a46a1ce165f6d2744c0').list() as Set == ['ideaIC-14.1.5.pom'] as Set
+        new File(cacheDir, 'af6b922431b0283c8bfe6bca871978f9d734d9c7').list() as Set == ['ideaIC-14.1.5', 'ideaIC-14.1.5.zip'] as Set
 
         // do not download ideaIC dist
-        assert ideaCommunityCacheDir.list() as Set == ['f58943066d699049a2e802660d554190e613a403'] as Set
-        assert new File(cacheDir, 'f58943066d699049a2e802660d554190e613a403').list() as Set == ['ideaIC-14.1.5-sources.jar'] as Set
+        ideaCommunityCacheDir.list() as Set == ['f58943066d699049a2e802660d554190e613a403'] as Set
+        new File(cacheDir, 'f58943066d699049a2e802660d554190e613a403').list() as Set == ['ideaIC-14.1.5-sources.jar'] as Set
     }
 
     def 'download sources if option is enabled'() {
@@ -151,14 +153,14 @@ class App {
         buildFile << 'intellij { downloadSources = true }'
 
         when:
-        run(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
         def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.3')
-        assert cacheDir.list() as Set == ['b6e282e0e4f49b6cdcb62f180f141ff1a7464ba2', 'b52fd6ecd1178b17bbebe338a9efe975c95f7037', 'e71057c345e163250c544ee6b56411ce9ac7e23'] as Set
-        assert new File(cacheDir, 'b52fd6ecd1178b17bbebe338a9efe975c95f7037').list() as Set == ['ideaIC-14.1.3.pom'] as Set
-        assert new File(cacheDir, 'e71057c345e163250c544ee6b56411ce9ac7e23').list() as Set == ['ideaIC-14.1.3', 'ideaIC-14.1.3.zip'] as Set
-        assert new File(cacheDir, 'b6e282e0e4f49b6cdcb62f180f141ff1a7464ba2').list() as Set == ['ideaIC-14.1.3-sources.jar'] as Set
+        cacheDir.list() as Set == ['b6e282e0e4f49b6cdcb62f180f141ff1a7464ba2', 'b52fd6ecd1178b17bbebe338a9efe975c95f7037', 'e71057c345e163250c544ee6b56411ce9ac7e23'] as Set
+        new File(cacheDir, 'b52fd6ecd1178b17bbebe338a9efe975c95f7037').list() as Set == ['ideaIC-14.1.3.pom'] as Set
+        new File(cacheDir, 'e71057c345e163250c544ee6b56411ce9ac7e23').list() as Set == ['ideaIC-14.1.3', 'ideaIC-14.1.3.zip'] as Set
+        new File(cacheDir, 'b6e282e0e4f49b6cdcb62f180f141ff1a7464ba2').list() as Set == ['ideaIC-14.1.3-sources.jar'] as Set
     }
 
     def 'patch test tasks'() {
@@ -166,11 +168,11 @@ class App {
         writeTestFile()
 
         when:
-        def project = run(true, JavaPlugin.TEST_TASK_NAME)
-        def sandboxPath = adjustWindowsPath("$project.buildDirectory.absolutePath/idea-sandbox")
+        def result = build(JavaPlugin.TEST_TASK_NAME, '--info')
+        def sandboxPath = adjustWindowsPath("$buildDirectory.canonicalPath/idea-sandbox")
 
         then:
-        def testCommand = parseCommand(stdout)
+        def testCommand = parseCommand(result.output)
         assertPathParameters(testCommand, sandboxPath)
         !testCommand.properties.containsKey('idea.required.plugins.id')
 
@@ -190,10 +192,10 @@ class App {
 </idea-plugin>
 """
         when:
-        run(true, JavaPlugin.TEST_TASK_NAME)
+        def result = build(JavaPlugin.TEST_TASK_NAME, '--info')
 
         then:
-        parseCommand(stdout).properties.'idea.required.plugins.id' == 'com.intellij.mytestid'
+        parseCommand(result.output).properties.'idea.required.plugins.id' == 'com.intellij.mytestid'
     }
 
     def 'do not update existing jvm arguments in test tasks'() {
@@ -207,10 +209,10 @@ test {
 }
 """
         when:
-        run(true, JavaPlugin.TEST_TASK_NAME)
+        def result = build(JavaPlugin.TEST_TASK_NAME, '--info')
 
         then:
-        def testCommand = parseCommand(stdout)
+        def testCommand = parseCommand(result.output)
         testCommand.xms == '200m'
         testCommand.xmx == '500m'
         testCommand.permGen == '256m'
@@ -226,10 +228,10 @@ intellij {
 }
 """
         when:
-        run(true, JavaPlugin.TEST_TASK_NAME)
+        def result = build(JavaPlugin.TEST_TASK_NAME, '--info')
 
         then:
-        assertPathParameters(parseCommand(stdout), sandboxPath)
+        assertPathParameters(parseCommand(result.output), sandboxPath)
     }
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")

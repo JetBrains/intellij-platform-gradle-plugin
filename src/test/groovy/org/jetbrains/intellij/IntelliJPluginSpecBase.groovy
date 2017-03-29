@@ -2,10 +2,8 @@ package org.jetbrains.intellij
 
 import groovy.io.FileType
 import org.gradle.api.internal.project.ProjectInternal
-import org.gradle.tooling.GradleConnector
-import org.gradle.tooling.ProjectConnection
-import org.gradle.tooling.internal.consumer.DefaultGradleConnector
-import org.gradle.tooling.model.GradleProject
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
 import org.jetbrains.annotations.NotNull
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -14,30 +12,29 @@ import spock.lang.Specification
 import java.util.zip.ZipFile
 
 abstract class IntelliJPluginSpecBase extends Specification {
+    protected final String gradleHome = System.properties.get('test.gradle.home')
+    protected String intellijRepo = System.properties.get('intellij.repo', '')
+
     @Rule
     final TemporaryFolder dir = new TemporaryFolder()
-    protected final String gradleHome = System.properties.get('test.gradle.home')
 
     def setup() {
-        String localRepoPath = System.properties.get("local.repo")
-        assert localRepoPath != null
-        String intellijRepo = System.properties.get('intellij.repo', '')
-        assert gradleHome != null
         file("settings.gradle") << "rootProject.name='projectName'\n"
         buildFile << """\
             buildscript {
                 repositories { 
-                    maven { url "${adjustWindowsPath(localRepoPath)}" }
                     maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' } 
                     mavenCentral()
                 }
                 dependencies {
-                    classpath group: 'org.jetbrains.intellij.plugins', name: 'gradle-intellij-plugin', version: 'latest.release'
                     classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6"
                 }
             }
+            plugins {
+                id 'org.jetbrains.intellij'
+            }
+            apply plugin: 'java'
             apply plugin: 'kotlin'
-            apply plugin: 'org.jetbrains.intellij'
             repositories { mavenCentral() }
             intellij {
                 version = '14.1.3'
@@ -57,43 +54,34 @@ abstract class IntelliJPluginSpecBase extends Specification {
 
     }
 
-    private final OutputStream standardError = new ByteArrayOutputStream()
-    private final ByteArrayOutputStream standardOutput = new ByteArrayOutputStream()
-
-    protected GradleProject run(boolean infoLogging, String... tasks) {
-        GradleConnector gradleConnector = (GradleConnector.newConnector()
-                .useGradleUserHomeDir(new File(gradleHome))
-                .forProjectDirectory(dir.root) as DefaultGradleConnector)
-        ProjectConnection connection = gradleConnector.connect()
-        try {
-            standardOutput.reset()
-
-            def build = connection.newBuild()
-            if (infoLogging) build.withArguments("--info")
-            build.setStandardError(standardError)
-                    .setStandardOutput(standardOutput)
-                    .forTasks(tasks).run()
-            return connection.getModel(GradleProject)
-        }
-        finally {
-            connection?.close()
-        }
+    protected BuildResult buildAndFail(String... tasks) {
+        return build(true, tasks)
     }
 
-    protected GradleProject run(String... tasks) {
-        return run(false, tasks)
+    protected BuildResult build(String... tasks) {
+        return build(false, tasks)
     }
 
-    protected String getStdout() {
-        standardOutput.toString()
+    protected BuildResult build(boolean fail, String... tasks) {
+        GradleRunner builder = builder(tasks)
+        return fail ? builder.buildAndFail() : builder.build()
     }
 
-    protected String getStderr() {
-        standardError.toString()
+    private GradleRunner builder(String... tasks) {
+        def builder = GradleRunner.create().withProjectDir(dir.root).withGradleVersion("2.14")
+                .withPluginClasspath()
+                .withDebug(true)
+                .withTestKitDir(new File(gradleHome))
+                .withArguments(tasks)
+        return builder
     }
 
     protected File getBuildFile() {
         file('build.gradle')
+    }
+
+    protected File getBuildDirectory() {
+        return new File(dir.root, "build")
     }
 
     protected File getPluginXml() {
@@ -101,10 +89,10 @@ abstract class IntelliJPluginSpecBase extends Specification {
     }
 
     protected List<String> tasks(@NotNull String groupName) {
-        run(ProjectInternal.TASKS_TASK)
+        def buildResult = build(ProjectInternal.TASKS_TASK)
         List<String> result = new ArrayList<>()
         boolean targetGroupAppeared = false
-        for (String line : stdout.readLines()) {
+        for (String line : buildResult.output.readLines()) {
             if (!targetGroupAppeared) {
                 targetGroupAppeared = line.equalsIgnoreCase(groupName + " tasks")
             } else if (line != ("-" * (groupName + " tasks").length())) {
