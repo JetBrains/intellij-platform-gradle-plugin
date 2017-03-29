@@ -68,6 +68,7 @@ test {
     }
     systemProperties['local.repo'] = "$buildDir/localRepo"
     systemProperties['test.gradle.home'] = "$buildDir/testGradleHome"
+    systemProperties['intellij.repo'] = System.getProperty('intellij.repo')
     dependsOn install
 }
 
