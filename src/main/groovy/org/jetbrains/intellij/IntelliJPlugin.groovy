@@ -46,7 +46,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.getPlugins().apply(JavaPlugin)
+        def javaPlugin = project.getPlugins().apply(JavaPlugin)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension)
         intellijExtension.with {
             plugins = []
@@ -61,15 +61,15 @@ class IntelliJPlugin implements Plugin<Project> {
             downloadSources = !System.getenv().containsKey('CI')
             publish = new IntelliJPluginExtension.Publish()
         }
-        configureConfigurations(project)
+        configureConfigurations(project, javaPlugin)
         configureTasks(project, intellijExtension)
     }
 
-    private static void configureConfigurations(@NotNull Project project) {
+    private static void configureConfigurations(@NotNull Project project, @NotNull JavaPlugin javaPlugin) {
         def idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
         def ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
 
-        if (JavaPlugin.hasProperty('COMPILE_ONLY_CONFIGURATION_NAME')) {
+        if (javaPlugin.hasProperty('COMPILE_ONLY_CONFIGURATION_NAME')) {
             project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
             project.configurations.getByName(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
         } else {
