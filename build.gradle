@@ -69,6 +69,13 @@ test {
     systemProperties['local.repo'] = "$buildDir/localRepo"
     systemProperties['test.gradle.home'] = "$buildDir/testGradleHome"
     systemProperties['intellij.repo'] = System.getProperty('intellij.repo')
+    try {
+      if (!systemProperties['intellij.repo'] && InetAddress.getByName("jetbrains-com-mirror.labs.intellij.net").isReachable(300)) {
+          systemProperties['intellij.repo'] = 'http://jetbrains-com-mirror.labs.intellij.net/intellij-repository'
+      }
+    }
+    catch (UnknownHostException ignore) {
+    }
     dependsOn install
 }
 
