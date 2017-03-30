@@ -191,6 +191,10 @@ class Utils {
 
     @NotNull
     static parsePluginDependencyString(@NotNull String s) {
+        if (new File(s).exists()) {
+            return new Tuple(s, null, null)
+        }
+
         def id = null, version = null, channel = null
         def idAndVersion = s.split('[:]', 2)
         if (idAndVersion.length == 1) {

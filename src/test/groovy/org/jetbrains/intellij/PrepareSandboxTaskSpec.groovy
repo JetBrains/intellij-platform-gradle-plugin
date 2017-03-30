@@ -160,7 +160,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
         buildFile << """\
             intellij {
-                plugins = ['${plugin.absolutePath}']
+                plugins = ['${adjustWindowsPath(plugin.canonicalPath)}']
                 pluginName = 'myPluginName'
             }
             """.stripIndent()
