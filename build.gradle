@@ -63,19 +63,30 @@ pluginBundle {
     }
 }
 
+task cacheIntolerantTest(type: Test) {
+    configureTests(it)
+    include '**/DownloadIntelliJSpec.class'
+}
+
 test {
+    configureTests(it)
+    exclude '**/DownloadIntelliJSpec.class'
+    dependsOn cacheIntolerantTest
+}
+
+def configureTests(testTask) {
     def testGradleHomePath = "$buildDir/testGradleHome"
-    doFirst {
+    testTask.doFirst {
         new File(testGradleHomePath).mkdir()
     }
-    systemProperties['test.gradle.home'] = testGradleHomePath
-    outputs.dir(testGradleHomePath)
+    testTask.systemProperties['test.gradle.home'] = testGradleHomePath
+    testTask.outputs.dir(testGradleHomePath)
 
-    systemProperties['intellij.repo'] = System.getProperty('intellij.repo')
+    testTask.systemProperties['intellij.repo'] = System.getProperty('intellij.repo')
     try {
-      if (!systemProperties['intellij.repo'] && InetAddress.getByName("jetbrains-com-mirror.labs.intellij.net").isReachable(300)) {
-          systemProperties['intellij.repo'] = 'http://jetbrains-com-mirror.labs.intellij.net/intellij-repository'
-      }
+        if (!testTask.systemProperties['intellij.repo'] && InetAddress.getByName("jetbrains-com-mirror.labs.intellij.net").isReachable(300)) {
+            testTask.systemProperties['intellij.repo'] = 'http://jetbrains-com-mirror.labs.intellij.net/intellij-repository'
+        }
     }
     catch (UnknownHostException ignore) {
     }
