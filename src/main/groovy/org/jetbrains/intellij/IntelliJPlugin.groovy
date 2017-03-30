@@ -71,7 +71,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
         if (JavaPlugin.hasProperty('COMPILE_ONLY_CONFIGURATION_NAME')) {
             project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-            project.configurations.getByName(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
+            project.configurations.getByName(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
         } else {
             project.configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
         }
