@@ -134,7 +134,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull Configuration configuration) {
         LOG.info("Configuring IntelliJ IDEA plugin dependencies")
         def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-        def resolver = new PluginDependencyManager(project, extension.ideaDependency)
+        def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
         extension.plugins.each {
             LOG.info("Configuring IntelliJ plugin $it")
             if (it instanceof Project) {

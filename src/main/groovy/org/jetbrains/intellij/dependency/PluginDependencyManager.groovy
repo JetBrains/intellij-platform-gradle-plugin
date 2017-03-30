@@ -4,7 +4,6 @@ import com.intellij.structure.domain.PluginManager
 import com.intellij.structure.impl.utils.StringUtil
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
@@ -35,10 +34,6 @@ class PluginDependencyManager {
         def host = StringUtil.trimStart(StringUtil.trimStart(StringUtil.trimStart(repositoryHost, 'http://'), 'https://'), 'www')
         // todo: a better way to define cache directory
         cacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea', host).toString()
-    }
-
-    PluginDependencyManager(@NotNull Project project, @Nullable IdeaDependency ideaDependency) {
-        this(project.gradle.gradleUserHomeDir.absolutePath, ideaDependency)
     }
 
     @NotNull
