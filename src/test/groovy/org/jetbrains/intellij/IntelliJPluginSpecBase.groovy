@@ -67,7 +67,8 @@ abstract class IntelliJPluginSpecBase extends Specification {
         return fail ? builder.buildAndFail() : builder.build()
     }
 
-    private GradleRunner builder(String... tasks) {
+    private GradleRunner builder(String[] tasks) {
+        tasks += ['--stacktrace']
         def builder = GradleRunner.create().withProjectDir(dir.root).withGradleVersion("2.14")
                 .withPluginClasspath()
                 .withDebug(true)
