@@ -27,7 +27,7 @@ dependencies {
     compile localGroovy()
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
-    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.17'
+    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.18'
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.34'
 
     testCompile gradleTestKit()
