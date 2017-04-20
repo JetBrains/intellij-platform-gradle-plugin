@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.8
+
+- prefer `compile` configuration for IDEA dependencies in tests
+- prefer `compileOnly` configuration for plugins dependencies in tests 
+
 ## 0.2.7
 
 - avoid exception due to adding duplicated configurations

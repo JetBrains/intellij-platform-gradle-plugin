@@ -3,17 +3,13 @@
 Plugin provides following options to configure target IntelliJ SDK and build archive
 
 - `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
-The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.
-<br/>
-Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. 
-<br/><br/> 
+The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.<br/>
+Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. <br/><br/> 
 **Default value**: `LATEST-EAP-SNAPSHOT`
 
 - `intellij.localPath` defines path to locally installed IDEA distribution that should be used as a dependency. 
-The option accepts path, e.g. `/Applications/IntelliJIDEA.app`
-<br/>
-`intellij.version` and `intellij.localPath` should not be specified at the same time.
-<br/><br/> 
+The option accepts path, e.g. `/Applications/IntelliJIDEA.app`<br/>
+`intellij.version` and `intellij.localPath` should not be specified at the same time.<br/><br/> 
 **Default value**: `null`
 
 - `intellij.type` defines the type of IDEA distribution: `IC` for community version, `IU` for ultimate and `JPS` for jps-only dependencies.<br/><br/> 
@@ -51,8 +47,7 @@ it to `false` for particular environment.<br/><br/>
 
 - `intellij.systemProperties` defines the map of system properties which will be passed to IDEA instance on
 executing `runIdea` task and tests.<br/>
-Also you can use `intellij.systemProperty(name, value)` method in order to set single system property.
-<br/><br/>
+Also you can use `intellij.systemProperty(name, value)` method in order to set single system property.<br/><br/>
 **Deprecated**. Use `systemProperties` methods of a particular tasks like `runIde` or `test`.<br/><br/>
 **Default value**: `[]`
 
@@ -69,28 +64,22 @@ distributions. If empty – Gradle cache directory will be used.
 
 The `patchPluginXml` task supports following properties:
 
-- `version` is a value for `<version>` tag.
-<br/>
+- `version` is a value for `<version>` tag.<br/>
 **Default value**: `<project.version>`
 
-- `sinceBuild` is a value for `<idea-version since-build="">` attribute.
-<br/>
+- `sinceBuild` is a value for `<idea-version since-build="">` attribute.<br/>
 **Default value**: `<IntelliJIDEABuildNumber>`
 
-- `untilBuild` is a value for `<idea-version until-build="">` attribute.
-<br/>
+- `untilBuild` is a value for `<idea-version until-build="">` attribute.<br/>
 **Default value**: `<IntelliJIDEABranch.*>`
 
-- `pluginDescription` is a value for `<description>` tag.
-<br/>
+- `pluginDescription` is a value for `<description>` tag.<br/>
 **Default value**: null
 
-- `pluginXmlFiles` is a collections of xml files to patch.
-<br/>
+- `pluginXmlFiles` is a collections of xml files to patch.<br/>
 **Default value**: `<all plugin.xml files with idea-plugin root tag in resources>`
 
-- `destinationDir` is a directory to store patched xml files.
-<br/>
+- `destinationDir` is a directory to store patched xml files.<br/>
 **Default value**: `<project.buildDir>/patchedPluginXmlFiles`
 
 ### Publishing plugin
@@ -100,24 +89,20 @@ The `patchPluginXml` task supports following properties:
 - `intellij.publish.password` your password at JetBrains plugin repository.
 - `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
 - `intellij.publish.channels` defines several channels to upload, you may use any comma-separated strings here, 
-`default` string means default channel.
-<br/><br/>
+`default` string means default channel.<br/><br/>
 **Default value**: `<empty>`
 
 `publishPlugin` task supports following properties:
 
 - `username` is a login at JetBrains plugin repository.
 - `password` is a password at JetBrains plugin repository.
-- `channels` are channels names to upload the plugin to.
-<br/>
+- `channels` are channels names to upload the plugin to.<br/>
 **Default value**: `[default]`
 
-- `host` host of plugin repository.
-<br/>
+- `host` host of plugin repository.<br/>
 **Default value**: `http://plugins.jetbrains.com`
 
-- `distributionFile` is a file to upload.
-<br/>
+- `distributionFile` is a file to upload.<br/>
 **Default value**: `<output of buildPlugin task>`
 
 
