@@ -126,6 +126,40 @@ class App {
         testCommand.permGen == '250m'
     }
 
+    def 'use compile only classpath for plugins if Gradle >= 2.12'() {
+        given:
+        writeTestFile()
+        buildFile << 'intellij.plugins = [\'copyright\']\n'
+        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build('2.14', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
+        assert compileClasspath.contains('copyright.jar')
+        assert !runtimeClasspath.contains('copyright.jar')
+    }
+
+    def 'use compile classpath for plugins if Gradle < 2.12'() {
+        given:
+        writeTestFile()
+        buildFile << 'intellij.plugins = [\'copyright\']\n'
+        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build('2.11', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
+        assert compileClasspath.contains('copyright.jar')
+        assert runtimeClasspath.contains('copyright.jar')
+    }
+
     def 'add require plugin id parameter in test tasks'() {
         given:
         writeTestFile()

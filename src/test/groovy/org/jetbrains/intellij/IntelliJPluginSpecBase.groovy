@@ -63,13 +63,17 @@ abstract class IntelliJPluginSpecBase extends Specification {
     }
 
     protected BuildResult build(boolean fail, String... tasks) {
-        GradleRunner builder = builder(tasks)
+        return build('2.14', fail, tasks)
+    }
+
+    protected BuildResult build(String gradleVersion, boolean fail, String... tasks) {
+        GradleRunner builder = builder(gradleVersion, tasks)
         return fail ? builder.buildAndFail() : builder.build()
     }
 
-    private GradleRunner builder(String[] tasks) {
+    private GradleRunner builder(String gradleVersion, String[] tasks) {
         tasks += ['--stacktrace']
-        def builder = GradleRunner.create().withProjectDir(dir.root).withGradleVersion("2.14")
+        def builder = GradleRunner.create().withProjectDir(dir.root).withGradleVersion(gradleVersion)
                 .withPluginClasspath()
                 .withDebug(true)
                 .withTestKitDir(new File(gradleHome))
