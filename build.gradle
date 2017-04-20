@@ -66,6 +66,7 @@ pluginBundle {
 task cacheIntolerantTest(type: Test) {
     configureTests(it)
     include '**/DownloadIntelliJSpec.class'
+    filter.failOnNoMatchingTests = false
 }
 
 test {
