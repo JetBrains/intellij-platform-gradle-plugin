@@ -1,9 +1,13 @@
 # Changelog
 
+## 0.2.9
+
+- prefer `compile` configuration for bundled plugins IDEA dependencies in tests
+
 ## 0.2.8
 
 - prefer `compile` configuration for IDEA dependencies in tests
-- prefer `compileOnly` configuration for plugins dependencies in tests 
+- prefer `compileOnly` configuration for plugins dependencies in tests
 
 ## 0.2.7
 
