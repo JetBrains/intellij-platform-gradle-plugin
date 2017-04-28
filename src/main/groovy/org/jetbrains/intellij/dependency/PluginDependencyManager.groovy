@@ -3,7 +3,6 @@ package org.jetbrains.intellij.dependency
 import com.intellij.structure.domain.PluginManager
 import com.intellij.structure.impl.utils.StringUtil
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
@@ -54,7 +53,7 @@ class PluginDependencyManager {
         return findCachedPlugin(id, version, channel) ?: downloadPlugin(id, version, channel)
     }
 
-    void register(@NotNull Project project, @NotNull PluginDependency plugin, @NotNull Configuration configuration) {
+    void register(@NotNull Project project, @NotNull PluginDependency plugin, @NotNull String configuration) {
         def baseDir = plugin.artifact.parentFile.parentFile // idea for builtin, cache dir for external
         def ivyFile = getOrCreateIvyXml(plugin, baseDir)
         project.repositories.ivy { repo ->
@@ -65,7 +64,7 @@ class PluginDependencyManager {
                 repo.artifactPattern("$plugin.sourcesDirectory.parent/[artifact]-$plugin.version-[classifier].[ext]")
             }
         }
-        project.dependencies.add(configuration.name, [
+        project.dependencies.add(configuration, [
             group: 'org.jetbrains.plugins', name: plugin.id, version: plugin.version, configuration: 'compile'
         ])
     }

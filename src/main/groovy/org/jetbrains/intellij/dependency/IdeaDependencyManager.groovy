@@ -58,7 +58,7 @@ class IdeaDependencyManager {
         return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, null, project)
     }
 
-    static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull Configuration configuration) {
+    static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull String configuration) {
         def ivyFile = getOrCreateIvyXml(dependency)
         project.repositories.ivy { repo ->
             repo.url = dependency.classes
@@ -68,7 +68,7 @@ class IdeaDependencyManager {
                 repo.artifactPattern("$dependency.sources.parent/[artifact]-$dependency.version-[classifier].[ext]")
             }
         }
-        project.dependencies.add(configuration.name, [
+        project.dependencies.add(configuration, [
             group: 'com.jetbrains', name: dependency.name, version: dependency.version, configuration: 'compile'
         ])
     }
@@ -112,7 +112,7 @@ class IdeaDependencyManager {
         LOG.debug("IDEA zip: " + zipFile.path)
         def directoryName = zipFile.name - ".zip"
 
-        def cacheParentDirectoryPath = zipFile.parent
+        String cacheParentDirectoryPath = zipFile.parent
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension.class)
         if (intellijExtension && intellijExtension.ideaDependencyCachePath) {
             def customCacheParent = new File(intellijExtension.ideaDependencyCachePath)

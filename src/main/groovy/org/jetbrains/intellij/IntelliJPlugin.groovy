@@ -99,14 +99,13 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
 
-        configureIntellijDependency(project, extension, project.configurations[IDEA_CONFIGURATION_NAME])
-        configurePluginDependencies(project, extension, project.configurations[IDEA_PLUGINS_CONFIGURATION_NAME])
+        configureIntellijDependency(project, extension)
+        configurePluginDependencies(project, extension)
         configureTestTasks(project, extension)
     }
 
     private static void configureIntellijDependency(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension,
-                                                    @NotNull Configuration configuration) {
+                                                    @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA dependency")
         def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
         def ideaDependency
@@ -122,7 +121,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
         extension.ideaDependency = ideaDependency
         LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} is used for building")
-        resolver.register(project, ideaDependency, configuration)
+        resolver.register(project, ideaDependency, IDEA_CONFIGURATION_NAME)
 
         def toolsJar = Jvm.current().toolsJar
         if (toolsJar) {
@@ -131,15 +130,14 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configurePluginDependencies(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension,
-                                                    @NotNull Configuration configuration) {
+                                                    @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA plugin dependencies")
         def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
         def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
         extension.plugins.each {
             LOG.info("Configuring IntelliJ plugin $it")
             if (it instanceof Project) {
-                project.dependencies.add(configuration.name, it)
+                project.dependencies.add(IDEA_PLUGINS_CONFIGURATION_NAME, it)
                 it.afterEvaluate {
                     if (it.plugins.findPlugin(IntelliJPlugin) == null) {
                         throw new BuildException("Cannot use $it as a plugin dependency. IntelliJ Plugin is not found." + it.plugins, null)
@@ -147,8 +145,7 @@ class IntelliJPlugin implements Plugin<Project> {
                     extension.pluginDependencies.add(new PluginProjectDependency(it))
                     project.tasks.withType(PrepareSandboxTask)*.dependsOn(it.tasks.findByName(PREPARE_SANDBOX_TASK_NAME))
                 }
-            }
-            else {
+            } else {
                 def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
                 if (!pluginId) {
                     throw new BuildException("Failed to resolve plugin $it", null)
@@ -160,7 +157,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
                     throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
                 }
-                resolver.register(project, plugin, configuration)
+                resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
                 extension.pluginDependencies.add(plugin)
             }
         }

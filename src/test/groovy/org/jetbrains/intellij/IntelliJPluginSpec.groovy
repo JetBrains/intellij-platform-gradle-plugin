@@ -126,10 +126,10 @@ class App {
         testCommand.permGen == '250m'
     }
 
-    def 'use compile only classpath for plugins if Gradle >= 2.12'() {
+    def 'use compile only classpath for non-builtin plugins if Gradle >= 2.12'() {
         given:
         writeTestFile()
-        buildFile << 'intellij.plugins = [\'copyright\']\n'
+        buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
         buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
         buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
 
@@ -140,13 +140,15 @@ class App {
 
         then:
         assert compileClasspath.contains('copyright.jar')
-        assert !runtimeClasspath.contains('copyright.jar')
+        assert runtimeClasspath.contains('copyright.jar')
+        assert compileClasspath.contains('intellij-postfix.jar')
+        assert !runtimeClasspath.contains('intellij-postfix.jar')
     }
 
-    def 'use compile classpath for plugins if Gradle < 2.12'() {
+    def 'use compile classpath for non-builtin plugins if Gradle < 2.12'() {
         given:
         writeTestFile()
-        buildFile << 'intellij.plugins = [\'copyright\']\n'
+        buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
         buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
         buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
 
@@ -158,6 +160,8 @@ class App {
         then:
         assert compileClasspath.contains('copyright.jar')
         assert runtimeClasspath.contains('copyright.jar')
+        assert compileClasspath.contains('intellij-postfix.jar')
+        assert runtimeClasspath.contains('intellij-postfix.jar')
     }
 
     def 'add require plugin id parameter in test tasks'() {
