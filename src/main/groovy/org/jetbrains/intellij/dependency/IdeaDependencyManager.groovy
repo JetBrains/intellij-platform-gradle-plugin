@@ -50,9 +50,9 @@ class IdeaDependencyManager {
     @NotNull
     IdeaDependency resolveLocal(@NotNull Project project, @NotNull String localPath) {
         LOG.debug("Adding local IDE dependency")
-        def ideaDir = new File(localPath)
+        def ideaDir = Utils.ideaDir(localPath)
         if (!ideaDir.exists() || !ideaDir.isDirectory()) {
-            throw new BuildException("Specified localPath '$localPath' is not path to IntelliJ IDE", null)
+            throw new BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
         def buildNumber = Utils.ideaBuildNumber(ideaDir)
         return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, null, project)

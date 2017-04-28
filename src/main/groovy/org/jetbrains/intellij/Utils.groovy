@@ -116,10 +116,7 @@ class Utils {
     static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
         def path = extension.alternativeIdePath
         if (path) {
-            def dir = new File(path)
-            if (dir.getName().endsWith(".app")) {
-                dir = new File(dir, "Contents")
-            }
+            def dir = ideaDir(path)
             if (!dir.exists()) {
                 def ideaDirectory = extension.ideaDependency.classes
                 IntelliJPlugin.LOG.error("Cannot find alternate SDK path: $dir. Default IDEA will be used : $ideaDirectory")
@@ -139,6 +136,12 @@ class Utils {
             }
         }
         return new File(ideaDirectory, "build.txt").getText('UTF-8').trim()
+    }
+
+    @NotNull
+    static File ideaDir(@NotNull String path) {
+        File dir = new File(path)
+        return dir.name.endsWith(".app") ? new File(dir, "Contents") : dir
     }
 
     // todo: collect all ids for multiproject configuration
