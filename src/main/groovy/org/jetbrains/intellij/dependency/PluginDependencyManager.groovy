@@ -20,7 +20,7 @@ import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 
 class PluginDependencyManager {
-    public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'http://plugins.jetbrains.com'
+    public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://plugins.jetbrains.com'
 
     private final String cacheDirectoryPath
     private final String repositoryHost
