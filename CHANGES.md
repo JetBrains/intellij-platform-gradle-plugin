@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.10
+
+- upgrade plugin-services libraries to fix 'Invalid plugin type' exception while downloading plugins dependencies (fixes [#201](../../issues/201))
+- prefer `compile` configuration for any plugins IDEA dependencies in tests (fixes [#202](../../issues/202))
+
 ## 0.2.9
 
 - prefer `compile` configuration for bundled plugins IDEA dependencies in tests

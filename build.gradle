@@ -37,7 +37,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.2.9'
+version = '0.2.10'
 group = 'org.jetbrains.intellij.plugins'
 description = """
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
