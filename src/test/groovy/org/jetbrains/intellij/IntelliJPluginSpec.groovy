@@ -130,6 +130,44 @@ class App {
         given:
         writeTestFile()
         buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
+        buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build('2.14', false, 'printMainRuntimeClassPath', 'printMainCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
+        assert compileClasspath.contains('copyright.jar')
+        assert !runtimeClasspath.contains('copyright.jar')
+        assert compileClasspath.contains('intellij-postfix.jar')
+        assert !runtimeClasspath.contains('intellij-postfix.jar')
+    }
+
+    def 'use compile classpath for non-builtin plugins if Gradle < 2.12'() {
+        given:
+        writeTestFile()
+        buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
+        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build('2.11', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
+        assert compileClasspath.contains('copyright.jar')
+        assert runtimeClasspath.contains('copyright.jar')
+        assert compileClasspath.contains('intellij-postfix.jar')
+        assert runtimeClasspath.contains('intellij-postfix.jar')
+    }
+
+    def 'use test compile classpath for non-builtin plugins if Gradle >= 2.12'() {
+        given:
+        writeTestFile()
+        buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
         buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
         buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
 
@@ -142,10 +180,10 @@ class App {
         assert compileClasspath.contains('copyright.jar')
         assert runtimeClasspath.contains('copyright.jar')
         assert compileClasspath.contains('intellij-postfix.jar')
-        assert !runtimeClasspath.contains('intellij-postfix.jar')
+        assert runtimeClasspath.contains('intellij-postfix.jar')
     }
 
-    def 'use compile classpath for non-builtin plugins if Gradle < 2.12'() {
+    def 'use test compile classpath for non-builtin plugins if Gradle < 2.12'() {
         given:
         writeTestFile()
         buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
