@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.11
+
+- upgrade plugin-repository-rest-client
+
 ## 0.2.10
 
 - upgrade plugin-services libraries to fix 'Invalid plugin type' exception while downloading plugins dependencies (fixes [#201](../../issues/201))
