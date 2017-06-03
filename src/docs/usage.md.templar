@@ -3,12 +3,6 @@
 ## Gradle >= 2.1{\n}
 {\n}
 ```groovy{\n}
-buildscript {{{\n}
-  repositories {{{\n}
-    maven {{ url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }{\n}
-  }{\n}
-}{\n}
-{\n}
 plugins {{{\n}
   id "org.jetbrains.intellij" version "{version}"{\n}
 }{\n}
@@ -22,10 +16,6 @@ buildscript {{{\n}
     maven {{{\n}
       url "https://plugins.gradle.org/m2/"{\n}
     }{\n}
-    maven {{ {\n}
-      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' {\n}
-    }{\n}
-    {\n}
   }{\n}
   dependencies {{{\n}
     classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:{version}"{\n}
