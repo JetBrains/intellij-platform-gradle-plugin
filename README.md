@@ -246,6 +246,7 @@ As examples of using this plugin you can check out following projects:
   - Mixes Java, Kotlin, and Groovy code
   - Uses Grammar Kit
   - Uses a Kotlin version not bundled with IntelliJ
+- [Mainframer Integration](https://github.com/elpassion/mainframer-intellij-plugin)
 
 # License
 
