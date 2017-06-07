@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.12
+
+- upgrade plugin-repository-rest-client
+
 ## 0.2.11
 
 - upgrade plugin-repository-rest-client

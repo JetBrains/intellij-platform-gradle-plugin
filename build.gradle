@@ -27,7 +27,7 @@ dependencies {
     compile localGroovy()
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
-    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.20'
+    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.21'
     compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.37'
 
     testCompile gradleTestKit()
@@ -37,7 +37,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.2.11'
+version = '0.2.12'
 group = 'org.jetbrains.intellij.plugins'
 description = """
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
