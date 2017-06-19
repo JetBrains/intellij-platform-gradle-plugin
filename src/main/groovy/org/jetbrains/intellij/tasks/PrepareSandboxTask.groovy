@@ -10,6 +10,7 @@ import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.PluginDependency
+import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.xml.sax.SAXParseException
 
 @SuppressWarnings("GroovyUnusedDeclaration")
@@ -141,16 +142,17 @@ class PrepareSandboxTask extends Sync {
         }
     }
 
-    void configureExternalPlugins(Collection<PluginDependency> pluginDependencies) {
-        def externalPlugins = mainSpec.addChild().into('.')
-        pluginDependencies.each {
-            if (!it.builtin) {
-                def artifact = it.artifact
-                if (artifact.isDirectory()) {
-                    externalPlugins.from(artifact) { it.into(artifact.getName()) }
-                } else {
-                    externalPlugins.from(artifact)
-                }
+    void configureCompositePlugin(PluginProjectDependency pluginDependency) {
+        from(pluginDependency.artifact) { into(pluginDependency.artifact.name) }
+    }
+
+    void configureExternalPlugin(PluginDependency pluginDependency) {
+        if (!pluginDependency.builtin) {
+            def artifact = pluginDependency.artifact
+            if (artifact.isDirectory()) {
+                from(artifact) { it.into(artifact.getName()) }
+            } else {
+                from(artifact)
             }
         }
     }

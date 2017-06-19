@@ -101,9 +101,6 @@ class IntelliJPlugin implements Plugin<Project> {
         configureIntellijDependency(project, extension)
         configurePluginDependencies(project, extension)
         configureTestTasks(project, extension)
-        project.tasks.withType(PrepareSandboxTask).each {
-            it.configureExternalPlugins(extension.pluginDependencies)
-        }
     }
 
     private static void configureIntellijDependency(@NotNull Project project,
@@ -144,8 +141,13 @@ class IntelliJPlugin implements Plugin<Project> {
                     if (it.plugins.findPlugin(IntelliJPlugin) == null) {
                         throw new BuildException("Cannot use $it as a plugin dependency. IntelliJ Plugin is not found." + it.plugins, null)
                     }
-                    extension.pluginDependencies.add(new PluginProjectDependency(it))
-                    project.tasks.withType(PrepareSandboxTask)*.dependsOn(it.tasks.findByName(PREPARE_SANDBOX_TASK_NAME))
+                    def dependency = new PluginProjectDependency(it)
+                    extension.pluginDependencies.add(dependency)
+                    def dependencySandboxTask = it.tasks.findByName(PREPARE_SANDBOX_TASK_NAME)
+                    project.tasks.withType(PrepareSandboxTask).each {
+                        it.dependsOn(dependencySandboxTask)
+                        it.configureCompositePlugin(dependency)
+                    }
                 }
             } else {
                 def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
@@ -161,6 +163,9 @@ class IntelliJPlugin implements Plugin<Project> {
                 }
                 resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
                 extension.pluginDependencies.add(plugin)
+                project.tasks.withType(PrepareSandboxTask).each {
+                    it.configureExternalPlugin(plugin)
+                }
             }
         }
     }
