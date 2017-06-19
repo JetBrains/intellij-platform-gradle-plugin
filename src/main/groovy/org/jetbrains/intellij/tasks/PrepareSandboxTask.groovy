@@ -21,7 +21,6 @@ class PrepareSandboxTask extends Sync {
     List<Object> pluginDependencies = []
 
     PrepareSandboxTask() {
-        configureExternalPlugins()
         configurePlugin()
     }
 
@@ -142,21 +141,17 @@ class PrepareSandboxTask extends Sync {
         }
     }
 
-    private void configureExternalPlugins() {
-        def externalPlugins = mainSpec.addChild()
-        externalPlugins.from {
-            def result = []
-            getPluginDependencies().each {
-                if (!it.builtin) {
-                    def artifact = it.artifact
-                    if (artifact.isDirectory()) {
-                        externalPlugins.into(artifact.getName()) { it.from(artifact) }
-                    } else {
-                        result.add(artifact)
-                    }
+    void configureExternalPlugins(Collection<PluginDependency> pluginDependencies) {
+        def externalPlugins = mainSpec.addChild().into('.')
+        pluginDependencies.each {
+            if (!it.builtin) {
+                def artifact = it.artifact
+                if (artifact.isDirectory()) {
+                    externalPlugins.from(artifact) { it.into(artifact.getName()) }
+                } else {
+                    externalPlugins.from(artifact)
                 }
             }
-            result
         }
     }
 

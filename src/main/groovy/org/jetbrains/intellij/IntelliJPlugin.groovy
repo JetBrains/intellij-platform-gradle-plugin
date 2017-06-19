@@ -101,6 +101,9 @@ class IntelliJPlugin implements Plugin<Project> {
         configureIntellijDependency(project, extension)
         configurePluginDependencies(project, extension)
         configureTestTasks(project, extension)
+        project.tasks.withType(PrepareSandboxTask).each {
+            it.configureExternalPlugins(extension.pluginDependencies)
+        }
     }
 
     private static void configureIntellijDependency(@NotNull Project project,

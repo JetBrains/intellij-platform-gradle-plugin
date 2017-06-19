@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.13
+
+- Gradle 4.0 compatibility fixes
+
 ## 0.2.12
 
 - upgrade plugin-repository-rest-client
