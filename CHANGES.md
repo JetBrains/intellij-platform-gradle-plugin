@@ -2,7 +2,8 @@
 
 ## 0.2.14
 
-- Support RD prefix for Rider
+- support RD prefix for Rider
+- avoid possible NPEs (fixes [#208](../../issues/208))
 
 ## 0.2.13
 
