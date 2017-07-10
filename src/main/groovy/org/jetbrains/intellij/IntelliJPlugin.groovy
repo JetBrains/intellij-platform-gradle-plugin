@@ -246,7 +246,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ compile tasks")
-        def instrumentCode = { extension.instrumentCode && extension.type != 'RS' }
+        def instrumentCode = { extension.instrumentCode && extension.type != 'RS' && extension.type != 'RD' }
         project.sourceSets.all { SourceSet sourceSet ->
             def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
             instrumentTask.sourceSet = sourceSet

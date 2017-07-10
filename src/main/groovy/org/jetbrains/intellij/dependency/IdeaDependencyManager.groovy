@@ -34,9 +34,13 @@ class IdeaDependencyManager {
         def dependencyName = 'ideaIC'
         if (type == 'IU') {
             dependencyName = 'ideaIU'
+        } else if (type == 'RD') {
+            dependencyGroup = 'com.jetbrains.intellij.rider'
+            dependencyName = "riderRD"
         } else if (type == 'RS') {
             dependencyGroup = 'com.jetbrains.intellij.rider'
-            dependencyName = 'riderRS'
+            dependencyName = "riderRS"
+            LOG.warn("'RS' type is deprecated and will be removed in 0.3.0. Use 'RD' type instead")
         }
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
         def configuration = project.configurations.detachedConfiguration(dependency)
@@ -119,7 +123,7 @@ class IdeaDependencyManager {
             if (customCacheParent.exists()) {
                 cacheParentDirectoryPath = customCacheParent.absolutePath
             }
-        } else if (type == 'RS') {
+        } else if (type == 'RS' || type == 'RD') {
             cacheParentDirectoryPath = project.buildDir
         }
         def cacheDirectory = new File(cacheParentDirectoryPath, directoryName)

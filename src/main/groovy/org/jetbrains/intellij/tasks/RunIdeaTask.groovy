@@ -22,6 +22,7 @@ class RunIdeaTask extends JavaExec {
                                          DB: '0xDBE',
                                          AI: 'AndroidStudio',
                                          GO: 'Gogland',
+                                         RD: 'Rider',
                                          RS: 'Rider']
 
     private List<Object> requiredPluginIds = []

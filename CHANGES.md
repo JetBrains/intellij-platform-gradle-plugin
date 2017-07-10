@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.14
+
+- Support RD prefix for Rider
+
 ## 0.2.13
 
 - Gradle 4.0 compatibility fixes

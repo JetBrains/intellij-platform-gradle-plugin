@@ -93,7 +93,7 @@ The option accepts path, e.g. `/Applications/IntelliJIDEA.app`<br/>
 `intellij.version` and `intellij.localPath` should not be specified at the same time.<br/><br/> 
 **Default value**: `null`
 
-- `intellij.type` defines the type of IDEA distribution: `IC` for community version, `IU` for ultimate, `JPS` for jps-only dependencies and `RS` for Rider.<br/><br/>
+- `intellij.type` defines the type of IDEA distribution: `IC` for community version, `IU` for ultimate, `JPS` for jps-only dependencies and `RD` for Rider.<br/><br/>
 **Default value**: `IC`
 
 - `intellij.plugins` defines the list of bundled IDEA plugins and plugins from [idea repository](https://plugins.jetbrains.com/) 
@@ -110,7 +110,7 @@ of bundled IDEA plugins that should be used as dependencies.<br/><br/>
 
 - `intellij.instrumentCode` defines whether plugin should instrument java classes with nullability assertions.
 Also it might be required for compiling forms created by IntelliJ GUI designer.<br/><br/>
-Instrumentation code cannot be performed while using Rider distributions `RS`.<br/><br/>
+Instrumentation code cannot be performed while using Rider distributions `RD`.<br/><br/>
 **Default value**: `true`
 
 - `intellij.updateSinceUntilBuild` defines whether plugin should patch `plugin.xml` with since and until build values, 
