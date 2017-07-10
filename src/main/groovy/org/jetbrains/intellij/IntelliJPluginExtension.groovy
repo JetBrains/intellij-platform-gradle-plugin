@@ -8,21 +8,21 @@ import org.jetbrains.intellij.dependency.PluginDependency
  */
 @SuppressWarnings("GroovyUnusedDeclaration")
 class IntelliJPluginExtension {
-    Object[] plugins
+    Object[] plugins = []
     String localPath
-    String version
-    String type
+    String version = IntelliJPlugin.DEFAULT_IDEA_VERSION
+    String type = 'IC'
     String pluginName
     String sandboxDirectory
-    String intellijRepo
+    String intellijRepo = IntelliJPlugin.DEFAULT_INTELLIJ_REPO
     String alternativeIdePath
     String ideaDependencyCachePath
-    boolean instrumentCode
-    boolean updateSinceUntilBuild
-    boolean sameSinceUntilBuild
-    boolean downloadSources
+    boolean instrumentCode = true
+    boolean updateSinceUntilBuild = true
+    boolean sameSinceUntilBuild = false
+    boolean downloadSources = true
     @Deprecated
-    Publish publish
+    Publish publish = new Publish()
 
     IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
@@ -30,6 +30,9 @@ class IntelliJPluginExtension {
     private final Map<String, Object> systemProperties = new HashMap<>()
 
     String getType() {
+        if (version == null) {
+            return "IC"
+        }
         if (version.startsWith("IU-") || "IU" == type) {
             return "IU"
         } else if (version.startsWith("JPS-") || "JPS" == type) {
@@ -44,10 +47,13 @@ class IntelliJPluginExtension {
     }
 
     String getVersion() {
+        if (version == null) {
+            return null
+        }
         if (version.startsWith('JPS-')) {
             return version.substring(4)
         }
-        return version.startsWith('IU-') || version.startsWith('IC-') || version.startsWith('RS-') || version.startsWith('RD-')? version.substring(3) : version
+        return version.startsWith('IU-') || version.startsWith('IC-') || version.startsWith('RS-') || version.startsWith('RD-') ? version.substring(3) : version
     }
 
     Set<PluginDependency> getPluginDependencies() {

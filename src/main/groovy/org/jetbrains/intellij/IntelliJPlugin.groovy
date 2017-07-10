@@ -49,17 +49,9 @@ class IntelliJPlugin implements Plugin<Project> {
         def javaPlugin = project.getPlugins().apply(JavaPlugin)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension) as IntelliJPluginExtension
         intellijExtension.with {
-            plugins = []
-            version = DEFAULT_IDEA_VERSION
-            type = 'IC'
             pluginName = project.name
             sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
-            instrumentCode = true
-            updateSinceUntilBuild = true
-            sameSinceUntilBuild = false
-            intellijRepo = DEFAULT_INTELLIJ_REPO
             downloadSources = !System.getenv().containsKey('CI')
-            publish = new IntelliJPluginExtension.Publish()
         }
         configureConfigurations(project, javaPlugin)
         configureTasks(project, intellijExtension)
