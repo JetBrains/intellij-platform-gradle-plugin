@@ -8,6 +8,7 @@ import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
@@ -45,7 +46,7 @@ class IdeaDependencyManager {
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
         def configuration = project.configurations.detachedConfiguration(dependency)
 
-        def classesDirectory = getClassesDirectory(project, configuration, type)
+        def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type)
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
         return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project)
@@ -110,7 +111,7 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    private static File getClassesDirectory(
+    private static File extractClassesFromRemoteDependency(
             @NotNull Project project, @NotNull Configuration configuration, @NotNull String type) {
         File zipFile = configuration.singleFile
         LOG.debug("IDEA zip: " + zipFile.path)
@@ -127,6 +128,11 @@ class IdeaDependencyManager {
             cacheParentDirectoryPath = project.buildDir
         }
         def cacheDirectory = new File(cacheParentDirectoryPath, directoryName)
+        unzipDependencyFile(cacheDirectory, project, zipFile, type)
+        return cacheDirectory
+    }
+
+    private static void unzipDependencyFile(@NotNull File cacheDirectory, @NotNull Project project, @NotNull File zipFile, @NotNull String type) {
         def markerFile = new File(cacheDirectory, "markerFile")
         if (!markerFile.exists()) {
             if (cacheDirectory.exists()) cacheDirectory.deleteDir()
@@ -136,10 +142,31 @@ class IdeaDependencyManager {
                 it.from(project.zipTree(zipFile))
                 it.into(cacheDirectory)
             }
+            resetExecutablePermissions(cacheDirectory, project, type)
             markerFile.createNewFile()
             LOG.debug("Unzipped")
         }
-        return cacheDirectory
+    }
+
+    private static void resetExecutablePermissions(@NotNull File cacheDirectory, @NotNull Project project, @NotNull String type) {
+        if (type == 'RS' || type == 'RD') {
+            LOG.debug("Resetting executable permissions")
+            def operatingSystem = OperatingSystem.current()
+            if (!operatingSystem.isWindows()) {
+                setExecutable(cacheDirectory, "lib/ReSharperHost/dupfinder.sh")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/inspectcode.sh")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/runtime.sh")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py")
+            }
+        }
+    }
+
+    static def setExecutable(File parent, String child) {
+        new File(parent, child).setExecutable(true, true)
     }
 
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
