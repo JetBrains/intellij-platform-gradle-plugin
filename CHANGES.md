@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.15
+
+- restore scripts execution permissions in Rider distribution 
+
 ## 0.2.14
 
 - support RD prefix for Rider
