@@ -35,3 +35,4 @@ As examples of using this plugin you can check out following projects:
 	- Uses Gradle Script Kotlin
 	- Fully written in kotlin
 	- Uses RxJava
+- [Unity 3D plugin](https://github.com/JetBrains/resharper-unity/tree/master/rider) for JetBrains Rider
