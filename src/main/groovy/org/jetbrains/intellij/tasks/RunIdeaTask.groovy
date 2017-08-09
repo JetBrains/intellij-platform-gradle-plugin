@@ -143,9 +143,16 @@ class RunIdeaTask extends JavaExec {
         if (!getSystemProperties().containsKey('idea.platform.prefix')) {
             def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(getIdeaDirectory()))
             if (matcher.find()) {
-                def prefix = PREFIXES.get(matcher.group(1))
+                def abbreviation = matcher.group(1)
+                def prefix = PREFIXES.get(abbreviation)
                 if (prefix) {
                     systemProperty('idea.platform.prefix', prefix)
+
+                    if (abbreviation == "RD" || abbreviation == "RS") {
+                        // Allow debugging Rider's out of process ReSharper host
+                        systemProperty('rider.debug.mono.debug', true)
+                        systemProperty('rider.debug.mono.allowConnect', true)
+                    }
                 }
             }
         }
