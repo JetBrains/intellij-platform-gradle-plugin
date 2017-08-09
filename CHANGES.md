@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.16
+
+- automatically set system properties for debugging Resharper
+
 ## 0.2.15
 
 - restore scripts execution permissions in Rider distribution 
