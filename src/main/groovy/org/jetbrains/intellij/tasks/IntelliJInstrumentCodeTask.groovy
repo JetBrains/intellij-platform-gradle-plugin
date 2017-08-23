@@ -24,7 +24,10 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
     @InputFiles
     @SkipWhenEmpty
     FileTree getOriginalClasses() {
-        return project.fileTree(sourceSet.output.classesDir)
+        def output = sourceSet.output
+        return output.hasProperty("classesDirs") ?
+                project.files(output.classesDirs.from).asFileTree :
+                project.fileTree(output.classesDir)
     }
 
     @InputFiles

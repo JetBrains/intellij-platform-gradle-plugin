@@ -247,7 +247,13 @@ class IntelliJPlugin implements Plugin<Project> {
                 onlyIf instrumentCode
 
                 conventionMapping('ideaDependency', { extension.ideaDependency })
-                conventionMapping('outputDir', { new File(sourceSet.output.classesDir.getParent(), "${sourceSet.name}-instrumented") })
+                conventionMapping('outputDir', {
+                    def output = sourceSet.output
+                    def classesDir = output.hasProperty('classesDirs') ?
+                            output.classesDirs.first() :
+                            output.classesDir
+                    new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
+                })
             }
 
             def updateTask = project.tasks.create('post' + instrumentTask.name.capitalize())
@@ -256,10 +262,17 @@ class IntelliJPlugin implements Plugin<Project> {
                 onlyIf instrumentCode
 
                 doLast {
-                    def oldClassesDir = sourceSet.output.classesDir
+                    def sourceSetOutput = sourceSet.output
+
+                    def oldClassesDir = sourceSetOutput.hasProperty("classesDirs") ?
+                            sourceSetOutput.classesDirs :
+                            sourceSetOutput.classesDir
 
                     // Set the classes dir to the new one with the instrumented classes
-                    sourceSet.output.classesDir = instrumentTask.outputDir
+
+                    if (sourceSetOutput.hasProperty("classesDirs"))
+                        sourceSetOutput.classesDirs.from = instrumentTask.outputDir else
+                        sourceSetOutput.classesDir = instrumentTask.outputDir
 
                     if (sourceSet.name == SourceSet.MAIN_SOURCE_SET_NAME) {
                         // When we change the output classes directory, Gradle will automatically configure
