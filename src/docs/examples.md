@@ -11,7 +11,7 @@ As examples of using this plugin you can check out following projects:
 - [Android Drawable Importer plugin](https://github.com/winterDroid/android-drawable-importer-intellij-plugin)
 - [Android Material Design Icon Generator plugin](https://github.com/konifar/android-material-design-icon-generator-plugin)
 - [AceJump plugin](https://github.com/johnlindquist/AceJump)  
-	- Uses Gradle Script Kotlin
+	- Uses the Gradle Kotlin DSL
 - [EmberJS plugin](https://github.com/Turbo87/intellij-emberjs)
 - [GCloud plugin](https://github.com/GoogleCloudPlatform/gcloud-intellij)
 - [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
@@ -19,7 +19,7 @@ As examples of using this plugin you can check out following projects:
 - [TOML plugin](https://github.com/stuartcarnie/toml-plugin)
 - [SQLDelight Android Studio Plugin](https://github.com/square/sqldelight/tree/master/sqldelight-studio-plugin)
 - [idear plugin](https://github.com/breandan/idear)
-  - Uses Gradle Script Kotlin
+  - Uses the Gradle Kotlin DSL
 - [Android WiFi ADB plugin](https://github.com/pedrovgs/AndroidWiFiADB)
 - [SonarLint plugin](https://github.com/SonarSource/sonar-intellij)
 - [IdeaVim plugin](https://github.com/JetBrains/ideavim) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaVim&guest=1)
@@ -27,12 +27,12 @@ As examples of using this plugin you can check out following projects:
 - [Gerrit](https://github.com/uwolfer/gerrit-intellij-plugin) uses Travis CI inclusive automated publishing of releases to GitHub and JetBrains plugin repository (triggered by version tag creation)
 - [.ignore](https://github.com/hsz/idea-gitignore)
 - [Minecraft Development](https://github.com/minecraft-dev/MinecraftDev) and its [TeamCity build configuration](https://ci.demonwav.com/viewType.html?buildTypeId=MinecraftDevIntelliJ_Build)
-  - Uses Gradle Script Kotlin
+  - Uses the Gradle Kotlin DSL
   - Mixes Java, Kotlin, and Groovy code
   - Uses Grammar Kit
   - Uses a Kotlin version not bundled with IntelliJ
 - [Mainframer Integration](https://github.com/elpassion/mainframer-intellij-plugin)
-	- Uses Gradle Script Kotlin
+	- Uses the Gradle Kotlin DSL
 	- Fully written in kotlin
 	- Uses RxJava
 - [Unity 3D plugin](https://github.com/JetBrains/resharper-unity/tree/master/rider) for JetBrains Rider
