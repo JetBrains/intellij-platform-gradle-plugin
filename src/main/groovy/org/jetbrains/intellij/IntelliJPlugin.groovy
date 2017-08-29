@@ -33,7 +33,6 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
     public static final String VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
-    public static final String RUN_IDEA_TASK_NAME = "runIdea"
     public static final String RUN_IDE_TASK_NAME = "runIde"
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
@@ -246,9 +245,6 @@ class IntelliJPlugin implements Plugin<Project> {
             it.dependsOn(PREPARE_SANDBOX_TASK_NAME)
         }
         project.tasks.create(RUN_IDE_TASK_NAME, RunIdeaTask).with(configureTask)
-        project.tasks.create(RUN_IDEA_TASK_NAME, RunIdeaTask).with(configureTask).doLast {
-            LOG.warn("'runIdea' task is deprecated and will be removed in 0.3.0. Use 'runIde' task instead")
-        }
     }
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
