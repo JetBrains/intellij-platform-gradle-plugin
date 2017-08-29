@@ -1,7 +1,10 @@
 package org.jetbrains.intellij.dependency
 
-import com.intellij.structure.domain.PluginManager
 import com.intellij.structure.impl.utils.StringUtil
+import com.intellij.structure.plugin.PluginCreationFail
+import com.intellij.structure.plugin.PluginCreationSuccess
+import com.intellij.structure.plugin.PluginManager
+import com.intellij.structure.problems.PluginProblem
 import org.gradle.api.Project
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
@@ -189,12 +192,21 @@ class PluginDependencyManager {
     }
 
     private static externalPluginDependency(@NotNull File artifact, @Nullable String channel) {
-        def intellijPlugin = PluginManager.instance.createPlugin(artifact)
-        def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
-        pluginDependency.channel = channel
-        pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
-        pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
-        return pluginDependency
+        def creationResult = PluginManager.instance.createPlugin(artifact)
+        if (creationResult instanceof PluginCreationSuccess) {
+            def intellijPlugin = creationResult.plugin
+            def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
+            pluginDependency.channel = channel
+            pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
+            pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
+            return pluginDependency
+        } else if (creationResult instanceof PluginCreationFail) {
+            def problems = creationResult.errorsAndWarnings.findAll { it.level == PluginProblem.Level.ERROR }.join(", ")
+            IntelliJPlugin.LOG.warn("Cannot create plugin from file ($artifact): $problems")
+        } else {
+            IntelliJPlugin.LOG.warn("Cannot create plugin from file ($artifact). $creationResult")
+        }
+        return null
     }
 
     private static void copyInputStream(InputStream input, OutputStream output) throws IOException {

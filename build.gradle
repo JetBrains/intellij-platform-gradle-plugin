@@ -28,7 +28,7 @@ dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.21'
-    compile 'org.jetbrains.intellij.plugins:intellij-plugin-structure:1.37'
+    compile 'org.jetbrains.intellij.plugins:structure-base:2.8'
 
     testCompile gradleTestKit()
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {

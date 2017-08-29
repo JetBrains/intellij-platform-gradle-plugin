@@ -1,7 +1,7 @@
 package org.jetbrains.intellij.dependency
 
-import com.intellij.structure.domain.PluginManager
-import com.intellij.structure.errors.IncorrectPluginException
+import com.intellij.structure.plugin.PluginCreationSuccess
+import com.intellij.structure.plugin.PluginManager
 import groovy.transform.ToString
 import org.gradle.api.Project
 import org.jetbrains.annotations.NotNull
@@ -24,16 +24,15 @@ class PluginProjectDependency implements PluginDependency, Serializable {
     @Lazy
     private transient PluginDependencyImpl pluginDependency = {
         if (pluginDirectory.exists()) {
-            try {
-                def intellijPlugin = PluginManager.instance.createPlugin(pluginDirectory)
+            def creationResult = PluginManager.instance.createPlugin(pluginDirectory)
+            if (creationResult instanceof PluginCreationSuccess) {
+                def intellijPlugin = creationResult.plugin
                 def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, pluginDirectory)
                 pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
                 pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
                 return pluginDependency
             }
-            catch (IncorrectPluginException e) {
-                IntelliJPlugin.LOG.error("Cannot use $pluginDirectory as a plugin dependency", e)
-            }
+            IntelliJPlugin.LOG.error("Cannot use $pluginDirectory as a plugin dependency. " + creationResult)
         }
         return null
     }()

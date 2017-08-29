@@ -1,10 +1,10 @@
 package org.jetbrains.intellij.dependency
 
 import com.google.common.base.Predicate
-import com.intellij.structure.impl.utils.JarsUtils
 import groovy.transform.ToString
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
+import org.jetbrains.intellij.Utils
 
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 class IdeaDependency implements Serializable {
@@ -37,7 +37,7 @@ class IdeaDependency implements Serializable {
         if (classes.isDirectory()) {
             File lib = new File(classes, "lib")
             if (lib.isDirectory()) {
-                return JarsUtils.collectJars(lib, new Predicate<File>() {
+                return Utils.collectJars(lib, new Predicate<File>() {
                     @Override
                     boolean apply(File file) {
                         return withKotlin || "kotlin-runtime.jar" != file.name && "kotlin-reflect.jar" != file.name

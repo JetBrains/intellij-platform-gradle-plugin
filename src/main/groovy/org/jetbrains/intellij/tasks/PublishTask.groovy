@@ -1,6 +1,10 @@
 package org.jetbrains.intellij.tasks
 
-import com.intellij.structure.domain.PluginManager
+import com.intellij.structure.plugin.PluginCreationFail
+import com.intellij.structure.plugin.PluginCreationSuccess
+import com.intellij.structure.plugin.PluginManager
+import com.intellij.structure.problems.PluginProblem
+import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.gradle.util.CollectionUtils
@@ -99,17 +103,25 @@ class PublishTask extends ConventionTask {
 
         def host = getHost()
         def distributionFile = getDistributionFile()
-        def pluginId = PluginManager.instance.createPlugin(distributionFile).pluginId
-        for (String channel : channels) {
-            IntelliJPlugin.LOG.info("Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
-            try {
-                def repoClient = new PluginRepositoryInstance(host, getUsername(), getPassword())
-                repoClient.uploadPlugin(pluginId, distributionFile, channel && 'default' != channel ? channel : '')
-                IntelliJPlugin.LOG.info("Uploaded successfully")
+        def creationResult = PluginManager.instance.createPlugin(distributionFile)
+        if (creationResult instanceof PluginCreationSuccess) {
+            def pluginId = creationResult.plugin.pluginId
+            for (String channel : channels) {
+                IntelliJPlugin.LOG.info("Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
+                try {
+                    def repoClient = new PluginRepositoryInstance(host, getUsername(), getPassword())
+                    repoClient.uploadPlugin(pluginId, distributionFile, channel && 'default' != channel ? channel : '')
+                    IntelliJPlugin.LOG.info("Uploaded successfully")
+                }
+                catch (exception) {
+                    throw new TaskExecutionException(this, new RuntimeException("Failed to upload plugin", exception))
+                }
             }
-            catch (exception) {
-                throw new TaskExecutionException(this, new RuntimeException("Failed to upload plugin", exception))
-            }
+        } else if (creationResult instanceof PluginCreationFail) {
+            def problems = creationResult.errorsAndWarnings.findAll { it.level == PluginProblem.Level.ERROR }.join(", ")
+            throw new TaskExecutionException(this, new GradleException("Cannot upload plugin. $problems"))
+        } else {
+            throw new TaskExecutionException(this, new GradleException("Cannot upload plugin. $cre"))
         }
     }
 }
