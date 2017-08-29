@@ -32,6 +32,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
     public static final String PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
+    public static final String VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     public static final String RUN_IDEA_TASK_NAME = "runIdea"
     public static final String RUN_IDE_TASK_NAME = "runIde"
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
@@ -73,6 +74,7 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Configuring IntelliJ IDEA gradle plugin")
         configurePatchPluginXmlTask(project, extension)
         configurePrepareSandboxTasks(project, extension)
+        configurePluginVerificationTask(project)
         configureRunIdeaTask(project, extension)
         configureBuildPluginTask(project)
         configurePublishPluginTask(project, extension)
@@ -208,6 +210,19 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             dependsOn(JavaPlugin.JAR_TASK_NAME)
+        }
+    }
+
+    private static void configurePluginVerificationTask(@NotNull Project project) {
+        LOG.info("Configuring plugin verification task")
+        project.tasks.create(VERIFY_PLUGIN_TASK_NAME, VerifyPluginTask).with {
+            group = GROUP_NAME
+            description = "Verifies built plugin."
+            conventionMapping('pluginDirectory', {
+                def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
+                new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName())
+            })
+            dependsOn { project.getTasksByName(PREPARE_SANDBOX_TASK_NAME, false) }
         }
     }
 
@@ -355,6 +370,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 return distributionFile?.exists() ? distributionFile : null
             })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
+            dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }
         }
     }
 

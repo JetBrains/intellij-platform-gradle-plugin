@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.0-SNAPSHOT
+
+- added plugin verification task: `verifyPlugin`
+
 ## 0.2.17
 
 - fix compatibility with Gradle 4.0 new versions of Kotlin and Scala plugins (fixes [#221](../../issues/221) and [#222](../../issues/222))
