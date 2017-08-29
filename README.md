@@ -61,7 +61,7 @@ buildscript {
     
   }
   dependencies {
-    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.0-SNAPSHOT"
+    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.0-SNAPSHOT"
   }
 }
 
@@ -79,7 +79,9 @@ Plugin introduces following tasks
 - `runIdea` the same as `runIde`. **Deprecated** and will be remove in `0.3.0` 
 - `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com
 
-## Configuration
+**Available in SNAPSHOT:**
+
+- `verifyPlugin` validates plugin.xml and plugin's structure## Configuration
 
 Plugin provides following options to configure target IntelliJ SDK and build archive
 

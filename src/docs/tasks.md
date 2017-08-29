@@ -9,3 +9,6 @@ Plugin introduces following tasks
 - `runIdea` the same as `runIde`. **Deprecated** and will be remove in `0.3.0` 
 - `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com
 
+**Available in SNAPSHOT:**
+
+- `verifyPlugin` validates plugin.xml and plugin's structure
