@@ -65,8 +65,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'instrument kotlin forms'() {
         given:
         buildFile << 'intellij { instrumentCode = true }'
-        file('src/main/kotlin/pack/App.form') << """<?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="pack.App">
+        file('src/main/kotlin/pack/AppKt.form') << """<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="pack.AppKt">
   <grid id="27dc6" binding="panel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
@@ -78,14 +78,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
   </grid>
 </form>
 """
-        file('src/main/kotlin/pack/App.kt') << """package pack
-import javax.swing.JPanel
-class App {
-    private lateinit var panel: JPanel
-    init {
-        panel.toString()
-    }
-}"""
+        writeKotlinUIFile()
 
         when:
         def result = build('buildSourceSet', '--info')

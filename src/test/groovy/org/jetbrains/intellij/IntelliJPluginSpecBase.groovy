@@ -17,6 +17,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
 
     @Rule
     final TemporaryFolder dir = new TemporaryFolder()
+    private boolean debugEnabled = true
 
     def setup() {
         file("settings.gradle") << "rootProject.name='projectName'\n"
@@ -54,6 +55,10 @@ abstract class IntelliJPluginSpecBase extends Specification {
 
     }
 
+    protected disableDebug() {
+        debugEnabled = false
+    }
+
     protected BuildResult buildAndFail(String... tasks) {
         return build(true, tasks)
     }
@@ -75,7 +80,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
         tasks += ['--stacktrace']
         def builder = GradleRunner.create().withProjectDir(dir.root).withGradleVersion(gradleVersion)
                 .withPluginClasspath()
-                .withDebug(true)
+                .withDebug(debugEnabled)
                 .withTestKitDir(new File(gradleHome))
                 .withArguments(tasks)
         return builder
@@ -135,6 +140,17 @@ class App {
     }
 }
 """
+    }
+
+    protected File writeKotlinUIFile() {
+        file('src/main/kotlin/pack/AppKt.kt') << """package pack
+import javax.swing.JPanel
+class AppKt {
+    private lateinit var panel: JPanel
+    init {
+        panel.toString()
+    }
+}"""
     }
 
     protected static String adjustWindowsPath(@NotNull String s) {

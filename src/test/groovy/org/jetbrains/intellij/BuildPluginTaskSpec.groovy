@@ -42,6 +42,33 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
             </idea-plugin>""".stripIndent()
     }
 
+    def 'build plugin distribution with Gradle 4 and Kotlin 1.1.4'() {
+        given:
+        writeJavaFile()
+        writeKotlinUIFile()
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << """\
+            intellij.pluginName = 'myPluginName'
+            version='0.42.123'
+           """.stripIndent()
+        buildFile.text = buildFile.text.replace("kotlin-gradle-plugin:1.0.6", "kotlin-gradle-plugin:1.1.4")
+
+        when:
+        // while debugging Gradle 4.0 includes all dependencies, including intellij-plugin-structure,
+        // which depends on asm-all different from IDEA-builtin asm-all.
+        disableDebug()
+        build('4.0', false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        distribution.exists()
+
+        def zipFile = new ZipFile(distribution)
+        collectPaths(zipFile) == ['myPluginName/', 'myPluginName/lib/', 'myPluginName/lib/projectName-0.42.123.jar'] as Set
+
+        def jar = new ZipFile(extractFile(zipFile, 'myPluginName/lib/projectName-0.42.123.jar'))
+        collectPaths(jar) == ['App.class', 'pack/', 'pack/AppKt.class', 'META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
+    }
 
     def 'use custom sandbox for distribution'() {
         given:
