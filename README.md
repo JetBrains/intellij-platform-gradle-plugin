@@ -1,4 +1,4 @@
-[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.2.16-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
+[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.2.17-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
 
 > **This project requires JVM version of at least 1.7**
 
@@ -25,7 +25,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.2.16"
+  id "org.jetbrains.intellij" version "0.2.17"
 }
 ```
 
@@ -39,7 +39,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.2.16"
+    classpath "gradle.plugin.org.jetbrains:gradle-intellij-plugin:0.2.17"
   }
 }
 
@@ -192,7 +192,7 @@ The `patchPluginXml` task supports following properties:
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.2.16"
+  id "org.jetbrains.intellij" version "0.2.17"
 }
 
 intellij {
