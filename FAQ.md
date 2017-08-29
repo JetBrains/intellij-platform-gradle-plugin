@@ -1,4 +1,4 @@
-#### How to modify jvmArguments of runIdea task
+#### How to modify jvmArguments of runIde task
 
 `runIde` task is a [Java Exec](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html) task and can be modified according to the documentation.
 
@@ -10,7 +10,7 @@ runIde {
 }
 ```
 
-####  How to modify system properties of runIdea task
+####  How to modify system properties of runIde task
 
 Using the [very same task documentation](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html), configure `runIde` task:
 
