@@ -80,7 +80,9 @@ Plugin introduces following tasks
 
 **Available in SNAPSHOT:**
 
-- `verifyPlugin` validates plugin.xml and plugin's structure## Configuration
+- `verifyPlugin` validates plugin.xml and plugin's structure
+
+## Configuration
 
 Plugin provides following options to configure target IntelliJ SDK and build archive
 

@@ -11,3 +11,4 @@ Plugin introduces following tasks
 **Available in SNAPSHOT:**
 
 - `verifyPlugin` validates plugin.xml and plugin's structure
+
