@@ -49,7 +49,7 @@ helpful while developing plugins for IntelliJ platform.
 """
 
 pluginBundle {
-    website = 'https://jetbrains.com/'
+    website = 'https://github.com/JetBrains/gradle-intellij-plugin'
     vcsUrl = 'https://github.com/JetBrains/gradle-intellij-plugin'
     description = 'Plugin for building plugins for IntelliJ IDEs'
     tags = ['intellij', 'jetbrains', 'idea']
