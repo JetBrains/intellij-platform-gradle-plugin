@@ -100,7 +100,8 @@ The option accepts path, e.g. `/Applications/IntelliJIDEA.app`<br/>
 **Default value**: `IC`
 
 - `intellij.plugins` defines the list of bundled IDEA plugins and plugins from [idea repository](https://plugins.jetbrains.com/) 
-that should be used as dependencies in format `org.plugin.id:version`. E.g. `plugins = ['org.intellij.plugins.markdown:8.5.0.20160208']`.
+that should be used as dependencies in format `org.plugin.id:version[@channel]`.
+E.g. `plugins = ['org.intellij.plugins.markdown:8.5.0.20160208', 'org.intellij.scala:2017.2.638@nightly']`.
 For bundled plugins a plugin's directory should be used as a name and a version should be omitted, e.g. `plugins = ['android', 'Groovy']`.
 You can can also specify a Gradle subproject as a plugin dependency, e.g. `plugins = [project(':plugin-subproject')]`.<br/><br/>
 **Default value:** `<empty>`
