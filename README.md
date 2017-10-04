@@ -205,12 +205,12 @@ intellij {
   plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
   pluginName 'MyPlugin'
 
-  publish {
-    username 'zolotov'
-    password 'password'
-    channel 'nightly'
-  } 
 }
+publishPlugin {
+  username 'zolotov'
+  password 'password'
+  channels 'nightly'
+} 
 ```
 
 # Getting started
