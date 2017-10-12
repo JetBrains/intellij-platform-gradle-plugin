@@ -6,9 +6,9 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 
 | **Attribute**             | **Information** | **Values** |
 | :-----------------------: | :-------------- | :--------- |
-| `version`                 | The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** `intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><ul><li><kbd>build #</kbd> - e.g. `example` </li><li><kbd>version #</kbd> - e.g. `example` </li><li><kbd>LATEST-EAP-SNAPSHOT</kbd></li><li><kbd>LATEST_TRUNK-SNAPSHOT</kbd></li></ul><br/><br/>**Default Value:** <kbd>LATEST-EAP-SNAPSHOT</kbd> |
+| `version`                 | The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** `intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><ul><li><kbd>build #</kbd> - e.g. `example` </li><li><kbd>version #</kbd> - e.g. `example` </li><li><kbd>LATEST-EAP-SNAPSHOT</kbd></li><li><kbd>LATEST_TRUNK-SNAPSHOT</kbd></li></ul>**Default Value:** <kbd>LATEST-EAP-SNAPSHOT</kbd> |
 | `localPath`               | The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** `intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><ul><li><kbd>path</kbd> - e.g. `/Applications/IntelliJIDEA.app`</li></ul><br/><br/>**Default Value:** <kbd>null</kbd> |
-| `type`                    | The type of IDEA distribution. <br/><br/>**Notes:** notes. | **Acceptable Values:** <br/><ul><li><kbd>IC</kbd> - Community Edition. </li><li><kbd>IU</kbd> - Ultimate Edition. </li><li><kbd>JPS</kbd> - JPS-only. </li><li><kbd>RD</kbd> - Rider.</li></ul><br/><br/>**Default Value:** <kbd>IC</kbd> |
+| `type`                    | The type of IDEA distribution. <br/><br/>**Notes:** notes. | **Acceptable Values:** <br/><ul><li><kbd>IC</kbd> - Community Edition. </li><li><kbd>IU</kbd> - Ultimate Edition. </li><li><kbd>JPS</kbd> - JPS-only. </li><li><kbd>RD</kbd> - Rider.</li></ul><br/>**Default Value:** <kbd>IC</kbd> |
 | `plugins`                 |  |
 | `pluginName`              | The name of the target zip-archive and defines the name of plugin artifact. | 
 | `sandboxDirectory`        |  |
