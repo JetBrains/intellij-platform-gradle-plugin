@@ -99,13 +99,13 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 
 ### intellij
 
-| `` | Description <br/><br/>NOTES: notes. <br/><br/>Acceptable Values : values. <br/><br/>Default Value: value. |
+| `` | Description <br/><br/>**NOTES:** notes. <br/><br/>**Acceptable Values:** values. <br/><br/>**Default Value:** value. |
 
 | **Task**                  | **Define** | 
 | ------------------------- | ---------- |
-| `version`                 | The version of the IDEA distribution that should be used as a dependency. <br/><br/>Notes: `intellij.version` and `intellij.localPath` should not be specified at the same time. <br/><br/>Acceptable Values: <kbd>build #</kbd> <kbd>version #</kbd> <kbd>`LATEST-EAP-SNAPSHOT`</kbd> <kbd>`LATEST_TRUNK-SNAPSHOT`</kbd> <br/><br/>Default Value: <kbd>`LATEST-EAP-SNAPSHOT`</kbd> |
-| `localPath`               | The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>NOTES: `intellij.version` and `intellij.localPath` should not be specified at the same time.. <br/><br/>Acceptable Values : <kbd>path</kbd> (e.g. `/Applications/IntelliJIDEA.app`) <br/><br/>Default Value: <kbd>`null`</kbd>. |
-| `type`                    | The type of IDEA distribution. <br/><br/>NOTES: notes. <br/><br/>Acceptable Values : <kbd>`IC`</kbd> for community version <kbd>`IU`</kbd> for ultimate <kbd>`JPS`</kbd> for jps-only <kbd>`RD`</kbd> for Rider. <br/><br/>Default Value: <kbd>`IC`</kbd>. |
+| `version`                 | The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** `intellij.version` and `intellij.localPath` should not be specified at the same time. <br/><br/>**Acceptable Values:** <kbd>build #</kbd> <kbd>version #</kbd> <kbd>LATEST-EAP-SNAPSHOT</kbd> <kbd>LATEST_TRUNK-SNAPSHOT</kbd> <br/><br/>**Default Value:** <kbd>LATEST-EAP-SNAPSHOT</kbd> |
+| `localPath`               | The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>**NOTES:** `intellij.version` and `intellij.localPath` should not be specified at the same time.. <br/><br/>**Acceptable Values:** <kbd>path</kbd> (e.g. `/Applications/IntelliJIDEA.app`) <br/><br/>**Default Value:** <kbd>null</kbd>. |
+| `type`                    | The type of IDEA distribution. <br/><br/>**NOTES:** notes. <br/><br/>**Acceptable Values:** <ol><li><kbd>IC</kbd> for community version</li><li><kbd>IU</kbd> for ultimate</li><li><kbd>JPS</kbd> for jps-only</li><li><kbd>RD</kbd> for Rider.</li></ol> <br/><br/>**Default Value:** <kbd>IC</kbd>. |
 | `` |  |
 | `pluginName`              | The name of the target zip-archive and defines the name of plugin artifact. | 
 | `sandboxDirectory`        |  |
