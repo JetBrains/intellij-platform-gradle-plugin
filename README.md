@@ -97,18 +97,25 @@ Plugin introduces the following tasks
 
 Plugin provides following options to configure target IntelliJ SDK and build archive
 
-- `intellij.version` defines the version of IDEA distribution that should be used as a dependency. 
-The option accepts build numbers, version numbers and two meta values `LATEST-EAP-SNAPSHOT`, `LATEST-TRUNK-SNAPSHOT`.<br/>
-Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. <br/><br/> 
-**Default value**: `LATEST-EAP-SNAPSHOT`
+### intellij
 
-- `intellij.localPath` defines path to locally installed IDEA distribution that should be used as a dependency. 
-The option accepts path, e.g. `/Applications/IntelliJIDEA.app`<br/>
-`intellij.version` and `intellij.localPath` should not be specified at the same time.<br/><br/> 
-**Default value**: `null`
+| `` | Description <br/><br/>NOTES: notes. <br/><br/>Acceptable Values : values. <br/><br/>Default Value: value. |
 
-- `intellij.type` defines the type of IDEA distribution: `IC` for community version, `IU` for ultimate, `JPS` for jps-only dependencies and `RD` for Rider.<br/><br/>
-**Default value**: `IC`
+| **Task**                  | **Define** | 
+| ------------------------- | ---------- |
+| `version`                 | The version of the IDEA distribution that should be used as a dependency. <br/><br/>Notes: `intellij.version` and `intellij.localPath` should not be specified at the same time. <br/><br/>Acceptable Values: <kbd>build #</kbd> <kbd>version #</kbd> <kbd>`LATEST-EAP-SNAPSHOT`</kbd> <kbd>`LATEST_TRUNK-SNAPSHOT`</kbd> <br/><br/>Default Value: <kbd>`LATEST-EAP-SNAPSHOT`</kbd> |
+| `localPath`               | The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>NOTES: `intellij.version` and `intellij.localPath` should not be specified at the same time.. <br/><br/>Acceptable Values : <kbd>path</kbd> (e.g. `/Applications/IntelliJIDEA.app`) <br/><br/>Default Value: <kbd>`null`</kbd>. |
+| `type`                    | The type of IDEA distribution. <br/><br/>NOTES: notes. <br/><br/>Acceptable Values : <kbd>`IC`</kbd> for community version <kbd>`IU`</kbd> for ultimate <kbd>`JPS`</kbd> for jps-only <kbd>`RD`</kbd> for Rider. <br/><br/>Default Value: <kbd>`IC`</kbd>. |
+| `` |  |
+| `pluginName`              | The name of the target zip-archive and defines the name of plugin artifact. | 
+| `sandboxDirectory`        |  |
+| `instrumentCode`          |  |
+| `updateSinceUntilBuild`   |  |
+| `sameSinceUntilBuild`     |  |
+| `downloadSources`         |  |
+| `systemProperties`        |  |
+| `alternativeIdePath`      |  | 
+| `ideaDependencyCachePath` |  | 
 
 - `intellij.plugins` defines the list of bundled IDEA plugins and plugins from [idea repository](https://plugins.jetbrains.com/) 
 that should be used as dependencies in format `org.plugin.id:version[@channel]`.
@@ -116,10 +123,6 @@ E.g. `plugins = ['org.intellij.plugins.markdown:8.5.0.20160208', 'org.intellij.s
 For bundled plugins a plugin's directory should be used as a name and a version should be omitted, e.g. `plugins = ['android', 'Groovy']`.
 You can can also specify a Gradle subproject as a plugin dependency, e.g. `plugins = [project(':plugin-subproject')]`.<br/><br/>
 **Default value:** `<empty>`
-
-- `intellij.pluginName` is used for naming target zip-archive and defines the name of plugin artifact. 
-of bundled IDEA plugins that should be used as dependencies.<br/><br/>
-**Default value:** `$project.name`
 
 - `intellij.sandboxDirectory` defines path of sandbox directory that is used for running IDEA with developing plugin.<br/><br/>
 **Default value**: `$project.buildDir/idea-sandbox`
