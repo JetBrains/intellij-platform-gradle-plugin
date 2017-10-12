@@ -1,14 +1,17 @@
 # Usage{\n}
 {\n}
-## Gradle >= 2.1{\n}
+## Gradle{\n}
 {\n}
 ```groovy{\n}
 plugins {{{\n}
-  id "org.jetbrains.intellij" version "{version}"{\n}
+  id "org.jetbrains.intellij" version "0.2.17"{\n}
 }{\n}
 ```{\n}
 {\n}
-## Gradle < 2.1{\n}
+### Other Setups{\n}
+{\n}
+<details>{\n}
+<summary><b>Pre Gradle 2.1</b> - Use the following code when Gradle is not at version 2.1 or higher <em>(Click to expand)</em>...</summary>{\n}
 {\n}
 ```groovy{\n}
 buildscript {{{\n}
@@ -18,32 +21,37 @@ buildscript {{{\n}
     }{\n}
   }{\n}
   dependencies {{{\n}
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:{version}"{\n}
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.17"{\n}
   }{\n}
 }{\n}
 {\n}
 apply plugin: 'org.jetbrains.intellij'{\n}
 ```{\n}
 {\n}
-## Snapshot{\n}
+</details>{\n}
 {\n}
-```groovy{\n}
+<details>{\n}
+<summary><b>SNAPSHOT</b> - Use the following code to get the lastest features <em>(Click to expand)</em>...</summary>{\n}
+{\n}
+ ```groovy{\n}
 buildscript {{{\n}
   repositories {{{\n}
     mavenCentral(){\n}
     maven {{{\n}
       url "https://oss.sonatype.org/content/repositories/snapshots/"{\n}
     }{\n}
-    maven {{ {\n}
+    maven {{{\n}
       url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' {\n}
     }{\n}
     {\n}
   }{\n}
   dependencies {{{\n}
-    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:{snapshotVersion}-SNAPSHOT"{\n}
+    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.0-SNAPSHOT"{\n}
   }{\n}
 }{\n}
 {\n}
 apply plugin: 'org.jetbrains.intellij'{\n}
 ```{\n}
+{\n}
+</details>{\n}
 {\n}

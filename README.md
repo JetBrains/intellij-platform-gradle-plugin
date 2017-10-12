@@ -21,7 +21,7 @@ helpful while developing plugins for IntelliJ platform.
 
 # Usage
 
-## Gradle >= 2.1
+## Gradle
 
 ```groovy
 plugins {
@@ -29,7 +29,10 @@ plugins {
 }
 ```
 
-## Gradle < 2.1
+### Other Setups
+
+<details>
+<summary><b>Pre Gradle 2.1</b> - Use the following code when Gradle is not at version 2.1 or higher <em>(Click to expand)</em>...</summary>
 
 ```groovy
 buildscript {
@@ -46,16 +49,19 @@ buildscript {
 apply plugin: 'org.jetbrains.intellij'
 ```
 
-## Snapshot
+</details>
 
-```groovy
+<details>
+<summary><b>SNAPSHOT</b> - Use the following code to get the lastest features <em>(Click to expand)</em>...</summary>
+
+ ```groovy
 buildscript {
   repositories {
     mavenCentral()
     maven {
       url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
-    maven { 
+    maven {
       url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' 
     }
     
@@ -67,6 +73,8 @@ buildscript {
 
 apply plugin: 'org.jetbrains.intellij'
 ```
+
+</details>
 
 ### Tasks
 
