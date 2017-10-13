@@ -2,9 +2,16 @@
 
 Plugin provides following options to configure target IntelliJ SDK and build archive
 
-### intellij
+### intellij DSL
 
-| **Attribute**             | **Values** |
+The following attributes are apart of the IntelliJ DSL in which allows you to set up the environment and dependencies.
+```groovy
+intellij {
+    // Attributes here
+}
+```
+
+| **Attributes**             | **Values** |
 | :-----------------------  | :--------- |
 | <kbd>pluginName</kbd> - The name of the target zip-archive and defines the name of plugin artifact. | **Acceptable Values:** <br/><kbd>String</kbd> - `gradle-intellij-plugin` <br/><br/>**Default Value:** <kbd>$project.name</kbd> |
 | <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. <br/><br/>`intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><ul><li><kbd>build #</kbd> - `2017.2.5` </li><li><kbd>version #</kbd> - `172.4343.14` </li><li><kbd>LATEST-EAP-SNAPSHOT</kbd></li><li><kbd>LATEST_TRUNK-SNAPSHOT</kbd></li></ul>**Default Value:** <kbd>LATEST-EAP-SNAPSHOT</kbd> |
