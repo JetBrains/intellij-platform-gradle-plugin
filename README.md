@@ -109,8 +109,8 @@ intellij {
 | **Attributes**             | **Values** |
 | :-----------------------  | :--------- |
 | <kbd>pluginName</kbd> - The name of the target zip-archive and defines the name of plugin artifact. | **Acceptable Values:** <br/><kbd>String</kbd> - `gradle-intellij-plugin` <br/><br/>**Default Value:** <kbd>$project.name</kbd> |
-| <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. <br/><br/>`intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><ul><li><kbd>build #</kbd> - `2017.2.5` </li><li><kbd>version #</kbd> - `172.4343.14` </li><li><kbd>LATEST-EAP-SNAPSHOT</kbd></li><li><kbd>LATEST_TRUNK-SNAPSHOT</kbd></li></ul>**Default Value:** <kbd>LATEST-EAP-SNAPSHOT</kbd> |
-| <kbd>type</kbd> - The type of IDEA distribution. | **Acceptable Values:** <br/><ul><li><kbd>IC</kbd> - Community Edition. </li><li><kbd>IU</kbd> - Ultimate Edition. </li><li><kbd>JPS</kbd> - JPS-only. </li><li><kbd>RD</kbd> - Rider.</li></ul>**Default Value:** <kbd>IC</kbd> |
+| <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. <br/><br/>`intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><li><kbd>build #</kbd> - `2017.2.5` </li><li><kbd>version #</kbd> - `172.4343.14` </li><li><kbd>LATEST-EAP-SNAPSHOT</kbd></li><li><kbd>LATEST_TRUNK-SNAPSHOT</kbd></li>**Default Value:** <kbd>LATEST-EAP-SNAPSHOT</kbd> |
+| <kbd>type</kbd> - The type of IDEA distribution. | **Acceptable Values:** <br/><li><kbd>IC</kbd> - Community Edition. </li><li><kbd>IU</kbd> - Ultimate Edition. </li><li><kbd>JPS</kbd> - JPS-only. </li><li><kbd>RD</kbd> - Rider.</li>**Default Value:** <kbd>IC</kbd> |
 | <kbd>updateSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with since and until build values? <br/><br/>**Notes:** If `true` then user-defined values from `patchPluginXml.sinceBuild` and `patchPluginXml.untilBuild` will be used (or their default values if none set). | **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> |
 | <kbd>sameSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with an until build value that is just an "open" since build?  <br/><br/>**Notes:** Is useful for building plugins against EAP IDEA builds. <br/><br/> If `true` then the user-defined value from `patchPluginXml.sinceBuild` (or its default value) will be used as a `since` and an "open" `until` value. <br/><br/> If `patchPluginXml.untilBuild` has a value set, then `sameSinceUntilBuild` is ignored.  |  **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>false</kbd> |
 | <kbd>instrumentCode</kbd> - Should plugin instrument java classes with nullability assertions? <br/><br/>**Notes:** Instrumentation code cannot be performed while using Rider distributions `RD`. <br/><br/> Might be required for compiling forms created by IntelliJ GUI designer. | **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> |
@@ -121,66 +121,62 @@ intellij {
 | <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:** Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio. <br/> Empty value means that the IDE that was used for compiling will be used for running/debugging as well. | **Acceptable Values:** <br/><kbd>path</kbd> - `/Applications/Android Studio.app`<br/><br/>**Default Value:** none |
 | <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>**Notes:** Empty value means the Gradle cache directory will be used. | **Acceptable Values:** <br/><kbd>path</kbd> - `example`<br/><br/> **Default Value:** none |
 
-
 ##### Deprecated
 | **Attribute**             | **Values** |
 | :------------------------ | :--------- |
 | <kbd>systemProperties</kbd> - The map of system properties which will be passed to IDEA instance on executing `runIdea` task and tests. <br/><br/>**Notes:** Use `systemProperties` methods of a particular tasks like `runIde` or `test`. | **Acceptable Values:** <br/><br/><br/>**Default Value:** <kbd>[]</kbd> |
 
-
-<!-- 
-
-| `type` | Description. <br/><br/>**Notes:** notes. | **Acceptable Values:** <br/><kbd>item1</kbd> <kbd>item2</kbd><br/><br/>**Default Value:** <kbd>value</kbd> |
-
-<ul><li><kbd>item1</kbd> item1Description.</li><li><kbd>item2</kbd> item2Description.</li></ul>
-
+<!--
+| <kbd>attribute</kbd> - Description. <br/><br/>**Notes:** notes. | **Acceptable Values:** <br/><kbd>item1</kbd> <kbd>item2</kbd><br/><br/> **Default Value:** <kbd>value</kbd> |
+<li><kbd>item1</kbd> item1Description.</li><li><kbd>item2</kbd> item2Description.</li>
 -->
 
+### Patching DSL
+The following attributes are apart of the Patching DSL in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
+```groovy
+patchPluginXml {
+    // Attributes here
+}
+```
+| **Attribute**             | **Default Value** |
+| :------------------------ |  :---------------- |
+| <kbd>version</kbd> is a value for the `<version>` tag.                                | <kbd>project.version</kbd> |
+| <kbd>sinceBuild</kbd> is for the `since-build` attribute of the `<idea-version>` tag. | <kbd>IntelliJIDEABuildNumber</kbd> |
+| <kbd>untilBuild</kbd> is for the `until-build` attribute of the `<idea-version>` tag. | <kbd>IntelliJIDEABranch.*</kbd> |
+| <kbd>pluginDescription</kbd> is for the `<description>` tag.                          | none |
+| <kbd>pluginXmlFiles</kbd> is a collection of xml files to patch.                      | All `plugin.xml` files with `<idea-plugin>` |
+| <kbd>destinationDir</kbd> is a directory to store patched xml files.                  | <kbd>$project.buildDir/patchedPluginXmlFiles</kbd> |
 
-### Patching plugin.xml
+### Publishing DSL
+The following attributes are apart of the Publishing DSL in which allows Gradle to upload a working plugin to the JetBrain Plugin Repository.
+```groovy
+publishPlugin {
+    // Attributes here
+}
+```
 
-The `patchPluginXml` task supports following properties:
+| **Attribute**               | **Default Value**  |
+| :-------------------------- | :----------------- |
+| <kbd>username</kbd> Login username | none |
+| <kbd>password</kbd> Login password | none |
+| <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
+| <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
+| <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
-- `version` is a value for `<version>` tag.<br/>
-**Default value**: `<project.version>`
-
-- `sinceBuild` is a value for `<idea-version since-build="">` attribute.<br/>
-**Default value**: `<IntelliJIDEABuildNumber>`
-
-- `untilBuild` is a value for `<idea-version until-build="">` attribute.<br/>
-**Default value**: `<IntelliJIDEABranch.*>`
-
-- `pluginDescription` is a value for `<description>` tag.<br/>
-**Default value**: null
-
-- `pluginXmlFiles` is a collections of xml files to patch.<br/>
-**Default value**: `<all plugin.xml files with idea-plugin root tag in resources>`
-
-- `destinationDir` is a directory to store patched xml files.<br/>
-**Default value**: `<project.buildDir>/patchedPluginXmlFiles`
-
-### Publishing plugin
-
-**`intellij.publish.\* properties are deprecated**
-- `intellij.publish.username` your login at JetBrains plugin repository.
-- `intellij.publish.password` your password at JetBrains plugin repository.
-- `intellij.publish.channel` defines channel to upload, you may use any string here, empty string means default channel.
-- `intellij.publish.channels` defines several channels to upload, you may use any comma-separated strings here, 
-`default` string means default channel.<br/><br/>
-**Default value**: `<empty>`
-
-`publishPlugin` task supports following properties:
-
-- `username` is a login at JetBrains plugin repository.
-- `password` is a password at JetBrains plugin repository.
-- `channels` are channels names to upload the plugin to.<br/>
-**Default value**: `[default]`
-
-- `host` host of plugin repository.<br/>
-**Default value**: `http://plugins.jetbrains.com`
-
-- `distributionFile` is a file to upload.<br/>
-**Default value**: `<output of buildPlugin task>`
+##### Deprecated
+```groovy
+intelliJ {
+    publish {
+        // Deprecated
+    }
+}
+```
+| **Attribute**               | **Default Value**  |
+| :-------------------------- | :----------------- |
+| <kbd>username</kbd> Login username | none |
+| <kbd>password</kbd> Login password | none |
+| <kbd>channel</kbd> A single channel name to upload plugin to.   | <kbd>default</kbd> |
+| <kbd>channels</kbd> List of comma-separated channel names to upload plugin to.  | <kbd>default</kbd> |
 
 
 ### build.gradle
