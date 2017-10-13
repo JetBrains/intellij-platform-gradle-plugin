@@ -119,7 +119,7 @@ intellij {
 | <kbd>localPath</kbd> - The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** `intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><kbd>path</kbd> - `/Applications/IntelliJIDEA.app`</br>**Default Value:** <kbd>null</kbd> |
 | <kbd>sandboxDirectory</kbd> - The path of sandbox directory that is used for running IDEA with developing plugin. | **Acceptable Values:** <br/><kbd>path</kbd> - `/build/sandbox` <br/><br/>**Default Value:** <kbd>$project.buildDir/idea-sandbox</kbd> |
 | <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:** Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio. <br/> Empty value means that the IDE that was used for compiling will be used for running/debugging as well. | **Acceptable Values:** <br/><kbd>path</kbd> - `/Applications/Android Studio.app`<br/><br/>**Default Value:** none |
-| <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>**Notes:** Empty value means the Gradle cache directory will be used. | **Acceptable Values:** <br/><kbd>path</kbd> - `example`</br>**Default Value:** none |
+| <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>**Notes:** Empty value means the Gradle cache directory will be used. | **Acceptable Values:** <br/><kbd>path</kbd> - `example`<br/><br/> **Default Value:** none |
 
 
 ##### Deprecated
