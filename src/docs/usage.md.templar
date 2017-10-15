@@ -54,5 +54,7 @@ buildscript {
 apply plugin: 'org.jetbrains.intellij' 
 ``` 
  
-</details> 
+</details>
+
+
 pre}

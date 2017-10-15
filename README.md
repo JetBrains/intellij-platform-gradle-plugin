@@ -20,60 +20,60 @@ helpful while developing plugins for IntelliJ platform.
 
 
 # Usage
-
-## Gradle
-
-```groovy
-plugins {
-  id "org.jetbrains.intellij" version "0.2.17"
-}
-```
-
-### Other Setups
-
-<details>
-<summary><b>Pre Gradle 2.1</b> - Use the following code when Gradle is not at version 2.1 or higher <em>(Click to expand)</em>...</summary>
-
-```groovy
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.17"
-  }
-}
-
-apply plugin: 'org.jetbrains.intellij'
-```
-
-</details>
-
-<details>
-<summary><b>SNAPSHOT</b> - Use the following code to get the lastest features <em>(Click to expand)</em>...</summary>
-
- ```groovy
-buildscript {
-  repositories {
-    mavenCentral()
-    maven {
-      url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-    maven {
-      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' 
-    }
-    
-  }
-  dependencies {
-    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.0-SNAPSHOT"
-  }
-}
-
-apply plugin: 'org.jetbrains.intellij'
-```
-
+ 
+## Gradle 
+ 
+```groovy 
+plugins { 
+  id "org.jetbrains.intellij" version "0.2.17" 
+} 
+``` 
+ 
+### Other Setups 
+ 
+<details> 
+<summary><b>Pre Gradle 2.1</b> - Use the following code when Gradle is not at version 2.1 or higher <em>(Click to expand)</em>...</summary> 
+ 
+```groovy 
+buildscript { 
+  repositories { 
+    maven { 
+      url "https://plugins.gradle.org/m2/" 
+    } 
+  } 
+  dependencies { 
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.17" 
+  } 
+} 
+ 
+apply plugin: 'org.jetbrains.intellij' 
+``` 
+ 
+</details> 
+ 
+<details> 
+<summary><b>SNAPSHOT</b> - Use the following code to get the lastest features <em>(Click to expand)</em>...</summary> 
+ 
+ ```groovy 
+buildscript { 
+  repositories { 
+    mavenCentral() 
+    maven { 
+      url "https://oss.sonatype.org/content/repositories/snapshots/" 
+    } 
+    maven { 
+      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'  
+    } 
+     
+  } 
+  dependencies { 
+    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.0-SNAPSHOT" 
+  } 
+} 
+ 
+apply plugin: 'org.jetbrains.intellij' 
+``` 
+ 
 </details>
 
 ### Tasks
@@ -82,17 +82,18 @@ Plugin introduces the following tasks
 
 | **Task** | **Description** |
 | -------- | --------------- |
-| `buildPlugin`    | Assembles plugin and prepares zip archive for deployment. |
-| `patchPluginXml` | Collects all plugin.xml files in sources and fill since/until build and version attributes. |
-| `prepareSandbox` | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
-| `runIde`         | Executes an IntelliJ IDEA instance with the plugin you are developing. |
-| `publishPlugin`  | Uploads plugin distribution archive to http://plugins.jetbrains.com. |
+| `buildPlugin`           | Assembles plugin and prepares zip archive for deployment. |
+| `patchPluginXml`        | Collects all plugin.xml files in sources and fill since/until build and version attributes. |
+| `prepareSandbox`        | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
+| `prepareTestingSandbox` | Prepares sandbox that will be used while running tests |
+| `runIde`                | Executes an IntelliJ IDEA instance with the plugin you are developing. |
+| `publishPlugin`         | Uploads plugin distribution archive to http://plugins.jetbrains.com. |
 
 **Available in SNAPSHOT:**
 
 | **Task** | **Description** |
 | -------- | --------------- |
-| `verifyPlugin` | Validates plugin.xml and plugin's structure. |
+| `verifyPlugin`  | Validates plugin.xml and plugin's structure. |
 ## Configuration
 
 Plugin provides following options to configure target IntelliJ SDK and build archive
@@ -106,30 +107,26 @@ intellij {
 }
 ```
 
-| **Attributes**             | **Values** |
-| :-----------------------  | :--------- |
-| <kbd>pluginName</kbd> - The name of the target zip-archive and defines the name of plugin artifact. | **Acceptable Values:** <br/><kbd>String</kbd> - `gradle-intellij-plugin` <br/><br/>**Default Value:** <kbd>$project.name</kbd> |
-| <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type. <br/><br/>`intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><li><kbd>build #</kbd> - `2017.2.5` </li><li><kbd>version #</kbd> - `172.4343.14` </li><li><kbd>LATEST-EAP-SNAPSHOT</kbd></li><li><kbd>LATEST_TRUNK-SNAPSHOT</kbd></li>**Default Value:** <kbd>LATEST-EAP-SNAPSHOT</kbd> |
-| <kbd>type</kbd> - The type of IDEA distribution. | **Acceptable Values:** <br/><li><kbd>IC</kbd> - Community Edition. </li><li><kbd>IU</kbd> - Ultimate Edition. </li><li><kbd>JPS</kbd> - JPS-only. </li><li><kbd>RD</kbd> - Rider.</li>**Default Value:** <kbd>IC</kbd> |
-| <kbd>updateSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with since and until build values? <br/><br/>**Notes:** If `true` then user-defined values from `patchPluginXml.sinceBuild` and `patchPluginXml.untilBuild` will be used (or their default values if none set). | **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> |
-| <kbd>sameSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with an until build value that is just an "open" since build?  <br/><br/>**Notes:** Is useful for building plugins against EAP IDEA builds. <br/><br/> If `true` then the user-defined value from `patchPluginXml.sinceBuild` (or its default value) will be used as a `since` and an "open" `until` value. <br/><br/> If `patchPluginXml.untilBuild` has a value set, then `sameSinceUntilBuild` is ignored.  |  **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>false</kbd> |
-| <kbd>instrumentCode</kbd> - Should plugin instrument java classes with nullability assertions? <br/><br/>**Notes:** Instrumentation code cannot be performed while using Rider distributions `RD`. <br/><br/> Might be required for compiling forms created by IntelliJ GUI designer. | **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> |
-| <kbd>downloadSources</kbd> - Should plugin download IntelliJ sources while initializing Gradle build? <br/><br/>**Notes:** Since sources are not needed while testing on CI, you can set it to `false` for a particular environment. | **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> if `CI` environment variable is not set |
-| <kbd>plugins</kbd> -The list of bundled IDEA plugins and plugins from the [IDEA repository](https://plugins.jetbrains.com/). <br/><br/>**Notes:** <li>For plugins from the IDEA repository use `format 1`.</li><li>For bundled plugins from the project use `format 2`.</li><li>For sub-projects use `format 3`</li><br/>Mix and match all types of acceptable values.  |**Acceptable Values:** <br/><ol><li><kbd>org.plugin.id:version[@channel]</kbd><br/>`['org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly']`</li><li><kbd>bundledPluginName</kbd><br/>`['android', 'Groovy']`</li><li><kbd>project(':projectName')</kbd><br/>`[project(':plugin-subproject')]`</li></ol><br/><b>Default Value:</b> none |
-| <kbd>localPath</kbd> - The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>**Notes:** `intellij.version` and `intellij.localPath` should not be specified at the same time. | **Acceptable Values:** <br/><kbd>path</kbd> - `/Applications/IntelliJIDEA.app`</br>**Default Value:** <kbd>null</kbd> |
-| <kbd>sandboxDirectory</kbd> - The path of sandbox directory that is used for running IDEA with developing plugin. | **Acceptable Values:** <br/><kbd>path</kbd> - `/build/sandbox` <br/><br/>**Default Value:** <kbd>$project.buildDir/idea-sandbox</kbd> |
-| <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:** Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio. <br/> Empty value means that the IDE that was used for compiling will be used for running/debugging as well. | **Acceptable Values:** <br/><kbd>path</kbd> - `/Applications/Android Studio.app`<br/><br/>**Default Value:** none |
-| <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>**Notes:** Empty value means the Gradle cache directory will be used. | **Acceptable Values:** <br/><kbd>path</kbd> - `example`<br/><br/> **Default Value:** none |
+| **Attribute**             | **Values** |
+| :------------------------ | :--------- |
+| <kbd>pluginName</kbd> - The name of the target zip-archive and defines the name of plugin artifact.|**Acceptable Values:** <br/><kbd>String</kbd> - `'gradle-intellij-plugin'` <br/><br/>**Default Value:** <kbd>$project.name</kbd>|
+| <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:**    <ul>        <li>Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type.</li>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:**    <ul>        <li><kbd>build #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>        <li><kbd>version #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>        <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>        <li><kbd>'LATEST_TRUNK-SNAPSHOT'</kbd></li>    </ul>**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>|
+| <kbd>type</kbd> - The type of IDEA distribution.|**Acceptable Values:**    <ul>        <li><kbd>'IC'</kbd> - Community Edition. </li>        <li><kbd>'IU'</kbd> - Ultimate Edition. </li>        <li><kbd>'JPS'</kbd> - JPS-only. </li>        <li><kbd>'RD'</kbd> - Rider.</li>    </ul>**Default Value:** <kbd>'IC'</kbd>|
+| <kbd>updateSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with since and until build values? <br/><br/>**Notes:**    <ul>        <li>If `true` then user-defined values from `patchPluginXml.sinceBuild` and `patchPluginXml.untilBuild` will be used (or their default values if none set). </li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd>|
+| <kbd>sameSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with an until build value that is just an "open" since build?  <br/><br/>**Notes:**    <ul>        <li>Is useful for building plugins against EAP IDEA builds.</li>        <li>If `true` then the user-defined value from `patchPluginXml.sinceBuild` (or its default value) will be used as a `since` and an "open" `until` value. </li>        <li>If `patchPluginXml.untilBuild` has a value set, then `sameSinceUntilBuild` is ignored.</li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>false</kbd>|
+| <kbd>instrumentCode</kbd> - Should plugin instrument java classes with nullability assertions? <br/><br/>**Notes:**    <ul>        <li>Instrumentation code cannot be performed while using Rider distributions `RD`.</li>        <li>Might be required for compiling forms created by IntelliJ GUI designer.</li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd>|
+| <kbd>plugins</kbd> -The list of bundled IDEA plugins and plugins from the [IDEA repository](https://plugins.jetbrains.com/). <br/><br/>**Notes:**    <ul>        <li>Mix and match all types of acceptable values.</li><br/>        <li>For plugins from the IDEA repository use `format 1`.</li>        <li>For bundled plugins from the project use `format 2`.</li>        <li>For sub-projects use `format 3`.</li>    </ul>|**Acceptable Values:**    <ol>        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`['org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly']`</li>        <li><kbd>bundledPluginName</kbd><br/>`['android', 'Groovy']`</li>        <li><kbd>project(':projectName')</kbd><br/>`[project(':plugin-subproject')]`</li>    </ol>**Default Value\:** none|
+| <kbd>downloadSources</kbd> - Should plugin download IntelliJ sources while initializing Gradle build? <br/><br/>**Notes:**    <ul>        <li>Since sources are not needed while testing on CI, you can set it to `false` for a particular environment.</li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> if `CI` environment variable is not set|
+| <kbd>localPath</kbd> - The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>**Notes:**    <ul>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `/Applications/IntelliJIDEA.app`</br></br>**Default Value:** <kbd>null</kbd>|
+| <kbd>sandboxDirectory</kbd> - The path of sandbox directory that is used for running IDEA with developing plugin.|**Acceptable Values:** <br/><kbd>path</kbd> - `/build/sandbox` <br/><br/>**Default Value:** <kbd>$project.buildDir/idea-sandbox</kbd>|
+| <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:**    <ul>        <li>Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio.</li>        <li>Empty value means that the IDE that was used for compiling will be used for running/debugging as well.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `/Applications/Android Studio.app`<br/><br/>**Default Value:** none|
+| <kbd>ideaDependencyCachePath</kbd> -The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>**Notes:**    <ul>        <li>Empty value means the Gradle cache directory will be used.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `example`<br/><br/>**Default Value:** none|
 
 ##### Deprecated
 | **Attribute**             | **Values** |
 | :------------------------ | :--------- |
-| <kbd>systemProperties</kbd> - The map of system properties which will be passed to IDEA instance on executing `runIdea` task and tests. <br/><br/>**Notes:** Use `systemProperties` methods of a particular tasks like `runIde` or `test`. | **Acceptable Values:** <br/><br/><br/>**Default Value:** <kbd>[]</kbd> |
+|<kbd>systemProperties</kbd> - The map of system properties which will be passed to IDEA instance on executing `runIdea` task and tests. <br/><br/>**Notes:**    <ul>        <li>Use `systemProperties` methods of a particular tasks like `runIde` or `test`.</li>    </ul>|**Acceptable Values:** <br/><br/><br/>**Default Value:** <kbd>[]</kbd>|
 
-<!--
-| <kbd>attribute</kbd> - Description. <br/><br/>**Notes:** notes. | **Acceptable Values:** <br/><kbd>item1</kbd> <kbd>item2</kbd><br/><br/> **Default Value:** <kbd>value</kbd> |
-<li><kbd>item1</kbd> item1Description.</li><li><kbd>item2</kbd> item2Description.</li>
--->
 
 ### Patching DSL
 The following attributes are apart of the Patching DSL in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
@@ -177,28 +174,25 @@ intelliJ {
 | <kbd>password</kbd> Login password | none |
 | <kbd>channel</kbd> A single channel name to upload plugin to.   | <kbd>default</kbd> |
 | <kbd>channels</kbd> List of comma-separated channel names to upload plugin to.  | <kbd>default</kbd> |
-
-
-### build.gradle
-
-```groovy
-plugins {
-  id "org.jetbrains.intellij" version "0.2.17"
-}
-
-intellij {
-  version 'IC-2016.1'
-  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
-  pluginName 'MyPlugin'
-
-}
-publishPlugin {
-  username 'zolotov'
-  password 'password'
-  channels 'nightly'
+### build.gradle 
+ 
+```groovy 
+plugins { 
+  id "org.jetbrains.intellij" version "{version}" 
 } 
+ 
+intellij { 
+  version 'IC-2016.1' 
+  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208'] 
+  pluginName 'MyPlugin' 
+ 
+} 
+publishPlugin { 
+  username 'zolotov' 
+  password 'password' 
+  channels 'nightly' 
+}  
 ```
-
 # Getting started
 
 Here is [the manual](http://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
