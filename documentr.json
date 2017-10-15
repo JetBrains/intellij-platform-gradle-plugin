@@ -36,8 +36,8 @@
       "value": "src/docs/tasks.md"
     },
     {
-      "type": "file",
-      "value": "src/docs/configuration.md"
+      "type": "template",
+      "value": "src/docs/configuration.md.templar"
     },
     {
       "type": "template",
