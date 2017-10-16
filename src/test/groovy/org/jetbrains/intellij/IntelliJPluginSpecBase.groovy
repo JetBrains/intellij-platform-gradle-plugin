@@ -55,6 +55,20 @@ abstract class IntelliJPluginSpecBase extends Specification {
 
     }
 
+    protected File writeTestFile() {
+        file('src/test/java/AppTest.java') << """
+import java.lang.String;
+import org.junit.Test;
+import org.jetbrains.annotations.NotNull;
+public class AppTest {
+    @Test
+    public void testSomething() {}
+    
+    private void print(@NotNull String s) { System.out.println(s); }
+}
+"""
+    }
+
     protected disableDebug() {
         debugEnabled = false
     }
