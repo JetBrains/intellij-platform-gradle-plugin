@@ -254,20 +254,6 @@ intellij {
         assert adjustWindowsPath(testCommand.properties.'idea.plugins.path') == "$sandboxPath/plugins-test"
     }
 
-    private File writeTestFile() {
-        file('src/test/java/AppTest.java') << """
-import java.lang.String;
-import org.junit.Test;
-import org.jetbrains.annotations.NotNull;
-public class AppTest {
-    @Test
-    public void testSomething() {}
-    
-    private void print(@NotNull String s) { System.out.println(s); }
-}
-"""
-    }
-
     private static ProcessProperties parseCommand(@NotNull String output) {
         ProcessProperties testCommand = null
         for (String line : output.readLines()) {

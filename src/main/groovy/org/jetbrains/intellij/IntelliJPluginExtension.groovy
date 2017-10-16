@@ -21,6 +21,9 @@ class IntelliJPluginExtension {
     boolean updateSinceUntilBuild = true
     boolean sameSinceUntilBuild = false
     boolean downloadSources = true
+    // turning it off disables configuring dependencies to intellij sdk jars automatically,
+    // instead the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration
+    boolean configureDefaultDependencies = true
     @Deprecated
     Publish publish = new Publish()
 
