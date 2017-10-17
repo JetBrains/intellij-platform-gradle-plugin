@@ -3,7 +3,7 @@
  
 ```groovy 
 plugins { 
-  id "org.jetbrains.intellij" version "{version}" 
+  id "org.jetbrains.intellij" version "0.2.17"
 } 
  
 intellij { 

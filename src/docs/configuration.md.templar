@@ -1,28 +1,29 @@
 {pre
+
 ## Configuration
 
 Plugin provides following options to configure target IntelliJ SDK and build archive
 
-### intellij DSL
+### Setup DSL
 
-The following attributes are apart of the IntelliJ DSL in which allows you to set up the environment and dependencies.
-```groovy
-intellij {
-    // Attributes here
-}
-```
+The following attributes are apart of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies.
 
 pre}
 {\n}
 
 
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{--                                               INTELLIJ DSL TABLE                                                --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
 
-{-- * * * COMPLEX TABLE * * * --}
+| **Attributes** | **Values** | {\n}
+| :------------- | :--------- | {\n}
 
-
-
-| **Attribute**             | **Values** |{\n}
-| :------------------------ | :--------- |{\n}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{--                                                   TABLE CONTENT                                                 --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>pluginName</kbd> - The name of the target zip-archive and defines the name of plugin artifact.
 |
@@ -31,6 +32,7 @@ pre}
 **Default Value:** <kbd>$project.name</kbd>
 |{\n}
 
+{-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>
@@ -46,12 +48,13 @@ pre}
         <li><kbd>build #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>
         <li><kbd>version #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>
         <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>
-        <li><kbd>'LATEST_TRUNK-SNAPSHOT'</kbd></li>
+        <li><kbd>'LATEST-TRUNK-SNAPSHOT'</kbd></li>
     </ul>
 
 **Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>
 |{\n}
 
+{-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>type</kbd> - The type of IDEA distribution.
@@ -68,6 +71,32 @@ pre}
 |{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+
+| <kbd>plugins</kbd> -The list of bundled IDEA plugins and plugins from the [IDEA repository](https://plugins.jetbrains.com/). <br/><br/>
+
+**Notes:**
+    <ul>
+        <li>Mix and match all types of acceptable values.</li>
+        <li>Can be in the form of a `Groovy List` or `comma-separated list`.<br/>`['plugin1', 'plugin2']` or `'plugin1', 'plugin2'`</li><br/>
+        <li>For plugins from the IDEA repository use `format 1`.</li>
+        <li>For bundled plugins from the project use `format 2`.</li>
+        <li>For sub-projects use `format 3`.</li>
+    </ul>
+|
+**Acceptable Values:**
+    <ol>
+        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`'org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly'`</li>
+        <li><kbd>bundledPluginName</kbd><br/>`'android', 'Groovy'`</li>
+        <li><kbd>project(':projectName')</kbd><br/>`project(':plugin-subproject')`</li>
+    </ol>
+
+**Default Value\:** none
+|{\n}
+
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+
 
 | <kbd>updateSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with since and until build values? <br/><br/>
 
@@ -81,6 +110,7 @@ pre}
 **Default Value:** <kbd>true</kbd>
 |{\n}
 
+{-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>sameSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with an until build value that is just an "open" since build?  <br/><br/>
@@ -98,6 +128,7 @@ pre}
 |{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>instrumentCode</kbd> - Should plugin instrument java classes with nullability assertions? <br/><br/>
 
@@ -113,27 +144,6 @@ pre}
 |{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
-
-| <kbd>plugins</kbd> -The list of bundled IDEA plugins and plugins from the [IDEA repository](https://plugins.jetbrains.com/). <br/><br/>
-
-**Notes:**
-    <ul>
-        <li>Mix and match all types of acceptable values.</li><br/>
-        <li>For plugins from the IDEA repository use `format 1`.</li>
-        <li>For bundled plugins from the project use `format 2`.</li>
-        <li>For sub-projects use `format 3`.</li>
-    </ul>
-|
-**Acceptable Values:**
-    <ol>
-        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`['org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly']`</li>
-        <li><kbd>bundledPluginName</kbd><br/>`['android', 'Groovy']`</li>
-        <li><kbd>project(':projectName')</kbd><br/>`[project(':plugin-subproject')]`</li>
-    </ol>
-
-**Default Value\:** none
-|{\n}
-
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
 
@@ -150,6 +160,7 @@ pre}
 |{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>localPath</kbd> - The path to locally installed IDEA distribution that should be used as a dependency. <br/><br/>
 
@@ -160,21 +171,23 @@ pre}
 
 |
 **Acceptable Values:** <br/>
-<kbd>path</kbd> - `/Applications/IntelliJIDEA.app`</br></br>
+<kbd>path</kbd> - `'/Applications/IntelliJIDEA.app'`</br></br>
 
 **Default Value:** <kbd>null</kbd>
 |{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>sandboxDirectory</kbd> - The path of sandbox directory that is used for running IDEA with developing plugin.
 |
 **Acceptable Values:** <br/>
-<kbd>path</kbd> - `/build/sandbox` <br/><br/>
+<kbd>path</kbd> - `'${{project.rootDir}/.sandbox'` <br/><br/>
 
-**Default Value:** <kbd>$project.buildDir/idea-sandbox</kbd>
+**Default Value:** <kbd>'${{project.buildDir}/idea-sandbox'</kbd>
 |{\n}
 
+{-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>
@@ -186,11 +199,12 @@ pre}
     </ul>
 |
 **Acceptable Values:** <br/>
-<kbd>path</kbd> - `/Applications/Android Studio.app`<br/><br/>
+<kbd>path</kbd> - `'/Applications/Android Studio.app'`<br/><br/>
 
 **Default Value:** none
 |{\n}
 
+{-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
 | <kbd>ideaDependencyCachePath</kbd> -
@@ -201,15 +215,15 @@ The absolute path to the local directory that should be used for storing IDEA di
     </ul>
 |
 **Acceptable Values:** <br/>
-<kbd>path</kbd> - `example`<br/><br/>
+<kbd>path</kbd> - `'<example>'`<br/><br/>
 **Default Value:** none
 |{\n}{\n}
 
-
-
-{-- * * * COMPLEX TABLE END * * * --}
-
-
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{--                                                    TABLE END                                                    --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
 
 ##### Deprecated{\n}
 | **Attribute**             | **Values** |{\n}
@@ -221,37 +235,29 @@ The absolute path to the local directory that should be used for storing IDEA di
         <li>Use `systemProperties` methods of a particular tasks like `runIde` or `test`.</li>
     </ul>
 |
-**Acceptable Values:** <br/><br/><br/>
+**Acceptable Values:** <br/><br/>
 **Default Value:** <kbd>[]</kbd>
 |{\n}{\n}
 
 {pre
 
 ### Patching DSL
-The following attributes are apart of the Patching DSL in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
-```groovy
-patchPluginXml {
-    // Attributes here
-}
-```
-| **Attribute**             | **Default Value** |
+The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
+
+| **Attributes**            | **Default Value** |
 | :------------------------ |  :---------------- |
 | <kbd>version</kbd> is a value for the `<version>` tag.                                | <kbd>project.version</kbd> |
 | <kbd>sinceBuild</kbd> is for the `since-build` attribute of the `<idea-version>` tag. | <kbd>IntelliJIDEABuildNumber</kbd> |
 | <kbd>untilBuild</kbd> is for the `until-build` attribute of the `<idea-version>` tag. | <kbd>IntelliJIDEABranch.*</kbd> |
 | <kbd>pluginDescription</kbd> is for the `<description>` tag.                          | none |
+| <kbd>changeNotes</kbd> is for the `<change-notes>` tag.                               | none |
 | <kbd>pluginXmlFiles</kbd> is a collection of xml files to patch.                      | All `plugin.xml` files with `<idea-plugin>` |
-| <kbd>destinationDir</kbd> is a directory to store patched xml files.                  | <kbd>$project.buildDir/patchedPluginXmlFiles</kbd> |
+| <kbd>destinationDir</kbd> is a directory to store patched xml files.                  | <kbd>'${project.buildDir}/patchedPluginXmlFiles'</kbd> |
 
 ### Publishing DSL
-The following attributes are apart of the Publishing DSL in which allows Gradle to upload a working plugin to the JetBrain Plugin Repository.
-```groovy
-publishPlugin {
-    // Attributes here
-}
-```
+The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrain Plugin Repository.
 
-| **Attribute**               | **Default Value**  |
+| **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
 | <kbd>username</kbd> Login username | none |
 | <kbd>password</kbd> Login password | none |
@@ -259,19 +265,19 @@ publishPlugin {
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
+
 ##### Deprecated
-```groovy
-intelliJ {
-    publish {
-        // Deprecated
-    }
-}
-```
-| **Attribute**               | **Default Value**  |
+
+<details>
+<summary> Publishing DSL <kbd>intellij.publish { ... }</kbd> or <kbd>intellij { publish { ... } }</kbd> </summary>
+
+| **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
 | <kbd>username</kbd> Login username | none |
 | <kbd>password</kbd> Login password | none |
 | <kbd>channel</kbd> A single channel name to upload plugin to.   | <kbd>default</kbd> |
 | <kbd>channels</kbd> List of comma-separated channel names to upload plugin to.  | <kbd>default</kbd> |
 
-pre}
+</details>
+
+pre}{\n}
