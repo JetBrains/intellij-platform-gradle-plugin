@@ -226,6 +226,10 @@ The absolute path to the local directory that should be used for storing IDEA di
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
 ##### Deprecated{\n}
+
+<details>{\n}
+<summary> Deprecated Setup DSL Attributes</kbd> </summary>{\n}{\n}
+
 | **Attribute**             | **Values** |{\n}
 | :------------------------ | :--------- |{\n}
 |
@@ -238,6 +242,8 @@ The absolute path to the local directory that should be used for storing IDEA di
 **Acceptable Values:** <br/><br/>
 **Default Value:** <kbd>[]</kbd>
 |{\n}{\n}
+
+</details>{\n}
 
 {pre
 
@@ -265,11 +271,10 @@ The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ..
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
-
 ##### Deprecated
 
 <details>
-<summary> Publishing DSL <kbd>intellij.publish { ... }</kbd> or <kbd>intellij { publish { ... } }</kbd> </summary>
+<summary> Deprecated Publishing DSL <kbd>intellij.publish { ... }</kbd> or <kbd>intellij { publish { ... } }</kbd> </summary>
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |

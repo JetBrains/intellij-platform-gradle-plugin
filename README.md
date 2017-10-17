@@ -119,10 +119,14 @@ The following attributes are apart of the Setup DSL <kbd>intellij { ... }</kbd> 
 | <kbd>ideaDependencyCachePath</kbd> -The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>**Notes:**    <ul>        <li>Empty value means the Gradle cache directory will be used.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'<example>'`<br/><br/>**Default Value:** none|
 
 ##### Deprecated
+<details>
+<summary> Deprecated Setup DSL Attributes</kbd> </summary>
+
 | **Attribute**             | **Values** |
 | :------------------------ | :--------- |
 |<kbd>systemProperties</kbd> - The map of system properties which will be passed to IDEA instance on executing `runIdea` task and tests. <br/><br/>**Notes:**    <ul>        <li>Use `systemProperties` methods of a particular tasks like `runIde` or `test`.</li>    </ul>|**Acceptable Values:** <br/><br/>**Default Value:** <kbd>[]</kbd>|
 
+</details>
 
 ### Patching DSL
 The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
@@ -148,11 +152,10 @@ The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ..
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
-
 ##### Deprecated
 
 <details>
-<summary> Publishing DSL <kbd>intellij.publish { ... }</kbd> or <kbd>intellij { publish { ... } }</kbd> </summary>
+<summary> Deprecated Publishing DSL <kbd>intellij.publish { ... }</kbd> or <kbd>intellij { publish { ... } }</kbd> </summary>
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
