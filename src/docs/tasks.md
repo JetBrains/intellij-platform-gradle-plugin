@@ -1,14 +1,18 @@
 ### Tasks
 
-Plugin introduces following tasks
+Plugin introduces the following tasks
 
-- `patchPluginXml` collects all plugin.xml files in sources and fill since/until build and version attributes
-- `prepareSandbox` creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it
-- `buildPlugin` assembles plugin and prepares zip archive for deployment
-- `runIde` executes IntelliJ IDEA instance with the plugin you are developing installed in
-- `publishPlugin` uploads plugin distribution archive to http://plugins.jetbrains.com
+| **Task** | **Description** |
+| -------- | --------------- |
+| `buildPlugin`           | Assembles plugin and prepares zip archive for deployment. |
+| `patchPluginXml`        | Collects all plugin.xml files in sources and fill since/until build and version attributes. |
+| `prepareSandbox`        | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
+| `prepareTestingSandbox` | Prepares sandbox that will be used while running tests |
+| `runIde`                | Executes an IntelliJ IDEA instance with the plugin you are developing. |
+| `publishPlugin`         | Uploads plugin distribution archive to http://plugins.jetbrains.com. |
 
 **Available in SNAPSHOT:**
 
-- `verifyPlugin` validates plugin.xml and plugin's structure
-
+| **Task** | **Description** |
+| -------- | --------------- |
+| `verifyPlugin`  | Validates plugin.xml and plugin's structure. |
