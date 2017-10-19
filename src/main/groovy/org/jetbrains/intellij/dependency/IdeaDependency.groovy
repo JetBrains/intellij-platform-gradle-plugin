@@ -21,9 +21,10 @@ class IdeaDependency implements Serializable {
     @NotNull
     private final Collection<File> jarFiles
     private final boolean withKotlin
+    private final Collection<IdeaExtraDependency> extraDependencies
 
     IdeaDependency(@NotNull String name, @NotNull String version, @NotNull String buildNumber, @NotNull File classes,
-                   @Nullable File sources, boolean withKotlin) {
+                   @Nullable File sources, boolean withKotlin, Collection<IdeaExtraDependency> extraDependencies) {
         this.name = name
         this.version = version
         this.buildNumber = buildNumber
@@ -31,6 +32,7 @@ class IdeaDependency implements Serializable {
         this.sources = sources
         this.withKotlin = withKotlin
         this.jarFiles = collectJarFiles()
+        this.extraDependencies = extraDependencies
     }
 
     protected Collection<File> collectJarFiles() {
@@ -82,6 +84,11 @@ class IdeaDependency implements Serializable {
         return withKotlin
     }
 
+    @NotNull
+    Collection<IdeaExtraDependency> getExtraDependencies() {
+        return extraDependencies
+    }
+
     String getFqn() {
         def fqn = "$name-$version"
         if (withKotlin) {
@@ -97,6 +104,7 @@ class IdeaDependency implements Serializable {
         if (this.is(o)) return true
         if (!(o instanceof IdeaDependency)) return false
         IdeaDependency that = (IdeaDependency) o
+        if (extraDependencies != that.extraDependencies) return false
         if (withKotlin != that.withKotlin) return false
         if (buildNumber != that.buildNumber) return false
         if (classes != that.classes) return false
@@ -116,6 +124,7 @@ class IdeaDependency implements Serializable {
         result = 31 * result + (sources != null ? sources.hashCode() : 0)
         result = 31 * result + jarFiles.hashCode()
         result = 31 * result + (withKotlin ? 1 : 0)
+        result = 31 * result + extraDependencies.hashCode()
         return result
     }
 }

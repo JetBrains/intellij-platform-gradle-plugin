@@ -2,6 +2,11 @@ package org.jetbrains.intellij
 
 class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
 
+    @Override
+    String getIntellijVersion() {
+        return '2017.2.5'
+    }
+
     def 'configure sdk manually test'() {
         given:
         writeTestFile()
@@ -107,6 +112,57 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         assert !testRuntimeClasspath.contains('copyright.jar')
     }
 
+    def 'configure extra dependencies manually test'() {
+        given:
+        writeTestFile()
+        buildFile << """\
+            intellij {
+                configureDefaultDependencies = false
+                extraDependencies = ['intellij-core', 'jps-build-test']
+            }
+            afterEvaluate {
+                dependencies {
+                    compileOnly intellijExtra('jps-build-test') { include('jps-build-test*.jar') }
+                    runtime     intellijExtra('intellij-core')  { exclude('intellij-core.jar') }
+                    testCompile intellijExtra('intellij-core')  { include("annotations.jar") }
+                    testRuntime intellijExtra('jps-build-test')
+                    testRuntime intellijExtra('intellij-core')
+                } 
+            }
+            task printMainCompileClassPath { doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath } }
+            task printMainRuntimeClassPath { doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath } }
+            task printTestCompileClassPath { doLast { println 'testCompile: ' + sourceSets.test.compileClasspath.asPath } }
+            task printTestRuntimeClassPath { doLast { println 'testRuntime: ' + sourceSets.test.runtimeClasspath.asPath } }
+            """.stripIndent()
+
+        when:
+        def result = build('printMainCompileClassPath', 'printTestCompileClassPath', 'printTestRuntimeClassPath', 'printMainRuntimeClassPath')
+        def mainClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def mainRuntimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+        def testClasspath = result.output.readLines().find { it.startsWith('testCompile:') }
+        def testRuntimeClasspath = result.output.readLines().find { it.startsWith('testRuntime:') }
+
+        then:
+        assert  mainClasspath.contains('jps-build-test')            // included explicitly in compileOnly (note - versioned jar, checking by name only)
+        assert !mainRuntimeClasspath.contains('jps-build-test')
+        assert !testClasspath.contains('jps-build-test')
+        assert  testRuntimeClasspath.contains('jps-build-test')     // includes all
+
+        assert !mainClasspath.contains('intellij-core.jar')
+        assert !mainRuntimeClasspath.contains('intellij-core.jar')  // excluded explicitly
+        assert !testClasspath.contains('intellij-core.jar')         // not included
+        assert  testRuntimeClasspath.contains('intellij-core.jar')  // includes all
+
+        assert !mainClasspath.contains('annotations.jar')
+        assert  testClasspath.contains('annotations.jar')           // included explicitly
+        assert  testRuntimeClasspath.contains('annotations.jar')    // includes all
+
+        assert !mainClasspath.contains('intellij-core-analysis.jar')
+        assert  mainRuntimeClasspath.contains('intellij-core-analysis.jar') // includes intellij-core
+        assert !testClasspath.contains('intellij-core-analysis.jar')
+        assert  testRuntimeClasspath.contains('intellij-core-analysis.jar') // includes all
+    }
+
     def 'configure sdk manually fail without afterEvaluate'() {
         given:
         writeTestFile()
@@ -183,5 +239,47 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains('intellij plugins [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies to them in the afterEvaluate block')
+    }
+
+    def 'configure extra manually fail without afterEvaluate'() {
+        given:
+        writeTestFile()
+        buildFile << """\
+            intellij {
+                configureDefaultDependencies = false
+                extraDependencies = ['intellij-core']
+            }
+            dependencies {
+                compile intellijExtra('intellij-core')
+            }
+            """.stripIndent()
+
+        when:
+        def result = buildAndFail('tasks')
+
+        then:
+        result.output.contains('intellij extra artefact \'intellij-core\' is not (yet) configured or not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies to them in the afterEvaluate block')
+    }
+
+    def 'configure extra manually fail on unconfigured extra dependency'() {
+        given:
+        writeTestFile()
+        buildFile << """\
+            intellij {
+                configureDefaultDependencies = false
+                extraDependencies = ['jps-build-test']
+            }
+            afterEvaluate {
+                dependencies {
+                    compile intellijExtra('intellij-core')
+                }
+            }
+            """.stripIndent()
+
+        when:
+        def result = buildAndFail('tasks')
+
+        then:
+        result.output.contains('intellij extra artefact \'intellij-core\' is not (yet) configured or not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies to them in the afterEvaluate block')
     }
 }

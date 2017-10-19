@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
@@ -19,15 +20,17 @@ import static org.jetbrains.intellij.IntelliJPlugin.LOG
 
 class IdeaDependencyManager {
     private final String repoUrl
+    private static final String[] mainDependencies = ["ideaIC", "ideaIU", "riderRD", "riderRS"]
 
     IdeaDependencyManager(@NotNull String repoUrl) {
         this.repoUrl = repoUrl
     }
 
     @NotNull
-    IdeaDependency resolveRemote(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources) {
-        LOG.debug("Adding IntelliJ IDEA repository")
+    IdeaDependency resolveRemote(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources,
+                                 @NotNull Object[] extraDependencies) {
         def releaseType = version.contains('SNAPSHOT') ? 'snapshots' : 'releases'
+        LOG.debug("Adding IntelliJ IDEA repository: ${repoUrl}/$releaseType")
         project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
 
         LOG.debug("Adding IntelliJ IDEA dependency")
@@ -47,9 +50,11 @@ class IdeaDependencyManager {
         def configuration = project.configurations.detachedConfiguration(dependency)
 
         def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type)
+        LOG.info("IntelliJ IDEA dependency cache directory: $classesDirectory")
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
-        return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project)
+        def resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
+        return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project, resolvedExtraDependencies)
     }
 
     @NotNull
@@ -60,7 +65,7 @@ class IdeaDependencyManager {
             throw new BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
         def buildNumber = Utils.ideaBuildNumber(ideaDir)
-        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, null, project)
+        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, null, project, Collections.emptyList())
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull String configuration) {
@@ -81,13 +86,14 @@ class IdeaDependencyManager {
     @NotNull
     private static IdeaDependency createDependency(String name, String type, String version,
                                                    String buildNumber,
-                                                   File classesDirectory, File sourcesDirectory, Project project) {
+                                                   File classesDirectory, File sourcesDirectory, Project project,
+                                                   Collection<IdeaExtraDependency> extraDependencies) {
         if (type == 'JPS') {
             return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
                     !hasKotlinDependency(project))
         }
         return new IdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
-                !hasKotlinDependency(project))
+                !hasKotlinDependency(project), extraDependencies)
     }
 
     @Nullable
@@ -115,8 +121,15 @@ class IdeaDependencyManager {
             @NotNull Project project, @NotNull Configuration configuration, @NotNull String type) {
         File zipFile = configuration.singleFile
         LOG.debug("IDEA zip: " + zipFile.path)
-        def directoryName = zipFile.name - ".zip"
+        def cacheDirectory = getZipCacheDirectory(zipFile, project, type)
+        unzipDependencyFile("idea", cacheDirectory, project, zipFile, type)
+        return cacheDirectory
+    }
 
+    @NotNull
+    private static File getZipCacheDirectory(@NotNull File zipFile, @NotNull Project project, @NotNull String type) {
+
+        def directoryName = zipFile.name - ".zip"
         String cacheParentDirectoryPath = zipFile.parent
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension.class)
         if (intellijExtension && intellijExtension.ideaDependencyCachePath) {
@@ -128,16 +141,61 @@ class IdeaDependencyManager {
             cacheParentDirectoryPath = project.buildDir
         }
         def cacheDirectory = new File(cacheParentDirectoryPath, directoryName)
-        unzipDependencyFile(cacheDirectory, project, zipFile, type)
         return cacheDirectory
     }
 
-    private static void unzipDependencyFile(@NotNull File cacheDirectory, @NotNull Project project, @NotNull File zipFile, @NotNull String type) {
+    @NotNull
+    private static Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project, @NotNull String version,
+                                                                            @NotNull Object[] extraDependencies) {
+        LOG.info("Configuring IntelliJ IDEA extra dependencies $extraDependencies")
+        def mainInExtraDeps = extraDependencies.findAll { dep -> mainDependencies.any { it == dep } }
+        if (!mainInExtraDeps.empty) {
+            throw new GradleException("The items $mainInExtraDeps cannot be used as extra dependencies")
+        }
+        def resolvedExtraDependencies = new ArrayList<IdeaExtraDependency>()
+        extraDependencies.each {
+            def name = it as String
+            def dependencyFile = resolveExtraDependency(project, version, name)
+            def extraDependency = new IdeaExtraDependency(name, dependencyFile)
+            LOG.debug("IntelliJ IDEA extra dependency $name in $dependencyFile files: ${extraDependency.jarFiles}")
+            resolvedExtraDependencies.add(extraDependency)
+        }
+        return resolvedExtraDependencies
+    }
+
+    @Nullable
+    private static File resolveExtraDependency(@NotNull Project project, @NotNull String version, @NotNull String name) {
+        try {
+            def dependency = project.dependencies.create("com.jetbrains.intellij.idea:$name:$version")
+            def extraDepConfiguration = project.configurations.detachedConfiguration(dependency)
+            def files = extraDepConfiguration.files
+            if (files.size() == 1) {
+                File depFile = files.first()
+                if (depFile.name.endsWith(".zip")) {
+                    def cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
+                    LOG.debug("IDEA extra dependency $name: " + cacheDirectory.path)
+                    unzipDependencyFile(name, cacheDirectory, project, depFile, "IC")
+                    return cacheDirectory
+                }
+                else {
+                    LOG.debug("IDEA extra dependency $name: " + depFile.path)
+                    return depFile
+                }
+            } else {
+                LOG.warn("Cannot attach IDEA extra dependency $name. Found files: " + files)
+            }
+        } catch (ResolveException e) {
+            LOG.warn("Cannot resolve IDEA extra dependency $name", e)
+        }
+        return null
+    }
+
+    private static void unzipDependencyFile(@NotNull String name, @NotNull File cacheDirectory, @NotNull Project project, @NotNull File zipFile, @NotNull String type) {
         def markerFile = new File(cacheDirectory, "markerFile")
         if (!markerFile.exists()) {
             if (cacheDirectory.exists()) cacheDirectory.deleteDir()
             cacheDirectory.mkdir()
-            LOG.debug("Unzipping idea")
+            LOG.debug("Unzipping ${zipFile.name}")
             project.copy {
                 it.from(project.zipTree(zipFile))
                 it.into(cacheDirectory)
