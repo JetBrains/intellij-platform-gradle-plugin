@@ -15,6 +15,10 @@ abstract class IntelliJPluginSpecBase extends Specification {
     protected final String gradleHome = System.properties.get('test.gradle.home')
     protected String intellijRepo = System.properties.get('intellij.repo', '')
 
+    String getIntellijVersion() {
+        return '14.1.3'
+    }
+
     @Rule
     final TemporaryFolder dir = new TemporaryFolder()
     private boolean debugEnabled = true
@@ -38,7 +42,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
             apply plugin: 'kotlin'
             repositories { mavenCentral() }
             intellij {
-                version = '14.1.3'
+                version = '$intellijVersion'
                 downloadSources = false
                 intellijRepo = '$intellijRepo'
             }

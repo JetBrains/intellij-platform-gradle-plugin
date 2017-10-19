@@ -136,12 +136,13 @@ class IntelliJPlugin implements Plugin<Project> {
             project.files(selectedPlugins.collect { it.jarFiles })
         }
 
-        project.dependencies.ext.ideaDeps = { String... args ->
-            project.files(extension.ideaDependency.jarFiles).filter { args.contains(it.name) }
-        }
-
-        project.dependencies.ext.ideaAllDeps = {
-            project.files(extension.ideaDependency.jarFiles)
+        project.dependencies.ext.intellijExtra = { String extra, Closure filter = {} ->
+            def dependency = extension.ideaDependency
+            def extraDep = dependency != null ? dependency.extraDependencies.find { it.name == extra } : null
+            if (extraDep == null || extraDep.jarFiles == null || extraDep.jarFiles.empty) {
+                throw new GradleException("intellij extra artefact '$extra' is not (yet) configured or not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies to them in the afterEvaluate block")
+            }
+            project.files(extraDep.jarFiles).asFileTree.matching(filter)
         }
     }
 
@@ -158,12 +159,16 @@ class IntelliJPlugin implements Plugin<Project> {
             ideaDependency = resolver.resolveLocal(project, extension.localPath)
         } else {
             LOG.info("Using IDE from remote repository")
-            ideaDependency = resolver.resolveRemote(project, extension.version, extension.type, extension.downloadSources)
+            ideaDependency = resolver.resolveRemote(project, extension.version, extension.type, extension.downloadSources,
+                    extension.extraDependencies)
         }
         extension.ideaDependency = ideaDependency
         if (extension.configureDefaultDependencies) {
             LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} is used for building")
             resolver.register(project, ideaDependency, IDEA_CONFIGURATION_NAME)
+            if (!ideaDependency.extraDependencies.empty) {
+                LOG.info("Note: IntelliJ IDEA ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+            }
 
             def toolsJar = Jvm.current().toolsJar
             if (toolsJar) {
@@ -171,7 +176,7 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
         else {
-            LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} dependencies are configured manually")
+            LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} dependencies are applied manually")
         }
     }
 
@@ -203,7 +208,9 @@ class IntelliJPlugin implements Plugin<Project> {
                 if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
                     throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
                 }
-                resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
+                if (extension.configureDefaultDependencies) {
+                    resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
+                }
                 extension.pluginDependencies.add(plugin)
                 project.tasks.withType(PrepareSandboxTask).each {
                     it.configureExternalPlugin(plugin)
