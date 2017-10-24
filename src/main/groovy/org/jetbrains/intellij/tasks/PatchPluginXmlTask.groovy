@@ -17,6 +17,9 @@ class PatchPluginXmlTask extends ConventionTask {
     private Object changeNotes
     private Object pluginId
 
+    private static final String TAG_DATA = 'value'
+    private static final String BREAK_LOGIC = "_break-logic_"
+
     @OutputDirectory
     File getDestinationDir() {
         destinationDir != null ? project.file(destinationDir) : null
@@ -134,11 +137,25 @@ class PatchPluginXmlTask extends ConventionTask {
         def files = getPluginXmlFiles()
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
-            patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
-            patchNode("description", getPluginDescription(), pluginXml)
-            patchNode("change-notes", getChangeNotes(), pluginXml)
-            patchPluginVersion(getVersion(), pluginXml)
-            patchNode("id", getPluginId(), pluginXml)
+
+//            patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
+//            patchNode("description", getPluginDescription(), pluginXml)
+//            patchNode("change-notes", getChangeNotes(), pluginXml)
+//            patchPluginVersion(getVersion(), pluginXml)
+//            patchNode("id", getPluginId(), pluginXml)
+
+            patchNode(pluginXml, "idea-version", [
+                    "@since-build" : getSinceBuild(),
+                    "@until-build" : getUntilBuild()])
+            patchNode(pluginXml, "description", [
+                    (TAG_DATA) : getPluginDescription()])
+            patchNode(pluginXml, "change-notes", [
+                    (TAG_DATA) : getChangeNotes()])
+            patchNode(pluginXml, "version", [
+                    (BREAK_LOGIC) : getVersion() == Project.DEFAULT_VERSION,
+                    (TAG_DATA) : getVersion()])
+            patchNode(pluginXml, "id", [
+                    (TAG_DATA) : getPluginId()])
 
             def writer
             try {
@@ -155,37 +172,54 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchPluginVersion(String pluginVersion, Node pluginXml) {
-        if (pluginVersion && pluginVersion != Project.DEFAULT_VERSION) {
-            def version = pluginXml.version
-            if (version) {
-                version*.value = pluginVersion
-            } else {
-                pluginXml.children().add(0, new Node(null, 'version', pluginVersion))
-            }
-        }
-    }
+//    static void patchPluginVersion(String pluginVersion, Node pluginXml) {
+//        if (pluginVersion && pluginVersion != Project.DEFAULT_VERSION) {
+//            def version = pluginXml.version
+//            if (version) {
+//                version*.value = pluginVersion
+//            } else {
+//                pluginXml.children().add(0, new Node(null, 'version', pluginVersion))
+//            }
+//        }
+//    }
+//
+//    static void patchSinceUntilBuild(String sinceBuild, String untilBuild, Node pluginXml) {
+//        if (sinceBuild && untilBuild) {
+//            def ideaVersionTag = pluginXml.'idea-version'
+//            if (ideaVersionTag) {
+//                ideaVersionTag*.'@since-build' = sinceBuild
+//                ideaVersionTag*.'@until-build' = untilBuild
+//            } else {
+//                pluginXml.children().add(0, new Node(null, 'idea-version',
+//                        ['since-build': sinceBuild, 'until-build': untilBuild]))
+//            }
+//        }
+//    }
+//
+//    static void patchNode(String name, String value, Node pluginXml) {
+//        if (value != null) {
+//            def tag = pluginXml."$name"
+//            if(tag) {
+//                tag*.value = value
+//            } else {
+//                pluginXml.children().add(0, new Node(null, name, value))
+//            }
+//        }
+//    }
 
-    static void patchSinceUntilBuild(String sinceBuild, String untilBuild, Node pluginXml) {
-        if (sinceBuild && untilBuild) {
-            def ideaVersionTag = pluginXml.'idea-version'
-            if (ideaVersionTag) {
-                ideaVersionTag*.'@since-build' = sinceBuild
-                ideaVersionTag*.'@until-build' = untilBuild
+    static void patchNode(Node pluginXml, String tagName, Map<String, Object> values) {
+        if (!values) return
+        if (values.findResult { (it.key == BREAK_LOGIC) ? it.value : false}) return
+        values.each { it ->
+            if (!it.value) return
+            def tag = pluginXml."$tagName"
+            if (tag) {
+                tag*."$it.key" = it.value
             } else {
-                pluginXml.children().add(0, new Node(null, 'idea-version',
-                        ['since-build': sinceBuild, 'until-build': untilBuild]))
-            }
-        }
-    }
-
-    static void patchNode(String name, String value, Node pluginXml) {
-        if (value != null) {
-            def tag = pluginXml."$name"
-            if(tag) {
-                tag*.value = value
-            } else {
-                pluginXml.children().add(0, new Node(null, name, value))
+                def value = it.key.startsWith("@") \
+                    ? ([(it.key[1..-1]) : it.value])
+                        : (it.value)
+                pluginXml.children().add(0, new Node(null, tagName, value))
             }
         }
     }
