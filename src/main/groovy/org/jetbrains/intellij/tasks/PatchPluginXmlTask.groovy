@@ -173,9 +173,10 @@ class PatchPluginXmlTask extends ConventionTask {
     }
 
     static void patchNode(Node pluginXml, Map<String, Object> values) {
-        if (!values || values.remove(BREAK_LOGIC)?.value) return
-        def tagName = values.remove(TAG_NAME)?.value?.toString()
-        if (!tagName) return
+        def tagName
+        if (!values) return
+        if (values.remove(BREAK_LOGIC)) return
+        if (!(tagName = values.remove(TAG_NAME))) return
         values.each { it ->
             if (!it.value) return
             def tag = pluginXml."$tagName"
