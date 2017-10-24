@@ -138,12 +138,6 @@ class PatchPluginXmlTask extends ConventionTask {
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
 
-//            patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
-//            patchNode("description", getPluginDescription(), pluginXml)
-//            patchNode("change-notes", getChangeNotes(), pluginXml)
-//            patchPluginVersion(getVersion(), pluginXml)
-//            patchNode("id", getPluginId(), pluginXml)
-
             patchNode(pluginXml, "idea-version", [
                     "@since-build" : getSinceBuild(),
                     "@until-build" : getUntilBuild()])
@@ -171,41 +165,6 @@ class PatchPluginXmlTask extends ConventionTask {
             }
         }
     }
-
-//    static void patchPluginVersion(String pluginVersion, Node pluginXml) {
-//        if (pluginVersion && pluginVersion != Project.DEFAULT_VERSION) {
-//            def version = pluginXml.version
-//            if (version) {
-//                version*.value = pluginVersion
-//            } else {
-//                pluginXml.children().add(0, new Node(null, 'version', pluginVersion))
-//            }
-//        }
-//    }
-//
-//    static void patchSinceUntilBuild(String sinceBuild, String untilBuild, Node pluginXml) {
-//        if (sinceBuild && untilBuild) {
-//            def ideaVersionTag = pluginXml.'idea-version'
-//            if (ideaVersionTag) {
-//                ideaVersionTag*.'@since-build' = sinceBuild
-//                ideaVersionTag*.'@until-build' = untilBuild
-//            } else {
-//                pluginXml.children().add(0, new Node(null, 'idea-version',
-//                        ['since-build': sinceBuild, 'until-build': untilBuild]))
-//            }
-//        }
-//    }
-//
-//    static void patchNode(String name, String value, Node pluginXml) {
-//        if (value != null) {
-//            def tag = pluginXml."$name"
-//            if(tag) {
-//                tag*.value = value
-//            } else {
-//                pluginXml.children().add(0, new Node(null, name, value))
-//            }
-//        }
-//    }
 
     static void patchNode(Node pluginXml, String tagName, Map<String, Object> values) {
         if (!values) return
