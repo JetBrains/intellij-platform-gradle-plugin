@@ -18,6 +18,7 @@ class PatchPluginXmlTask extends ConventionTask {
     private Object pluginId
 
     private static final String TAG_DATA = 'value'
+    private static final String TAG_NAME = "_tag-name_"
     private static final String BREAK_LOGIC = "_break-logic_"
 
     @OutputDirectory
@@ -138,17 +139,22 @@ class PatchPluginXmlTask extends ConventionTask {
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
 
-            patchNode(pluginXml, "idea-version", [
+            patchNode(pluginXml, [
+                    (TAG_NAME) : "idea-version",
                     "@since-build" : getSinceBuild(),
                     "@until-build" : getUntilBuild()])
-            patchNode(pluginXml, "description", [
+            patchNode(pluginXml, [
+                    (TAG_NAME) : "description",
                     (TAG_DATA) : getPluginDescription()])
-            patchNode(pluginXml, "change-notes", [
+            patchNode(pluginXml, [
+                    (TAG_NAME) : "change-notes",
                     (TAG_DATA) : getChangeNotes()])
-            patchNode(pluginXml, "version", [
-                    (BREAK_LOGIC) : getVersion() == Project.DEFAULT_VERSION,
-                    (TAG_DATA) : getVersion()])
-            patchNode(pluginXml, "id", [
+            patchNode(pluginXml, [
+                    (TAG_NAME) : "version",
+                    (TAG_DATA) : getVersion(),
+                    (BREAK_LOGIC) : getVersion() == Project.DEFAULT_VERSION])
+            patchNode(pluginXml, [
+                    (TAG_NAME) : "id",
                     (TAG_DATA) : getPluginId()])
 
             def writer
@@ -166,9 +172,10 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchNode(Node pluginXml, String tagName, Map<String, Object> values) {
-        if (!values) return
-        if (values.findResult { (it.key == BREAK_LOGIC) ? it.value : false}) return
+    static void patchNode(Node pluginXml, Map<String, Object> values) {
+        if (!values || values.remove(BREAK_LOGIC)?.value) return
+        def tagName = values.remove(TAG_NAME)?.value?.toString()
+        if (!tagName) return
         values.each { it ->
             if (!it.value) return
             def tag = pluginXml."$tagName"
@@ -176,7 +183,7 @@ class PatchPluginXmlTask extends ConventionTask {
                 tag*."$it.key" = it.value
             } else {
                 def value = it.key.startsWith("@") \
-                    ? ([(it.key[1..-1]) : it.value])
+                        ? ([(it.key[1..-1]) : it.value])
                         : (it.value)
                 pluginXml.children().add(0, new Node(null, tagName, value))
             }
