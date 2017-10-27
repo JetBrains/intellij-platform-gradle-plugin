@@ -18,7 +18,6 @@ class PatchPluginXmlTask extends ConventionTask {
     private Object pluginId
 
     private static final String TAG_DATA = 'value'
-    private static final String BREAK_LOGIC = "_break-logic_"
 
     @OutputDirectory
     File getDestinationDir() {
@@ -138,15 +137,14 @@ class PatchPluginXmlTask extends ConventionTask {
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
 
-            patchNode(pluginXml, "idea-version",  [
-                    "@since-build" : getSinceBuild(),
-                    "@until-build" : getUntilBuild()])
-            patchNode(pluginXml, "description", [(TAG_DATA) : getPluginDescription()])
-            patchNode(pluginXml, "change-notes", [(TAG_DATA) : getChangeNotes()])
-            patchNode(pluginXml, "version", [
-                    (TAG_DATA) : getVersion(),
-                    (BREAK_LOGIC) : getVersion() == Project.DEFAULT_VERSION])
-            patchNode(pluginXml, "id", [(TAG_DATA) : getPluginId()])
+            patchTag(pluginXml, "idea-version", null, [
+                    "since-build": getSinceBuild(),
+                    "until-build": getUntilBuild()])
+            patchTag(pluginXml, "description", getPluginDescription())
+            patchTag(pluginXml, "change-notes", getChangeNotes())
+            patchTagIf(getVersion() != Project.DEFAULT_VERSION,
+                    pluginXml, "version", getVersion())
+            patchTag(pluginXml, "id", getPluginId())
 
             def writer
             try {
@@ -163,17 +161,24 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchNode(Node pluginXml, String tagName, Map<String, Object> values) {
-        if (!values) return
-        if (values.remove(BREAK_LOGIC)) return
-        values.each { it ->
+    static void patchTagIf(boolean shouldPatch, Node pluginXml, String name, String content = null, Map<String, Object> attributes = [:]) {
+        if (shouldPatch) patchTag(pluginXml, name, content, attributes)
+    }
+
+    static void patchTag(Node pluginXml, String name, String content = null, Map<String, Object> attributes = [:]) {
+        if (!name || !pluginXml) return
+        def tagNodes = content != null ? [value: content] : [:]
+        for (attribute in attributes) {
+            tagNodes += [("@$attribute.key" as String) : attribute.value]
+        }
+        tagNodes.each {
             if (!it.value) return
-            def tag = pluginXml."$tagName"
+            def tag = pluginXml."$name"
             if (tag) {
                 tag*."$it.key" = it.value
             } else {
                 def value = it.key.startsWith("@") ? [(it.key[1..-1]) : it.value] : it.value
-                pluginXml.children().add(0, new Node(null, tagName, value))
+                pluginXml.children().add(0, new Node(null, name, value))
             }
         }
     }
