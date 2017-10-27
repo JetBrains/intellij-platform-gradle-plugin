@@ -17,6 +17,8 @@ class PatchPluginXmlTask extends ConventionTask {
     private Object changeNotes
     private Object pluginId
 
+    private static final String TAG_DATA = 'value'
+
     @OutputDirectory
     File getDestinationDir() {
         destinationDir != null ? project.file(destinationDir) : null
@@ -134,11 +136,15 @@ class PatchPluginXmlTask extends ConventionTask {
         def files = getPluginXmlFiles()
         files.each { file ->
             def pluginXml = Utils.parseXml(file)
-            patchSinceUntilBuild(getSinceBuild(), getUntilBuild(), pluginXml)
-            patchNode("description", getPluginDescription(), pluginXml)
-            patchNode("change-notes", getChangeNotes(), pluginXml)
-            patchPluginVersion(getVersion(), pluginXml)
-            patchNode("id", getPluginId(), pluginXml)
+
+            patchTag(pluginXml, "idea-version", null, [
+                    "since-build": getSinceBuild(),
+                    "until-build": getUntilBuild()])
+            patchTag(pluginXml, "description", getPluginDescription())
+            patchTag(pluginXml, "change-notes", getChangeNotes())
+            patchTagIf(getVersion() != Project.DEFAULT_VERSION,
+                    pluginXml, "version", getVersion())
+            patchTag(pluginXml, "id", getPluginId())
 
             def writer
             try {
@@ -155,36 +161,23 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchPluginVersion(String pluginVersion, Node pluginXml) {
-        if (pluginVersion && pluginVersion != Project.DEFAULT_VERSION) {
-            def version = pluginXml.version
-            if (version) {
-                version*.value = pluginVersion
-            } else {
-                pluginXml.children().add(0, new Node(null, 'version', pluginVersion))
-            }
-        }
+    static void patchTagIf(boolean shouldPatch, Node pluginXml, String name, String content = null, Map<String, Object> attributes = [:]) {
+        if (shouldPatch) patchTag(pluginXml, name, content, attributes)
     }
 
-    static void patchSinceUntilBuild(String sinceBuild, String untilBuild, Node pluginXml) {
-        if (sinceBuild && untilBuild) {
-            def ideaVersionTag = pluginXml.'idea-version'
-            if (ideaVersionTag) {
-                ideaVersionTag*.'@since-build' = sinceBuild
-                ideaVersionTag*.'@until-build' = untilBuild
-            } else {
-                pluginXml.children().add(0, new Node(null, 'idea-version',
-                        ['since-build': sinceBuild, 'until-build': untilBuild]))
-            }
+    static void patchTag(Node pluginXml, String name, String content = null, Map<String, Object> attributes = [:]) {
+        if (!name || !pluginXml) return
+        def tagNodes = content != null ? [value: content] : [:]
+        for (attribute in attributes) {
+            tagNodes += [("@$attribute.key" as String) : attribute.value]
         }
-    }
-
-    static void patchNode(String name, String value, Node pluginXml) {
-        if (value != null) {
+        tagNodes.each {
+            if (!it.value) return
             def tag = pluginXml."$name"
-            if(tag) {
-                tag*.value = value
+            if (tag) {
+                tag*."$it.key" = it.value
             } else {
+                def value = it.key.startsWith("@") ? [(it.key[1..-1]) : it.value] : it.value
                 pluginXml.children().add(0, new Node(null, name, value))
             }
         }
