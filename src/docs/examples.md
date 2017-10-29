@@ -8,6 +8,7 @@ As examples of using this plugin you can check out following projects:
 - [AWS CloudFormation plugin](https://github.com/shalupov/idea-cloudformation) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IdeaAwsCloudFormation&tab=projectOverview)
 - [Bash plugin](https://github.com/jansorg/BashSupport) and its [TeamCity build configuration](https://teamcity.jetbrains.com/project.html?projectId=IntellijIdeaPlugins_BashSupport&tab=projectOverview)
 - [Perl5 plugin](https://github.com/hurricup/Perl5-IDEA) and its [Travis configuration file](https://github.com/hurricup/Perl5-IDEA/blob/master/.travis.yml)
+- [Bamboo Soy plugin](https://github.com/google/bamboo-soy) and its [Travis configuration file](https://github.com/google/bamboo-soy/blob/master/.travis.yml)
 - [Android Drawable Importer plugin](https://github.com/winterDroid/android-drawable-importer-intellij-plugin)
 - [Android Material Design Icon Generator plugin](https://github.com/konifar/android-material-design-icon-generator-plugin)
 - [AceJump plugin](https://github.com/johnlindquist/AceJump)  
