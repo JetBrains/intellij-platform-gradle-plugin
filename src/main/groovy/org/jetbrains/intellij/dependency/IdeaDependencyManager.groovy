@@ -229,6 +229,9 @@ class IdeaDependencyManager {
 
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
         def ivyFile = new File(dependency.classes, "${dependency.fqn}.xml")
+        if (dependency.version.endsWith(".SNAPSHOT")) {
+            ivyFile.delete()
+        }
         if (!ivyFile.exists()) {
             def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
