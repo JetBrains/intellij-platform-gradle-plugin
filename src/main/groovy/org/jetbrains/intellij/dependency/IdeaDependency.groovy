@@ -89,6 +89,11 @@ class IdeaDependency implements Serializable {
         return extraDependencies
     }
 
+    @Nullable
+    File getIvyRepositoryFile() {
+        new File(classes, "${fqn}.xml")
+    }
+
     String getFqn() {
         def fqn = "$name-$version"
         if (withKotlin) {

@@ -91,6 +91,9 @@ class IdeaDependencyManager {
         if (type == 'JPS') {
             return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
                     !hasKotlinDependency(project))
+        } else if (type == null) {
+            return new LocalIdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
+                    !hasKotlinDependency(project), extraDependencies)
         }
         return new IdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
                 !hasKotlinDependency(project), extraDependencies)
@@ -128,7 +131,6 @@ class IdeaDependencyManager {
 
     @NotNull
     private static File getZipCacheDirectory(@NotNull File zipFile, @NotNull Project project, @NotNull String type) {
-
         def directoryName = zipFile.name - ".zip"
         String cacheParentDirectoryPath = zipFile.parent
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension.class)
@@ -228,10 +230,7 @@ class IdeaDependencyManager {
     }
 
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
-        def ivyFile = new File(dependency.classes, "${dependency.fqn}.xml")
-        if (dependency.version.endsWith(".SNAPSHOT")) {
-            ivyFile.delete()
-        }
+        File ivyFile = dependency.getIvyRepositoryFile() ?: File.createTempFile(dependency.name, ".xml")
         if (!ivyFile.exists()) {
             def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
