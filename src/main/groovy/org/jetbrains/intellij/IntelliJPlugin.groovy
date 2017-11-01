@@ -159,7 +159,8 @@ class IntelliJPlugin implements Plugin<Project> {
             ideaDependency = resolver.resolveLocal(project, extension.localPath)
         } else {
             LOG.info("Using IDE from remote repository")
-            ideaDependency = resolver.resolveRemote(project, extension.version, extension.type, extension.downloadSources,
+            def version = extension.version ?: DEFAULT_IDEA_VERSION
+            ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources,
                     extension.extraDependencies)
         }
         extension.ideaDependency = ideaDependency

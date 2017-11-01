@@ -10,7 +10,7 @@ import org.jetbrains.intellij.dependency.PluginDependency
 class IntelliJPluginExtension {
     Object[] plugins = []
     String localPath
-    String version = IntelliJPlugin.DEFAULT_IDEA_VERSION
+    String version
     String type = 'IC'
     String pluginName
     String sandboxDirectory
