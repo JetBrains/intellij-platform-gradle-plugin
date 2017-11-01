@@ -298,7 +298,9 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
-        def configureTask = { RunIdeaTask it ->
+        project.tasks.create(RUN_IDE_TASK_NAME, RunIdeTask)
+        //noinspection GroovyAssignabilityCheck
+        project.tasks.withType(RunIdeTask) { RunIdeTask it ->
             it.group = GROUP_NAME
             it.description = "Runs Intellij IDEA with installed plugin."
             it.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
@@ -315,7 +317,6 @@ class IntelliJPlugin implements Plugin<Project> {
             })
             it.dependsOn(PREPARE_SANDBOX_TASK_NAME)
         }
-        project.tasks.create(RUN_IDE_TASK_NAME, RunIdeaTask).with(configureTask)
     }
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {

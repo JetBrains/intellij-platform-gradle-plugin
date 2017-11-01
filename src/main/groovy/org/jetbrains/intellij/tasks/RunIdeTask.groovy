@@ -8,7 +8,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.Utils
 
-class RunIdeaTask extends JavaExec {
+class RunIdeTask extends JavaExec {
     private static final def PREFIXES = [IU: null,
                                          IC: 'Idea',
                                          RM: 'Ruby',
@@ -97,7 +97,7 @@ class RunIdeaTask extends JavaExec {
         this.pluginsDirectory = pluginsDirectory
     }
 
-    RunIdeaTask() {
+    RunIdeTask() {
         setMain("com.intellij.idea.Main")
         enableAssertions = true
         outputs.upToDateWhen { false }
