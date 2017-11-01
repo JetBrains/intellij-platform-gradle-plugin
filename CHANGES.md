@@ -3,6 +3,7 @@
 ## 0.3.0-SNAPSHOT
 
 - added plugin verification task: `verifyPlugin`
+- default values of `runIde` task are propagated to all RunIdeaTask-like tasks
 
 ## 0.2.17
 
