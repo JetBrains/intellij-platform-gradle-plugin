@@ -4,6 +4,10 @@
 
 - updated default repository url
 
+## 0.2.18
+
+- support for running GoLand 
+
 ## 0.2.17
 
 - fix compatibility with Gradle 4.0 new versions of Kotlin and Scala plugins (fixes #221 and #222)

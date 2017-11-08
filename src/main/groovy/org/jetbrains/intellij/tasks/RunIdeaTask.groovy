@@ -21,7 +21,7 @@ class RunIdeaTask extends JavaExec {
                                          CL: 'CLion',
                                          DB: '0xDBE',
                                          AI: 'AndroidStudio',
-                                         GO: 'Gogland',
+                                         GO: 'GoLand',
                                          RD: 'Rider',
                                          RS: 'Rider']
 
