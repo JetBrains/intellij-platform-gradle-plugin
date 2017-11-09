@@ -75,7 +75,7 @@ class IdeaDependencyManager {
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$dependency.classes.path/[artifact].[ext]") // idea libs
             if (dependency.sources) {
-                repo.artifactPattern("$dependency.sources.parent/[artifact]-$dependency.version-[classifier].[ext]")
+                repo.artifactPattern("$dependency.sources.parent/[artifact]-[revision]-[classifier].[ext]")
             }
         }
         project.dependencies.add(configuration, [

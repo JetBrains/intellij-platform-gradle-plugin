@@ -64,7 +64,7 @@ class PluginDependencyManager {
             repo.ivyPattern(ivyFile.absolutePath) // ivy xml
             repo.artifactPattern("$baseDir.absolutePath/[artifact].[ext]") // jars
             if (plugin.sourcesDirectory) {
-                repo.artifactPattern("$plugin.sourcesDirectory.parent/[artifact]-$plugin.version-[classifier].[ext]")
+                repo.artifactPattern("$plugin.sourcesDirectory.parent/[artifact]-[revision]-[classifier].[ext]")
             }
         }
         project.dependencies.add(configuration, [
