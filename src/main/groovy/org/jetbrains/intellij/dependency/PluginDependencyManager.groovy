@@ -29,6 +29,9 @@ class PluginDependencyManager {
     private final String repositoryHost
     private final IdeaDependency ideaDependency
 
+    private boolean repoRegistered
+    private Set<String> pluginSources = new HashSet<>()
+
     PluginDependencyManager(@NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency) {
         this.repositoryHost = DEFAULT_INTELLIJ_PLUGINS_REPO
         this.ideaDependency = ideaDependency
@@ -47,7 +50,8 @@ class PluginDependencyManager {
                 IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
                 def pluginDirectory = new File(ideaDependency.classes, "plugins/$id").canonicalFile
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    return new PluginDependencyImpl(pluginDirectory.name, ideaDependency.version, pluginDirectory, ideaDependency.sources, true)
+                    def builtinPluginVersion = ideaDependency.version + (ideaDependency.sources ? "-withSources" : "")
+                    return new PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
                 }
             }
             // todo: implement downloading last compatible plugin version
@@ -57,19 +61,34 @@ class PluginDependencyManager {
     }
 
     void register(@NotNull Project project, @NotNull PluginDependency plugin, @NotNull String configuration) {
-        def baseDir = plugin.artifact.parentFile.parentFile // idea for builtin, cache dir for external
-        def ivyFile = getOrCreateIvyXml(plugin, baseDir)
-        project.repositories.ivy { repo ->
-            repo.url = baseDir
-            repo.ivyPattern(ivyFile.absolutePath) // ivy xml
-            repo.artifactPattern("$baseDir.absolutePath/[artifact].[ext]") // jars
-            if (plugin.sourcesDirectory) {
-                repo.artifactPattern("$plugin.sourcesDirectory.parent/[artifact]-[revision]-[classifier].[ext]")
-            }
-        }
+        registerRepoIfNeeded(project, plugin)
+        generateIvyFile(plugin)
         project.dependencies.add(configuration, [
             group: 'org.jetbrains.plugins', name: plugin.id, version: plugin.version, configuration: 'compile'
         ])
+    }
+
+    void registerRepoIfNeeded(@NotNull Project project, @NotNull PluginDependency plugin) {
+        if (!plugin.builtin) {
+            def artifactParent = plugin.artifact.parentFile
+            if (artifactParent.parent != cacheDirectoryPath) {
+                pluginSources.add(artifactParent.absolutePath)
+            }
+        }
+        if (repoRegistered) return
+        repoRegistered = true
+
+        project.repositories.ivy { repo ->
+            repo.ivyPattern("$cacheDirectoryPath/[module]-[revision].[ext]") // ivy xml
+            repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
+            repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact].[ext]") // external plugins
+            pluginSources.each {
+                repo.artifactPattern("$it/[artifact].[ext]") // local plugins
+            }
+            if (ideaDependency.sources) {
+                repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision]-[classifier].[ext]")
+            }
+        }
     }
 
     String getCacheDirectoryPath() {
@@ -77,9 +96,10 @@ class PluginDependencyManager {
     }
 
     @NotNull
-    private File getOrCreateIvyXml(@NotNull PluginDependency plugin, @NotNull File baseDir) {
-        def pluginFqn = pluginFqn(plugin.id, plugin.version, plugin.channel)
-        def ivyFile = new File(cacheDirectoryPath, "${pluginFqn}${plugin.sourcesDirectory ? '-sources' : ''}.xml")
+    private void generateIvyFile(@NotNull PluginDependency plugin) {
+        def baseDir = plugin.builtin ? plugin.artifact : plugin.artifact.parentFile
+        def pluginFqn = pluginFqn(plugin.id, plugin.version)
+        def ivyFile = new File(cacheDirectoryPath, "${pluginFqn}.xml")
         if (!ivyFile.exists()) {
             def identity = new DefaultIvyPublicationIdentity("org.jetbrains.plugins", plugin.id, plugin.version)
             def generator = new IvyDescriptorFileGenerator(identity)
@@ -94,14 +114,13 @@ class PluginDependencyManager {
             if (plugin.metaInfDirectory) {
                 generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir))
             }
-            if (plugin.sourcesDirectory) {
-                def artifact = new DefaultIvyArtifact(plugin.sourcesDirectory, "ideaIC", "jar", "sources", "sources")
+            if (plugin.builtin && ideaDependency.sources) {
+                def artifact = new DefaultIvyArtifact(ideaDependency.sources, "ideaIC", "jar", "sources", "sources")
                 artifact.conf = "sources"
                 generator.addArtifact(artifact)
             }
             generator.writeTo(ivyFile)
         }
-        return ivyFile
     }
 
     @NotNull
@@ -114,7 +133,7 @@ class PluginDependencyManager {
             throw new BuildException("Cannot find plugin $id:$version at $repositoryHost", null)
         }
 
-        def cacheDirectory = pluginCache(id, version, channel)
+        def cacheDirectory = pluginCache(id, version)
         if (!cacheDirectory.exists() && !cacheDirectory.mkdirs()) {
             throw new BuildException("Cannot get access to cache directory: $cacheDirectory.absolutePath", null)
         }
@@ -167,7 +186,7 @@ class PluginDependencyManager {
     private PluginDependency findCachedPlugin(@NotNull String id, @NotNull String version, @Nullable String channel) {
         def cache = null
         try {
-            cache = pluginCache(id, version, channel)
+            cache = pluginCache(id, version)
             if (cache.exists()) {
                 return externalPluginDependency(findArtifact(cache), channel)
             }
@@ -178,8 +197,8 @@ class PluginDependencyManager {
         return null
     }
 
-    private File pluginCache(@NotNull String pluginId, @NotNull String version, @Nullable String channel) {
-        return new File(cacheDirectoryPath, pluginFqn(pluginId, version, channel))
+    private File pluginCache(@NotNull String pluginId, @NotNull String version) {
+        return new File(cacheDirectoryPath, pluginFqn(pluginId, version))
     }
 
     @NotNull
@@ -219,8 +238,8 @@ class PluginDependencyManager {
         output.close()
     }
 
-    private static pluginFqn(@NotNull String id, @NotNull String version, @Nullable String channel) {
-        "$id-${channel ?: 'master'}-$version"
+    private static pluginFqn(@NotNull String id, @NotNull String version) {
+        "$id-$version"
     }
 }
 

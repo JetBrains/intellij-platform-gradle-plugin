@@ -90,8 +90,8 @@ class IdeaDependency implements Serializable {
     }
 
     @Nullable
-    File getIvyRepositoryFile() {
-        new File(classes, "${fqn}.xml")
+    File getIvyRepositoryDirectory() {
+        classes
     }
 
     String getFqn() {

@@ -11,7 +11,7 @@ class LocalIdeaDependency extends IdeaDependency {
     }
 
     @Nullable
-    File getIvyRepositoryFile() {
-        version.endsWith(".SNAPSHOT") ? super.getIvyRepositoryFile() : null
+    File getIvyRepositoryDirectory() {
+        version.endsWith(".SNAPSHOT") ? null : super.getIvyRepositoryDirectory()
     }
 }

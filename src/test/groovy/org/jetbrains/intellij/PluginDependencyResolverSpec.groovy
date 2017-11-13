@@ -14,7 +14,7 @@ class PluginDependencyResolverSpec extends IntelliJPluginSpecBase {
         plugin != null
         plugin.artifact.name == 'intellij-postfix.jar'
         collectFilePaths(plugin.jarFiles, manager.cacheDirectoryPath) ==
-                ['/org.jetbrains.postfixCompletion-master-0.8-beta/intellij-postfix.jar'] as Set
+                ['/org.jetbrains.postfixCompletion-0.8-beta/intellij-postfix.jar'] as Set
     }
 
     def 'find zip-type plugin'() {
@@ -28,10 +28,10 @@ class PluginDependencyResolverSpec extends IntelliJPluginSpecBase {
         plugin != null
         plugin.artifact.name == 'markdown'
         collectFilePaths(plugin.jarFiles, manager.cacheDirectoryPath) ==
-                ['/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/markdown-javafx-preview.jar',
-                 '/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/Loboevolution.jar',
-                 '/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/intellij-markdown.jar',
-                 '/org.intellij.plugins.markdown-master-8.5.0.20160208/markdown/lib/markdown.jar'] as Set
+                ['/org.intellij.plugins.markdown-8.5.0.20160208/markdown/lib/markdown-javafx-preview.jar',
+                 '/org.intellij.plugins.markdown-8.5.0.20160208/markdown/lib/Loboevolution.jar',
+                 '/org.intellij.plugins.markdown-8.5.0.20160208/markdown/lib/intellij-markdown.jar',
+                 '/org.intellij.plugins.markdown-8.5.0.20160208/markdown/lib/markdown.jar'] as Set
     }
 
     private static def collectFilePaths(Collection<File> files, String cacheDir) {

@@ -70,9 +70,10 @@ class IdeaDependencyManager {
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull String configuration) {
         def ivyFile = getOrCreateIvyXml(dependency)
+        def ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length()) - ".xml"
         project.repositories.ivy { repo ->
             repo.url = dependency.classes
-            repo.ivyPattern(ivyFile.absolutePath) // ivy xml
+            repo.ivyPattern("$ivyFile.parent/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
             repo.artifactPattern("$dependency.classes.path/[artifact].[ext]") // idea libs
             if (dependency.sources) {
                 repo.artifactPattern("$dependency.sources.parent/[artifact]-[revision]-[classifier].[ext]")
@@ -230,7 +231,8 @@ class IdeaDependencyManager {
     }
 
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
-        File ivyFile = dependency.getIvyRepositoryFile() ?: File.createTempFile(dependency.name, ".xml")
+        def directory = dependency.getIvyRepositoryDirectory()
+        File ivyFile = directory != null ? new File(directory, "${dependency.fqn}.xml") : File.createTempFile(dependency.fqn, ".xml")
         if (!ivyFile.exists()) {
             def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))

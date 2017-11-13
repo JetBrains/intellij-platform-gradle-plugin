@@ -195,6 +195,25 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         assert runtimeClasspath.contains('intellij-postfix.jar')
     }
 
+    def 'resolve plugins in Gradle >= 4.3'() {
+        given:
+        writeTestFile()
+        buildFile << 'intellij.plugins = [\'org.jetbrains.postfixCompletion:0.8-beta\', \'copyright\']\n'
+        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build('4.3', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
+        assert compileClasspath.contains('copyright.jar')
+        assert runtimeClasspath.contains('copyright.jar')
+        assert compileClasspath.contains('intellij-postfix.jar')
+        assert runtimeClasspath.contains('intellij-postfix.jar')
+    }
+
     def 'add require plugin id parameter in test tasks'() {
         given:
         writeTestFile()

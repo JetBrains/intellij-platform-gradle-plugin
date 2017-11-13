@@ -34,11 +34,7 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
 
     private boolean builtin
 
-    PluginDependencyImpl(@NotNull String id,
-                         @NotNull String version,
-                         @NotNull File artifact,
-                         @Nullable File sourcesDirectory = null,
-                         boolean builtin = false) {
+    PluginDependencyImpl(@NotNull String id, @NotNull String version, @NotNull File artifact, boolean builtin = false) {
         this.id = id
         this.version = version
         this.artifact = artifact
