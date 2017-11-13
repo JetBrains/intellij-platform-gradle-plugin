@@ -24,5 +24,5 @@ subprojects {
 }
 
 wrapper {
-    gradleVersion '4.1'
+    gradleVersion '4.3.1'
 }
