@@ -126,7 +126,7 @@ class IdeaDependencyManager {
         File zipFile = configuration.singleFile
         LOG.debug("IDEA zip: " + zipFile.path)
         def cacheDirectory = getZipCacheDirectory(zipFile, project, type)
-        unzipDependencyFile("idea", cacheDirectory, project, zipFile, type)
+        unzipDependencyFile(cacheDirectory, project, zipFile, type)
         return cacheDirectory
     }
 
@@ -148,7 +148,8 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    private static Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project, @NotNull String version,
+    private static Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project,
+                                                                            @NotNull String version,
                                                                             @NotNull Object[] extraDependencies) {
         LOG.info("Configuring IntelliJ IDEA extra dependencies $extraDependencies")
         def mainInExtraDeps = extraDependencies.findAll { dep -> mainDependencies.any { it == dep } }
@@ -177,10 +178,9 @@ class IdeaDependencyManager {
                 if (depFile.name.endsWith(".zip")) {
                     def cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
                     LOG.debug("IDEA extra dependency $name: " + cacheDirectory.path)
-                    unzipDependencyFile(name, cacheDirectory, project, depFile, "IC")
+                    unzipDependencyFile(cacheDirectory, project, depFile, "IC")
                     return cacheDirectory
-                }
-                else {
+                } else {
                     LOG.debug("IDEA extra dependency $name: " + depFile.path)
                     return depFile
                 }
@@ -193,7 +193,10 @@ class IdeaDependencyManager {
         return null
     }
 
-    private static void unzipDependencyFile(@NotNull String name, @NotNull File cacheDirectory, @NotNull Project project, @NotNull File zipFile, @NotNull String type) {
+    private static void unzipDependencyFile(@NotNull File cacheDirectory,
+                                            @NotNull Project project,
+                                            @NotNull File zipFile,
+                                            @NotNull String type) {
         def markerFile = new File(cacheDirectory, "markerFile")
         if (!markerFile.exists()) {
             if (cacheDirectory.exists()) cacheDirectory.deleteDir()
@@ -203,13 +206,13 @@ class IdeaDependencyManager {
                 it.from(project.zipTree(zipFile))
                 it.into(cacheDirectory)
             }
-            resetExecutablePermissions(cacheDirectory, project, type)
+            resetExecutablePermissions(cacheDirectory, type)
             markerFile.createNewFile()
             LOG.debug("Unzipped")
         }
     }
 
-    private static void resetExecutablePermissions(@NotNull File cacheDirectory, @NotNull Project project, @NotNull String type) {
+    private static void resetExecutablePermissions(@NotNull File cacheDirectory, @NotNull String type) {
         if (type == 'RS' || type == 'RD') {
             LOG.debug("Resetting executable permissions")
             def operatingSystem = OperatingSystem.current()
