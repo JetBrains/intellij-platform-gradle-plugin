@@ -4,6 +4,7 @@
 
 - added plugin verification task: `verifyPlugin`
 - default values of `runIde` task are propagated to all RunIdeaTask-like tasks
+- `*_rt.jar` files are excluded from IDE dependency (fixes [IDEA-182214](https://youtrack.jetbrains.com/v2/issue/IDEA-182214))
 
 ## 0.2.18
 
