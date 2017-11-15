@@ -52,8 +52,6 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         assert !mainRuntimeClasspath.contains('idea.jar')       // excluded explicitly
         assert !testClasspath.contains('idea.jar')
         assert  testRuntimeClasspath.contains('idea.jar')       // includes all
-
-        assert mainRuntimeClasspath.contains('idea_rt.jar')     // includes all but idea.jar
     }
 
     def 'configure plugins manually test'() {
