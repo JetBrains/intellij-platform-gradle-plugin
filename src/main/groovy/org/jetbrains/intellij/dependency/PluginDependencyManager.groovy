@@ -86,7 +86,7 @@ class PluginDependencyManager {
                 repo.artifactPattern("$it/[artifact].[ext]") // local plugins
             }
             if (ideaDependency.sources) {
-                repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision]-[classifier].[ext]")
+                repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision](-[classifier]).[ext]")
             }
         }
     }
