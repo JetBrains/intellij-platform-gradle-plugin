@@ -49,6 +49,7 @@ class IdeaDependencyManager {
             LOG.warn("'RS' type is deprecated and will be removed in 0.3.0. Use 'RD' type instead")
         }
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
+
         def configuration = project.configurations.detachedConfiguration(dependency)
 
         def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
@@ -203,30 +204,41 @@ class IdeaDependencyManager {
                                             @NotNull String type,
                                             boolean checkVersionChange) {
         def markerFile = new File(cacheDirectory, "markerFile")
-        if (checkVersionChange && markerFile.exists()) {
+        if (isCacheUpToDate(zipFile, markerFile, checkVersionChange)) {
+            return
+        }
+
+        if (cacheDirectory.exists()) cacheDirectory.deleteDir()
+        cacheDirectory.mkdir()
+
+        LOG.debug("Unzipping ${zipFile.name}")
+        project.copy {
+            it.from(project.zipTree(zipFile))
+            it.into(cacheDirectory)
+        }
+        resetExecutablePermissions(cacheDirectory, type)
+
+        storeCache(cacheDirectory, markerFile)
+        LOG.debug("Unzipped")
+    }
+
+    private static boolean isCacheUpToDate(File zipFile, File markerFile, boolean checkVersion) {
+        if (checkVersion && markerFile.exists()) {
             def zip = new ZipFile(zipFile)
             def entry = zip.getEntry("build.txt")
             if (entry != null && zip.getInputStream(entry).text.trim() != markerFile.text.trim()) {
-                markerFile.delete()
+                return false
             }
             zip.close()
         }
-        if (!markerFile.exists()) {
-            if (cacheDirectory.exists()) cacheDirectory.deleteDir()
-            cacheDirectory.mkdir()
-            LOG.debug("Unzipping ${zipFile.name}")
-            project.copy {
-                it.from(project.zipTree(zipFile))
-                it.into(cacheDirectory)
-            }
-            resetExecutablePermissions(cacheDirectory, type)
-            markerFile.createNewFile()
+        return markerFile.exists()
+    }
 
-            def buildTxt = new File(cacheDirectory, "build.txt")
-            if (buildTxt.exists()) {
-                markerFile.text = buildTxt.text.trim()
-            }
-            LOG.debug("Unzipped")
+    private static void storeCache(File directoryToCache, File markerFile) {
+        markerFile.createNewFile()
+        def buildTxt = new File(directoryToCache, "build.txt")
+        if (buildTxt.exists()) {
+            markerFile.text = buildTxt.text.trim()
         }
     }
 
