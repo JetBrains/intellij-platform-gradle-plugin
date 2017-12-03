@@ -16,6 +16,8 @@ import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 
+import java.util.zip.ZipFile
+
 import static org.jetbrains.intellij.IntelliJPlugin.LOG
 
 class IdeaDependencyManager {
@@ -49,7 +51,7 @@ class IdeaDependencyManager {
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
         def configuration = project.configurations.detachedConfiguration(dependency)
 
-        def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type)
+        def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
         LOG.info("IntelliJ IDEA dependency cache directory: $classesDirectory")
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
@@ -121,12 +123,14 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    private static File extractClassesFromRemoteDependency(
-            @NotNull Project project, @NotNull Configuration configuration, @NotNull String type) {
+    private static File extractClassesFromRemoteDependency(@NotNull Project project,
+                                                           @NotNull Configuration configuration,
+                                                           @NotNull String type,
+                                                           @NotNull String version) {
         File zipFile = configuration.singleFile
         LOG.debug("IDEA zip: " + zipFile.path)
         def cacheDirectory = getZipCacheDirectory(zipFile, project, type)
-        unzipDependencyFile(cacheDirectory, project, zipFile, type)
+        unzipDependencyFile(cacheDirectory, project, zipFile, type, version.endsWith("-SNAPSHOT"))
         return cacheDirectory
     }
 
@@ -178,7 +182,7 @@ class IdeaDependencyManager {
                 if (depFile.name.endsWith(".zip")) {
                     def cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
                     LOG.debug("IDEA extra dependency $name: " + cacheDirectory.path)
-                    unzipDependencyFile(cacheDirectory, project, depFile, "IC")
+                    unzipDependencyFile(cacheDirectory, project, depFile, "IC", version.endsWith("-SNAPSHOT"))
                     return cacheDirectory
                 } else {
                     LOG.debug("IDEA extra dependency $name: " + depFile.path)
@@ -196,8 +200,17 @@ class IdeaDependencyManager {
     private static void unzipDependencyFile(@NotNull File cacheDirectory,
                                             @NotNull Project project,
                                             @NotNull File zipFile,
-                                            @NotNull String type) {
+                                            @NotNull String type,
+                                            boolean checkVersionChange) {
         def markerFile = new File(cacheDirectory, "markerFile")
+        if (checkVersionChange && markerFile.exists()) {
+            def zip = new ZipFile(zipFile)
+            def entry = zip.getEntry("build.txt")
+            if (entry != null && zip.getInputStream(entry).text.trim() != markerFile.text.trim()) {
+                markerFile.delete()
+            }
+            zip.close()
+        }
         if (!markerFile.exists()) {
             if (cacheDirectory.exists()) cacheDirectory.deleteDir()
             cacheDirectory.mkdir()
@@ -208,6 +221,11 @@ class IdeaDependencyManager {
             }
             resetExecutablePermissions(cacheDirectory, type)
             markerFile.createNewFile()
+
+            def buildTxt = new File(cacheDirectory, "build.txt")
+            if (buildTxt.exists()) {
+                markerFile.text = buildTxt.text.trim()
+            }
             LOG.debug("Unzipped")
         }
     }
