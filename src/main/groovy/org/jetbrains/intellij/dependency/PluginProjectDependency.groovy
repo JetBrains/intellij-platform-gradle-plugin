@@ -1,7 +1,7 @@
 package org.jetbrains.intellij.dependency
 
-import com.intellij.structure.plugin.PluginCreationSuccess
-import com.intellij.structure.plugin.PluginManager
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import groovy.transform.ToString
 import org.gradle.api.Project
 import org.jetbrains.annotations.NotNull
@@ -24,7 +24,7 @@ class PluginProjectDependency implements PluginDependency, Serializable {
     @Lazy
     private transient PluginDependencyImpl pluginDependency = {
         if (pluginDirectory.exists()) {
-            def creationResult = PluginManager.instance.createPlugin(pluginDirectory)
+            def creationResult = IdePluginManager.createManager().createPlugin(pluginDirectory)
             if (creationResult instanceof PluginCreationSuccess) {
                 def intellijPlugin = creationResult.plugin
                 def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, pluginDirectory)

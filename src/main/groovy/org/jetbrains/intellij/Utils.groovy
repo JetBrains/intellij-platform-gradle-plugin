@@ -1,7 +1,7 @@
 package org.jetbrains.intellij
 
 import com.google.common.base.Predicate
-import com.intellij.structure.impl.utils.StringUtil
+import com.jetbrains.plugin.structure.intellij.utils.StringUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter

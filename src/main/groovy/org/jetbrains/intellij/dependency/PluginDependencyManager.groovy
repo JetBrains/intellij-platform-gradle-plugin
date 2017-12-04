@@ -1,10 +1,10 @@
 package org.jetbrains.intellij.dependency
 
-import com.intellij.structure.impl.utils.StringUtil
-import com.intellij.structure.plugin.PluginCreationFail
-import com.intellij.structure.plugin.PluginCreationSuccess
-import com.intellij.structure.plugin.PluginManager
-import com.intellij.structure.problems.PluginProblem
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.base.plugin.PluginProblem
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import com.jetbrains.plugin.structure.intellij.utils.StringUtil
 import org.gradle.api.Project
 import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
@@ -211,7 +211,7 @@ class PluginDependencyManager {
     }
 
     private static externalPluginDependency(@NotNull File artifact, @Nullable String channel) {
-        def creationResult = PluginManager.instance.createPlugin(artifact)
+        def creationResult = IdePluginManager.createManager().createPlugin(artifact)
         if (creationResult instanceof PluginCreationSuccess) {
             def intellijPlugin = creationResult.plugin
             def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)

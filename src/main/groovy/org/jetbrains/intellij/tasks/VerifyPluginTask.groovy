@@ -1,9 +1,9 @@
 package org.jetbrains.intellij.tasks
 
-import com.intellij.structure.plugin.PluginCreationFail
-import com.intellij.structure.plugin.PluginCreationSuccess
-import com.intellij.structure.plugin.PluginManager
-import com.intellij.structure.problems.PluginProblem
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.base.plugin.PluginProblem
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
@@ -58,7 +58,7 @@ class VerifyPluginTask extends ConventionTask implements VerificationTask {
     @TaskAction
     void verifyPlugin() {
         boolean failBuild = true
-        def creationResult = PluginManager.instance.createPlugin(getPluginDirectory())
+        def creationResult = IdePluginManager.createManager().createPlugin(getPluginDirectory())
         if (creationResult instanceof PluginCreationSuccess) {
             failBuild = !ignoreWarnings && !creationResult.warnings.empty
         }

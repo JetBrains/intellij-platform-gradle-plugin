@@ -1,7 +1,7 @@
 package org.jetbrains.intellij.dependency
 
 import com.google.common.base.Predicates
-import com.intellij.structure.ide.IdeVersion
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.ToString
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
