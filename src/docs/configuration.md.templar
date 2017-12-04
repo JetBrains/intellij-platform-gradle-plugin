@@ -258,10 +258,9 @@ In addition to that, following attributes may be used to customize IDE running:
 | :-------------------------- | :----------------- |
 | <kbd>jbreVersion</kbd> JetBrains Java version to use | **Acceptable Values:** <kbd>String</kbd> - `'jbrex8u112b752.4'` <br/><br/>All JetBrains Java version are available at [BitTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDEA &lt; 2017.3, <kdb>builtin java version</kdb>  for IDEA &gt;= 2017.3 |
 | <kbd>ideaDirectory</kbd> Path to IDEA distribution | <kdb>path to IDE-dependency<kdb> |
-| <kbd>configDirectory</kbd> Path to configuration directory | <kdb>${intellij.sandboxDirectory}/config</kdb> |
-| <kbd>systemDirectory</kbd> Path to indexes directory | <kdb>${intellij.sandboxDirectory}/system</kdb> |
-| <kbd>pluginsDirectory</kbd> Path to plugins directory | <kdb>${intellij.sandboxDirectory}/plugins</kdb> |
-| <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
+| <kbd>configDirectory</kbd> Path to configuration directory | <kdb>${intellij.sandboxDirectory}/config</kbd> |
+| <kbd>pluginsDirectory</kbd> Path to plugins directory | <kdb>${intellij.sandboxDirectory}/plugins</kbd> |
+| <kbd>systemDirectory</kbd> Path to indexes directory | <kbd>${intellij.sandboxDirectory}/system</kbd> |
 
 ### Patching DSL
 The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
