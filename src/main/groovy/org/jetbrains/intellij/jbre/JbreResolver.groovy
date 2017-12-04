@@ -74,12 +74,12 @@ class JbreResolver {
     }
 
     @Nullable
-    private static def findJavaExecutable(@NotNull File javaHome) {
+    private def findJavaExecutable(@NotNull File javaHome) {
         def java = new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home/jre/bin/java' : 'jre/bin/java')
         return java.exists() ? java.absolutePath : null
     }
 
-    private static def platform() {
+    private def platform() {
         def current = operatingSystem
         if (current.isWindows()) return 'windows'
         if (current.isMacOsX()) return 'osx'
