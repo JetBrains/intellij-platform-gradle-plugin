@@ -12,6 +12,7 @@ intellij {
   pluginName 'MyPlugin' 
  
 } 
+
 publishPlugin { 
   username 'zolotov' 
   password 'password' 
