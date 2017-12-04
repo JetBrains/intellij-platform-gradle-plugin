@@ -50,7 +50,7 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         if (artifact.isDirectory()) {
             File lib = new File(artifact, "lib")
             if (lib.isDirectory()) {
-                jarFiles = Utils.collectJars(lib, Predicates.<File> alwaysTrue(), true)
+                jarFiles = Utils.collectJars(lib, Predicates.<File> alwaysTrue(), false)
             }
             File classes = new File(artifact, "classes")
             if (classes.isDirectory()) {
