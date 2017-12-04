@@ -21,6 +21,7 @@ repositories {
     maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
     maven { url mavenCentralUrl }
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
@@ -29,6 +30,7 @@ dependencies {
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.3.21'
     compile 'org.jetbrains.intellij.plugins:structure-base:2.8'
+    compile 'de.undercouch:gradle-download-task:3.3.0'
 
     testCompile gradleTestKit()
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
@@ -87,6 +89,7 @@ def configureTests(testTask) {
     try {
         if (!testTask.systemProperties['intellij.repo'] && InetAddress.getByName("jetbrains-com-mirror.labs.intellij.net").isReachable(300)) {
             testTask.systemProperties['intellij.repo'] = 'http://jetbrains-com-mirror.labs.intellij.net/intellij-repository'
+            testTask.systemProperties['jbre.repo'] = 'http://repo.labs.intellij.net/intellij-jdk'
         }
     }
     catch (UnknownHostException ignore) {

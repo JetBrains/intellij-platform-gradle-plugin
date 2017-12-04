@@ -15,6 +15,7 @@ class IntelliJPluginExtension {
     String pluginName
     String sandboxDirectory
     String intellijRepo = IntelliJPlugin.DEFAULT_INTELLIJ_REPO
+    String jreRepo = IntelliJPlugin.DEFAULT_JBRE_REPO
     String alternativeIdePath
     String ideaDependencyCachePath
     boolean instrumentCode = true

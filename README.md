@@ -106,7 +106,7 @@ The following attributes are apart of the Setup DSL <kbd>intellij { ... }</kbd> 
 | **Attributes** | **Values** | 
 | :------------- | :--------- | 
 | <kbd>pluginName</kbd> - The name of the target zip-archive and defines the name of plugin artifact.|**Acceptable Values:** <br/><kbd>String</kbd> - `'gradle-intellij-plugin'` <br/><br/>**Default Value:** <kbd>$project.name</kbd>|
-| <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:**    <ul>        <li>Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type.</li>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:**    <ul>        <li><kbd>version #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>        <li><kbd>build #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>        <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>        <li><kbd>'LATEST-TRUNK-SNAPSHOT'</kbd></li>    </ul>**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>|
+| <kbd>version</kbd> - The version of the IDEA distribution that should be used as a dependency. <br/><br/>**Notes:**    <ul>        <li>Value may have `IC-`, `IU-` or `JPS-` prefix in order to define IDEA distribution type.</li>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:**    <ul>        <li><kbd>build #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>        <li><kbd>version #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>        <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>        <li><kbd>'LATEST-TRUNK-SNAPSHOT'</kbd></li>    </ul>**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>|
 | <kbd>type</kbd> - The type of IDEA distribution.|**Acceptable Values:**    <ul>        <li><kbd>'IC'</kbd> - Community Edition. </li>        <li><kbd>'IU'</kbd> - Ultimate Edition. </li>        <li><kbd>'JPS'</kbd> - JPS-only. </li>        <li><kbd>'RD'</kbd> - Rider.</li>    </ul>**Default Value:** <kbd>'IC'</kbd>|
 | <kbd>plugins</kbd> -The list of bundled IDEA plugins and plugins from the [IDEA repository](https://plugins.jetbrains.com/). <br/><br/>**Notes:**    <ul>        <li>Mix and match all types of acceptable values.</li>        <li>Can be in the form of a `Groovy List` or `comma-separated list`.<br/>`['plugin1', 'plugin2']` or `'plugin1', 'plugin2'`</li><br/>        <li>For plugins from the IDEA repository use `format 1`.</li>        <li>For bundled plugins from the project use `format 2`.</li>        <li>For sub-projects use `format 3`.</li>    </ul>|**Acceptable Values:**    <ol>        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`'org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly'`</li>        <li><kbd>bundledPluginName</kbd><br/>`'android', 'Groovy'`</li>        <li><kbd>project(':projectName')</kbd><br/>`project(':plugin-subproject')`</li>    </ol>**Default Value\:** none|
 | <kbd>updateSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with since and until build values? <br/><br/>**Notes:**    <ul>        <li>If `true` then user-defined values from `patchPluginXml.sinceBuild` and `patchPluginXml.untilBuild` will be used (or their default values if none set). </li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd>|
@@ -127,6 +127,22 @@ The following attributes are apart of the Setup DSL <kbd>intellij { ... }</kbd> 
 |<kbd>systemProperties</kbd> - The map of system properties which will be passed to IDEA instance on executing `runIdea` task and tests. <br/><br/>**Notes:**    <ul>        <li>Use `systemProperties` methods of a particular tasks like `runIde` or `test`.</li>    </ul>|**Acceptable Values:** <br/><br/>**Default Value:** <kbd>[]</kbd>|
 
 </details>
+
+### Running DSL
+
+`runIde` task extends [JavaExec](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html) Gradle task,
+all configuration attributes of `JavaExec` task can be used in `runIde` as well.
+
+In addition to that, following attributes may be used to customize IDE running:
+
+| **Attributes**              | **Default Value**  |
+| :-------------------------- | :----------------- |
+| <kbd>jbreVersion</kbd> JetBrains Java version to use | **Acceptable Values:** <kbd>String</kbd> - `'jbrex8u112b752.4'` <br/><br/>All JetBrains Java version are available at [BitTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDEA &lt; 2017.3, <kdb>builtin java version</kdb>  for IDEA &gt;= 2017.3 |
+| <kbd>ideaDirectory</kbd> Path to IDEA distribution | <kdb>path to IDE-dependency<kdb> |
+| <kbd>configDirectory</kbd> Path to configuration directory | <kdb>${intellij.sandboxDirectory}/config</kdb> |
+| <kbd>systemDirectory</kbd> Path to indexes directory | <kdb>${intellij.sandboxDirectory}/system</kdb> |
+| <kbd>pluginsDirectory</kbd> Path to plugins directory | <kdb>${intellij.sandboxDirectory}/plugins</kdb> |
+| <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
 ### Patching DSL
 The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
@@ -179,6 +195,7 @@ intellij {
   pluginName 'MyPlugin' 
  
 } 
+
 publishPlugin { 
   username 'zolotov' 
   password 'password' 

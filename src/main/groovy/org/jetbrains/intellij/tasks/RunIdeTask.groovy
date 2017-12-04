@@ -1,12 +1,11 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.Utils
+import org.jetbrains.intellij.jbre.JbreResolver
 
 class RunIdeTask extends JavaExec {
     private static final def PREFIXES = [IU: null,
@@ -30,6 +29,7 @@ class RunIdeTask extends JavaExec {
     private Object configDirectory
     private Object systemDirectory
     private Object pluginsDirectory
+    private Object jbreVersion
 
     List<String> getRequiredPluginIds() {
         CollectionUtils.stringize(requiredPluginIds.collect {
@@ -44,6 +44,20 @@ class RunIdeTask extends JavaExec {
 
     void requiredPluginIds(Object... requiredPluginIds) {
         this.requiredPluginIds.addAll(requiredPluginIds as List)
+    }
+
+    @Input
+    @Optional
+    String getJbreVersion() {
+        Utils.stringInput(jbreVersion)
+    }
+
+    void setJbreVersion(Object jbreVersion) {
+        this.jbreVersion = jbreVersion
+    }
+
+    void jbreVersion(Object jbreVersion) {
+        this.jbreVersion = jbreVersion
     }
 
     @InputDirectory
@@ -106,10 +120,18 @@ class RunIdeTask extends JavaExec {
     @Override
     void exec() {
         workingDir = project.file("${getIdeaDirectory()}/bin/")
+        configureJbre()
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
         super.exec()
+    }
+
+    private void configureJbre() {
+        def jvm = new JbreResolver(project).resolve(getJbreVersion())
+        if (jvm != null) {
+            executable(jvm)
+        }
     }
 
     private void configureClasspath() {
