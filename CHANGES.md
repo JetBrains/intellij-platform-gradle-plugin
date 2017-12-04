@@ -6,6 +6,7 @@
 - default values of `runIde` task are propagated to all RunIdeaTask-like tasks
 - enhanced plugins resolution: better error messages for unresolved dependencies and fixes [#247](../../issues/247)
 - check build number to decide whether the unzipped distribution can be reused (fixes [#234](../../issues/234)
+- download JetBrains Java runtime and use it while running IDE (fixes [#192](../../issues/192)
 
 ## 0.2.18
 

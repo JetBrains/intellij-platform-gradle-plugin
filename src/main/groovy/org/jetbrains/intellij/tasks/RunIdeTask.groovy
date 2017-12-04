@@ -128,7 +128,7 @@ class RunIdeTask extends JavaExec {
     }
 
     private void configureJbre() {
-        def jvm = new JbreResolver(project).resolve(getJbreVersion())
+        def jvm = new JbreResolver(project).resolve(getJbreVersion() ?: getBuiltinJbreVersion())
         if (jvm != null) {
             executable(jvm)
         }
@@ -182,5 +182,23 @@ class RunIdeTask extends JavaExec {
 
     def configureJvmArgs() {
         jvmArgs = Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory())
+    }
+
+    private String getBuiltinJbreVersion() {
+        def dependenciesFile = new File(getIdeaDirectory(), "dependencies.txt")
+        if (dependenciesFile.exists()) {
+            def properties = new Properties()
+            def reader = new FileReader(dependenciesFile)
+            try {
+                properties.load(reader)
+                return properties.getProperty('jdkBuild')
+            }
+            catch (IOException ignore) {
+            }
+            finally {
+                reader.close()
+            }
+        }
+        return null
     }
 }
