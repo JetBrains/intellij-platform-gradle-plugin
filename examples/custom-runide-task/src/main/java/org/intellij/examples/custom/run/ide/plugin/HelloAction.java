@@ -1,4 +1,4 @@
-package org.intellij.examples.dependencies.plugin;
+package org.intellij.examples.custom.run.ide.plugin;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.AnAction;
