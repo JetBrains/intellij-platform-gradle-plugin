@@ -13,7 +13,6 @@ import java.util.zip.ZipFile
 
 abstract class IntelliJPluginSpecBase extends Specification {
     protected final String gradleHome = System.properties.get('test.gradle.home')
-    protected String intellijRepo = System.properties.get('intellij.repo', '')
     protected String jbreRepo = System.properties.get('jbre.repo', '')
 
     String getIntellijVersion() {
@@ -45,7 +44,6 @@ abstract class IntelliJPluginSpecBase extends Specification {
             intellij {
                 version = '$intellijVersion'
                 downloadSources = false
-                intellijRepo = '$intellijRepo'
                 jreRepo = '$jbreRepo'
             }
 
