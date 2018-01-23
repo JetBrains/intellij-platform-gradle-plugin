@@ -11,6 +11,7 @@
 
 ## 0.2.18
 
+- update default repository url
 - support for running GoLand 
 
 ## 0.2.17

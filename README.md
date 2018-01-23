@@ -1,4 +1,4 @@
-[![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.2.17-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
+[![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.2.18-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
 
 > **This project requires JVM version of at least 1.7**
 
@@ -249,7 +249,7 @@ As examples of using this plugin you can check out following projects:
 
 
 ```
-Copyright 2017 org.jetbrains.intellij.plugins
+Copyright 2018 org.jetbrains.intellij.plugins
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
