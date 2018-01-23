@@ -13,7 +13,6 @@ import java.util.zip.ZipFile
 
 abstract class IntelliJPluginSpecBase extends Specification {
     protected final String gradleHome = System.properties.get('test.gradle.home')
-    protected String intellijRepo = System.properties.get('intellij.repo', '')
 
     @Rule
     final TemporaryFolder dir = new TemporaryFolder()
@@ -40,7 +39,6 @@ abstract class IntelliJPluginSpecBase extends Specification {
             intellij {
                 version = '14.1.3'
                 downloadSources = false
-                intellijRepo = '$intellijRepo'
             }
 
             // Define tasks with a minmal set of tasks required to build a source set

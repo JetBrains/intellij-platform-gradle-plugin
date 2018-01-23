@@ -82,15 +82,6 @@ def configureTests(testTask) {
     }
     testTask.systemProperties['test.gradle.home'] = testGradleHomePath
     testTask.outputs.dir(testGradleHomePath)
-
-    testTask.systemProperties['intellij.repo'] = System.getProperty('intellij.repo')
-    try {
-        if (!testTask.systemProperties['intellij.repo'] && InetAddress.getByName("jetbrains-com-mirror.labs.intellij.net").isReachable(300)) {
-            testTask.systemProperties['intellij.repo'] = 'http://jetbrains-com-mirror.labs.intellij.net/intellij-repository'
-        }
-    }
-    catch (UnknownHostException ignore) {
-    }
 }
 
 task javadocJar(type: Jar) {
