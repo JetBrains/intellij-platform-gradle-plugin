@@ -27,7 +27,6 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             intellij {
                 version = '14.1.3'
                 downloadSources = false
-                intellijRepo = '$intellijRepo'
                 pluginName = 'myNestedPluginName'
             }
             version='0.42.123'"""
