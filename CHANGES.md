@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.2.18
+
+- updated default repository url
+
+## 0.2.17
+
+- fix compatibility with Gradle 4.0 new versions of Kotlin and Scala plugins (fixes #221 and #222)
+
 ## 0.2.16
 
 - automatically set system properties for debugging Resharper
