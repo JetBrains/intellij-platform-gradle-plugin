@@ -14,6 +14,7 @@ import java.util.zip.ZipFile
 abstract class IntelliJPluginSpecBase extends Specification {
     protected final String gradleHome = System.properties.get('test.gradle.home')
     protected String jbreRepo = System.properties.get('jbre.repo', '')
+    protected String pluginsRepo = System.properties.get('plugins.repo', IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO)
 
     String getIntellijVersion() {
         return '14.1.3'
@@ -45,6 +46,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
                 version = '$intellijVersion'
                 downloadSources = false
                 jreRepo = '$jbreRepo'
+                pluginsRepo = '$pluginsRepo'
             }
 
             // Define tasks with a minimal set of tasks required to build a source set

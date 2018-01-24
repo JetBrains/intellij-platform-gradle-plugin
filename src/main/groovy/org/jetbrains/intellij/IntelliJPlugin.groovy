@@ -46,6 +46,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/~urlswitch/intellij-repository'
     public static final String DEFAULT_JBRE_REPO = 'https://dl.bintray.com/jetbrains/intellij-jdk'
+    public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://plugins.jetbrains.com'
 
     @Override
     void apply(Project project) {
@@ -186,7 +187,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA plugin dependencies")
         def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-        def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
+        def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency, extension.pluginsRepo)
         extension.plugins.each {
             LOG.info("Configuring IntelliJ plugin $it")
             if (it instanceof Project) {

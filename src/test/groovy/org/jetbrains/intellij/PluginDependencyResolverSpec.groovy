@@ -5,7 +5,7 @@ import org.jetbrains.intellij.dependency.PluginDependencyManager
 class PluginDependencyResolverSpec extends IntelliJPluginSpecBase {
     def 'find jar-type plugin'() {
         given:
-        def manager = new PluginDependencyManager(gradleHome, null)
+        def manager = new PluginDependencyManager(gradleHome, null, pluginsRepo)
 
         when:
         def plugin = manager.resolve('org.jetbrains.postfixCompletion', '0.8-beta', null)
@@ -19,7 +19,7 @@ class PluginDependencyResolverSpec extends IntelliJPluginSpecBase {
 
     def 'find zip-type plugin'() {
         given:
-        def manager = new PluginDependencyManager(gradleHome, null)
+        def manager = new PluginDependencyManager(gradleHome, null, pluginsRepo)
 
         when:
         def plugin = manager.resolve('org.intellij.plugins.markdown', '8.5.0.20160208', null)

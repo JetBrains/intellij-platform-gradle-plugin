@@ -23,8 +23,6 @@ import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 
 class PluginDependencyManager {
-    public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://plugins.jetbrains.com'
-
     private final String cacheDirectoryPath
     private final String repositoryHost
     private final IdeaDependency ideaDependency
@@ -32,8 +30,9 @@ class PluginDependencyManager {
     private boolean repoRegistered
     private Set<String> pluginSources = new HashSet<>()
 
-    PluginDependencyManager(@NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency) {
-        this.repositoryHost = DEFAULT_INTELLIJ_PLUGINS_REPO
+    PluginDependencyManager(
+            @NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency, @NotNull String pluginRepoUrl) {
+        this.repositoryHost = pluginRepoUrl
         this.ideaDependency = ideaDependency
 
         def host = StringUtil.trimStart(StringUtil.trimStart(StringUtil.trimStart(repositoryHost, 'http://'), 'https://'), 'www')

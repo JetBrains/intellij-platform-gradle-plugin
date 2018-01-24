@@ -84,6 +84,7 @@ def configureTests(testTask) {
         new File(testGradleHomePath).mkdir()
     }
     testTask.systemProperties['test.gradle.home'] = testGradleHomePath
+    testTask.systemProperties['plugins.repo'] = pluginsRepo
     testTask.outputs.dir(testGradleHomePath)
 
     try {

@@ -10,12 +10,11 @@ import org.gradle.api.tasks.*
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
-import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class PublishTask extends ConventionTask {
     private Object distributionFile
-    private Object host = PluginDependencyManager.DEFAULT_INTELLIJ_PLUGINS_REPO
+    private Object host = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO
     private Object username
     private Object password
     private List<Object> channels = new ArrayList<Object>()
