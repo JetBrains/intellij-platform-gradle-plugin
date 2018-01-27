@@ -2,58 +2,60 @@
 # Usage
  
 ## Gradle 
- 
-```groovy 
-plugins { 
-  id "org.jetbrains.intellij" version "0.2.17" 
-} 
-``` 
+pre}
+{\n}{\n}```groovy{\n}
+plugins {{{\n}
+  id "org.jetbrains.intellij" version "{version}"{\n}
+}{\n}
+```{\n}
+{pre
  
 ### Other Setups 
  
 <details> 
 <summary><b>Pre Gradle 2.1</b> - Use the following code when Gradle is not at version 2.1 or higher <em>(Click to expand)</em>...</summary> 
- 
-```groovy 
-buildscript { 
-  repositories { 
-    maven { 
-      url "https://plugins.gradle.org/m2/" 
-    } 
-  } 
-  dependencies { 
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.17" 
-  } 
-} 
- 
-apply plugin: 'org.jetbrains.intellij' 
-``` 
+pre}
+{\n}{\n}```groovy{\n}
+buildscript {{{\n}
+  repositories {{{\n}
+    maven {{{\n}
+      url "https://plugins.gradle.org/m2/"{\n}
+    }{\n}
+  }{\n}
+  dependencies {{{\n}
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:{version}"{\n}
+  }{\n}
+}{\n}
+{\n}
+apply plugin: 'org.jetbrains.intellij'{\n}
+```{\n}
+{pre
  
 </details> 
  
 <details> 
 <summary><b>SNAPSHOT</b> - Use the following code to get the lastest features <em>(Click to expand)</em>...</summary> 
- 
- ```groovy 
-buildscript { 
-  repositories { 
-    mavenCentral() 
-    maven { 
-      url "https://oss.sonatype.org/content/repositories/snapshots/" 
-    } 
-    maven { 
-      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'  
-    } 
-     
-  } 
-  dependencies { 
-    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.0-SNAPSHOT" 
-  } 
-} 
- 
-apply plugin: 'org.jetbrains.intellij' 
-``` 
- 
+pre}
+{\n}{\n}```groovy{\n}
+buildscript {{{\n}
+  repositories {{{\n}
+    mavenCentral(){\n}
+    maven {{{\n}
+      url "https://oss.sonatype.org/content/repositories/snapshots/"{\n}
+    }{\n}
+    maven {{ {\n}
+      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' {\n}
+    }{\n}
+    {\n}
+  }{\n}
+  dependencies {{{\n}
+    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:{snapshotVersion}-SNAPSHOT"{\n}
+  }{\n}
+}{\n}
+{\n}
+apply plugin: 'org.jetbrains.intellij'{\n}
+```{\n}
+{pre 
 </details>
 
 

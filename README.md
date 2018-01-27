@@ -22,58 +22,58 @@ helpful while developing plugins for IntelliJ platform.
 # Usage
  
 ## Gradle 
- 
-```groovy 
-plugins { 
-  id "org.jetbrains.intellij" version "0.2.17" 
-} 
-``` 
+
+```groovy
+plugins {
+  id "org.jetbrains.intellij" version "0.2.18"
+}
+```
  
 ### Other Setups 
  
 <details> 
 <summary><b>Pre Gradle 2.1</b> - Use the following code when Gradle is not at version 2.1 or higher <em>(Click to expand)</em>...</summary> 
- 
-```groovy 
-buildscript { 
-  repositories { 
-    maven { 
-      url "https://plugins.gradle.org/m2/" 
-    } 
-  } 
-  dependencies { 
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.17" 
-  } 
-} 
- 
-apply plugin: 'org.jetbrains.intellij' 
-``` 
+
+```groovy
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+  dependencies {
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.18"
+  }
+}
+
+apply plugin: 'org.jetbrains.intellij'
+```
  
 </details> 
  
 <details> 
 <summary><b>SNAPSHOT</b> - Use the following code to get the lastest features <em>(Click to expand)</em>...</summary> 
- 
- ```groovy 
-buildscript { 
-  repositories { 
-    mavenCentral() 
+
+```groovy
+buildscript {
+  repositories {
+    mavenCentral()
+    maven {
+      url "https://oss.sonatype.org/content/repositories/snapshots/"
+    }
     maven { 
-      url "https://oss.sonatype.org/content/repositories/snapshots/" 
-    } 
-    maven { 
-      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service'  
-    } 
-     
-  } 
-  dependencies { 
-    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.0-SNAPSHOT" 
-  } 
-} 
- 
-apply plugin: 'org.jetbrains.intellij' 
-``` 
- 
+      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' 
+    }
+    
+  }
+  dependencies {
+    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.0-SNAPSHOT"
+  }
+}
+
+apply plugin: 'org.jetbrains.intellij'
+```
+
 </details>
 
 ### Tasks
@@ -181,26 +181,26 @@ The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ..
 
 </details>
 
-### build.gradle 
- 
-```groovy 
-plugins { 
-  id "org.jetbrains.intellij" version "0.2.17"
-} 
- 
-intellij { 
-  version 'IC-2016.1' 
-  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208'] 
-  pluginName 'MyPlugin' 
- 
-} 
+### build.gradle
 
-publishPlugin { 
-  username 'zolotov' 
-  password 'password' 
-  channels 'nightly' 
-}  
+```groovy
+plugins {
+  id "org.jetbrains.intellij" version "0.2.18"
+}
+
+intellij {
+  version 'IC-2016.1'
+  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
+  pluginName 'MyPlugin'
+
+}
+publishPlugin {
+  username 'zolotov'
+  password 'password'
+  channels 'nightly'
+} 
 ```
+
 # Getting started
 
 Here is [the manual](http://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
