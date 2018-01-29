@@ -104,7 +104,7 @@ class Utils {
         if (options.maxHeapSize == null) options.maxHeapSize = "512m"
         if (options.minHeapSize == null) options.minHeapSize = "256m"
         boolean hasPermSizeArg = false
-        def result = []
+        List<String> result = []
         for (String arg : originalArguments) {
             if (arg.startsWith("-XX:MaxPermSize")) {
                 hasPermSizeArg = true
@@ -112,7 +112,8 @@ class Utils {
             result += arg
         }
 
-        result += "-Xbootclasspath/a:${ideaDirectory.absolutePath}/lib/boot.jar"
+        def bootJar = new File(ideaDirectory, "lib/boot.jar")
+        if (bootJar.exists()) result += "-Xbootclasspath/a:$bootJar.absolutePath"
         if (!hasPermSizeArg) result += "-XX:MaxPermSize=250m"
         return result
     }
