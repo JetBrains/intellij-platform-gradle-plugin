@@ -113,7 +113,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         assertPathParameters(testCommand, sandboxPath)
         !testCommand.properties.containsKey('idea.required.plugins.id')
 
-        testCommand.xclasspath.endsWith('/lib/boot.jar')
+        new File(testCommand.xclasspath).name == 'boot.jar'
+        new File(testCommand.xclasspath).parentFile.name == 'lib'
         testCommand.xms == '256m'
         testCommand.xmx == '512m'
         testCommand.permGen == '250m'
