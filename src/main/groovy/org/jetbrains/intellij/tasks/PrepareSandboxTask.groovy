@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPlugin
@@ -115,16 +114,6 @@ class PrepareSandboxTask extends Sync {
 
             def result = [getPluginJar()]
             runtimeConfiguration.getAllDependencies().each {
-                if (it instanceof ProjectDependency) {
-                    def dependencyProject = it.dependencyProject
-                    def intelliJPlugin = dependencyProject.plugins.findPlugin(IntelliJPlugin)
-                    if (intelliJPlugin != null) {
-                        if (!Utils.sourcePluginXmlFiles(dependencyProject).isEmpty()) {
-                            IntelliJPlugin.LOG.debug(":${dependencyProject.name} project is IntelliJ-plugin project and won't be packed into the target distribution")
-                            return
-                        }
-                    }
-                }
                 result.addAll(runtimeConfiguration.fileCollection(it).filter {
                     if (librariesToIgnore.contains(it)) {
                         return false
