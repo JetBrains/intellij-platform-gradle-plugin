@@ -324,15 +324,15 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ compile tasks")
-        def instrumentCode = { extension.instrumentCode && extension.type != 'RS' && extension.type != 'RD' }
         project.sourceSets.all { SourceSet sourceSet ->
             def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
             instrumentTask.sourceSet = sourceSet
             instrumentTask.with {
                 dependsOn sourceSet.classesTaskName
-                onlyIf instrumentCode
+                onlyIf { extension.instrumentCode && it.getJavac2().exists() }
 
                 conventionMapping('ideaDependency', { extension.ideaDependency })
+                conventionMapping('javac2', { project.file("$extension.ideaDependency.classes/lib/javac2.jar") })
                 conventionMapping('outputDir', {
                     def output = sourceSet.output
                     def classesDir = output.hasProperty('classesDirs') ?
@@ -345,7 +345,7 @@ class IntelliJPlugin implements Plugin<Project> {
             def updateTask = project.tasks.create('post' + instrumentTask.name.capitalize())
             updateTask.with {
                 dependsOn instrumentTask
-                onlyIf instrumentCode
+                onlyIf { extension.instrumentCode && instrumentTask.getJavac2().exists() }
 
                 doLast {
                     def sourceSetOutput = sourceSet.output

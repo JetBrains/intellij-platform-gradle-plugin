@@ -8,6 +8,7 @@
 - check build number to decide whether the unzipped distribution can be reused (fixes [#234](../../issues/234)
 - download JetBrains Java runtime and use it while running IDE (fixes [#192](../../issues/192)
 - do not include plugin's jars recursively (fixes [#231](../../issues/231)
+- allow to add custom Javac2.jar to `instrumentCode` task
 
 ## 0.2.18
 

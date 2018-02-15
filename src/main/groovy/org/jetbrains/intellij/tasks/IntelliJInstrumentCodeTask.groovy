@@ -1,7 +1,6 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.BuildException
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.internal.ConventionTask
@@ -18,6 +17,8 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
     @Input
     IdeaDependency ideaDependency
 
+    Object javac2
+
     @OutputDirectory
     File outputDir
 
@@ -28,6 +29,19 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         return output.hasProperty("classesDirs") ?
                 project.files(output.classesDirs.from).asFileTree :
                 project.fileTree(output.classesDir)
+    }
+
+    @InputFile
+    File getJavac2() {
+        javac2 != null ? project.file(javac2) : null
+    }
+
+    void setJavac2(Object javac2) {
+        this.javac2 = javac2
+    }
+
+    void javac2(Object javac2) {
+        this.javac2 = javac2
     }
 
     @InputFiles
@@ -43,7 +57,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
 
         def ideaDependency = getIdeaDependency()
         def classpath = project.files(
-                "$ideaDependency.classes/lib/javac2.jar",
+                getJavac2(),
                 "$ideaDependency.classes/lib/jdom.jar",
                 "$ideaDependency.classes/lib/asm-all.jar",
                 "$ideaDependency.classes/lib/jgoodies-forms.jar")
@@ -67,7 +81,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         }
     }
 
-    private boolean prepareNotNullInstrumenting(@NotNull ConfigurableFileCollection classpath) {
+    private boolean prepareNotNullInstrumenting(@NotNull FileCollection classpath) {
         try {
             ant.typedef(name: 'skip', classpath: classpath.asPath, loaderref: LOADER_REF,
                     classname: FILTER_ANNOTATION_REGEXP_CLASS)

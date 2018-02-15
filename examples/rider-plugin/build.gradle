@@ -1,3 +1,7 @@
 intellij {
-    version 'RD-LATEST-TRUNK-SNAPSHOT'
+    version 'RD-173.3994.2442'
+}
+
+instrumentCode {
+    javac2 project.file('lib/javac2.jar')
 }
