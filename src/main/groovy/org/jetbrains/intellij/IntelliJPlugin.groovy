@@ -24,6 +24,7 @@ import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginProjectDependency
+import org.jetbrains.intellij.jbre.JbreResolver
 import org.jetbrains.intellij.tasks.*
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -303,22 +304,29 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Configuring run IntelliJ task")
         project.tasks.create(RUN_IDE_TASK_NAME, RunIdeTask)
         //noinspection GroovyAssignabilityCheck
-        project.tasks.withType(RunIdeTask) { RunIdeTask it ->
-            it.group = GROUP_NAME
-            it.description = "Runs Intellij IDEA with installed plugin."
-            it.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
-            it.conventionMapping.map("systemProperties", { extension.systemProperties })
-            it.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
-            it.conventionMapping.map("configDirectory", {
+        project.tasks.withType(RunIdeTask) { RunIdeTask task ->
+            task.group = GROUP_NAME
+            task.description = "Runs Intellij IDEA with installed plugin."
+            task.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
+            task.conventionMapping.map("systemProperties", { extension.systemProperties })
+            task.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
+            task.conventionMapping.map("configDirectory", {
                 (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getConfigDirectory()
             })
-            it.conventionMapping.map("pluginsDirectory", {
+            task.conventionMapping.map("pluginsDirectory", {
                 (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getDestinationDir()
             })
-            it.conventionMapping.map("systemDirectory", {
+            task.conventionMapping.map("systemDirectory", {
                 project.file(Utils.systemDir(extension.sandboxDirectory, false))
             })
-            it.dependsOn(PREPARE_SANDBOX_TASK_NAME)
+            task.conventionMapping("executable", {
+                def jbreVersion = task.getJbreVersion()
+                def jbreResolver = new JbreResolver(project)
+                def jbre = jbreResolver.resolve(jbreVersion)
+                return jbre != null ? jbre : jbreResolver.resolve(Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension)))
+            })
+
+            task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
         }
     }
 

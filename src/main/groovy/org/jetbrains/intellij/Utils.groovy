@@ -234,4 +234,22 @@ class Utils {
             }
         }, recursively ? TrueFileFilter.INSTANCE : FalseFileFilter.FALSE)
     }
+
+    static String getBuiltinJbreVersion(@NotNull File ideaDirectory) {
+        def dependenciesFile = new File(ideaDirectory, "dependencies.txt")
+        if (dependenciesFile.exists()) {
+            def properties = new Properties()
+            def reader = new FileReader(dependenciesFile)
+            try {
+                properties.load(reader)
+                return properties.getProperty('jdkBuild')
+            }
+            catch (IOException ignore) {
+            }
+            finally {
+                reader.close()
+            }
+        }
+        return null
+    }
 }

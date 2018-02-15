@@ -5,7 +5,6 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.Utils
-import org.jetbrains.intellij.jbre.JbreResolver
 
 class RunIdeTask extends JavaExec {
     private static final def PREFIXES = [IU: null,
@@ -120,18 +119,10 @@ class RunIdeTask extends JavaExec {
     @Override
     void exec() {
         workingDir = project.file("${getIdeaDirectory()}/bin/")
-        configureJbre()
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
         super.exec()
-    }
-
-    private void configureJbre() {
-        def jvm = new JbreResolver(project).resolve(getJbreVersion() ?: getBuiltinJbreVersion())
-        if (jvm != null) {
-            executable(jvm)
-        }
     }
 
     private void configureClasspath() {
@@ -182,23 +173,5 @@ class RunIdeTask extends JavaExec {
 
     def configureJvmArgs() {
         jvmArgs = Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory())
-    }
-
-    private String getBuiltinJbreVersion() {
-        def dependenciesFile = new File(getIdeaDirectory(), "dependencies.txt")
-        if (dependenciesFile.exists()) {
-            def properties = new Properties()
-            def reader = new FileReader(dependenciesFile)
-            try {
-                properties.load(reader)
-                return properties.getProperty('jdkBuild')
-            }
-            catch (IOException ignore) {
-            }
-            finally {
-                reader.close()
-            }
-        }
-        return null
     }
 }
