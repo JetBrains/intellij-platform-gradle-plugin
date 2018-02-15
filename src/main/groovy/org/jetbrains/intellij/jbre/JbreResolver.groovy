@@ -55,8 +55,13 @@ class JbreResolver {
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension)
         def repo = intellijExtension != null ? intellijExtension.jreRepo : null
         def url = "${repo ?: IntelliJPlugin.DEFAULT_JBRE_REPO}/$archiveName"
-        new DownloadActionWrapper(project, url, javaArchive.absolutePath).execute()
-        return javaArchive
+        try {
+            new DownloadActionWrapper(project, url, javaArchive.absolutePath).execute()
+            return javaArchive
+        } catch (IOException e) {
+            IntelliJPlugin.LOG.warn("Cannot download JetBrains Java Runtime $artifactName", e)
+            return null
+        }
     }
 
     private void untar(@NotNull File from, @NotNull File to) {
