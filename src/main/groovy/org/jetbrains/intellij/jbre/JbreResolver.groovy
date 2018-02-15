@@ -75,7 +75,8 @@ class JbreResolver {
 
     @Nullable
     private def findJavaExecutable(@NotNull File javaHome) {
-        def java = new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home/jre/bin/java' : 'jre/bin/java')
+        def java = new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home/jre/bin/java' :
+                operatingSystem.isWindows() ? 'jre/bin/java.exe' : 'jre/bin/java')
         return java.exists() ? java.absolutePath : null
     }
 
