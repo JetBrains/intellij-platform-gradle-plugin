@@ -122,6 +122,7 @@ class RunIdeTask extends JavaExec {
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
+        executable(getExecutable())
         super.exec()
     }
 
