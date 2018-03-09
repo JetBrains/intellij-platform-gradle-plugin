@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.19
+
+- Setup project plugin dependency for an already evaluated project (fixes [#238](../../issues/238))
+
 ## 0.2.18
 
 - updated default repository url
@@ -10,7 +14,7 @@
 
 ## 0.2.17
 
-- fix compatibility with Gradle 4.0 new versions of Kotlin and Scala plugins (fixes #221 and #222)
+- fix compatibility with Gradle 4.0 new versions of Kotlin and Scala plugins (fixes [#221](../../issues/221) and [#222](../../issues/222))
 
 ## 0.2.16
 
