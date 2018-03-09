@@ -21,7 +21,7 @@ class JbreResolver {
     }
 
     @Nullable
-    String resolve(@Nullable String version) {
+    Jbre resolve(@Nullable String version) {
         if (version == null) {
             return null
         }
@@ -32,7 +32,7 @@ class JbreResolver {
         def javaDir = new File(cacheDirectoryPath, artifactName)
         if (javaDir.exists()) {
             if (javaDir.isDirectory()) {
-                return findJavaExecutable(javaDir)
+                return new Jbre(version, javaDir, findJavaExecutable(javaDir))
             }
             javaDir.delete()
         }
@@ -41,7 +41,7 @@ class JbreResolver {
         if (javaArchive != null) {
             untar(javaArchive, javaDir)
             javaArchive.delete()
-            return findJavaExecutable(javaDir)
+            return new Jbre(version, javaDir, findJavaExecutable(javaDir))
         }
         return null
     }
