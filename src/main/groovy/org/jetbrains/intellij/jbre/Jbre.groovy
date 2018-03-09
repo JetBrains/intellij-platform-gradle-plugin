@@ -5,9 +5,9 @@ class Jbre {
     final String javaHome
     final String javaExecutable
 
-    Jbre(String version, String javaHome, String javaExecutable) {
+    Jbre(String version, File javaHome, String javaExecutable) {
         this.version = version
-        this.javaHome = javaHome
+        this.javaHome = javaHome.path
         this.javaExecutable = javaExecutable
     }
 }
