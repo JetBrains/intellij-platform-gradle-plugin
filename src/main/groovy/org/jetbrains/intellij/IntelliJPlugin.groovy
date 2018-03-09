@@ -323,7 +323,8 @@ class IntelliJPlugin implements Plugin<Project> {
                 def jbreVersion = task.getJbreVersion()
                 def jbreResolver = new JbreResolver(project)
                 def jbre = jbreResolver.resolve(jbreVersion)
-                return jbre != null ? jbre : jbreResolver.resolve(Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension)))
+                return jbre != null ? jbre.javaExecutable
+                        : jbreResolver.resolve(Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension)))?.javaExecutable
             })
 
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
