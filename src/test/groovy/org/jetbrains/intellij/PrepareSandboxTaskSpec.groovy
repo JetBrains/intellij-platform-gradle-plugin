@@ -49,6 +49,53 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                                                         'META-INF/plugin.xml'] as Set
     }
 
+    def 'prepare sandbox for two plugins with evaluated project'() {
+        given:
+        writeJavaFile()
+        pluginXml << """\
+            <idea-plugin>
+              <id>org.intellij.test.plugin</id>
+              <name>Test Plugin</name>
+              <version>1.0</version>
+              <vendor url="https://jetbrains.com">JetBrains</vendor>
+              <description>test plugin</description>
+              <change-notes/>
+            </idea-plugin>""".stripIndent()
+
+        buildFile << """\
+            allprojects {
+                version='0.42.123'
+                apply plugin: 'org.jetbrains.intellij'
+                intellij { downloadSources = false }
+            }
+            project(':') {
+                intellij.pluginName = 'myPluginName'
+                intellij.plugins = [project(':nestedProject')]
+            }
+            project(':nestedProject') {
+                intellij.pluginName = 'myNestedPluginName'
+            }
+            """.stripIndent()
+        file('settings.gradle') << "include 'nestedProject'"
+        file('nestedProject/src/main/java/NestedAppFile.java') << "class NestedAppFile{}"
+        file('nestedProject/src/main/resources/META-INF/plugin.xml') << pluginXml.text
+
+        when:
+        build(":$IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME")
+
+        then:
+        collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
+                                  '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar',
+                                  '/config/options/updates.xml'] as Set
+
+        def jar = new File(sandbox, '/plugins/myPluginName/lib/projectName-0.42.123.jar')
+        collectPaths(new ZipFile(jar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'App.class', 'META-INF/plugin.xml'] as Set
+
+        def nestedProjectJar = new File(sandbox, '/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar')
+        collectPaths(new ZipFile(nestedProjectJar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'NestedAppFile.class',
+                                                        'META-INF/plugin.xml'] as Set
+    }
+
     def 'prepare sandbox task without plugin_xml'() {
         given:
         writeJavaFile()

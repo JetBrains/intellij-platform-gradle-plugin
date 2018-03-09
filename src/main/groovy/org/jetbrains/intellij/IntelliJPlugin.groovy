@@ -78,6 +78,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePublishPluginTask(project, extension)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
+        assert !project.state.executed : "afterEvaluate is a no-op for an executed project"
         project.afterEvaluate { configureProjectAfterEvaluate(it, extension) }
     }
 
@@ -129,16 +130,11 @@ class IntelliJPlugin implements Plugin<Project> {
             LOG.info("Configuring IntelliJ plugin $it")
             if (it instanceof Project) {
                 project.dependencies.add(IDEA_PLUGINS_CONFIGURATION_NAME, it)
-                it.afterEvaluate {
-                    if (it.plugins.findPlugin(IntelliJPlugin) == null) {
-                        throw new BuildException("Cannot use $it as a plugin dependency. IntelliJ Plugin is not found." + it.plugins, null)
-                    }
-                    def dependency = new PluginProjectDependency(it)
-                    extension.pluginDependencies.add(dependency)
-                    def dependencySandboxTask = it.tasks.findByName(PREPARE_SANDBOX_TASK_NAME)
-                    project.tasks.withType(PrepareSandboxTask).each {
-                        it.dependsOn(dependencySandboxTask)
-                        it.configureCompositePlugin(dependency)
+                if (it.state.executed) {
+                    configureProjectPluginDependency(project, it, extension)
+                } else {
+                    it.afterEvaluate {
+                        configureProjectPluginDependency(project, it, extension)
                     }
                 }
             } else {
@@ -159,6 +155,21 @@ class IntelliJPlugin implements Plugin<Project> {
                     it.configureExternalPlugin(plugin)
                 }
             }
+        }
+    }
+
+    private static void configureProjectPluginDependency(@NotNull Project project,
+                                                         @NotNull Project dependency,
+                                                         @NotNull IntelliJPluginExtension extension) {
+        if (dependency.plugins.findPlugin(IntelliJPlugin) == null) {
+            throw new BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+        }
+        def pluginDependency = new PluginProjectDependency(dependency)
+        extension.pluginDependencies.add(pluginDependency)
+        def dependencySandboxTask = dependency.tasks.findByName(PREPARE_SANDBOX_TASK_NAME)
+        project.tasks.withType(PrepareSandboxTask).each {
+            it.dependsOn(dependencySandboxTask)
+            it.configureCompositePlugin(pluginDependency)
         }
     }
 
