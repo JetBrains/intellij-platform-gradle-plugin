@@ -224,12 +224,19 @@ class IdeaDependencyManager {
 
     private static boolean isCacheUpToDate(File zipFile, File markerFile, boolean checkVersion) {
         if (checkVersion && markerFile.exists()) {
-            def zip = new ZipFile(zipFile)
-            def entry = zip.getEntry("build.txt")
-            if (entry != null && zip.getInputStream(entry).text.trim() != markerFile.text.trim()) {
-                return false
+            def zip
+            try {
+                zip = new ZipFile(zipFile)
+                def entry = zip.getEntry("build.txt")
+                if (entry != null && zip.getInputStream(entry).text.trim() != markerFile.text.trim()) {
+                    return false
+                }
             }
-            zip.close()
+            finally {
+                if (zip) {
+                    zip.close()
+                }
+            }
         }
         return markerFile.exists()
     }
