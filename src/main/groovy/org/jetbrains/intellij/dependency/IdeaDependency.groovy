@@ -42,7 +42,7 @@ class IdeaDependency implements Serializable {
                 return Utils.collectJars(lib, new Predicate<File>() {
                     @Override
                     boolean apply(File file) {
-                        return withKotlin || "kotlin-runtime.jar" != file.name && "kotlin-reflect.jar" != file.name
+                        return withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name)
                     }
                 }, false)
             }
