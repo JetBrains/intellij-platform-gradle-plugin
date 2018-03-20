@@ -295,12 +295,16 @@ class IdeaDependencyManager {
         def configurations = project.configurations
         def closure = {
             if ("org.jetbrains.kotlin" == it.group) {
-                return "kotlin-runtime" == it.name || it.name.startsWith('kotlin-stdlib') || "kotlin-reflect" == it.name
+                return isKotlinRuntime(it.name)
             }
             return false
         }
         return configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().find(closure) ||
                 configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().find(closure)
+    }
+
+    static boolean isKotlinRuntime(name) {
+        return "kotlin-runtime" == name || name.startsWith('kotlin-stdlib') || "kotlin-reflect" == name
     }
 }
 
