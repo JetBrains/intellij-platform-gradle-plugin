@@ -87,6 +87,10 @@ class IdeaDependencyManager {
         ])
     }
 
+    static boolean isKotlinRuntime(name) {
+        return 'kotlin-runtime' == name || 'kotlin-reflect' == name || name.startsWith('kotlin-stdlib')
+    }
+
     @NotNull
     private static IdeaDependency createDependency(String name, String type, String version,
                                                    String buildNumber,
@@ -295,7 +299,7 @@ class IdeaDependencyManager {
         def configurations = project.configurations
         def closure = {
             if ("org.jetbrains.kotlin" == it.group) {
-                return "kotlin-runtime" == it.name || it.name.startsWith('kotlin-stdlib') || "kotlin-reflect" == it.name
+                return isKotlinRuntime(it.name)
             }
             return false
         }
