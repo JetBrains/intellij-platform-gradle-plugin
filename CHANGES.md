@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.20
+
+- recognize new kotlin stdlib files as part of IDEA dependency
+
 ## 0.2.19
 
 - Setup project plugin dependency for an already evaluated project (fixes [#238](../../issues/238))
@@ -7,9 +11,6 @@
 ## 0.2.18
 
 - updated default repository url
-
-## 0.2.18
-
 - support for running GoLand 
 
 ## 0.2.17
