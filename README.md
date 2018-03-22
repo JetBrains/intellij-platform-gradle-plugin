@@ -88,12 +88,7 @@ Plugin introduces the following tasks
 | `prepareTestingSandbox` | Prepares sandbox that will be used while running tests |
 | `runIde`                | Executes an IntelliJ IDEA instance with the plugin you are developing. |
 | `publishPlugin`         | Uploads plugin distribution archive to http://plugins.jetbrains.com. |
-
-**Available in SNAPSHOT:**
-
-| **Task** | **Description** |
-| -------- | --------------- |
-| `verifyPlugin`  | Validates plugin.xml and plugin's structure. |
+| `verifyPlugin`          | Validates plugin.xml and plugin's structure. |
 
 ## Configuration
 
