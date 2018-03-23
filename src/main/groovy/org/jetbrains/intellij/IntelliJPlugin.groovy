@@ -320,11 +320,24 @@ class IntelliJPlugin implements Plugin<Project> {
                 project.file(Utils.systemDir(extension.sandboxDirectory, false))
             })
             task.conventionMapping("executable", {
-                def jbreVersion = task.getJbreVersion()
                 def jbreResolver = new JbreResolver(project)
-                def jbre = jbreResolver.resolve(jbreVersion)
-                return jbre != null ? jbre.javaExecutable
-                        : jbreResolver.resolve(Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension)))?.javaExecutable
+                def jbreVersion = task.getJbreVersion()
+                if (jbreVersion != null) {
+                    def jbre = jbreResolver.resolve(jbreVersion)
+                    if (jbre != null) {
+                        return jbre.javaExecutable
+                    }
+                    LOG.warn("Cannot resolve JBRE $jbreVersion. Falling back to builtin JBRE.")
+                }
+                def builtinJbreVersion = Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension))
+                if (builtinJbreVersion != null) {
+                    def builtinJbre = jbreResolver.resolve(builtinJbreVersion)
+                    if (builtinJbre != null) {
+                        return builtinJbre.javaExecutable
+                    }
+                    LOG.warn("Cannot resolve builtin JBRE $builtinJbreVersion. Falling local Java.")
+                }
+                return Jvm.current().javaExecutable.absolutePath
             })
 
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
