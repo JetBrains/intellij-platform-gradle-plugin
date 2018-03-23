@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.3.0-SNAPSHOT
+## 0.3.1
+
+- fix running for IDEA version < 2017.3 [#273](../../issues/273))
+
+## 0.3.0
 
 - added plugin verification task: `verifyPlugin`
 - default values of `runIde` task are propagated to all RunIdeaTask-like tasks
