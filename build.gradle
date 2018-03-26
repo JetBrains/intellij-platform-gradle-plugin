@@ -28,10 +28,10 @@ dependencies {
     compile localGroovy()
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
-    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.4.26'
-    compile 'org.jetbrains.intellij.plugins:structure-base:3.3'
-    compile 'org.jetbrains.intellij.plugins:structure-intellij:3.3'
-    compile 'de.undercouch:gradle-download-task:3.3.0'
+    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.4.27'
+    compile 'org.jetbrains.intellij.plugins:structure-base:3.24'
+    compile 'org.jetbrains.intellij.plugins:structure-intellij:3.24'
+    compile 'de.undercouch:gradle-download-task:3.4.2'
 
     testCompile gradleTestKit()
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
