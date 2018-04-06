@@ -2,13 +2,13 @@
 
 ## 0.3.1
 
-- fix running for IDEA version < 2017.3 [#273](../../issues/273))
+- fix running for IDEA version < 2017.3 [#273](../../issues/273)
 
 ## 0.3.0
 
 - added plugin verification task: `verifyPlugin`
 - default values of `runIde` task are propagated to all RunIdeaTask-like tasks
-- enhanced plugins resolution: better error messages for unresolved dependencies and fixes [#247](../../issues/247))
+- enhanced plugins resolution: better error messages for unresolved dependencies and fixes [#247](../../issues/247)
 - check build number to decide whether the unzipped distribution can be reused (fixes [#234](../../issues/234))
 - download JetBrains Java runtime and use it while running IDE (fixes [#192](../../issues/192))
 - do not include plugin's jars recursively (fixes [#231](../../issues/231))
