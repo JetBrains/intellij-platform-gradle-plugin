@@ -277,7 +277,7 @@ class IdeaDependencyManager {
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
         def directory = dependency.getIvyRepositoryDirectory()
         File ivyFile = directory != null ? new File(directory, "${dependency.fqn}.xml") : File.createTempFile(dependency.fqn, ".xml")
-        if (!ivyFile.exists()) {
+        if (directory == null || !ivyFile.exists()) {
             def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
