@@ -43,10 +43,6 @@ class IdeaDependencyManager {
         } else if (type == 'RD') {
             dependencyGroup = 'com.jetbrains.intellij.rider'
             dependencyName = "riderRD"
-        } else if (type == 'RS') {
-            dependencyGroup = 'com.jetbrains.intellij.rider'
-            dependencyName = "riderRS"
-            LOG.warn("'RS' type is deprecated and will be removed in 0.3.0. Use 'RD' type instead")
         } else if (type == 'MPS') {
             dependencyGroup = 'com.jetbrains.intellij.mps'
             dependencyName = 'mps'
@@ -153,7 +149,7 @@ class IdeaDependencyManager {
             if (customCacheParent.exists()) {
                 cacheParentDirectoryPath = customCacheParent.absolutePath
             }
-        } else if (type == 'RS' || type == 'RD') {
+        } else if (type == 'RD') {
             cacheParentDirectoryPath = project.buildDir
         }
         def cacheDirectory = new File(cacheParentDirectoryPath, directoryName)
@@ -258,7 +254,7 @@ class IdeaDependencyManager {
     }
 
     private static void resetExecutablePermissions(@NotNull File cacheDirectory, @NotNull String type) {
-        if (type == 'RS' || type == 'RD') {
+        if (type == 'RD') {
             LOG.debug("Resetting executable permissions")
             def operatingSystem = OperatingSystem.current()
             if (!operatingSystem.isWindows()) {

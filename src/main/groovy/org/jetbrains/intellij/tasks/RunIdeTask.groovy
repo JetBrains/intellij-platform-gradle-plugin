@@ -162,7 +162,7 @@ class RunIdeTask extends JavaExec {
                 if (prefix) {
                     systemProperty('idea.platform.prefix', prefix)
 
-                    if (abbreviation == "RD" || abbreviation == "RS") {
+                    if (abbreviation == 'RD') {
                         // Allow debugging Rider's out of process ReSharper host
                         systemProperty('rider.debug.mono.debug', true)
                         systemProperty('rider.debug.mono.allowConnect', true)

@@ -46,8 +46,6 @@ class IntelliJPluginExtension {
             return "IU"
         } else if (version.startsWith("JPS-") || "JPS" == type) {
             return "JPS"
-        } else if (version.startsWith("RS-") || "RS" == type) {
-            return "RS"
         } else if (version.startsWith("RD-") || "RD" == type) {
             return "RD"
         } else if (version.startsWith("MPS-") || "MPS" == type) {
