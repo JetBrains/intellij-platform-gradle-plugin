@@ -50,6 +50,8 @@ class IntelliJPluginExtension {
             return "RS"
         } else if (version.startsWith("RD-") || "RD" == type) {
             return "RD"
+        } else if (version.startsWith("MPS-") || "MPS" == type) {
+            return "MPS"
         } else {
             return "IC"
         }

@@ -47,6 +47,9 @@ class IdeaDependencyManager {
             dependencyGroup = 'com.jetbrains.intellij.rider'
             dependencyName = "riderRS"
             LOG.warn("'RS' type is deprecated and will be removed in 0.3.0. Use 'RD' type instead")
+        } else if (type == 'MPS') {
+            dependencyGroup = 'com.jetbrains.intellij.mps'
+            dependencyName = 'mps'
         }
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
 
