@@ -61,14 +61,15 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    IdeaDependency resolveLocal(@NotNull Project project, @NotNull String localPath) {
+    IdeaDependency resolveLocal(@NotNull Project project, @NotNull String localPath, @Nullable String localPathSources) {
         LOG.debug("Adding local IDE dependency")
         def ideaDir = Utils.ideaDir(localPath)
         if (!ideaDir.exists() || !ideaDir.isDirectory()) {
             throw new BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
         def buildNumber = Utils.ideaBuildNumber(ideaDir)
-        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, null, project, Collections.emptyList())
+        def sources = localPathSources ? new File(localPathSources) : null
+        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, Collections.emptyList())
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull String configuration) {
@@ -307,5 +308,3 @@ class IdeaDependencyManager {
                 configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().find(closure)
     }
 }
-
-

@@ -159,7 +159,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 LOG.warn("Both `localPath` and `version` specified, second would be ignored")
             }
             LOG.info("Using path to locally installed IDE: '${extension.localPath}'")
-            ideaDependency = resolver.resolveLocal(project, extension.localPath)
+            ideaDependency = resolver.resolveLocal(project, extension.localPath, extension.localSourcesPath)
         } else {
             LOG.info("Using IDE from remote repository")
             def version = extension.version ?: DEFAULT_IDEA_VERSION

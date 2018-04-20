@@ -10,6 +10,7 @@ import org.jetbrains.intellij.dependency.PluginDependency
 class IntelliJPluginExtension {
     Object[] plugins = []
     String localPath
+    String localSourcesPath
     String version
     String type = 'IC'
     String pluginName
