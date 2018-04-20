@@ -40,18 +40,18 @@ class IntelliJPluginExtension {
 
     String getType() {
         if (version == null) {
-            return "IC"
+            return 'IC'
         }
-        if (version.startsWith("IU-") || "IU" == type) {
-            return "IU"
-        } else if (version.startsWith("JPS-") || "JPS" == type) {
+        if (version.startsWith('IU-') || 'IU' == type) {
+            return 'IU'
+        } else if (version.startsWith('JPS-') || 'JPS' == type) {
             return "JPS"
-        } else if (version.startsWith("RD-") || "RD" == type) {
-            return "RD"
-        } else if (version.startsWith("MPS-") || "MPS" == type) {
-            return "MPS"
+        } else if (version.startsWith('RD-') || 'RD' == type) {
+            return 'RD'
+        } else if (version.startsWith('MPS-') || 'MPS' == type) {
+            return 'MPS'
         } else {
-            return "IC"
+            return 'IC'
         }
     }
 
@@ -59,10 +59,10 @@ class IntelliJPluginExtension {
         if (version == null) {
             return null
         }
-        if (version.startsWith('JPS-')) {
+        if (version.startsWith('JPS-') || version.startsWith('MPS-')) {
             return version.substring(4)
         }
-        return version.startsWith('IU-') || version.startsWith('IC-') || version.startsWith('RS-') || version.startsWith('RD-') ? version.substring(3) : version
+        return version.startsWith('IU-') || version.startsWith('IC-') || version.startsWith('RD-') ? version.substring(3) : version
     }
 
     Set<PluginDependency> getPluginDependencies() {

@@ -42,9 +42,9 @@ class IdeaDependencyManager {
             dependencyName = 'ideaIU'
         } else if (type == 'RD') {
             dependencyGroup = 'com.jetbrains.intellij.rider'
-            dependencyName = "riderRD"
+            dependencyName = 'riderRD'
         } else if (type == 'MPS') {
-            dependencyGroup = 'com.jetbrains.intellij.mps'
+            dependencyGroup = 'com.jetbrains.mps'
             dependencyName = 'mps'
         }
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
