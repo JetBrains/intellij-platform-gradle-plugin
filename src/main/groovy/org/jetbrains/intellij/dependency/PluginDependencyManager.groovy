@@ -49,7 +49,7 @@ class PluginDependencyManager {
                 IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
                 def pluginDirectory = new File(ideaDependency.classes, "plugins/$id").canonicalFile
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    def builtinPluginVersion = ideaDependency.version + (ideaDependency.sources ? "-withSources" : "")
+                    def builtinPluginVersion = "$ideaDependency.name-$ideaDependency.version${ideaDependency.sources ? '-withSources' : ''}"
                     return new PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
                 }
             }
