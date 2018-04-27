@@ -37,3 +37,7 @@ As examples of using this plugin you can check out following projects:
 	- Fully written in kotlin
 	- Uses RxJava
 - [Unity 3D plugin](https://github.com/JetBrains/resharper-unity/tree/master/rider) for JetBrains Rider
+- [AEM Tools plugin](https://github.com/aemtools/aemtools) for Adobe Experience Manager integration
+	- Uses the Gradle Kotlin DSL
+	- Fully written in kotlin
+	- Uses template language
