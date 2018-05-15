@@ -105,7 +105,7 @@ class PrepareSandboxTask extends Sync {
     private void configurePlugin() {
         CopySpec plugin = mainSpec.addChild().into { "${getPluginName()}/lib" }
         plugin.from {
-            def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME)
+            def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME)
             def librariesToIgnore = getLibrariesToIgnore().toSet()
             librariesToIgnore.add(Jvm.current().toolsJar)
 

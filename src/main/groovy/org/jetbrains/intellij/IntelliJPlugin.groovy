@@ -176,7 +176,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
             def toolsJar = Jvm.current().toolsJar
             if (toolsJar) {
-                project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, project.files(toolsJar))
+                project.dependencies.add(JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME, project.files(toolsJar))
             }
         }
         else {

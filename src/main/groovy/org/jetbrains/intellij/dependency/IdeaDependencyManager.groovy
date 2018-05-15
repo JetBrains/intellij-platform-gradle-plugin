@@ -303,7 +303,8 @@ class IdeaDependencyManager {
             }
             return false
         }
-        return configurations.getByName(JavaPlugin.RUNTIME_CONFIGURATION_NAME).getAllDependencies().find(closure) ||
-                configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).getAllDependencies().find(closure)
+        return configurations.getByName(JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME).getAllDependencies().find(closure) ||
+                configurations.getByName(JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME).getAllDependencies().find(closure) ||
+                configurations.getByName(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME).getAllDependencies().find(closure)
     }
 }
