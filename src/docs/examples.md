@@ -41,3 +41,5 @@ As examples of using this plugin you can check out following projects:
 	- Uses the Gradle Kotlin DSL
 	- Fully written in kotlin
 	- Uses template language
+- [F# plugin](https://github.com/JetBrains/fsharp-support/tree/master/rider-fsharp) for JetBrains Rider
+	- Uses the Gradle Kotlin DSL
