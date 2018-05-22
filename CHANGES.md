@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+- use tools.jar from a java of `runIde` task [IDEA-192418](https://youtrack.jetbrains.com/issue/IDEA-192418)
+
 ## 0.3.1
 
 - fix running for IDEA version < 2017.3 [#273](../../issues/273)
