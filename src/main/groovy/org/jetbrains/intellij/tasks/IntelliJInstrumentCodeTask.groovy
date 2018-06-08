@@ -60,7 +60,8 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
                 getJavac2(),
                 "$ideaDependency.classes/lib/jdom.jar",
                 "$ideaDependency.classes/lib/asm-all.jar",
-                "$ideaDependency.classes/lib/jgoodies-forms.jar")
+                "$ideaDependency.classes/lib/jgoodies-forms.jar",
+                "$ideaDependency.classes/lib/forms-1.1-preview.jar")
 
         ant.taskdef(name: 'instrumentIdeaExtensions',
                 classpath: classpath.asPath,
