@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.3
+
+- fixed compiling JGoodies forms for IDEA version >= 182.* [#290](../../issues/290)
+
 ## 0.3.2
 
 - use tools.jar from a java of `runIde` task [IDEA-192418](https://youtrack.jetbrains.com/issue/IDEA-192418)
