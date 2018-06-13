@@ -58,9 +58,14 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         def ideaDependency = getIdeaDependency()
         def classpath = project.files(
                 getJavac2(),
-                "$ideaDependency.classes/lib/jdom.jar",
-                "$ideaDependency.classes/lib/asm-all.jar",
-                "$ideaDependency.classes/lib/jgoodies-forms.jar")
+                project.fileTree("$ideaDependency.classes/lib").include(
+                        'jdom.jar',
+                        'asm-all.jar',
+                        'asm-all-*.jar',
+                        'jgoodies-forms.jar',
+                        'forms-*.jar',
+                )
+        )
 
         ant.taskdef(name: 'instrumentIdeaExtensions',
                 classpath: classpath.asPath,
