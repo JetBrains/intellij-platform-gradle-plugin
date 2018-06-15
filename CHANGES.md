@@ -2,7 +2,7 @@
 
 ## 0.3.4
 
-- Gradle 4.8 compatibility [#290](../../issues/290)
+- Gradle 4.8 compatibility [#283](../../issues/283)
 
 ## 0.3.3
 
