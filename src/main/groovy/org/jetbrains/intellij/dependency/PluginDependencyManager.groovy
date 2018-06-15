@@ -6,7 +6,6 @@ import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.StringUtil
 import org.gradle.api.Project
-import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
@@ -114,7 +113,7 @@ class PluginDependencyManager {
                 generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir))
             }
             if (plugin.builtin && ideaDependency.sources) {
-                def artifact = new DefaultIvyArtifact(ideaDependency.sources, "ideaIC", "jar", "sources", "sources")
+                def artifact = new IntellijIvyArtifact(ideaDependency.sources, "ideaIC", "jar", "sources", "sources")
                 artifact.conf = "sources"
                 generator.addArtifact(artifact)
             }

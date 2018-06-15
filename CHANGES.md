@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4
+
+- Gradle 4.8 compatibility [#290](../../issues/290)
+
 ## 0.3.3
 
 - fixed compiling JGoodies forms for IDEA version >= 182.* [#290](../../issues/290)

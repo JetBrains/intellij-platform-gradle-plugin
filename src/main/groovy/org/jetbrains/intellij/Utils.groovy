@@ -9,11 +9,12 @@ import org.apache.commons.io.filefilter.TrueFileFilter
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginConvention
-import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
+import org.gradle.api.publish.ivy.IvyArtifact
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.dependency.IntellijIvyArtifact
 import org.xml.sax.ErrorHandler
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
@@ -31,20 +32,19 @@ class Utils {
     }
 
     @NotNull
-    static DefaultIvyArtifact createJarDependency(File file, String configuration, File baseDir) {
+    static IvyArtifact createJarDependency(File file, String configuration, File baseDir) {
         return createDependency(baseDir, file, configuration, "jar", "jar")
     }
 
     @NotNull
-    static DefaultIvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
+    static IvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
         return createDependency(baseDir, file, configuration, "", "directory")
     }
 
-    private static DefaultIvyArtifact createDependency(File baseDir, File file, String configuration,
-                                                       String extension, String type) {
+    private static IvyArtifact createDependency(File baseDir, File file, String configuration, String extension, String type) {
         def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
         def name = extension ? relativePath - ".$extension" : relativePath
-        def artifact = new DefaultIvyArtifact(file, name, extension, type, null)
+        def artifact = new IntellijIvyArtifact(file, name, extension, type, null)
         artifact.conf = configuration
         return artifact
     }

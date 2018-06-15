@@ -5,7 +5,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.publish.ivy.internal.artifact.DefaultIvyArtifact
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
@@ -286,7 +285,7 @@ class IdeaDependencyManager {
                 generator.addArtifact(Utils.createJarDependency(it, "compile", dependency.classes))
             }
             if (dependency.sources) {
-                def artifact = new DefaultIvyArtifact(dependency.sources, 'ideaIC', "jar", "sources", "sources")
+                def artifact = new IntellijIvyArtifact(dependency.sources, 'ideaIC', "jar", "sources", "sources")
                 artifact.conf = "sources"
                 generator.addArtifact(artifact)
             }
