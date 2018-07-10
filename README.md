@@ -221,7 +221,7 @@ As examples of using this plugin you can check out following projects:
 - [HCL plugin](https://github.com/VladRassokhin/intellij-hcl)
 - [Robot plugin](https://github.com/AmailP/robot-plugin)
 - [TOML plugin](https://github.com/stuartcarnie/toml-plugin)
-- [SQLDelight Android Studio Plugin](https://github.com/square/sqldelight/tree/master/sqldelight-studio-plugin)
+- [SQLDelight Android Studio Plugin](https://github.com/square/sqldelight/tree/master/sqldelight-idea-plugin)
 - [idear plugin](https://github.com/breandan/idear)
   - Uses the Gradle Kotlin DSL
 - [Android WiFi ADB plugin](https://github.com/pedrovgs/AndroidWiFiADB)
