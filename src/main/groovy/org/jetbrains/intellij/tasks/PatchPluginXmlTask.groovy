@@ -6,6 +6,8 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.Utils
 
+import java.nio.charset.StandardCharsets
+
 @SuppressWarnings("GroovyUnusedDeclaration")
 class PatchPluginXmlTask extends ConventionTask {
     private Object destinationDir
@@ -148,7 +150,10 @@ class PatchPluginXmlTask extends ConventionTask {
 
             def writer
             try {
-                writer = new PrintWriter(new FileWriter(new File(getDestinationDir(), file.getName())))
+                def outputFile = new File(getDestinationDir(), file.getName())
+                def binaryOutputStream = new BufferedOutputStream(new FileOutputStream(outputFile))
+                writer = new PrintWriter(new OutputStreamWriter(binaryOutputStream, StandardCharsets.UTF_8))
+
                 def printer = new XmlNodePrinter(writer)
                 printer.preserveWhitespace = true
                 printer.print(pluginXml)
