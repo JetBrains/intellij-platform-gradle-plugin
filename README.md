@@ -246,6 +246,12 @@ As examples of using this plugin you can check out following projects:
 	- Uses template language
 - [F# plugin](https://github.com/JetBrains/fsharp-support/tree/master/rider-fsharp) for JetBrains Rider
 	- Uses the Gradle Kotlin DSL
+- [Intellij Rainbow Brackets](https://github.com/izhangzhihao/intellij-rainbow-brackets)
+	- Fully written in kotlin
+	- Uses other intellij plugins as test dependencies
+	- Circle CI configuration file & Travis CI configuration file
+	- Gradle task to verify plugin compatibility cross intellij versions
+	- Auto subbmit anonymous feedback as github issues
 
 # License
 
