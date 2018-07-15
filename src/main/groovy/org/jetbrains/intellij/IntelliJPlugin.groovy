@@ -45,8 +45,8 @@ class IntelliJPlugin implements Plugin<Project> {
 
     public static final LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-    public static final String DEFAULT_INTELLIJ_REPO = 'https://www.jetbrains.com/~urlswitch/intellij-repository'
-    public static final String DEFAULT_JBRE_REPO = 'https://dl.bintray.com/jetbrains/intellij-jdk'
+    public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/intellij-repository'
+    public static final String DEFAULT_JBRE_REPO = 'https://cache-redirector.jetbrains.com/intellij-jdk'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://plugins.jetbrains.com'
 
     @Override
