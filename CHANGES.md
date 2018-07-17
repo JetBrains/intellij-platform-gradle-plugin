@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.5
+
+- Move to the new url to JBRE and Gradle distributions [#301](../../issues/301)
+- Fixed an encoding while writing plugin.xml [#295](../../issues/295)
+
 ## 0.3.4
 
 - Gradle 4.8 compatibility [#283](../../issues/283)
