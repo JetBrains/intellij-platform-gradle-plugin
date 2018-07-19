@@ -74,15 +74,13 @@ pre}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>plugins</kbd> -The list of bundled IDEA plugins and plugins from the [IDEA repository](https://plugins.jetbrains.com/). <br/><br/>
+| <kbd>plugins</kbd> - The list of bundled IDEA plugins and plugins from the [IDEA repository](https://plugins.jetbrains.com/). <br/><br/>
 
 **Notes:**
     <ul>
-        <li>Mix and match all types of acceptable values.</li>
-        <li>Can be in the form of a `Groovy List` or `comma-separated list`.<br/>`['plugin1', 'plugin2']` or `'plugin1', 'plugin2'`</li><br/>
-        <li>For plugins from the IDEA repository use `format 1`.</li>
-        <li>For bundled plugins from the project use `format 2`.</li>
-        <li>For sub-projects use `format 3`.</li>
+        <li>For plugins from the IDEA repository use format `pluginId:version`.</li>
+        <li>For bundled plugins use directory name of the plugin in IDEA distribution (e.g. `Groovy` for `IDEA/plugins/Groovy`).</li>
+        <li>For sub-projects use project reference `project(':subproject')`.</li>
     </ul>
 |
 **Acceptable Values:**
