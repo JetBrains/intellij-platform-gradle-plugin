@@ -39,14 +39,14 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
 
     def 'patch patching preserves UTF-8 characters'() {
         given:
-        pluginXml << "<idea-plugin version=\"2\" someattr=\"\u2202\"></idea-plugin>"
+        pluginXml.write("<idea-plugin version=\"2\" someattr=\"\u2202\"></idea-plugin>", "UTF-8")
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
 
         when:
         build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
 
         then:
-        patchedPluginXml.text == """<idea-plugin version="2" someattr="\u2202">
+        patchedPluginXml.getText("UTF-8") == """<idea-plugin version="2" someattr="\u2202">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
