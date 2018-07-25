@@ -2,6 +2,7 @@
 
 ## 0.3.5
 
+- Allow to override all system properties in RunIde task [#304](../../issues/304)
 - Move to the new url to JBRE and Gradle distributions [#301](../../issues/301)
 - Fixed an encoding while writing plugin.xml [#295](../../issues/295)
 
