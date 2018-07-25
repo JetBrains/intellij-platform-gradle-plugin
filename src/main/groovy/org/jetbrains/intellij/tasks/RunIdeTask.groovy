@@ -147,14 +147,16 @@ class RunIdeTask extends JavaExec {
         systemProperties(getSystemProperties())
         systemProperties(Utils.getIdeaSystemProperties(getConfigDirectory(), getSystemDirectory(), getPluginsDirectory(), getRequiredPluginIds()))
         def operatingSystem = OperatingSystem.current()
+        def userDefinedSystemProperties = getSystemProperties()
         if (operatingSystem.isMacOsX()) {
-            systemProperty("idea.smooth.progress", false)
-            systemProperty("apple.laf.useScreenMenuBar", true)
-        } else if (operatingSystem.isUnix() && !getSystemProperties().containsKey("sun.awt.disablegrab")) {
-            systemProperty("sun.awt.disablegrab", true)
+            systemPropertyIfNotDefined("idea.smooth.progress", false, userDefinedSystemProperties)
+            systemPropertyIfNotDefined("apple.laf.useScreenMenuBar", true, userDefinedSystemProperties)
+            systemPropertyIfNotDefined("apple.awt.fileDialogForDirectories", true, userDefinedSystemProperties)
+        } else if (operatingSystem.isUnix()) {
+            systemPropertyIfNotDefined("sun.awt.disablegrab", true, userDefinedSystemProperties)
         }
-        systemProperty("idea.classpath.index.enabled", false)
-        systemProperty("idea.is.internal", true)
+        systemPropertyIfNotDefined("idea.classpath.index.enabled", false, userDefinedSystemProperties)
+        systemPropertyIfNotDefined("idea.is.internal", true, userDefinedSystemProperties)
 
         if (!getSystemProperties().containsKey('idea.platform.prefix')) {
             def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(getIdeaDirectory()))
@@ -166,11 +168,17 @@ class RunIdeTask extends JavaExec {
 
                     if (abbreviation == 'RD') {
                         // Allow debugging Rider's out of process ReSharper host
-                        systemProperty('rider.debug.mono.debug', true)
-                        systemProperty('rider.debug.mono.allowConnect', true)
+                        systemPropertyIfNotDefined('rider.debug.mono.debug', true, userDefinedSystemProperties)
+                        systemPropertyIfNotDefined('rider.debug.mono.allowConnect', true, userDefinedSystemProperties)
                     }
                 }
             }
+        }
+    }
+
+    private void systemPropertyIfNotDefined(String name, Object value, Map<String, Object> userDefinedSystemProperties) {
+        if (!userDefinedSystemProperties.containsKey(name)) {
+            systemProperty(name, value)
         }
     }
 
