@@ -79,7 +79,7 @@ class PluginDependencyManager {
         project.repositories.ivy { repo ->
             repo.ivyPattern("$cacheDirectoryPath/[module]-[revision].[ext]") // ivy xml
             repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
-            repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact].[ext]") // external plugins
+            repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact](.[ext])") // external plugins
             pluginSources.each {
                 repo.artifactPattern("$it/[artifact].[ext]") // local plugins
             }
