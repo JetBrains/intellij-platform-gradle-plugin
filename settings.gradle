@@ -1,2 +1,10 @@
-rootProject.name = 'gradle-intellij-plugin'
+pluginManagement {
+    repositories {
+        maven {
+            url 'https://cache-redirector.jetbrains.com/plugins.gradle.org'
+        }
+        gradlePluginPortal()
+    }
+}
 
+rootProject.name = 'gradle-intellij-plugin'
