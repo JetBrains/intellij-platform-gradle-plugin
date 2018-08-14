@@ -1,4 +1,4 @@
-[![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.3.5-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
+[![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.3.6-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
 
 > **This project requires JVM version of at least 1.7**
 
@@ -25,7 +25,7 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.3.5"
+  id "org.jetbrains.intellij" version "0.3.6"
 }
 ```
  
@@ -42,7 +42,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.5"
+    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.6"
   }
 }
 
@@ -132,7 +132,7 @@ In addition to that, following attributes may be used to customize IDE running:
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
-| <kbd>jbreVersion</kbd> JetBrains Java version to use | **Acceptable Values:** <kbd>String</kbd> - `'jbrex8u112b752.4'` <br/><br/>All JetBrains Java version are available at [BinTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDEA &lt; 2017.3, <kdb>builtin java version</kdb>  for IDEA &gt;= 2017.3 |
+| <kbd>jbreVersion</kbd> JetBrains Java version to use | **Acceptable Values:** <kbd>String</kbd> - `'jbrex8u112b752.4'` <br/><br/>All JetBrains Java version are available at [BitTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDEA &lt; 2017.3, <kdb>builtin java version</kdb>  for IDEA &gt;= 2017.3 |
 | <kbd>ideaDirectory</kbd> Path to IDEA distribution | path to IDE-dependency |
 | <kbd>configDirectory</kbd> Path to configuration directory | <kbd>${intellij.sandboxDirectory}/config</kbd> |
 | <kbd>pluginsDirectory</kbd> Path to plugins directory | <kbd>${intellij.sandboxDirectory}/plugins</kbd> |
@@ -180,7 +180,7 @@ The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ..
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.3.5"
+  id "org.jetbrains.intellij" version "0.3.6"
 }
 
 intellij {
