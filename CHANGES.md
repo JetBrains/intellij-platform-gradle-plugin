@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.7
+
+- fixed missing `tools.jar` on Mac [#312](../../issues/312)
+
+## 0.3.6
+
+- `runIde` task uses `tools.jar` from a JBRE java [#307](../../issues/307)
+
 ## 0.3.5
 
 - Allow to override all system properties in RunIde task [#304](../../issues/304)
