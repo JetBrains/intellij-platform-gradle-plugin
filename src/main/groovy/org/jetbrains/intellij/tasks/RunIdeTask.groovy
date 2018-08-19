@@ -1,14 +1,10 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.GradleException
+
 import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.Utils
-
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 
 class RunIdeTask extends JavaExec {
     private static final def PREFIXES = [IU: null,
@@ -133,7 +129,7 @@ class RunIdeTask extends JavaExec {
     private void configureClasspath() {
         File ideaDirectory = getIdeaDirectory()
         def executable = getExecutable()
-        if (executable) classpath += project.files(resolveToolsJar(executable))
+        if (executable) classpath += project.files(Utils.resolveToolsJar(executable))
         classpath += project.files("$ideaDirectory/lib/idea_rt.jar",
                 "$ideaDirectory/lib/idea.jar",
                 "$ideaDirectory/lib/bootstrap.jar",
@@ -143,23 +139,6 @@ class RunIdeTask extends JavaExec {
                 "$ideaDirectory/lib/trove4j.jar",
                 "$ideaDirectory/lib/jdom.jar",
                 "$ideaDirectory/lib/log4j.jar")
-    }
-
-    private String resolveToolsJar(String javaExec) {
-        String binDir = new File(javaExec).parent
-        // tools.jar for windows & linux
-        // sibling of bin dir
-        Path toolsJar = Paths.get("$binDir/../lib/tools.jar")
-        // tools.jar for osx
-        // sibling of the parent of bind dir
-        Path altToolsJar = Paths.get("$binDir/../../lib/tools.jar")
-        if (Files.exists(toolsJar)) {
-            return toolsJar.toString()
-        } else if (Files.exists(altToolsJar)) {
-            return altToolsJar.toString()
-        }
-
-        throw new GradleException("Unable to resolve tools.jar for $javaExec.")
     }
 
     def configureSystemProperties() {
