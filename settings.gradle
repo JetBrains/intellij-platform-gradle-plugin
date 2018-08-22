@@ -3,7 +3,6 @@ pluginManagement {
         maven {
             url 'https://cache-redirector.jetbrains.com/plugins.gradle.org'
         }
-        gradlePluginPortal()
     }
 }
 
