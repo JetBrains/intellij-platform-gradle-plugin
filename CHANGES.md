@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.8
+## 0.3.7
 
 - fixed missing `tools.jar` on Mac [#312](../../issues/312)
 
