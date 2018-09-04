@@ -2,6 +2,7 @@ package org.jetbrains.intellij.tasks
 
 
 import org.gradle.api.tasks.*
+import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.Utils
@@ -129,7 +130,8 @@ class RunIdeTask extends JavaExec {
     private void configureClasspath() {
         File ideaDirectory = getIdeaDirectory()
         def executable = getExecutable()
-        if (executable) classpath += project.files(Utils.resolveToolsJar(executable))
+        def toolsJar = executable ? project.file(Utils.resolveToolsJar(executable)) : null
+        classpath += !toolsJar && toolsJar.exists() ? toolsJar : Jvm.current().toolsJar
         classpath += project.files("$ideaDirectory/lib/idea_rt.jar",
                 "$ideaDirectory/lib/idea.jar",
                 "$ideaDirectory/lib/bootstrap.jar",
