@@ -14,12 +14,14 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.dependency.IntellijIvyArtifact
 import org.xml.sax.ErrorHandler
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import org.xml.sax.SAXParseException
 
+import java.util.function.Consumer
 import java.util.regex.Pattern
 
 class Utils {
@@ -259,5 +261,35 @@ class Utils {
             }
         }
         return null
+    }
+
+    static def unzip(@NotNull File zipFile,
+                     @NotNull File cacheDirectory,
+                     @NotNull Project project,
+                     @Nullable java.util.function.Predicate<File> isUpToDate,
+                     @Nullable Consumer<File> markUpToDate) {
+        def targetDirectory = new File(cacheDirectory, zipFile.name - ".zip")
+        def markerFile = new File(targetDirectory, "markerFile")
+        if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
+            return targetDirectory
+        }
+
+        if (targetDirectory.exists()) {
+            targetDirectory.deleteDir()
+        }
+        targetDirectory.mkdir()
+
+        IntelliJPlugin.LOG.debug("Unzipping ${zipFile.name}")
+        project.copy {
+            it.from(project.zipTree(zipFile))
+            it.into(targetDirectory)
+        }
+        IntelliJPlugin.LOG.debug("Unzipped ${zipFile.name}")
+
+        markerFile.createNewFile()
+        if (markUpToDate != null) {
+            markUpToDate.accept(markerFile)
+        }
+        return targetDirectory
     }
 }

@@ -29,4 +29,6 @@ interface PluginDependency {
     File getSourcesDirectory()
 
     boolean isBuiltin()
+
+    boolean isMaven()
 }

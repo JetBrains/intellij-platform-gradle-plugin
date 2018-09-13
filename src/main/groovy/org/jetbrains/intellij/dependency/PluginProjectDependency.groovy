@@ -92,4 +92,9 @@ class PluginProjectDependency implements PluginDependency, Serializable {
     boolean isBuiltin() {
         return false
     }
+
+    @Override
+    boolean isMaven() {
+        return false
+    }
 }

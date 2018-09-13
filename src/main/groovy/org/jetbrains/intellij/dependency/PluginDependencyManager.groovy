@@ -4,7 +4,6 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
-import com.jetbrains.plugin.structure.intellij.utils.StringUtil
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
@@ -15,33 +14,28 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
-import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
-import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.file.StandardCopyOption
-import java.util.zip.ZipFile
 
 class PluginDependencyManager {
+    private static final String INTERNAL_PLUGIN_DEPENDENCY_GROUP = 'internal.com.jetbrains.plugins'
+
     private final String cacheDirectoryPath
-    private final String repositoryHost
+    private final String mavenCacheDirectoryPath
     private final IdeaDependency ideaDependency
 
     private Set<String> pluginSources = new HashSet<>()
     private IvyArtifactRepository ivyArtifactRepository
 
-    PluginDependencyManager(
-            @NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency, @NotNull String pluginRepoUrl) {
-        this.repositoryHost = pluginRepoUrl
+    PluginDependencyManager(@NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency) {
         this.ideaDependency = ideaDependency
-
-        def host = StringUtil.trimStart(StringUtil.trimStart(StringUtil.trimStart(repositoryHost, 'http://'), 'https://'), 'www')
         // todo: a better way to define cache directory
-        cacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea', host).toString()
+        mavenCacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1').toString()
+        cacheDirectoryPath = Paths.get(mavenCacheDirectoryPath, 'com.jetbrains.intellij.idea/plugins').toString()
     }
 
     @NotNull
-    PluginDependency resolve(@NotNull String id, @Nullable String version, @Nullable String channel) {
+    PluginDependency resolve(@NotNull Project project, @NotNull String id, @Nullable String version, @Nullable String channel) {
         if (!version && !channel) {
             if (Paths.get(id).absolute) {
                 return externalPluginDependency(new File(id), null)
@@ -53,32 +47,62 @@ class PluginDependencyManager {
                     return new PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
                 }
             }
-            // todo: implement downloading last compatible plugin version
             throw new BuildException("Cannot find builtin plugin $id for IDE: $ideaDependency.classes.absolutePath", null)
         }
-        return findCachedPlugin(id, version, channel) ?: downloadPlugin(id, version, channel)
+        return resolveRemote(project, id, version, channel)
     }
 
     void register(@NotNull Project project, @NotNull PluginDependency plugin, @NotNull String configuration) {
+        if (plugin.maven && Utils.isJarFile(plugin.artifact)) {
+            project.dependencies.add(configuration, pluginDependency(plugin.id, plugin.version, plugin.channel))
+            return
+        }
         registerRepoIfNeeded(project, plugin)
         generateIvyFile(plugin)
         project.dependencies.add(configuration, [
-            group: 'org.jetbrains.plugins', name: plugin.id, version: plugin.version, configuration: 'compile'
+                group: INTERNAL_PLUGIN_DEPENDENCY_GROUP, name: plugin.id, version: plugin.version, configuration: 'compile'
         ])
     }
 
-    void registerRepoIfNeeded(@NotNull Project project, @NotNull PluginDependency plugin) {
+    @NotNull
+    private PluginDependency resolveRemote(@NotNull Project project, @NotNull String id, @NotNull String version, @Nullable String channel) {
+        def dependency = project.dependencies.create(pluginDependency(id, version, channel))
+        def configuration = project.configurations.detachedConfiguration(dependency)
+        def pluginFile = configuration.singleFile
+        if (Utils.isZipFile(pluginFile)) {
+            def pluginDir = findSingleDirectory(Utils.unzip(pluginFile, new File(cacheDirectoryPath), project, null, null))
+            return externalPluginDependency(pluginDir, channel, true)
+        } else if (Utils.isJarFile(pluginFile)) {
+            return externalPluginDependency(configuration.singleFile, channel, true)
+        }
+        throw new BuildException("Invalid type of downloaded plugin: $pluginFile.name", null)
+    }
+
+    private static File findSingleDirectory(@NotNull File dir) {
+        def files = dir.listFiles(new FileFilter() {
+            @Override
+            boolean accept(File pathname) {
+                return pathname.isDirectory()
+            }
+        })
+        if (files == null || files.length != 1) {
+            throw new AssertionError("Single directory expected in $dir")
+        }
+        return files[0]
+    }
+
+    private void registerRepoIfNeeded(@NotNull Project project, @NotNull PluginDependency plugin) {
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy { IvyArtifactRepository repo ->
                 repo.ivyPattern("$cacheDirectoryPath/[module]-[revision].[ext]") // ivy xml
                 repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
-                repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact].[ext]") // external plugins
+                repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency.sources) {
                     repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision](-[classifier]).[ext]")
                 }
             }
         }
-        if (!plugin.builtin) {
+        if (!plugin.builtin && !plugin.maven) {
             def artifactParent = plugin.artifact.parentFile
             def pluginSource = artifactParent.absolutePath
             if (pluginSource != cacheDirectoryPath && pluginSources.add(pluginSource)) {
@@ -87,17 +111,13 @@ class PluginDependencyManager {
         }
     }
 
-    String getCacheDirectoryPath() {
-        return cacheDirectoryPath
-    }
-
     @NotNull
     private void generateIvyFile(@NotNull PluginDependency plugin) {
         def baseDir = plugin.builtin ? plugin.artifact : plugin.artifact.parentFile
-        def pluginFqn = pluginFqn(plugin.id, plugin.version)
+        def pluginFqn = "${plugin.id}-${plugin.version}"
         def ivyFile = new File(cacheDirectoryPath, "${pluginFqn}.xml")
         if (!ivyFile.exists()) {
-            def identity = new DefaultIvyPublicationIdentity("org.jetbrains.plugins", plugin.id, plugin.version)
+            def identity = new DefaultIvyPublicationIdentity(INTERNAL_PLUGIN_DEPENDENCY_GROUP, plugin.id, plugin.version)
             def generator = new IvyDescriptorFileGenerator(identity)
             def configuration = new DefaultIvyConfiguration("compile")
             generator.addConfiguration(configuration)
@@ -119,98 +139,11 @@ class PluginDependencyManager {
         }
     }
 
-    @NotNull
-    private PluginDependency downloadPlugin(@NotNull String id, @Nullable String version, @Nullable String channel) {
-        IntelliJPlugin.LOG.info("Downloading $id:$version from $repositoryHost")
-        def repositoryInstance = new PluginRepositoryInstance(repositoryHost, null, null)
-        def tempDirectory = Files.createTempDirectory("intellij")
-        def download = repositoryInstance.download(id, version, channel, tempDirectory.toString())
-        if (download == null) {
-            throw new BuildException("Cannot find plugin $id:$version at $repositoryHost", null)
-        }
-
-        def cacheDirectory = pluginCache(id, version)
-        if (!cacheDirectory.exists() && !cacheDirectory.mkdirs()) {
-            throw new BuildException("Cannot get access to cache directory: $cacheDirectory.absolutePath", null)
-        }
-        if (Utils.isJarFile(download)) {
-            def artifactFile = new File(cacheDirectory, download.name)
-            def move = Files.move(download.toPath(), artifactFile.toPath(), StandardCopyOption.REPLACE_EXISTING)
-            return externalPluginDependency(move.toFile(), channel)
-        } else if (Utils.isZipFile(download)) {
-            return externalPluginDependency(extractZip(id, version, download, cacheDirectory), channel)
-        }
-        throw new BuildException("Invalid type of downloaded plugin: $download", null)
-    }
-
-    @NotNull
-    private static File extractZip(@NotNull String pluginId, @Nullable String version,
-                                   @NotNull File pluginZip, @NotNull File targetDirectory) {
-        def zipFile = new ZipFile(pluginZip)
-        try {
-            def entries = zipFile.entries()
-            while (entries.hasMoreElements()) {
-                def entry = entries.nextElement()
-                def path = entry.name
-                if (!path) {
-                    continue
-                }
-                File dest = new File(targetDirectory, path)
-                if (entry.isDirectory()) {
-                    if (!dest.exists() && !dest.mkdirs()) {
-                        throw new BuildException("Cannot unzip plugin $pluginId:$version: $pluginZip.absolutePath", null)
-                    }
-                } else {
-                    if (!dest.getParentFile().exists() && !dest.getParentFile().mkdirs()) {
-                        throw new BuildException("Cannot unzip plugin $pluginId:$version: $pluginZip.absolutePath", null)
-                    }
-                    OutputStream outputStream = new BufferedOutputStream(new FileOutputStream(dest))
-                    try {
-                        copyInputStream(zipFile.getInputStream(entry), outputStream)
-                    } finally {
-                        outputStream.close()
-                    }
-                }
-            }
-        } finally {
-            zipFile.close()
-        }
-        return findArtifact(targetDirectory)
-    }
-
-    @Nullable
-    private PluginDependency findCachedPlugin(@NotNull String id, @NotNull String version, @Nullable String channel) {
-        def cache = null
-        try {
-            cache = pluginCache(id, version)
-            if (cache.exists()) {
-                return externalPluginDependency(findArtifact(cache), channel)
-            }
-        }
-        catch (AssertionError ignored) {
-            IntelliJPlugin.LOG.warn("Cannot read cached plugin $cache")
-        }
-        return null
-    }
-
-    private File pluginCache(@NotNull String pluginId, @NotNull String version) {
-        return new File(cacheDirectoryPath, pluginFqn(pluginId, version))
-    }
-
-    @NotNull
-    private static File findArtifact(File directory) {
-        def files = directory.listFiles()
-        if (files == null || files.length != 1) {
-            throw new AssertionError("Single child expected in $directory")
-        }
-        return files[0]
-    }
-
-    private static externalPluginDependency(@NotNull File artifact, @Nullable String channel) {
+    private static externalPluginDependency(@NotNull File artifact, @Nullable String channel, boolean maven = false) {
         def creationResult = IdePluginManager.createManager().createPlugin(artifact)
         if (creationResult instanceof PluginCreationSuccess) {
             def intellijPlugin = creationResult.plugin
-            def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
+            def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact, false, maven)
             pluginDependency.channel = channel
             //noinspection GroovyAccessibility
             pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
@@ -226,18 +159,8 @@ class PluginDependencyManager {
         return null
     }
 
-    private static void copyInputStream(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[1024]
-        int len
-        while ((len = input.read(buffer)) >= 0) {
-            output.write(buffer, 0, len)
-        }
-        input.close()
-        output.close()
-    }
-
-    private static pluginFqn(@NotNull String id, @NotNull String version) {
-        "$id-$version"
+    private static def pluginDependency(@NotNull String id, @NotNull String version, @Nullable String channel) {
+        def classifier = channel ? ":$channel" : ""
+        return "com.jetbrains.plugins:$id$classifier:$version"
     }
 }
-

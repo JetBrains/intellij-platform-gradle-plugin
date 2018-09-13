@@ -47,7 +47,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
     public static final String DEFAULT_JBRE_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
-    public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://plugins.jetbrains.com'
+    public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
 
     @Override
     void apply(Project project) {
@@ -188,7 +188,8 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA plugin dependencies")
         def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-        def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency, extension.pluginsRepo)
+        def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
+        project.repositories.maven { it.url = extension.pluginsRepo }
         extension.plugins.each {
             LOG.info("Configuring IntelliJ plugin $it")
             if (it instanceof Project) {
@@ -205,7 +206,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 if (!pluginId) {
                     throw new BuildException("Failed to resolve plugin $it", null)
                 }
-                def plugin = resolver.resolve(pluginId, pluginVersion, channel)
+                def plugin = resolver.resolve(project, pluginId, pluginVersion, channel)
                 if (plugin == null) {
                     throw new BuildException("Failed to resolve plugin $it", null)
                 }

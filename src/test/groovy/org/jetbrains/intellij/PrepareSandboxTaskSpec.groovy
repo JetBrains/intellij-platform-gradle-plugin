@@ -169,7 +169,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
 
         then:
-        collectPaths(sandbox) == ['/plugins/intellij-postfix.jar',
+        collectPaths(sandbox) == ['/plugins/org.jetbrains.postfixCompletion-0.8-beta.jar',
                                   '/plugins/myPluginName/lib/projectName.jar',
                                   '/config/options/updates.xml'] as Set
     }

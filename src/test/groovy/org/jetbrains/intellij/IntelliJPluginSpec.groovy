@@ -3,9 +3,7 @@ package org.jetbrains.intellij
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.dependency.PluginDependencyManager
-
-import java.nio.file.Files
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'intellij-specific tasks'() {
@@ -138,8 +136,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         then:
         assert compileClasspath.contains('copyright.jar')
         assert !runtimeClasspath.contains('copyright.jar')
-        assert compileClasspath.contains('intellij-postfix.jar')
-        assert !runtimeClasspath.contains('intellij-postfix.jar')
+        assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
+        assert !runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
     }
 
     def 'add external zip-plugins to compile only classpath'() {
@@ -150,7 +148,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
         when:
-        def result = build(false, 'printMainRuntimeClassPath', 'printMainCompileClassPath')
+        def result = build('printMainRuntimeClassPath', 'printMainCompileClassPath')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 
@@ -169,12 +167,10 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
     def 'add local plugin to compile only classpath'() {
         given:
-        def manager = new PluginDependencyManager(gradleHome, null, pluginsRepo)
-        def plugin = manager.resolve('org.jetbrains.postfixCompletion', '0.8-beta', null)
-        def localFile = new File(dir.root, plugin.artifact.name)
-        Files.copy(plugin.artifact.toPath(), localFile.toPath())
+        def repositoryInstance = new PluginRepositoryInstance("https://plugins.jetbrains.com", null, null)
+        def plugin = repositoryInstance.download('org.jetbrains.postfixCompletion', '0.8-beta', null, dir.root.absolutePath)
 
-        buildFile << "intellij.plugins = ['copyright', '${adjustWindowsPath(localFile.canonicalPath)}']\n"
+        buildFile << "intellij.plugins = ['copyright', '${adjustWindowsPath(plugin.canonicalPath)}']\n"
         buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
         buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
@@ -196,15 +192,15 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
 
         when:
-        def result = build('2.11', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def result = build('2.11', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath', '--info')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 
         then:
         assert compileClasspath.contains('copyright.jar')
         assert runtimeClasspath.contains('copyright.jar')
-        assert compileClasspath.contains('intellij-postfix.jar')
-        assert runtimeClasspath.contains('intellij-postfix.jar')
+        assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
+        assert runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
     }
 
     def 'use test compile classpath for non-builtin plugins if Gradle >= 2.12'() {
@@ -222,8 +218,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         then:
         assert compileClasspath.contains('copyright.jar')
         assert runtimeClasspath.contains('copyright.jar')
-        assert compileClasspath.contains('intellij-postfix.jar')
-        assert runtimeClasspath.contains('intellij-postfix.jar')
+        assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
+        assert runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
     }
 
     def 'use test compile classpath for non-builtin plugins if Gradle < 2.12'() {
@@ -241,8 +237,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         then:
         assert compileClasspath.contains('copyright.jar')
         assert runtimeClasspath.contains('copyright.jar')
-        assert compileClasspath.contains('intellij-postfix.jar')
-        assert runtimeClasspath.contains('intellij-postfix.jar')
+        assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
+        assert runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
     }
 
     def 'resolve plugins in Gradle >= 4.3'() {
@@ -260,8 +256,8 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         then:
         assert compileClasspath.contains('copyright.jar')
         assert runtimeClasspath.contains('copyright.jar')
-        assert compileClasspath.contains('intellij-postfix.jar')
-        assert runtimeClasspath.contains('intellij-postfix.jar')
+        assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
+        assert runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
     }
 
     def 'add require plugin id parameter in test tasks'() {

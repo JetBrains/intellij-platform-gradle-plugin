@@ -33,13 +33,19 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
     private Collection<File> jarFiles = Collections.emptySet()
 
     private boolean builtin
+    private boolean maven
 
-    PluginDependencyImpl(@NotNull String id, @NotNull String version, @NotNull File artifact, boolean builtin = false) {
+    PluginDependencyImpl(@NotNull String id,
+                         @NotNull String version,
+                         @NotNull File artifact,
+                         boolean builtin = false,
+                         boolean maven = false) {
         this.id = id
         this.version = version
         this.artifact = artifact
         this.sourcesDirectory = sourcesDirectory
         this.builtin = builtin
+        this.maven = maven
         initFiles()
     }
 
@@ -155,6 +161,16 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         this.sourcesDirectory = sourcesDirectory
     }
 
+    @Override
+    boolean isMaven() {
+        return maven
+    }
+
+    boolean setMaven(boolean maven) {
+        this.maven = maven
+    }
+
+    @Override
     boolean isBuiltin() {
         return builtin
     }

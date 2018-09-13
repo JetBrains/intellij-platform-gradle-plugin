@@ -133,26 +133,21 @@ class IdeaDependencyManager {
                                                            @NotNull String version) {
         File zipFile = configuration.singleFile
         LOG.debug("IDEA zip: " + zipFile.path)
-        def cacheDirectory = getZipCacheDirectory(zipFile, project, type)
-        unzipDependencyFile(cacheDirectory, project, zipFile, type, version.endsWith("-SNAPSHOT"))
-        return cacheDirectory
+        return unzipDependencyFile(getZipCacheDirectory(zipFile, project, type), project, zipFile, type, version.endsWith("-SNAPSHOT"))
     }
 
     @NotNull
     private static File getZipCacheDirectory(@NotNull File zipFile, @NotNull Project project, @NotNull String type) {
-        def directoryName = zipFile.name - ".zip"
-        String cacheParentDirectoryPath = zipFile.parent
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension.class)
         if (intellijExtension && intellijExtension.ideaDependencyCachePath) {
             def customCacheParent = new File(intellijExtension.ideaDependencyCachePath)
             if (customCacheParent.exists()) {
-                cacheParentDirectoryPath = customCacheParent.absolutePath
+                return new File(customCacheParent.absolutePath)
             }
         } else if (type == 'RD') {
-            cacheParentDirectoryPath = project.buildDir
+            return project.buildDir
         }
-        def cacheDirectory = new File(cacheParentDirectoryPath, directoryName)
-        return cacheDirectory
+        return zipFile.parentFile
     }
 
     @NotNull
@@ -186,8 +181,7 @@ class IdeaDependencyManager {
                 if (depFile.name.endsWith(".zip")) {
                     def cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
                     LOG.debug("IDEA extra dependency $name: " + cacheDirectory.path)
-                    unzipDependencyFile(cacheDirectory, project, depFile, "IC", version.endsWith("-SNAPSHOT"))
-                    return cacheDirectory
+                    return unzipDependencyFile(cacheDirectory, project, depFile, "IC", version.endsWith("-SNAPSHOT"))
                 } else {
                     LOG.debug("IDEA extra dependency $name: " + depFile.path)
                     return depFile
@@ -201,28 +195,18 @@ class IdeaDependencyManager {
         return null
     }
 
-    private static void unzipDependencyFile(@NotNull File cacheDirectory,
+    @NotNull
+    private static File unzipDependencyFile(@NotNull File cacheDirectory,
                                             @NotNull Project project,
                                             @NotNull File zipFile,
                                             @NotNull String type,
                                             boolean checkVersionChange) {
-        def markerFile = new File(cacheDirectory, "markerFile")
-        if (isCacheUpToDate(zipFile, markerFile, checkVersionChange)) {
-            return
-        }
-
-        if (cacheDirectory.exists()) cacheDirectory.deleteDir()
-        cacheDirectory.mkdir()
-
-        LOG.debug("Unzipping ${zipFile.name}")
-        project.copy {
-            it.from(project.zipTree(zipFile))
-            it.into(cacheDirectory)
-        }
-        resetExecutablePermissions(cacheDirectory, type)
-
-        storeCache(cacheDirectory, markerFile)
-        LOG.debug("Unzipped")
+        return Utils.unzip(zipFile, cacheDirectory, project, {
+            markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange)
+        }, { markerFile ->
+            resetExecutablePermissions(cacheDirectory, type)
+            storeCache(cacheDirectory, markerFile)
+        })
     }
 
     private static boolean isCacheUpToDate(File zipFile, File markerFile, boolean checkVersion) {
@@ -245,7 +229,6 @@ class IdeaDependencyManager {
     }
 
     private static void storeCache(File directoryToCache, File markerFile) {
-        markerFile.createNewFile()
         def buildTxt = new File(directoryToCache, "build.txt")
         if (buildTxt.exists()) {
             markerFile.text = buildTxt.text.trim()
