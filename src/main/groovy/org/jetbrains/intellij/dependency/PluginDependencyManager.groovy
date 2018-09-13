@@ -6,6 +6,7 @@ import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.StringUtil
 import org.gradle.api.Project
+import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
@@ -26,8 +27,8 @@ class PluginDependencyManager {
     private final String repositoryHost
     private final IdeaDependency ideaDependency
 
-    private boolean repoRegistered
     private Set<String> pluginSources = new HashSet<>()
+    private IvyArtifactRepository ivyArtifactRepository
 
     PluginDependencyManager(
             @NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency, @NotNull String pluginRepoUrl) {
@@ -67,24 +68,21 @@ class PluginDependencyManager {
     }
 
     void registerRepoIfNeeded(@NotNull Project project, @NotNull PluginDependency plugin) {
-        if (!plugin.builtin) {
-            def artifactParent = plugin.artifact.parentFile
-            if (artifactParent.parent != cacheDirectoryPath) {
-                pluginSources.add(artifactParent.absolutePath)
+        if (ivyArtifactRepository == null) {
+            ivyArtifactRepository = project.repositories.ivy { IvyArtifactRepository repo ->
+                repo.ivyPattern("$cacheDirectoryPath/[module]-[revision].[ext]") // ivy xml
+                repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
+                repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact].[ext]") // external plugins
+                if (ideaDependency.sources) {
+                    repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision](-[classifier]).[ext]")
+                }
             }
         }
-        if (repoRegistered) return
-        repoRegistered = true
-
-        project.repositories.ivy { repo ->
-            repo.ivyPattern("$cacheDirectoryPath/[module]-[revision].[ext]") // ivy xml
-            repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
-            repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact].[ext]") // external plugins
-            pluginSources.each {
-                repo.artifactPattern("$it/[artifact].[ext]") // local plugins
-            }
-            if (ideaDependency.sources) {
-                repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision](-[classifier]).[ext]")
+        if (!plugin.builtin) {
+            def artifactParent = plugin.artifact.parentFile
+            def pluginSource = artifactParent.absolutePath
+            if (pluginSource != cacheDirectoryPath && pluginSources.add(pluginSource)) {
+                ivyArtifactRepository.artifactPattern("$pluginSource/[artifact].[ext]")  // local plugins
             }
         }
     }
@@ -214,7 +212,9 @@ class PluginDependencyManager {
             def intellijPlugin = creationResult.plugin
             def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact)
             pluginDependency.channel = channel
+            //noinspection GroovyAccessibility
             pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
+            //noinspection GroovyAccessibility
             pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
             return pluginDependency
         } else if (creationResult instanceof PluginCreationFail) {

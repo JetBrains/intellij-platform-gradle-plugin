@@ -3,6 +3,9 @@ package org.jetbrains.intellij
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.dependency.PluginDependencyManager
+
+import java.nio.file.Files
 
 class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'intellij-specific tasks'() {
@@ -128,13 +131,59 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
         when:
-        def result = build('2.14', false, 'printMainRuntimeClassPath', 'printMainCompileClassPath')
+        def result = build('printMainRuntimeClassPath', 'printMainCompileClassPath')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 
         then:
         assert compileClasspath.contains('copyright.jar')
         assert !runtimeClasspath.contains('copyright.jar')
+        assert compileClasspath.contains('intellij-postfix.jar')
+        assert !runtimeClasspath.contains('intellij-postfix.jar')
+    }
+
+    def 'add external zip-plugins to compile only classpath'() {
+        given:
+        writeTestFile()
+        buildFile << 'intellij.plugins = [\'org.intellij.plugins.markdown:8.0.0.20150929\']\n'
+        buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build(false, 'printMainRuntimeClassPath', 'printMainCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
+        assert compileClasspath.contains('markdown.jar')
+        assert compileClasspath.contains('kotlin-reflect.jar')
+        assert compileClasspath.contains('kotlin-runtime.jar')
+        assert compileClasspath.contains('Loboevolution.jar')
+        assert compileClasspath.contains('intellij-markdown.jar')
+        assert !runtimeClasspath.contains('markdown.jar')
+        assert !runtimeClasspath.contains('kotlin-reflect.jar')
+        assert !runtimeClasspath.contains('kotlin-runtime.jar')
+        assert !runtimeClasspath.contains('Loboevolution.jar')
+        assert !runtimeClasspath.contains('intellij-markdown.jar')
+    }
+
+    def 'add local plugin to compile only classpath'() {
+        given:
+        def manager = new PluginDependencyManager(gradleHome, null, pluginsRepo)
+        def plugin = manager.resolve('org.jetbrains.postfixCompletion', '0.8-beta', null)
+        def localFile = new File(dir.root, plugin.artifact.name)
+        Files.copy(plugin.artifact.toPath(), localFile.toPath())
+
+        buildFile << "intellij.plugins = ['copyright', '${adjustWindowsPath(localFile.canonicalPath)}']\n"
+        buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build('printMainRuntimeClassPath', 'printMainCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
         assert compileClasspath.contains('intellij-postfix.jar')
         assert !runtimeClasspath.contains('intellij-postfix.jar')
     }
@@ -166,7 +215,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
 
         when:
-        def result = build('2.14', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def result = build('printTestRuntimeClassPath', 'printTestCompileClassPath')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 
