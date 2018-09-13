@@ -18,10 +18,9 @@ plugins.withType(JavaPlugin) {
 }
 
 repositories {
-    maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
-    maven { url mavenCentralUrl }
-    mavenCentral()
-    jcenter()
+    maven { url 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service' }
+    maven { url 'https://cache-redirector.jetbrains.com/repo1.maven.org/maven2' }
+    maven { url 'https://cache-redirector.jetbrains.com/jcenter.bintray.com' }
 }
 
 dependencies {
