@@ -17,7 +17,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
     protected String pluginsRepo = System.properties.get('plugins.repo', IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO)
 
     String getIntellijVersion() {
-        return '14.1.3'
+        return '2017.2.5'
     }
 
     @Rule

@@ -144,7 +144,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'add external zip-plugins to compile only classpath'() {
         given:
         writeTestFile()
-        buildFile << 'intellij.plugins = [\'org.intellij.plugins.markdown:8.0.0.20150929\']\n'
+        buildFile << 'intellij.plugins = [\'org.intellij.plugins.markdown:2017.2.20170404\']\n'
         buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
         buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
@@ -250,7 +250,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
 
         when:
-        def result = build('4.3', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def result = build('4.9', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 

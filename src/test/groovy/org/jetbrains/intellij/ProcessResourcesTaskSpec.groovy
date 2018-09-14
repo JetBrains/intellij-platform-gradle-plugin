@@ -14,7 +14,7 @@ class ProcessResourcesTaskSpec extends IntelliJPluginSpecBase {
         then:
         outputPluginXml.text == '''
             <idea-plugin version="2">
-              <idea-version since-build="141.1010" until-build="141.*"/>
+              <idea-version since-build="172.4343" until-build="172.*"/>
             </idea-plugin>
             '''[1..-1].stripIndent()
     }
@@ -46,7 +46,7 @@ class ProcessResourcesTaskSpec extends IntelliJPluginSpecBase {
         outputPluginXml.text == '''
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="Oh" until-build="141.*"/>
+              <idea-version since-build="Oh" until-build="172.*"/>
             </idea-plugin>
             '''[1..-1].stripIndent()
     }

@@ -213,7 +213,7 @@ intellij {
     def 'patch version and since until builds on intellij version changing'() {
         given:
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
-        buildFile << "version='0.42.123'\nintellij { version = '14.1.3' }"
+        buildFile << "version='0.42.123'\nintellij { version = '2017.2.5' }"
 
         when:
         build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)

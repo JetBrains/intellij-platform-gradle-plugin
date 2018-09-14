@@ -1,12 +1,6 @@
 package org.jetbrains.intellij
 
 class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
-
-    @Override
-    String getIntellijVersion() {
-        return '2017.2.5'
-    }
-
     def 'configure sdk manually test'() {
         given:
         writeTestFile()

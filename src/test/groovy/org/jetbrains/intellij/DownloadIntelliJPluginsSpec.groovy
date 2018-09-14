@@ -14,16 +14,16 @@ class DownloadIntelliJPluginsSpec extends IntelliJPluginSpecBase {
 
     def 'download zip plugin'() {
         given:
-        buildFile << 'intellij { plugins = ["org.intellij.plugins.markdown:8.0.0.20150929"] }'
+        buildFile << 'intellij { plugins = ["org.intellij.plugins.markdown:2017.2.20170404"] }'
 
         when:
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
-        def pluginDir = new File(mavenCacheDir, 'org.intellij.plugins.markdown/8.0.0.20150929')
-        pluginDir.list().contains('24b1d87bfb3d679b5f1438764e3867a3d39c1972')
-        new File(pluginDir, '24b1d87bfb3d679b5f1438764e3867a3d39c1972').list().contains('org.intellij.plugins.markdown-8.0.0.20150929.zip')
-        pluginsCacheDir.list().contains('org.intellij.plugins.markdown-8.0.0.20150929')
+        def pluginDir = new File(mavenCacheDir, 'org.intellij.plugins.markdown/2017.2.20170404')
+        pluginDir.list().contains('ff7b86635cc3ec6d9ea33d0e1193c3afb33c22ad')
+        new File(pluginDir, 'ff7b86635cc3ec6d9ea33d0e1193c3afb33c22ad').list().contains('org.intellij.plugins.markdown-2017.2.20170404.zip')
+        pluginsCacheDir.list().contains('org.intellij.plugins.markdown-2017.2.20170404')
     }
 
     def 'download jar plugin'() {

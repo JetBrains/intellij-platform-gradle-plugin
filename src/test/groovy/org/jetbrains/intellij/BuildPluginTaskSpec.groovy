@@ -37,7 +37,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         fileText(jar, 'META-INF/plugin.xml') == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="141.1010" until-build="141.*"/>
+              <idea-version since-build="172.4343" until-build="172.*"/>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
     }
@@ -57,7 +57,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         // while debugging Gradle 4.0 includes all dependencies, including intellij-plugin-structure,
         // which depends on asm-all different from IDEA-builtin asm-all.
         disableDebug()
-        build('4.0', false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build('4.9', false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
         File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
@@ -131,7 +131,7 @@ class App {
             version='0.42.123'
             intellij {
                 pluginName = 'myPluginName'
-                plugins = ['org.intellij.plugins.markdown:8.0.0.20150929']
+                plugins = ['org.intellij.plugins.markdown:2017.2.20170404']
             }
             """.stripIndent()
 
