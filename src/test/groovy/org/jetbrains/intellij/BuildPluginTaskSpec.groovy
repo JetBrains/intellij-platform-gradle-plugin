@@ -145,6 +145,36 @@ class App {
         (new ZipFile(jar).entries().collect { it.name }).contains('App.class')
     }
 
+    def 'can compile classes that depend on external plugin with classes directory'() {
+        given:
+        file('src/main/java/App.java') << """
+import java.lang.String;
+import org.jetbrains.annotations.NotNull;
+import org.asciidoc.intellij.AsciiDoc;
+class App {
+    public static void main(@NotNull String[] strings) {
+        System.out.println(AsciiDoc.class.getName());
+    }
+}
+"""
+        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        buildFile << """\
+            version='0.42.123'
+            intellij {
+                pluginName = 'myPluginName'
+                plugins = ['org.asciidoctor.intellij.asciidoc:0.20.6']
+            }
+            """.stripIndent()
+        when:
+        build('4.9', false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        distribution.exists()
+        def jar = extractFile(new ZipFile(distribution), 'myPluginName/lib/projectName-0.42.123.jar')
+        (new ZipFile(jar).entries().collect { it.name }).contains('App.class')
+    }
+
     def 'build plugin without sources'() {
         given:
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
