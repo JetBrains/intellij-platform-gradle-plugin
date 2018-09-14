@@ -35,6 +35,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'instrument tests with nullability annotations'() {
         given:
         writeTestFile()
+        buildFile << 'intellij { instrumentCode = true }'
 
         when:
         def result = build('buildTestSourceSet', '--info')

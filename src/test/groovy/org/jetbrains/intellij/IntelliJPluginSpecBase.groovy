@@ -47,6 +47,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
                 downloadSources = false
                 jreRepo = '$jbreRepo'
                 pluginsRepo = '$pluginsRepo'
+                instrumentCode = false
             }
 
             // Define tasks with a minimal set of tasks required to build a source set
