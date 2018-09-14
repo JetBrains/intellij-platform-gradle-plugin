@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.10
+
+- fixed dependency on local plugin files
+- cache-redirector is used for downloading plugin dependencies [#301](../../issues/301) 
+
 ## 0.3.7
 
 - fixed missing `tools.jar` on Mac [#312](../../issues/312)
