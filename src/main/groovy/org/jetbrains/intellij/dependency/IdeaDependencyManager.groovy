@@ -204,8 +204,9 @@ class IdeaDependencyManager {
         return Utils.unzip(zipFile, cacheDirectory, project, {
             markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange)
         }, { markerFile ->
-            resetExecutablePermissions(cacheDirectory, type)
-            storeCache(cacheDirectory, markerFile)
+            def targetDirectory = markerFile.parentFile
+            resetExecutablePermissions(targetDirectory, type)
+            storeCache(targetDirectory, markerFile)
         })
     }
 
