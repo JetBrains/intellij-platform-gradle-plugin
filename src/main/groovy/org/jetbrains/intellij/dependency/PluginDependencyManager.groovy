@@ -161,6 +161,6 @@ class PluginDependencyManager {
 
     private static def pluginDependency(@NotNull String id, @NotNull String version, @Nullable String channel) {
         def classifier = channel ? ":$channel" : ""
-        return "com.jetbrains.plugins:$id$classifier:$version"
+        return "com.jetbrains.plugins:$id:$version$classifier"
     }
 }
