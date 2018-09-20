@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.dependency
 
-import com.google.common.base.Predicate
 import groovy.transform.ToString
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
@@ -39,11 +38,8 @@ class IdeaDependency implements Serializable {
         if (classes.isDirectory()) {
             File lib = new File(classes, "lib")
             if (lib.isDirectory()) {
-                return Utils.collectJars(lib, new Predicate<File>() {
-                    @Override
-                    boolean apply(File file) {
-                        return withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name - '.jar')
-                    }
+                return Utils.collectJars(lib, { file ->
+                    return withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name - '.jar')
                 }, false)
             }
         }

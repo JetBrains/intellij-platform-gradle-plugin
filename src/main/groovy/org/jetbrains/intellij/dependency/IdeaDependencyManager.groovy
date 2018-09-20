@@ -203,29 +203,33 @@ class IdeaDependencyManager {
                                             boolean checkVersionChange) {
         return Utils.unzip(zipFile, cacheDirectory, project, {
             markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange)
-        }, { markerFile ->
-            resetExecutablePermissions(cacheDirectory, type)
-            storeCache(cacheDirectory, markerFile)
+        }, { unzippedDirectory, markerFile ->
+            resetExecutablePermissions(unzippedDirectory, type)
+            storeCache(unzippedDirectory, markerFile)
         })
     }
 
     private static boolean isCacheUpToDate(File zipFile, File markerFile, boolean checkVersion) {
-        if (checkVersion && markerFile.exists()) {
-            def zip
-            try {
-                zip = new ZipFile(zipFile)
-                def entry = zip.getEntry("build.txt")
-                if (entry != null && zip.getInputStream(entry).text.trim() != markerFile.text.trim()) {
-                    return false
-                }
-            }
-            finally {
-                if (zip) {
-                    zip.close()
-                }
+        if (!checkVersion) {
+            return markerFile.exists()
+        }
+        if (!markerFile.exists()) {
+            return false
+        }
+        def zip
+        try {
+            zip = new ZipFile(zipFile)
+            def entry = zip.getEntry("build.txt")
+            if (entry != null && zip.getInputStream(entry).text.trim() != markerFile.text.trim()) {
+                return false
             }
         }
-        return markerFile.exists()
+        finally {
+            if (zip) {
+                zip.close()
+            }
+        }
+        return true
     }
 
     private static void storeCache(File directoryToCache, File markerFile) {

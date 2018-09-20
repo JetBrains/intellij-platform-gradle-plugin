@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 
-import com.google.common.base.Predicate
 import com.jetbrains.plugin.structure.intellij.utils.StringUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
@@ -21,7 +20,8 @@ import org.xml.sax.InputSource
 import org.xml.sax.SAXException
 import org.xml.sax.SAXParseException
 
-import java.util.function.Consumer
+import java.util.function.BiConsumer
+import java.util.function.Predicate
 import java.util.regex.Pattern
 
 class Utils {
@@ -266,8 +266,8 @@ class Utils {
     static def unzip(@NotNull File zipFile,
                      @NotNull File cacheDirectory,
                      @NotNull Project project,
-                     @Nullable java.util.function.Predicate<File> isUpToDate,
-                     @Nullable Consumer<File> markUpToDate) {
+                     @Nullable Predicate<File> isUpToDate,
+                     @Nullable BiConsumer<File, File> markUpToDate) {
         def targetDirectory = new File(cacheDirectory, zipFile.name - ".zip")
         def markerFile = new File(targetDirectory, "markerFile")
         if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
@@ -288,7 +288,7 @@ class Utils {
 
         markerFile.createNewFile()
         if (markUpToDate != null) {
-            markUpToDate.accept(markerFile)
+            markUpToDate.accept(targetDirectory, markerFile)
         }
         return targetDirectory
     }

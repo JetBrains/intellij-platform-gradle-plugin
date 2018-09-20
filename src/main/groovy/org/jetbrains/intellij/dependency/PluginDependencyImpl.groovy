@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.dependency
 
-import com.google.common.base.Predicates
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.ToString
 import org.jetbrains.annotations.NotNull
@@ -56,7 +55,7 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         if (artifact.isDirectory()) {
             File lib = new File(artifact, "lib")
             if (lib.isDirectory()) {
-                jarFiles = Utils.collectJars(lib, Predicates.<File> alwaysTrue(), false)
+                jarFiles = Utils.collectJars(lib, { file -> true }, false)
             }
             File classes = new File(artifact, "classes")
             if (classes.isDirectory()) {

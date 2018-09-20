@@ -1,6 +1,6 @@
 package org.jetbrains.intellij.dependency
 
-import com.google.common.base.Predicate
+
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.Utils
 
@@ -16,10 +16,7 @@ class IdeaExtraDependency {
         this.name = name
         this.classes = classes
         if (classes.isDirectory()) {
-            this.jarFiles = Utils.collectJars(classes, new Predicate<File>() {
-                @Override
-                boolean apply(File file) { return true }
-            }, false)
+            this.jarFiles = Utils.collectJars(classes, { file -> true }, false)
         }
         else {
             this.jarFiles = [classes] as Set
