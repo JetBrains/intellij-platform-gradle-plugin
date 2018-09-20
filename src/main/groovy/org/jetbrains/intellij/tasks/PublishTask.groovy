@@ -14,7 +14,7 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 
 class PublishTask extends ConventionTask {
     private Object distributionFile
-    private Object host = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO
+    private Object host = "https://plugins.jetbrains.com"
     private Object username
     private Object password
     private List<Object> channels = new ArrayList<Object>()
