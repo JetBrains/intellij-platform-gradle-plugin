@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.11
+
+- fixed resolving plugins from a custom channel [#320](../../issues/320)
+- fixed uploading plugins [#321](../../issues/321)
+- fixed caching strategy for IDEA dependency [#318](../../issues/318)
+ 
 ## 0.3.10
 
 - fixed dependency on local plugin files
