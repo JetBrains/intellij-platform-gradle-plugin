@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+import org.gradle.api.Action
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 
@@ -71,6 +72,10 @@ class IntelliJPluginExtension {
 
     def publish(Closure c) {
         publish.with(c)
+    }
+
+    void publish(Action<Publish> action) {
+        action.execute(publish)
     }
 
     /**
