@@ -120,7 +120,7 @@ class PublishTask extends ConventionTask {
             def problems = creationResult.errorsAndWarnings.findAll { it.level == PluginProblem.Level.ERROR }.join(", ")
             throw new TaskExecutionException(this, new GradleException("Cannot upload plugin. $problems"))
         } else {
-            throw new TaskExecutionException(this, new GradleException("Cannot upload plugin. $cre"))
+            throw new TaskExecutionException(this, new GradleException("Cannot upload plugin. $creationResult"))
         }
     }
 }
