@@ -1,5 +1,10 @@
 # Changelog
 
+
+## Next version
+
+- fixed building with Java 9
+
 ## 0.3.11
 
 - fixed resolving plugins from a custom channel [#320](../../issues/320)
