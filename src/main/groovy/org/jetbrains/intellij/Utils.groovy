@@ -34,19 +34,19 @@ class Utils {
     }
 
     @NotNull
-    static IvyArtifact createJarDependency(File file, String configuration, File baseDir) {
-        return createDependency(baseDir, file, configuration, "jar", "jar")
+    static IvyArtifact createJarDependency(File file, String configuration, File baseDir, String classifier = null) {
+        return createDependency(baseDir, file, configuration, "jar", "jar", classifier)
     }
 
     @NotNull
-    static IvyArtifact createDirectoryDependency(File file, String configuration, File baseDir) {
-        return createDependency(baseDir, file, configuration, "", "directory")
+    static IvyArtifact createDirectoryDependency(File file, String configuration, File baseDir, String classifier = null) {
+        return createDependency(baseDir, file, configuration, "", "directory", classifier)
     }
 
-    private static IvyArtifact createDependency(File baseDir, File file, String configuration, String extension, String type) {
+    private static IvyArtifact createDependency(File baseDir, File file, String configuration, String extension, String type, String classifier) {
         def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
         def name = extension ? relativePath - ".$extension" : relativePath
-        def artifact = new IntellijIvyArtifact(file, name, extension, type, null)
+        def artifact = new IntellijIvyArtifact(file, name, extension, type, classifier)
         artifact.conf = configuration
         return artifact
     }

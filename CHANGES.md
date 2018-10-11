@@ -3,11 +3,12 @@
 
 ## Next version
 
+- fixed resolving plugins from a custom channel [#320](../../issues/320)
 - fixed building with Java 9
 
 ## 0.3.11
 
-- fixed resolving plugins from a custom channel [#320](../../issues/320)
+- -fixed resolving plugins from a custom channel [#320](../../issues/320)-
 - fixed uploading plugins [#321](../../issues/321)
 - fixed caching strategy for IDEA dependency [#318](../../issues/318)
  

@@ -18,8 +18,6 @@ import org.jetbrains.intellij.Utils
 import java.nio.file.Paths
 
 class PluginDependencyManager {
-    private static final String INTERNAL_PLUGIN_DEPENDENCY_GROUP = 'internal.com.jetbrains.plugins'
-
     private final String cacheDirectoryPath
     private final String mavenCacheDirectoryPath
     private final IdeaDependency ideaDependency
@@ -31,7 +29,7 @@ class PluginDependencyManager {
         this.ideaDependency = ideaDependency
         // todo: a better way to define cache directory
         mavenCacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1').toString()
-        cacheDirectoryPath = Paths.get(mavenCacheDirectoryPath, 'com.jetbrains.intellij.idea/plugins').toString()
+        cacheDirectoryPath = Paths.get(mavenCacheDirectoryPath, 'com.jetbrains.intellij.idea').toString()
     }
 
     @NotNull
@@ -60,7 +58,7 @@ class PluginDependencyManager {
         registerRepoIfNeeded(project, plugin)
         generateIvyFile(plugin)
         project.dependencies.add(configuration, [
-                group: INTERNAL_PLUGIN_DEPENDENCY_GROUP, name: plugin.id, version: plugin.version, configuration: 'compile'
+                group: groupId(plugin.channel), name: plugin.id, version: plugin.version, configuration: 'compile'
         ])
     }
 
@@ -70,12 +68,16 @@ class PluginDependencyManager {
         def configuration = project.configurations.detachedConfiguration(dependency)
         def pluginFile = configuration.singleFile
         if (Utils.isZipFile(pluginFile)) {
-            def pluginDir = findSingleDirectory(Utils.unzip(pluginFile, new File(cacheDirectoryPath), project, null, null))
+            def pluginDir = findSingleDirectory(Utils.unzip(pluginFile, new File(cacheDirectoryPath, groupId(channel)), project, null, null))
             return externalPluginDependency(pluginDir, channel, true)
         } else if (Utils.isJarFile(pluginFile)) {
             return externalPluginDependency(configuration.singleFile, channel, true)
         }
         throw new BuildException("Invalid type of downloaded plugin: $pluginFile.name", null)
+    }
+
+    private static String groupId(@Nullable String channel) {
+        return channel ? "unzipped.${channel}.com.jetbrains.plugins" : 'unzipped.com.jetbrains.plugins'
     }
 
     private static File findSingleDirectory(@NotNull File dir) {
@@ -94,9 +96,9 @@ class PluginDependencyManager {
     private void registerRepoIfNeeded(@NotNull Project project, @NotNull PluginDependency plugin) {
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy { IvyArtifactRepository repo ->
-                repo.ivyPattern("$cacheDirectoryPath/[module]-[revision].[ext]") // ivy xml
+                repo.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision].[ext]") // ivy xml
                 repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
-                repo.artifactPattern("$cacheDirectoryPath/[module]-[revision]/[artifact](.[ext])") // external zip plugins
+                repo.artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency.sources) {
                     repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision](-[classifier]).[ext]")
                 }
@@ -105,7 +107,7 @@ class PluginDependencyManager {
         if (!plugin.builtin && !plugin.maven) {
             def artifactParent = plugin.artifact.parentFile
             def pluginSource = artifactParent.absolutePath
-            if (pluginSource != cacheDirectoryPath && pluginSources.add(pluginSource)) {
+            if (artifactParent?.parentFile?.absolutePath != cacheDirectoryPath && pluginSources.add(pluginSource)) {
                 ivyArtifactRepository.artifactPattern("$pluginSource/[artifact].[ext]")  // local plugins
             }
         }
@@ -115,20 +117,23 @@ class PluginDependencyManager {
     private void generateIvyFile(@NotNull PluginDependency plugin) {
         def baseDir = plugin.builtin ? plugin.artifact : plugin.artifact.parentFile
         def pluginFqn = "${plugin.id}-${plugin.version}"
-        def ivyFile = new File(cacheDirectoryPath, "${pluginFqn}.xml")
+        def groupId = groupId(plugin.channel)
+        def ivyFile = new File(new File(cacheDirectoryPath, groupId), "${pluginFqn}.xml")
         if (!ivyFile.exists()) {
-            def identity = new DefaultIvyPublicationIdentity(INTERNAL_PLUGIN_DEPENDENCY_GROUP, plugin.id, plugin.version)
+            def identity = new DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
             def generator = new IvyDescriptorFileGenerator(identity)
             def configuration = new DefaultIvyConfiguration("compile")
             generator.addConfiguration(configuration)
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
-            plugin.jarFiles.each { generator.addArtifact(Utils.createJarDependency(it, configuration.name, baseDir)) }
+            plugin.jarFiles.each {
+                generator.addArtifact(Utils.createJarDependency(it, configuration.name, baseDir, groupId))
+            }
             if (plugin.classesDirectory) {
-                generator.addArtifact(Utils.createDirectoryDependency(plugin.classesDirectory, configuration.name, baseDir))
+                generator.addArtifact(Utils.createDirectoryDependency(plugin.classesDirectory, configuration.name, baseDir, groupId))
             }
             if (plugin.metaInfDirectory) {
-                generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir))
+                generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir, groupId))
             }
             if (plugin.builtin && ideaDependency.sources) {
                 def artifact = new IntellijIvyArtifact(ideaDependency.sources, "ideaIC", "jar", "sources", "sources")
@@ -160,7 +165,7 @@ class PluginDependencyManager {
     }
 
     private static def pluginDependency(@NotNull String id, @NotNull String version, @Nullable String channel) {
-        def classifier = channel ? ":$channel" : ""
-        return "com.jetbrains.plugins:$id:$version$classifier"
+        def groupPrefix = channel ? "$channel." : ""
+        return "${groupPrefix}com.jetbrains.plugins:$id:$version"
     }
 }
