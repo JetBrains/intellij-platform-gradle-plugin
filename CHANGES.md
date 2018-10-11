@@ -8,7 +8,7 @@
 
 ## 0.3.11
 
-- -fixed resolving plugins from a custom channel [#320](../../issues/320)-
+- ~~fixed resolving plugins from a custom channel~~
 - fixed uploading plugins [#321](../../issues/321)
 - fixed caching strategy for IDEA dependency [#318](../../issues/318)
  
