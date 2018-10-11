@@ -154,9 +154,11 @@ The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ...
 ### Publishing DSL
 The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrain Plugin Repository.
 
+See the instruction on how to generate authentication token: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
+
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
-| <kbd>username</kbd> Login username | none |
+| <kbd>token</kbd> Authentication token | none |
 | <kbd>password</kbd> Login password | none |
 | <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |

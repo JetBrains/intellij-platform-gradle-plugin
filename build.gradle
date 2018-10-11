@@ -27,7 +27,7 @@ dependencies {
     compile localGroovy()
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
-    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.4.28'
+    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.4.30'
     compile 'org.jetbrains.intellij.plugins:structure-base:3.45'
     compile 'org.jetbrains.intellij.plugins:structure-intellij:3.45'
     compile 'de.undercouch:gradle-download-task:3.4.2'
@@ -149,7 +149,7 @@ uploadArchives {
     }
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.8.1'
+wrapper {
+    gradleVersion = '4.10'
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }

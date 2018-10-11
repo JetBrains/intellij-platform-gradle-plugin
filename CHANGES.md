@@ -1,7 +1,10 @@
 # Changelog
 
-
 ## Next version
+
+- support token-based authentication while publishing plugins [#317](../../issues/317)
+
+## 0.3.12
 
 - fixed resolving plugins from a custom channel [#320](../../issues/320)
 - fixed building with Java 9
