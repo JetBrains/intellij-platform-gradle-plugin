@@ -131,7 +131,10 @@ class RunIdeTask extends JavaExec {
         File ideaDirectory = getIdeaDirectory()
         def executable = getExecutable()
         def toolsJar = executable ? project.file(Utils.resolveToolsJar(executable)) : null
-        classpath += project.files(toolsJar?.exists() ? toolsJar : Jvm.current().toolsJar)
+        toolsJar = toolsJar?.exists() ? toolsJar : Jvm.current().toolsJar
+        if (toolsJar != null) {
+            classpath += project.files(toolsJar)
+        }
         classpath += project.files("$ideaDirectory/lib/idea_rt.jar",
                 "$ideaDirectory/lib/idea.jar",
                 "$ideaDirectory/lib/bootstrap.jar",
