@@ -28,8 +28,8 @@ dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.4.28'
-    compile 'org.jetbrains.intellij.plugins:structure-base:3.43'
-    compile 'org.jetbrains.intellij.plugins:structure-intellij:3.43'
+    compile 'org.jetbrains.intellij.plugins:structure-base:3.45'
+    compile 'org.jetbrains.intellij.plugins:structure-intellij:3.45'
     compile 'de.undercouch:gradle-download-task:3.4.2'
 
     testCompile gradleTestKit()
