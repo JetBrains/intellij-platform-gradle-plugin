@@ -144,7 +144,7 @@ class IdeaDependencyManager {
             if (customCacheParent.exists()) {
                 return new File(customCacheParent.absolutePath)
             }
-        } else if (type == 'RD') {
+        } else if (type == 'RD' && OperatingSystem.current().isWindows()) {
             return project.buildDir
         }
         return zipFile.parentFile
