@@ -282,6 +282,7 @@ See the instruction on how to generate authentication token: http://www.jetbrain
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
 | <kbd>token</kbd> Authentication token | none |
+| <kbd>username</kbd> Login username | none |
 | <kbd>password</kbd> Login password | none |
 | <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
