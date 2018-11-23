@@ -6,7 +6,7 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 
 ### Setup DSL
 
-The following attributes are apart of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies.
+The following attributes are part of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies.
 
 pre}
 {\n}
