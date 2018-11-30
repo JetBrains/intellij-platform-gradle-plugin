@@ -100,7 +100,7 @@ class PluginDependencyManager {
                 repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
                 repo.artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency.sources) {
-                    repo.artifactPattern("$ideaDependency.sources/[artifact]-[revision](-[classifier]).[ext]")
+                    repo.artifactPattern("$ideaDependency.sources.parent/[artifact]-$ideaDependency.sources(-[classifier]).[ext]")
                 }
             }
         }

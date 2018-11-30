@@ -3,6 +3,7 @@
 ## Next version
 
 - support token-based authentication while publishing plugins [#317](../../issues/317)
+- fix attaching sources to bundled plugins [#337](../../issues/337)
 
 ## 0.3.12
 
