@@ -92,6 +92,9 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureProjectAfterEvaluate(@NotNull Project project,
                                                       @NotNull IntelliJPluginExtension extension) {
         for (def subproject : project.subprojects) {
+            if (subproject.plugins.findPlugin(IntelliJPlugin) != null) {
+                continue
+            }
             def subprojectExtension = subproject.extensions.findByType(IntelliJPluginExtension)
             if (subprojectExtension) {
                 configureProjectAfterEvaluate(subproject, subprojectExtension)
