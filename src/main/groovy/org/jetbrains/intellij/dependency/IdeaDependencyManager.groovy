@@ -39,6 +39,9 @@ class IdeaDependencyManager {
         def dependencyName = 'ideaIC'
         if (type == 'IU') {
             dependencyName = 'ideaIU'
+        } else if (type == 'CL') {
+            dependencyGroup = 'com.jetbrains.intellij.clion'
+            dependencyName = 'clion'
         } else if (type == 'RD') {
             dependencyGroup = 'com.jetbrains.intellij.rider'
             dependencyName = 'riderRD'

@@ -57,13 +57,14 @@ pre}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>type</kbd> - The type of IDEA distribution.
+| <kbd>type</kbd> - The type of IDE distribution.
 |
 **Acceptable Values:**
     <ul>
-        <li><kbd>'IC'</kbd> - Community Edition. </li>
-        <li><kbd>'IU'</kbd> - Ultimate Edition. </li>
+        <li><kbd>'IC'</kbd> - IntelliJ IDEA Community Edition. </li>
+        <li><kbd>'IU'</kbd> - IntelliJ IDEA Ultimate Edition. </li>
         <li><kbd>'JPS'</kbd> - JPS-only. </li>
+        <li><kbd>'CL'</kbd> - CLion. </li>
         <li><kbd>'RD'</kbd> - Rider.</li>
         <li><kbd>'MPS'</kbd> - MPS.</li>
     </ul>
