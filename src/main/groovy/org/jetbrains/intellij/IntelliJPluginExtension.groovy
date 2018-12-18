@@ -64,7 +64,11 @@ class IntelliJPluginExtension {
         if (version.startsWith('JPS-') || version.startsWith('MPS-')) {
             return version.substring(4)
         }
-        return version.startsWith('IU-') || version.startsWith('IC-') || version.startsWith('RD-') ? version.substring(3) : version
+        if (version.startsWith('IU-') || version.startsWith('IC-') ||
+                version.startsWith('RD-') || version.startsWith('CL-')) {
+            return version.substring(3)
+        }
+        return version
     }
 
     Set<PluginDependency> getPluginDependencies() {
