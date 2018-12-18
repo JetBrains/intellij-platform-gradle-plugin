@@ -57,12 +57,7 @@ class VerifyPluginTask extends ConventionTask implements VerificationTask {
 
     @TaskAction
     void verifyPlugin() {
-        boolean failBuild = true
         def creationResult = IdePluginManager.createManager().createPlugin(getPluginDirectory())
-        if (creationResult instanceof PluginCreationSuccess) {
-            failBuild = !ignoreWarnings && !creationResult.warnings.empty
-        }
-
         if (creationResult instanceof PluginCreationSuccess) {
             creationResult.warnings.each {
                 IntelliJPlugin.LOG.warn("Plugin verification: $it.message")
@@ -78,7 +73,9 @@ class VerifyPluginTask extends ConventionTask implements VerificationTask {
         } else {
             IntelliJPlugin.LOG.error(creationResult.toString())
         }
-        if (failBuild && !ignoreFailures) {
+        boolean failBuild = !(creationResult instanceof PluginCreationSuccess) ||
+                !getIgnoreWarnings() && !creationResult.warnings.empty
+        if (failBuild && !getIgnoreFailures()) {
             throw new GradleException("Plugin verification failed.")
         }
     }

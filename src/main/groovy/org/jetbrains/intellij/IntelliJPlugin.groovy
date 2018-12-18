@@ -361,9 +361,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 conventionMapping('javac2', { project.file("$extension.ideaDependency.classes/lib/javac2.jar") })
                 conventionMapping('outputDir', {
                     def output = sourceSet.output
-                    def classesDir = output.hasProperty('classesDirs') ?
-                            output.classesDirs.first() :
-                            output.classesDir
+                    def classesDir = output.hasProperty('classesDirs') ? output.classesDirs.first() : output.classesDir
                     new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
                 })
             }
