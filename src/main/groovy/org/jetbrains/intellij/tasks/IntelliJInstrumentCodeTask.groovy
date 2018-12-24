@@ -1,23 +1,30 @@
 package org.jetbrains.intellij.tasks
 
+
 import org.apache.tools.ant.BuildException
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.IdeaDependency
 
 class IntelliJInstrumentCodeTask extends ConventionTask {
     private static final String FILTER_ANNOTATION_REGEXP_CLASS = 'com.intellij.ant.ClassFilterAnnotationRegexp'
     private static final LOADER_REF = "java2.loader"
+    private static final ASM_REPO_URL = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies"
+    private static final FORMS_REPO_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
 
     SourceSet sourceSet
 
     @Input
+    @Optional
     IdeaDependency ideaDependency
 
     Object javac2
+    Object compilerVersion
 
     @OutputDirectory
     File outputDir
@@ -32,6 +39,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
     }
 
     @InputFile
+    @Optional
     File getJavac2() {
         javac2 != null ? project.file(javac2) : null
     }
@@ -44,6 +52,20 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         this.javac2 = javac2
     }
 
+    @Input
+    String getCompilerVersion() {
+        Utils.stringInput(compilerVersion)
+    }
+
+    void setCompilerVersion(Object compilerVersion) {
+        this.compilerVersion = compilerVersion
+    }
+
+    void compilerVersion(Object compilerVersion) {
+        this.compilerVersion = compilerVersion
+    }
+
+
     @InputFiles
     FileCollection getSourceDirs() {
         return project.files(sourceSet.allSource.srcDirs.findAll { !sourceSet.resources.contains(it) && it.exists() })
@@ -55,18 +77,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         def outputDir = getOutputDir()
         copyOriginalClasses(outputDir)
 
-        def ideaDependency = getIdeaDependency()
-        def classpath = project.files(
-                getJavac2(),
-                project.fileTree("$ideaDependency.classes/lib").include(
-                        'jdom.jar',
-                        'asm-all.jar',
-                        'asm-all-*.jar',
-                        'jgoodies-forms.jar',
-                        'forms-*.jar',
-                )
-        )
-
+        def classpath = compilerClassPath()
         ant.taskdef(name: 'instrumentIdeaExtensions',
                 classpath: classpath.asPath,
                 loaderref: LOADER_REF,
@@ -75,6 +86,39 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         logger.info("Compiling forms and instrumenting code with nullability preconditions")
         boolean instrumentNotNull = prepareNotNullInstrumenting(classpath)
         instrumentCode(getSourceDirs(), outputDir, instrumentNotNull)
+    }
+
+    private FileCollection compilerClassPath() {
+        // local compiler
+        def ideaDependency = getIdeaDependency()
+        def javac2 = getJavac2()
+        if (ideaDependency != null && javac2?.exists()) {
+            return project.files(
+                    javac2,
+                    project.fileTree("$ideaDependency.classes/lib").include(
+                            'jdom.jar',
+                            'asm-all.jar',
+                            'asm-all-*.jar',
+                            'jgoodies-forms.jar',
+                            'forms-*.jar',
+                    )
+            )
+        }
+
+        return compilerClassPathFromMaven()
+    }
+
+    private ConfigurableFileCollection compilerClassPathFromMaven() {
+        def compilerVersion = getCompilerVersion()
+        def dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:$compilerVersion")
+        def repos = [project.repositories.maven { it.url = ASM_REPO_URL },
+                     project.repositories.maven { it.url = FORMS_REPO_URL }]
+        try {
+            return project.files(project.configurations.detachedConfiguration(dependency).files)
+        }
+        finally {
+            project.repositories.removeAll(repos)
+        }
     }
 
 

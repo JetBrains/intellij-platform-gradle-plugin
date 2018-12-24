@@ -1,3 +1,7 @@
 intellij {
     version 'CL-183.4925'
 }
+
+instrumentCode {
+    compilerVersion '183.4886.37'
+}

@@ -355,10 +355,18 @@ class IntelliJPlugin implements Plugin<Project> {
             instrumentTask.sourceSet = sourceSet
             instrumentTask.with {
                 dependsOn sourceSet.classesTaskName
-                onlyIf { extension.instrumentCode && it.getJavac2().exists() }
-
+                onlyIf { extension.instrumentCode }
+                conventionMapping('compilerVersion', {
+                    def ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
+                    return "$ideVersion.baselineVersion.$ideVersion.build".toString()
+                })
                 conventionMapping('ideaDependency', { extension.ideaDependency })
-                conventionMapping('javac2', { project.file("$extension.ideaDependency.classes/lib/javac2.jar") })
+                conventionMapping('javac2', {
+                    def javac2 = project.file("$extension.ideaDependency.classes/lib/javac2.jar")
+                    if (javac2?.exists()) {
+                        return javac2
+                    }
+                })
                 conventionMapping('outputDir', {
                     def output = sourceSet.output
                     def classesDir = output.hasProperty('classesDirs') ? output.classesDirs.first() : output.classesDir
@@ -369,7 +377,7 @@ class IntelliJPlugin implements Plugin<Project> {
             def updateTask = project.tasks.create('post' + instrumentTask.name.capitalize())
             updateTask.with {
                 dependsOn instrumentTask
-                onlyIf { extension.instrumentCode && instrumentTask.getJavac2().exists() }
+                onlyIf { extension.instrumentCode }
 
                 doLast {
                     def sourceSetOutput = sourceSet.output
