@@ -189,11 +189,11 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         given:
         writeTestFile()
         buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
-        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
-        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
+        buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
         when:
-        def result = build('2.11', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath', '--info')
+        def result = build('2.11', false, 'printMainRuntimeClassPath', 'printMainCompileClassPath', '--info')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 
@@ -246,19 +246,19 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         given:
         writeTestFile()
         buildFile << 'intellij.plugins = [\'org.jetbrains.postfixCompletion:0.8-beta\', \'copyright\']\n'
-        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
-        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
+        buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
         when:
-        def result = build('4.9', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def result = build('4.9', false, 'printMainRuntimeClassPath', 'printMainCompileClassPath')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 
         then:
         assert compileClasspath.contains('copyright.jar')
-        assert runtimeClasspath.contains('copyright.jar')
+        assert !runtimeClasspath.contains('copyright.jar')
         assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
-        assert runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
+        assert !runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
     }
 
     def 'add require plugin id parameter in test tasks'() {
