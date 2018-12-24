@@ -4,6 +4,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
+import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
 import java.nio.charset.StandardCharsets
@@ -135,56 +136,65 @@ class PatchPluginXmlTask extends ConventionTask {
 
     @TaskAction
     void patchPluginXmlFiles() {
-        def files = getPluginXmlFiles()
-        files.each { file ->
+        getPluginXmlFiles().each { file ->
             def pluginXml = Utils.parseXml(file)
+            if (!pluginXml) return
 
-            patchTag(pluginXml, "idea-version", null, [
-                    "since-build": getSinceBuild(),
-                    "until-build": getUntilBuild()])
+            patchAttribute(pluginXml, "idea-version", "since-build", getSinceBuild())
+            patchAttribute(pluginXml, "idea-version", "until-build", getUntilBuild())
             patchTag(pluginXml, "description", getPluginDescription())
             patchTag(pluginXml, "change-notes", getChangeNotes())
-            patchTagIf(getVersion() != Project.DEFAULT_VERSION,
-                    pluginXml, "version", getVersion())
+            if (getVersion() != Project.DEFAULT_VERSION) {
+                patchTag(pluginXml, "version", getVersion())
+            }
             patchTag(pluginXml, "id", getPluginId())
 
-            def writer
-            try {
-                def outputFile = new File(getDestinationDir(), file.getName())
-                def binaryOutputStream = new BufferedOutputStream(new FileOutputStream(outputFile))
-                writer = new PrintWriter(new OutputStreamWriter(binaryOutputStream, StandardCharsets.UTF_8))
+            writePatchedPluginXml(pluginXml, new File(getDestinationDir(), file.getName()))
+        }
+    }
 
-                def printer = new XmlNodePrinter(writer)
-                printer.preserveWhitespace = true
-                printer.print(pluginXml)
-            }
-            finally {
-                if (writer) {
-                    writer.close()
-                }
+    static void writePatchedPluginXml(Node pluginXml, File outputFile) {
+        def writer
+        try {
+            def binaryOutputStream = new BufferedOutputStream(new FileOutputStream(outputFile))
+            writer = new PrintWriter(new OutputStreamWriter(binaryOutputStream, StandardCharsets.UTF_8))
+
+            def printer = new XmlNodePrinter(writer)
+            printer.preserveWhitespace = true
+            printer.print(pluginXml)
+        }
+        finally {
+            if (writer) {
+                writer.close()
             }
         }
     }
 
-    static void patchTagIf(boolean shouldPatch, Node pluginXml, String name, String content = null, Map<String, Object> attributes = [:]) {
-        if (shouldPatch) patchTag(pluginXml, name, content, attributes)
+    static void patchTag(Node pluginXml, String name, String content) {
+        if (!content) return
+        def tag = pluginXml."$name"
+        if (tag) {
+            def existingValues = tag*.text() - null
+            if (existingValues) {
+                IntelliJPlugin.LOG.warn("Patching plugin.xml: value of `$name$existingValues` tag will be set to `$content`")
+            }
+            tag*.value = content
+        } else {
+            pluginXml.children().add(0, new Node(null, name, content))
+        }
     }
 
-    static void patchTag(Node pluginXml, String name, String content = null, Map<String, Object> attributes = [:]) {
-        if (!name || !pluginXml) return
-        def tagNodes = content != null ? [value: content] : [:]
-        for (attribute in attributes) {
-            tagNodes += [("@$attribute.key" as String) : attribute.value]
-        }
-        tagNodes.each {
-            if (!it.value) return
-            def tag = pluginXml."$name"
-            if (tag) {
-                tag*."$it.key" = it.value
-            } else {
-                def value = it.key.startsWith("@") ? [(it.key[1..-1]) : it.value] : it.value
-                pluginXml.children().add(0, new Node(null, name, value))
+    static void patchAttribute(Node pluginXml, String tagName, String attributeName, String attributeValue) {
+        if (!attributeValue) return
+        def tag = pluginXml."$tagName"
+        if (tag) {
+            def existingValues = tag*."@$attributeName" - null
+            if (existingValues) {
+                IntelliJPlugin.LOG.warn("Patching plugin.xml: attribute `$attributeName=$existingValues` of `$tagName` tag will be set to `$attributeValue`")
             }
+            tag*."@$attributeName" = attributeValue
+        } else {
+            pluginXml.children().add(0, new Node(null, tagName, [(attributeName): attributeValue]))
         }
     }
 }

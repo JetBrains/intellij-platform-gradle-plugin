@@ -9,7 +9,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -17,6 +17,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'patch description'() {
@@ -26,7 +27,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         buildFile << "patchPluginXml { pluginDescription = 'Plugin pluginDescription' }"
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -35,6 +36,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'patch patching preserves UTF-8 characters'() {
@@ -43,7 +45,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.getText("UTF-8") == """<idea-plugin version="2" someattr="\u2202">
@@ -51,6 +53,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'patch change notes'() {
@@ -60,7 +63,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         buildFile << "patchPluginXml { changeNotes = 'change notes' }"
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -69,6 +72,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'patch id'() {
@@ -78,7 +82,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         buildFile << "patchPluginXml { pluginId = 'my.plugin.id' }"
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -87,6 +91,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'do not update id if pluginId is undefined'() {
@@ -95,7 +100,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }\n"
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -104,6 +109,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
   <id>my.plugin.id</id>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'same since and until builds'() {
@@ -111,13 +117,14 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4'; sameSinceUntilBuild = true }"
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.1532.*"/>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'add version tags in the beginning of file'() {
@@ -125,7 +132,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
         pluginXml << "<idea-plugin version=\"2\">\n<id>org.jetbrains.erlang</id>\n</idea-plugin>"
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
@@ -133,6 +140,7 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
   <id>org.jetbrains.erlang</id>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'override version and since until builds'() {
@@ -143,13 +151,16 @@ class PatchPluginXmlSpec extends IntelliJPluginSpecBase {
 </idea-plugin>"""
         buildFile << "version='0.42.123'\nintellij { version = '14.1.4' }"
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
   <version>0.42.123</version>
   <idea-version since-build="141.1532" until-build="141.*">my_version</idea-version>
 </idea-plugin>
 """
+        assert output.contains('attribute `since-build=[1]` of `idea-version` tag will be set to `141.1532`')
+        assert output.contains('attribute `until-build=[2]` of `idea-version` tag will be set to `141.*`')
+        assert output.contains('value of `version[my_version]` tag will be set to `0.42.123`')
     }
 
     def 'take extension setting into account while patching'() {
@@ -166,7 +177,7 @@ intellij {
 }"""
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -174,6 +185,7 @@ intellij {
   <idea-version since-build="1" until-build="2">my_version</idea-version>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'do not update version tag if project.version is undefined'() {
@@ -182,7 +194,7 @@ intellij {
         buildFile << "intellij { version = '14.1.4' }"
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -190,6 +202,7 @@ intellij {
   <version>0.10.0</version>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     def 'skip patch task if intellij version did not changed'() {
@@ -237,7 +250,7 @@ intellij {
 """
 
         when:
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        def output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
 
         then:
         patchedPluginXml.text == """<idea-plugin version="2">
@@ -245,6 +258,7 @@ intellij {
   <idea-version since-build="141.1532" until-build="141.*"/>
 </idea-plugin>
 """
+        assert !output.contains('will be overwritten')
     }
 
     private File getPatchedPluginXml() {
