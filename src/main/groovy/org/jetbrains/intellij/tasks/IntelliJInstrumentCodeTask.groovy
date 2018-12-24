@@ -44,10 +44,12 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         javac2 != null ? project.file(javac2) : null
     }
 
+    @Deprecated
     void setJavac2(Object javac2) {
         this.javac2 = javac2
     }
 
+    @Deprecated
     void javac2(Object javac2) {
         this.javac2 = javac2
     }

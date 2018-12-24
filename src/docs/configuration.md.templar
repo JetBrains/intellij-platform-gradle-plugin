@@ -130,13 +130,7 @@ pre}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>instrumentCode</kbd> - Should plugin instrument java classes with nullability assertions? <br/><br/>
-
-**Notes:**
-    <ul>
-        <li>Instrumentation code cannot be performed while using Rider distributions `RD`.</li>
-        <li>Might be required for compiling forms created by IntelliJ GUI designer.</li>
-    </ul>
+| <kbd>instrumentCode</kbd> - Should plugin instrument java classes with nullability assertions and compile forms created by IntelliJ GUI Designer?
 |
 **Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>
 
@@ -289,18 +283,11 @@ See the instruction on how to generate authentication token: http://www.jetbrain
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
-##### Deprecated
+### Instrumenting DSL
+The following attributes help you to tune instrumenting behaviour in <kbd>instrumentCode { ... }</kbd> block.
 
-<details>
-<summary> Deprecated Publishing DSL <kbd>intellij.publish { ... }</kbd> or <kbd>intellij { publish { ... } }</kbd> </summary>
-
-| **Attributes**              | **Default Value**  |
-| :-------------------------- | :----------------- |
-| <kbd>username</kbd> Login username | none |
-| <kbd>password</kbd> Login password | none |
-| <kbd>channel</kbd> A single channel name to upload plugin to.   | <kbd>default</kbd> |
-| <kbd>channels</kbd> List of comma-separated channel names to upload plugin to.  | <kbd>default</kbd> |
-
-</details>
+| **Attributes**            | **Default Value** |
+| :------------------------ |  :---------------- |
+| <kbd>compiler version</kbd> is a version of instrumenting compiler. It's used for non-IDEA plugins (e.g. CLion or Rider). | <kbd>Build number of the IDE dependency</kbd> |
 
 pre}{\n}
