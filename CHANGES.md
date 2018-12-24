@@ -4,6 +4,7 @@
 
 - support for CLion as a building dependency [#342](../../issues/342)
 - support token-based authentication while publishing plugins [#317](../../issues/317)
+- add notification about patching particular tag values and attributes in plugin.xml [#284](../../issues/284)
 - fix attaching sources to bundled plugins [#337](../../issues/337)
 - fix verification message in case of default value of `description`-tag
 
