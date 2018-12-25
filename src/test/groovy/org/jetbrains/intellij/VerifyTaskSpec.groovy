@@ -9,7 +9,7 @@ class VerifyTaskSpec extends IntelliJPluginSpecBase {
         def result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
 
         then:
-        result.output.contains('verifyPlugin UP-TO-DATE')
+        result.output.contains('verifyPlugin NO-SOURCE')
     }
 
     def 'do not fail on warning by default'() {

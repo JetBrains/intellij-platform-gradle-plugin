@@ -54,9 +54,8 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         buildFile.text = buildFile.text.replace("kotlin-gradle-plugin:1.0.6", "kotlin-gradle-plugin:1.1.4")
 
         when:
-        // while debugging Gradle 4.0 includes all dependencies, including intellij-plugin-structure,
-        // which depends on asm-all different from IDEA-builtin asm-all.
-        disableDebug()
+        disableDebug("while debugging Gradle 4.0 includes all dependencies, including intellij-plugin-structure, " +
+                "which depends on asm-all different from IDEA-builtin asm-all")
         build('4.9', false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:

@@ -74,7 +74,8 @@ public class AppTest {
 """
     }
 
-    protected disableDebug() {
+    protected disableDebug(String reason) {
+        println("Debugging is disable for test with the following reason: $reason")
         debugEnabled = false
     }
 
@@ -87,7 +88,7 @@ public class AppTest {
     }
 
     protected BuildResult build(boolean fail, String... tasks) {
-        return build('2.14', fail, tasks)
+        return build('3.4', fail, tasks)
     }
 
     protected BuildResult build(String gradleVersion, boolean fail, String... tasks) {

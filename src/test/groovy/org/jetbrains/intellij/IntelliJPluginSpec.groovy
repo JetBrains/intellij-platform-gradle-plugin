@@ -24,9 +24,10 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         given:
         buildFile << 'intellij { instrumentCode = true }'
         writeJavaFile()
+        disableDebug('Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation')
 
         when:
-        def result = build('buildSourceSet', '--info')
+        def result = build('4.0', false, 'buildSourceSet', '--info')
 
         then:
         result.output.contains('Added @NotNull assertions to 1 files')
@@ -36,6 +37,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         given:
         writeTestFile()
         buildFile << 'intellij { instrumentCode = true }'
+        disableDebug('Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation')
 
         when:
         def result = build('buildTestSourceSet', '--info')
@@ -81,6 +83,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 </form>
 """
         writeKotlinUIFile()
+        disableDebug('Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation')
 
         when:
         def result = build('buildSourceSet', '--info')
@@ -93,6 +96,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         given:
         buildFile << 'intellij { instrumentCode = true }'
         writeJavaFile()
+        disableDebug('Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation')
 
         when:
         build('buildSourceSet')
@@ -185,25 +189,6 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         assert !runtimeClasspath.contains('intellij-postfix.jar')
     }
 
-    def 'use compile classpath for non-builtin plugins if Gradle < 2.12'() {
-        given:
-        writeTestFile()
-        buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
-        buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
-        buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
-
-        when:
-        def result = build('2.11', false, 'printMainRuntimeClassPath', 'printMainCompileClassPath', '--info')
-        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
-        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
-
-        then:
-        assert compileClasspath.contains('copyright.jar')
-        assert runtimeClasspath.contains('copyright.jar')
-        assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
-        assert runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
-    }
-
     def 'use test compile classpath for non-builtin plugins if Gradle >= 2.12'() {
         given:
         writeTestFile()
@@ -213,25 +198,6 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
         when:
         def result = build('printTestRuntimeClassPath', 'printTestCompileClassPath')
-        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
-        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
-
-        then:
-        assert compileClasspath.contains('copyright.jar')
-        assert runtimeClasspath.contains('copyright.jar')
-        assert compileClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
-        assert runtimeClasspath.contains('org.jetbrains.postfixCompletion-0.8-beta.jar')
-    }
-
-    def 'use test compile classpath for non-builtin plugins if Gradle < 2.12'() {
-        given:
-        writeTestFile()
-        buildFile << 'intellij.plugins = [\'copyright\', \'org.jetbrains.postfixCompletion:0.8-beta\']\n'
-        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
-        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
-
-        when:
-        def result = build('2.11', false, 'printTestRuntimeClassPath', 'printTestCompileClassPath')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 

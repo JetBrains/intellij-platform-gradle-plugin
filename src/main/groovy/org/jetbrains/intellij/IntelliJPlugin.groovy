@@ -11,6 +11,7 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
@@ -51,27 +52,32 @@ class IntelliJPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        def javaPlugin = project.getPlugins().apply(JavaPlugin)
+        checkGradleVersion(project)
+        project.getPlugins().apply(JavaPlugin)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension) as IntelliJPluginExtension
         intellijExtension.with {
             pluginName = project.name
             sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
             downloadSources = !System.getenv().containsKey('CI')
         }
-        configureConfigurations(project, javaPlugin)
+        configureConfigurations(project)
         configureTasks(project, intellijExtension)
     }
 
-    private static void configureConfigurations(@NotNull Project project, @NotNull JavaPlugin javaPlugin) {
+    private static void checkGradleVersion(@NotNull Project project) {
+        def gradleVersionComponents = project.gradle.gradleVersion.split('\\.')
+        if (gradleVersionComponents.length > 1 &&
+                Integer.parseInt(gradleVersionComponents[0]) < 3 ||
+                Integer.parseInt(gradleVersionComponents[0]) == 3 && Integer.parseInt(gradleVersionComponents[1]) < 4) {
+            throw new PluginInstantiationException("gradle-intellij-plugin requires Gradle 3.4 and higher")
+        }
+    }
+
+    private static void configureConfigurations(@NotNull Project project) {
         def idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
         def ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
-
-        if (javaPlugin.hasProperty('COMPILE_ONLY_CONFIGURATION_NAME')) {
-            project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-            project.configurations.getByName(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-        } else {
-            project.configurations.getByName(JavaPlugin.COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-        }
+        project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
+        project.configurations.getByName(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
     }
 
     private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
@@ -179,7 +185,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
             def toolsJar = Jvm.current().toolsJar
             if (toolsJar) {
-                project.dependencies.add(JavaPlugin.RUNTIME_CONFIGURATION_NAME, project.files(toolsJar))
+                project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
             }
         }
         else {
@@ -368,6 +374,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 })
                 conventionMapping('outputDir', {
                     def output = sourceSet.output
+                    // @since Gradle 4.0
                     def classesDir = output.hasProperty('classesDirs') ? output.classesDirs.first() : output.classesDir
                     new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
                 })
@@ -381,12 +388,14 @@ class IntelliJPlugin implements Plugin<Project> {
                 doLast {
                     def sourceSetOutput = sourceSet.output
 
+                    // @since Gradle 4.0
                     def oldClassesDir = sourceSetOutput.hasProperty("classesDirs") ?
                             sourceSetOutput.classesDirs :
                             sourceSetOutput.classesDir
 
                     // Set the classes dir to the new one with the instrumented classes
 
+                    // @since Gradle 4.0
                     if (sourceSetOutput.hasProperty("classesDirs"))
                         sourceSetOutput.classesDirs.from = instrumentTask.outputDir else
                         sourceSetOutput.classesDir = instrumentTask.outputDir

@@ -23,8 +23,8 @@ class DownloadIntelliJSpec extends IntelliJPluginSpecBase {
     def 'download sources if option is enabled'() {
         given:
         def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2017.2.5')
-        def sourcesJar = new File(cacheDir, '885f9dd2a7c79499361c15c57d58cdff9eaa74c6/ideaIC-2017.2.5-sources.jar').exists()
-        Assume.assumeFalse("it was already cached. test is senseless until gradle clean", sourcesJar)
+        def sourcesJar = new File(cacheDir, '885f9dd2a7c79499361c15c57d58cdff9eaa74c6/ideaIC-2017.2.5-sources.jar')
+        Assume.assumeFalse("it was already cached. test is senseless until gradle clean", sourcesJar.exists())
 
         buildFile << 'intellij { downloadSources = true }'
 

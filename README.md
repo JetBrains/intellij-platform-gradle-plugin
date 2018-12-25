@@ -10,6 +10,8 @@
 
 
 > 
+**This project requires Gradle version of at least 3.4**
+
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
 The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks to fill some tags 
@@ -25,34 +27,13 @@ helpful while developing plugins for IntelliJ platform.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.3.12"
+  id "org.jetbrains.intellij" version "0.4.0"
 }
 ```
  
-### Other Setups 
- 
-<details> 
-<summary><b>Pre Gradle 2.1</b> - Use the following code when Gradle is not at version 2.1 or higher <em>(Click to expand)</em>...</summary> 
+### Snapshot version
 
-```groovy
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
-    }
-  }
-  dependencies {
-    classpath "gradle.plugin.org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.3.12"
-  }
-}
-
-apply plugin: 'org.jetbrains.intellij'
-```
- 
-</details> 
- 
-<details> 
-<summary><b>SNAPSHOT</b> - Use the following code to get the lastest features <em>(Click to expand)</em>...</summary> 
+<summary>Use the following code to get the latest features</summary>
 
 ```groovy
 buildscript {
@@ -67,13 +48,12 @@ buildscript {
     
   }
   dependencies {
-    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.4.0-SNAPSHOT"
+    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.5.0-SNAPSHOT"
   }
 }
 
 apply plugin: 'org.jetbrains.intellij'
 ```
-
 </details>
 
 ### Tasks
@@ -176,11 +156,11 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.3.12"
+  id "org.jetbrains.intellij" version "0.4.0"
 }
 
 intellij {
-  version 'IC-2016.1'
+  version 'IC-2018.3'
   plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
   pluginName 'MyPlugin'
 

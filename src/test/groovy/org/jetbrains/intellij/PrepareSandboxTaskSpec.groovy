@@ -28,6 +28,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 version = '${getIntellijVersion()}'
                 downloadSources = false
                 pluginName = 'myNestedPluginName'
+                instrumentCode false
             }
             version='0.42.123'"""
         file('nestedProject/src/main/java/NestedAppFile.java') << "class NestedAppFile{}"
@@ -74,6 +75,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             }
             project(':nestedProject') {
                 intellij.pluginName = 'myNestedPluginName'
+                intellij.instrumentCode = false
             }
             """.stripIndent()
         file('settings.gradle') << "include 'nestedProject'"

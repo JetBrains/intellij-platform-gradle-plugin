@@ -39,9 +39,11 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.3.13'
+version = '0.4.0'
 group = 'org.jetbrains.intellij.plugins'
 description = """
+**This project requires Gradle version of at least 3.4**
+
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
 The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks to fill some tags 
