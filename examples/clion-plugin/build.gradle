@@ -1,5 +1,6 @@
 intellij {
     version 'CL-183.4925'
+    downloadSources false
 }
 
 instrumentCode {
