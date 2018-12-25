@@ -28,6 +28,10 @@
       "value": "project-description"
     },
     {
+      "type": "tocbacktotop",
+      "value": " <sup><sup>[top](#documentr_top)</sup></sup>"
+    },
+    {
       "type": "template",
       "value": "src/docs/usage.md.templar"
     },

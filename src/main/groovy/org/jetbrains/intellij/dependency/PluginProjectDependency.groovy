@@ -68,7 +68,7 @@ class PluginProjectDependency implements PluginDependency, Serializable {
     @NotNull
     @Override
     Collection<File> getJarFiles() {
-        return pluginDependency ? pluginDependency.jarFiles : Collections.emptyList()
+        return pluginDependency ? pluginDependency.jarFiles : Collections.<File>emptyList()
     }
 
     @Nullable

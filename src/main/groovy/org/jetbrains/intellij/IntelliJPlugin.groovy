@@ -81,12 +81,12 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project, extension)
         configureBuildPluginTask(project)
-        configurePublishPluginTask(project, extension)
+        configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
         configureDependencyExtensions(project, extension)
         assert !project.state.executed : "afterEvaluate is a no-op for an executed project"
-        project.afterEvaluate { configureProjectAfterEvaluate(it, extension) }
+        project.afterEvaluate { Project p -> configureProjectAfterEvaluate(p, extension) }
     }
 
     private static void configureProjectAfterEvaluate(@NotNull Project project,
@@ -312,7 +312,6 @@ class IntelliJPlugin implements Plugin<Project> {
             task.group = GROUP_NAME
             task.description = "Runs Intellij IDEA with installed plugin."
             task.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
-            task.conventionMapping.map("systemProperties", { extension.systemProperties })
             task.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
             task.conventionMapping.map("configDirectory", {
                 (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getConfigDirectory()
@@ -426,7 +425,6 @@ class IntelliJPlugin implements Plugin<Project> {
             def pluginsDirectory = project.file(Utils.pluginsDir(extension.sandboxDirectory, true))
 
             it.enableAssertions = true
-            it.systemProperties(extension.systemProperties)
             it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, Utils.ideaSdkDirectory(extension))
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
@@ -458,15 +456,11 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configurePublishPluginTask(@NotNull Project project,
-                                                   @NotNull IntelliJPluginExtension extension) {
+    private static void configurePublishPluginTask(@NotNull Project project) {
         LOG.info("Configuring publishing IntelliJ IDEA plugin task")
         project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask).with {
             group = GROUP_NAME
             description = "Publish plugin distribution on plugins.jetbrains.com."
-            conventionMapping('username', { extension.publish.username })
-            conventionMapping('password', { extension.publish.password })
-            conventionMapping('channels', { extension.publish.channels })
             conventionMapping('distributionFile', {
                 def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
                 def distributionFile = buildPluginTask?.archivePath

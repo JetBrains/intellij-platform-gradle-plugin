@@ -88,7 +88,7 @@ class PluginDependencyManager {
             }
         })
         if (files == null || files.length != 1) {
-            throw new AssertionError("Single directory expected in $dir")
+            throw new BuildException("Single directory expected in $dir", null)
         }
         return files[0]
     }

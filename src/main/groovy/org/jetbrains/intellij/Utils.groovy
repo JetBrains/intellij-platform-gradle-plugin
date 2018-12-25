@@ -153,13 +153,13 @@ class Utils {
     }
 
     // todo: collect all ids for multiproject configuration
-    static def getPluginIds(@NotNull Project project) {
+    static List<String> getPluginIds(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
         sourcePluginXmlFiles(project).files.each {
             def pluginXml = parseXml(it)
             ids += pluginXml.id*.text()
         }
-        return ids.size() == 1 ? [ids.first()] : Collections.emptyList()
+        return ids.size() == 1 ? [ids.first()] : Collections.<String>emptyList()
     }
 
     static Node parseXml(File file) {

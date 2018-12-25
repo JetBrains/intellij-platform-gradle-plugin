@@ -1,6 +1,6 @@
 plugins {
     id 'com.gradle.plugin-publish' version '0.10.0'
-    id 'synapticloop.documentr' version '1.3.4'
+    id 'synapticloop.documentr' version '2.9.0'
     id 'java-gradle-plugin'
     id 'maven'
 }
@@ -30,7 +30,7 @@ dependencies {
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.4.30'
     compile 'org.jetbrains.intellij.plugins:structure-base:3.46'
     compile 'org.jetbrains.intellij.plugins:structure-intellij:3.46'
-    compile 'de.undercouch:gradle-download-task:3.4.2'
+    compile 'de.undercouch:gradle-download-task:3.4.3'
 
     testCompile gradleTestKit()
     testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
@@ -56,7 +56,6 @@ pluginBundle {
     description = 'Plugin for building plugins for IntelliJ IDEs'
     tags = ['intellij', 'jetbrains', 'idea']
 
-    //noinspection GroovyAssignabilityCheck
     plugins {
         intellijPlugin {
             id = 'org.jetbrains.intellij'
@@ -85,14 +84,6 @@ def configureTests(testTask) {
     testTask.systemProperties['test.gradle.home'] = testGradleHomePath
     testTask.systemProperties['plugins.repo'] = pluginsRepo
     testTask.outputs.dir(testGradleHomePath)
-
-    try {
-        if (InetAddress.getByName("jetbrains-com-mirror.labs.intellij.net").isReachable(300)) {
-            testTask.systemProperties['jbre.repo'] = 'http://repo.labs.intellij.net/intellij-jdk'
-        }
-    }
-    catch (UnknownHostException ignore) {
-    }
 }
 
 task javadocJar(type: Jar) {

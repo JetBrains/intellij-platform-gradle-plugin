@@ -6,7 +6,6 @@ import org.jetbrains.intellij.dependency.PluginDependency
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
  */
-@SuppressWarnings("GroovyUnusedDeclaration")
 class IntelliJPluginExtension {
     Object[] plugins = []
     String localPath
@@ -30,13 +29,9 @@ class IntelliJPluginExtension {
     // configure extra dependency artifacts from intellij repo
     // the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
     Object[] extraDependencies = []
-    @Deprecated
-    Publish publish = new Publish()
 
     IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
-    @Deprecated
-    private final Map<String, Object> systemProperties = new HashMap<>()
 
     String getType() {
         if (version == null) {
@@ -73,100 +68,5 @@ class IntelliJPluginExtension {
 
     Set<PluginDependency> getPluginDependencies() {
         return pluginDependencies
-    }
-
-    def publish(Closure c) {
-        publish.with(c)
-    }
-
-    /**
-     * @deprecated
-     */
-    static class Publish {
-        /**
-         * @deprecated intellij.publish.pluginId property is deprecated. Tag 'id' from plugin.xml will be used for uploading. 
-         */
-        String pluginId
-        String username
-        String password
-        String[] channels
-
-        static def pluginId(String pluginId) {
-            IntelliJPlugin.LOG.warn("intellij.publish.pluginId property is deprecated. " +
-                    "Tag 'id' from plugin.xml will be used for uploading.")
-        }
-
-        def username(String username) {
-            IntelliJPlugin.LOG.warn("intellij.publish.username property is deprecated. " +
-                    "Use `publishPlugin { username 'username' }` instead.")
-            this.username = username
-        }
-
-        def password(String password) {
-            IntelliJPlugin.LOG.warn("intellij.publish.password property is deprecated. " +
-                    "Use `publishPlugin { password 'password' }` instead.")
-            this.password = password
-        }
-
-        def setChannel(String channel) {
-            IntelliJPlugin.LOG.warn("intellij.publish.channel property is deprecated. " +
-                    "Use `publishPlugin { channel 'channel' }` instead.")
-            this.channels = [channel]
-        }
-
-        def channel(String channel) {
-            IntelliJPlugin.LOG.warn("intellij.publish.channel property is deprecated. " +
-                    "Use `publishPlugin { channel 'channel' }` instead.")
-            channels(channel)
-        }
-
-        def channels(String... channels) {
-            IntelliJPlugin.LOG.warn("intellij.publish.channels property is deprecated. " +
-                    "Use `publishPlugin { channels 'channels' }` instead.")
-            this.channels = channels
-        }
-
-        def setChannels(String... channels) {
-            IntelliJPlugin.LOG.warn("intellij.publish.channels property is deprecated. " +
-                    "Use `publishPlugin { channels 'channels' }` instead.")
-            this.channels = channels
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    Map<String, Object> getSystemProperties() {
-        systemProperties
-    }
-
-    /**
-     * @deprecated
-     */
-    void setSystemProperties(Map<String, ?> properties) {
-        IntelliJPlugin.LOG.warn("intellij.systemProperties property is deprecated. " +
-                "Use systemProperties property of a particular task like `runIde` or `test`.")
-        systemProperties.clear()
-        systemProperties.putAll(properties)
-    }
-
-    /**
-     * @deprecated
-     */
-    IntelliJPluginExtension systemProperties(Map<String, ?> properties) {
-        IntelliJPlugin.LOG.warn("intellij.systemProperties method is deprecated. " +
-                "Use systemProperties method of a particular task like `runIde` or `test`.")
-        systemProperties.putAll(properties)
-        this
-    }
-
-    /**
-     * @deprecated
-     */
-    IntelliJPluginExtension systemProperty(String name, Object value) {
-        IntelliJPlugin.LOG.warn("intellij.systemProperty method is deprecated. " +
-                "Use systemProperty method of a particular task like `runIde` or `test`.")
-        systemProperties.put(name, value)
-        this
     }
 }
