@@ -6,7 +6,7 @@ plugins {{{\n}
 }{\n}
 {\n}
 intellij {{{\n}
-  version 'IC-2016.1'{\n}
+  version 'IC-2018.3'{\n}
   plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']{\n}
   pluginName 'MyPlugin'{\n}
 {\n}
