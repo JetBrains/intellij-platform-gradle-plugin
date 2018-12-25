@@ -10,7 +10,7 @@
 
 
 > 
-**This project requires Gradle version of at least 3.4**
+**This project requires Gradle 3.4 or newer**
 
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
