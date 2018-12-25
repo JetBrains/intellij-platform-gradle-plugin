@@ -93,15 +93,6 @@ The following attributes are part of the Setup DSL <kbd>intellij { ... }</kbd> i
 | <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:**    <ul>        <li>Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio.</li>        <li>Empty value means that the IDE that was used for compiling will be used for running/debugging as well.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/Android Studio.app'`<br/><br/>**Default Value:** none|
 | <kbd>ideaDependencyCachePath</kbd> -The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>**Notes:**    <ul>        <li>Empty value means the Gradle cache directory will be used.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'<example>'`<br/><br/>**Default Value:** none|
 
-##### Deprecated
-<details>
-<summary> Deprecated Setup DSL Attributes</kbd> </summary>
-
-| **Attribute**             | **Values** |
-| :------------------------ | :--------- |
-|<kbd>systemProperties</kbd> - The map of system properties which will be passed to IDEA instance on executing `runIdea` task and tests. <br/><br/>**Notes:**    <ul>        <li>Use `systemProperties` methods of a particular tasks like `runIde` or `test`.</li>    </ul>|**Acceptable Values:** <br/><br/>**Default Value:** <kbd>[]</kbd>|
-
-</details>
 
 ### Running DSL
 

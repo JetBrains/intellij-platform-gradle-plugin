@@ -219,26 +219,6 @@ The absolute path to the local directory that should be used for storing IDEA di
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-##### Deprecated{\n}
-
-<details>{\n}
-<summary> Deprecated Setup DSL Attributes</kbd> </summary>{\n}{\n}
-
-| **Attribute**             | **Values** |{\n}
-| :------------------------ | :--------- |{\n}
-|
-<kbd>systemProperties</kbd> - The map of system properties which will be passed to IDEA instance on executing `runIdea` task and tests. <br/><br/>
-**Notes:**
-    <ul>
-        <li>Use `systemProperties` methods of a particular tasks like `runIde` or `test`.</li>
-    </ul>
-|
-**Acceptable Values:** <br/><br/>
-**Default Value:** <kbd>[]</kbd>
-|{\n}{\n}
-
-</details>{\n}
-
 {pre
 
 ### Running DSL

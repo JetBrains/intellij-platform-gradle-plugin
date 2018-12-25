@@ -42,7 +42,7 @@ dependencies {
 version = '0.4.0'
 group = 'org.jetbrains.intellij.plugins'
 description = """
-**This project requires Gradle version of at least 3.4**
+**This project requires Gradle 3.4 or newer**
 
 This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
 
@@ -146,3 +146,11 @@ wrapper {
     gradleVersion = '4.10'
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
+
+
+
+
+
+
+
+
