@@ -87,7 +87,7 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
 
         logger.info("Compiling forms and instrumenting code with nullability preconditions")
         boolean instrumentNotNull = prepareNotNullInstrumenting(classpath)
-        instrumentCode(getSourceDirs(), classpath, outputDir, instrumentNotNull)
+        instrumentCode(getSourceDirs(), outputDir, instrumentNotNull)
     }
 
     private FileCollection compilerClassPath() {
@@ -149,13 +149,10 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         return true
     }
 
-    private void instrumentCode(@NotNull FileCollection srcDirs,
-                                @NotNull FileCollection classpath,
-                                @NotNull File outputDir,
-                                boolean instrumentNotNull) {
+    private void instrumentCode(@NotNull FileCollection srcDirs, @NotNull File outputDir, boolean instrumentNotNull) {
         def headlessOldValue = System.setProperty('java.awt.headless', 'true')
         ant.instrumentIdeaExtensions(srcdir: srcDirs.asPath,
-                destdir: outputDir, classpath: classpath.asPath,
+                destdir: outputDir, classpath: sourceSet.compileClasspath.asPath,
                 includeantruntime: false, instrumentNotNull: instrumentNotNull) {
             if (instrumentNotNull) {
                 ant.skip(pattern: 'kotlin/Metadata')
