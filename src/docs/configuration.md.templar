@@ -211,6 +211,17 @@ The absolute path to the local directory that should be used for storing IDEA di
 **Acceptable Values:** <br/>
 <kbd>path</kbd> - `'<example>'`<br/><br/>
 **Default Value:** none
+|{\n}
+
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+
+| <kbd>intellijRepo</kbd>, <kbd>pluginsRepo</kbd>, <kbd>jrerepo</kbd> -
+Urls to repositories for downloading IDE distributions, plugin dependencies and JetBrains Java Runtime. <br/><br/>
+|
+**Acceptable Values:** <br/>
+<kbd>url</kbd><br/><br/>
+**Default Value:** <kbd>www.jetbrains.com/intellij-repository</<kbd>, <kbd>plugins.jetbrains.com/maven</kbd>, <kbd>jetbrains.bintray.com/intellij-jdk<kbd>
 |{\n}{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
