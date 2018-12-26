@@ -201,8 +201,7 @@ pre}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>ideaDependencyCachePath</kbd> -
-The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>
+| <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDEA distributions. <br/><br/>
 **Notes:**
     <ul>
         <li>Empty value means the Gradle cache directory will be used.</li>
@@ -216,12 +215,11 @@ The absolute path to the local directory that should be used for storing IDEA di
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>intellijRepo</kbd>, <kbd>pluginsRepo</kbd>, <kbd>jrerepo</kbd> -
-Urls to repositories for downloading IDE distributions, plugin dependencies and JetBrains Java Runtime. <br/><br/>
+| <kbd>intellijRepo</kbd>, <kbd>pluginsRepo</kbd>, <kbd>jreRepo</kbd> - Urls of repositories for downloading IDE distributions, plugin dependencies and JetBrains Java Runtime. <br/><br/>
 |
 **Acceptable Values:** <br/>
 <kbd>url</kbd><br/><br/>
-**Default Value:** <kbd>www.jetbrains.com/intellij-repository</<kbd>, <kbd>plugins.jetbrains.com/maven</kbd>, <kbd>jetbrains.bintray.com/intellij-jdk<kbd>
+**Default Value:** <kbd>jetbrains.com/intellij-repository</kbd>, <kbd>plugins.jetbrains.com/maven</kbd>, <kbd>jetbrains.bintray.com/intellij-jdk</kbd>
 |{\n}{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
