@@ -13,7 +13,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 
-                plugins = ['copyright'] 
+                plugins = ['copyright']
             }
             dependencies { 
                 compile 'joda-time:joda-time:2.8.1'

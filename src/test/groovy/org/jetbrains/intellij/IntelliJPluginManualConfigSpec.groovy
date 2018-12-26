@@ -190,7 +190,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail('tasks')
 
         then:
-        result.output.contains('intellij plugin \'junit\' is not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies to them in the afterEvaluate block')
+        result.output.contains('intellij plugin \'junit\' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block')
     }
 
     def 'configure plugins manually fail on unconfigured plugin'() {
@@ -212,7 +212,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail('tasks')
 
         then:
-        result.output.contains('intellij plugin \'junit\' is not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies to them in the afterEvaluate block')
+        result.output.contains('intellij plugin \'junit\' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block')
     }
 
     def 'configure plugins manually fail on some unconfigured plugins'() {
@@ -234,7 +234,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail('tasks')
 
         then:
-        result.output.contains('intellij plugins [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies to them in the afterEvaluate block')
+        result.output.contains('intellij plugins [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block')
     }
 
     def 'configure extra manually fail without afterEvaluate'() {
@@ -254,7 +254,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail('tasks')
 
         then:
-        result.output.contains('intellij extra artefact \'intellij-core\' is not (yet) configured or not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies to them in the afterEvaluate block')
+        result.output.contains('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
     }
 
     def 'configure extra manually fail on unconfigured extra dependency'() {
@@ -276,6 +276,6 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail('tasks')
 
         then:
-        result.output.contains('intellij extra artefact \'intellij-core\' is not (yet) configured or not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies to them in the afterEvaluate block')
+        result.output.contains('intellij extra artifact \'intellij-core\' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block')
     }
 }

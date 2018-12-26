@@ -66,6 +66,7 @@ class IntelliJPlugin implements Plugin<Project> {
         project.getPlugins().apply(JavaPlugin)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension) as IntelliJPluginExtension
         intellijExtension.with {
+            it.project = project
             pluginName = project.name
             sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
             downloadSources = !System.getenv().containsKey('CI')
@@ -114,6 +115,8 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
+        configureIntellijDependency(project, extension)
+        configurePluginDependencies(project, extension)
         configureDependencyExtensions(project, extension)
         assert !project.state.executed: "afterEvaluate is a no-op for an executed project"
         project.afterEvaluate { Project p -> configureProjectAfterEvaluate(p, extension) }
@@ -131,25 +134,25 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
 
-        configureIntellijDependency(project, extension)
-        configurePluginDependencies(project, extension)
         configureTestTasks(project, extension)
     }
 
     private static void configureDependencyExtensions(@NotNull Project project,
                                                       @NotNull IntelliJPluginExtension extension) {
         project.dependencies.ext.intellij = { Closure filter = {} ->
-            def dependency = extension.ideaDependency
-            if (dependency == null || dependency.jarFiles == null || dependency.jarFiles.empty) {
+            if (!project.state.executed) {
                 throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
             }
-            project.files(dependency.jarFiles).asFileTree.matching(filter)
+            project.files(extension.ideaDependency.jarFiles).asFileTree.matching(filter)
         }
 
         project.dependencies.ext.intellijPlugin = { String plugin, Closure filter = {} ->
+            if (!project.state.executed) {
+                throw new GradleException("intellij plugin '$plugin' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+            }
             def pluginDep = extension.pluginDependencies.find { it.id == plugin }
             if (pluginDep == null || pluginDep.jarFiles == null || pluginDep.jarFiles.empty) {
-                throw new GradleException("intellij plugin '$plugin' is not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies to them in the afterEvaluate block")
+                throw new GradleException("intellij plugin '$plugin' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
             }
             project.files(pluginDep.jarFiles).asFileTree.matching(filter)
         }
@@ -166,16 +169,19 @@ class IntelliJPlugin implements Plugin<Project> {
                 }
             }
             if (!invalidPlugins.empty) {
-                throw new GradleException("intellij plugins $invalidPlugins are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies to them in the afterEvaluate block")
+                throw new GradleException("intellij plugins $invalidPlugins are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
             }
             project.files(selectedPlugins.collect { it.jarFiles })
         }
 
         project.dependencies.ext.intellijExtra = { String extra, Closure filter = {} ->
+            if (!project.state.executed) {
+                throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
+            }
             def dependency = extension.ideaDependency
             def extraDep = dependency != null ? dependency.extraDependencies.find { it.name == extra } : null
             if (extraDep == null || extraDep.jarFiles == null || extraDep.jarFiles.empty) {
-                throw new GradleException("intellij extra artefact '$extra' is not (yet) configured or not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies to them in the afterEvaluate block")
+                throw new GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
             }
             project.files(extraDep.jarFiles).asFileTree.matching(filter)
         }
@@ -183,80 +189,85 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureIntellijDependency(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
-        Utils.info(project, "Configuring IDE dependency")
-        def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
-        def ideaDependency
-        if (extension.localPath != null) {
-            if (extension.version != null) {
-                Utils.warn(project, "Both `localPath` and `version` specified, second would be ignored")
-            }
-            Utils.info(project, "Using path to locally installed IDE: '${extension.localPath}'")
-            ideaDependency = resolver.resolveLocal(project, extension.localPath, extension.localSourcesPath)
-        } else {
-            Utils.info(project, "Using IDE from remote repository")
-            def version = extension.version ?: DEFAULT_IDEA_VERSION
-            ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources,
-                    extension.extraDependencies)
-        }
-        extension.ideaDependency = ideaDependency
-        if (extension.configureDefaultDependencies) {
-            Utils.info(project, "$ideaDependency.buildNumber is used for building")
-            resolver.register(project, ideaDependency, IDEA_CONFIGURATION_NAME)
-            if (!ideaDependency.extraDependencies.empty) {
-                Utils.info(project, "Note: $ideaDependency.buildNumber extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
-            }
-
-            if (extension.type == 'IC' || extension.type == 'IU') {
-                def toolsJar = Jvm.current().toolsJar
-                if (toolsJar) {
-                    project.dependencies.add(IDEA_CONFIGURATION_NAME, project.files(toolsJar))
+        project.configurations.getByName(IDEA_CONFIGURATION_NAME).withDependencies { dependencies ->
+            Utils.info(project, "Configuring IDE dependency")
+            def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
+            def ideaDependency
+            if (extension.localPath != null) {
+                if (extension.version != null) {
+                    Utils.warn(project, "Both `localPath` and `version` specified, second would be ignored")
                 }
+                Utils.info(project, "Using path to locally installed IDE: '${extension.localPath}'")
+                ideaDependency = resolver.resolveLocal(project, extension.localPath, extension.localSourcesPath)
+            } else {
+                Utils.info(project, "Using IDE from remote repository")
+                def version = extension.version ?: DEFAULT_IDEA_VERSION
+                ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources,
+                        extension.extraDependencies)
             }
-        } else {
-            Utils.info(project, "$ideaDependency.buildNumber dependencies are applied manually")
+            extension.ideaDependency = ideaDependency
+            if (extension.configureDefaultDependencies) {
+                Utils.info(project, "$ideaDependency.buildNumber is used for building")
+                resolver.register(project, ideaDependency, IDEA_CONFIGURATION_NAME)
+                if (!ideaDependency.extraDependencies.empty) {
+                    Utils.info(project, "Note: $ideaDependency.buildNumber extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+                }
+            } else {
+                Utils.info(project, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
+            }
+        }
+        def toolsJar = Jvm.current().toolsJar
+        if (toolsJar) {
+            project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
         }
     }
 
-    private static void configurePluginDependencies(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension) {
-        Utils.info(project, "Configuring plugin dependencies")
-        def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-        def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
-        boolean repoRegistered = false
-        extension.plugins.each {
-            Utils.info(project, "Configuring plugin $it")
-            if (it instanceof Project) {
-                project.dependencies.add(IDEA_PLUGINS_CONFIGURATION_NAME, it)
-                if (it.state.executed) {
+    private static void configurePluginDependencies(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).withDependencies { dependencies ->
+            Utils.info(project, "Configuring plugin dependencies")
+            def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+            def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
+            boolean repoRegistered = false
+            extension.plugins.each {
+                Utils.info(project, "Configuring plugin $it")
+                if (it instanceof Project) {
                     configureProjectPluginDependency(project, it, extension)
                 } else {
-                    it.afterEvaluate {
-                        configureProjectPluginDependency(project, it, extension)
+                    def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
+                    if (!pluginId) {
+                        throw new BuildException("Failed to resolve plugin $it", null)
+                    }
+                    if (!repoRegistered && (pluginVersion || channel)) {
+                        project.repositories.maven { it.url = extension.pluginsRepo }
+                        repoRegistered = true
+                    }
+                    def plugin = resolver.resolve(project, pluginId, pluginVersion, channel)
+                    if (plugin == null) {
+                        throw new BuildException("Failed to resolve plugin $it", null)
+                    }
+                    if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
+                        throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
+                    }
+                    configurePluginDependency(project, plugin, extension, resolver)
+                }
+            }
+            if (extension.configureDefaultDependencies) {
+                configureBuiltinPluginsDependencies(project, resolver, extension)
+            }
+            verifyJavaPluginDependency(extension, project)
+        }
+
+        project.afterEvaluate {
+            extension.plugins.findAll { it instanceof Project }.each { Project dependency ->
+                if (dependency.state.executed) {
+                    configureProjectPluginTasksDependency(project, dependency)
+                } else {
+                    dependency.afterEvaluate {
+                        configureProjectPluginTasksDependency(project, dependency)
                     }
                 }
-            } else {
-                def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
-                if (!pluginId) {
-                    throw new BuildException("Failed to resolve plugin $it", null)
-                }
-                if (!repoRegistered && (pluginVersion || channel)) {
-                    project.repositories.maven { it.url = extension.pluginsRepo }
-                    repoRegistered = true
-                }
-                def plugin = resolver.resolve(project, pluginId, pluginVersion, channel)
-                if (plugin == null) {
-                    throw new BuildException("Failed to resolve plugin $it", null)
-                }
-                if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
-                    throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
-                }
-                configurePluginDependency(project, plugin, extension, resolver)
             }
         }
-        if (extension.configureDefaultDependencies) {
-            configureBuiltinPluginsDependencies(project, resolver, extension)
-        }
-        verifyJavaPluginDependency(extension, project)
     }
 
     private static void verifyJavaPluginDependency(IntelliJPluginExtension extension, Project project) {
@@ -278,14 +289,12 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureBuiltinPluginsDependencies(@NotNull Project project,
                                                             @NotNull PluginDependencyManager resolver,
                                                             @NotNull IntelliJPluginExtension extension) {
-        def configuredPlugins = extension.pluginDependencies
+        def configuredPlugins = extension.unresolvedPluginDependencies
                 .findAll { it.builtin }
                 .collect { it.id }
         extension.ideaDependency.pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
             def plugin = resolver.resolve(project, it, null, null)
             configurePluginDependency(project, plugin, extension, resolver)
-            resolver.register(project, plugin, IDEA_CONFIGURATION_NAME)
-            extension.pluginDependencies.add(plugin)
         }
     }
 
@@ -294,25 +303,34 @@ class IntelliJPlugin implements Plugin<Project> {
                                                   IntelliJPluginExtension extension,
                                                   PluginDependencyManager resolver) {
         if (extension.configureDefaultDependencies) {
-            resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
+            resolver.register(project, plugin, IDEA_PLUGINS_CONFIGURATION_NAME)
         }
-        extension.pluginDependencies.add(plugin)
+        extension.addPluginDependency(plugin)
         project.tasks.withType(PrepareSandboxTask).each {
             it.configureExternalPlugin(plugin)
         }
     }
 
-    private static void configureProjectPluginDependency(@NotNull Project project,
-                                                         @NotNull Project dependency,
-                                                         @NotNull IntelliJPluginExtension extension) {
+    private static void configureProjectPluginTasksDependency(@NotNull Project project, @NotNull Project dependency) {
+        // invoke before tasks graph is ready
         if (dependency.plugins.findPlugin(IntelliJPlugin) == null) {
             throw new BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
         }
-        def pluginDependency = new PluginProjectDependency(dependency)
-        extension.pluginDependencies.add(pluginDependency)
         def dependencySandboxTask = dependency.tasks.findByName(PREPARE_SANDBOX_TASK_NAME)
         project.tasks.withType(PrepareSandboxTask).each {
             it.dependsOn(dependencySandboxTask)
+        }
+    }
+
+    private static void configureProjectPluginDependency(@NotNull Project project, @NotNull Project dependency, @NotNull IntelliJPluginExtension extension) {
+        // invoke on demand, when plugins artifacts are needed
+        if (dependency.plugins.findPlugin(IntelliJPlugin) == null) {
+            throw new BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+        }
+        project.dependencies.add(IDEA_PLUGINS_CONFIGURATION_NAME, dependency)
+        def pluginDependency = new PluginProjectDependency(dependency)
+        extension.addPluginDependency(pluginDependency)
+        project.tasks.withType(PrepareSandboxTask).each {
             it.configureCompositePlugin(pluginDependency)
         }
     }
@@ -366,7 +384,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull IntelliJPluginExtension extension,
                                                     String taskName,
                                                     String testSuffix) {
-        Utils.info(project, "Configuring prepare sandbox task")
+        Utils.info(project, "Configuring $taskName task")
         return project.tasks.create(taskName, PrepareSandboxTask).with { task ->
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
@@ -546,27 +564,28 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring tests tasks")
-        project.tasks.withType(Test).each {
+        project.tasks.withType(Test).each { task ->
             def configDirectory = project.file("${extension.sandboxDirectory}/config-test")
             def systemDirectory = project.file("${extension.sandboxDirectory}/system-test")
             def pluginsDirectory = project.file("${extension.sandboxDirectory}/plugins-test")
+            task.enableAssertions = true
+            task.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
+            task.doFirst {
+                task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension))
+                task.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
+                        "$extension.ideaDependency.classes/lib/idea.jar")
+            }
+            task.outputs.dir(systemDirectory)
+            task.outputs.dir(configDirectory)
+            task.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
 
-            it.enableAssertions = true
-            it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
-            it.jvmArgs = Utils.getIdeJvmArgs(it, it.jvmArgs, Utils.ideSdkDirectory(project, extension))
-            it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
-                    "$extension.ideaDependency.classes/lib/idea.jar")
-            it.outputs.dir(systemDirectory)
-            it.outputs.dir(configDirectory)
-            it.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
-
-            it.doFirst {
+            task.doFirst {
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
-                // to handle this, use plugin.path property as it's the very first source of plugins
+                // to handle this, use plugin.path property as task's the very first source of plugins
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
                 def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
                 if (ideVersion.baselineVersion >= 193) {
-                    it.systemProperty(PLUGIN_PATH, pluginsDirectory.listFiles().collect { it.path }.join("$File.pathSeparator,"))
+                    task.systemProperty(PLUGIN_PATH, pluginsDirectory.listFiles().collect { it.path }.join("$File.pathSeparator,"))
                 }
             }
         }

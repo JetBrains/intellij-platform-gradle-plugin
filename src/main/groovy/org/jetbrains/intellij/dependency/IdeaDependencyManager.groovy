@@ -162,6 +162,9 @@ class IdeaDependencyManager {
     private static Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project,
                                                                             @NotNull String version,
                                                                             @NotNull Object[] extraDependencies) {
+        if (extraDependencies.length == 0) {
+            return []
+        }
         Utils.info(project, "Configuring IDE extra dependencies $extraDependencies")
         def mainInExtraDeps = extraDependencies.findAll { dep -> mainDependencies.any { it == dep } }
         if (!mainInExtraDeps.empty) {
