@@ -483,10 +483,12 @@ class IntelliJPlugin implements Plugin<Project> {
         Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
-            from([
-              "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}",
-              jarSearchableOptionsTask.getDestinationDir()
-            ])
+            from({
+                [
+                        "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}",
+                        jarSearchableOptionsTask.getDestinationDir()
+                ]
+            })
             into { prepareSandboxTask.getPluginName() }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
