@@ -7,7 +7,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.FileTreeElement
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
@@ -376,31 +375,9 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureJarSearchableOptionsTask(@NotNull Project project) {
         LOG.info("Configuring jar searchable options task")
-        project.tasks.create(JAR_SEARCHABLE_OPTIONS_TASK_NAME, Jar).with {
+        project.tasks.create(JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask).with {
             group = GROUP_NAME
             description = "Jars searchable options."
-            def pluginJarFiles = null
-            from {
-                include { FileTreeElement element ->
-                    if (element.directory) {
-                        return true
-                    }
-                    def suffix = ".searchableOptions.xml"
-                    if (element.name.endsWith(suffix)) {
-                        if (pluginJarFiles == null) {
-                            def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-                            def lib = "${prepareSandboxTask.getPluginName()}/lib"
-                            def files = new File(prepareSandboxTask.getDestinationDir(), lib).list()
-                            pluginJarFiles = files != null ? files as Set : []
-                        }
-                        def jarName = element.name.replace(suffix, "")
-                        pluginJarFiles.contains(jarName)
-                    }
-                }
-                "$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME"
-            }
-            eachFile { path = "search/$name" }
-            includeEmptyDirs = false
             conventionMapping.map('baseName', { "lib/searchableOptions" })
             conventionMapping.map('destinationDir', { new File(project.buildDir, "libsSearchableOptions") })
             dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
