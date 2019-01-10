@@ -91,8 +91,8 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project, extension)
-        configureBuildSearchableOptions(project, extension)
-        configureJarSearchableOptions(project)
+        configureBuildSearchableOptionsTask(project, extension)
+        configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
@@ -327,7 +327,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureBuildSearchableOptions(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    private static void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring build searchable options task")
         project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
             task.group = GROUP_NAME
@@ -374,7 +374,7 @@ class IntelliJPlugin implements Plugin<Project> {
         })
     }
 
-    private static void configureJarSearchableOptions(@NotNull Project project) {
+    private static void configureJarSearchableOptionsTask(@NotNull Project project) {
         LOG.info("Configuring jar searchable options task")
         project.tasks.create(JAR_SEARCHABLE_OPTIONS_TASK_NAME, Jar).with {
             group = GROUP_NAME
