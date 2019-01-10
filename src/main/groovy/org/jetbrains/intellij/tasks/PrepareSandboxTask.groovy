@@ -109,8 +109,7 @@ class PrepareSandboxTask extends Sync {
             def librariesToIgnore = getLibrariesToIgnore().toSet()
             librariesToIgnore.add(Jvm.current().toolsJar)
 
-            def pluginDirectories = []
-            getPluginDependencies().collect { pluginDirectories.add(it.artifact.absolutePath) }
+            def pluginDirectories = getPluginDependencies().collect { it.artifact.absolutePath }
 
             def result = [getPluginJar()]
             runtimeConfiguration.getAllDependencies().each {

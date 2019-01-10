@@ -20,6 +20,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.jvm.tasks.Jar
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
+import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -38,6 +39,9 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
     public static final String VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     public static final String RUN_IDE_TASK_NAME = "runIde"
+    public static final String BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
+    public static final String SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
+    public static final String JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     public static final String BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     public static final String PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
@@ -86,6 +90,8 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project, extension)
+        configureBuildSearchableOptionsTask(project, extension)
+        configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
@@ -312,44 +318,70 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring run IntelliJ task")
-        project.tasks.create(RUN_IDE_TASK_NAME, RunIdeTask)
-        //noinspection GroovyAssignabilityCheck
-        project.tasks.withType(RunIdeTask) { RunIdeTask task ->
+        project.tasks.create(RUN_IDE_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
             task.group = GROUP_NAME
             task.description = "Runs Intellij IDEA with installed plugin."
-            task.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
-            task.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
-            task.conventionMapping.map("configDirectory", {
-                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getConfigDirectory()
-            })
-            task.conventionMapping.map("pluginsDirectory", {
-                (project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask).getDestinationDir()
-            })
-            task.conventionMapping.map("systemDirectory", {
-                project.file(Utils.systemDir(extension.sandboxDirectory, false))
-            })
-            task.conventionMapping("executable", {
-                def jbreResolver = new JbreResolver(project)
-                def jbreVersion = task.getJbreVersion()
-                if (jbreVersion != null) {
-                    def jbre = jbreResolver.resolve(jbreVersion)
-                    if (jbre != null) {
-                        return jbre.javaExecutable
-                    }
-                    LOG.warn("Cannot resolve JBRE $jbreVersion. Falling back to builtin JBRE.")
-                }
-                def builtinJbreVersion = Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension))
-                if (builtinJbreVersion != null) {
-                    def builtinJbre = jbreResolver.resolve(builtinJbreVersion)
-                    if (builtinJbre != null) {
-                        return builtinJbre.javaExecutable
-                    }
-                    LOG.warn("Cannot resolve builtin JBRE $builtinJbreVersion. Falling local Java.")
-                }
-                return Jvm.current().javaExecutable.absolutePath
-            })
-
+            prepareConventionMappingsForRunIdeTask(project, extension, task)
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
+        }
+    }
+
+    private static void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        LOG.info("Configuring build searchable options task")
+        project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
+            task.group = GROUP_NAME
+            task.description = "Builds searchable options for plugin."
+            prepareConventionMappingsForRunIdeTask(project, extension, task)
+            task.args(["traverseUI", "$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME", "true"])
+            task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
+            task.onlyIf {
+                def number = Utils.ideaBuildNumber(Utils.ideaSdkDirectory(extension))
+                VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752")
+            }
+        }
+    }
+
+    private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension, 
+                                                               @NotNull RunIdeTask task) {
+        def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
+        task.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
+        task.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
+        task.conventionMapping.map("configDirectory", { prepareSandboxTask.getConfigDirectory() })
+        task.conventionMapping.map("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
+        task.conventionMapping.map("systemDirectory", {
+            project.file(Utils.systemDir(extension.sandboxDirectory, false))
+        })
+        task.conventionMapping("executable", {
+            def jbreResolver = new JbreResolver(project)
+            def jbreVersion = task.getJbreVersion()
+            if (jbreVersion != null) {
+                def jbre = jbreResolver.resolve(jbreVersion)
+                if (jbre != null) {
+                    return jbre.javaExecutable
+                }
+                LOG.warn("Cannot resolve JBRE $jbreVersion. Falling back to builtin JBRE.")
+            }
+            def builtinJbreVersion = Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension))
+            if (builtinJbreVersion != null) {
+                def builtinJbre = jbreResolver.resolve(builtinJbreVersion)
+                if (builtinJbre != null) {
+                    return builtinJbre.javaExecutable
+                }
+                LOG.warn("Cannot resolve builtin JBRE $builtinJbreVersion. Falling local Java.")
+            }
+            return Jvm.current().javaExecutable.absolutePath
+        })
+    }
+
+    private static void configureJarSearchableOptionsTask(@NotNull Project project) {
+        LOG.info("Configuring jar searchable options task")
+        project.tasks.create(JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask).with {
+            group = GROUP_NAME
+            description = "Jars searchable options."
+            conventionMapping.map('baseName', { "lib/searchableOptions" })
+            conventionMapping.map('destinationDir', { new File(project.buildDir, "libsSearchableOptions") })
+            dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+            onlyIf { new File(project.buildDir, SEARCHABLE_OPTIONS_DIR_NAME).isDirectory() }
         }
     }
 
@@ -447,12 +479,18 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureBuildPluginTask(@NotNull Project project) {
         LOG.info("Configuring building IntelliJ IDEA plugin task")
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
+        def jarSearchableOptionsTask = project.tasks.findByName(JAR_SEARCHABLE_OPTIONS_TASK_NAME) as Jar
         Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
-            from { "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}" }
+            from({
+                [
+                        "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}",
+                        jarSearchableOptionsTask.getDestinationDir()
+                ]
+            })
             into { prepareSandboxTask.getPluginName() }
-            dependsOn(prepareSandboxTask)
+            dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
             it
         }
