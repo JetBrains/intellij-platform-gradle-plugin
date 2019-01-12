@@ -378,8 +378,8 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask).with {
             group = GROUP_NAME
             description = "Jars searchable options."
-            conventionMapping.map('baseName', { "lib/searchableOptions" })
-            conventionMapping.map('destinationDir', { new File(project.buildDir, "libsSearchableOptions") })
+            baseName = "lib/searchableOptions"
+            destinationDir = new File(project.buildDir, "libsSearchableOptions")
             dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             onlyIf { new File(project.buildDir, SEARCHABLE_OPTIONS_DIR_NAME).isDirectory() }
         }
