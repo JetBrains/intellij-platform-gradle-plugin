@@ -391,6 +391,10 @@ class IntelliJPlugin implements Plugin<Project> {
                 dependsOn sourceSet.classesTaskName
                 onlyIf { extension.instrumentCode }
                 conventionMapping('compilerVersion', {
+                    def version = extension.version ?: DEFAULT_IDEA_VERSION
+                    if (version.endsWith('-SNAPSHOT')) {
+                        return extension.type == 'CL' ? "CLION-$version".toString() : version
+                    }
                     def ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
                     return "$ideVersion.baselineVersion.$ideVersion.build".toString()
                 })
