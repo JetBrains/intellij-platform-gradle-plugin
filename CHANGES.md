@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2
+
+- fixed removing `config/` and `system/` on running `runIde` task [#359](../../issues/359)
+
+## 0.4.1
+
+- fixed plugin's sources attaching
+
 ## 0.4.0
 
 - drop Gradle 2 support
