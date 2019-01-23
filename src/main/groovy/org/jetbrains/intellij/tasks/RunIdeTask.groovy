@@ -1,7 +1,10 @@
 package org.jetbrains.intellij.tasks
 
 
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.Optional
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
@@ -73,7 +76,6 @@ class RunIdeTask extends JavaExec {
         this.ideaDirectory = ideaDirectory
     }
 
-    @OutputDirectory
     File getConfigDirectory() {
         configDirectory != null ? project.file(configDirectory) : null
     }
@@ -86,7 +88,6 @@ class RunIdeTask extends JavaExec {
         this.configDirectory = configDirectory
     }
 
-    @OutputDirectory
     File getSystemDirectory() {
         systemDirectory != null ? project.file(systemDirectory) : null
     }
