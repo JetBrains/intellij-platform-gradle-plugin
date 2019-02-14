@@ -25,10 +25,18 @@ class JbreResolver {
         if (version == null) {
             return null
         }
-        if (version.startsWith("u")) {
-            version = "jbrex8${version}"
+        def artifactName
+        if (!version.startsWith('jbrex8') && !version.startsWith('u')) {
+            version = !version.startsWith("jbrsdk-") ? "jbrsdk-${version}" : version
+            def lastIndexOfB = version.lastIndexOf('b')
+            def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
+            def buildNumber = lastIndexOfB > -1 ? version.substring(lastIndexOfB) : ''
+            artifactName = "${majorVersion}-${platform()}-${arch()}-${buildNumber}"
+        } else {
+            // old jbre
+            version = !version.startsWith("jbrex8") ? "jbrex8${version}" : version
+            artifactName = "${version}_${platform()}_${arch()}"
         }
-        def artifactName = "${version}_${platform()}_${arch()}"
         def javaDir = new File(cacheDirectoryPath, artifactName)
         if (javaDir.exists()) {
             if (javaDir.isDirectory()) {
