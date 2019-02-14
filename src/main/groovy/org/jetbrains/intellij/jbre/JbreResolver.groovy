@@ -31,11 +31,11 @@ class JbreResolver {
             def lastIndexOfB = version.lastIndexOf('b')
             def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
             def buildNumber = lastIndexOfB > -1 ? version.substring(lastIndexOfB) : ''
-            artifactName = "${majorVersion}-${platform()}-${arch()}-${buildNumber}"
+            artifactName = "${majorVersion}-${platform()}-${arch(true)}-${buildNumber}"
         } else {
             // old jbre
             version = !version.startsWith("jbrex8") ? "jbrex8${version}" : version
-            artifactName = "${version}_${platform()}_${arch()}"
+            artifactName = "${version}_${platform()}_${arch(false)}"
         }
         def javaDir = new File(cacheDirectoryPath, artifactName)
         if (javaDir.exists()) {
@@ -100,8 +100,8 @@ class JbreResolver {
         return 'linux'
     }
 
-    private static def arch() {
+    private static def arch(boolean newFormat) {
         def arch = System.getProperty("os.arch")
-        return "x86" == arch ? "x86" : "x64"
+        return 'x86' == arch ? (newFormat ? 'i586' : 'x86') : 'x64'
     }
 }
