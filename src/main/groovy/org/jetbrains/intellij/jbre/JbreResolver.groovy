@@ -25,7 +25,7 @@ class JbreResolver {
         if (version == null) {
             return null
         }
-        if (!version.startsWith("jbrex8")) {
+        if (version.startsWith("u")) {
             version = "jbrex8${version}"
         }
         def artifactName = "${version}_${platform()}_${arch()}"
