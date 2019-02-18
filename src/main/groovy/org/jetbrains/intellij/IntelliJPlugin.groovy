@@ -395,8 +395,7 @@ class IntelliJPlugin implements Plugin<Project> {
                     if (version.endsWith('-SNAPSHOT')) {
                         return extension.type == 'CL' ? "CLION-$version".toString() : version
                     }
-                    def ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
-                    return "$ideVersion.baselineVersion.$ideVersion.build".toString()
+                    return IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode()
                 })
                 conventionMapping('ideaDependency', { extension.ideaDependency })
                 conventionMapping('javac2', {
