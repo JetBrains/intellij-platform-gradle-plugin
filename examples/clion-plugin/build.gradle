@@ -1,8 +1,4 @@
 intellij {
-    version 'CL-183.4925'
+    version 'CL-2018.3.4'
     downloadSources false
-}
-
-instrumentCode {
-    compilerVersion '183.4886.37'
 }
