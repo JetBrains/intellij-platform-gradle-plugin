@@ -10,14 +10,14 @@ buildscript {
 
     }
     dependencies {
-        classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.2.0-SNAPSHOT"
+        classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:FAKE_VERSION"
     }
 }
 
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.jetbrains.intellij'
-    
+
     intellij {
         version '2018.2'
     }
