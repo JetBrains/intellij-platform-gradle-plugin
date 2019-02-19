@@ -2,6 +2,7 @@ package org.jetbrains.intellij.jbre
 
 import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
@@ -25,18 +26,7 @@ class JbreResolver {
         if (version == null) {
             return null
         }
-        def artifactName
-        if (!version.startsWith('jbrex8') && !version.startsWith('u')) {
-            version = !version.startsWith("jbrsdk-") ? "jbrsdk-${version}" : version
-            def lastIndexOfB = version.lastIndexOf('b')
-            def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
-            def buildNumber = lastIndexOfB > -1 ? version.substring(lastIndexOfB) : ''
-            artifactName = "${majorVersion}-${platform()}-${arch(true)}-${buildNumber}"
-        } else {
-            // old jbre
-            version = !version.startsWith("jbrex8") ? "jbrex8${version}" : version
-            artifactName = "${version}_${platform()}_${arch(false)}"
-        }
+        def artifactName = getJbreArtifactName(version.startsWith('u') ? "8$version" : version)
         def javaDir = new File(cacheDirectoryPath, artifactName)
         if (javaDir.exists()) {
             if (javaDir.isDirectory()) {
@@ -52,6 +42,23 @@ class JbreResolver {
             return new Jbre(version, javaDir, findJavaExecutable(javaDir))
         }
         return null
+    }
+
+    @NotNull
+    private String getJbreArtifactName(@NotNull String version) {
+        def lastIndexOfB = version.lastIndexOf('b')
+        def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
+        def buildNumber = lastIndexOfB > -1 ? version.substring(lastIndexOfB + 1) : ''
+        boolean oldFormat = version.startsWith('jbrex8') ||
+                VersionNumber.parse(buildNumber) < VersionNumber.parse('1483.24')
+        if (oldFormat) {
+            majorVersion = !majorVersion.startsWith('jbrex8') ? "jbrex8${majorVersion}" : majorVersion
+            return "${majorVersion}b${buildNumber}_${platform()}_${arch(false)}"
+        }
+        if (!majorVersion.startsWith('jbrsdk-') && !majorVersion.startsWith('jbrx-')) {
+            majorVersion = majorVersion.startsWith('11') ? "jbrsdk-$majorVersion" : "jbrx-$majorVersion"
+        }
+        return "${majorVersion}-${platform()}-${arch(true)}-b${buildNumber}"
     }
 
     private File getJavaArchive(@NotNull String artifactName) {
