@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.3
+
+- fixed downloading instrumentation dependencies for release versions
+- fixed downloading renamed JetBrains Runtime artifacts
+
 ## 0.4.2
 
 - fixed removing `config/` and `system/` on running `runIde` task [#359](../../issues/359)
