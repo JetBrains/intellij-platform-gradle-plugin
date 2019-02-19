@@ -3,6 +3,7 @@ plugins {
     id 'synapticloop.documentr' version '2.9.0'
     id 'java-gradle-plugin'
     id 'maven'
+    id "com.github.breadmoirai.github-release" version "2.2.4"
 }
 
 apply plugin: 'groovy'
@@ -147,10 +148,18 @@ wrapper {
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
+githubRelease {
+    token githubToken
+    owner 'jetbrains'
+    repo 'gradle-intellij-plugin'
+    body extractChanges().trim()
+}
 
-
-
-
-
-
-
+def extractChanges() {
+    def currentVersionTitle = "## $project.version"
+    def changes = file("CHANGES.md").text
+    def startOffset = changes.indexOf(currentVersionTitle) + currentVersionTitle.length()
+    if (startOffset == -1) return ''
+    def endOffset = changes.indexOf('\n## ', startOffset)
+    return endOffset >= 0 ? changes.substring(startOffset, endOffset) : changes.substring(startOffset)
+}
