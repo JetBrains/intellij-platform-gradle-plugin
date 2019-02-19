@@ -40,7 +40,7 @@ class IdeaDependency implements Serializable {
             if (lib.isDirectory()) {
                 return Utils.collectJars(lib, { file ->
                     return withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name - '.jar')
-                }, false)
+                }, false).sort()
             }
         }
         return Collections.emptySet()
