@@ -142,7 +142,7 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 
 | **Attributes**            | **Default Value** |
 | :------------------------ |  :---------------- |
-| <kbd>compiler version</kbd> is a version of instrumenting compiler. It's used for non-IDEA plugins (e.g. CLion or Rider). | <kbd>Build number of the IDE dependency</kbd> |
+| <kbd>compilerVersion</kbd> is a version of instrumenting compiler. It's used for non-IDEA plugins (e.g. CLion or Rider). | <kbd>Build number of the IDE dependency</kbd> |
 
 ### build.gradle
 
