@@ -49,10 +49,10 @@ class JbreResolver {
         def lastIndexOfB = version.lastIndexOf('b')
         def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
         def buildNumber = lastIndexOfB > -1 ? version.substring(lastIndexOfB + 1) : ''
-        boolean oldFormat = version.startsWith('jbrex8') ||
+        boolean oldFormat = version.startsWith('jbrex') ||
                 VersionNumber.parse(buildNumber) < VersionNumber.parse('1483.24')
         if (oldFormat) {
-            majorVersion = !majorVersion.startsWith('jbrex8') ? "jbrex8${majorVersion}" : majorVersion
+            majorVersion = !majorVersion.startsWith('jbrex') ? "jbrex${majorVersion}" : majorVersion
             return "${majorVersion}b${buildNumber}_${platform()}_${arch(false)}"
         }
         if (!majorVersion.startsWith('jbrsdk-') && !majorVersion.startsWith('jbrx-')) {
