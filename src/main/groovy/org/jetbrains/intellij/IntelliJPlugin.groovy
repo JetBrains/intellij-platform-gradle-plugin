@@ -52,6 +52,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
     public static final String DEFAULT_JBRE_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
+    public static final String DEFAULT_NEW_JBRE_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
 
     @Override

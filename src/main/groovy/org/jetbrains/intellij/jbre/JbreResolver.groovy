@@ -13,7 +13,7 @@ import java.nio.file.Paths
 class JbreResolver {
     private final Project project
     private final String cacheDirectoryPath
-    private OperatingSystem operatingSystem
+    private final OperatingSystem operatingSystem
 
     JbreResolver(@NotNull Project project) {
         this.project = project
@@ -26,8 +26,8 @@ class JbreResolver {
         if (version == null) {
             return null
         }
-        def artifactName = getJbreArtifactName(version.startsWith('u') ? "8$version" : version)
-        def javaDir = new File(cacheDirectoryPath, artifactName)
+        def jbreArtifact = JbreArtifact.from(version.startsWith('u') ? "8$version" : version, operatingSystem)
+        def javaDir = new File(cacheDirectoryPath, jbreArtifact.name)
         if (javaDir.exists()) {
             if (javaDir.isDirectory()) {
                 return new Jbre(version, javaDir, findJavaExecutable(javaDir))
@@ -35,7 +35,7 @@ class JbreResolver {
             javaDir.delete()
         }
 
-        def javaArchive = getJavaArchive(artifactName)
+        def javaArchive = getJavaArchive(jbreArtifact)
         if (javaArchive != null) {
             untar(javaArchive, javaDir)
             javaArchive.delete()
@@ -44,32 +44,15 @@ class JbreResolver {
         return null
     }
 
-    @NotNull
-    private String getJbreArtifactName(@NotNull String version) {
-        def lastIndexOfB = version.lastIndexOf('b')
-        def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
-        def buildNumber = lastIndexOfB > -1 ? version.substring(lastIndexOfB + 1) : ''
-        boolean oldFormat = version.startsWith('jbrex') ||
-                VersionNumber.parse(buildNumber) < VersionNumber.parse('1483.24')
-        if (oldFormat) {
-            majorVersion = !majorVersion.startsWith('jbrex') ? "jbrex${majorVersion}" : majorVersion
-            return "${majorVersion}b${buildNumber}_${platform()}_${arch(false)}"
-        }
-        if (!majorVersion.startsWith('jbrsdk-') && !majorVersion.startsWith('jbrx-')) {
-            majorVersion = majorVersion.startsWith('11') ? "jbrsdk-$majorVersion" : "jbrx-$majorVersion"
-        }
-        return "${majorVersion}-${platform()}-${arch(true)}-b${buildNumber}"
-    }
-
-    private File getJavaArchive(@NotNull String artifactName) {
-        def archiveName = "${artifactName}.tar.gz"
+    private File getJavaArchive(@NotNull JbreArtifact jbreArtifact) {
+        def archiveName = "${jbreArtifact.name}.tar.gz"
         def javaArchive = new File(cacheDirectoryPath, archiveName)
         if (javaArchive.exists()) {
             return javaArchive
         }
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension)
         def repo = intellijExtension != null ? intellijExtension.jreRepo : null
-        def url = "${repo ?: IntelliJPlugin.DEFAULT_JBRE_REPO}/$archiveName"
+        def url = "${repo ?: jbreArtifact.repoUrl}/$archiveName"
         try {
             new DownloadActionWrapper(project, url, javaArchive.absolutePath).execute()
             return javaArchive
@@ -100,15 +83,45 @@ class JbreResolver {
         return java.exists() ? java.absolutePath : null
     }
 
-    private def platform() {
-        def current = operatingSystem
-        if (current.isWindows()) return 'windows'
-        if (current.isMacOsX()) return 'osx'
-        return 'linux'
-    }
+    private static class JbreArtifact {
+        String name
+        String repoUrl
 
-    private static def arch(boolean newFormat) {
-        def arch = System.getProperty("os.arch")
-        return 'x86' == arch ? (newFormat ? 'i586' : 'x86') : 'x64'
+        JbreArtifact(@NotNull String name, @NotNull String repoUrl) {
+            this.name = name
+            this.repoUrl = repoUrl
+        }
+
+        static JbreArtifact from(@NotNull String version, @NotNull OperatingSystem operatingSystem) {
+            def lastIndexOfB = version.lastIndexOf('b')
+            def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
+            def buildNumberString = lastIndexOfB > -1 ? version.substring(lastIndexOfB + 1) : ''
+            def buildNumber = VersionNumber.parse(buildNumberString)
+            boolean oldFormat = version.startsWith('jbrex') ||
+                    buildNumber < VersionNumber.parse('1483.24')
+//            String repoUrl = buildNumber < VersionNumber.parse('1483.24') ? IntelliJPlugin.DEFAULT_JBRE_REPO
+//                    : IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
+            String repoUrl = IntelliJPlugin.DEFAULT_JBRE_REPO
+            if (oldFormat) {
+                majorVersion = !majorVersion.startsWith('jbrex') ? "jbrex${majorVersion}" : majorVersion
+                return new JbreArtifact("${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
+            }
+            if (!majorVersion.startsWith('jbrsdk-') && !majorVersion.startsWith('jbrx-')) {
+                majorVersion = majorVersion.startsWith('11') ? "jbrsdk-$majorVersion" : "jbrx-$majorVersion"
+            }
+            return new JbreArtifact("${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
+        }
+
+        private static def platform(def operatingSystem) {
+            def current = operatingSystem
+            if (current.isWindows()) return 'windows'
+            if (current.isMacOsX()) return 'osx'
+            return 'linux'
+        }
+
+        private static def arch(boolean newFormat) {
+            def arch = System.getProperty("os.arch")
+            return 'x86' == arch ? (newFormat ? 'i586' : 'x86') : 'x64'
+        }
     }
 }
