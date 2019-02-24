@@ -125,7 +125,6 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         new File(testCommand.xclasspath).parentFile.name == 'lib'
         testCommand.xms == '256m'
         testCommand.xmx == '512m'
-        testCommand.permGen == '250m'
     }
 
     def 'use compile only classpath for non-builtin plugins if Gradle >= 2.12'() {
@@ -252,7 +251,6 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 test {
     minHeapSize = "200m"
     maxHeapSize = "500m"
-    jvmArgs '-XX:MaxPermSize=256m'    
 }
 """
         when:
@@ -262,7 +260,6 @@ test {
         def testCommand = parseCommand(result.output)
         testCommand.xms == '200m'
         testCommand.xmx == '500m'
-        testCommand.permGen == '256m'
     }
 
     def 'custom sandbox directory'() {
@@ -291,9 +288,11 @@ intellij {
     private static ProcessProperties parseCommand(@NotNull String output) {
         ProcessProperties testCommand = null
         for (String line : output.readLines()) {
-            if (line.startsWith('Starting process ')) {
+            if (line.startsWith('Starting process ') && !line.contains('vm_stat')) {
                 testCommand = ProcessProperties.parse(line.substring(line.indexOf('Command: ') + 'Command: '.length()))
-                break
+                if (testCommand != null) {
+                    break
+                }
             }
         }
         assert testCommand != null
@@ -305,7 +304,6 @@ intellij {
         String xclasspath = null
         String xmx = null
         String xms = null
-        String permGen = null
         def jvmArgs = new HashSet<String>()
 
         static ProcessProperties parse(@NotNull String commandLine) {
@@ -324,8 +322,6 @@ intellij {
                     result.xms = it.substring(4)
                 } else if (it.startsWith('-Xmx')) {
                     result.xmx = it.substring(4)
-                } else if (it.startsWith('-XX:MaxPermSize=')) {
-                    result.permGen = it.substring('-XX:MaxPermSize='.length())
                 } else if (it.startsWith('-Xbootclasspath')) {
                     result.xclasspath = it.substring('-Xbootclasspath'.length())
                 } else {
