@@ -30,7 +30,7 @@ class IdeaDependencyManager {
     @NotNull
     IdeaDependency resolveRemote(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources,
                                  @NotNull Object[] extraDependencies) {
-        def releaseType = releaseType(version)
+        def releaseType = Utils.releaseType(version)
         LOG.debug("Adding IntelliJ IDEA repository: ${repoUrl}/$releaseType")
         project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
 
@@ -61,15 +61,6 @@ class IdeaDependencyManager {
         return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project, resolvedExtraDependencies)
     }
 
-    private static String releaseType(@NotNull String version) {
-        if (version.endsWith('TRUNK-SNAPSHOT') || version.matches('\\d+-SNAPSHOT')) {
-            return 'nightly'
-        }
-        if (version.endsWith('-SNAPSHOT')) {
-            return 'snapshots'
-        }
-        return 'releases'
-    }
 
     @NotNull
     IdeaDependency resolveLocal(@NotNull Project project, @NotNull String localPath, @Nullable String localPathSources) {

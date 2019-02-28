@@ -8,6 +8,8 @@ import org.gradle.api.file.FileTree
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.jetbrains.annotations.NotNull
+import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.IdeaDependency
 
@@ -113,7 +115,9 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
     private ConfigurableFileCollection compilerClassPathFromMaven() {
         def compilerVersion = getCompilerVersion()
         def dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:$compilerVersion")
-        def repos = [project.repositories.maven { it.url = ASM_REPO_URL },
+        def intellijRepoUrl = project.extensions.findByType(IntelliJPluginExtension)?.intellijRepo ?: IntelliJPlugin.DEFAULT_INTELLIJ_REPO
+        def repos = [project.repositories.maven { it.url = "$intellijRepoUrl/${Utils.releaseType(compilerVersion)}" },
+                     project.repositories.maven { it.url = ASM_REPO_URL },
                      project.repositories.maven { it.url = FORMS_REPO_URL }]
         try {
             return project.files(project.configurations.detachedConfiguration(dependency).files)

@@ -283,4 +283,14 @@ class Utils {
         }
         return targetDirectory
     }
+
+    static String releaseType(@NotNull String version) {
+        if (version.endsWith('TRUNK-SNAPSHOT') || version.matches('\\d+-SNAPSHOT')) {
+            return 'nightly'
+        }
+        if (version.endsWith('-SNAPSHOT')) {
+            return 'snapshots'
+        }
+        return 'releases'
+    }
 }
