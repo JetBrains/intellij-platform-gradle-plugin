@@ -99,9 +99,8 @@ class JbreResolver {
             def buildNumber = VersionNumber.parse(buildNumberString)
             boolean oldFormat = version.startsWith('jbrex') ||
                     buildNumber < VersionNumber.parse('1483.24')
-//            String repoUrl = buildNumber < VersionNumber.parse('1483.24') ? IntelliJPlugin.DEFAULT_JBRE_REPO
-//                    : IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
-            String repoUrl = IntelliJPlugin.DEFAULT_JBRE_REPO
+            String repoUrl = buildNumber < VersionNumber.parse('1483.31') ? IntelliJPlugin.DEFAULT_JBRE_REPO
+                    : IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
             if (oldFormat) {
                 majorVersion = !majorVersion.startsWith('jbrex') ? "jbrex${majorVersion}" : majorVersion
                 return new JbreArtifact("${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
