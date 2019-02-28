@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.4
+- support the new bintray repository for JetBrains Runtime artifacts
+- fixed downloading of old JBR  builds [#367](../../issues/367)
+- fix instrumentation for local IDE instances [#369](../../issues/369)
+
 ## 0.4.3
 
 - fixed downloading instrumentation dependencies for release versions
