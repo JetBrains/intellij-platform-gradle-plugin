@@ -98,14 +98,17 @@ class JbreResolver {
             def buildNumberString = lastIndexOfB > -1 ? version.substring(lastIndexOfB + 1) : ''
             def buildNumber = VersionNumber.parse(buildNumberString)
             boolean oldFormat = version.startsWith('jbrex') ||
-                    buildNumber < VersionNumber.parse('1483.24')
-            String repoUrl = buildNumber < VersionNumber.parse('1483.31') ? IntelliJPlugin.DEFAULT_JBRE_REPO
-                    : IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
+                    buildNumber < VersionNumber.parse('1483.24') && !version.startsWith('jbr-')
+            String repoUrl = IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
+            if (!version.startsWith('jbr-')) {
+                repoUrl = buildNumber < VersionNumber.parse('1483.31') ? IntelliJPlugin.DEFAULT_JBRE_REPO
+                        : IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
+            }
             if (oldFormat) {
                 majorVersion = !majorVersion.startsWith('jbrex') ? "jbrex${majorVersion}" : majorVersion
                 return new JbreArtifact("${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
             }
-            if (!majorVersion.startsWith('jbrsdk-') && !majorVersion.startsWith('jbrx-')) {
+            if (!majorVersion.startsWith('jbrsdk-') && !majorVersion.startsWith('jbrx-') && !majorVersion.startsWith('jbr-')) {
                 majorVersion = majorVersion.startsWith('11') ? "jbrsdk-$majorVersion" : "jbrx-$majorVersion"
             }
             return new JbreArtifact("${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
