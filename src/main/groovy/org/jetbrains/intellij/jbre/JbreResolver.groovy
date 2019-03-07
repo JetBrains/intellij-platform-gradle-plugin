@@ -93,22 +93,36 @@ class JbreResolver {
         }
 
         static JbreArtifact from(@NotNull String version, @NotNull OperatingSystem operatingSystem) {
+            def prefix = getPrefix(version)
             def lastIndexOfB = version.lastIndexOf('b')
-            def majorVersion = lastIndexOfB > -1 ? version.substring(0, lastIndexOfB) : version
+            def majorVersion = lastIndexOfB > -1
+                    ? version.substring(prefix.length(), lastIndexOfB)
+                    : version.substring(prefix.length())
             def buildNumberString = lastIndexOfB > -1 ? version.substring(lastIndexOfB + 1) : ''
             def buildNumber = VersionNumber.parse(buildNumberString)
-            boolean oldFormat = version.startsWith('jbrex') ||
-                    buildNumber < VersionNumber.parse('1483.24')
-            String repoUrl = buildNumber < VersionNumber.parse('1483.31') ? IntelliJPlugin.DEFAULT_JBRE_REPO
-                    : IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
+            def isJava8 = majorVersion.startsWith('8')
+
+            String repoUrl = !isJava8 || buildNumber >= VersionNumber.parse('1483.31')
+                    ? IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
+                    : IntelliJPlugin.DEFAULT_JBRE_REPO
+
+            boolean oldFormat = prefix == 'jbrex-' || isJava8 && buildNumber < VersionNumber.parse('1483.24')
             if (oldFormat) {
-                majorVersion = !majorVersion.startsWith('jbrex') ? "jbrex${majorVersion}" : majorVersion
-                return new JbreArtifact("${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
+                return new JbreArtifact("jbrex-${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
             }
-            if (!majorVersion.startsWith('jbrsdk-') && !majorVersion.startsWith('jbrx-')) {
-                majorVersion = majorVersion.startsWith('11') ? "jbrsdk-$majorVersion" : "jbrx-$majorVersion"
+
+            if (!prefix) {
+                prefix = isJava8 ? "jbrx-" : "jbr-"
             }
-            return new JbreArtifact("${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
+            return new JbreArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
+        }
+
+        private static String getPrefix(String version) {
+            def prefix = version.substring(0, version.indexOf('-') + 1)
+            if (prefix == 'jbrex-' || prefix == 'jbr-' || prefix == 'jbrx-') {
+                return prefix
+            }
+            return ''
         }
 
         private static def platform(def operatingSystem) {

@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- support JBR 11 from the new JetBrains Runtime Repo
+
 ## 0.4.4
 - support the new bintray repository for JetBrains Runtime artifacts
 - fixed downloading of old JBR  builds [#367](../../issues/367)
