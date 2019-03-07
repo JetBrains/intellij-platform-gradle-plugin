@@ -22,7 +22,7 @@ buildscript {{{\n}
       url "https://oss.sonatype.org/content/repositories/snapshots/"{\n}
     }{\n}
     maven {{ {\n}
-      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' {\n}
+      url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' {\n}
     }{\n}
     {\n}
   }{\n}
