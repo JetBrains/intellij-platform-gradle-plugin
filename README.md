@@ -1,4 +1,4 @@
-<a name="documentr_top"></a>[![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.4-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.4-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
 
 > **This project requires JVM version of at least 1.7**
 
@@ -43,7 +43,7 @@ buildscript {
       url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
     maven { 
-      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' 
+      url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' 
     }
     
   }
@@ -67,7 +67,7 @@ Plugin introduces the following tasks
 | `prepareSandbox`        | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
 | `prepareTestingSandbox` | Prepares sandbox that will be used while running tests |
 | `runIde`                | Executes an IntelliJ IDEA instance with the plugin you are developing. |
-| `publishPlugin`         | Uploads plugin distribution archive to http://plugins.jetbrains.com. |
+| `publishPlugin`         | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
 | `verifyPlugin`          | Validates plugin.xml and plugin's structure. |
 
 ## Configuration
@@ -126,7 +126,7 @@ The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ...
 ### Publishing DSL
 The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrain Plugin Repository.
 
-See the instruction on how to generate authentication token: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
+See the instruction on how to generate authentication token: https://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
@@ -134,7 +134,7 @@ See the instruction on how to generate authentication token: http://www.jetbrain
 | <kbd>username</kbd> Login username | none |
 | <kbd>password</kbd> Login password | none |
 | <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
-| <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
+| <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>https://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
 ### Instrumenting DSL
@@ -166,7 +166,7 @@ publishPlugin {
 
 # Getting started
 
-Here is [the manual](http://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
+Here is [the manual](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
 to start developing plugins for IntelliJ IDEA using Gradle.
 
 # Examples
