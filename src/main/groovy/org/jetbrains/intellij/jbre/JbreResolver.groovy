@@ -45,7 +45,8 @@ class JbreResolver {
     }
 
     private File getJavaArchive(@NotNull JbreArtifact jbreArtifact) {
-        def archiveName = "${jbreArtifact.name}.tar.gz"
+        def artifactName = jbreArtifact.name
+        def archiveName = "${artifactName}.tar.gz"
         def javaArchive = new File(cacheDirectoryPath, archiveName)
         if (javaArchive.exists()) {
             return javaArchive
