@@ -1,4 +1,4 @@
-<a name="documentr_top"></a>[![official JetBrains project](http://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.4-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.4-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
 
 > **This project requires JVM version of at least 1.7**
 
@@ -43,7 +43,7 @@ buildscript {
       url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
     maven { 
-      url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' 
+      url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' 
     }
     
   }
@@ -67,7 +67,7 @@ Plugin introduces the following tasks
 | `prepareSandbox`        | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
 | `prepareTestingSandbox` | Prepares sandbox that will be used while running tests |
 | `runIde`                | Executes an IntelliJ IDEA instance with the plugin you are developing. |
-| `publishPlugin`         | Uploads plugin distribution archive to http://plugins.jetbrains.com. |
+| `publishPlugin`         | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
 | `verifyPlugin`          | Validates plugin.xml and plugin's structure. |
 
 ## Configuration
@@ -104,7 +104,7 @@ In addition to that, following attributes may be used to customize IDE running:
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
-| <kbd>jbreVersion</kbd> JetBrains Java version to use | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'` or `'8u202b1483.24'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java version are available at [BitTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
+| <kbd>jbreVersion</kbd> JetBrains Java version to use | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java version are available at [BitTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
 | <kbd>ideaDirectory</kbd> Path to IDE distribution | path to IDE-dependency |
 | <kbd>configDirectory</kbd> Path to configuration directory | <kbd>${intellij.sandboxDirectory}/config</kbd> |
 | <kbd>pluginsDirectory</kbd> Path to plugins directory | <kbd>${intellij.sandboxDirectory}/plugins</kbd> |
@@ -166,7 +166,7 @@ publishPlugin {
 
 # Getting started
 
-Here is [the manual](http://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
+Here is [the manual](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
 to start developing plugins for IntelliJ IDEA using Gradle.
 
 # Examples

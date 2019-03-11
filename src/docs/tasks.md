@@ -9,5 +9,5 @@ Plugin introduces the following tasks
 | `prepareSandbox`        | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
 | `prepareTestingSandbox` | Prepares sandbox that will be used while running tests |
 | `runIde`                | Executes an IntelliJ IDEA instance with the plugin you are developing. |
-| `publishPlugin`         | Uploads plugin distribution archive to http://plugins.jetbrains.com. |
+| `publishPlugin`         | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
 | `verifyPlugin`          | Validates plugin.xml and plugin's structure. |
