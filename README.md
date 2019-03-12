@@ -81,7 +81,7 @@ The following attributes are part of the Setup DSL <kbd>intellij { ... }</kbd> i
 | **Attributes** | **Values** | 
 | :------------- | :--------- | 
 | <kbd>pluginName</kbd> - The name of the target zip-archive and defines the name of plugin artifact.|**Acceptable Values:** <br/><kbd>String</kbd> - `'gradle-intellij-plugin'` <br/><br/>**Default Value:** <kbd>$project.name</kbd>|
-| <kbd>version</kbd> - The version of the IDE distribution that should be used as a dependency. <br/><br/>**Notes:**    <ul>        <li>Value may have `IC-`, `IU-`, `CL-`, `RD` or `JPS-` prefix in order to define IDE distribution type.</li>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:**    <ul>        <li><kbd>build #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>        <li><kbd>version #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>        <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>        <li><kbd>'LATEST-TRUNK-SNAPSHOT'</kbd></li>    </ul>**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>|
+| <kbd>version</kbd> - The version of the IDE distribution that should be used as a dependency. <br/><br/>**Notes:**    <ul>        <li>Value may have `IC-`, `IU-`, `CL-`, `RD` or `JPS-` prefix in order to define IDE distribution type.</li>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:**    <ul>        <li><kbd>build #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>        <li><kbd>version #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>        <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>    </ul>**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>|
 | <kbd>type</kbd> - The type of IDE distribution.|**Acceptable Values:**    <ul>        <li><kbd>'IC'</kbd> - IntelliJ IDEA Community Edition. </li>        <li><kbd>'IU'</kbd> - IntelliJ IDEA Ultimate Edition. </li>        <li><kbd>'JPS'</kbd> - JPS-only. </li>        <li><kbd>'CL'</kbd> - CLion. </li>        <li><kbd>'RD'</kbd> - Rider.</li>        <li><kbd>'MPS'</kbd> - MPS.</li>    </ul>**Default Value:** <kbd>'IC'</kbd>|
 | <kbd>plugins</kbd> - The list of bundled IDE plugins and plugins from the [JetBrains Plugin Repository](https://plugins.jetbrains.com/). <br/><br/>**Notes:**    <ul>        <li>For plugins from the JetBrains Plugin Repository use format `pluginId:version`.</li>        <li>For bundled plugins use directory name of the plugin in IDE distribution (e.g. `Groovy` for `IDEA/plugins/Groovy`).</li>        <li>For sub-projects use project reference `project(':subproject')`.</li>    </ul>|**Acceptable Values:**    <ol>        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`'org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly'`</li>        <li><kbd>bundledPluginName</kbd><br/>`'android', 'Groovy'`</li>        <li><kbd>project(':projectName')</kbd><br/>`project(':plugin-subproject')`</li>    </ol>**Default Value\:** none|
 | <kbd>updateSinceUntilBuild</kbd> - Should plugin patch `plugin.xml` with since and until build values? <br/><br/>**Notes:**    <ul>        <li>If `true` then user-defined values from `patchPluginXml.sinceBuild` and `patchPluginXml.untilBuild` will be used (or their default values if none set). </li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd>|
@@ -126,7 +126,7 @@ The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ...
 ### Publishing DSL
 The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrain Plugin Repository.
 
-See the instruction on how to generate authentication token: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
+See the instruction on how to generate authentication token: https://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
@@ -134,7 +134,7 @@ See the instruction on how to generate authentication token: http://www.jetbrain
 | <kbd>username</kbd> Login username | none |
 | <kbd>password</kbd> Login password | none |
 | <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
-| <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>http://plugins.jetbrains.com</kbd> |
+| <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>https://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
 
 ### Instrumenting DSL

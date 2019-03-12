@@ -48,7 +48,6 @@ pre}
         <li><kbd>build #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>
         <li><kbd>version #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>
         <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>
-        <li><kbd>'LATEST-TRUNK-SNAPSHOT'</kbd></li>
     </ul>
 
 **Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>
