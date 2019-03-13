@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.jbre
+package org.jetbrains.intellij.jbr
 
 import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
@@ -10,42 +10,42 @@ import org.jetbrains.intellij.IntelliJPluginExtension
 
 import java.nio.file.Paths
 
-class JbreResolver {
+class JbrResolver {
     private final Project project
     private final String cacheDirectoryPath
     private final OperatingSystem operatingSystem
 
-    JbreResolver(@NotNull Project project) {
+    JbrResolver(@NotNull Project project) {
         this.project = project
         this.cacheDirectoryPath = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, 'caches/modules-2/files-2.1/com.jetbrains/jbre').toString()
         this.operatingSystem = OperatingSystem.current()
     }
 
     @Nullable
-    Jbre resolve(@Nullable String version) {
+    Jbr resolve(@Nullable String version) {
         if (version == null) {
             return null
         }
-        def jbreArtifact = JbreArtifact.from(version.startsWith('u') ? "8$version" : version, operatingSystem)
-        def javaDir = new File(cacheDirectoryPath, jbreArtifact.name)
+        def jbrArtifact = JbrArtifact.from(version.startsWith('u') ? "8$version" : version, operatingSystem)
+        def javaDir = new File(cacheDirectoryPath, jbrArtifact.name)
         if (javaDir.exists()) {
             if (javaDir.isDirectory()) {
-                return new Jbre(version, javaDir, findJavaExecutable(javaDir))
+                return new Jbr(version, javaDir, findJavaExecutable(javaDir))
             }
             javaDir.delete()
         }
 
-        def javaArchive = getJavaArchive(jbreArtifact)
+        def javaArchive = getJavaArchive(jbrArtifact)
         if (javaArchive != null) {
             untar(javaArchive, javaDir)
             javaArchive.delete()
-            return new Jbre(version, javaDir, findJavaExecutable(javaDir))
+            return new Jbr(version, javaDir, findJavaExecutable(javaDir))
         }
         return null
     }
 
-    private File getJavaArchive(@NotNull JbreArtifact jbreArtifact) {
-        def artifactName = jbreArtifact.name
+    private File getJavaArchive(@NotNull JbrArtifact jbrArtifact) {
+        def artifactName = jbrArtifact.name
         def archiveName = "${artifactName}.tar.gz"
         def javaArchive = new File(cacheDirectoryPath, archiveName)
         if (javaArchive.exists()) {
@@ -53,7 +53,7 @@ class JbreResolver {
         }
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension)
         def repo = intellijExtension != null ? intellijExtension.jreRepo : null
-        def url = "${repo ?: jbreArtifact.repoUrl}/$archiveName"
+        def url = "${repo ?: jbrArtifact.repoUrl}/$archiveName"
         try {
             new DownloadActionWrapper(project, url, javaArchive.absolutePath).execute()
             return javaArchive
@@ -84,16 +84,16 @@ class JbreResolver {
         return java.exists() ? java.absolutePath : null
     }
 
-    private static class JbreArtifact {
+    private static class JbrArtifact {
         String name
         String repoUrl
 
-        JbreArtifact(@NotNull String name, @NotNull String repoUrl) {
+        JbrArtifact(@NotNull String name, @NotNull String repoUrl) {
             this.name = name
             this.repoUrl = repoUrl
         }
 
-        static JbreArtifact from(@NotNull String version, @NotNull OperatingSystem operatingSystem) {
+        static JbrArtifact from(@NotNull String version, @NotNull OperatingSystem operatingSystem) {
             def prefix = getPrefix(version)
             def lastIndexOfB = version.lastIndexOf('b')
             def majorVersion = lastIndexOfB > -1
@@ -104,18 +104,18 @@ class JbreResolver {
             def isJava8 = majorVersion.startsWith('8')
 
             String repoUrl = !isJava8 || buildNumber >= VersionNumber.parse('1483.31')
-                    ? IntelliJPlugin.DEFAULT_NEW_JBRE_REPO
-                    : IntelliJPlugin.DEFAULT_JBRE_REPO
+                    ? IntelliJPlugin.DEFAULT_NEW_JBR_REPO
+                    : IntelliJPlugin.DEFAULT_JBR_REPO
 
             boolean oldFormat = prefix == 'jbrex-' || isJava8 && buildNumber < VersionNumber.parse('1483.24')
             if (oldFormat) {
-                return new JbreArtifact("jbrex-${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
+                return new JbrArtifact("jbrex-${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
             }
 
             if (!prefix) {
                 prefix = isJava8 ? "jbrx-" : "jbr-"
             }
-            return new JbreArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
+            return new JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
         }
 
         private static String getPrefix(String version) {

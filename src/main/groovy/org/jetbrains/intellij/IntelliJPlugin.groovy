@@ -26,7 +26,7 @@ import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginProjectDependency
-import org.jetbrains.intellij.jbre.JbreResolver
+import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.tasks.*
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -51,8 +51,8 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
-    public static final String DEFAULT_JBRE_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
-    public static final String DEFAULT_NEW_JBRE_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
+    public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
+    public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
 
     @Override
@@ -350,22 +350,22 @@ class IntelliJPlugin implements Plugin<Project> {
             project.file(Utils.systemDir(extension.sandboxDirectory, false))
         })
         task.conventionMapping("executable", {
-            def jbreResolver = new JbreResolver(project)
-            def jbreVersion = task.getJbreVersion()
-            if (jbreVersion != null) {
-                def jbre = jbreResolver.resolve(jbreVersion)
-                if (jbre != null) {
-                    return jbre.javaExecutable
+            def jbrResolver = new JbrResolver(project)
+            def jbrVersion = task.getJbrVersion() ?: task.getJbreVersion()
+            if (jbrVersion != null) {
+                def jbr = jbrResolver.resolve(jbrVersion)
+                if (jbr != null) {
+                    return jbr.javaExecutable
                 }
-                LOG.warn("Cannot resolve JBRE $jbreVersion. Falling back to builtin JBRE.")
+                LOG.warn("Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
             }
-            def builtinJbreVersion = Utils.getBuiltinJbreVersion(Utils.ideaSdkDirectory(extension))
-            if (builtinJbreVersion != null) {
-                def builtinJbre = jbreResolver.resolve(builtinJbreVersion)
-                if (builtinJbre != null) {
-                    return builtinJbre.javaExecutable
+            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideaSdkDirectory(extension))
+            if (builtinJbrVersion != null) {
+                def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
+                if (builtinJbr != null) {
+                    return builtinJbr.javaExecutable
                 }
-                LOG.warn("Cannot resolve builtin JBRE $builtinJbreVersion. Falling local Java.")
+                LOG.warn("Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
             }
             return Jvm.current().javaExecutable.absolutePath
         })

@@ -8,6 +8,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
+import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
 class RunIdeTask extends JavaExec {
@@ -32,7 +33,7 @@ class RunIdeTask extends JavaExec {
     private Object configDirectory
     private Object systemDirectory
     private Object pluginsDirectory
-    private Object jbreVersion
+    private Object jbrVersion
 
     List<String> getRequiredPluginIds() {
         CollectionUtils.stringize(requiredPluginIds.collect {
@@ -51,16 +52,36 @@ class RunIdeTask extends JavaExec {
 
     @Input
     @Optional
+    @Deprecated
     String getJbreVersion() {
-        Utils.stringInput(jbreVersion)
+        IntelliJPlugin.LOG.warn("jbreVersion is deprecated, use jbrVersion instead")
+        Utils.stringInput(jbrVersion)
     }
 
+    @Deprecated
     void setJbreVersion(Object jbreVersion) {
-        this.jbreVersion = jbreVersion
+        IntelliJPlugin.LOG.warn("jbreVersion is deprecated, use jbrVersion instead")
+        this.jbrVersion = jbreVersion
     }
 
+    @Deprecated
     void jbreVersion(Object jbreVersion) {
-        this.jbreVersion = jbreVersion
+        IntelliJPlugin.LOG.warn("jbreVersion is deprecated, use jbrVersion instead")
+        this.jbrVersion = jbreVersion
+    }
+
+    @Input
+    @Optional
+    String getJbrVersion() {
+        Utils.stringInput(jbrVersion)
+    }
+
+    void setJbrVersion(Object jbrVersion) {
+        this.jbrVersion = jbrVersion
+    }
+
+    void jbrVersion(Object jbrVersion) {
+        this.jbrVersion = jbrVersion
     }
 
     @InputDirectory

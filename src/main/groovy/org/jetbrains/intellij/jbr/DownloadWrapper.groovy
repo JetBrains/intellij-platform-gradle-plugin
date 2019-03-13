@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.jbre
+package org.jetbrains.intellij.jbr
 
 import de.undercouch.gradle.tasks.download.DownloadAction
 import org.gradle.api.Project

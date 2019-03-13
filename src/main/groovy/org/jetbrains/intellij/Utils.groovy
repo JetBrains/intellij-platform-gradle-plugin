@@ -236,7 +236,7 @@ class Utils {
         return "$binDir/../lib/tools.jar"
     }
 
-    static String getBuiltinJbreVersion(@NotNull File ideaDirectory) {
+    static String getBuiltinJbrVersion(@NotNull File ideaDirectory) {
         def dependenciesFile = new File(ideaDirectory, "dependencies.txt")
         if (dependenciesFile.exists()) {
             def properties = new Properties()
