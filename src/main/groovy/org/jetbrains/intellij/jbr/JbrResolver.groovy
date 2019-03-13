@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.jbr
 
 import org.gradle.api.Project
+import org.gradle.internal.impldep.com.fasterxml.jackson.core.sym.NameN
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
@@ -30,7 +31,7 @@ class JbrResolver {
         def javaDir = new File(cacheDirectoryPath, jbrArtifact.name)
         if (javaDir.exists()) {
             if (javaDir.isDirectory()) {
-                return new Jbr(version, javaDir, findJavaExecutable(javaDir))
+                return fromDir(javaDir, version)
             }
             javaDir.delete()
         }
@@ -39,9 +40,19 @@ class JbrResolver {
         if (javaArchive != null) {
             untar(javaArchive, javaDir)
             javaArchive.delete()
-            return new Jbr(version, javaDir, findJavaExecutable(javaDir))
+            return fromDir(javaDir, version)
         }
         return null
+    }
+
+    @Nullable
+    private Jbr fromDir(@NotNull File javaDir, @NotNull String version) {
+        def javaExecutable = findJavaExecutable(javaDir)
+        if (javaExecutable == null) {
+            IntelliJPlugin.LOG.warn("Couldn't find java executable in $javaDir")
+            return null
+        }
+        return new Jbr(version, javaDir, findJavaExecutable(javaDir))
     }
 
     private File getJavaArchive(@NotNull JbrArtifact jbrArtifact) {
