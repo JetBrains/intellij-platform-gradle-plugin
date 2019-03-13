@@ -1,8 +1,9 @@
 # Changelog
 
-## Next
+## 0.4.5
 
 - support JBR 11 from the new JetBrains Runtime Repo
+- support running using JBR 11 [IDEA-208692](https://youtrack.jetbrains.com/issue/IDEA-208692)
 
 ## 0.4.4
 - support the new bintray repository for JetBrains Runtime artifacts
