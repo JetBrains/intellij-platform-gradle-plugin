@@ -1,7 +1,6 @@
 package org.jetbrains.intellij.jbr
 
 import org.gradle.api.Project
-import org.gradle.internal.impldep.com.fasterxml.jackson.core.sym.NameN
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
@@ -49,7 +48,7 @@ class JbrResolver {
     private Jbr fromDir(@NotNull File javaDir, @NotNull String version) {
         def javaExecutable = findJavaExecutable(javaDir)
         if (javaExecutable == null) {
-            IntelliJPlugin.LOG.warn("Couldn't find java executable in $javaDir")
+            IntelliJPlugin.LOG.warn("Cannot find java executable in $javaDir")
             return null
         }
         return new Jbr(version, javaDir, findJavaExecutable(javaDir))
@@ -90,8 +89,9 @@ class JbrResolver {
 
     @Nullable
     private def findJavaExecutable(@NotNull File javaHome) {
-        def java = new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home/jre/bin/java' :
-                operatingSystem.isWindows() ? 'jre/bin/java.exe' : 'jre/bin/java')
+        def root = new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home' : '')
+        def jre = new File(root, 'jre')
+        def java = new File(jre.exists() ? jre : root, operatingSystem.isWindows() ? 'bin/java.exe' : 'bin/java')
         return java.exists() ? java.absolutePath : null
     }
 
