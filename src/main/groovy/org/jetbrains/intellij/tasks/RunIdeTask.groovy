@@ -54,7 +54,6 @@ class RunIdeTask extends JavaExec {
     @Optional
     @Deprecated
     String getJbreVersion() {
-        IntelliJPlugin.LOG.warn("jbreVersion is deprecated, use jbrVersion instead")
         Utils.stringInput(jbrVersion)
     }
 
