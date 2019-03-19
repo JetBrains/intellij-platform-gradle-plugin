@@ -330,7 +330,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.group = GROUP_NAME
             task.description = "Builds searchable options for plugin."
             prepareConventionMappingsForRunIdeTask(project, extension, task)
-            task.args(["traverseUI", "$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME", "true"])
+            task.args(["$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME", "true"])
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
                 def number = Utils.ideaBuildNumber(Utils.ideaSdkDirectory(extension))

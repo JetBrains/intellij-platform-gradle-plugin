@@ -14,6 +14,23 @@ class RunIdeTask extends RunIdeBase {
 }
 
 class BuildSearchableOptionsTask extends RunIdeBase {
+
+    private static final List<String> TRAVERSE_UI_ARG = ["traverseUI"]
+
+    BuildSearchableOptionsTask() {
+        super()
+        super.setArgs(TRAVERSE_UI_ARG)
+    }
+
+    @Override
+    JavaExec setArgs(List<String> applicationArgs) {
+        super.setArgs(TRAVERSE_UI_ARG + applicationArgs)
+    }
+
+    @Override
+    JavaExec setArgs(Iterable<?> applicationArgs) {
+        super.setArgs(TRAVERSE_UI_ARG + applicationArgs)
+    }
 }
 
 abstract class RunIdeBase extends JavaExec {
