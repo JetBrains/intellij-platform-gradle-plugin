@@ -326,7 +326,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring build searchable options task")
-        project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
+        project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask).with { BuildSearchableOptionsTask task ->
             task.group = GROUP_NAME
             task.description = "Builds searchable options for plugin."
             prepareConventionMappingsForRunIdeTask(project, extension, task)
@@ -340,7 +340,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension, 
-                                                               @NotNull RunIdeTask task) {
+                                                               @NotNull RunIdeBase task) {
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
         task.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
         task.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })

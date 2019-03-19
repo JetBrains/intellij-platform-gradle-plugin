@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.JavaExec
@@ -11,7 +10,13 @@ import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
-class RunIdeTask extends JavaExec {
+class RunIdeTask extends RunIdeBase {
+}
+
+class BuildSearchableOptionsTask extends RunIdeBase {
+}
+
+abstract class RunIdeBase extends JavaExec {
     private static final def PREFIXES = [IU: null,
                                          IC: 'Idea',
                                          RM: 'Ruby',
@@ -132,7 +137,7 @@ class RunIdeTask extends JavaExec {
         this.pluginsDirectory = pluginsDirectory
     }
 
-    RunIdeTask() {
+    RunIdeBase() {
         setMain("com.intellij.idea.Main")
         enableAssertions = true
         outputs.upToDateWhen { false }
