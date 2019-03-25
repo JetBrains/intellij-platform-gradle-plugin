@@ -1,13 +1,8 @@
-<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.5-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) 
-
-> **This project requires JVM version of at least 1.7**
-
-
-
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.6-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/org.jetbrains.intellij.plugins/gradle-intellij-plugin.svg)](https://github.com/org.jetbrains.intellij.plugins/gradle-intellij-plugin/releases) 
 
 # gradle-intellij-plugin
 
-
+#### The latest version is 0.4.6
 
 > 
 **This project requires Gradle 3.4 or newer**
@@ -21,13 +16,18 @@ helpful while developing plugins for IntelliJ platform.
 
 
 
+# Getting started
+
+Here is [the manual](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
+to start developing plugins for IntelliJ IDEA using Gradle.
+
 # Usage
  
 ## Gradle 
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.5"
+  id "org.jetbrains.intellij" version "0.4.6"
 }
 ```
  
@@ -148,7 +148,7 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.5"
+  id "org.jetbrains.intellij" version "0.4.6"
 }
 
 intellij {
@@ -163,11 +163,6 @@ publishPlugin {
   channels 'nightly'
 } 
 ```
-
-# Getting started
-
-Here is [the manual](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
-to start developing plugins for IntelliJ IDEA using Gradle.
 
 # Examples
 
@@ -240,4 +235,11 @@ Copyright 2019 org.jetbrains.intellij.plugins
     limitations under the License.
 
 ```
+
+
+--
+
+> `This README.md file was hand-crafted with care utilising synapticloop`[`templar`](https://github.com/synapticloop/templar/)`->`[`documentr`](https://github.com/synapticloop/documentr/)
+
+--
 

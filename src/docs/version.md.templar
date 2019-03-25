@@ -1,0 +1,10 @@
+{set "true" as allOk}
+
+{if fn:null[version]}{set "false" as allOk}{\n}{\n}MISSING variable `version` in the context{\n}{\n}{endif}
+
+{if fn:=[allOk, "false"]}
+	{set "docs/version.md.templar" as template}
+	{import classpath:/includes/missing-variables.templar}
+{else}
+	#### The latest version is {version}
+{endif}

@@ -17,11 +17,15 @@
     },
     {
       "type": "inbuilt",
-      "value": "jvm-compatability"
+      "value": "badge-shield-io-github-release"
     },
     {
       "type": "inbuilt",
       "value": "project-name"
+    },
+    {
+      "type": "template",
+      "value": "src/docs/version.md.templar"
     },
     {
       "type": "inbuilt",
@@ -30,6 +34,10 @@
     {
       "type": "tocbacktotop",
       "value": " <sup><sup>[top](#documentr_top)</sup></sup>"
+    },
+    {
+      "type": "file",
+      "value": "src/docs/getting_started.md"
     },
     {
       "type": "template",
@@ -49,15 +57,15 @@
     },
     {
       "type": "file",
-      "value": "src/docs/getting_started.md"
-    },
-    {
-      "type": "file",
       "value": "src/docs/examples.md"
     },
     {
       "type": "inbuilt",
       "value": "license-apache-2.0"
+    },
+    {
+      "type": "inbuilt",
+      "value": "attribution"
     }
   ]
 }
