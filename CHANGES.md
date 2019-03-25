@@ -2,7 +2,7 @@
 
 ## 0.4.6
 
-- support Gradle 5.3 [#379](../../issues/367)
+- support Gradle 5.3 [#379](../../issues/379)
 - fixed downloading JBR 8 for IDEAE 2018.3 and earlier
 
 ## 0.4.5
