@@ -118,9 +118,9 @@ class JbrResolver {
                     ? IntelliJPlugin.DEFAULT_NEW_JBR_REPO
                     : IntelliJPlugin.DEFAULT_JBR_REPO
 
-            boolean oldFormat = prefix == 'jbrex-' || isJava8 && buildNumber < VersionNumber.parse('1483.24')
+            boolean oldFormat = prefix == 'jbrex' || isJava8 && buildNumber < VersionNumber.parse('1483.24')
             if (oldFormat) {
-                return new JbrArtifact("jbrex-${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
+                return new JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
             }
 
             if (!prefix) {
@@ -130,9 +130,14 @@ class JbrResolver {
         }
 
         private static String getPrefix(String version) {
-            def prefix = version.substring(0, version.indexOf('-') + 1)
-            if (prefix == 'jbrex-' || prefix == 'jbr-' || prefix == 'jbrx-') {
-                return prefix
+            if (version.startsWith('jbr-')) {
+                return 'jbr-'
+            }
+            if (version.startsWith('jbrx-')) {
+                return 'jbrx-'
+            }
+            if (version.startsWith('jbrex8')) {
+                return 'jbrex'
             }
             return ''
         }
