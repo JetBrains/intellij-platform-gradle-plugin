@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.7
+
+- add one more executable file in Rider SDK
+
 ## 0.4.6
 
 - support Gradle 5.3 [#379](../../issues/379)

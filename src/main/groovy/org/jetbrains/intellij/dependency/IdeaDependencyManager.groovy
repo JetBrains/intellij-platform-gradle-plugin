@@ -252,6 +252,7 @@ class IdeaDependencyManager {
                 setExecutable(cacheDirectory, "lib/ReSharperHost/inspectcode.sh")
                 setExecutable(cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh")
                 setExecutable(cacheDirectory, "lib/ReSharperHost/runtime.sh")
+                setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper")
                 setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen")
                 setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py")
                 setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen")
