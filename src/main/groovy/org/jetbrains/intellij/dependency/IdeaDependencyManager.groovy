@@ -4,10 +4,10 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ResolveException
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
-import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
@@ -75,7 +75,7 @@ class IdeaDependencyManager {
     }
 
     static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull String configuration) {
-        def ivyFile = getOrCreateIvyXml(dependency)
+        def ivyFile = getOrCreateIvyXml(dependency, project.getGradle())
         def ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length()) - ".xml"
         project.repositories.ivy { repo ->
             repo.url = dependency.classes
@@ -264,11 +264,12 @@ class IdeaDependencyManager {
         new File(parent, child).setExecutable(true, true)
     }
 
-    private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
+    private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency, @NotNull Gradle gradle) {
         def directory = dependency.getIvyRepositoryDirectory()
         File ivyFile = directory != null ? new File(directory, "${dependency.fqn}.xml") : File.createTempFile(dependency.fqn, ".xml")
         if (directory == null || !ivyFile.exists()) {
-            def generator = new IvyDescriptorFileGenerator(new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version))
+            def identity = new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version)
+            def generator = Utils.createIvyFileGenerator(identity, gradle)
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))

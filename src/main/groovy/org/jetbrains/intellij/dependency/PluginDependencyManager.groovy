@@ -6,9 +6,9 @@ import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
-import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
@@ -56,7 +56,7 @@ class PluginDependencyManager {
             return
         }
         registerRepoIfNeeded(project, plugin)
-        generateIvyFile(plugin)
+        generateIvyFile(plugin, project.getGradle())
         project.dependencies.add(configuration, [
                 group: groupId(plugin.channel), name: plugin.id, version: plugin.version, configuration: 'compile'
         ])
@@ -114,14 +114,14 @@ class PluginDependencyManager {
     }
 
     @NotNull
-    private void generateIvyFile(@NotNull PluginDependency plugin) {
+    private void generateIvyFile(@NotNull PluginDependency plugin, @NotNull Gradle gradle) {
         def baseDir = plugin.builtin ? plugin.artifact : plugin.artifact.parentFile
         def pluginFqn = "${plugin.id}-${plugin.version}"
         def groupId = groupId(plugin.channel)
         def ivyFile = new File(new File(cacheDirectoryPath, groupId), "${pluginFqn}.xml")
         if (!ivyFile.exists()) {
             def identity = new DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
-            def generator = new IvyDescriptorFileGenerator(identity)
+            def generator = Utils.createIvyFileGenerator(identity, gradle)
             def configuration = new DefaultIvyConfiguration("compile")
             generator.addConfiguration(configuration)
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
