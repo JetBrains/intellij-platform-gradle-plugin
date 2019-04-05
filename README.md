@@ -124,7 +124,7 @@ The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ...
 | <kbd>destinationDir</kbd> is a directory to store patched xml files.                  | <kbd>'${project.buildDir}/patchedPluginXmlFiles'</kbd> |
 
 ### Publishing DSL
-The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrain Plugin Repository.
+The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository.
 
 See the instruction on how to generate authentication token: https://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
 
