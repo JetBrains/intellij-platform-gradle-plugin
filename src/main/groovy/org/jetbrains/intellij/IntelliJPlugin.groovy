@@ -331,6 +331,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.description = "Builds searchable options for plugin."
             prepareConventionMappingsForRunIdeTask(project, extension, task)
             task.args(["$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME", "true"])
+            task.outputs.dir("$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME")
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
                 def number = Utils.ideaBuildNumber(Utils.ideaSdkDirectory(extension))

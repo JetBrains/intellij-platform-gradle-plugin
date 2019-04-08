@@ -11,6 +11,9 @@ import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
 class RunIdeTask extends RunIdeBase {
+    RunIdeTask() {
+        super(true)
+    }
 }
 
 class BuildSearchableOptionsTask extends RunIdeBase {
@@ -18,7 +21,7 @@ class BuildSearchableOptionsTask extends RunIdeBase {
     private static final List<String> TRAVERSE_UI_ARG = ["traverseUI"]
 
     BuildSearchableOptionsTask() {
-        super()
+        super(false)
         super.setArgs(TRAVERSE_UI_ARG)
     }
 
@@ -142,6 +145,7 @@ abstract class RunIdeBase extends JavaExec {
         this.systemDirectory = systemDirectory
     }
 
+    @InputDirectory
     File getPluginsDirectory() {
         pluginsDirectory != null ? project.file(pluginsDirectory) : null
     }
@@ -154,10 +158,12 @@ abstract class RunIdeBase extends JavaExec {
         this.pluginsDirectory = pluginsDirectory
     }
 
-    RunIdeBase() {
+    RunIdeBase(boolean runAlways) {
         setMain("com.intellij.idea.Main")
         enableAssertions = true
-        outputs.upToDateWhen { false }
+        if (runAlways) {
+            outputs.upToDateWhen { false }
+        }
     }
 
     @Override
