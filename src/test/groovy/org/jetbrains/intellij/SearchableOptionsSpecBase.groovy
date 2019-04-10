@@ -1,11 +1,6 @@
 package org.jetbrains.intellij
 
-class SearchableOptionsSpecBase extends IntelliJPluginSpecBase {
-
-    @Override
-    String getIntellijVersion() {
-        return '2019.1'
-    }
+abstract class SearchableOptionsSpecBase extends IntelliJPluginSpecBase {
 
     protected static String getPluginXmlWithSearchableConfigurable() {
         """<idea-plugin version="2">
