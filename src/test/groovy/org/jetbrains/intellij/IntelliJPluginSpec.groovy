@@ -110,6 +110,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
     def 'patch test tasks'() {
         given:
+        buildFile << "intellij { version = '14.1.4' }"
         writeTestFile()
 
         when:
@@ -149,7 +150,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'add external zip-plugins to compile only classpath'() {
         given:
         writeTestFile()
-        buildFile << 'intellij.plugins = [\'org.intellij.plugins.markdown:2017.2.20170404\']\n'
+        buildFile << 'intellij.plugins = [\'org.intellij.plugins.markdown:191.5849.16\']\n'
         buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
         buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
@@ -160,15 +161,17 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
         then:
         assert compileClasspath.contains('markdown.jar')
-        assert compileClasspath.contains('kotlin-reflect.jar')
-        assert compileClasspath.contains('kotlin-runtime.jar')
-        assert compileClasspath.contains('Loboevolution.jar')
-        assert compileClasspath.contains('intellij-markdown.jar')
+        assert compileClasspath.contains('resources_en.jar')
+        assert compileClasspath.contains('kotlin-reflect-1.3.11.jar')
+        assert compileClasspath.contains('kotlin-stdlib-1.3.11.jar')
+        assert compileClasspath.contains('owasp-java-html-sanitizer.jar')
+        assert compileClasspath.contains('markdown-0.1.31.jar')
         assert !runtimeClasspath.contains('markdown.jar')
-        assert !runtimeClasspath.contains('kotlin-reflect.jar')
-        assert !runtimeClasspath.contains('kotlin-runtime.jar')
-        assert !runtimeClasspath.contains('Loboevolution.jar')
-        assert !runtimeClasspath.contains('intellij-markdown.jar')
+        assert !runtimeClasspath.contains('resources_en.jar')
+        assert !runtimeClasspath.contains('kotlin-reflect-1.3.11.jar')
+        assert !runtimeClasspath.contains('kotlin-stdlib-1.3.11.jar')
+        assert !runtimeClasspath.contains('owasp-java-html-sanitizer.jar')
+        assert !runtimeClasspath.contains('markdown-0.1.31.jar')
     }
 
     def 'add local plugin to compile only classpath'() {

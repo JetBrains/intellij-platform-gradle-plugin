@@ -152,7 +152,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         fileText(jar, 'META-INF/plugin.xml') == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="172.4343" until-build="172.*"/>
+              <idea-version since-build="191.6183" until-build="191.*"/>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
     }
@@ -182,7 +182,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
         buildFile << """\
             intellij {
-                plugins = ['org.intellij.plugins.markdown:2017.2.20170404']
+                plugins = ['org.intellij.plugins.markdown:191.5849.16']
                 pluginName = 'myPluginName'
             }
             """.stripIndent()
@@ -192,9 +192,10 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         then:
         collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName.jar',
                                   '/plugins/markdown/lib/markdown.jar',
+                                  '/plugins/markdown/lib/resources_en.jar',
                                   '/config/options/updates.xml',
-                                  '/plugins/markdown/lib/Loboevolution.jar',
-                                  '/plugins/markdown/lib/intellij-markdown.jar'] as Set
+                                  '/plugins/markdown/lib/owasp-java-html-sanitizer.jar',
+                                  '/plugins/markdown/lib/markdown-0.1.31.jar'] as Set
     }
 
     def 'prepare sandbox with plugin dependency with classes directory'() {
@@ -231,7 +232,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
               <id>$plugin.name</id>
               <name>Test Plugin</name>
               <version>1.0</version>
-              <idea-version since-build="172.1" until-build="172.*"/>
+              <idea-version since-build="191.6183" until-build="191.*"/>
               <vendor url="https://jetbrains.com">JetBrains</vendor>
               <description>test plugin</description>
               <change-notes/>

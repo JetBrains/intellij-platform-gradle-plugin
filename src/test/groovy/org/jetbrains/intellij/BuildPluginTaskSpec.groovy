@@ -8,7 +8,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
-        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name><depends config-file="other.xml"/></idea-plugin>'
         buildFile << """\
             version='0.42.123'
             intellij { 
@@ -28,7 +28,8 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
 
         def zipFile = new ZipFile(distribution)
         collectPaths(zipFile) == ['myPluginName/', 'myPluginName/lib/', 'myPluginName/lib/joda-time-2.8.1.jar',
-                                  'myPluginName/lib/projectName-0.42.123.jar'] as Set
+                                  'myPluginName/lib/projectName-0.42.123.jar',
+                                  'myPluginName/lib/searchableOptions-0.42.123.jar'] as Set
 
         def jar = new ZipFile(extractFile(zipFile, 'myPluginName/lib/projectName-0.42.123.jar'))
         collectPaths(jar) == ['App.class', 'META-INF/', 'META-INF/MANIFEST.MF',
@@ -37,7 +38,8 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         fileText(jar, 'META-INF/plugin.xml') == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="172.4343" until-build="172.*"/>
+              <idea-version since-build="191.6183" until-build="191.*"/>
+              <name>MyPluginName</name>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
     }
@@ -46,7 +48,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         given:
         writeJavaFile()
         writeKotlinUIFile()
-        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
         buildFile << """\
             intellij.pluginName = 'myPluginName'
             version='0.42.123'
@@ -63,7 +65,10 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         distribution.exists()
 
         def zipFile = new ZipFile(distribution)
-        collectPaths(zipFile) == ['myPluginName/', 'myPluginName/lib/', 'myPluginName/lib/projectName-0.42.123.jar'] as Set
+        collectPaths(zipFile) == ['myPluginName/',
+                                  'myPluginName/lib/',
+                                  'myPluginName/lib/projectName-0.42.123.jar',
+                                  'myPluginName/lib/searchableOptions-0.42.123.jar'] as Set
 
         def jar = new ZipFile(extractFile(zipFile, 'myPluginName/lib/projectName-0.42.123.jar'))
         collectPaths(jar) == ['App.class', 'pack/', 'pack/AppKt.class', 'META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
@@ -74,7 +79,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
-        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name><depends config-file="other.xml"/></idea-plugin>'
         def sandboxPath = adjustWindowsPath("$dir.root.absolutePath/customSandbox")
         buildFile << """\
             version='0.42.123'
@@ -96,13 +101,14 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         collectPaths(new ZipFile(distribution)) as Set == ['myPluginName/',
                                                            'myPluginName/lib/',
                                                            'myPluginName/lib/joda-time-2.8.1.jar',
-                                                           'myPluginName/lib/projectName-0.42.123.jar'] as Set
+                                                           'myPluginName/lib/projectName-0.42.123.jar',
+                                                           'myPluginName/lib/searchableOptions-0.42.123.jar'] as Set
     }
 
     def 'use gradle project name for distribution if plugin name is not defined'() {
         given:
         buildFile << 'version="0.42.123"'
-        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
 
         when:
         build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
@@ -125,12 +131,12 @@ class App {
     }
 }
 """
-        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
         buildFile << """\
             version='0.42.123'
             intellij {
                 pluginName = 'myPluginName'
-                plugins = ['org.intellij.plugins.markdown:2017.2.20170404']
+                plugins = ['org.intellij.plugins.markdown:191.5849.16']
             }
             """.stripIndent()
 
@@ -156,7 +162,7 @@ class App {
     }
 }
 """
-        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
         buildFile << """\
             version='0.42.123'
             intellij {
@@ -176,7 +182,7 @@ class App {
 
     def 'build plugin without sources'() {
         given:
-        pluginXml << '<idea-plugin version="2"></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
         buildFile << """\
             version='0.42.123'
             intellij { pluginName = 'myPluginName' }
@@ -192,7 +198,8 @@ class App {
         def zip = new ZipFile(distribution)
         zip.entries().collect { it.name } == ['myPluginName/',
                                               'myPluginName/lib/',
-                                              'myPluginName/lib/projectName-0.42.123.jar']
+                                              'myPluginName/lib/projectName-0.42.123.jar',
+                                              'myPluginName/lib/searchableOptions-0.42.123.jar']
         def jar = extractFile(zip, 'myPluginName/lib/projectName-0.42.123.jar')
         collectPaths(new ZipFile(jar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
     }

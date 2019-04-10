@@ -3,7 +3,7 @@ package org.jetbrains.intellij
 class BuildSearchableOptionsTaskSpec extends SearchableOptionsSpecBase {
     def 'skip building searchable options using IDEA prior 2019.1'() {
         given:
-        buildFile << "intellij { version = '2017.2.5' }"
+        buildFile << "intellij { version = '14.1.4' }"
 
         when:
         def result = build(IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)

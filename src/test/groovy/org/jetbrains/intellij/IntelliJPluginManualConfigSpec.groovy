@@ -5,6 +5,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         given:
         writeTestFile()
         buildFile << """\
+            intellij { version = '14.1.4' }
             intellij.configureDefaultDependencies = false
             afterEvaluate {
                 dependencies {
@@ -55,6 +56,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         writeTestFile()
         buildFile << """\
             intellij {
+                version = '14.1.4'
                 configureDefaultDependencies = false
                 plugins = ['junit', 'testng', 'copyright']
             }
