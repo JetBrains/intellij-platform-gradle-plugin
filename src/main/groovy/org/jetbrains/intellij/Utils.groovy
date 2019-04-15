@@ -285,7 +285,7 @@ class Utils {
     }
 
     static String releaseType(@NotNull String version) {
-        if (version.endsWithAny('-EAP-SNAPSHOT', '-EAP-CANDIDATE-SNAPSHOT')) {
+        if (version.endsWith('-EAP-SNAPSHOT') || version.endsWith('-EAP-CANDIDATE-SNAPSHOT') || version.endsWith('-CUSTOM-SNAPSHOT')) {
             return 'snapshots'
         }
         if (version.endsWith('-SNAPSHOT')) {
