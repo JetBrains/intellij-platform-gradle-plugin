@@ -7,15 +7,11 @@ import org.apache.commons.io.filefilter.FalseFileFilter
 import org.apache.commons.io.filefilter.TrueFileFilter
 import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.ivy.IvyArtifact
-import org.gradle.api.publish.ivy.internal.publisher.IvyDescriptorFileGenerator
-import org.gradle.api.publish.ivy.internal.publisher.IvyPublicationIdentity
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
-import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.dependency.IntellijIvyArtifact
@@ -296,12 +292,5 @@ class Utils {
             return 'snapshots'
         }
         return 'releases'
-    }
-
-    static IvyDescriptorFileGenerator createIvyFileGenerator(IvyPublicationIdentity identity, Gradle gradle) {
-        if (VersionNumber.parse(gradle.gradleVersion) >= VersionNumber.parse('5.3')) {
-            return new IvyDescriptorFileGenerator(identity, true)
-        }
-        return new IvyDescriptorFileGenerator(identity)
     }
 }
