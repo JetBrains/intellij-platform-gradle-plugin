@@ -89,12 +89,18 @@ class JbrResolver {
 
     @Nullable
     private def findJavaExecutable(@NotNull File javaHome) {
-        def jbr = new File(javaHome, 'jbr')
-        def macRootPath = jbr.exists() ? 'jbr/Contents/Home' : 'jdk/Contents/Home'
-        def root = new File(javaHome, operatingSystem.isMacOsX() ? macRootPath : '')
+        def root = getJbrRoot(javaHome)
         def jre = new File(root, 'jre')
         def java = new File(jre.exists() ? jre : root, operatingSystem.isWindows() ? 'bin/java.exe' : 'bin/java')
         return java.exists() ? java.absolutePath : null
+    }
+
+    private def getJbrRoot(@NotNull File javaHome) {
+        def jbr = new File(javaHome, 'jbr')
+        if (jbr.exists()) {
+            return operatingSystem.isMacOsX() ? new File(jbr, 'Contents/Home') : jbr
+        }
+        return new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home' : '')
     }
 
     private static class JbrArtifact {
