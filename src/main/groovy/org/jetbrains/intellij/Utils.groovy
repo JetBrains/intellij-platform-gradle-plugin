@@ -150,7 +150,7 @@ class Utils {
             def pluginXml = parseXml(it)
             ids += pluginXml.id*.text()
         }
-        return ids.size() == 1 ? [ids.first()] : Collections.<String>emptyList()
+        return ids.size() == 1 ? [ids.first()] : Collections.<String> emptyList()
     }
 
     static Node parseXml(File file) {
@@ -285,11 +285,11 @@ class Utils {
     }
 
     static String releaseType(@NotNull String version) {
-        if (version.endsWith('TRUNK-SNAPSHOT') || version.matches('\\d+-SNAPSHOT')) {
-            return 'nightly'
+        if (version.endsWithAny('-EAP-SNAPSHOT', '-EAP-CANDIDATE-SNAPSHOT')) {
+            return 'snapshots'
         }
         if (version.endsWith('-SNAPSHOT')) {
-            return 'snapshots'
+            return 'nightly'
         }
         return 'releases'
     }
