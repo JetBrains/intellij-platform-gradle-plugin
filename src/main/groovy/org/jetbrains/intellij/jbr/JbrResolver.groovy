@@ -89,7 +89,9 @@ class JbrResolver {
 
     @Nullable
     private def findJavaExecutable(@NotNull File javaHome) {
-        def root = new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home' : '')
+        def jbr = new File(javaHome, 'jbr')
+        def macRootPath = jbr.exists() ? 'jbr/Contents/Home' : 'jdk/Contents/Home'
+        def root = new File(javaHome, operatingSystem.isMacOsX() ? macRootPath : '')
         def jre = new File(root, 'jre')
         def java = new File(jre.exists() ? jre : root, operatingSystem.isWindows() ? 'bin/java.exe' : 'bin/java')
         return java.exists() ? java.absolutePath : null
