@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.8
+
+- Gradle 5.4 compatibility
+- Support for new JBR distributions layout
+- Made buildSearchableOption task incremental
+
 ## 0.4.7
 
 - add one more executable file in Rider SDK

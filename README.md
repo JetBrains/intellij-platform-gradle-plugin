@@ -1,8 +1,8 @@
-<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.7-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://badges.gitter.im/JetBrains/gradle-intellij-plugin.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.8-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
 
 # gradle-intellij-plugin
 
-#### The latest version is 0.4.7
+#### The latest version is 0.4.8
 
 > 
 **This project requires Gradle 3.4 or newer**
@@ -27,7 +27,7 @@ to start developing plugins for IntelliJ IDEA using Gradle.
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.7"
+  id "org.jetbrains.intellij" version "0.4.8"
 }
 ```
  
@@ -150,7 +150,7 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.7"
+  id "org.jetbrains.intellij" version "0.4.8"
 }
 
 intellij {
