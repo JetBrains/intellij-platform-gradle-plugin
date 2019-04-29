@@ -20,6 +20,7 @@ class IntelliJPluginExtension {
     String alternativeIdePath
     String ideaDependencyCachePath
     boolean instrumentCode = true
+    boolean buildSearchableOptions = true
     boolean updateSinceUntilBuild = true
     boolean sameSinceUntilBuild = false
     boolean downloadSources = true

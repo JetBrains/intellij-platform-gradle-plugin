@@ -335,7 +335,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
                 def number = Utils.ideaBuildNumber(Utils.ideaSdkDirectory(extension))
-                VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752")
+                VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752") && extension.buildSearchableOptions
             }
         }
     }
