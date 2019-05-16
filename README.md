@@ -78,7 +78,7 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 
 ### Setup DSL
 
-The following attributes are part of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies.
+The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies. 
 
 | **Attributes** | **Values** | 
 | :------------- | :--------- | 
@@ -113,7 +113,7 @@ In addition to that, following attributes may be used to customize IDE running:
 | <kbd>systemDirectory</kbd> Path to indexes directory | <kbd>${intellij.sandboxDirectory}/system</kbd> |
 
 ### Patching DSL
-The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
+The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
 
 | **Attributes**            | **Default Value** |
 | :------------------------ |  :---------------- |
