@@ -39,7 +39,7 @@ pre}
 
 **Notes:**
     <ul>
-        <li>Value may have `IC-`, `IU-`, `CL-`, `RD` or `JPS-` prefix in order to define IDE distribution type.</li>
+        <li>Value may have `IC-`, `IU-`, `CL-`, `PY-`, `PC-`, `RD` or `JPS-` prefix in order to define IDE distribution type.</li>
         <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>
     </ul>
 |
@@ -64,6 +64,8 @@ pre}
         <li><kbd>'IU'</kbd> - IntelliJ IDEA Ultimate Edition. </li>
         <li><kbd>'JPS'</kbd> - JPS-only. </li>
         <li><kbd>'CL'</kbd> - CLion. </li>
+        <li><kbd>'PY'</kbd> - PyCharm Professional Edition. </li>
+        <li><kbd>'PC'</kbd> - PyCharm Community Edition. </li>
         <li><kbd>'RD'</kbd> - Rider.</li>
         <li><kbd>'MPS'</kbd> - MPS.</li>
     </ul>
