@@ -6,7 +6,7 @@ Plugin provides following options to configure target IntelliJ SDK and build arc
 
 ### Setup DSL
 
-The following attributes are part of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies.
+The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies.
 
 pre}
 {\n}
@@ -245,7 +245,7 @@ In addition to that, following attributes may be used to customize IDE running:
 | <kbd>systemDirectory</kbd> Path to indexes directory | <kbd>${intellij.sandboxDirectory}/system</kbd> |
 
 ### Patching DSL
-The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
+The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
 
 | **Attributes**            | **Default Value** |
 | :------------------------ |  :---------------- |
@@ -258,7 +258,7 @@ The following attributes are apart of the Patching DSL <kbd>patchPluginXml { ...
 | <kbd>destinationDir</kbd> is a directory to store patched xml files.                  | <kbd>'${project.buildDir}/patchedPluginXmlFiles'</kbd> |
 
 ### Publishing DSL
-The following attributes are apart of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository.
+The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
 
 See the instruction on how to generate authentication token: https://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
 
