@@ -42,6 +42,9 @@ class IdeaDependencyManager {
         } else if (type == 'CL') {
             dependencyGroup = 'com.jetbrains.intellij.clion'
             dependencyName = 'clion'
+        } else if (type == 'PY' || type == 'PC') {
+            dependencyGroup = 'com.jetbrains.intellij.pycharm'
+            dependencyName = 'pycharm' + type
         } else if (type == 'RD') {
             dependencyGroup = 'com.jetbrains.intellij.rider'
             dependencyName = 'riderRD'

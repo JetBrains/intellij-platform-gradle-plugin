@@ -43,6 +43,10 @@ class IntelliJPluginExtension {
             return "JPS"
         } else if (version.startsWith('CL-') || 'CL' == type) {
             return 'CL'
+        } else if (version.startsWith('PY-') || 'PY' == type) {
+            return 'PY'
+        } else if (version.startsWith('PC-') || 'PC' == type) {
+            return 'PC'
         } else if (version.startsWith('RD-') || 'RD' == type) {
             return 'RD'
         } else if (version.startsWith('MPS-') || 'MPS' == type) {
@@ -60,7 +64,8 @@ class IntelliJPluginExtension {
             return version.substring(4)
         }
         if (version.startsWith('IU-') || version.startsWith('IC-') ||
-                version.startsWith('RD-') || version.startsWith('CL-')) {
+                version.startsWith('RD-') || version.startsWith('CL-')
+                || version.startsWith('PY-') || version.startsWith('PC-')) {
             return version.substring(3)
         }
         return version

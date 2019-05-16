@@ -6,7 +6,14 @@ pluginManagement {
     }
 }
 
-include 'simple-plugin', 'composite-plugin', 'plugin-with-dependencies', 'rider-plugin', 'kotlin-plugin', 'clion-plugin'
-include 'composite-plugin:subplugin', 'custom-runide-task'
+include 'simple-plugin', 
+        'composite-plugin', 
+        'plugin-with-dependencies', 
+        'rider-plugin', 
+        'kotlin-plugin', 
+        'clion-plugin',
+        'pycharm-plugin', 
+        'composite-plugin:subplugin',
+        'custom-runide-task'
 includeBuild '..'
 
