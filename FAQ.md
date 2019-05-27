@@ -20,6 +20,19 @@ runIde {
 }
 ```
 
+#### How to disable building searchable options
+
+Building searchable options can be disabled as a task:
+
+```
+buildingSearchableOptions.enabled = false
+```
+
+#### How disabling building searchable options affects the plugin
+
+As the result of disabling building searchable options, the configurables that your plugin provides
+won't be seachable in the Settings dialog.
+
 #### How to Debug
 
 Running gradle tasks from IDEA produces Gradle run configuration. The produced configuration can be run in debug mode just as any other run configuration:
