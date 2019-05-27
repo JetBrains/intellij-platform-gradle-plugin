@@ -11,6 +11,7 @@ import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
+import retrofit.RetrofitError
 
 class PublishTask extends ConventionTask {
     private Object distributionFile
@@ -132,7 +133,14 @@ class PublishTask extends ConventionTask {
                     IntelliJPlugin.LOG.info("Uploaded successfully")
                 }
                 catch (exception) {
-                    throw new TaskExecutionException(this, new GradleException("Failed to upload plugin", exception))
+                    def cause = exception.getCause()
+                    if (cause instanceof RetrofitError && cause.getResponse().getStatus() == 404) {
+                        def message = '''Failed to upload plugin
+The plugin should be uploaded manually at least once before using `publishPlugin` task.
+Please follow the instructions: https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/publishing_plugin.html'''
+                        throw new TaskExecutionException(this, new GradleException(message))
+                    }
+                    throw new TaskExecutionException(this, new GradleException('Failed to upload plugin', exception))
                 }
             }
         } else if (creationResult instanceof PluginCreationFail) {

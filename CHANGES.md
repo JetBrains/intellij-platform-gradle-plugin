@@ -1,5 +1,10 @@
 # Changelog
 
+## next version
+
+- Graceful handling of 404 errors when publishing a new plugin [#389](../../issues/389)
+- Support PyCharm as an SDK
+
 ## 0.4.8
 
 - Gradle 5.4 compatibility
