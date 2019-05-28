@@ -134,7 +134,7 @@ class PublishTask extends ConventionTask {
                 }
                 catch (exception) {
                     def cause = exception.getCause()
-                    if (cause instanceof RetrofitError && cause.getResponse().getStatus() == 404) {
+                    if (cause instanceof RetrofitError && cause.response && cause.response.status == 404) {
                         def message = '''Failed to upload plugin
 The plugin should be uploaded manually at least once before using `publishPlugin` task.
 Please follow the instructions: https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/publishing_plugin.html'''
