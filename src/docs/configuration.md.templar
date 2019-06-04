@@ -233,18 +233,18 @@ pre}
 
 ### Running DSL
 
-`runIde` task extends [JavaExec](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html) Gradle task,
-all configuration attributes of `JavaExec` task can be used in `runIde` as well.
+`RunIde` tasks (both `runIde` and `buildSearchableOptions`) extend [JavaExec](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.JavaExec.html) Gradle task,
+all configuration attributes of `JavaExec` task can be used in `RunIde` as well.
 
 In addition to that, following attributes may be used to customize IDE running:
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
-| <kbd>jbrVersion</kbd> JetBrains Java runtime version to use when running the plugin. | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java version are available at [BitTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
-| <kbd>ideaDirectory</kbd> Path to IDE distribution that will be used to run the plugin | path to IDE-dependency |
-| <kbd>configDirectory</kbd> Path to configuration directory | <kbd>${intellij.sandboxDirectory}/config</kbd> |
-| <kbd>pluginsDirectory</kbd> Path to plugins directory | <kbd>${intellij.sandboxDirectory}/plugins</kbd> |
-| <kbd>systemDirectory</kbd> Path to indexes directory | <kbd>${intellij.sandboxDirectory}/system</kbd> |
+| <kbd>jbrVersion</kbd> JetBrains Java runtime version to use when running the IDE with the plugin. | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java version are available at [BitTray](https://bintray.com/jetbrains/intellij-jdk/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
+| <kbd>ideaDirectory</kbd> Path to IDE distribution that will be used to run the IDE with the plugin. | path to IDE-dependency |
+| <kbd>configDirectory</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDirectory}/config</kbd> |
+| <kbd>pluginsDirectory</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDirectory}/plugins</kbd> |
+| <kbd>systemDirectory</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDirectory}/system</kbd> |
 
 ### Patching DSL
 The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
@@ -268,12 +268,12 @@ Also here is the tutorial on how to configure plugin publishing: https://www.jet
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
-| <kbd>token</kbd> Authentication token | none |
-| <kbd>username</kbd> Login username | none |
-| <kbd>password</kbd> Login password | none |
+| <kbd>token</kbd> Authentication token. | none |
+| <kbd>username</kbd> Login username. | none |
+| <kbd>password</kbd> Login password. | none |
 | <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>https://plugins.jetbrains.com</kbd> |
-| <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload | output of `buildPlugin` task |
+| <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload. | output of `buildPlugin` task |
 
 ### Instrumenting DSL
 The following attributes help you to tune instrumenting behaviour in <kbd>instrumentCode { ... }</kbd> block.
