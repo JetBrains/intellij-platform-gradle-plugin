@@ -6,5 +6,7 @@
 	{set "docs/version.md.templar" as template}
 	{import classpath:/includes/missing-variables.templar}
 {else}
-	<h4><span id="the-latest-version">The latest version is {version}</span></h4>
+  <span id="the-latest-version">
+	#### The latest version is {version}
+	</span>
 {endif}

@@ -2,7 +2,7 @@
 
 # gradle-intellij-plugin
 
-<h4><span id="the-latest-version">The latest version is 0.4.8</span></h4>
+  <span id="the-latest-version">#### The latest version is 0.4.8</span>
 
 > 
 **This project requires Gradle 3.4 or newer**
