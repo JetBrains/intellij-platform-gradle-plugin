@@ -219,6 +219,16 @@ As examples of using this plugin you can check out following projects:
 	- Gradle task to verify plugin compatibility cross intellij versions
 	- Auto subbmit anonymous feedback as github issues
 
+# Contributing
+
+Contributing tips:
+
+You can debug the source code of gradle-intellij-plugin (e.g. put breakpoints there) if you add a reference to your local copy into `settings.gradle` of your IntelliJ plugin:
+
+```groovy
+includeBuild '/path/to/gradle-intellij-plugin'
+```
+
 # License
 
 
