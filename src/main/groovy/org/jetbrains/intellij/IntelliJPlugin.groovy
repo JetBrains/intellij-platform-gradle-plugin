@@ -235,6 +235,23 @@ class IntelliJPlugin implements Plugin<Project> {
                 }
             }
         }
+        verifyJavaPluginDependency(extension, project)
+    }
+
+    private static void verifyJavaPluginDependency(IntelliJPluginExtension extension, Project project) {
+        if (!extension.plugins.contains('java') && new File(extension.ideaDependency.classes, "plugins/java").exists()) {
+            Utils.sourcePluginXmlFiles(project).each { file ->
+                def pluginXml = Utils.parseXml(file)
+                if (pluginXml) {
+                    pluginXml.depends.each {
+                        if (it.text() == 'com.intellij.modules.java') {
+                            throw new BuildException("The project depends on `com.intellij.modules.java` module but doesn't declare a compile dependency on it.\n" +
+                                    "Please delete `depends` tag from $file.absolutePath or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })", null)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private static void configureProjectPluginDependency(@NotNull Project project,
