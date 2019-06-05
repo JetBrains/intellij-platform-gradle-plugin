@@ -1,9 +1,10 @@
 # Changelog
 
-## next version
+## 0.4.9
 
 - Graceful handling of 404 errors when publishing a new plugin [#389](../../issues/389)
 - Support PyCharm as an SDK
+- Fail if the plugin depends on Java plugin but doesn't declare it as dependency
 
 ## 0.4.8
 
