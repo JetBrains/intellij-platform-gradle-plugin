@@ -218,7 +218,6 @@ As examples of using this plugin you can check out following projects:
 	- Circle CI configuration file & Travis CI configuration file
 	- Gradle task to verify plugin compatibility cross intellij versions
 	- Auto subbmit anonymous feedback as github issues
-
 # Contributing
 
 Contributing tips:

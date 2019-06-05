@@ -61,6 +61,10 @@
       "value": "src/docs/examples.md"
     },
     {
+      "type": "file",
+      "value": "src/docs/contributing.md"
+    },
+    {
       "type": "inbuilt",
       "value": "license-apache-2.0"
     },
