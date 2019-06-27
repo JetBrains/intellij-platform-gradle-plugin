@@ -84,6 +84,11 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         LOG.info("Configuring IntelliJ IDEA gradle plugin")
+        project.tasks.whenTaskAdded {
+            if (it instanceof RunIdeBase) {
+                prepareConventionMappingsForRunIdeTask(project, extension, it)
+            }
+        }
         configurePatchPluginXmlTask(project, extension)
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
@@ -336,7 +341,6 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(RUN_IDE_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
             task.group = GROUP_NAME
             task.description = "Runs Intellij IDEA with installed plugin."
-            prepareConventionMappingsForRunIdeTask(project, extension, task)
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
         }
     }
@@ -346,7 +350,6 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask).with { BuildSearchableOptionsTask task ->
             task.group = GROUP_NAME
             task.description = "Builds searchable options for plugin."
-            prepareConventionMappingsForRunIdeTask(project, extension, task)
             task.args(["$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME", "true"])
             task.outputs.dir("$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME")
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
