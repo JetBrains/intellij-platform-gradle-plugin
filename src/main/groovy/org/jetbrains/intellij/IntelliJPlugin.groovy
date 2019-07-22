@@ -192,9 +192,11 @@ class IntelliJPlugin implements Plugin<Project> {
                 LOG.info("Note: IntelliJ IDEA ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
             }
 
-            def toolsJar = Jvm.current().toolsJar
-            if (toolsJar) {
-                project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
+            if (extension.type == 'IC' || extension.type == 'IU') {
+                def toolsJar = Jvm.current().toolsJar
+                if (toolsJar) {
+                    project.dependencies.add(IDEA_CONFIGURATION_NAME, project.files(toolsJar))
+                }
             }
         }
         else {
