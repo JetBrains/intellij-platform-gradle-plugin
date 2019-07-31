@@ -12,4 +12,4 @@ Plugin introduces the following tasks
 | `jarSearchableOptions`   | Creates a jar file with searchable options to be distributed with the plugin. |
 | `runIde`                 | Executes an IntelliJ IDEA instance with the plugin you are developing. |
 | `publishPlugin`          | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
-| `verifyPlugin`           | Validates plugin.xml and plugin's structure. |
+| `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |

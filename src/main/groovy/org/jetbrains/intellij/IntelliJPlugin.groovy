@@ -329,7 +329,7 @@ class IntelliJPlugin implements Plugin<Project> {
         LOG.info("Configuring plugin verification task")
         project.tasks.create(VERIFY_PLUGIN_TASK_NAME, VerifyPluginTask).with {
             group = GROUP_NAME
-            description = "Verifies built plugin."
+            description = "Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure."
             conventionMapping('pluginDirectory', {
                 def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
                 new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName())
