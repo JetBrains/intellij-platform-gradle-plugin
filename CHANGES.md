@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.10
+- Upgrade download plugin [#418](../../issues/418)
+- Simplify custom runIde task configuration [#401](../../issues/401)
+
+
 ## 0.4.9
 
 - Graceful handling of 404 errors when publishing a new plugin [#389](../../issues/389)

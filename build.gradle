@@ -40,7 +40,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.4.9'
+version = '0.4.10'
 group = 'org.jetbrains.intellij.plugins'
 description = """
 **This project requires Gradle 3.4 or newer**
