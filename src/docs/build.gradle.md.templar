@@ -12,8 +12,7 @@ intellij {{{\n}
 {\n}
 }{\n}
 publishPlugin {{{\n}
-  username 'zolotov'{\n}
-  password 'password'{\n}
+  token 'ssdfhasdfASDaq23jhnasdkjh'{\n}
   channels 'nightly'{\n}
 } {\n}
 ```{\n}

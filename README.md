@@ -151,8 +151,6 @@ Also here is the tutorial on how to configure plugin publishing: https://www.jet
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
 | <kbd>token</kbd> Authentication token. | none |
-| <kbd>username</kbd> Login username. | none |
-| <kbd>password</kbd> Login password. | none |
 | <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>https://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload. | output of `buildPlugin` task |
@@ -178,8 +176,7 @@ intellij {
 
 }
 publishPlugin {
-  username 'zolotov'
-  password 'password'
+  token 'ssdfhasdfASDaq23jhnasdkjh'
   channels 'nightly'
 } 
 ```
