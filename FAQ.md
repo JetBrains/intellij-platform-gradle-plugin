@@ -25,7 +25,7 @@ runIde {
 Building searchable options can be disabled as a task:
 
 ```
-buildingSearchableOptions.enabled = false
+buildSearchableOptions.enabled = false
 ```
 
 #### How disabling building searchable options affects the plugin
