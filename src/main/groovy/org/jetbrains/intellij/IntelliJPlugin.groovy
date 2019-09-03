@@ -507,13 +507,13 @@ class IntelliJPlugin implements Plugin<Project> {
         Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
-            from { "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}" }
-            from({ jarSearchableOptionsTask.getDestinationDir() }) {
-                include {
-                    it.isDirectory() || it.getRelativePath().getPathString() == jarSearchableOptionsTask.getArchiveName()
-                }
-            }
-            into { prepareSandboxTask.getPluginName() }
+            from({
+                [
+                        "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}/lib",
+                        "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
+                ]
+            })
+            into { "${prepareSandboxTask.getPluginName()}/lib" }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
             it
