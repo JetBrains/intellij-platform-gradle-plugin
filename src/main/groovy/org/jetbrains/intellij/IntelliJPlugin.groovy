@@ -509,11 +509,11 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             from({
                 [
-                        "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}",
-                        jarSearchableOptionsTask.getDestinationDir()
+                        "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}/lib",
+                        "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
                 ]
             })
-            into { prepareSandboxTask.getPluginName() }
+            into { "${prepareSandboxTask.getPluginName()}/lib" }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
             it

@@ -203,4 +203,33 @@ class App {
         def jar = extractFile(zip, 'myPluginName/lib/projectName-0.42.123.jar')
         collectPaths(new ZipFile(jar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
     }
+
+    def 'include only relevant searchableOptions.jar'() {
+        given:
+        pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
+        buildFile << """\
+            version='0.42.321'
+            intellij { pluginName = 'myPluginName' }
+            """.stripIndent()
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        buildFile << """\
+            version='0.42.123'
+            intellij { pluginName = 'myPluginName' }
+            """.stripIndent()
+
+        when:
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+
+        then:
+        File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
+        distribution.exists()
+
+        def zip = new ZipFile(distribution)
+        zip.entries().collect { it.name } == ['myPluginName/',
+                                              'myPluginName/lib/',
+                                              'myPluginName/lib/projectName-0.42.123.jar',
+                                              'myPluginName/lib/searchableOptions-0.42.123.jar']
+        def jar = extractFile(zip, 'myPluginName/lib/projectName-0.42.123.jar')
+        collectPaths(new ZipFile(jar)) == ['META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
+    }
 }
