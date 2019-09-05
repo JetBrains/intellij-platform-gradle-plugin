@@ -100,7 +100,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configureProcessResources(project)
         configureInstrumentation(project, extension)
         configureDependencyExtensions(project, extension)
-        assert !project.state.executed : "afterEvaluate is a no-op for an executed project"
+        assert !project.state.executed: "afterEvaluate is a no-op for an executed project"
         project.afterEvaluate { Project p -> configureProjectAfterEvaluate(p, extension) }
     }
 
@@ -146,8 +146,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 def plugin = extension.pluginDependencies.find { it.id == pluginName }
                 if (plugin == null || plugin.jarFiles == null || plugin.jarFiles.empty) {
                     invalidPlugins.add(pluginName)
-                }
-                else {
+                } else {
                     selectedPlugins.add(plugin)
                 }
             }
@@ -198,8 +197,7 @@ class IntelliJPlugin implements Plugin<Project> {
                     project.dependencies.add(IDEA_CONFIGURATION_NAME, project.files(toolsJar))
                 }
             }
-        }
-        else {
+        } else {
             LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} dependencies are applied manually")
         }
     }
@@ -362,7 +360,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension, 
+    private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
                                                                @NotNull RunIdeBase task) {
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
         task.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
@@ -507,13 +505,12 @@ class IntelliJPlugin implements Plugin<Project> {
         Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
+            from { "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}" }
+            into { prepareSandboxTask.getPluginName() }
+
             from({
-                [
-                        "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}/lib",
-                        "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
-                ]
-            })
-            into { "${prepareSandboxTask.getPluginName()}/lib" }
+                "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
+            }) { into 'lib' }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
             it
