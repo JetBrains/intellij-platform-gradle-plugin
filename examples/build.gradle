@@ -24,6 +24,6 @@ subprojects {
 }
 
 wrapper {
-    gradleVersion = '4.10'
+    gradleVersion = '5.6.2'
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
