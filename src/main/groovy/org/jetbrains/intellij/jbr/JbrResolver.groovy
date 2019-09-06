@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.jbr
 
+import de.undercouch.gradle.tasks.download.DownloadAction
 import org.gradle.api.Project
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
@@ -65,7 +66,12 @@ class JbrResolver {
         def repo = intellijExtension != null ? intellijExtension.jreRepo : null
         def url = "${repo ?: jbrArtifact.repoUrl}/$archiveName"
         try {
-            new DownloadActionWrapper(project, url, javaArchive.absolutePath).execute()
+            new DownloadAction(project).with {
+                src(url)
+                dest(javaArchive.absolutePath)
+                tempAndMove(true)
+                execute()
+            }
             return javaArchive
         } catch (IOException e) {
             IntelliJPlugin.LOG.warn("Cannot download JetBrains Java Runtime $artifactName", e)
