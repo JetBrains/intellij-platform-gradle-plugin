@@ -43,7 +43,7 @@ pre}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>version</kbd> - The version of the IntelliJ Platform IDE that will to build the plugin. <br/><br/>
+| <kbd>version</kbd> - The version of the IntelliJ Platform IDE that will be used to build the plugin. <br/><br/>
 
 **Notes:**
     <ul>
