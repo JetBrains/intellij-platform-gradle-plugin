@@ -58,7 +58,8 @@ pre}
         <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>
     </ul>
 
-<br/><br/>All available JetBrains IDEs versions can be found at [Intellij Artifacts](http://www.jetbrains.org/intellij/sdk/docs/reference_guide/intellij_artifacts.html) page.<br/><br/>
+<br/><br/>All available JetBrains IDEs versions can be found at [Intellij Artifacts](https://www.jetbrains.org/intellij/sdk/docs/reference_guide/intellij_artifacts.html) page.
+<br/><br/>Please see [Plugin Compatibility](https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html) in SDK docs for more details.<br/><br/>
 
 **Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>
 |{\n}
@@ -111,6 +112,10 @@ pre}
         <li>For bundled plugins use directory name of the plugin in IDE distribution (e.g. `Groovy` for `IDEA/plugins/Groovy`).</li>
         <li>For sub-projects use project reference `project(':subproject')`.</li>
     </ul>
+
+    <br/><br/>If you need to refer plugin's classes from your project, you also have to define a dependency in your `plugin.xml`.
+    See details in the [Plugin Dependencies documentation](http://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html).
+    <br/><br/>
 |
 **Acceptable Values:**
     <ol>
