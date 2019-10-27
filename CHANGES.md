@@ -1,6 +1,11 @@
 # Changelog
 
+## 0.4.11
+
+- Fix setting archive name for Gradle 5.1 and higher [#436](../../issues/436)  
+
 ## 0.4.10
+
 - Upgrade download plugin [#418](../../issues/418)
 - Simplify custom runIde task configuration [#401](../../issues/401)
 

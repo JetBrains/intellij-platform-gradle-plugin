@@ -363,11 +363,11 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
                                                                @NotNull RunIdeBase task) {
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-        task.conventionMapping.map("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
-        task.conventionMapping.map("requiredPluginIds", { Utils.getPluginIds(project) })
-        task.conventionMapping.map("configDirectory", { prepareSandboxTask.getConfigDirectory() })
-        task.conventionMapping.map("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
-        task.conventionMapping.map("systemDirectory", {
+        task.conventionMapping("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
+        task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
+        task.conventionMapping("configDirectory", { prepareSandboxTask.getConfigDirectory() })
+        task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
+        task.conventionMapping("systemDirectory", {
             project.file(Utils.systemDir(extension.sandboxDirectory, false))
         })
         task.conventionMapping("executable", {
@@ -512,7 +512,11 @@ class IntelliJPlugin implements Plugin<Project> {
                 "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
             }) { into 'lib' }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
-            conventionMapping.map('baseName', { prepareSandboxTask.getPluginName() })
+            if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
+                archiveBaseName.convention(project.provider { prepareSandboxTask.getPluginName() })
+            } else {
+                conventionMapping('baseName', { prepareSandboxTask.getPluginName() })
+            }
             it
         }
         Configuration archivesConfiguration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
