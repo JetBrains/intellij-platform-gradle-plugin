@@ -48,6 +48,10 @@ class IdeaDependencyManager {
         } else if (type == 'RD') {
             dependencyGroup = 'com.jetbrains.intellij.rider'
             dependencyName = 'riderRD'
+            if (sources && releaseType == 'snapshots') {
+                LOG.warn("IntelliJ sources are not available for Rider SNAPSHOTS")
+                sources = false
+            }
         } else if (type == 'MPS') {
             dependencyGroup = 'com.jetbrains.mps'
             dependencyName = 'mps'
