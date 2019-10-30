@@ -3,6 +3,7 @@
 ## 0.4.11
 
 - Fix setting archive name for Gradle 5.1 and higher [#436](../../issues/436)  
+- Fix forms compilation for Rider and Python snapshot builds. Works for Rider-2019.3-SNAPSHOT and higher [#403](../../issues/403)   
 
 ## 0.4.10
 
