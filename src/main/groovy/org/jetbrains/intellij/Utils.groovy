@@ -284,7 +284,7 @@ class Utils {
         return targetDirectory
     }
 
-    private static def MAJOR_VERSION_PATTERN = Pattern.compile('\\d{4}\\.\\d-SNAPSHOT')
+    private static def MAJOR_VERSION_PATTERN = Pattern.compile('(RIDER-)?\\d{4}\\.\\d-SNAPSHOT')
     static String releaseType(@NotNull String version) {
         if (version.endsWith('-EAP-SNAPSHOT') || version.endsWith('-EAP-CANDIDATE-SNAPSHOT') || version.endsWith('-CUSTOM-SNAPSHOT') || MAJOR_VERSION_PATTERN.matcher(version).matches()) {
             return 'snapshots'

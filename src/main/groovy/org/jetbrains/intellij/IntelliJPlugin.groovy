@@ -415,7 +415,16 @@ class IntelliJPlugin implements Plugin<Project> {
                 conventionMapping('compilerVersion', {
                     def version = extension.version ?: DEFAULT_IDEA_VERSION
                     if (version.endsWith('-SNAPSHOT')) {
-                        return extension.type == 'CL' ? "CLION-$version".toString() : version
+                        if (extension.type == 'CL') {
+                            return "CLION-$version".toString()
+                        }
+                        if (extension.type == 'RD') {
+                            return "RIDER-$version".toString()
+                        }
+                        if (extension.type == 'PY' || extension.type == 'PC') {
+                            return "PYCHARM-$version".toString()
+                        }
+                        return version
                     }
                     return IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode()
                 })

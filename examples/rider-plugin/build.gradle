@@ -1,7 +1,3 @@
 intellij {
-    version 'RD-2018.1'
-}
-
-instrumentCode {
-    javac2 project.file('lib/javac2.jar')
+    version 'RD-2019.3-SNAPSHOT'
 }
