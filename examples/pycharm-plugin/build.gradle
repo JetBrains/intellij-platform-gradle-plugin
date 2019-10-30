@@ -1,5 +1,4 @@
 intellij {
-    // PC-LATEST-EAP-SNAPSHOT is also available here
-    version 'PY-LATEST-EAP-SNAPSHOT'
-    downloadSources false
+    // PC is also available here
+    type 'PY'
 }
