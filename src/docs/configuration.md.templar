@@ -79,7 +79,6 @@ Please see [Plugin Compatibility](https://www.jetbrains.org/intellij/sdk/docs/ba
         <li><kbd>'PY'</kbd> - PyCharm Professional Edition. </li>
         <li><kbd>'PC'</kbd> - PyCharm Community Edition. </li>
         <li><kbd>'RD'</kbd> - Rider.</li>
-        <li><kbd>'MPS'</kbd> - MPS.</li>
     </ul>
 
 **Default Value:** <kbd>'IC'</kbd>

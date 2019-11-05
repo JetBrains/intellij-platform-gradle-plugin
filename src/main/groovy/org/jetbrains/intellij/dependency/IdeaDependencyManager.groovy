@@ -52,9 +52,6 @@ class IdeaDependencyManager {
                 LOG.warn("IntelliJ sources are not available for Rider SNAPSHOTS")
                 sources = false
             }
-        } else if (type == 'MPS') {
-            dependencyGroup = 'com.jetbrains.mps'
-            dependencyName = 'mps'
         }
         def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
 

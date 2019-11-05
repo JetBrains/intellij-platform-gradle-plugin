@@ -49,8 +49,6 @@ class IntelliJPluginExtension {
             return 'PC'
         } else if (version.startsWith('RD-') || 'RD' == type) {
             return 'RD'
-        } else if (version.startsWith('MPS-') || 'MPS' == type) {
-            return 'MPS'
         } else {
             return 'IC'
         }
@@ -60,7 +58,7 @@ class IntelliJPluginExtension {
         if (version == null) {
             return null
         }
-        if (version.startsWith('JPS-') || version.startsWith('MPS-')) {
+        if (version.startsWith('JPS-')) {
             return version.substring(4)
         }
         if (version.startsWith('IU-') || version.startsWith('IC-') ||
