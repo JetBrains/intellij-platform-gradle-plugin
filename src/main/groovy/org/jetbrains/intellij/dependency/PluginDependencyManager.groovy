@@ -41,8 +41,11 @@ class PluginDependencyManager {
                 IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
                 def pluginDirectory = new File(ideaDependency.classes, "plugins/$id").canonicalFile
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    def builtinPluginVersion = "$ideaDependency.name-$ideaDependency.buildNumber${ideaDependency.sources ? '-withSources' : ''}"
-                    return new PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
+                    if (pluginDirectory.name == id) {
+                        def builtinPluginVersion = "$ideaDependency.name-$ideaDependency.buildNumber${ideaDependency.sources ? '-withSources' : ''}"
+                        return new PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
+                    }
+                    throw new BuildException("Builtin plugins should be referred case-sensitively. Expected: $pluginDirectory.name. Got: $id", null)
                 }
             }
             throw new BuildException("Cannot find builtin plugin $id for IDE: $ideaDependency.classes.absolutePath", null)
