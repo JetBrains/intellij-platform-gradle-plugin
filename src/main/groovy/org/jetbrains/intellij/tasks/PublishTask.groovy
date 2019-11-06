@@ -151,7 +151,7 @@ Please follow the instructions: https://www.jetbrains.org/intellij/sdk/docs/basi
 
     private void validateInput() {
         if (!getToken()) {
-            throw new TaskExecutionException(this, new GradleException('Password authentication for uploading is deprecated. Use token access instead: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html'))
+            throw new TaskExecutionException(this, new GradleException('token property must be specified for plugin publishing'))
         }
     }
 }

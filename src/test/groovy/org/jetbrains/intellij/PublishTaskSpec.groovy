@@ -30,7 +30,7 @@ class PublishTaskSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail(IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)
 
         then:
-        result.output.contains('token or username/password properties must be specified for plugin publishing')
+        result.output.contains('token property must be specified for plugin publishing')
     }
 
 }
