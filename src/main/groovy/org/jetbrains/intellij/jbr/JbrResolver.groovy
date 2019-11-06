@@ -2,12 +2,14 @@ package org.jetbrains.intellij.jbr
 
 import de.undercouch.gradle.tasks.download.DownloadAction
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.Utils
 
 import java.nio.file.Paths
 
@@ -15,8 +17,10 @@ class JbrResolver {
     private final Project project
     private final String cacheDirectoryPath
     private final OperatingSystem operatingSystem
+    private final def context
 
-    JbrResolver(@NotNull Project project) {
+    JbrResolver(@NotNull Project project, @Nullable Task context) {
+        this.context = context ?: project
         this.project = project
         this.cacheDirectoryPath = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, 'caches/modules-2/files-2.1/com.jetbrains/jbre').toString()
         this.operatingSystem = OperatingSystem.current()
@@ -49,7 +53,7 @@ class JbrResolver {
     private Jbr fromDir(@NotNull File javaDir, @NotNull String version) {
         def javaExecutable = findJavaExecutable(javaDir)
         if (javaExecutable == null) {
-            IntelliJPlugin.LOG.warn("Cannot find java executable in $javaDir")
+            Utils.warn(context, "Cannot find java executable in $javaDir")
             return null
         }
         return new Jbr(version, javaDir, findJavaExecutable(javaDir))
@@ -74,7 +78,7 @@ class JbrResolver {
             }
             return javaArchive
         } catch (IOException e) {
-            IntelliJPlugin.LOG.warn("Cannot download JetBrains Java Runtime $artifactName", e)
+            Utils.warn(context, "Cannot download JetBrains Java Runtime $artifactName", e)
             return null
         }
     }

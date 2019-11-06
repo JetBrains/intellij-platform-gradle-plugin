@@ -6,7 +6,9 @@ import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.apache.commons.io.filefilter.TrueFileFilter
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.publish.ivy.IvyArtifact
 import org.gradle.api.tasks.SourceSet
@@ -61,9 +63,8 @@ class Utils {
                     if (parseXml(pluginXml).name() == 'idea-plugin') {
                         result += pluginXml
                     }
-                } catch (SAXParseException ignore) {
-                    IntelliJPlugin.LOG.warn("Cannot read ${pluginXml}. Skipping.")
-                    IntelliJPlugin.LOG.debug("Cannot read ${pluginXml}", ignore)
+                } catch (SAXParseException e) {
+                    warn(project, "Cannot read ${pluginXml}. Skipping", e)
                 }
             }
         }
@@ -107,18 +108,18 @@ class Utils {
         if (options.minHeapSize == null) options.minHeapSize = "256m"
         List<String> result = new ArrayList<String>(originalArguments)
         def bootJar = new File(ideaDirectory, "lib/boot.jar")
-        if (bootJar.exists()) result += "-Xbootclasspath/a:$bootJar.absolutePath"
+        if (bootJar.exists()) result.add("-Xbootclasspath/a:$bootJar.absolutePath")
         return result
     }
 
     @NotNull
-    static File ideaSdkDirectory(@NotNull IntelliJPluginExtension extension) {
+    static File ideaSdkDirectory(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         def path = extension.alternativeIdePath
         if (path) {
             def dir = ideaDir(path)
             if (!dir.exists()) {
                 def ideaDirectory = extension.ideaDependency.classes
-                IntelliJPlugin.LOG.error("Cannot find alternate SDK path: $dir. Default IDEA will be used : $ideaDirectory")
+                error(project, "Cannot find alternate SDK path: $dir. Default IDEA will be used : $ideaDirectory")
                 return ideaDirectory
             }
             return dir
@@ -143,7 +144,7 @@ class Utils {
         return dir.name.endsWith(".app") ? new File(dir, "Contents") : dir
     }
 
-    // todo: collect all ids for multiproject configuration
+    // todo: collect all ids for multi-project configuration
     static List<String> getPluginIds(@NotNull Project project) {
         Set<String> ids = new HashSet<>()
         sourcePluginXmlFiles(project).files.each {
@@ -270,12 +271,12 @@ class Utils {
         }
         targetDirectory.mkdir()
 
-        IntelliJPlugin.LOG.debug("Unzipping ${zipFile.name}")
+        debug(project, "Unzipping ${zipFile.name}")
         project.copy {
             it.from(project.zipTree(zipFile))
             it.into(targetDirectory)
         }
-        IntelliJPlugin.LOG.debug("Unzipped ${zipFile.name}")
+        debug(project, "Unzipped ${zipFile.name}")
 
         markerFile.createNewFile()
         if (markUpToDate != null) {
@@ -285,6 +286,7 @@ class Utils {
     }
 
     private static def MAJOR_VERSION_PATTERN = Pattern.compile('(RIDER-)?\\d{4}\\.\\d-SNAPSHOT')
+
     static String releaseType(@NotNull String version) {
         if (version.endsWith('-EAP-SNAPSHOT') || version.endsWith('-EAP-CANDIDATE-SNAPSHOT') || version.endsWith('-CUSTOM-SNAPSHOT') || MAJOR_VERSION_PATTERN.matcher(version).matches()) {
             return 'snapshots'
@@ -293,5 +295,38 @@ class Utils {
             return 'nightly'
         }
         return 'releases'
+    }
+
+    static def error(def context, String message, Throwable e = null) {
+        log(LogLevel.ERROR, context, message, e)
+    }
+
+    static def warn(def context, String message, Throwable e = null) {
+        log(LogLevel.WARN, context, message, e)
+    }
+
+    static def info(def context, String message, Throwable e = null) {
+        log(LogLevel.INFO, context, message, e)
+    }
+
+    static def debug(def context, String message, Throwable e = null) {
+        log(LogLevel.DEBUG, context, message, e)
+    }
+
+    private static log(LogLevel level, def context, String message, Throwable e) {
+        if (e != null) {
+            if (level != LogLevel.ERROR && !IntelliJPlugin.LOG.isDebugEnabled()) {
+                e = null
+                message += ". Run with --debug option to get more log output."
+            }
+        }
+        def category = "gradle-intellij-plugin"
+        if (context instanceof Project) {
+            category += " :${(context as Project).name}"
+        }
+        if (context instanceof Task) {
+            category += " :${(context as Task).project.name}:${(context as Task).name}"
+        }
+        IntelliJPlugin.LOG.log(level, "[$category] $message", e as Throwable)
     }
 }

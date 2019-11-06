@@ -8,7 +8,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.gradle.util.CollectionUtils
-import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
 import retrofit.RetrofitError
@@ -125,12 +124,12 @@ class PublishTask extends ConventionTask {
         if (creationResult instanceof PluginCreationSuccess) {
             def pluginId = creationResult.plugin.pluginId
             for (String channel : channels) {
-                IntelliJPlugin.LOG.info("Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
+                Utils.info(this, "Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
                 try {
                     def repoClient = getToken() ? new PluginRepositoryInstance(host, getToken())
                             : new PluginRepositoryInstance(host, getUsername(), getPassword())
                     repoClient.uploadPlugin(pluginId, distributionFile, channel && 'default' != channel ? channel : '')
-                    IntelliJPlugin.LOG.info("Uploaded successfully")
+                    Utils.info(this, "Uploaded successfully")
                 }
                 catch (exception) {
                     def cause = exception.getCause()
@@ -156,7 +155,7 @@ Please follow the instructions: https://www.jetbrains.org/intellij/sdk/docs/basi
             if (!getPassword() && !getUsername()) {
                 throw new TaskExecutionException(this, new GradleException('token or username/password properties must be specified for plugin publishing'))
             } else {
-                IntelliJPlugin.LOG.warn("Password authentication for uploading is deprecated. Use token access instead: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html")
+                Utils.warn(this, "Password authentication for uploading is deprecated. Use token access instead: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html")
                 if (!getPassword()) {
                     throw new TaskExecutionException(this, new GradleException('No value has been specified for property \'password\''))
                 } else if (!getUsername()) {

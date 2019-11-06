@@ -17,8 +17,6 @@ import org.jetbrains.intellij.Utils
 
 import java.util.zip.ZipFile
 
-import static org.jetbrains.intellij.IntelliJPlugin.LOG
-
 class IdeaDependencyManager {
     private final String repoUrl
     private static final String[] mainDependencies = ["ideaIC", "ideaIU", "riderRD", "riderRS"]
@@ -31,10 +29,10 @@ class IdeaDependencyManager {
     IdeaDependency resolveRemote(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources,
                                  @NotNull Object[] extraDependencies) {
         def releaseType = Utils.releaseType(version)
-        LOG.debug("Adding IntelliJ IDEA repository: ${repoUrl}/$releaseType")
+        Utils.debug(project, "Adding IDE repository: ${repoUrl}/$releaseType")
         project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
 
-        LOG.debug("Adding IntelliJ IDEA dependency")
+        Utils.debug(project, "Adding IDE dependency")
         def dependencyGroup = 'com.jetbrains.intellij.idea'
         def dependencyName = 'ideaIC'
         if (type == 'IU') {
@@ -49,7 +47,7 @@ class IdeaDependencyManager {
             dependencyGroup = 'com.jetbrains.intellij.rider'
             dependencyName = 'riderRD'
             if (sources && releaseType == 'snapshots') {
-                LOG.warn("IntelliJ sources are not available for Rider SNAPSHOTS")
+                Utils.warn(project, "IDE sources are not available for Rider SNAPSHOTS")
                 sources = false
             }
         }
@@ -58,7 +56,7 @@ class IdeaDependencyManager {
         def configuration = project.configurations.detachedConfiguration(dependency)
 
         def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
-        LOG.info("IntelliJ IDEA dependency cache directory: $classesDirectory")
+        Utils.info(project, "IDE dependency cache directory: $classesDirectory")
         def buildNumber = Utils.ideaBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
         def resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
@@ -68,7 +66,7 @@ class IdeaDependencyManager {
 
     @NotNull
     IdeaDependency resolveLocal(@NotNull Project project, @NotNull String localPath, @Nullable String localPathSources) {
-        LOG.debug("Adding local IDE dependency")
+        Utils.debug(project, "Adding local IDE dependency")
         def ideaDir = Utils.ideaDir(localPath)
         if (!ideaDir.exists() || !ideaDir.isDirectory()) {
             throw new BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
@@ -116,20 +114,20 @@ class IdeaDependencyManager {
 
     @Nullable
     private static File resolveSources(@NotNull Project project, @NotNull String version) {
-        LOG.info("Adding IntelliJ IDEA sources repository")
+        Utils.info(project, "Adding IDE sources repository")
         try {
             def dependency = project.dependencies.create("com.jetbrains.intellij.idea:ideaIC:$version:sources@jar")
             def sourcesConfiguration = project.configurations.detachedConfiguration(dependency)
             def sourcesFiles = sourcesConfiguration.files
             if (sourcesFiles.size() == 1) {
                 File sourcesDirectory = sourcesFiles.first()
-                LOG.debug("IDEA sources jar: " + sourcesDirectory.path)
+                Utils.debug(project, "IDE sources jar: " + sourcesDirectory.path)
                 return sourcesDirectory
             } else {
-                LOG.warn("Cannot attach IDEA sources. Found files: " + sourcesFiles)
+                Utils.warn(project, "Cannot attach IDE sources. Found files: " + sourcesFiles)
             }
         } catch (ResolveException e) {
-            LOG.warn("Cannot resolve IDEA sources dependency", e)
+            Utils.warn(project, "Cannot resolve IDE sources dependency", e)
         }
         return null
     }
@@ -140,7 +138,7 @@ class IdeaDependencyManager {
                                                            @NotNull String type,
                                                            @NotNull String version) {
         File zipFile = configuration.singleFile
-        LOG.debug("IDEA zip: " + zipFile.path)
+        Utils.debug(project, "IDE zip: " + zipFile.path)
         return unzipDependencyFile(getZipCacheDirectory(zipFile, project, type), project, zipFile, type, version.endsWith("-SNAPSHOT"))
     }
 
@@ -162,7 +160,7 @@ class IdeaDependencyManager {
     private static Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project,
                                                                             @NotNull String version,
                                                                             @NotNull Object[] extraDependencies) {
-        LOG.info("Configuring IntelliJ IDEA extra dependencies $extraDependencies")
+        Utils.info(project, "Configuring IDE extra dependencies $extraDependencies")
         def mainInExtraDeps = extraDependencies.findAll { dep -> mainDependencies.any { it == dep } }
         if (!mainInExtraDeps.empty) {
             throw new GradleException("The items $mainInExtraDeps cannot be used as extra dependencies")
@@ -172,7 +170,7 @@ class IdeaDependencyManager {
             def name = it as String
             def dependencyFile = resolveExtraDependency(project, version, name)
             def extraDependency = new IdeaExtraDependency(name, dependencyFile)
-            LOG.debug("IntelliJ IDEA extra dependency $name in $dependencyFile files: ${extraDependency.jarFiles}")
+            Utils.debug(project, "IDE extra dependency $name in $dependencyFile files: ${extraDependency.jarFiles}")
             resolvedExtraDependencies.add(extraDependency)
         }
         return resolvedExtraDependencies
@@ -188,17 +186,17 @@ class IdeaDependencyManager {
                 File depFile = files.first()
                 if (depFile.name.endsWith(".zip")) {
                     def cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
-                    LOG.debug("IDEA extra dependency $name: " + cacheDirectory.path)
+                    Utils.debug(project, "IDE extra dependency $name: " + cacheDirectory.path)
                     return unzipDependencyFile(cacheDirectory, project, depFile, "IC", version.endsWith("-SNAPSHOT"))
                 } else {
-                    LOG.debug("IDEA extra dependency $name: " + depFile.path)
+                    Utils.debug(project, "IDE extra dependency $name: " + depFile.path)
                     return depFile
                 }
             } else {
-                LOG.warn("Cannot attach IDEA extra dependency $name. Found files: " + files)
+                Utils.warn(project, "Cannot attach IDE extra dependency $name. Found files: " + files)
             }
         } catch (ResolveException e) {
-            LOG.warn("Cannot resolve IDEA extra dependency $name", e)
+            Utils.warn(project, "Cannot resolve IDE extra dependency $name", e)
         }
         return null
     }
@@ -247,26 +245,27 @@ class IdeaDependencyManager {
         }
     }
 
-    private static void resetExecutablePermissions(@NotNull File cacheDirectory, @NotNull String type) {
+    private static void resetExecutablePermissions(@NotNull Project project, @NotNull File cacheDirectory, @NotNull String type) {
         if (type == 'RD') {
-            LOG.debug("Resetting executable permissions")
             def operatingSystem = OperatingSystem.current()
             if (!operatingSystem.isWindows()) {
-                setExecutable(cacheDirectory, "lib/ReSharperHost/dupfinder.sh")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/inspectcode.sh")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/runtime.sh")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen")
-                setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/dupfinder.sh")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/inspectcode.sh")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/runtime.sh")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen")
+                setExecutable(project, cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py")
             }
         }
     }
 
-    static def setExecutable(File parent, String child) {
-        new File(parent, child).setExecutable(true, true)
+    static def setExecutable(@Nullable Project project, File parent, String child) {
+        def file = new File(parent, child)
+        Utils.debug(project, "Resetting executable permissions for $file.path")
+        file.setExecutable(true, true)
     }
 
     private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {

@@ -4,7 +4,6 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
 import java.nio.charset.StandardCharsets
@@ -170,13 +169,13 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchTag(Node pluginXml, String name, String content) {
+    void patchTag(Node pluginXml, String name, String content) {
         if (!content) return
         def tag = pluginXml."$name"
         if (tag) {
             def existingValues = tag*.text() - null
             if (existingValues) {
-                IntelliJPlugin.LOG.warn("Patching plugin.xml: value of `$name$existingValues` tag will be set to `$content`")
+                Utils.warn(this, "Patching plugin.xml: value of `$name$existingValues` tag will be set to `$content`")
             }
             tag*.value = content
         } else {
@@ -184,13 +183,13 @@ class PatchPluginXmlTask extends ConventionTask {
         }
     }
 
-    static void patchAttribute(Node pluginXml, String tagName, String attributeName, String attributeValue) {
+    void patchAttribute(Node pluginXml, String tagName, String attributeName, String attributeValue) {
         if (!attributeValue) return
         def tag = pluginXml."$tagName"
         if (tag) {
             def existingValues = tag*."@$attributeName" - null
             if (existingValues) {
-                IntelliJPlugin.LOG.warn("Patching plugin.xml: attribute `$attributeName=$existingValues` of `$tagName` tag will be set to `$attributeValue`")
+                Utils.warn(this, "Patching plugin.xml: attribute `$attributeName=$existingValues` of `$tagName` tag will be set to `$attributeValue`")
             }
             tag*."@$attributeName" = attributeValue
         } else {

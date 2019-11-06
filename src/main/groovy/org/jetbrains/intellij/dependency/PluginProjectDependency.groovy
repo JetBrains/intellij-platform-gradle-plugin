@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.Utils
 
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 class PluginProjectDependency implements PluginDependency, Serializable {
@@ -32,7 +33,7 @@ class PluginProjectDependency implements PluginDependency, Serializable {
                 pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
                 return pluginDependency
             }
-            IntelliJPlugin.LOG.error("Cannot use $pluginDirectory as a plugin dependency. " + creationResult)
+            Utils.error(project, "Cannot use $pluginDirectory as a plugin dependency. " + creationResult)
         }
         return null
     }()

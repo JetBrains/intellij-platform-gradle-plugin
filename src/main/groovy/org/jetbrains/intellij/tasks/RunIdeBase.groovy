@@ -7,7 +7,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
-import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
 class RunIdeTask extends RunIdeBase {
@@ -84,13 +83,13 @@ abstract class RunIdeBase extends JavaExec {
 
     @Deprecated
     void setJbreVersion(Object jbreVersion) {
-        IntelliJPlugin.LOG.warn("jbreVersion is deprecated, use jbrVersion instead")
+        Utils.warn(this, "jbreVersion is deprecated, use jbrVersion instead")
         this.jbrVersion = jbreVersion
     }
 
     @Deprecated
     void jbreVersion(Object jbreVersion) {
-        IntelliJPlugin.LOG.warn("jbreVersion is deprecated, use jbrVersion instead")
+        Utils.warn(this, "jbreVersion is deprecated, use jbrVersion instead")
         this.jbrVersion = jbreVersion
     }
 

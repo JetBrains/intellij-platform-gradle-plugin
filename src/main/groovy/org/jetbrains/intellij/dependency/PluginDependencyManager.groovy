@@ -12,7 +12,6 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 
 import java.nio.file.Paths
@@ -36,9 +35,9 @@ class PluginDependencyManager {
     PluginDependency resolve(@NotNull Project project, @NotNull String id, @Nullable String version, @Nullable String channel) {
         if (!version && !channel) {
             if (Paths.get(id).absolute) {
-                return externalPluginDependency(new File(id), null)
+                return externalPluginDependency(project, new File(id), null)
             } else if (ideaDependency) {
-                IntelliJPlugin.LOG.info("Looking for builtin $id in $ideaDependency.classes.absolutePath")
+                Utils.info(project, "Looking for builtin $id in $ideaDependency.classes.absolutePath")
                 def pluginDirectory = new File(ideaDependency.classes, "plugins/$id").canonicalFile
                 if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
                     if (pluginDirectory.name == id) {
@@ -72,9 +71,9 @@ class PluginDependencyManager {
         def pluginFile = configuration.singleFile
         if (Utils.isZipFile(pluginFile)) {
             def pluginDir = findSingleDirectory(Utils.unzip(pluginFile, new File(cacheDirectoryPath, groupId(channel)), project, null, null))
-            return externalPluginDependency(pluginDir, channel, true)
+            return externalPluginDependency(project, pluginDir, channel, true)
         } else if (Utils.isJarFile(pluginFile)) {
-            return externalPluginDependency(pluginFile, channel, true)
+            return externalPluginDependency(project, pluginFile, channel, true)
         }
         throw new BuildException("Invalid type of downloaded plugin: $pluginFile.name", null)
     }
@@ -147,9 +146,9 @@ class PluginDependencyManager {
         }
     }
 
-    private static externalPluginDependency(@NotNull File artifact, @Nullable String channel, boolean maven = false) {
+    private static externalPluginDependency(@NotNull Project project, @NotNull File artifact, @Nullable String channel, boolean maven = false) {
         if (!Utils.isJarFile(artifact) && !artifact.isDirectory()) {
-            IntelliJPlugin.LOG.warn("Cannot create plugin from file ($artifact): only directories or jars are supported")
+            Utils.warn(project, "Cannot create plugin from file ($artifact): only directories or jars are supported")
         }
         def creationResult = IdePluginManager.createManager().createPlugin(artifact)
         if (creationResult instanceof PluginCreationSuccess) {
@@ -163,9 +162,9 @@ class PluginDependencyManager {
             return pluginDependency
         } else if (creationResult instanceof PluginCreationFail) {
             def problems = creationResult.errorsAndWarnings.findAll { it.level == PluginProblem.Level.ERROR }.join(", ")
-            IntelliJPlugin.LOG.warn("Cannot create plugin from file ($artifact): $problems")
+            Utils.warn(project, "Cannot create plugin from file ($artifact): $problems")
         } else {
-            IntelliJPlugin.LOG.warn("Cannot create plugin from file ($artifact). $creationResult")
+            Utils.warn(project, "Cannot create plugin from file ($artifact). $creationResult")
         }
         return null
     }

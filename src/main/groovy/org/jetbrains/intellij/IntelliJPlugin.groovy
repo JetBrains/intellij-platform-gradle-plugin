@@ -83,7 +83,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring IntelliJ IDEA gradle plugin")
+        Utils.info(project, "Configuring plugin")
         project.tasks.whenTaskAdded {
             if (it instanceof RunIdeBase) {
                 prepareConventionMappingsForRunIdeTask(project, extension, it)
@@ -168,27 +168,27 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configureIntellijDependency(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring IntelliJ IDEA dependency")
+        Utils.info(project, "Configuring IDE dependency")
         def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
         def ideaDependency
         if (extension.localPath != null) {
             if (extension.version != null) {
-                LOG.warn("Both `localPath` and `version` specified, second would be ignored")
+                Utils.warn(project, "Both `localPath` and `version` specified, second would be ignored")
             }
-            LOG.info("Using path to locally installed IDE: '${extension.localPath}'")
+            Utils.info(project, "Using path to locally installed IDE: '${extension.localPath}'")
             ideaDependency = resolver.resolveLocal(project, extension.localPath, extension.localSourcesPath)
         } else {
-            LOG.info("Using IDE from remote repository")
+            Utils.info(project, "Using IDE from remote repository")
             def version = extension.version ?: DEFAULT_IDEA_VERSION
             ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources,
                     extension.extraDependencies)
         }
         extension.ideaDependency = ideaDependency
         if (extension.configureDefaultDependencies) {
-            LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} is used for building")
+            Utils.info(project, "$ideaDependency.buildNumber is used for building")
             resolver.register(project, ideaDependency, IDEA_CONFIGURATION_NAME)
             if (!ideaDependency.extraDependencies.empty) {
-                LOG.info("Note: IntelliJ IDEA ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+                Utils.info(project, "Note: $ideaDependency.buildNumber extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
             }
 
             if (extension.type == 'IC' || extension.type == 'IU') {
@@ -198,18 +198,18 @@ class IntelliJPlugin implements Plugin<Project> {
                 }
             }
         } else {
-            LOG.info("IntelliJ IDEA ${ideaDependency.buildNumber} dependencies are applied manually")
+            Utils.info(project, "$ideaDependency.buildNumber dependencies are applied manually")
         }
     }
 
     private static void configurePluginDependencies(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring IntelliJ IDEA plugin dependencies")
+        Utils.info(project, "Configuring plugin dependencies")
         def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
         def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
         project.repositories.maven { it.url = extension.pluginsRepo }
         extension.plugins.each {
-            LOG.info("Configuring IntelliJ plugin $it")
+            Utils.info(project, "Configuring plugin $it")
             if (it instanceof Project) {
                 project.dependencies.add(IDEA_PLUGINS_CONFIGURATION_NAME, it)
                 if (it.state.executed) {
@@ -276,7 +276,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePatchPluginXmlTask(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring patch plugin.xml task")
+        Utils.info(project, "Configuring patch plugin.xml task")
         project.tasks.create(PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask).with {
             group = GROUP_NAME
             description = "Patch plugin xml files with corresponding since/until build numbers and version attributes"
@@ -308,7 +308,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configurePrepareSandboxTask(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension,
                                                     boolean inTest) {
-        LOG.info("Configuring prepare IntelliJ sandbox task")
+        Utils.info(project, "Configuring prepare sandbox task")
         def taskName = inTest ? PREPARE_TESTING_SANDBOX_TASK_NAME : PREPARE_SANDBOX_TASK_NAME
         project.tasks.create(taskName, PrepareSandboxTask).with {
             group = GROUP_NAME
@@ -324,7 +324,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configurePluginVerificationTask(@NotNull Project project) {
-        LOG.info("Configuring plugin verification task")
+        Utils.info(project, "Configuring plugin verification task")
         project.tasks.create(VERIFY_PLUGIN_TASK_NAME, VerifyPluginTask).with {
             group = GROUP_NAME
             description = "Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure."
@@ -337,7 +337,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring run IntelliJ task")
+        Utils.info(project, "Configuring run IDE task")
         project.tasks.create(RUN_IDE_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
             task.group = GROUP_NAME
             task.description = "Runs Intellij IDEA with installed plugin."
@@ -346,7 +346,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring build searchable options task")
+        Utils.info(project, "Configuring build searchable options task")
         project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask).with { BuildSearchableOptionsTask task ->
             task.group = GROUP_NAME
             task.description = "Builds searchable options for plugin."
@@ -354,7 +354,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.outputs.dir("$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME")
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
-                def number = Utils.ideaBuildNumber(Utils.ideaSdkDirectory(extension))
+                def number = Utils.ideaBuildNumber(Utils.ideaSdkDirectory(project, extension))
                 VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752")
             }
         }
@@ -363,7 +363,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
                                                                @NotNull RunIdeBase task) {
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-        task.conventionMapping("ideaDirectory", { Utils.ideaSdkDirectory(extension) })
+        task.conventionMapping("ideaDirectory", { Utils.ideaSdkDirectory(project, extension) })
         task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
         task.conventionMapping("configDirectory", { prepareSandboxTask.getConfigDirectory() })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
@@ -371,29 +371,29 @@ class IntelliJPlugin implements Plugin<Project> {
             project.file(Utils.systemDir(extension.sandboxDirectory, false))
         })
         task.conventionMapping("executable", {
-            def jbrResolver = new JbrResolver(project)
+            def jbrResolver = new JbrResolver(project, task)
             def jbrVersion = task.getJbrVersion() ?: task.getJbreVersion()
             if (jbrVersion != null) {
                 def jbr = jbrResolver.resolve(jbrVersion)
                 if (jbr != null) {
                     return jbr.javaExecutable
                 }
-                LOG.warn("Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
+                Utils.warn(task, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
             }
-            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideaSdkDirectory(extension))
+            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideaSdkDirectory(project, extension))
             if (builtinJbrVersion != null) {
                 def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
                 if (builtinJbr != null) {
                     return builtinJbr.javaExecutable
                 }
-                LOG.warn("Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
+                Utils.warn(task, "Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
             }
             return Jvm.current().javaExecutable.absolutePath
         })
     }
 
     private static void configureJarSearchableOptionsTask(@NotNull Project project) {
-        LOG.info("Configuring jar searchable options task")
+        Utils.info(project, "Configuring jar searchable options task")
         project.tasks.create(JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask).with {
             group = GROUP_NAME
             description = "Jars searchable options."
@@ -405,7 +405,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring IntelliJ compile tasks")
+        Utils.info(project, "Configuring compile tasks")
         project.sourceSets.all { SourceSet sourceSet ->
             def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
             instrumentTask.sourceSet = sourceSet
@@ -490,7 +490,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        LOG.info("Configuring IntelliJ tests tasks")
+        Utils.info(project, "Configuring tests tasks")
         project.tasks.withType(Test).each {
             def configDirectory = project.file(Utils.configDir(extension.sandboxDirectory, true))
             def systemDirectory = project.file(Utils.systemDir(extension.sandboxDirectory, true))
@@ -498,7 +498,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
             it.enableAssertions = true
             it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
-            it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, Utils.ideaSdkDirectory(extension))
+            it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, Utils.ideaSdkDirectory(project, extension))
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
                     "$extension.ideaDependency.classes/lib/idea.jar")
             it.outputs.dir(systemDirectory)
@@ -508,7 +508,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureBuildPluginTask(@NotNull Project project) {
-        LOG.info("Configuring building IntelliJ IDEA plugin task")
+        Utils.info(project, "Configuring building plugin task")
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
         def jarSearchableOptionsTask = project.tasks.findByName(JAR_SEARCHABLE_OPTIONS_TASK_NAME) as Jar
         Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
@@ -538,7 +538,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configurePublishPluginTask(@NotNull Project project) {
-        LOG.info("Configuring publishing IntelliJ IDEA plugin task")
+        Utils.info(project, "Configuring publish plugin task")
         project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask).with {
             group = GROUP_NAME
             description = "Publish plugin distribution on plugins.jetbrains.com."
@@ -553,7 +553,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureProcessResources(@NotNull Project project) {
-        LOG.info("Configuring IntelliJ resources task")
+        Utils.info(project, "Configuring resources task")
         def processResourcesTask = project.tasks.findByName(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) as ProcessResources
         if (processResourcesTask) {
             processResourcesTask.from(project.tasks.findByName(PATCH_PLUGIN_XML_TASK_NAME)) {

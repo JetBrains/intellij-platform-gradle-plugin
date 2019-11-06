@@ -6,7 +6,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.*
 import org.gradle.internal.FileUtils
 import org.gradle.internal.jvm.Jvm
-import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
@@ -148,13 +147,13 @@ class PrepareSandboxTask extends Sync {
     private void disableIdeUpdate() {
         def optionsDir = new File(getConfigDirectory(), "options")
         if (!optionsDir.exists() && !optionsDir.mkdirs()) {
-            IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")
+            Utils.error(this, "Cannot disable update checking in host IDE")
             return
         }
 
         def updatesConfig = new File(optionsDir, "updates.xml")
         if (!updatesConfig.exists() && !updatesConfig.createNewFile()) {
-            IntelliJPlugin.LOG.error("Cannot disable update checking in host IDE")
+            Utils.error(this, "Cannot disable update checking in host IDE")
             return
         }
         def parse

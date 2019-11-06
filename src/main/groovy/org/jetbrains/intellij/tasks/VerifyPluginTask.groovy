@@ -7,7 +7,7 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.Utils
 
 @SuppressWarnings("GroovyUnusedDeclaration")
 class VerifyPluginTask extends ConventionTask implements VerificationTask {
@@ -60,18 +60,18 @@ class VerifyPluginTask extends ConventionTask implements VerificationTask {
         def creationResult = IdePluginManager.createManager().createPlugin(getPluginDirectory())
         if (creationResult instanceof PluginCreationSuccess) {
             creationResult.warnings.each {
-                IntelliJPlugin.LOG.warn("Plugin verification: $it.message")
+                Utils.warn(this, it.message)
             }
         } else if (creationResult instanceof PluginCreationFail) {
             creationResult.errorsAndWarnings.each {
                 if (it.level == PluginProblem.Level.ERROR) {
-                    IntelliJPlugin.LOG.error("Plugin verification: $it.message")
+                    Utils.error(this, it.message)
                 } else {
-                    IntelliJPlugin.LOG.warn("Plugin verification: $it.message")
+                    Utils.warn(this, it.message)
                 }
             }
         } else {
-            IntelliJPlugin.LOG.error(creationResult.toString())
+            Utils.error(this, creationResult.toString())
         }
         boolean failBuild = !(creationResult instanceof PluginCreationSuccess) ||
                 !getIgnoreWarnings() && !creationResult.warnings.empty
