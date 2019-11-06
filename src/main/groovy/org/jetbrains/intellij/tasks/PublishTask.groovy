@@ -126,8 +126,7 @@ class PublishTask extends ConventionTask {
             for (String channel : channels) {
                 Utils.info(this, "Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
                 try {
-                    def repoClient = getToken() ? new PluginRepositoryInstance(host, getToken())
-                            : new PluginRepositoryInstance(host, getUsername(), getPassword())
+                    def repoClient = new PluginRepositoryInstance(host, getToken());
                     repoClient.uploadPlugin(pluginId, distributionFile, channel && 'default' != channel ? channel : '')
                     Utils.info(this, "Uploaded successfully")
                 }
@@ -152,16 +151,7 @@ Please follow the instructions: https://www.jetbrains.org/intellij/sdk/docs/basi
 
     private void validateInput() {
         if (!getToken()) {
-            if (!getPassword() && !getUsername()) {
-                throw new TaskExecutionException(this, new GradleException('token or username/password properties must be specified for plugin publishing'))
-            } else {
-                Utils.warn(this, "Password authentication for uploading is deprecated. Use token access instead: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html")
-                if (!getPassword()) {
-                    throw new TaskExecutionException(this, new GradleException('No value has been specified for property \'password\''))
-                } else if (!getUsername()) {
-                    throw new TaskExecutionException(this, new GradleException('No value has been specified for property \'username\''))
-                }
-            }
+            throw new TaskExecutionException(this, new GradleException('Password authentication for uploading is deprecated. Use token access instead: http://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html'))
         }
     }
 }
