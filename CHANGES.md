@@ -1,5 +1,9 @@
 # Changelog
 
+## Upcoming
+
+- More structured logging
+
 ## 0.4.11
 
 - Fix setting archive name for Gradle 5.1 and higher [#436](../../issues/436)  
