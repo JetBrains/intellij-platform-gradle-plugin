@@ -210,7 +210,7 @@ class IdeaDependencyManager {
         return Utils.unzip(zipFile, cacheDirectory, project, {
             markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange)
         }, { unzippedDirectory, markerFile ->
-            resetExecutablePermissions(unzippedDirectory, type)
+            resetExecutablePermissions(project, unzippedDirectory, type)
             storeCache(unzippedDirectory, markerFile)
         })
     }
