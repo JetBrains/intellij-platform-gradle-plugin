@@ -126,7 +126,7 @@ class PublishTask extends ConventionTask {
             for (String channel : channels) {
                 Utils.info(this, "Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
                 try {
-                    def repoClient = new PluginRepositoryInstance(host, getToken());
+                    def repoClient = new PluginRepositoryInstance(host, getToken())
                     repoClient.uploadPlugin(pluginId, distributionFile, channel && 'default' != channel ? channel : '')
                     Utils.info(this, "Uploaded successfully")
                 }
