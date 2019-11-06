@@ -1,0 +1,5 @@
+container:
+  image: gradle:jdk8
+
+test:
+  test_script: ./gradlew test
