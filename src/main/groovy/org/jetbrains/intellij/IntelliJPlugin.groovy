@@ -54,6 +54,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
     public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
+    public static final String RUN_TEST_WITH_BUNDLED_PLUGINS = 'idea.run.tests.with.bundled.plugins'
 
     @Override
     void apply(Project project) {
@@ -499,11 +500,16 @@ class IntelliJPlugin implements Plugin<Project> {
             it.enableAssertions = true
             it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, Utils.ideaSdkDirectory(project, extension))
+            if (extension.useSandboxFolderInTestClasspath) {
+                it.classpath = project.sourceSets.test.runtimeClasspath.filter { !project.sourceSets.main.runtimeClasspath.contains(it) }
+                it.systemProperty(RUN_TEST_WITH_BUNDLED_PLUGINS, true)
+            }
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
                     "$extension.ideaDependency.classes/lib/idea.jar")
             it.outputs.dir(systemDirectory)
             it.outputs.dir(configDirectory)
             it.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
+
         }
     }
 

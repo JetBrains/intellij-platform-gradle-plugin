@@ -29,6 +29,7 @@ class IntelliJPluginExtension {
     // configure extra dependency artifacts from intellij repo
     // the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
     Object[] extraDependencies = []
+    boolean useSandboxFolderInTestClasspath = false
 
     IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
