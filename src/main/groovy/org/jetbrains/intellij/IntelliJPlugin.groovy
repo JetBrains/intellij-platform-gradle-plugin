@@ -500,7 +500,7 @@ class IntelliJPlugin implements Plugin<Project> {
             it.enableAssertions = true
             it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
             it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, Utils.ideaSdkDirectory(project, extension))
-            if (extension.useSandboxFolderInTestClasspath) {
+            if (extension.useProductionClassLoaderInTests) {
                 it.classpath = project.sourceSets.test.runtimeClasspath.filter { !project.sourceSets.main.runtimeClasspath.contains(it) }
                 it.systemProperty(RUN_TEST_WITH_BUNDLED_PLUGINS, true)
             }

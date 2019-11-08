@@ -1,8 +1,9 @@
 # Changelog
 
-## Upcoming
+## 0.4.12
 
 - More structured logging
+- Introduced `intellij.useProductionClassLoaderInTests` option to control how plugin is going to be loaded in tests 
 
 ## 0.4.11
 
