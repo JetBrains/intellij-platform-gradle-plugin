@@ -505,7 +505,16 @@ class IntelliJPlugin implements Plugin<Project> {
             it.outputs.dir(systemDirectory)
             it.outputs.dir(configDirectory)
             it.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
-            it.systemProperty(PLUGIN_PATH, pluginsDirectory)
+
+            it.doFirst {
+                // since 193 plugins from classpath are loaded before plugins from plugins directory
+                // to handle this, use plugin.path property as it's the very first source of plugins
+                // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
+                def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                if (ideVersion.baselineVersion >= 193) {
+                    it.systemProperty(PLUGIN_PATH, pluginsDirectory.listFiles().collect { it.path }.join("$File.pathSeparator,"))
+                }
+            }
         }
     }
 
