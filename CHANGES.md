@@ -1,5 +1,9 @@
 # Changelog
 
+## next version
+
+- Deprecated `runIde.ideaDirectory`. `runIde.ideDirectory` should be used instead
+
 ## 0.4.13
 
 - Removed `intellij.useProductionClassLoaderInTests` option as we found another way to fix loading plugins in tests in 2019.3 

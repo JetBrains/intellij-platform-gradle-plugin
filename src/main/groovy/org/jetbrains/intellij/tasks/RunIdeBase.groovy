@@ -53,7 +53,7 @@ abstract class RunIdeBase extends JavaExec {
                                          RS: 'Rider']
 
     private List<Object> requiredPluginIds = []
-    private Object ideaDirectory
+    private Object ideDirectory
     private Object configDirectory
     private Object systemDirectory
     private Object pluginsDirectory
@@ -107,17 +107,36 @@ abstract class RunIdeBase extends JavaExec {
         this.jbrVersion = jbrVersion
     }
 
+    @Deprecated
     @InputDirectory
+    @Optional
     File getIdeaDirectory() {
-        ideaDirectory != null ? project.file(ideaDirectory) : null
+        ideDirectory != null ? project.file(ideDirectory) : null
     }
 
-    void setIdeaDirectory(Object ideaDirectory) {
-        this.ideaDirectory = ideaDirectory
+    @Deprecated
+    void setIdeaDirectory(Object ideDirectory) {
+        Utils.warn(this, "ideaDirectory is deprecated, use ideDirectory instead")
+        this.ideDirectory = ideDirectory
     }
 
-    void ideaDirectory(Object ideaDirectory) {
-        this.ideaDirectory = ideaDirectory
+    @Deprecated
+    void ideaDirectory(Object ideDirectory) {
+        Utils.warn(this, "ideaDirectory is deprecated, use ideDirectory instead")
+        this.ideDirectory = ideDirectory
+    }
+
+    @InputDirectory
+    File getIdeDirectory() {
+        ideDirectory != null ? project.file(ideDirectory) : null
+    }
+
+    void setIdeDirectory(Object ideDirectory) {
+        this.ideDirectory = ideDirectory
+    }
+
+    void ideDirectory(Object ideDirectory) {
+        this.ideDirectory = ideDirectory
     }
 
     File getConfigDirectory() {
@@ -167,7 +186,7 @@ abstract class RunIdeBase extends JavaExec {
 
     @Override
     void exec() {
-        workingDir = project.file("${getIdeaDirectory()}/bin/")
+        workingDir = project.file("${getIdeDirectory()}/bin/")
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
@@ -176,22 +195,22 @@ abstract class RunIdeBase extends JavaExec {
     }
 
     private void configureClasspath() {
-        File ideaDirectory = getIdeaDirectory()
+        File ideDirectory = getIdeDirectory()
         def executable = getExecutable()
         def toolsJar = executable ? project.file(Utils.resolveToolsJar(executable)) : null
         toolsJar = toolsJar?.exists() ? toolsJar : Jvm.current().toolsJar
         if (toolsJar != null) {
             classpath += project.files(toolsJar)
         }
-        classpath += project.files("$ideaDirectory/lib/idea_rt.jar",
-                "$ideaDirectory/lib/idea.jar",
-                "$ideaDirectory/lib/bootstrap.jar",
-                "$ideaDirectory/lib/extensions.jar",
-                "$ideaDirectory/lib/util.jar",
-                "$ideaDirectory/lib/openapi.jar",
-                "$ideaDirectory/lib/trove4j.jar",
-                "$ideaDirectory/lib/jdom.jar",
-                "$ideaDirectory/lib/log4j.jar")
+        classpath += project.files("$ideDirectory/lib/idea_rt.jar",
+                "$ideDirectory/lib/idea.jar",
+                "$ideDirectory/lib/bootstrap.jar",
+                "$ideDirectory/lib/extensions.jar",
+                "$ideDirectory/lib/util.jar",
+                "$ideDirectory/lib/openapi.jar",
+                "$ideDirectory/lib/trove4j.jar",
+                "$ideDirectory/lib/jdom.jar",
+                "$ideDirectory/lib/log4j.jar")
     }
 
     def configureSystemProperties() {
@@ -210,7 +229,7 @@ abstract class RunIdeBase extends JavaExec {
         systemPropertyIfNotDefined("idea.is.internal", true, userDefinedSystemProperties)
 
         if (!getSystemProperties().containsKey('idea.platform.prefix')) {
-            def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideaBuildNumber(getIdeaDirectory()))
+            def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideBuildNumber(getIdeDirectory()))
             if (matcher.find()) {
                 def abbreviation = matcher.group(1)
                 def prefix = PREFIXES.get(abbreviation)
@@ -234,6 +253,6 @@ abstract class RunIdeBase extends JavaExec {
     }
 
     def configureJvmArgs() {
-        jvmArgs = Utils.getIdeaJvmArgs(this, getJvmArgs(), getIdeaDirectory())
+        jvmArgs = Utils.getIdeJvmArgs(this, getJvmArgs(), getIdeDirectory())
     }
 }

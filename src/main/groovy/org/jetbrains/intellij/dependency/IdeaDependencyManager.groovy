@@ -57,7 +57,7 @@ class IdeaDependencyManager {
 
         def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
         Utils.info(project, "IDE dependency cache directory: $classesDirectory")
-        def buildNumber = Utils.ideaBuildNumber(classesDirectory)
+        def buildNumber = Utils.ideBuildNumber(classesDirectory)
         def sourcesDirectory = sources ? resolveSources(project, version) : null
         def resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
         return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project, resolvedExtraDependencies)
@@ -71,7 +71,7 @@ class IdeaDependencyManager {
         if (!ideaDir.exists() || !ideaDir.isDirectory()) {
             throw new BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
-        def buildNumber = Utils.ideaBuildNumber(ideaDir)
+        def buildNumber = Utils.ideBuildNumber(ideaDir)
         def sources = localPathSources ? new File(localPathSources) : null
         return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, Collections.emptyList())
     }

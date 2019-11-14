@@ -101,26 +101,26 @@ class Utils {
     }
 
     @NotNull
-    static List<String> getIdeaJvmArgs(@NotNull JavaForkOptions options,
-                                       @NotNull List<String> originalArguments,
-                                       @NotNull File ideaDirectory) {
+    static List<String> getIdeJvmArgs(@NotNull JavaForkOptions options,
+                                      @NotNull List<String> originalArguments,
+                                      @NotNull File ideDirectory) {
         if (options.maxHeapSize == null) options.maxHeapSize = "512m"
         if (options.minHeapSize == null) options.minHeapSize = "256m"
         List<String> result = new ArrayList<String>(originalArguments)
-        def bootJar = new File(ideaDirectory, "lib/boot.jar")
+        def bootJar = new File(ideDirectory, "lib/boot.jar")
         if (bootJar.exists()) result.add("-Xbootclasspath/a:$bootJar.absolutePath")
         return result
     }
 
     @NotNull
-    static File ideaSdkDirectory(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    static File ideSdkDirectory(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         def path = extension.alternativeIdePath
         if (path) {
             def dir = ideaDir(path)
             if (!dir.exists()) {
-                def ideaDirectory = extension.ideaDependency.classes
-                error(project, "Cannot find alternate SDK path: $dir. Default IDEA will be used : $ideaDirectory")
-                return ideaDirectory
+                def ideDirectory = extension.ideaDependency.classes
+                error(project, "Cannot find alternate SDK path: $dir. Default IDE will be used : $ideDirectory")
+                return ideDirectory
             }
             return dir
         }
@@ -128,14 +128,14 @@ class Utils {
     }
 
     @NotNull
-    static String ideaBuildNumber(@NotNull File ideaDirectory) {
+    static String ideBuildNumber(@NotNull File ideDirectory) {
         if (OperatingSystem.current().isMacOsX()) {
-            def file = new File(ideaDirectory, "Resources/build.txt")
+            def file = new File(ideDirectory, "Resources/build.txt")
             if (file.exists()) {
                 return file.getText('UTF-8').trim()
             }
         }
-        return new File(ideaDirectory, "build.txt").getText('UTF-8').trim()
+        return new File(ideDirectory, "build.txt").getText('UTF-8').trim()
     }
 
     @NotNull
@@ -237,8 +237,8 @@ class Utils {
         return "$binDir/../lib/tools.jar"
     }
 
-    static String getBuiltinJbrVersion(@NotNull File ideaDirectory) {
-        def dependenciesFile = new File(ideaDirectory, "dependencies.txt")
+    static String getBuiltinJbrVersion(@NotNull File ideDirectory) {
+        def dependenciesFile = new File(ideDirectory, "dependencies.txt")
         if (dependenciesFile.exists()) {
             def properties = new Properties()
             def reader = new FileReader(dependenciesFile)

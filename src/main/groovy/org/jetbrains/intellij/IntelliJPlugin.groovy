@@ -355,7 +355,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.outputs.dir("$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME")
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
-                def number = Utils.ideaBuildNumber(Utils.ideaSdkDirectory(project, extension))
+                def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension))
                 VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752")
             }
         }
@@ -364,7 +364,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
                                                                @NotNull RunIdeBase task) {
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-        task.conventionMapping("ideaDirectory", { Utils.ideaSdkDirectory(project, extension) })
+        task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension) })
         task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
         task.conventionMapping("configDirectory", { prepareSandboxTask.getConfigDirectory() })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
@@ -381,7 +381,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 }
                 Utils.warn(task, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
             }
-            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideaSdkDirectory(project, extension))
+            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension))
             if (builtinJbrVersion != null) {
                 def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
                 if (builtinJbr != null) {
@@ -499,7 +499,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
             it.enableAssertions = true
             it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
-            it.jvmArgs = Utils.getIdeaJvmArgs(it, it.jvmArgs, Utils.ideaSdkDirectory(project, extension))
+            it.jvmArgs = Utils.getIdeJvmArgs(it, it.jvmArgs, Utils.ideSdkDirectory(project, extension))
             it.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
                     "$extension.ideaDependency.classes/lib/idea.jar")
             it.outputs.dir(systemDirectory)
