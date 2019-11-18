@@ -1,9 +1,6 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.CollectionUtils
@@ -59,6 +56,7 @@ abstract class RunIdeBase extends JavaExec {
     private Object pluginsDirectory
     private Object jbrVersion
 
+    @Internal
     List<String> getRequiredPluginIds() {
         CollectionUtils.stringize(requiredPluginIds.collect {
             it instanceof Closure ? (it as Closure).call() : it
@@ -139,6 +137,7 @@ abstract class RunIdeBase extends JavaExec {
         this.ideDirectory = ideDirectory
     }
 
+    @Internal
     File getConfigDirectory() {
         configDirectory != null ? project.file(configDirectory) : null
     }

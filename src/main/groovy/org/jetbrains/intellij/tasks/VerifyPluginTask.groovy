@@ -20,20 +20,12 @@ class VerifyPluginTask extends ConventionTask implements VerificationTask {
         return this.ignoreFailures
     }
 
-    boolean isIgnoreFailures() {
-        return this.ignoreFailures
-    }
-
     void setIgnoreFailures(boolean ignoreFailures) {
         this.ignoreFailures = ignoreFailures
     }
 
     @Input
     boolean getIgnoreWarnings() {
-        return this.ignoreWarnings
-    }
-
-    boolean isIgnoreWarnings() {
         return this.ignoreWarnings
     }
 
