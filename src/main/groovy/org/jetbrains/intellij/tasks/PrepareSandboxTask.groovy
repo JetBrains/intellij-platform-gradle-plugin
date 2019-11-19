@@ -51,15 +51,16 @@ class PrepareSandboxTask extends Sync {
     }
 
     @Input
-    File getConfigDirectory() {
-        configDirectory != null ? project.file(configDirectory) : null
+    String getConfigDirectory() {
+        def pluginName = Utils.stringInput(pluginName)
+        pluginName != null ? FileUtils.toSafeFileName(pluginName) : null
     }
 
-    void setConfigDirectory(File configDirectory) {
+    void setConfigDirectory(Object configDirectory) {
         this.configDirectory = configDirectory
     }
 
-    void configDirectory(File configDirectory) {
+    void configDirectory(Object configDirectory) {
         this.configDirectory = configDirectory
     }
 
@@ -145,7 +146,7 @@ class PrepareSandboxTask extends Sync {
     }
 
     private void disableIdeUpdate() {
-        def optionsDir = new File(getConfigDirectory(), "options")
+        def optionsDir = new File(project.file(getConfigDirectory()), "/options")
         if (!optionsDir.exists() && !optionsDir.mkdirs()) {
             Utils.error(this, "Cannot disable update checking in host IDE")
             return
