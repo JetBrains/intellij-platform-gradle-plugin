@@ -150,6 +150,7 @@ abstract class RunIdeBase extends JavaExec {
         this.configDirectory = configDirectory
     }
 
+    @Internal
     File getSystemDirectory() {
         systemDirectory != null ? project.file(systemDirectory) : null
     }
