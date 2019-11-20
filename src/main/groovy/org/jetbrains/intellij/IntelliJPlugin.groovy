@@ -317,7 +317,7 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping('pluginName', { extension.pluginName })
             conventionMapping('pluginJar', { (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath })
             conventionMapping('destinationDir', { project.file(Utils.pluginsDir(extension.sandboxDirectory, inTest)) })
-            conventionMapping('configDirectory', { Utils.configDir(extension.sandboxDirectory, inTest) })
+            conventionMapping('configDirectory', { Utils.configDir(extension.sandboxDirectory, inTest).toString() })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             dependsOn(JavaPlugin.JAR_TASK_NAME)
