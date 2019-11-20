@@ -366,7 +366,7 @@ class IntelliJPlugin implements Plugin<Project> {
         def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
         task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension) })
         task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
-        task.conventionMapping("configDirectory", { prepareSandboxTask.getConfigDirectory() })
+        task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory()) })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
         task.conventionMapping("systemDirectory", {
             project.file(Utils.systemDir(extension.sandboxDirectory, false))
