@@ -1,7 +1,8 @@
 # Changelog
 
-## next version
+## 0.4.14
 
+- Support for Gradle 6.0
 - Deprecated `runIde.ideaDirectory`. `runIde.ideDirectory` should be used instead
 
 ## 0.4.13
