@@ -414,8 +414,8 @@ class IntelliJPlugin implements Plugin<Project> {
                 dependsOn sourceSet.classesTaskName
                 onlyIf { extension.instrumentCode }
                 conventionMapping('compilerVersion', {
-                    def version = extension.version ?: DEFAULT_IDEA_VERSION
-                    if (version.endsWith('-SNAPSHOT')) {
+                    def version = extension.version
+                    if (version && version.endsWith('-SNAPSHOT')) {
                         if (extension.type == 'CL') {
                             return "CLION-$version".toString()
                         }
