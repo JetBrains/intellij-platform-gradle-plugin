@@ -28,7 +28,7 @@ dependencies {
     compile localGroovy()
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
-    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.6.3'
+    compile 'org.jetbrains.intellij:plugin-repository-rest-client:0.6.5'
     compile 'org.jetbrains.intellij.plugins:structure-base:3.46'
     compile 'org.jetbrains.intellij.plugins:structure-intellij:3.46'
     compile 'de.undercouch:gradle-download-task:4.0.2'
@@ -40,7 +40,7 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-version = '0.4.14'
+version = '0.4.15'
 group = 'org.jetbrains.intellij.plugins'
 description = """
 **This project requires Gradle 3.4 or newer**

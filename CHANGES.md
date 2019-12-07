@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.15
+
+- Fix uploading on Java 11 [#448](../../issues/448)
+
 ## 0.4.14
 
 - Support for Gradle 6.0
