@@ -7,9 +7,9 @@
 > 
 **This project requires Gradle 3.4 or newer**
 
-This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
+This plugin allows you to build plugins for IntelliJ platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
-The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks to fill some tags 
+The plugin adds extra IntelliJ-specific dependencies, patches `processResources` tasks to fill some tags 
 (name, version) in `plugin.xml` with appropriate values, patches compile tasks to instrument code with 
 nullability assertions and forms classes made with IntelliJ GUI Designer and provides some build steps which might be
 helpful while developing plugins for IntelliJ platform.
@@ -19,7 +19,7 @@ helpful while developing plugins for IntelliJ platform.
 # Getting started
 
 Here is [the manual](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
-to start developing plugins for IntelliJ IDEA using Gradle.
+to start developing plugins for IntelliJ Platform using Gradle.
 
 Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
@@ -215,24 +215,25 @@ As examples of using this plugin you can check out following projects:
   - Uses the Gradle Kotlin DSL
   - Mixes Java, Kotlin, and Groovy code
   - Uses Grammar Kit
-  - Uses a Kotlin version not bundled with IntelliJ
+  - Uses a Kotlin version not bundled with IntelliJ IDEA
 - [Mainframer Integration](https://github.com/elpassion/mainframer-intellij-plugin)
 	- Uses the Gradle Kotlin DSL
-	- Fully written in kotlin
+	- Fully written in Kotlin
 	- Uses RxJava
 - [Unity 3D plugin](https://github.com/JetBrains/resharper-unity) for JetBrains Rider
 - [AEM Tools plugin](https://github.com/aemtools/aemtools) for Adobe Experience Manager integration
 	- Uses the Gradle Kotlin DSL
-	- Fully written in kotlin
+	- Fully written in Kotlin
 	- Uses template language
 - [F# plugin](https://github.com/JetBrains/fsharp-support/tree/master/rider-fsharp) for JetBrains Rider
 	- Uses the Gradle Kotlin DSL
 - [Intellij Rainbow Brackets](https://github.com/izhangzhihao/intellij-rainbow-brackets)
-	- Fully written in kotlin
-	- Uses other intellij plugins as test dependencies
+	- Fully written in Kotlin
+	- Uses other IntelliJ IDEA plugins as test dependencies
 	- Circle CI configuration file & Travis CI configuration file
-	- Gradle task to verify plugin compatibility cross intellij versions
-	- Auto subbmit anonymous feedback as github issues
+	- Gradle task to verify plugin compatibility cross IntelliJ Platform versions
+	- Auto submit anonymous feedback as github issues
+
 # Contributing
 
 Contributing tips:
