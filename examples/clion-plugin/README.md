@@ -4,4 +4,4 @@ The plugin adds `Say Hello` action in `Tools` menu and to Welcome Screen.
 
 ## Usage
 
-`./gradlew :clion-plugin:runIdea`
+`./gradlew :clion-plugin:runIde`

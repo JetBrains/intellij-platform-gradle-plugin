@@ -7,4 +7,4 @@ in a different `subplugin` module.
 
 ## Usage
 
-`./gradlew :composite-plugin:runIdea`
+`./gradlew :composite-plugin:runIde`

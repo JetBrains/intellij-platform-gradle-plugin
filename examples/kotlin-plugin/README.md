@@ -12,4 +12,4 @@ The actions will be added to IDE only if corresponding dependency-plugin is enab
 
 ## Usage
 
-`./gradlew :plugin-with-dependencies:runIdea`
+`./gradlew :plugin-with-dependencies:runIde`
