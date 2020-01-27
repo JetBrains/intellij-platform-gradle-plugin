@@ -108,6 +108,7 @@ abstract class RunIdeBase extends JavaExec {
     @Deprecated
     @InputDirectory
     @Optional
+    @PathSensitive(PathSensitivity.NONE)
     File getIdeaDirectory() {
         ideDirectory != null ? project.file(ideDirectory) : null
     }
@@ -125,6 +126,7 @@ abstract class RunIdeBase extends JavaExec {
     }
 
     @InputDirectory
+    @PathSensitive(PathSensitivity.NONE)
     File getIdeDirectory() {
         ideDirectory != null ? project.file(ideDirectory) : null
     }
@@ -164,6 +166,7 @@ abstract class RunIdeBase extends JavaExec {
     }
 
     @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
     File getPluginsDirectory() {
         pluginsDirectory != null ? project.file(pluginsDirectory) : null
     }
