@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.16 (under development)
+
+- Fix downloading JBR if temp directory and gradle chace are on the different partitions [#457](../../issues/457)
+- Build searchable options task is marked as cacheable
+
 ## 0.4.15
 
 - Fix uploading on Java 11 [#448](../../issues/448)

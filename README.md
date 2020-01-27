@@ -1,8 +1,8 @@
-<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://img.shields.io/badge/chat-%20%20-brightgreen.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.15-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://img.shields.io/badge/chat-%20%20-brightgreen.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.16-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
 
 # gradle-intellij-plugin
 
-<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.4.15</h4>
+<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.4.16</h4>
 
 > 
 **This project requires Gradle 3.4 or newer**
@@ -29,7 +29,7 @@ Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.15"
+  id "org.jetbrains.intellij" version "0.4.16"
 }
 ```
  
@@ -168,7 +168,7 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.15"
+  id "org.jetbrains.intellij" version "0.4.16"
 }
 
 intellij {
@@ -247,7 +247,7 @@ includeBuild '/path/to/gradle-intellij-plugin'
 
 
 ```
-Copyright 2019 org.jetbrains.intellij.plugins
+Copyright 2020 org.jetbrains.intellij.plugins
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
