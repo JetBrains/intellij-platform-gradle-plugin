@@ -230,6 +230,7 @@ abstract class RunIdeBase extends JavaExec {
         }
         systemPropertyIfNotDefined("idea.classpath.index.enabled", false, userDefinedSystemProperties)
         systemPropertyIfNotDefined("idea.is.internal", true, userDefinedSystemProperties)
+        systemPropertyIfNotDefined("idea.auto.reload.plugins", true, userDefinedSystemProperties)
 
         if (!getSystemProperties().containsKey('idea.platform.prefix')) {
             def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideBuildNumber(getIdeDirectory()))
