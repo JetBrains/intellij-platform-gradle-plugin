@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.4.16 (under development)
+## 0.4.17 (under development)
+
+- Fix platform prefix for DataGrip [#458](../../issues/458)
+
+## 0.4.16
 
 - Fix downloading JBR if temp directory and gradle chace are on the different partitions [#457](../../issues/457)
 - Build searchable options task is marked as cacheable
