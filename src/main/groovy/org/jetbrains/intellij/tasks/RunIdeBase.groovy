@@ -43,7 +43,7 @@ abstract class RunIdeBase extends JavaExec {
                                          WS: 'WebStorm',
                                          OC: 'AppCode',
                                          CL: 'CLion',
-                                         DB: '0xDBE',
+                                         DB: 'DataGrip',
                                          AI: 'AndroidStudio',
                                          GO: 'GoLand',
                                          RD: 'Rider',
