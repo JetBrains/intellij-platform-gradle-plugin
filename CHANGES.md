@@ -3,6 +3,7 @@
 ## 0.4.17 (under development)
 
 - Fix platform prefix for DataGrip [#458](../../issues/458)
+- Enable plugin auto-reloading by default
 
 ## 0.4.16
 
