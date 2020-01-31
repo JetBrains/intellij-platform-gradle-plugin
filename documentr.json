@@ -9,10 +9,6 @@
       "value": "[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) "
     },
     {
-      "type": "markup",
-      "value": "[![Join the chat at https://gitter.im/JetBrains/gradle-intellij-plugin](https://img.shields.io/badge/chat-%20%20-brightgreen.svg)](https://gitter.im/JetBrains/gradle-intellij-plugin?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) "
-    },
-    {
       "type": "inbuilt",
       "value": "badge-shield-io-gradle-plugin"
     },
