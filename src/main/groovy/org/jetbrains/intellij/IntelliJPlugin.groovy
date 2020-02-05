@@ -80,7 +80,7 @@ class IntelliJPlugin implements Plugin<Project> {
         def idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
         def ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
         project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
-        project.configurations.getByName(JavaPlugin.TEST_COMPILE_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
+        project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
     }
 
     private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
@@ -208,7 +208,7 @@ class IntelliJPlugin implements Plugin<Project> {
         Utils.info(project, "Configuring plugin dependencies")
         def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
         def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
-        project.repositories.maven { it.url = extension.pluginsRepo }
+        boolean repoRegistered = false
         extension.plugins.each {
             Utils.info(project, "Configuring plugin $it")
             if (it instanceof Project) {
@@ -224,6 +224,10 @@ class IntelliJPlugin implements Plugin<Project> {
                 def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
                 if (!pluginId) {
                     throw new BuildException("Failed to resolve plugin $it", null)
+                }
+                if (!repoRegistered && (pluginVersion || channel)) {
+                    project.repositories.maven { it.url = extension.pluginsRepo }
+                    repoRegistered = true
                 }
                 def plugin = resolver.resolve(project, pluginId, pluginVersion, channel)
                 if (plugin == null) {
