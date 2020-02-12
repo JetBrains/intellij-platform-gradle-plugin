@@ -3,7 +3,7 @@ package org.jetbrains.intellij
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.pluginRepository.PluginRepositoryInstance
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 
 class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'intellij-specific tasks'() {
@@ -176,7 +176,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
 
     def 'add local plugin to compile only classpath'() {
         given:
-        def repositoryInstance = new PluginRepositoryInstance("https://plugins.jetbrains.com", null)
+        def repositoryInstance = PluginRepositoryFactory.create("https://plugins.jetbrains.com", null)
         def plugin = repositoryInstance.download('org.jetbrains.postfixCompletion', '0.8-beta', null, dir.root.absolutePath)
 
         buildFile << "intellij.plugins = ['copyright', '${adjustWindowsPath(plugin.canonicalPath)}']\n"
