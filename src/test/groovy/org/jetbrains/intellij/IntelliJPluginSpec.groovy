@@ -177,7 +177,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
     def 'add local plugin to compile only classpath'() {
         given:
         def repositoryInstance = PluginRepositoryFactory.create("https://plugins.jetbrains.com", null)
-        def plugin = repositoryInstance.download('org.jetbrains.postfixCompletion', '0.8-beta', null, dir.root.absolutePath)
+        def plugin = repositoryInstance.downloader.download('org.jetbrains.postfixCompletion', '0.8-beta', dir.root, null)
 
         buildFile << "intellij.plugins = ['copyright', '${adjustWindowsPath(plugin.canonicalPath)}']\n"
         buildFile << 'task printMainRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.main.runtimeClasspath.asPath } }\n'
