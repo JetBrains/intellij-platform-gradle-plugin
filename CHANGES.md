@@ -5,6 +5,7 @@
 - Fix platform prefix for DataGrip [#458](../../issues/458)
 - Enable plugin auto-reloading by default
 - Upgrade plugins repository client
+- Use new methods for Gradle 5.1 and higher [#464](../../issues/464)
 
 ## 0.4.16
 

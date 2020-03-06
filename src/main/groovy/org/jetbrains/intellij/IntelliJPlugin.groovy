@@ -93,7 +93,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePatchPluginXmlTask(project, extension)
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
-        configureRunIdeaTask(project, extension)
+        configureRunIdeaTask(project)
         configureBuildSearchableOptionsTask(project, extension)
         configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
@@ -341,7 +341,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureRunIdeaTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    private static void configureRunIdeaTask(@NotNull Project project) {
         Utils.info(project, "Configuring run IDE task")
         project.tasks.create(RUN_IDE_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
             task.group = GROUP_NAME
@@ -402,8 +402,14 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask).with {
             group = GROUP_NAME
             description = "Jars searchable options."
-            baseName = "lib/searchableOptions"
-            destinationDir = new File(project.buildDir, "libsSearchableOptions")
+            if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
+                archiveBaseName.convention('lib/searchableOptions')
+                destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
+            } else {
+                conventionMapping('baseName', { 'lib/searchableOptions' })
+                destinationDir = new File(project.buildDir, "libsSearchableOptions")
+            }
+
             dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             onlyIf { new File(project.buildDir, SEARCHABLE_OPTIONS_DIR_NAME).isDirectory() }
         }
@@ -533,7 +539,12 @@ class IntelliJPlugin implements Plugin<Project> {
             into { prepareSandboxTask.getPluginName() }
 
             from({
-                "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
+                if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
+                    "${jarSearchableOptionsTask.getDestinationDirectory()}/${jarSearchableOptionsTask.getArchiveFileName()}"
+                } else {
+                    "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
+                }
+
             }) { into 'lib' }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
