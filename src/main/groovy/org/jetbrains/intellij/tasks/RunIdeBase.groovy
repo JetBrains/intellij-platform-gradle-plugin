@@ -12,6 +12,12 @@ class RunIdeTask extends RunIdeBase {
     }
 }
 
+class RunIdeForUiTestTask extends RunIdeBase {
+    RunIdeForUiTestTask() {
+        super(true)
+    }
+}
+
 @CacheableTask
 class BuildSearchableOptionsTask extends RunIdeBase {
     private static final List<String> TRAVERSE_UI_ARG = ["traverseUI"]
