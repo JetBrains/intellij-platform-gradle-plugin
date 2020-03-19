@@ -85,16 +85,31 @@ class Utils {
         result
     }
 
+    static def configDir(@NotNull String sandboxDirectoryPath, String suffix) {
+        "$sandboxDirectoryPath/config$suffix"
+    }
+
+    static def systemDir(@NotNull String sandboxDirectoryPath, String suffix) {
+        "$sandboxDirectoryPath/system$suffix"
+    }
+
+    static def pluginsDir(@NotNull String sandboxDirectoryPath, String suffix) {
+        "$sandboxDirectoryPath/plugins$suffix"
+    }
+
+    @Deprecated
     static def configDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$sandboxDirectoryPath/config$suffix"
     }
 
+    @Deprecated
     static def systemDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$sandboxDirectoryPath/system$suffix"
     }
 
+    @Deprecated
     static def pluginsDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
         "$sandboxDirectoryPath/plugins$suffix"

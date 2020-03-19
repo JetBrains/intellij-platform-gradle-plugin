@@ -12,6 +12,7 @@ import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
+import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
@@ -37,6 +38,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
     public static final String PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
+    public static final String PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
     public static final String VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     public static final String RUN_IDE_TASK_NAME = "runIde"
     public static final String BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
@@ -306,27 +308,57 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePrepareSandboxTasks(@NotNull Project project,
                                                      @NotNull IntelliJPluginExtension extension) {
-        configurePrepareSandboxTask(project, extension, false)
-        configurePrepareSandboxTask(project, extension, true)
+        configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
+        configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
+        configureCopyRobotServerTask(project, extension)
+        configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest")
+    }
+
+    private static void configureCopyRobotServerTask(@NotNull Project project,
+                                                     @NotNull IntelliJPluginExtension extension) {
+        Utils.info(project, "Configuring copy robot-server task")
+
+        def remoteRobotVersion = "0.9.1"
+
+        project.repositories {
+            maven { url "https://jetbrains.bintray.com/intellij-third-party-dependencies" }
+        }
+
+        project.configurations {
+            robotServerPluginImplementation
+        }
+
+        project.dependencies {
+            robotServerPluginImplementation("org.jetbrains.test:robot-server-plugin:$remoteRobotVersion")
+        }
+
+        project.tasks.create("copyRobotServer", Copy).with { task ->
+            group = GROUP_NAME
+            description = "Copy robot-server plugin to ui tests sandbox."
+            from project.zipTree(project.configurations.robotServerPluginImplementation.files.find { it.name.endsWith("zip") })
+            into Utils.pluginsDir(extension.sandboxDirectory, "-uiTest")
+            task.dependsOn(PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+        }
     }
 
     private static void configurePrepareSandboxTask(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension,
-                                                    boolean inTest) {
+                                                    String taskName,
+                                                    String testSuffix) {
         Utils.info(project, "Configuring prepare sandbox task")
-        def taskName = inTest ? PREPARE_TESTING_SANDBOX_TASK_NAME : PREPARE_SANDBOX_TASK_NAME
         project.tasks.create(taskName, PrepareSandboxTask).with {
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             conventionMapping('pluginName', { extension.pluginName })
             conventionMapping('pluginJar', { (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath })
-            conventionMapping('destinationDir', { project.file(Utils.pluginsDir(extension.sandboxDirectory, inTest)) })
-            conventionMapping('configDirectory', { Utils.configDir(extension.sandboxDirectory, inTest).toString() })
+            conventionMapping('destinationDir', { project.file(Utils.pluginsDir(extension.sandboxDirectory, testSuffix)) })
+            conventionMapping('configDirectory', { Utils.configDir(extension.sandboxDirectory, testSuffix).toString() })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             dependsOn(JavaPlugin.JAR_TASK_NAME)
         }
     }
+
 
     private static void configurePluginVerificationTask(@NotNull Project project) {
         Utils.info(project, "Configuring plugin verification task")
@@ -373,7 +405,7 @@ class IntelliJPlugin implements Plugin<Project> {
         task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory()) })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
         task.conventionMapping("systemDirectory", {
-            project.file(Utils.systemDir(extension.sandboxDirectory, false))
+            project.file(Utils.systemDir(extension.sandboxDirectory, ""))
         })
         task.conventionMapping("executable", {
             def jbrResolver = new JbrResolver(project, task)
@@ -503,9 +535,9 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring tests tasks")
         project.tasks.withType(Test).each {
-            def configDirectory = project.file(Utils.configDir(extension.sandboxDirectory, true))
-            def systemDirectory = project.file(Utils.systemDir(extension.sandboxDirectory, true))
-            def pluginsDirectory = project.file(Utils.pluginsDir(extension.sandboxDirectory, true))
+            def configDirectory = project.file(Utils.configDir(extension.sandboxDirectory, "-test"))
+            def systemDirectory = project.file(Utils.systemDir(extension.sandboxDirectory, "-test"))
+            def pluginsDirectory = project.file(Utils.pluginsDir(extension.sandboxDirectory, "-test"))
 
             it.enableAssertions = true
             it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
