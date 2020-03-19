@@ -157,6 +157,33 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             </idea-plugin>""".stripIndent()
     }
 
+    def 'prepare ui tests sandbox task'() {
+        given:
+        writeJavaFile()
+        file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
+        file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
+        buildFile << """\
+            version='0.42.123'
+            intellij { 
+                pluginName = 'myPluginName' 
+                plugins = ['copyright'] 
+            }
+            dependencies { 
+                compile 'joda-time:joda-time:2.8.1'
+            }\
+            """.stripIndent()
+
+        when:
+        build(IntelliJPlugin.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+
+        then:
+        collectPaths(sandbox).containsAll(['/plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar',
+                                  '/plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar',
+                                  '/config-uiTest/options/updates.xml',
+                                  '/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.0.1.jar'] as Set)
+    }
+
     def 'prepare sandbox with external jar-type plugin'() {
         given:
         writeJavaFile()

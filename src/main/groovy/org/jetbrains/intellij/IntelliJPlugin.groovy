@@ -12,7 +12,6 @@ import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
-import org.gradle.api.tasks.Copy
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
@@ -41,6 +40,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
     public static final String VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     public static final String RUN_IDE_TASK_NAME = "runIde"
+    public static final String RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     public static final String BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
     public static final String SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
     public static final String JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
@@ -89,13 +89,17 @@ class IntelliJPlugin implements Plugin<Project> {
         Utils.info(project, "Configuring plugin")
         project.tasks.whenTaskAdded {
             if (it instanceof RunIdeBase) {
-                prepareConventionMappingsForRunIdeTask(project, extension, it)
+                prepareConventionMappingsForRunIdeTask(project, extension, it, PREPARE_SANDBOX_TASK_NAME)
+            }
+            if (it instanceof RunIdeForUiTestTask) {
+                prepareConventionMappingsForRunIdeTask(project, extension, it, PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
             }
         }
         configurePatchPluginXmlTask(project, extension)
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
+        configureRunIdeaForUiTestsTask(project)
         configureBuildSearchableOptionsTask(project, extension)
         configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
@@ -310,15 +314,12 @@ class IntelliJPlugin implements Plugin<Project> {
                                                      @NotNull IntelliJPluginExtension extension) {
         configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
-        configureCopyRobotServerTask(project, extension)
+        addRobotServerDependency(project, "0.9.1")
         configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest")
     }
 
-    private static void configureCopyRobotServerTask(@NotNull Project project,
-                                                     @NotNull IntelliJPluginExtension extension) {
-        Utils.info(project, "Configuring copy robot-server task")
-
-        def remoteRobotVersion = "0.9.1"
+    private static void addRobotServerDependency(@NotNull Project project, @NotNull String robotServerVersion) {
+        Utils.info(project, "Configuring robot-server dependency")
 
         project.repositories {
             maven { url "https://jetbrains.bintray.com/intellij-third-party-dependencies" }
@@ -329,15 +330,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
 
         project.dependencies {
-            robotServerPluginImplementation("org.jetbrains.test:robot-server-plugin:$remoteRobotVersion")
-        }
-
-        project.tasks.create("copyRobotServer", Copy).with { task ->
-            group = GROUP_NAME
-            description = "Copy robot-server plugin to ui tests sandbox."
-            from project.zipTree(project.configurations.robotServerPluginImplementation.files.find { it.name.endsWith("zip") })
-            into Utils.pluginsDir(extension.sandboxDirectory, "-uiTest")
-            task.dependsOn(PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+            robotServerPluginImplementation("org.jetbrains.test:robot-server-plugin:$robotServerVersion")
         }
     }
 
@@ -346,7 +339,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     String taskName,
                                                     String testSuffix) {
         Utils.info(project, "Configuring prepare sandbox task")
-        project.tasks.create(taskName, PrepareSandboxTask).with {
+        project.tasks.create(taskName, PrepareSandboxTask).with { task ->
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             conventionMapping('pluginName', { extension.pluginName })
@@ -356,6 +349,11 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             dependsOn(JavaPlugin.JAR_TASK_NAME)
+
+            if (taskName == PREPARE_UI_TESTING_SANDBOX_TASK_NAME) {
+                from project.zipTree(project.configurations.robotServerPluginImplementation.files.find { it.name.endsWith("zip") })
+                into Utils.pluginsDir(extension.sandboxDirectory, "-uiTest")
+            }
         }
     }
 
@@ -382,6 +380,15 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
+    private static void configureRunIdeaForUiTestsTask(@NotNull Project project) {
+        Utils.info(project, "Configuring run IDE for ui tests task")
+        project.tasks.create(RUN_IDE_FOR_UI_TESTS_TASK_NAME, RunIdeForUiTestTask).with { RunIdeForUiTestTask task ->
+            task.group = GROUP_NAME
+            task.description = "Runs Intellij IDEA with installed plugin and robot-server plugin for ui tests."
+            task.dependsOn(PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+        }
+    }
+
     private static void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring build searchable options task")
         project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask).with { BuildSearchableOptionsTask task ->
@@ -398,8 +405,8 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
-                                                               @NotNull RunIdeBase task) {
-        def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
+                                                               @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
+        def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
         task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension) })
         task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
         task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory()) })
