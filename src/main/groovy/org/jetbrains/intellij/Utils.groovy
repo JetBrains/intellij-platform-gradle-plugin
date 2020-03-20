@@ -97,22 +97,19 @@ class Utils {
         "$sandboxDirectoryPath/plugins$suffix"
     }
 
-    @Deprecated
     static def configDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
-        "$sandboxDirectoryPath/config$suffix"
+        configDir(sandboxDirectoryPath, suffix)
     }
 
-    @Deprecated
     static def systemDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
-        "$sandboxDirectoryPath/system$suffix"
+        systemDir(sandboxDirectoryPath, suffix)
     }
 
-    @Deprecated
     static def pluginsDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
         def suffix = inTests ? "-test" : ""
-        "$sandboxDirectoryPath/plugins$suffix"
+        pluginsDir(sandboxDirectoryPath, suffix)
     }
 
     @NotNull

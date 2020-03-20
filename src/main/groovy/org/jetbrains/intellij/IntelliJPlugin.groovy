@@ -38,6 +38,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
     public static final String PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
+    public static final String DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     public static final String VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     public static final String RUN_IDE_TASK_NAME = "runIde"
     public static final String RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
@@ -314,23 +315,17 @@ class IntelliJPlugin implements Plugin<Project> {
                                                      @NotNull IntelliJPluginExtension extension) {
         configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
-        addRobotServerDependency(project, "0.9.1")
+        configureRobotServerDownloadTask(project, "0.9.1")
         configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest")
     }
 
-    private static void addRobotServerDependency(@NotNull Project project, @NotNull String robotServerVersion) {
-        Utils.info(project, "Configuring robot-server dependency")
+    private static void configureRobotServerDownloadTask(@NotNull Project project, @NotNull String robotServerVersion) {
+        Utils.info(project, "Configuring robot-server downloadTask")
 
-        project.repositories {
-            maven { url "https://jetbrains.bintray.com/intellij-third-party-dependencies" }
-        }
-
-        project.configurations {
-            robotServerPluginImplementation
-        }
-
-        project.dependencies {
-            robotServerPluginImplementation("org.jetbrains.test:robot-server-plugin:$robotServerVersion")
+        project.tasks.create(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, DownloadRobotRegistryPluginTask) { task ->
+            group = GROUP_NAME
+            description = "Downloading robot-server plugin."
+            task.robotServerVersion = robotServerVersion
         }
     }
 
@@ -351,8 +346,9 @@ class IntelliJPlugin implements Plugin<Project> {
             dependsOn(JavaPlugin.JAR_TASK_NAME)
 
             if (taskName == PREPARE_UI_TESTING_SANDBOX_TASK_NAME) {
-                from project.zipTree(project.configurations.robotServerPluginImplementation.files.find { it.name.endsWith("zip") })
-                into Utils.pluginsDir(extension.sandboxDirectory, "-uiTest")
+                dependsOn(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+                def downloadTask = project.tasks.findByName(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) as DownloadRobotRegistryPluginTask
+                task.configureExternalPlugin(downloadTask.plugin())
             }
         }
     }
