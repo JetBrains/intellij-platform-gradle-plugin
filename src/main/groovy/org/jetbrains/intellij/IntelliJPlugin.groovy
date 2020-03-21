@@ -57,6 +57,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
     public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
+    public static final String DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = '0.9.2'
     public static final String PLUGIN_PATH = 'plugin.path'
 
     @Override
@@ -126,6 +127,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
         configureIntellijDependency(project, extension)
         configurePluginDependencies(project, extension)
+        configureRobotServerDependency(project, extension)
         configureTestTasks(project, extension)
     }
 
@@ -207,6 +209,15 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         } else {
             Utils.info(project, "$ideaDependency.buildNumber dependencies are applied manually")
+        }
+    }
+
+    private static void configureRobotServerDependency(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        def downloadTask = project.tasks.findByName(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) as DownloadRobotServerPluginTask
+        downloadTask.robotServerVersion = extension.robotServerPluginVersion
+
+        project.tasks.withType(PrepareSandboxTask).find { it.getDependsOn().contains(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) }.each {
+            it.from(downloadTask.outputDir)
         }
     }
 
@@ -315,17 +326,16 @@ class IntelliJPlugin implements Plugin<Project> {
                                                      @NotNull IntelliJPluginExtension extension) {
         configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
-        configureRobotServerDownloadTask(project, "0.9.1")
+        configureRobotServerDownloadTask(project, extension)
         configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest")
     }
 
-    private static void configureRobotServerDownloadTask(@NotNull Project project, @NotNull String robotServerVersion) {
-        Utils.info(project, "Configuring robot-server downloadTask")
+    private static void configureRobotServerDownloadTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+        Utils.info(project, "Configuring robot-server download Task")
 
-        project.tasks.create(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, DownloadRobotRegistryPluginTask) { task ->
+        project.tasks.create(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, DownloadRobotServerPluginTask).with { task ->
             group = GROUP_NAME
             description = "Downloading robot-server plugin."
-            task.robotServerVersion = robotServerVersion
         }
     }
 
@@ -347,8 +357,6 @@ class IntelliJPlugin implements Plugin<Project> {
 
             if (taskName == PREPARE_UI_TESTING_SANDBOX_TASK_NAME) {
                 dependsOn(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-                def downloadTask = project.tasks.findByName(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) as DownloadRobotRegistryPluginTask
-                task.configureExternalPlugin(downloadTask.plugin())
             }
         }
     }
