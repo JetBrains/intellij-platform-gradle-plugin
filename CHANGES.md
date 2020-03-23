@@ -6,6 +6,7 @@
 - Enable plugin auto-reloading by default
 - Upgrade plugins repository client
 - Use new methods for Gradle 5.1 and higher [#464](../../issues/464)
+- Support JBR with JCEF [#465](../../issues/465)
 
 ## 0.4.16
 
