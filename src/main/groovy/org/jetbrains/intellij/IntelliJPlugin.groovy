@@ -4,6 +4,7 @@ import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.file.DuplicatesStrategy
@@ -98,6 +99,7 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
         configurePatchPluginXmlTask(project, extension)
+        configureRobotServerDownloadTask(project, extension)
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
@@ -127,7 +129,6 @@ class IntelliJPlugin implements Plugin<Project> {
 
         configureIntellijDependency(project, extension)
         configurePluginDependencies(project, extension)
-        configureRobotServerDependency(project, extension)
         configureTestTasks(project, extension)
     }
 
@@ -209,15 +210,6 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         } else {
             Utils.info(project, "$ideaDependency.buildNumber dependencies are applied manually")
-        }
-    }
-
-    private static void configureRobotServerDependency(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        def downloadTask = project.tasks.findByName(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) as DownloadRobotServerPluginTask
-        downloadTask.robotServerVersion = extension.robotServerPluginVersion
-
-        project.tasks.withType(PrepareSandboxTask).find { it.getDependsOn().contains(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) }.each {
-            it.from(downloadTask.outputDir)
         }
     }
 
@@ -326,8 +318,11 @@ class IntelliJPlugin implements Plugin<Project> {
                                                      @NotNull IntelliJPluginExtension extension) {
         configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
-        configureRobotServerDownloadTask(project, extension)
-        configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest")
+        configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest").with { task ->
+            def downloadPluginTask = project.tasks.getByName(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) as DownloadRobotServerPluginTask
+            task.from(downloadPluginTask.outputDir)
+            task.dependsOn(downloadPluginTask)
+        }
     }
 
     private static void configureRobotServerDownloadTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
@@ -335,16 +330,19 @@ class IntelliJPlugin implements Plugin<Project> {
 
         project.tasks.create(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, DownloadRobotServerPluginTask).with { task ->
             group = GROUP_NAME
-            description = "Downloading robot-server plugin."
+            description = "Download robot-server plugin."
+            project.afterEvaluate {
+                task.robotServerVersion = extension.robotServerPluginVersion
+            }
         }
     }
 
-    private static void configurePrepareSandboxTask(@NotNull Project project,
+    private static Task configurePrepareSandboxTask(@NotNull Project project,
                                                     @NotNull IntelliJPluginExtension extension,
                                                     String taskName,
                                                     String testSuffix) {
         Utils.info(project, "Configuring prepare sandbox task")
-        project.tasks.create(taskName, PrepareSandboxTask).with { task ->
+        return project.tasks.create(taskName, PrepareSandboxTask).with { task ->
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             conventionMapping('pluginName', { extension.pluginName })
@@ -354,10 +352,6 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             dependsOn(JavaPlugin.JAR_TASK_NAME)
-
-            if (taskName == PREPARE_UI_TESTING_SANDBOX_TASK_NAME) {
-                dependsOn(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-            }
         }
     }
 
