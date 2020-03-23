@@ -58,7 +58,6 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
     public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
-    public static final String DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = '0.9.2'
     public static final String PLUGIN_PATH = 'plugin.path'
 
     @Override
@@ -331,9 +330,6 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, DownloadRobotServerPluginTask).with { task ->
             group = GROUP_NAME
             description = "Download robot-server plugin."
-            project.afterEvaluate {
-                task.robotServerVersion = extension.robotServerPluginVersion
-            }
         }
     }
 

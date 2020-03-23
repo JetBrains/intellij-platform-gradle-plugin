@@ -168,8 +168,8 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             intellij { 
                 pluginName = 'myPluginName' 
                 plugins = ['copyright'] 
-                robotServerPluginVersion = '0.9.2'
             }
+            downloadRobotServerPlugin.version = '0.9.2'
             dependencies { 
                 compile 'joda-time:joda-time:2.8.1'
             }\

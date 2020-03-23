@@ -19,7 +19,6 @@ class IntelliJPluginExtension {
     String jreRepo
     String alternativeIdePath
     String ideaDependencyCachePath
-    String robotServerPluginVersion = IntelliJPlugin.DEFAULT_ROBOT_SERVER_PLUGIN_VERSION
     boolean instrumentCode = true
     boolean updateSinceUntilBuild = true
     boolean sameSinceUntilBuild = false
