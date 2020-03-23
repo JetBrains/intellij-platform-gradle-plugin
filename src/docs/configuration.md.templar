@@ -299,9 +299,9 @@ The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ..
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
 
-See the instruction on how to generate authentication token: https://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
+See the instruction on how to generate authentication token: https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html
 
-Also here is the tutorial on how to configure plugin publishing: https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html
+See [Publishing Plugins with Gradle](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html) tutorial for step-by-step instructions.
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
