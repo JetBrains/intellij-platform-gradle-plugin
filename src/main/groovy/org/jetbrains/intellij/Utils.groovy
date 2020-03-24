@@ -85,18 +85,6 @@ class Utils {
         result
     }
 
-    static def configDir(@NotNull String sandboxDirectoryPath, String suffix) {
-        "$sandboxDirectoryPath/config$suffix"
-    }
-
-    static def systemDir(@NotNull String sandboxDirectoryPath, String suffix) {
-        "$sandboxDirectoryPath/system$suffix"
-    }
-
-    static def pluginsDir(@NotNull String sandboxDirectoryPath, String suffix) {
-        "$sandboxDirectoryPath/plugins$suffix"
-    }
-
     @NotNull
     static List<String> getIdeJvmArgs(@NotNull JavaForkOptions options,
                                       @NotNull List<String> originalArguments,

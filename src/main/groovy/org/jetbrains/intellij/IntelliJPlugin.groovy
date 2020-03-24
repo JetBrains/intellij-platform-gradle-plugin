@@ -343,8 +343,8 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             conventionMapping('pluginName', { extension.pluginName })
             conventionMapping('pluginJar', { (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath })
-            conventionMapping('destinationDir', { project.file(Utils.pluginsDir(extension.sandboxDirectory, testSuffix)) })
-            conventionMapping('configDirectory', { Utils.configDir(extension.sandboxDirectory, testSuffix).toString() })
+            conventionMapping('destinationDir', { project.file("${extension.sandboxDirectory}/plugins$testSuffix") })
+            conventionMapping('configDirectory', { "${extension.sandboxDirectory}/config$testSuffix".toString() })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             dependsOn(JavaPlugin.JAR_TASK_NAME)
@@ -406,7 +406,7 @@ class IntelliJPlugin implements Plugin<Project> {
         task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory()) })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
         task.conventionMapping("systemDirectory", {
-            project.file(Utils.systemDir(extension.sandboxDirectory, ""))
+            project.file("${extension.sandboxDirectory}/system")
         })
         task.conventionMapping("executable", {
             def jbrResolver = new JbrResolver(project, task)
@@ -536,9 +536,9 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring tests tasks")
         project.tasks.withType(Test).each {
-            def configDirectory = project.file(Utils.configDir(extension.sandboxDirectory, "-test"))
-            def systemDirectory = project.file(Utils.systemDir(extension.sandboxDirectory, "-test"))
-            def pluginsDirectory = project.file(Utils.pluginsDir(extension.sandboxDirectory, "-test"))
+            def configDirectory = project.file("${extension.sandboxDirectory}/config-test")
+            def systemDirectory = project.file("${extension.sandboxDirectory}/system-test")
+            def pluginsDirectory = project.file("${extension.sandboxDirectory}/plugins-test")
 
             it.enableAssertions = true
             it.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
