@@ -1,4 +1,5 @@
-<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.17-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)
+ [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.17-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
 
 # gradle-intellij-plugin
 
@@ -146,9 +147,9 @@ The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ..
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
 
-See the instruction on how to generate authentication token: https://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
+See the instruction on how to generate authentication token: https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html
 
-Also here is the tutorial on how to configure plugin publishing: https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html
+See [Publishing Plugins with Gradle](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html) tutorial for step-by-step instructions.
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |

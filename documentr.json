@@ -9,6 +9,10 @@
       "value": "[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) "
     },
     {
+      "type": "markup",
+      "value": "[![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)\n "
+    },
+    {
       "type": "inbuilt",
       "value": "badge-shield-io-gradle-plugin"
     },
