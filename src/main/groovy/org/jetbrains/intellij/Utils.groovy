@@ -85,21 +85,6 @@ class Utils {
         result
     }
 
-    static def configDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
-        def suffix = inTests ? "-test" : ""
-        "$sandboxDirectoryPath/config$suffix"
-    }
-
-    static def systemDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
-        def suffix = inTests ? "-test" : ""
-        "$sandboxDirectoryPath/system$suffix"
-    }
-
-    static def pluginsDir(@NotNull String sandboxDirectoryPath, boolean inTests) {
-        def suffix = inTests ? "-test" : ""
-        "$sandboxDirectoryPath/plugins$suffix"
-    }
-
     @NotNull
     static List<String> getIdeJvmArgs(@NotNull JavaForkOptions options,
                                       @NotNull List<String> originalArguments,

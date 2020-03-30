@@ -13,12 +13,15 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         then:
         tasks(IntelliJPlugin.GROUP_NAME) == [IntelliJPlugin.BUILD_PLUGIN_TASK_NAME,
                                              IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
+                                             IntelliJPlugin.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
                                              IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME,
                                              IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
                                              IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
+                                             IntelliJPlugin.PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
                                              IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME,
                                              IntelliJPlugin.RUN_IDE_TASK_NAME,
+                                             IntelliJPlugin.RUN_IDE_FOR_UI_TESTS_TASK_NAME,
                                              IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME]
     }
 

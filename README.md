@@ -1,15 +1,16 @@
-<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.16-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)
+ [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.17-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
 
 # gradle-intellij-plugin
 
-<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.4.16</h4>
+<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.4.17</h4>
 
 > 
 **This project requires Gradle 3.4 or newer**
 
-This plugin allows you to build plugins for IntelliJ platform using specific IntelliJ SDK and bundled plugins.
+This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
-The plugin adds extra IntelliJ-specific dependencies, patches processResources tasks to fill some tags 
+The plugin adds extra IntelliJ-specific dependencies, patches `processResources` tasks to fill some tags 
 (name, version) in `plugin.xml` with appropriate values, patches compile tasks to instrument code with 
 nullability assertions and forms classes made with IntelliJ GUI Designer and provides some build steps which might be
 helpful while developing plugins for IntelliJ platform.
@@ -19,7 +20,7 @@ helpful while developing plugins for IntelliJ platform.
 # Getting started
 
 Here is [the manual](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
-to start developing plugins for IntelliJ IDEA using Gradle.
+to start developing plugins for IntelliJ Platform using Gradle.
 
 Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
@@ -29,7 +30,7 @@ Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.16"
+  id "org.jetbrains.intellij" version "0.4.17"
 }
 ```
  
@@ -66,11 +67,14 @@ Plugin introduces the following tasks
 | -------- | --------------- |
 | `buildPlugin`            | Assembles plugin and prepares zip archive for deployment. |
 | `patchPluginXml`         | Collects all plugin.xml files in sources and fill since/until build and version attributes. |
+| `downloadRobotServerPlugin` | Downloads robot-server plugin which is needed for ui tests running. | 
 | `prepareSandbox`         | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
 | `prepareTestingSandbox`  | Prepares sandbox that will be used while running tests. |
+| `prepareUiTestingSandbox` | Prepares sandbox that will be used while running ui tests. |
 | `buildSearchableOptions` | Builds an index of UI components (a.k.a. searchable options) for the plugin by running a headless IDE instance.<br>Note, that this is a `runIde` task with predefined arguments and all properties of `runIde` task are also applied to `buildSearchableOptions` tasks. |
 | `jarSearchableOptions`   | Creates a jar file with searchable options to be distributed with the plugin. |
 | `runIde`                 | Executes an IntelliJ IDEA instance with the plugin you are developing. |
+| `runIdeForUiTests`       | Executes an IntelliJ IDEA instance ready for ui tests run with the plugin you are developing. |
 | `publishPlugin`          | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
 | `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |
 
@@ -146,9 +150,9 @@ The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ..
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
 
-See the instruction on how to generate authentication token: https://www.jetbrains.org/intellij/sdk/docs/plugin_repository/api/plugin_upload.html
+See the instruction on how to generate authentication token: https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html
 
-Also here is the tutorial on how to configure plugin publishing: https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html
+See [Publishing Plugins with Gradle](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html) tutorial for step-by-step instructions.
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
@@ -168,7 +172,7 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.16"
+  id "org.jetbrains.intellij" version "0.4.17"
 }
 
 intellij {
@@ -215,23 +219,23 @@ As examples of using this plugin you can check out following projects:
   - Uses the Gradle Kotlin DSL
   - Mixes Java, Kotlin, and Groovy code
   - Uses Grammar Kit
-  - Uses a Kotlin version not bundled with IntelliJ
+  - Uses a Kotlin version not bundled with IntelliJ IDEA
 - [Mainframer Integration](https://github.com/elpassion/mainframer-intellij-plugin)
 	- Uses the Gradle Kotlin DSL
-	- Fully written in kotlin
+	- Fully written in Kotlin
 	- Uses RxJava
 - [Unity 3D plugin](https://github.com/JetBrains/resharper-unity) for JetBrains Rider
 - [AEM Tools plugin](https://github.com/aemtools/aemtools) for Adobe Experience Manager integration
 	- Uses the Gradle Kotlin DSL
-	- Fully written in kotlin
+	- Fully written in Kotlin
 	- Uses template language
 - [F# plugin](https://github.com/JetBrains/fsharp-support/tree/master/rider-fsharp) for JetBrains Rider
 	- Uses the Gradle Kotlin DSL
 - [Intellij Rainbow Brackets](https://github.com/izhangzhihao/intellij-rainbow-brackets)
-	- Fully written in kotlin
-	- Uses other intellij plugins as test dependencies
+	- Fully written in Kotlin
+	- Uses other IntelliJ IDEA plugins as test dependencies
 	- Circle CI configuration file & Travis CI configuration file
-	- Gradle task to verify plugin compatibility cross intellij versions
+	- Gradle task to verify plugin compatibility cross IntelliJ Platform versions
 	- Auto subbmit anonymous feedback as github issues
 # Contributing
 

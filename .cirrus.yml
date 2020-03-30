@@ -2,4 +2,4 @@ container:
   image: gradle:jdk8
 
 test_task:
-  test_script: ./gradlew test
+  test_script: ./gradlew test --stacktrace

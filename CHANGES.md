@@ -1,11 +1,14 @@
 # Changelog
 
-## 0.4.17 (under development)
+## 0.4.18 (under development)
+
+## 0.4.17
 
 - Fix platform prefix for DataGrip [#458](../../issues/458)
 - Enable plugin auto-reloading by default
 - Upgrade plugins repository client
 - Use new methods for Gradle 5.1 and higher [#464](../../issues/464)
+- Support JBR with JCEF [#465](../../issues/465)
 
 ## 0.4.16
 

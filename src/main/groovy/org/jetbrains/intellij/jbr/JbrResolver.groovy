@@ -148,6 +148,9 @@ class JbrResolver {
         }
 
         private static String getPrefix(String version) {
+            if (version.startsWith('jbr_jcef-')) {
+                return 'jbr_jcef-'
+            }
             if (version.startsWith('jbr-')) {
                 return 'jbr-'
             }
