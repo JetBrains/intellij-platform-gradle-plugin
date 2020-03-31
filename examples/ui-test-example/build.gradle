@@ -1,0 +1,38 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm' version '1.3.71'
+    id 'java'
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url = "https://jetbrains.bintray.com/intellij-third-party-dependencies" }
+}
+
+compileKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+compileTestKotlin {
+    kotlinOptions.jvmTarget = "1.8"
+}
+
+def remoteRobotVersion = "0.9.35"
+def fixturesVersion = "1.1.18"
+
+dependencies {
+    testImplementation("com.intellij.remoterobot:remote-robot:$remoteRobotVersion")
+    testImplementation("com.intellij.remoterobot:remote-fixtures:$fixturesVersion")
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
+}
+
+
+downloadRobotServerPlugin.version = remoteRobotVersion
+
+runIdeForUiTests {
+    systemProperty "robot-server.port", "8082"
+}
+
+test {
+    useJUnitPlatform()
+}
