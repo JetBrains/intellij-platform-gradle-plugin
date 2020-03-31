@@ -5,6 +5,7 @@ import com.jetbrains.test.fixtures.ContainerFixture
 import com.jetbrains.test.search.locators.byXpath
 import com.jetbrains.test.stepsProcessing.StepLogger
 import com.jetbrains.test.stepsProcessing.StepWorker
+import com.jetbrains.test.stepsProcessing.step
 import com.jetbrains.test.utils.waitFor
 import org.assertj.swing.core.MouseButton
 import org.intellij.examples.simple.plugin.pages.*
@@ -26,7 +27,7 @@ class CreateCommandLineAppTest {
             dialog("New Project") {
                 text("Java").click()
                 find<ComponentFixture>(byXpath("//div[@class='FrameworksTree']")).text("Kotlin/JVM").click()
-                execute("""robot.pressAndReleaseKey(${KeyEvent.VK_SPACE})""")
+                execute("robot.pressAndReleaseKey(${KeyEvent.VK_SPACE})")
                 button("Next").click()
                 button("Finish").click()
             }
@@ -37,20 +38,26 @@ class CreateCommandLineAppTest {
                     button("Close").click()
                 }
             }
-            with(projectViewTree) {
-                text(projectName).doubleClick()
-                waitFor { hasText("src") }
-                text("src").click(MouseButton.RIGHT_BUTTON)
+            step("Create App file") {
+                with(projectViewTree) {
+                    text(projectName).doubleClick()
+                    waitFor { hasText("src") }
+                    text("src").click(MouseButton.RIGHT_BUTTON)
+                }
+                actionMenu("New").click()
+                actionMenuItem("Kotlin File/Class").click()
+                keyboard { enterText("App"); enter() }
             }
-            actionMenu("New").click()
-            actionMenuItem("Kotlin File/Class").click()
-            keyboard { enterText("App"); enter() }
             editor {
-                autocomplete("main")
-                autocomplete("sout")
-                keyboard { enterText("\""); enterText("Hello from UI test") }
-                text("main").click()
-                keyboard { hotKey(KeyEvent.VK_ALT, KeyEvent.VK_ENTER); enter() }
+                step("Write a code") {
+                    autocomplete("main")
+                    autocomplete("sout")
+                    keyboard { enterText("\""); enterText("Hello from UI test") }
+                }
+                step("Launch application") {
+                    text("main").click()
+                    keyboard { hotKey(KeyEvent.VK_ALT, KeyEvent.VK_ENTER); enter() }
+                }
             }
         }
     }
