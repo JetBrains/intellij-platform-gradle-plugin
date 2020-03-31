@@ -15,9 +15,11 @@ compileTestKotlin {
 }
 
 def remoteRobotVersion = "0.9.18"
+def fixturesVersion = "1.1.8"
 
 dependencies {
     testImplementation("org.jetbrains.test:remote-robot:$remoteRobotVersion")
+    testImplementation("org.jetbrains.test:remote-fixtures:$fixturesVersion")
     testImplementation("com.squareup.okhttp3:okhttp:3.9.0")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'

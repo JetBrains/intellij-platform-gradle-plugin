@@ -6,6 +6,7 @@ import com.jetbrains.test.fixtures.ComponentFixture
 import com.jetbrains.test.fixtures.ContainerFixture
 import com.jetbrains.test.search.locators.byXpath
 import org.intellij.examples.simple.plugin.pages.welcomeFrame
+import org.intellij.examples.simple.plugin.utils.uiTest
 import org.junit.jupiter.api.Test
 
 class SimplePluginTest {
