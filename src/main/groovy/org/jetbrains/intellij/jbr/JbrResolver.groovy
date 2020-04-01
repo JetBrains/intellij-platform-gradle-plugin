@@ -85,14 +85,22 @@ class JbrResolver {
 
     private void untar(@NotNull File from, @NotNull File to) {
         def tempDir = new File(to.parent, to.name + "-temp")
+        Utils.debug(context, "Unpacking $from.absolutePath to $tempDir.absolutePath")
+
         if (tempDir.exists()) {
             tempDir.deleteDir()
         }
         tempDir.mkdir()
 
-        project.copy {
-            it.from project.tarTree(from)
-            it.into tempDir
+        if (OperatingSystem.current().isWindows()) {
+            project.copy {
+                it.from project.tarTree(from)
+                it.into tempDir
+            }
+        } else {
+            project.exec {
+                commandLine 'tar', '-xpf', from.absolutePath, '--directory', tempDir.absolutePath
+            }
         }
         tempDir.renameTo(to)
     }
