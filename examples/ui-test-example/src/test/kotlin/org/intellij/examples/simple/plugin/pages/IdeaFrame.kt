@@ -21,10 +21,10 @@ fun RemoteRobot.idea(function: IdeaFrame.() -> Unit) {
 class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) : CommonContainerFixture(remoteRobot, remoteComponent) {
 
     val projectViewTree
-        get() = find<ContainerFixture>(byXpath("//div[@class='ProjectViewTree']"))
+        get() = find<ContainerFixture>(byXpath("ProjectViewTree", "//div[@class='ProjectViewTree']"))
 
     val projectName
-        get() = retrieve<String>("component.getProject().getName()")
+        get() = step("Get project name") { return@step retrieve<String>("component.getProject().getName()") }
 
     fun dumbAware(timeout: Duration = Duration.ofMinutes(5), function: () -> Unit) {
         step("Wait for smart mode") {

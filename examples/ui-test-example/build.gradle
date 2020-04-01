@@ -15,7 +15,7 @@ compileTestKotlin {
 }
 
 def remoteRobotVersion = "0.9.18"
-def fixturesVersion = "1.1.8"
+def fixturesVersion = "1.1.9"
 
 dependencies {
     testImplementation("org.jetbrains.test:remote-robot:$remoteRobotVersion")
