@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.4.18 (under development)
+## 0.4.19 (under development)
+
+## 0.4.18
+- Introduced `runIdeForUiTests` task [#466](../../issues/466)
+- Fix unpacking JBR with JCEF on Mac [#468](../../issues/468)
+- Publish plugin security update [#472](../../issues/472)
 
 ## 0.4.17
 
