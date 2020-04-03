@@ -4,6 +4,7 @@ import com.jetbrains.test.RemoteRobot
 import com.jetbrains.test.data.RemoteComponent
 import com.jetbrains.test.fixtures.ComponentFixture
 import com.jetbrains.test.fixtures.ContainerFixture
+import com.jetbrains.test.fixtures.DefaultXpath
 import com.jetbrains.test.search.locators.byXpath
 import org.intellij.examples.simple.plugin.pages.welcomeFrame
 import org.intellij.examples.simple.plugin.utils.uiTest
@@ -22,6 +23,7 @@ class SimplePluginTest {
         helloDialog.ok.click()
     }
 
+    @DefaultXpath("title", "//div[@title='Hello' and @class='MyDialog']")
     class HelloWorldDialog(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent): ContainerFixture(remoteRobot, remoteComponent) {
         val textPane: ComponentFixture
             get() = find(byXpath("//div[@class='JTextPane']"))

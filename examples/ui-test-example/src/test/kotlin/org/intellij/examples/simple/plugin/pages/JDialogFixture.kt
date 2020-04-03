@@ -6,7 +6,7 @@ import com.jetbrains.test.data.componentAs
 import com.jetbrains.test.fixtures.CommonContainerFixture
 import com.jetbrains.test.fixtures.ContainerFixture
 import com.jetbrains.test.fixtures.FixtureName
-import com.jetbrains.test.search.locators.byLambda
+import com.jetbrains.test.search.locators.byXpath
 import com.jetbrains.test.stepsProcessing.step
 import java.time.Duration
 import javax.swing.JDialog
@@ -24,21 +24,8 @@ class JDialogFixture(
         remoteComponent: RemoteComponent) : CommonContainerFixture(remoteRobot, remoteComponent) {
 
     companion object {
-        fun byTitle(title: String) = byLambda("title $title") {
-            it is JDialog && it.isShowing && it.title == title
-        }
-
-        fun byType() = byLambda("JDialog") {
-            it is JDialog && it.isShowing
-        }
-
-        fun byTitleContains(title: String) = byLambda("title contains $title") {
-            it is JDialog && it.isShowing && it.title.contains(title, true)
-        }
-
-        fun byTitle(titleRegex: Regex) = byLambda("title match $titleRegex") {
-            it is JDialog && it.isShowing && it.title.matches(titleRegex)
-        }
+        @JvmStatic
+        fun byTitle(title: String) = byXpath("title $title", "//div[@title='$title' and @class='MyDialog']")
     }
 
     val title
