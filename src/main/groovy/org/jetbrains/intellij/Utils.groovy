@@ -209,7 +209,7 @@ class Utils {
         return FileUtils.listFiles(directory, new AbstractFileFilter() {
             @Override
             boolean accept(File file) {
-                return StringUtil.endsWithIgnoreCase(file.getName(), ".jar") && filter.test(file)
+                return FileUtilKt.isJar(file) && filter.test(file)
             }
         }, recursively ? TrueFileFilter.INSTANCE : FalseFileFilter.FALSE)
     }

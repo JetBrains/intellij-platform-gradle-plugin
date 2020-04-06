@@ -11,8 +11,8 @@ class KotlinHelloAction : AnAction() {
         Util.sayHello()
     }
 
-    override fun update(e: AnActionEvent?) {
+    override fun update(e: AnActionEvent) {
         super.update(e)
-        e!!.presentation.icon = AllIcons.Ide.Info_notifications
+        e.presentation.icon = AllIcons.General.Information
     }
 }
