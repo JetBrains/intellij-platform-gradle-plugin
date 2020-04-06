@@ -14,12 +14,12 @@ import javax.swing.JDialog
 fun ContainerFixture.dialog(
         title: String,
         timeout: Duration = Duration.ofSeconds(20),
-        function: JDialogFixture.() -> Unit = {}): JDialogFixture = step("Search for dialog with title $title") {
-    find<JDialogFixture>(JDialogFixture.byTitle(title), timeout).apply(function)
+        function: DialogFixture.() -> Unit = {}): DialogFixture = step("Search for dialog with title $title") {
+    find<DialogFixture>(DialogFixture.byTitle(title), timeout).apply(function)
 }
 
 @FixtureName("Dialog")
-class JDialogFixture(
+class DialogFixture(
         remoteRobot: RemoteRobot,
         remoteComponent: RemoteComponent) : CommonContainerFixture(remoteRobot, remoteComponent) {
 
