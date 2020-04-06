@@ -29,8 +29,8 @@ dependencies {
     compile gradleApi()
     compile 'org.jetbrains:annotations:13.0'
     compile 'org.jetbrains.intellij:plugin-repository-rest-client:2.0.2'
-    compile 'org.jetbrains.intellij.plugins:structure-base:3.46'
-    compile 'org.jetbrains.intellij.plugins:structure-intellij:3.46'
+    compile 'org.jetbrains.intellij.plugins:structure-base:3.102'
+    compile 'org.jetbrains.intellij.plugins:structure-intellij:3.102'
     compile 'de.undercouch:gradle-download-task:4.0.4'
 
     testCompile gradleTestKit()
