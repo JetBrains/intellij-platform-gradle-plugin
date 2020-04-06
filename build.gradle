@@ -146,7 +146,7 @@ uploadArchives {
 }
 
 wrapper {
-    gradleVersion = '6.0.1'
+    gradleVersion = '6.3'
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
