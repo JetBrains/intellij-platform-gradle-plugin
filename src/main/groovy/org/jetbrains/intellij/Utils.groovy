@@ -1,6 +1,6 @@
 package org.jetbrains.intellij
 
-import com.jetbrains.plugin.structure.intellij.utils.StringUtil
+import com.jetbrains.plugin.structure.base.utils.FileUtilKt
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
@@ -170,11 +170,11 @@ class Utils {
     }
 
     static boolean isJarFile(@NotNull File file) {
-        return StringUtil.endsWithIgnoreCase(file.name, ".jar")
+        return FileUtilKt.isJar(file)
     }
 
     static boolean isZipFile(@NotNull File file) {
-        return StringUtil.endsWithIgnoreCase(file.name, ".zip")
+        return FileUtilKt.isZip(file)
     }
 
     @NotNull
