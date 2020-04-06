@@ -19,7 +19,7 @@ import java.time.Duration
 
 class CreateCommandLineKotlinTest {
     init {
-        StepsLogger
+        StepsLogger.init()
     }
 
     @AfterEach
@@ -38,7 +38,7 @@ class CreateCommandLineKotlinTest {
             createNewProjectLink.click()
             dialog("New Project") {
                 text("Java").click()
-                find<ComponentFixture>(
+                find(ComponentFixture::class.java,
                         byXpath("//div[@class='FrameworksTree']")
                 ).text("Kotlin/JVM").click()
                 execute("robot.pressAndReleaseKey(${KeyEvent.VK_SPACE})")

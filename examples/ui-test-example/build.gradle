@@ -15,8 +15,8 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-def remoteRobotVersion = "0.9.23"
-def fixturesVersion = "1.1.11"
+def remoteRobotVersion = "0.9.24"
+def fixturesVersion = "1.1.13"
 
 dependencies {
     testImplementation("org.jetbrains.test:remote-robot:$remoteRobotVersion")

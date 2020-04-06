@@ -2,14 +2,13 @@ package org.intellij.examples.simple.plugin;
 
 import com.jetbrains.test.RemoteRobot;
 import com.jetbrains.test.fixtures.ContainerFixture;
-import com.jetbrains.test.search.locators.Locator;
 import com.jetbrains.test.utils.Keyboard;
 import org.assertj.swing.core.MouseButton;
 import org.intellij.examples.simple.plugin.pages.IdeaFrame;
 import org.intellij.examples.simple.plugin.steps.JavaExampleSteps;
 import org.intellij.examples.simple.plugin.utils.StepsLogger;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.awt.event.KeyEvent;
@@ -28,9 +27,9 @@ public class CreateCommandLineJavaTest {
     private final JavaExampleSteps steps = new JavaExampleSteps(remoteRobot);
     private final Keyboard keyboard = new Keyboard(remoteRobot);
 
-    @BeforeClass
+    @BeforeAll
     public static void initLogging() {
-        StepsLogger.INSTANCE.init();
+        StepsLogger.init();
     }
 
     @AfterEach
@@ -63,9 +62,10 @@ public class CreateCommandLineJavaTest {
         keyboard.hotKey(KeyEvent.VK_ALT, KeyEvent.VK_ENTER);
         keyboard.enter();
 
-        final Locator consoleLocator = byXpath("//div[@class='ConsoleViewImpl']");
-        waitFor(Duration.ofMinutes(1), () -> idea.findAll(ContainerFixture.class, consoleLocator).size() > 0);
-
-        assert (idea.find(ContainerFixture.class, consoleLocator).hasText("Hello from UI test"));
+        assert (idea.find(
+                ContainerFixture.class,
+                byXpath("//div[@class='ConsoleViewImpl']"),
+                Duration.ofMinutes(1)
+        ).hasText("Hello from UI test"));
     }
 }

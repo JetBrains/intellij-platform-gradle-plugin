@@ -11,9 +11,9 @@ import org.intellij.examples.simple.plugin.utils.StepsLogger
 import org.intellij.examples.simple.plugin.utils.uiTest
 import org.junit.jupiter.api.Test
 
-class SayHelloTest {
+class SayHelloKotlinTest {
     init {
-        StepsLogger
+        StepsLogger.init()
     }
 
     @Test
