@@ -71,7 +71,8 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
                                   'myPluginName/lib/searchableOptions-0.42.123.jar'] as Set
 
         def jar = new ZipFile(extractFile(zipFile, 'myPluginName/lib/projectName-0.42.123.jar'))
-        collectPaths(jar) == ['App.class', 'pack/', 'pack/AppKt.class', 'META-INF/', 'META-INF/MANIFEST.MF', 'META-INF/plugin.xml'] as Set
+        collectPaths(jar) == ['App.class', 'pack/', 'pack/AppKt.class', 'META-INF/',
+                              'META-INF/MANIFEST.MF', 'META-INF/plugin.xml', 'META-INF/projectName.kotlin_module'] as Set
     }
 
     def 'use custom sandbox for distribution'() {

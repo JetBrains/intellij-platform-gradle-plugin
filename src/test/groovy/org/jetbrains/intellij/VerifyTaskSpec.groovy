@@ -52,7 +52,7 @@ class VerifyTaskSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
 
         then:
-        result.output.contains('Plugin descriptor plugin.xml is not found')
+        result.output.contains("Plugin descriptor 'plugin.xml' is not found")
     }
 
     def 'do not fail on errors if option is enabled'() {
@@ -63,7 +63,7 @@ class VerifyTaskSpec extends IntelliJPluginSpecBase {
         def result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
 
         then:
-        result.output.contains('Plugin descriptor plugin.xml is not found')
+        result.output.contains("Plugin descriptor 'plugin.xml' is not found")
     }
 
     def 'do not fail if there are no errors and warnings'() {
