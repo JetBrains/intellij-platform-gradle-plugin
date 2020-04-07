@@ -40,7 +40,10 @@ runIdeForUiTests {
     systemProperty "robot-server.port", "8082"
 }
 ```
- 
+##### Create Remote-robot
+```java
+RemoteRobot remoteRobot = new RemoteRobot("http://127.0.0.1:8082");
+```
 ### Searching components
 We use `XPath` query language to find components.
 Once Idea with `robot-server` started, you can open `http://ROBOT-SERVER:PORT/hierarchy` [link](http://127.0.0.1:8082/hierarchy).
@@ -48,6 +51,80 @@ The page represent idea components hierarchy in HTML format. You can find the co
 There is also a simple XPath generator which can help write and test your XPaths.
 ![](docs/use_xpath.png)
 
-### Executing code on Idea side
+Define locator
+```java
+Locator loginToGitHubLocator = byXpath("//div[@class='MainButton' and @text='Log in to GitHub...']");
+```
+Find one component
+```java
+ComponentFixture loginToGitHub = remoteRobot.find(ComponentFixture.class, loginToGitHubLocator);
+```
+Find many components
+```java
+List<ContainterFixture> dialogs = remoteRobot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"));
+```
+### Fixtures
+Fixtures introduce `Page Object Pattern`. 
+There are two basic fixtures:
+- `ComponentFixture` is the most simple representation of real any component with basic methods;
+- `ContainerFixture` extends `ComponentFixture` and allows search other components inside it. 
 
+You can create your own fixtures:
+```java
+@DefaultXpath(by = "FlatWelcomeFrame type", xpath = "//div[@class='FlatWelcomeFrame']")
+@FixtureName(name = "Welcome Frame")
+public class WelcomeFrameFixture extends ContainerFixture {
+    public WelcomeFrameFixture(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
+        super(remoteRobot, remoteComponent);
+    }
+
+    // Create New Project 
+    public ComponentFixture createNewProjectLink() {
+        return find(ComponentFixture.class, byXpath("//div[@text='Create New Project' and @class='ActionLink']"));
+    }
+
+    // Import Project
+    public ComponentFixture importProjectLink() {
+        return find(ComponentFixture.class, byXpath("//div[@text='Import Project' and @class='ActionLink']"));
+    }
+}
+```
+```java
+// find custom fixture by its default xpath
+WelcomeFrameFixture welcomeFrame = remoteRobot.find(WelcomeFrameFixture.class);
+welcomeFrame.createNewProjectLink().click();
+```
+### Get data from real component. Executing code.
+We use JavaScript `rhino` engine to work with components on Idea side.
+
+Example of retrieving text from ActionLink component:
+```java
+public class ActionLinkFixture extends ComponentFixture {
+    public ActionLinkFixture(@NotNull RemoteRobot remoteRobot, @NotNull RemoteComponent remoteComponent) {
+        super(remoteRobot, remoteComponent);
+    }
+    
+    public String text() {
+        return retrieve("component.getText();");
+    }
+}
+```
+We can `retrieve` data via `RemoteRobot`. In this case there is a `robot` var in context of JavaScript execution. 
+The `robot` is instance of extended class of  [`org.assertj.swing.core.Robot`](https://joel-costigliola.github.io/assertj/swing/api/org/assertj/swing/core/Robot.html) 
+
+If you call `retrieve` from `fixture` object you will also have in the context `component` var which is the real component you found early.
+
+`execute` method works the same way without any return value:
+```java
+public void click() {
+        execute("const offset = component.getHeight()/2;" +
+                "robot.click(" +
+                "component, " +
+                "new java.awt.Point(offset, offset), " +
+                "org.assertj.swing.core.MouseButton.LEFT_BUTTON, 1);"
+        );
+    }
+```
 ### Steps logging
+
+### Kotlin
