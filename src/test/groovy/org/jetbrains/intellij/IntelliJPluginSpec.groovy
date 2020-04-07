@@ -32,7 +32,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         disableDebug('Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation')
 
         when:
-        def result = build('4.0', false, 'buildSourceSet', '--info')
+        def result = build('buildSourceSet', '--info')
 
         then:
         result.output.contains('Added @NotNull assertions to 1 files')
@@ -223,7 +223,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         buildFile << 'task printMainCompileClassPath { doLast { println \'compile: \' + sourceSets.main.compileClasspath.asPath } }\n'
 
         when:
-        def result = build('4.9', false, 'printMainRuntimeClassPath', 'printMainCompileClassPath')
+        def result = build('printMainRuntimeClassPath', 'printMainCompileClassPath')
         def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 

@@ -32,7 +32,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
                     mavenCentral()
                 }
                 dependencies {
-                    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.0.6"
+                    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60"
                 }
             }
             plugins {
@@ -88,7 +88,7 @@ public class AppTest {
     }
 
     protected BuildResult build(boolean fail, String... tasks) {
-        return build('3.4', fail, tasks)
+        return build('4.9', fail, tasks)
     }
 
     protected BuildResult build(String gradleVersion, boolean fail, String... tasks) {

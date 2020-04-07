@@ -45,7 +45,7 @@ dependencies {
 version = '0.4.18'
 group = 'org.jetbrains.intellij.plugins'
 description = """
-**This project requires Gradle 3.4 or newer**
+**This project requires Gradle 4.9 or newer**
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 

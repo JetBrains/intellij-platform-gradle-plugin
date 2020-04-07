@@ -58,7 +58,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         when:
         disableDebug("while debugging Gradle 4.0 includes all dependencies, including intellij-plugin-structure, " +
                 "which depends on asm-all different from IDEA-builtin asm-all")
-        build('4.9', false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
         File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
@@ -171,7 +171,7 @@ class App {
             }
             """.stripIndent()
         when:
-        build('4.9', false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
         then:
         File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')

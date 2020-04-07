@@ -75,8 +75,8 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void checkGradleVersion(@NotNull Project project) {
-        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("3.4")) {
-            throw new PluginInstantiationException("gradle-intellij-plugin requires Gradle 3.4 and higher")
+        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("4.9")) {
+            throw new PluginInstantiationException("gradle-intellij-plugin requires Gradle 4.9 and higher")
         }
     }
 
