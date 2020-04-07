@@ -6,7 +6,7 @@ import com.jetbrains.test.utils.Keyboard;
 import kotlin.Unit;
 import org.intellij.examples.simple.plugin.pages.DialogFixture;
 import org.intellij.examples.simple.plugin.pages.IdeaFrame;
-import org.intellij.examples.simple.plugin.pages.WelcomeFrame;
+import org.intellij.examples.simple.plugin.pages.WelcomeFrameFixture;
 
 import java.awt.event.KeyEvent;
 import java.time.Duration;
@@ -24,8 +24,8 @@ public class JavaExampleSteps {
     }
 
     public void createNewCommandLineProject() {
-        final WelcomeFrame welcomeFrame = remoteRobot.find(WelcomeFrame.class);
-        welcomeFrame.getCreateNewProjectLink().click();
+        final WelcomeFrameFixture welcomeFrame = remoteRobot.find(WelcomeFrameFixture.class);
+        welcomeFrame.createNewProjectLink().click();
 
         final DialogFixture newProjectDialog = welcomeFrame.find(DialogFixture.class, DialogFixture.byTitle("New Project"), Duration.ofSeconds(20));
         newProjectDialog.text("Java").click();

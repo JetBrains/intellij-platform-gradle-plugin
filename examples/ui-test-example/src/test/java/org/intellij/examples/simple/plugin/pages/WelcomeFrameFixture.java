@@ -18,8 +18,8 @@ public class WelcomeFrameFixture extends ContainerFixture {
         super(remoteRobot, remoteComponent);
     }
 
-    public ComponentFixture createNewProjectLink() {
-        return find(ComponentFixture.class, byXpath("//div[@text='Create New Project' and @class='ActionLink']"));
+    public ActionLinkFixture createNewProjectLink() {
+        return find(ActionLinkFixture.class, byXpath("//div[@text='Create New Project' and @class='ActionLink']"));
     }
 
     public ComponentFixture importProjectLink() {
