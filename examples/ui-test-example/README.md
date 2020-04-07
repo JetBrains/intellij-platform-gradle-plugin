@@ -1,5 +1,5 @@
 ## Quick start
-Fist we need to launch Ide. Since `runIdeForUiTests` task is blocking, we can run it asynchronously.
+Fist we need to launch Ide. Since `runIdeForUiTests` task is blocking, we can run it as an asynchronous process.
 
 `./gradlew ui-test-example:clean ui-test-example:runIdeForUiTests &`
  
@@ -40,14 +40,16 @@ runIdeForUiTests {
     systemProperty "robot-server.port", "8082"
 }
 ```
-##### Create Remote-robot
+Of course, you can have all in one project. 
+### Create Remote-robot
+In test project:
 ```java
 RemoteRobot remoteRobot = new RemoteRobot("http://127.0.0.1:8082");
 ```
 ### Searching components
-We use `XPath` query language to find components.
+We use [`XPath`](https://www.w3.org/TR/xpath-21/) query language to find components.
 Once Idea with `robot-server` started, you can open `http://ROBOT-SERVER:PORT/hierarchy` [link](http://127.0.0.1:8082/hierarchy).
-The page represent idea components hierarchy in HTML format. You can find the component you interesting in and write an XPath to it like we usualy do with Selenium WebDriver.
+The page represent idea components hierarchy in HTML format. You can find the component you interesting in and write an XPath to it like we usually do with Selenium WebDriver.
 There is also a simple XPath generator which can help write and test your XPaths.
 ![](docs/use_xpath.png)
 
