@@ -342,7 +342,11 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             conventionMapping('pluginName', { extension.pluginName })
-            conventionMapping('pluginJar', { (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath })
+            conventionMapping('pluginJar', {
+                return VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
+                        ? (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archiveFile.getOrNull()?.getAsFile()
+                        : (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath
+            })
             conventionMapping('destinationDir', { project.file("${extension.sandboxDirectory}/plugins$testSuffix") })
             conventionMapping('configDirectory', { "${extension.sandboxDirectory}/config$testSuffix".toString() })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
@@ -603,7 +607,9 @@ class IntelliJPlugin implements Plugin<Project> {
             description = "Publish plugin distribution on plugins.jetbrains.com."
             conventionMapping('distributionFile', {
                 def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
-                def distributionFile = buildPluginTask?.archivePath
+                def distributionFile =
+                        VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
+                                ? buildPluginTask?.archiveFile?.getOrNull()?.getAsFile() : buildPluginTask.archivePath;
                 return distributionFile?.exists() ? distributionFile : null
             })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
