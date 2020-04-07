@@ -61,7 +61,10 @@ ComponentFixture loginToGitHub = remoteRobot.find(ComponentFixture.class, loginT
 ```
 Find many components
 ```java
-List<ContainterFixture> dialogs = remoteRobot.findAll(ComponentFixture.class, byXpath("//div[@class='MyDialog']"));
+List<ContainterFixture> dialogs = remoteRobot.findAll(
+    ComponentFixture.class, 
+    byXpath("//div[@class='MyDialog']")
+);
 ```
 ### Fixtures
 Fixtures introduce `Page Object Pattern`. 
@@ -125,6 +128,24 @@ public void click() {
         );
     }
 ```
-### Steps logging
+### Text
+Sometimes you may don't want to dig the whole component to find out which field contains the text you need to reach. 
+If you just need to check whether some text is present on the component, or you just need to click at the text, 
+you can use `fixture` methods:
+```java
+welcomeFrame.text("Create New Project").click();
+
+assert(welcomeFrame.hasText("Version 2019.2"));
+
+List<String> renderedText = welcomeFrame.allText()
+    .stream()
+    .map(RemoteText::getText)
+    .collect(Collectors.toList());
+```
+Instead of looking for text inside the component structure we just render it on a fake `Graphics` to collect texts data and its points.
 
 ### Kotlin
+If you already familiar with Kotlin please take a look at [kotlin example](/src/test/kotlin/org/intellij/examples/simple/plugin/CreateCommandLineKotlinTest.kt). You can find it easier to read and use.
+### Steps logging
+We use `step` wrapper method to make test log easy to read. In the example simple `StepLogger` is used to show how useful it may be. 
+By implementing your own `StepProcessor` you can extend steps flow, connect [allure report](https://docs.qameta.io/allure/) for instance.

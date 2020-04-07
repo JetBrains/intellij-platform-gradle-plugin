@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.time.Duration;
 
 import static com.jetbrains.test.search.locators.LocatorKt.byXpath;
+import static com.jetbrains.test.stepsProcessing.StepWorkerKt.step;
 import static org.intellij.examples.simple.plugin.pages.DialogFixture.byTitle;
 
 public class JavaExampleSteps {
@@ -24,28 +25,32 @@ public class JavaExampleSteps {
     }
 
     public void createNewCommandLineProject() {
-        final WelcomeFrameFixture welcomeFrame = remoteRobot.find(WelcomeFrameFixture.class);
-        welcomeFrame.createNewProjectLink().click();
+        step("Create New Command Line Project", () -> {
+            final WelcomeFrameFixture welcomeFrame = remoteRobot.find(WelcomeFrameFixture.class);
+            welcomeFrame.createNewProjectLink().click();
 
-        final DialogFixture newProjectDialog = welcomeFrame.find(DialogFixture.class, DialogFixture.byTitle("New Project"), Duration.ofSeconds(20));
-        newProjectDialog.text("Java").click();
-        newProjectDialog.find(ComponentFixture.class,
-                byXpath("FrameworksTree", "//div[@class='FrameworksTree']"))
-                .text("Kotlin/JVM")
-                .click();
-        keyboard.key(KeyEvent.VK_SPACE, Duration.ZERO);
-        newProjectDialog.button("Next").click();
-        newProjectDialog.button("Finish").click();
+            final DialogFixture newProjectDialog = welcomeFrame.find(DialogFixture.class, DialogFixture.byTitle("New Project"), Duration.ofSeconds(20));
+            newProjectDialog.text("Java").click();
+            newProjectDialog.find(ComponentFixture.class,
+                    byXpath("FrameworksTree", "//div[@class='FrameworksTree']"))
+                    .text("Kotlin/JVM")
+                    .click();
+            keyboard.key(KeyEvent.VK_SPACE, Duration.ZERO);
+            newProjectDialog.button("Next").click();
+            newProjectDialog.button("Finish").click();
+        });
     }
 
     public void closeTipOfTheDay() {
-        final IdeaFrame idea = remoteRobot.find(IdeaFrame.class);
-        idea.dumbAware(() -> {
-            try {
-                idea.find(DialogFixture.class, byTitle("Tip of the Day")).button("Close").click();
-            } catch (Throwable ignore) {
-            }
-            return Unit.INSTANCE;
+        step("Close Tip of the Day if it appears", () -> {
+            final IdeaFrame idea = remoteRobot.find(IdeaFrame.class);
+            idea.dumbAware(() -> {
+                try {
+                    idea.find(DialogFixture.class, byTitle("Tip of the Day")).button("Close").click();
+                } catch (Throwable ignore) {
+                }
+                return Unit.INSTANCE;
+            });
         });
     }
 }

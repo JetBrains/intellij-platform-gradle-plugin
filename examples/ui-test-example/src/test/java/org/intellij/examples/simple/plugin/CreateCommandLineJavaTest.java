@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import java.time.Duration;
 
 import static com.jetbrains.test.search.locators.LocatorKt.byXpath;
+import static com.jetbrains.test.stepsProcessing.StepWorkerKt.step;
 import static com.jetbrains.test.utils.KeyboardUtilsKt.autocomplete;
 import static com.jetbrains.test.utils.RepeatUtilsKt.waitFor;
 import static org.intellij.examples.simple.plugin.pages.ActionMenuFixtureKt.actionMenu;
@@ -34,8 +35,10 @@ public class CreateCommandLineJavaTest {
 
     @AfterEach
     public void closeProject() {
-        actionMenu(remoteRobot, "File").click();
-        actionMenuItem(remoteRobot, "Close Project").click();
+        step("Close the project", () -> {
+            actionMenu(remoteRobot, "File").click();
+            actionMenuItem(remoteRobot, "Close Project").click();
+        });
     }
 
     @Test
@@ -44,23 +47,33 @@ public class CreateCommandLineJavaTest {
         steps.closeTipOfTheDay();
 
         final IdeaFrame idea = remoteRobot.find(IdeaFrame.class);
-        final ContainerFixture projectView = idea.getProjectViewTree();
-        projectView.text(idea.getProjectName()).doubleClick();
-        waitFor(() -> projectView.hasText("src"));
-        projectView.text("src").click(MouseButton.RIGHT_BUTTON);
-        actionMenu(remoteRobot, "New").click();
-        actionMenuItem(remoteRobot, "Kotlin File/Class").click();
-        keyboard.enterText("App");
-        keyboard.enter();
+
+        step("Create New Kotlin file", () -> {
+            final ContainerFixture projectView = idea.getProjectViewTree();
+
+            projectView.text(idea.getProjectName()).doubleClick();
+            waitFor(() -> projectView.hasText("src"));
+            projectView.text("src").click(MouseButton.RIGHT_BUTTON);
+            actionMenu(remoteRobot, "New").click();
+            actionMenuItem(remoteRobot, "Kotlin File/Class").click();
+            keyboard.enterText("App");
+            keyboard.enter();
+        });
 
         final ContainerFixture editor = editor(idea, "App.kt");
-        autocomplete(remoteRobot, "main");
-        autocomplete(remoteRobot, "sout");
-        keyboard.enterText("\"");
-        keyboard.enterText("Hello from UI test");
-        editor.text("main").click();
-        keyboard.hotKey(KeyEvent.VK_ALT, KeyEvent.VK_ENTER);
-        keyboard.enter();
+
+        step("Write a code", () -> {
+            autocomplete(remoteRobot, "main");
+            autocomplete(remoteRobot, "sout");
+            keyboard.enterText("\"");
+            keyboard.enterText("Hello from UI test");
+        });
+
+        step("Launch the application", () -> {
+            editor.text("main").click();
+            keyboard.hotKey(KeyEvent.VK_ALT, KeyEvent.VK_ENTER);
+            keyboard.enter();
+        });
 
         assert (idea.find(
                 ContainerFixture.class,
