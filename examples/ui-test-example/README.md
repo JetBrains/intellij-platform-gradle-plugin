@@ -100,7 +100,8 @@ WelcomeFrameFixture welcomeFrame = remoteRobot.find(WelcomeFrameFixture.class);
 welcomeFrame.createNewProjectLink().click();
 ```
 ### Get data from real component. Executing code.
-We use JavaScript `rhino` engine to work with components on Idea side.v
+We use JavaScript [`rhino`](https://github.com/mozilla/rhino) engine to work with components on Idea side.
+
 Example of retrieving text from ActionLink component:
 ```java
 public class ActionLinkFixture extends ComponentFixture {
@@ -136,7 +137,7 @@ We import some packages to the context before the script executed.
     org.assertj.swing.core
     org.assertj.swing.fixture
 ```
-You can add other packages with js [methods](https://www-archive.mozilla.org/rhino/apidocs/org/mozilla/javascript/importertoplevel).
+You can add other packages or classes with js [methods](https://www-archive.mozilla.org/rhino/apidocs/org/mozilla/javascript/importertoplevel).
 ```java
     importClass(java.io.File);            
     importPackage(java.io);
