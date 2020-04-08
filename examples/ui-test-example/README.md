@@ -12,7 +12,7 @@ Or just run all together with one line
 `./gradlew ui-test-example:clean ui-test-example:runIdeForUiTests & ./gradlew ui-test-example:test`
 
 ## Remote-robot
-Remote-robot library inspired by Selenium WebDriver.
+Remote-robot library inspired by Selenium WebDriver. It supports ideas since `2018.3`.
 
 ![](docs/simple-schema.png)
 
@@ -147,7 +147,7 @@ List<String> renderedText = welcomeFrame.allText()
 Instead of looking for text inside the component structure we just render it on a fake `Graphics` to collect texts data and its points.
 
 ### Kotlin
-If you already familiar with Kotlin please take a look at [kotlin example](/src/test/kotlin/org/intellij/examples/simple/plugin/CreateCommandLineKotlinTest.kt). You can find it easier to read and use.
+If you already familiar with Kotlin please take a look at [kotlin example](/examples/ui-test-example/src/test/kotlin/org/intellij/examples/simple/plugin/CreateCommandLineKotlinTest.kt). You can find it easier to read and use.
 ### Steps logging
 We use `step` wrapper method to make test log easy to read. In the example simple `StepLogger` is used to show how useful it may be. 
 By implementing your own `StepProcessor` you can extend steps flow, connect [allure report](https://docs.qameta.io/allure/) for instance.
