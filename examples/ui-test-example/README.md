@@ -12,7 +12,7 @@ Or just run all together with one line
 `./gradlew ui-test-example:clean ui-test-example:runIdeForUiTests & ./gradlew ui-test-example:test`
 
 ## Remote-robot
-Remote-robot library inspired by Selenium WebDriver. It supports ideas since `2018.3`.
+Remote-robot library is inspired by Selenium WebDriver. It supports ideas since `2018.3`.
 
 ![](docs/simple-schema.png)
 
@@ -48,7 +48,7 @@ RemoteRobot remoteRobot = new RemoteRobot("http://127.0.0.1:8082");
 ```
 ### Searching components
 We use [`XPath`](https://www.w3.org/TR/xpath-21/) query language to find components.
-Once Idea with `robot-server` started, you can open `http://ROBOT-SERVER:PORT/hierarchy` [link](http://127.0.0.1:8082/hierarchy).
+Once Idea with `robot-server` started, you can open `http://ROBOT-SERVER:PORT` [link](http://127.0.0.1:8082).
 The page represent idea components hierarchy in HTML format. You can find the component you interesting in and write an XPath to it like we usually do with Selenium WebDriver.
 There is also a simple XPath generator which can help write and test your XPaths.
 ![](docs/use_xpath.png)
@@ -100,8 +100,7 @@ WelcomeFrameFixture welcomeFrame = remoteRobot.find(WelcomeFrameFixture.class);
 welcomeFrame.createNewProjectLink().click();
 ```
 ### Get data from real component. Executing code.
-We use JavaScript `rhino` engine to work with components on Idea side.
-
+We use JavaScript `rhino` engine to work with components on Idea side.v
 Example of retrieving text from ActionLink component:
 ```java
 public class ActionLinkFixture extends ComponentFixture {
@@ -125,21 +124,38 @@ public void click() {
         execute("const offset = component.getHeight()/2;" +
                 "robot.click(" +
                 "component, " +
-                "new java.awt.Point(offset, offset), " +
-                "org.assertj.swing.core.MouseButton.LEFT_BUTTON, 1);"
+                "new Point(offset, offset), " +
+                "MouseButton.LEFT_BUTTON, 1);"
         );
     }
 ```
+
+We import some packages to the context before the script executed.
+```java
+    java.awt
+    org.assertj.swing.core
+    org.assertj.swing.fixture
+```
+You can add other packages with js [methods](https://www-archive.mozilla.org/rhino/apidocs/org/mozilla/javascript/importertoplevel).
+```java
+    importClass(java.io.File);            
+    importPackage(java.io);
+```
+Or just use the full path.
+```java
+    const fixture = org.assertj.swing.fixture.JListFixture(robot, component);
+```
+
 ### Text
 Sometimes you may don't want to dig the whole component to find out which field contains the text you need to reach. 
 If you just need to check whether some text is present on the component, or you just need to click at the text, 
 you can use `fixture` methods:
 ```java
-welcomeFrame.text("Create New Project").click();
+welcomeFrame.findText("Create New Project").click();
 
-assert(welcomeFrame.hasText("Version 2019.2"));
+assert(welcomeFrame.hasText(startsWith("Version 20")));
 
-List<String> renderedText = welcomeFrame.allText()
+List<String> renderedText = welcomeFrame.findAllText()
     .stream()
     .map(RemoteText::getText)
     .collect(Collectors.toList());

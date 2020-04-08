@@ -37,10 +37,10 @@ class CreateCommandLineKotlinTest {
         welcomeFrame {
             createNewProjectLink.click()
             dialog("New Project") {
-                text("Java").click()
+                findText("Java").click()
                 find(ComponentFixture::class.java,
                         byXpath("//div[@class='FrameworksTree']")
-                ).text("Kotlin/JVM").click()
+                ).findText("Kotlin/JVM").click()
                 execute("robot.pressAndReleaseKey(${KeyEvent.VK_SPACE})")
                 button("Next").click()
                 button("Finish").click()
@@ -50,9 +50,9 @@ class CreateCommandLineKotlinTest {
         idea {
             step("Create App file") {
                 with(projectViewTree) {
-                    text(projectName).doubleClick()
+                    findText(projectName).doubleClick()
                     waitFor { hasText("src") }
-                    text("src").click(MouseButton.RIGHT_BUTTON)
+                    findText("src").click(MouseButton.RIGHT_BUTTON)
                 }
                 actionMenu("New").click()
                 actionMenuItem("Kotlin File/Class").click()
@@ -65,7 +65,7 @@ class CreateCommandLineKotlinTest {
                     keyboard { enterText("\""); enterText("Hello from UI test") }
                 }
                 step("Launch application") {
-                    text("main").click()
+                    findText("main").click()
                     keyboard { hotKey(KeyEvent.VK_ALT, KeyEvent.VK_ENTER); enter() }
                 }
             }

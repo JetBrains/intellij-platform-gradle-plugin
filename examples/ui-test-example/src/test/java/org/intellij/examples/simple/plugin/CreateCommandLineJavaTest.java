@@ -53,7 +53,7 @@ public class CreateCommandLineJavaTest {
 
             projectView.text(idea.getProjectName()).doubleClick();
             waitFor(() -> projectView.hasText("src"));
-            projectView.text("src").click(MouseButton.RIGHT_BUTTON);
+            projectView.findText("src").click(MouseButton.RIGHT_BUTTON);
             actionMenu(remoteRobot, "New").click();
             actionMenuItem(remoteRobot, "Kotlin File/Class").click();
             keyboard.enterText("App");
@@ -70,7 +70,7 @@ public class CreateCommandLineJavaTest {
         });
 
         step("Launch the application", () -> {
-            editor.text("main").click();
+            editor.findText("main").click();
             keyboard.hotKey(KeyEvent.VK_ALT, KeyEvent.VK_ENTER);
             keyboard.enter();
         });
