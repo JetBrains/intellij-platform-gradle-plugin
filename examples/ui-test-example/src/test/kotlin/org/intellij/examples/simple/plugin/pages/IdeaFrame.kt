@@ -1,17 +1,14 @@
 package org.intellij.examples.simple.plugin.pages
 
-import com.intellij.openapi.project.DumbService
-import com.intellij.openapi.wm.impl.IdeFrameImpl
-import com.jetbrains.test.RemoteRobot
-import com.jetbrains.test.data.RemoteComponent
-import com.jetbrains.test.data.componentAs
-import com.jetbrains.test.fixtures.CommonContainerFixture
-import com.jetbrains.test.fixtures.ContainerFixture
-import com.jetbrains.test.fixtures.DefaultXpath
-import com.jetbrains.test.fixtures.FixtureName
-import com.jetbrains.test.search.locators.byXpath
-import com.jetbrains.test.stepsProcessing.step
-import com.jetbrains.test.utils.waitFor
+import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.data.RemoteComponent
+import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.ContainerFixture
+import com.intellij.remoterobot.fixtures.DefaultXpath
+import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.stepsProcessing.step
+import com.intellij.remoterobot.utils.waitFor
 import java.time.Duration
 
 fun RemoteRobot.idea(function: IdeaFrame.() -> Unit) {
@@ -44,8 +41,8 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) : Co
     }
 
     private fun isDumbMode(): Boolean {
-        return remoteRobot.retrieve(this, true) {
-            DumbService.isDumb(componentAs<IdeFrameImpl>().project!!)
-        }
+        return retrieve(
+                "com.intellij.openapi. project.DumbService.isDumb(component.project);",
+                true)
     }
 }

@@ -1,12 +1,12 @@
 package org.intellij.examples.simple.plugin;
 
-import com.jetbrains.test.RemoteRobot;
+import com.intellij.remoterobot.RemoteRobot;
 import org.intellij.examples.simple.plugin.pages.WelcomeFrame;
 import org.intellij.examples.simple.plugin.utils.StepsLogger;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import static com.jetbrains.test.fixtures.dataExtractor.TextDataPredicatesKt.startsWith;
+import static com.intellij.remoterobot.fixtures.dataExtractor.TextDataPredicatesKt.startsWith;
 
 public class SayHelloJavaTest {
     @BeforeAll

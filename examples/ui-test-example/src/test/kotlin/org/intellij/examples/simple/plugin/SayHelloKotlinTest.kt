@@ -1,11 +1,11 @@
 package org.intellij.examples.simple.plugin
 
-import com.jetbrains.test.RemoteRobot
-import com.jetbrains.test.data.RemoteComponent
-import com.jetbrains.test.fixtures.ComponentFixture
-import com.jetbrains.test.fixtures.ContainerFixture
-import com.jetbrains.test.fixtures.DefaultXpath
-import com.jetbrains.test.search.locators.byXpath
+import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.data.RemoteComponent
+import com.intellij.remoterobot.fixtures.ComponentFixture
+import com.intellij.remoterobot.fixtures.ContainerFixture
+import com.intellij.remoterobot.fixtures.DefaultXpath
+import com.intellij.remoterobot.search.locators.byXpath
 import org.intellij.examples.simple.plugin.pages.WelcomeFrame
 import org.intellij.examples.simple.plugin.utils.StepsLogger
 import org.intellij.examples.simple.plugin.utils.uiTest

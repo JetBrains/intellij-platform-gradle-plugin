@@ -1,12 +1,12 @@
 package org.intellij.examples.simple.plugin
 
-import com.jetbrains.test.fixtures.ComponentFixture
-import com.jetbrains.test.fixtures.ContainerFixture
-import com.jetbrains.test.search.locators.byXpath
-import com.jetbrains.test.stepsProcessing.step
-import com.jetbrains.test.utils.autocomplete
-import com.jetbrains.test.utils.keyboard
-import com.jetbrains.test.utils.waitFor
+import com.intellij.remoterobot.fixtures.ComponentFixture
+import com.intellij.remoterobot.fixtures.ContainerFixture
+import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.stepsProcessing.step
+import com.intellij.remoterobot.utils.autocomplete
+import com.intellij.remoterobot.utils.keyboard
+import com.intellij.remoterobot.utils.waitFor
 import org.assertj.swing.core.MouseButton
 import org.intellij.examples.simple.plugin.pages.*
 import org.intellij.examples.simple.plugin.steps.JavaExampleSteps
@@ -32,7 +32,7 @@ class CreateCommandLineKotlinTest {
 
     @Test
     fun createCommandLineApp() = uiTest {
-        val steps = JavaExampleSteps(this)
+        val sharedSteps = JavaExampleSteps(this)
 
         welcomeFrame {
             createNewProjectLink.click()
@@ -46,7 +46,7 @@ class CreateCommandLineKotlinTest {
                 button("Finish").click()
             }
         }
-        steps.closeTipOfTheDay()
+        sharedSteps.closeTipOfTheDay()
         idea {
             step("Create App file") {
                 with(projectViewTree) {

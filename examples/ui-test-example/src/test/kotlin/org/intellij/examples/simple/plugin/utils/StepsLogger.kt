@@ -1,7 +1,7 @@
 package org.intellij.examples.simple.plugin.utils
 
-import com.jetbrains.test.stepsProcessing.StepLogger
-import com.jetbrains.test.stepsProcessing.StepWorker
+import com.intellij.remoterobot.stepsProcessing.StepLogger
+import com.intellij.remoterobot.stepsProcessing.StepWorker
 
 object StepsLogger {
     private var initializaed = false

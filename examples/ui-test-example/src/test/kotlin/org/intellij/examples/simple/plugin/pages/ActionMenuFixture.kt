@@ -1,11 +1,11 @@
 package org.intellij.examples.simple.plugin.pages
 
-import com.jetbrains.test.RemoteRobot
-import com.jetbrains.test.data.RemoteComponent
-import com.jetbrains.test.fixtures.ComponentFixture
-import com.jetbrains.test.fixtures.FixtureName
-import com.jetbrains.test.search.locators.byXpath
-import com.jetbrains.test.utils.waitFor
+import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.data.RemoteComponent
+import com.intellij.remoterobot.fixtures.ComponentFixture
+import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.utils.waitFor
 
 fun RemoteRobot.actionMenu(text: String): ActionMenuFixture {
     val xpath = byXpath("text '$text'", "//div[@class='ActionMenu' and @text='$text']")

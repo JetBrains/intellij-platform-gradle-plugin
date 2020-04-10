@@ -1,8 +1,8 @@
 package org.intellij.examples.simple.plugin;
 
-import com.jetbrains.test.RemoteRobot;
-import com.jetbrains.test.fixtures.ContainerFixture;
-import com.jetbrains.test.utils.Keyboard;
+import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.ContainerFixture;
+import com.intellij.remoterobot.utils.Keyboard;
 import org.assertj.swing.core.MouseButton;
 import org.intellij.examples.simple.plugin.pages.IdeaFrame;
 import org.intellij.examples.simple.plugin.steps.JavaExampleSteps;
@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 import java.awt.event.KeyEvent;
 import java.time.Duration;
 
-import static com.jetbrains.test.search.locators.LocatorKt.byXpath;
-import static com.jetbrains.test.stepsProcessing.StepWorkerKt.step;
-import static com.jetbrains.test.utils.KeyboardUtilsKt.autocomplete;
-import static com.jetbrains.test.utils.RepeatUtilsKt.waitFor;
+import static com.intellij.remoterobot.search.locators.LocatorKt.byXpath;
+import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
+import static com.intellij.remoterobot.utils.KeyboardUtilsKt.autocomplete;
+import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;
 import static org.intellij.examples.simple.plugin.pages.ActionMenuFixtureKt.actionMenu;
 import static org.intellij.examples.simple.plugin.pages.ActionMenuFixtureKt.actionMenuItem;
 import static org.intellij.examples.simple.plugin.pages.EditorKt.editor;
@@ -25,7 +25,7 @@ import static org.intellij.examples.simple.plugin.pages.EditorKt.editor;
 public class CreateCommandLineJavaTest {
 
     private final RemoteRobot remoteRobot = new RemoteRobot("http://127.0.0.1:8082");
-    private final JavaExampleSteps steps = new JavaExampleSteps(remoteRobot);
+    private final JavaExampleSteps sharedSteps = new JavaExampleSteps(remoteRobot);
     private final Keyboard keyboard = new Keyboard(remoteRobot);
 
     @BeforeAll
@@ -43,15 +43,15 @@ public class CreateCommandLineJavaTest {
 
     @Test
     void createCommandLineProject() {
-        steps.createNewCommandLineProject();
-        steps.closeTipOfTheDay();
+        sharedSteps.createNewCommandLineProject();
+        sharedSteps.closeTipOfTheDay();
 
         final IdeaFrame idea = remoteRobot.find(IdeaFrame.class);
 
         step("Create New Kotlin file", () -> {
             final ContainerFixture projectView = idea.getProjectViewTree();
 
-            projectView.text(idea.getProjectName()).doubleClick();
+            projectView.findText(idea.getProjectName()).doubleClick();
             waitFor(() -> projectView.hasText("src"));
             projectView.findText("src").click(MouseButton.RIGHT_BUTTON);
             actionMenu(remoteRobot, "New").click();

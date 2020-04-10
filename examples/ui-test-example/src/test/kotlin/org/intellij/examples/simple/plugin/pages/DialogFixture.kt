@@ -1,15 +1,13 @@
 package org.intellij.examples.simple.plugin.pages
 
-import com.jetbrains.test.RemoteRobot
-import com.jetbrains.test.data.RemoteComponent
-import com.jetbrains.test.data.componentAs
-import com.jetbrains.test.fixtures.CommonContainerFixture
-import com.jetbrains.test.fixtures.ContainerFixture
-import com.jetbrains.test.fixtures.FixtureName
-import com.jetbrains.test.search.locators.byXpath
-import com.jetbrains.test.stepsProcessing.step
+import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.data.RemoteComponent
+import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.ContainerFixture
+import com.intellij.remoterobot.fixtures.FixtureName
+import com.intellij.remoterobot.search.locators.byXpath
+import com.intellij.remoterobot.stepsProcessing.step
 import java.time.Duration
-import javax.swing.JDialog
 
 fun ContainerFixture.dialog(
         title: String,
@@ -28,8 +26,6 @@ class DialogFixture(
         fun byTitle(title: String) = byXpath("title $title", "//div[@title='$title' and @class='MyDialog']")
     }
 
-    val title
-        get() = remoteRobot.retrieve(this) {
-            componentAs<JDialog>().title ?: ""
-        }
+    val title: String
+        get() = retrieve("component.getTitle();")
 }

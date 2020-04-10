@@ -1,14 +1,14 @@
 package org.intellij.examples.simple.plugin.pages;
 
-import com.jetbrains.test.RemoteRobot;
-import com.jetbrains.test.data.RemoteComponent;
-import com.jetbrains.test.fixtures.ComponentFixture;
-import com.jetbrains.test.fixtures.ContainerFixture;
-import com.jetbrains.test.fixtures.DefaultXpath;
-import com.jetbrains.test.fixtures.FixtureName;
+import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.data.RemoteComponent;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.fixtures.ContainerFixture;
+import com.intellij.remoterobot.fixtures.DefaultXpath;
+import com.intellij.remoterobot.fixtures.FixtureName;
 import org.jetbrains.annotations.NotNull;
 
-import static com.jetbrains.test.search.locators.LocatorKt.byXpath;
+import static com.intellij.remoterobot.search.locators.LocatorKt.byXpath;
 
 
 @DefaultXpath(by = "FlatWelcomeFrame type", xpath = "//div[@class='FlatWelcomeFrame']")

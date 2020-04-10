@@ -15,12 +15,12 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-def remoteRobotVersion = "0.9.28"
-def fixturesVersion = "1.1.14"
+def remoteRobotVersion = "0.9.31"
+def fixturesVersion = "1.1.17"
 
 dependencies {
-    testImplementation("org.jetbrains.test:remote-robot:$remoteRobotVersion")
-    testImplementation("org.jetbrains.test:remote-fixtures:$fixturesVersion")
+    testImplementation("com.intellij.remoterobot:remote-robot:$remoteRobotVersion")
+    testImplementation("com.intellij.remoterobot:remote-fixtures:$fixturesVersion")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.3.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.3.1'
 }

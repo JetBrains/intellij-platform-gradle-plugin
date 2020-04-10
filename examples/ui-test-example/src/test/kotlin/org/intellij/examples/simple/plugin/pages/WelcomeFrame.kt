@@ -1,12 +1,11 @@
 package org.intellij.examples.simple.plugin.pages
 
-import com.jetbrains.test.RemoteRobot
-import com.jetbrains.test.data.RemoteComponent
-import com.jetbrains.test.fixtures.ActionLinkFixture
-import com.jetbrains.test.fixtures.CommonContainerFixture
-import com.jetbrains.test.fixtures.DefaultXpath
-import com.jetbrains.test.fixtures.FixtureName
-import com.jetbrains.test.search.locators.byXpath
+import com.intellij.remoterobot.RemoteRobot
+import com.intellij.remoterobot.data.RemoteComponent
+import com.intellij.remoterobot.fixtures.ActionLinkFixture
+import com.intellij.remoterobot.fixtures.CommonContainerFixture
+import com.intellij.remoterobot.fixtures.DefaultXpath
+import com.intellij.remoterobot.fixtures.FixtureName
 
 fun RemoteRobot.welcomeFrame(function: WelcomeFrame.()-> Unit) {
     find(WelcomeFrame::class.java).apply(function)

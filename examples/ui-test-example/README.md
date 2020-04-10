@@ -26,13 +26,13 @@ The easiest way to do it is to execute `runIdeForUiTests` task. When Idea initia
 `remote-robot` communicates with the `robot-server` via HTTP protocol, that`s mean you can launch the Idea on remote machines or docker containers to check you plugin with different test environments.
 
 ### Setup
-In test project:
+In the test project:
 ```groovy
 dependencies {
     testImplementation("org.jetbrains.test:remote-robot:REMOTER-ROBOT_VERSION")
 }
 ```
-In plugin project:
+In the plugin project:
 ```groovy
 downloadRobotServerPlugin.version = REMOTER-ROBOT_VERSION
 

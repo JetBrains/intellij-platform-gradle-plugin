@@ -1,8 +1,8 @@
 package org.intellij.examples.simple.plugin.steps;
 
-import com.jetbrains.test.RemoteRobot;
-import com.jetbrains.test.fixtures.ComponentFixture;
-import com.jetbrains.test.utils.Keyboard;
+import com.intellij.remoterobot.RemoteRobot;
+import com.intellij.remoterobot.fixtures.ComponentFixture;
+import com.intellij.remoterobot.utils.Keyboard;
 import kotlin.Unit;
 import org.intellij.examples.simple.plugin.pages.DialogFixture;
 import org.intellij.examples.simple.plugin.pages.IdeaFrame;
@@ -11,8 +11,8 @@ import org.intellij.examples.simple.plugin.pages.WelcomeFrameFixture;
 import java.awt.event.KeyEvent;
 import java.time.Duration;
 
-import static com.jetbrains.test.search.locators.LocatorKt.byXpath;
-import static com.jetbrains.test.stepsProcessing.StepWorkerKt.step;
+import static com.intellij.remoterobot.search.locators.LocatorKt.byXpath;
+import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
 import static org.intellij.examples.simple.plugin.pages.DialogFixture.byTitle;
 
 public class JavaExampleSteps {
@@ -30,10 +30,10 @@ public class JavaExampleSteps {
             welcomeFrame.createNewProjectLink().click();
 
             final DialogFixture newProjectDialog = welcomeFrame.find(DialogFixture.class, DialogFixture.byTitle("New Project"), Duration.ofSeconds(20));
-            newProjectDialog.text("Java").click();
+            newProjectDialog.findText("Java").click();
             newProjectDialog.find(ComponentFixture.class,
                     byXpath("FrameworksTree", "//div[@class='FrameworksTree']"))
-                    .text("Kotlin/JVM")
+                    .findText("Kotlin/JVM")
                     .click();
             keyboard.key(KeyEvent.VK_SPACE, Duration.ZERO);
             newProjectDialog.button("Next").click();
