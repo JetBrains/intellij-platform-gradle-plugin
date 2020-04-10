@@ -39,7 +39,8 @@ class IdeaDependency implements Serializable {
             File lib = new File(classes, "lib")
             if (lib.isDirectory()) {
                 return Utils.collectJars(lib, { file ->
-                    return withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name - '.jar')
+                    return (withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name - '.jar'))
+                            && file.name != 'junit.jar'
                 }, false).sort()
             }
         }
