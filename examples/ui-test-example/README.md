@@ -143,8 +143,11 @@ You can add other packages or classes with js [methods](https://www-archive.mozi
     importPackage(java.io);
 ```
 Or just use the full path.
+
 ```java
-    const fixture = org.assertj.swing.fixture.JListFixture(robot, component);
+    Boolean isDumbMode = ideaFtame.retrieve(
+        "com.intellij.openapi.project.DumbService.isDumb(component.project);"
+    );
 ```
 
 ### Text
