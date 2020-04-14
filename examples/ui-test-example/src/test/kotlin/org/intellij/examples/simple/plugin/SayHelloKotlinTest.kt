@@ -18,7 +18,7 @@ class SayHelloKotlinTest {
 
     @Test
     fun checkHelloMessage() = uiTest {
-        find(WelcomeFrame::class.java).text("Say Hello").click()
+        find(WelcomeFrame::class.java).findText("Say Hello").click()
 
         val helloDialog = find(HelloWorldDialog::class.java)
 

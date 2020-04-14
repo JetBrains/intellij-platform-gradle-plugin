@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.awt.event.KeyEvent;
 import java.time.Duration;
 
-import static com.intellij.remoterobot.search.locators.LocatorKt.byXpath;
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
 import static com.intellij.remoterobot.utils.KeyboardUtilsKt.autocomplete;
 import static com.intellij.remoterobot.utils.RepeatUtilsKt.waitFor;

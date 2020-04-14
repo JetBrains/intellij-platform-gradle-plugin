@@ -14,7 +14,7 @@ fun ContainerFixture.editor(title: String, function: Editor.() -> Unit = {}): Co
             byXpath("//div[@class='EditorTabs']//div[@accessiblename='$title' and @class='SingleHeightLabel']")).click()
     return find<Editor>(
             byXpath("title '$title'", "//div[@accessiblename='Editor for $title' and @class='EditorComponentImpl']"))
-            .apply { execute("robot.moveMouse(component);") }
+            .apply { runJs("robot.moveMouse(component);") }
             .apply(function)
 }
 

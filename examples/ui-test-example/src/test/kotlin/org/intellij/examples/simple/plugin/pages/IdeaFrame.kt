@@ -23,7 +23,7 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) : Co
         get() = find<ContainerFixture>(byXpath("ProjectViewTree", "//div[@class='ProjectViewTree']"))
 
     val projectName
-        get() = step("Get project name") { return@step retrieve<String>("component.getProject().getName()") }
+        get() = step("Get project name") { return@step callJs<String>("component.getProject().getName()") }
 
     @JvmOverloads
     fun dumbAware(timeout: Duration = Duration.ofMinutes(5), function: () -> Unit) {
@@ -41,8 +41,6 @@ class IdeaFrame(remoteRobot: RemoteRobot, remoteComponent: RemoteComponent) : Co
     }
 
     private fun isDumbMode(): Boolean {
-        return retrieve(
-                "com.intellij.openapi. project.DumbService.isDumb(component.project);",
-                true)
+        return callJs("com.intellij.openapi. project.DumbService.isDumb(component.project);", true)
     }
 }

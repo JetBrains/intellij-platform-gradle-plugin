@@ -11,7 +11,7 @@ import org.intellij.examples.simple.plugin.pages.WelcomeFrameFixture;
 import java.awt.event.KeyEvent;
 import java.time.Duration;
 
-import static com.intellij.remoterobot.search.locators.LocatorKt.byXpath;
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 import static com.intellij.remoterobot.stepsProcessing.StepWorkerKt.step;
 import static org.intellij.examples.simple.plugin.pages.DialogFixture.byTitle;
 

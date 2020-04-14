@@ -12,7 +12,7 @@ Or just run all together with one line
 `./gradlew ui-test-example:clean ui-test-example:runIdeForUiTests & ./gradlew ui-test-example:test`
 
 ## Remote-robot
-Remote-robot library is inspired by Selenium WebDriver. It supports ideas since `2018.3`.
+Remote-robot library inspired by Selenium WebDriver. It supports ideas since `2018.3`.
 
 ![](docs/simple-schema.png)
 
@@ -71,7 +71,7 @@ List<ContainterFixture> dialogs = remoteRobot.findAll(
 ### Fixtures
 Fixtures introduce `Page Object Pattern`. 
 There are two basic fixtures:
-- `ComponentFixture` is the most simple representation of real any component with basic methods;
+- `ComponentFixture` is the simplest representation of a real any component with basic methods;
 - `ContainerFixture` extends `ComponentFixture` and allows search other components inside it. 
 
 You can create your own fixtures:
@@ -110,7 +110,7 @@ public class ActionLinkFixture extends ComponentFixture {
     }
     
     public String text() {
-        return retrieve("component.getText();");
+        return callJs("component.getText();");
     }
 }
 ```
@@ -122,7 +122,7 @@ If you call `retrieve` from `fixture` object you will also have in the context `
 `execute` method works the same way without any return value:
 ```java
 public void click() {
-        execute("const offset = component.getHeight()/2;" +
+        runJs("const offset = component.getHeight()/2;" +
                 "robot.click(" +
                 "component, " +
                 "new Point(offset, offset), " +

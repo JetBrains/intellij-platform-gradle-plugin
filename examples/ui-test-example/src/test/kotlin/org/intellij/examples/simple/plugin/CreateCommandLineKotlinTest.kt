@@ -41,7 +41,7 @@ class CreateCommandLineKotlinTest {
                 find(ComponentFixture::class.java,
                         byXpath("//div[@class='FrameworksTree']")
                 ).findText("Kotlin/JVM").click()
-                execute("robot.pressAndReleaseKey(${KeyEvent.VK_SPACE})")
+                runJs("robot.pressAndReleaseKey(${KeyEvent.VK_SPACE})")
                 button("Next").click()
                 button("Finish").click()
             }

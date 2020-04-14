@@ -27,5 +27,5 @@ class DialogFixture(
     }
 
     val title: String
-        get() = retrieve("component.getTitle();")
+        get() = callJs("component.getTitle();")
 }

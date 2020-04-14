@@ -8,7 +8,7 @@ import com.intellij.remoterobot.fixtures.DefaultXpath;
 import com.intellij.remoterobot.fixtures.FixtureName;
 import org.jetbrains.annotations.NotNull;
 
-import static com.intellij.remoterobot.search.locators.LocatorKt.byXpath;
+import static com.intellij.remoterobot.search.locators.Locators.byXpath;
 
 
 @DefaultXpath(by = "FlatWelcomeFrame type", xpath = "//div[@class='FlatWelcomeFrame']")
