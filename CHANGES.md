@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.4.19 (under development)
+- Require 4.9 Gradle version, dropped deprecated stuff
+- Do not add junit.jar into classpath, it may clash with junit-4.jar on certain JDKs
 
 ## 0.4.18
 - Introduced `runIdeForUiTests` task [#466](../../issues/466)
