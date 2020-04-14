@@ -99,7 +99,7 @@ class PluginDependencyManager {
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy { IvyArtifactRepository repo ->
                 repo.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision].[ext]") // ivy xml
-                repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact].[ext]") // builtin plugins
+                repo.artifactPattern("$ideaDependency.classes/plugins/[module]/[artifact](.[ext])") // builtin plugins
                 repo.artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency.sources) {
                     repo.artifactPattern("$ideaDependency.sources.parent/[artifact]-$ideaDependency.version(-[classifier]).[ext]")
@@ -110,7 +110,7 @@ class PluginDependencyManager {
             def artifactParent = plugin.artifact.parentFile
             def pluginSource = artifactParent.absolutePath
             if (artifactParent?.parentFile?.absolutePath != cacheDirectoryPath && pluginSources.add(pluginSource)) {
-                ivyArtifactRepository.artifactPattern("$pluginSource/[artifact].[ext]")  // local plugins
+                ivyArtifactRepository.artifactPattern("$pluginSource/[artifact](.[ext])")  // local plugins
             }
         }
     }
