@@ -114,12 +114,12 @@ public class ActionLinkFixture extends ComponentFixture {
     }
 }
 ```
-We can `retrieve` data via `RemoteRobot`. In this case there is a `robot` var in context of JavaScript execution. 
+We can retrieve data via `RemoteRobot` with `callJs` method. In this case there is a `robot` var in context of JavaScript execution. 
 The `robot` is instance of extended class of  [`org.assertj.swing.core.Robot`](https://joel-costigliola.github.io/assertj/swing/api/org/assertj/swing/core/Robot.html) 
 
-If you call `retrieve` from `fixture` object you will also have in the context `component` var which is the real component you found early.
+If you call `callJs` method from `fixture` object you will also have in the context `component` var which is the real component you found early.
 
-`execute` method works the same way without any return value:
+`runJs` method works the same way without any return value:
 ```java
 public void click() {
         runJs("const offset = component.getHeight()/2;" +
