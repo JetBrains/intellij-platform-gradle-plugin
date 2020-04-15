@@ -145,7 +145,7 @@ You can add other packages or classes with js [methods](https://www-archive.mozi
 Or just use the full path.
 
 ```java
-    Boolean isDumbMode = ideaFtame.retrieve(
+    Boolean isDumbMode = ideaFtame.callJs(
         "com.intellij.openapi.project.DumbService.isDumb(component.project);"
     );
 ```
