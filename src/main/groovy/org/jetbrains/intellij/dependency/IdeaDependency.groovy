@@ -22,8 +22,11 @@ class IdeaDependency implements Serializable {
     private final boolean withKotlin
     private final Collection<IdeaExtraDependency> extraDependencies
 
+    transient private final BuiltinPluginsRegistry pluginsRegistry
+
     IdeaDependency(@NotNull String name, @NotNull String version, @NotNull String buildNumber, @NotNull File classes,
-                   @Nullable File sources, boolean withKotlin, Collection<IdeaExtraDependency> extraDependencies) {
+                   @Nullable File sources, boolean withKotlin, @NotNull BuiltinPluginsRegistry pluginsRegistry,
+                   @NotNull Collection<IdeaExtraDependency> extraDependencies) {
         this.name = name
         this.version = version
         this.buildNumber = buildNumber
@@ -31,6 +34,7 @@ class IdeaDependency implements Serializable {
         this.sources = sources
         this.withKotlin = withKotlin
         this.jarFiles = collectJarFiles()
+        this.pluginsRegistry = pluginsRegistry
         this.extraDependencies = extraDependencies
     }
 
@@ -44,6 +48,11 @@ class IdeaDependency implements Serializable {
             }
         }
         return Collections.emptySet()
+    }
+
+    @NotNull
+    BuiltinPluginsRegistry getPluginsRegistry() {
+        return pluginsRegistry
     }
 
     @NotNull

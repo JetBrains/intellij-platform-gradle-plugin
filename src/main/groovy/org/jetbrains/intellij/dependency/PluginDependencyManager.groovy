@@ -1,9 +1,6 @@
 package org.jetbrains.intellij.dependency
 
-import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
-import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
-import com.jetbrains.plugin.structure.base.plugin.PluginProblem
-import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
@@ -38,13 +35,10 @@ class PluginDependencyManager {
                 return externalPluginDependency(project, new File(id), null)
             } else if (ideaDependency) {
                 Utils.info(project, "Looking for builtin $id in $ideaDependency.classes.absolutePath")
-                def pluginDirectory = new File(ideaDependency.classes, "plugins/$id").canonicalFile
-                if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-                    if (pluginDirectory.name == id) {
-                        def builtinPluginVersion = "$ideaDependency.name-$ideaDependency.buildNumber${ideaDependency.sources ? '-withSources' : ''}"
-                        return new PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
-                    }
-                    throw new BuildException("Builtin plugins should be referred case-sensitively. Expected: $pluginDirectory.name. Got: $id", null)
+                def pluginDirectory = ideaDependency.pluginsRegistry.findPlugin(id)
+                if (pluginDirectory != null) {
+                    def builtinPluginVersion = "$ideaDependency.name-$ideaDependency.buildNumber${ideaDependency.sources ? '-withSources' : ''}"
+                    return new PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
                 }
             }
             throw new BuildException("Cannot find builtin plugin $id for IDE: $ideaDependency.classes.absolutePath", null)
@@ -150,9 +144,8 @@ class PluginDependencyManager {
         if (!Utils.isJarFile(artifact) && !artifact.isDirectory()) {
             Utils.warn(project, "Cannot create plugin from file ($artifact): only directories or jars are supported")
         }
-        def creationResult = IdePluginManager.createManager().createPlugin(artifact)
-        if (creationResult instanceof PluginCreationSuccess) {
-            def intellijPlugin = creationResult.plugin
+        def intellijPlugin = Utils.createPlugin(artifact, true, project)
+        if (intellijPlugin != null) {
             def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, artifact, false, maven)
             pluginDependency.channel = channel
             //noinspection GroovyAccessibility
@@ -160,11 +153,6 @@ class PluginDependencyManager {
             //noinspection GroovyAccessibility
             pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
             return pluginDependency
-        } else if (creationResult instanceof PluginCreationFail) {
-            def problems = creationResult.errorsAndWarnings.findAll { it.level == PluginProblem.Level.ERROR }.join(", ")
-            Utils.warn(project, "Cannot create plugin from file ($artifact): $problems")
-        } else {
-            Utils.warn(project, "Cannot create plugin from file ($artifact). $creationResult")
         }
         return null
     }

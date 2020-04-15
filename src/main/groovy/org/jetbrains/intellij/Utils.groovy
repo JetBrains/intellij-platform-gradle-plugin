@@ -1,6 +1,11 @@
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.base.utils.FileUtilKt
+import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
@@ -313,5 +318,18 @@ class Utils {
             category += " :${(context as Task).project.name}:${(context as Task).name}"
         }
         IntelliJPlugin.LOG.log(level, "[$category] $message", e as Throwable)
+    }
+
+    static IdePlugin createPlugin(@NotNull File artifact, boolean validatePluginXml, def loggingContext) {
+        def creationResult = IdePluginManager.createManager().createPlugin(artifact, validatePluginXml)
+        if (creationResult instanceof PluginCreationSuccess) {
+            return creationResult.plugin as IdePlugin
+        } else if (creationResult instanceof PluginCreationFail) {
+            def problems = creationResult.errorsAndWarnings.findAll { it.level == PluginProblem.Level.ERROR }.join(", ")
+            warn(loggingContext, "Cannot create plugin from file ($artifact): $problems")
+        } else {
+            warn(loggingContext, "Cannot create plugin from file ($artifact). $creationResult")
+        }
+        return null
     }
 }

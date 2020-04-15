@@ -98,7 +98,7 @@ class IntelliJPlugin implements Plugin<Project> {
             }
         }
         configurePatchPluginXmlTask(project, extension)
-        configureRobotServerDownloadTask(project, extension)
+        configureRobotServerDownloadTask(project)
         configurePrepareSandboxTasks(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
@@ -245,15 +245,10 @@ class IntelliJPlugin implements Plugin<Project> {
                 if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
                     throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
                 }
-                if (extension.configureDefaultDependencies) {
-                    resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
-                }
-                extension.pluginDependencies.add(plugin)
-                project.tasks.withType(PrepareSandboxTask).each {
-                    it.configureExternalPlugin(plugin)
-                }
+                configurePluginDependency(project, plugin, extension, resolver)
             }
         }
+        configureImplementationDetailPlugins(project, resolver, extension)
         verifyJavaPluginDependency(extension, project)
     }
 
@@ -270,6 +265,31 @@ class IntelliJPlugin implements Plugin<Project> {
                     }
                 }
             }
+        }
+    }
+
+    private static void configureImplementationDetailPlugins(@NotNull Project project,
+                                                             @NotNull PluginDependencyManager resolver,
+                                                             @NotNull IntelliJPluginExtension extension) {
+        extension.ideaDependency.pluginsRegistry.getImplementationDetailPluginIds().forEach {
+            def plugin = resolver.resolve(project, it, null, null)
+            configurePluginDependency(project, plugin, extension, resolver)
+            resolver.register(project, plugin, IDEA_CONFIGURATION_NAME)
+            extension.pluginDependencies.add(plugin)
+        }
+    }
+
+    private static void configurePluginDependency(Project project,
+                                                  PluginDependency plugin,
+                                                  IntelliJPluginExtension extension,
+                                                  PluginDependencyManager resolver) {
+
+        if (extension.configureDefaultDependencies) {
+            resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
+        }
+        extension.pluginDependencies.add(plugin)
+        project.tasks.withType(PrepareSandboxTask).each {
+            it.configureExternalPlugin(plugin)
         }
     }
 
@@ -324,7 +344,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureRobotServerDownloadTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    private static void configureRobotServerDownloadTask(@NotNull Project project) {
         Utils.info(project, "Configuring robot-server download Task")
 
         project.tasks.create(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, DownloadRobotServerPluginTask).with { task ->

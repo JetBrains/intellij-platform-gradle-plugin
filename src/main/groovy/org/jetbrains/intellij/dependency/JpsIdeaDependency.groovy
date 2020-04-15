@@ -8,7 +8,7 @@ class JpsIdeaDependency extends IdeaDependency {
 
     JpsIdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes,
                       @Nullable File sources, boolean withKotlin) {
-        super("ideaJPS", version, buildNumber, classes, sources, withKotlin, Collections.emptyList())
+        super("ideaJPS", version, buildNumber, classes, sources, withKotlin, new BuiltinPluginsRegistry(classes), Collections.emptyList())
     }
 
     @Override

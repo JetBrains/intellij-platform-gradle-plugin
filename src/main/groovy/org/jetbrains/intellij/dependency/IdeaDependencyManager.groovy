@@ -105,11 +105,13 @@ class IdeaDependencyManager {
             return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
                     !hasKotlinDependency(project))
         } else if (type == null) {
+            def pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(new File(classesDirectory, "plugins"), project)
             return new LocalIdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
-                    !hasKotlinDependency(project), extraDependencies)
+                    !hasKotlinDependency(project), pluginsRegistry, extraDependencies)
         }
+        def pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(new File(classesDirectory, "plugins"), project)
         return new IdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
-                !hasKotlinDependency(project), extraDependencies)
+                !hasKotlinDependency(project), pluginsRegistry, extraDependencies)
     }
 
     @Nullable
