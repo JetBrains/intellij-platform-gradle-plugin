@@ -51,7 +51,7 @@ We use [`XPath`](https://www.w3.org/TR/xpath-21/) query language to find compone
 Once Idea with `robot-server` started, you can open `http://ROBOT-SERVER:PORT` [link](http://127.0.0.1:8082).
 The page represent idea components hierarchy in HTML format. You can find the component you interesting in and write an XPath to it like we usually do with Selenium WebDriver.
 There is also a simple XPath generator which can help write and test your XPaths.
-![](docs/use_xpath.png)
+![](docs/hierarchy.gif)
 
 Define locator
 ```java
