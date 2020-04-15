@@ -29,7 +29,7 @@ The easiest way to do it is to execute `runIdeForUiTests` task. When Idea initia
 In the test project:
 ```groovy
 dependencies {
-    testImplementation("org.jetbrains.test:remote-robot:REMOTER-ROBOT_VERSION")
+    testImplementation("com.intellij.remoterobot:remote-robot:REMOTER-ROBOT_VERSION")
 }
 ```
 In the plugin project:
