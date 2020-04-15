@@ -1,6 +1,8 @@
 # Changelog
 
 ## 0.4.19 (under development)
+- Enable implementation-detail plugins automatically [#474](../../issues/474)
+- Allow referring builtin plugins by their ids rather than directory name [IDEA-233841](https://youtrack.jetbrains.com/issue/IDEA-233841)
 - Require 4.9 Gradle version, dropped deprecated stuff
 - Do not add junit.jar into classpath, it may clash with junit-4.jar on certain JDKs
 
