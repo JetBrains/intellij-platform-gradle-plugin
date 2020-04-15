@@ -6,7 +6,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
     def 'prepare sandbox for two plugins'() {
         given:
         writeJavaFile()
-        pluginXml << """\
+        pluginXml << """
             <idea-plugin>
               <id>org.intellij.test.plugin</id>
               <name>Test Plugin</name>
@@ -16,7 +16,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
               <change-notes/>
             </idea-plugin>""".stripIndent()
 
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij.pluginName = 'myPluginName'
             intellij.plugins = [project('nestedProject')]
@@ -53,7 +53,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
     def 'prepare sandbox for two plugins with evaluated project'() {
         given:
         writeJavaFile()
-        pluginXml << """\
+        pluginXml << """
             <idea-plugin>
               <id>org.intellij.test.plugin</id>
               <name>Test Plugin</name>
@@ -63,7 +63,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
               <change-notes/>
             </idea-plugin>""".stripIndent()
 
-        buildFile << """\
+        buildFile << """
             allprojects {
                 version='0.42.123'
                 apply plugin: 'org.jetbrains.intellij'
@@ -101,7 +101,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
     def 'prepare sandbox task without plugin_xml'() {
         given:
         writeJavaFile()
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 
@@ -127,7 +127,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 
@@ -135,7 +135,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             }
             dependencies { 
                 compile 'joda-time:joda-time:2.8.1'
-            }\
+            }
             """.stripIndent()
 
         when:
@@ -152,7 +152,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         fileText(jar, 'META-INF/plugin.xml') == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="191.6183" until-build="191.*"/>
+              <idea-version since-build="201.6668" until-build="201.*"/>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
     }
@@ -163,7 +163,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 
@@ -189,7 +189,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 
@@ -215,7 +215,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         given:
         writeJavaFile()
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             intellij {
                 plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
                 pluginName = 'myPluginName'
@@ -234,9 +234,9 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         given:
         writeJavaFile()
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             intellij {
-                plugins = ['org.intellij.plugins.markdown:191.5849.16']
+                plugins = ['org.intellij.plugins.markdown:201.6668.74']
                 pluginName = 'myPluginName'
             }
             """.stripIndent()
@@ -248,8 +248,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                                   '/plugins/markdown/lib/markdown.jar',
                                   '/plugins/markdown/lib/resources_en.jar',
                                   '/config/options/updates.xml',
-                                  '/plugins/markdown/lib/owasp-java-html-sanitizer.jar',
-                                  '/plugins/markdown/lib/markdown-0.1.31.jar'] as Set
+                                  '/plugins/markdown/lib/markdown-0.1.41.jar'] as Set
     }
 
     def 'prepare sandbox with plugin dependency with classes directory'() {
@@ -257,7 +256,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         def plugin = createPlugin()
         writeJavaFile()
         pluginXml << '<idea-plugin version="2"></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             intellij {
                 plugins = ['${adjustWindowsPath(plugin.canonicalPath)}']
                 pluginName = 'myPluginName'
@@ -281,12 +280,12 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         new File(plugin, 'META-INF/').mkdir()
         new File(plugin, 'classes/A.class').createNewFile()
         new File(plugin, 'classes/someResources.properties').createNewFile()
-        new File(plugin, 'META-INF/plugin.xml') << """\
+        new File(plugin, 'META-INF/plugin.xml') << """
             <idea-plugin>
               <id>$plugin.name</id>
               <name>Test Plugin</name>
               <version>1.0</version>
-              <idea-version since-build="191.6183" until-build="191.*"/>
+              <idea-version since-build="201.6668" until-build="201.*"/>
               <vendor url="https://jetbrains.com">JetBrains</vendor>
               <description>test plugin</description>
               <change-notes/>
@@ -301,7 +300,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
         pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
         def sandboxPath = adjustWindowsPath("$dir.root.absolutePath/customSandbox")
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 

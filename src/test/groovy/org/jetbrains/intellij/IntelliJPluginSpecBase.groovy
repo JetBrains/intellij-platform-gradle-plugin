@@ -16,7 +16,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
     protected String pluginsRepo = System.properties.get('plugins.repo', IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO)
 
     String getIntellijVersion() {
-        return '2019.1'
+        return '2020.1'
     }
 
     @Rule
@@ -25,7 +25,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
 
     def setup() {
         file("settings.gradle") << "rootProject.name='projectName'\n"
-        buildFile << """\
+        buildFile << """
             buildscript {
                 repositories { 
                     maven { url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' } 

@@ -8,22 +8,22 @@ import spock.lang.Stepwise
 class DownloadIntelliJSpec extends IntelliJPluginSpecBase {
     def 'download idea dependencies'() {
         given:
-        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2019.1')
+        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1')
         Assume.assumeFalse("it was already cached. test is senseless until gradle clean", cacheDir.exists())
 
         when:
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
-        cacheDir.list() as Set == ['694a7f43987c80463928abbe411130b470c2b745', 'b0bd766fbab61007aefe7922895a1726afe11b14'] as Set
-        new File(cacheDir, '694a7f43987c80463928abbe411130b470c2b745').list() as Set == ['ideaIC-2019.1.pom'] as Set
-        new File(cacheDir, 'b0bd766fbab61007aefe7922895a1726afe11b14').list() as Set == ['ideaIC-2019.1', 'ideaIC-2019.1.zip'] as Set
+        cacheDir.list() as Set == ['cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a', '116a3a8911c3a4bd49b2cb23f9576d13eaa721df'] as Set
+        new File(cacheDir, '116a3a8911c3a4bd49b2cb23f9576d13eaa721df').list() as Set == ['ideaIC-2020.1.pom'] as Set
+        new File(cacheDir, 'cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a').list() as Set == ['ideaIC-2020.1', 'ideaIC-2020.1.zip'] as Set
     }
 
     def 'download sources if option is enabled'() {
         given:
-        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2019.1')
-        def sourcesJar = new File(cacheDir, 'a2c781ea46fb47d00ee87bfe0d9e43283928657f/ideaIC-2019.1-sources.jar')
+        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1')
+        def sourcesJar = new File(cacheDir, 'a2c781ea46fb47d00ee87bfe0d9e43283928657f/ideaIC-2020.1-sources.jar')
         Assume.assumeFalse("it was already cached. test is senseless until gradle clean", sourcesJar.exists())
 
         buildFile << 'intellij { downloadSources = true }'
@@ -32,10 +32,10 @@ class DownloadIntelliJSpec extends IntelliJPluginSpecBase {
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
-        cacheDir.list() as Set == ['a2c781ea46fb47d00ee87bfe0d9e43283928657f', '694a7f43987c80463928abbe411130b470c2b745', 'b0bd766fbab61007aefe7922895a1726afe11b14'] as Set
-        new File(cacheDir, '694a7f43987c80463928abbe411130b470c2b745').list() as Set == ['ideaIC-2019.1.pom'] as Set
-        new File(cacheDir, 'b0bd766fbab61007aefe7922895a1726afe11b14').list() as Set == ['ideaIC-2019.1', 'ideaIC-2019.1.zip'] as Set
-        new File(cacheDir, 'a2c781ea46fb47d00ee87bfe0d9e43283928657f').list() as Set == ['ideaIC-2019.1-sources.jar'] as Set
+        cacheDir.list() as Set == ['cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a', '6becac80419981b057df9cf0c62efcd94e6075a8', '116a3a8911c3a4bd49b2cb23f9576d13eaa721df'] as Set
+        new File(cacheDir, '116a3a8911c3a4bd49b2cb23f9576d13eaa721df').list() as Set == ['ideaIC-2020.1.pom'] as Set
+        new File(cacheDir, 'cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a').list() as Set == ['ideaIC-2020.1', 'ideaIC-2020.1.zip'] as Set
+        new File(cacheDir, '6becac80419981b057df9cf0c62efcd94e6075a8').list() as Set == ['ideaIC-2020.1-sources.jar'] as Set
     }
 
     def 'download ultimate idea dependencies'() {

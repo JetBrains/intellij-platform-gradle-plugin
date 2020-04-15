@@ -4,7 +4,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure sdk manually test'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij { version = '14.1.4' }
             intellij.configureDefaultDependencies = false
             afterEvaluate {
@@ -54,7 +54,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure plugins manually test'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij {
                 version = '14.1.4'
                 configureDefaultDependencies = false
@@ -111,7 +111,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure extra dependencies manually test'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['intellij-core', 'jps-build-test']
@@ -153,16 +153,16 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
         assert  testClasspath.contains('annotations.jar')           // included explicitly
         assert  testRuntimeClasspath.contains('annotations.jar')    // includes all
 
-        assert !mainClasspath.contains('intellij-core-analysis.jar')
-        assert  mainRuntimeClasspath.contains('intellij-core-analysis.jar') // includes intellij-core
-        assert !testClasspath.contains('intellij-core-analysis.jar')
-        assert  testRuntimeClasspath.contains('intellij-core-analysis.jar') // includes all
+        assert !mainClasspath.contains('intellij-core-analysis-deprecated.jar')
+        assert  mainRuntimeClasspath.contains('intellij-core-analysis-deprecated.jar') // includes intellij-core
+        assert !testClasspath.contains('intellij-core-analysis-deprecated.jar')
+        assert  testRuntimeClasspath.contains('intellij-core-analysis-deprecated.jar') // includes all
     }
 
     def 'configure sdk manually fail without afterEvaluate'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij.configureDefaultDependencies = false
             dependencies {
                 compile intellij { include('asm-all.jar') }
@@ -179,7 +179,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure plugins manually fail without afterEvaluate'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij.configureDefaultDependencies = false
             dependencies {
                 compile intellijPlugin('junit')
@@ -196,7 +196,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure plugins manually fail on unconfigured plugin'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij {
                 configureDefaultDependencies = false
                 plugins = []
@@ -218,7 +218,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure plugins manually fail on some unconfigured plugins'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij {
                 configureDefaultDependencies = false
                 plugins = ['junit']
@@ -240,7 +240,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure extra manually fail without afterEvaluate'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['intellij-core']
@@ -260,7 +260,7 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
     def 'configure extra manually fail on unconfigured extra dependency'() {
         given:
         writeTestFile()
-        buildFile << """\
+        buildFile << """
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['jps-build-test']

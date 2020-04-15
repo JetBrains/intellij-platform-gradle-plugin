@@ -14,30 +14,30 @@ class DownloadIntelliJPluginsSpec extends IntelliJPluginSpecBase {
 
     def 'download zip plugin from non-default channel'() {
         given:
-        buildFile << 'intellij { plugins = ["CSS-X-Fire:1.53.nightly@nightly"] }'
+        buildFile << 'intellij { plugins = ["CSS-X-Fire:1.55@nightly"] }'
 
         when:
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
-        def pluginDir = new File(mavenCacheDir, 'nightly.com.jetbrains.plugins/CSS-X-Fire/1.53.nightly')
-        pluginDir.list().contains('ece618ee1662d8df775ef57c412a00c6c6086cbb')
-        new File(pluginDir, 'ece618ee1662d8df775ef57c412a00c6c6086cbb').list().contains('CSS-X-Fire-1.53.nightly.zip')
-        new File(pluginsCacheDir, 'unzipped.nightly.com.jetbrains.plugins').list().contains('CSS-X-Fire-1.53.nightly')
+        def pluginDir = new File(mavenCacheDir, 'nightly.com.jetbrains.plugins/CSS-X-Fire/1.55')
+        pluginDir.list().contains('b36713d18b7845349268d9ba4ce4fedaff50d7a5')
+        new File(pluginDir, 'b36713d18b7845349268d9ba4ce4fedaff50d7a5').list().contains('CSS-X-Fire-1.55.zip')
+        new File(pluginsCacheDir, 'unzipped.nightly.com.jetbrains.plugins').list().contains('CSS-X-Fire-1.55')
     }
 
     def 'download zip plugin'() {
         given:
-        buildFile << 'intellij { plugins = ["org.intellij.plugins.markdown:191.5849.16"] }'
+        buildFile << 'intellij { plugins = ["org.intellij.plugins.markdown:201.6668.74"] }'
 
         when:
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
-        def pluginDir = new File(mavenCacheDir, 'com.jetbrains.plugins/org.intellij.plugins.markdown/191.5849.16')
-        pluginDir.list().contains('d06aeb05643e50406ff5f9325b63f9b993a6d4c')
-        new File(pluginDir, 'd06aeb05643e50406ff5f9325b63f9b993a6d4c').list().contains('org.intellij.plugins.markdown-191.5849.16.zip')
-        new File(pluginsCacheDir, 'unzipped.com.jetbrains.plugins').list().contains('org.intellij.plugins.markdown-191.5849.16')
+        def pluginDir = new File(mavenCacheDir, 'com.jetbrains.plugins/org.intellij.plugins.markdown/201.6668.74')
+        pluginDir.list().contains('5c9f1865c461d37e60c7083e8db9ad40c4bed98c')
+        new File(pluginDir, '5c9f1865c461d37e60c7083e8db9ad40c4bed98c').list().contains('org.intellij.plugins.markdown-201.6668.74.zip')
+        new File(pluginsCacheDir, 'unzipped.com.jetbrains.plugins').list().contains('org.intellij.plugins.markdown-201.6668.74')
     }
 
     def 'download jar plugin'() {

@@ -9,7 +9,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
         pluginXml << '<idea-plugin version="2"><name>MyPluginName</name><depends config-file="other.xml"/></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 
@@ -38,7 +38,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         fileText(jar, 'META-INF/plugin.xml') == """\
             <idea-plugin version="2">
               <version>0.42.123</version>
-              <idea-version since-build="191.6183" until-build="191.*"/>
+              <idea-version since-build="201.6668" until-build="201.*"/>
               <name>MyPluginName</name>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
@@ -49,7 +49,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         writeJavaFile()
         writeKotlinUIFile()
         pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             intellij.pluginName = 'myPluginName'
             version='0.42.123'
            """.stripIndent()
@@ -82,7 +82,7 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
         file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
         pluginXml << '<idea-plugin version="2"><name>MyPluginName</name><depends config-file="other.xml"/></idea-plugin>'
         def sandboxPath = adjustWindowsPath("$dir.root.absolutePath/customSandbox")
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { 
                 pluginName = 'myPluginName' 
@@ -133,11 +133,11 @@ class App {
 }
 """
         pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij {
                 pluginName = 'myPluginName'
-                plugins = ['org.intellij.plugins.markdown:191.5849.16']
+                plugins = ['org.intellij.plugins.markdown:201.6668.74']
             }
             """.stripIndent()
 
@@ -164,7 +164,7 @@ class App {
 }
 """
         pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -184,7 +184,7 @@ class App {
     def 'build plugin without sources'() {
         given:
         pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { pluginName = 'myPluginName' }
             """.stripIndent()
@@ -208,12 +208,12 @@ class App {
     def 'include only relevant searchableOptions.jar'() {
         given:
         pluginXml << '<idea-plugin version="2"><name>MyPluginName</name></idea-plugin>'
-        buildFile << """\
+        buildFile << """
             version='0.42.321'
             intellij { pluginName = 'myPluginName' }
             """.stripIndent()
         build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
-        buildFile << """\
+        buildFile << """
             version='0.42.123'
             intellij { pluginName = 'myPluginName' }
             """.stripIndent()
