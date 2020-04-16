@@ -1,6 +1,7 @@
 # Changelog
 
 ## 0.4.19 (under development)
+- Use builtin JBR from alternativeIdePath IDE [#358](../../issues/358)
 - Enable implementation-detail plugins automatically [#474](../../issues/474)
 - Allow referring builtin plugins by their ids rather than directory name [IDEA-233841](https://youtrack.jetbrains.com/issue/IDEA-233841)
 - Require 4.9 Gradle version, dropped deprecated stuff

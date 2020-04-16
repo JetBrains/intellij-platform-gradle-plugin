@@ -18,6 +18,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.jvm.tasks.Jar
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
@@ -449,6 +450,14 @@ class IntelliJPlugin implements Plugin<Project> {
                     return builtinJbr.javaExecutable
                 }
                 Utils.warn(task, "Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
+            }
+            if (extension.alternativeIdePath) {
+                def jbrPath = OperatingSystem.current().isMacOsX() ? "jbr/Contents/Home/bin/java" : "jbr/bin/java"
+                def java = new File(Utils.ideaDir(extension.alternativeIdePath), jbrPath)
+                if (java.exists()) {
+                    return java.absolutePath
+                }
+                Utils.warn(task, "Cannot resolve JBR at $java.absolutePath. Falling back to builtin JBR.")
             }
             return Jvm.current().javaExecutable.absolutePath
         })
