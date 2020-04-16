@@ -16,7 +16,7 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-def remoteRobotVersion = "0.9.33"
+def remoteRobotVersion = "0.9.35"
 def fixturesVersion = "1.1.18"
 
 dependencies {
