@@ -25,6 +25,8 @@ The easiest way to start the test system is to execute the `runIdeForUiTests` ta
 The `remote-robot` library communicates with the `robot-server` plugin via HTTP protocol. This connection means you can launch IDEA on remote machines or in docker containers to check your plugin within different test environments.
 
 ### Setup
+Last version of the Remote-Robot is `0.9.35`
+
 In the test project:
 ```groovy
 repositories {
@@ -39,10 +41,10 @@ In the plugin project:
 downloadRobotServerPlugin.version = REMOTER-ROBOT_VERSION
 
 runIdeForUiTests {
-    systemProperty "robot-server.port", "8082"
+    systemProperty "robot-server.port", "8082" // default port 8080
 }
 ```
-Of course, you can have it all in one project. 
+Of course, you can write UI tests in the plugin project. 
 
 ### Create RemoteRobot
 In the UI test project:
@@ -124,7 +126,7 @@ public class ActionLinkFixture extends ComponentFixture {
 We can retrieve data using `RemoteRobot` with the `callJs` method. In this case there is a `robot` var in the context of JavaScript execution. 
 The `robot` is an instance of extending the [`org.assertj.swing.core.Robot`](https://joel-costigliola.github.io/assertj/swing/api/org/assertj/swing/core/Robot.html) class.
 
-If you call the `callJs` method from a `fixture` object, you also have a `component` var in the context, which is the real component you found earlier. See the Searching Components section.
+When you use the `callJs()` method of a `fixture` object, the `component` argument represents the actual UI component that was found (see Searching Components) and used to initialize the `ComponentFixture`.
 
 The `runJs` method works the same way without any return value:
 ```java
