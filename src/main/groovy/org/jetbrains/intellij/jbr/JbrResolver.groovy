@@ -114,8 +114,14 @@ class JbrResolver {
     }
 
     private def getJbrRoot(@NotNull File javaHome) {
-        def jbr = new File(javaHome, 'jbr')
-        if (jbr.exists()) {
+        File jbr
+        for (folder in javaHome.listFiles()) {
+            if (folder.name in ["jbr", "jbrsdk"] ) {
+                jbr = folder
+                break
+            }
+        }
+        if (jbr != null && jbr.exists()) {
             return operatingSystem.isMacOsX() ? new File(jbr, 'Contents/Home') : jbr
         }
         return new File(javaHome, operatingSystem.isMacOsX() ? 'jdk/Contents/Home' : '')
@@ -156,6 +162,9 @@ class JbrResolver {
         }
 
         private static String getPrefix(String version) {
+            if (version.startsWith('jbrsdk-')) {
+                return 'jbrsdk-'
+            }
             if (version.startsWith('jbr_jcef-')) {
                 return 'jbr_jcef-'
             }
