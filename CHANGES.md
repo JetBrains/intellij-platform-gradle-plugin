@@ -1,13 +1,17 @@
 # Changelog
 
-## 0.4.19 (under development)
+## 0.4.20 (under development)
+
+## 0.4.19
+
 - Use builtin JBR from alternativeIdePath IDE [#358](../../issues/358)
-- Enable implementation-detail plugins automatically [#474](../../issues/474)
+- Enable dependencies for builtin plugins automatically [#474](../../issues/474)
 - Allow referring builtin plugins by their ids rather than directory name [IDEA-233841](https://youtrack.jetbrains.com/issue/IDEA-233841)
 - Require 4.9 Gradle version, dropped deprecated stuff
 - Do not add junit.jar into classpath, it may clash with junit-4.jar on certain JDKs
 
 ## 0.4.18
+
 - Introduced `runIdeForUiTests` task [#466](../../issues/466)
 - Fix unpacking JBR with JCEF on Mac [#468](../../issues/468)
 - Publish plugin security update [#472](../../issues/472)
