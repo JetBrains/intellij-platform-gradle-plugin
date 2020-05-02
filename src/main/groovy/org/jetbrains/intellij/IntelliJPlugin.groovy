@@ -249,7 +249,9 @@ class IntelliJPlugin implements Plugin<Project> {
                 configurePluginDependency(project, plugin, extension, resolver)
             }
         }
-        configureImplementationDetailPlugins(project, resolver, extension)
+        if (extension.configureDefaultDependencies) {
+            configureBuiltinPluginsDependencies(project, resolver, extension)
+        }
         verifyJavaPluginDependency(extension, project)
     }
 
@@ -269,10 +271,13 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureImplementationDetailPlugins(@NotNull Project project,
-                                                             @NotNull PluginDependencyManager resolver,
-                                                             @NotNull IntelliJPluginExtension extension) {
-        extension.ideaDependency.pluginsRegistry.getImplementationDetailPluginIds().forEach {
+    private static void configureBuiltinPluginsDependencies(@NotNull Project project,
+                                                            @NotNull PluginDependencyManager resolver,
+                                                            @NotNull IntelliJPluginExtension extension) {
+        def configuredPlugins = extension.pluginDependencies
+                .findAll { it.builtin }
+                .collect { it.id }
+        extension.ideaDependency.pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
             def plugin = resolver.resolve(project, it, null, null)
             configurePluginDependency(project, plugin, extension, resolver)
             resolver.register(project, plugin, IDEA_CONFIGURATION_NAME)
@@ -284,7 +289,6 @@ class IntelliJPlugin implements Plugin<Project> {
                                                   PluginDependency plugin,
                                                   IntelliJPluginExtension extension,
                                                   PluginDependencyManager resolver) {
-
         if (extension.configureDefaultDependencies) {
             resolver.register(project, plugin, plugin.builtin ? IDEA_CONFIGURATION_NAME : IDEA_PLUGINS_CONFIGURATION_NAME)
         }

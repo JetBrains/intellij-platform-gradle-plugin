@@ -194,8 +194,9 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         assert !runtimeClasspath.contains('intellij-postfix.jar')
     }
 
-    def 'add implementation-details plugin to classpath'() {
+    def 'add builtin plugin dependencies to classpath'() {
         given:
+        buildFile << "intellij.plugins = ['com.jetbrains.changeReminder']\n"
         buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
         buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
 
@@ -205,8 +206,10 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
 
         then:
-        assert compileClasspath.contains('platform-images.jar')
-        assert runtimeClasspath.contains('platform-images.jar')
+        assert compileClasspath.contains('vcs-changeReminder.jar')
+        assert runtimeClasspath.contains('vcs-changeReminder.jar')
+        assert compileClasspath.contains('git4idea.jar')
+        assert runtimeClasspath.contains('git4idea.jar')
     }
 
     def 'use test compile classpath for non-builtin plugins if Gradle >= 2.12'() {

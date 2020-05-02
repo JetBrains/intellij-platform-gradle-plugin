@@ -1,17 +1,15 @@
 package org.jetbrains.intellij.dependency
 
-import groovy.transform.ToString
 import groovy.xml.MarkupBuilder
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.Utils
 
-@ToString(includeNames = true, includeFields = true, ignoreNulls = true)
-class BuiltinPluginsRegistry implements Serializable {
+class BuiltinPluginsRegistry {
     private final Map<String, Plugin> plugins = new HashMap<>();
 
-    transient private final Map<String, String> directoryNameMapping = new HashMap<>();
-    transient private final File pluginsDirectory;
+    private final Map<String, String> directoryNameMapping = new HashMap<>();
+    private final File pluginsDirectory;
 
     BuiltinPluginsRegistry(def pluginsDirectory) {
         this.pluginsDirectory = pluginsDirectory
@@ -34,7 +32,8 @@ class BuiltinPluginsRegistry implements Serializable {
         Utils.debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
         try {
             Utils.parseXml(cache).children().forEach { node ->
-                plugins.put(node.id, new Plugin(node.id, node.directoryName, node.implementationDetail))
+                def dependencies = node.dependencies.children().collect { it.text() } as Collection<String>
+                plugins.put(node.id, new Plugin(node.id, node.directoryName, dependencies))
             }
             return true
         }
@@ -64,11 +63,13 @@ class BuiltinPluginsRegistry implements Serializable {
             writer = new FileWriter(cacheFile)
             new MarkupBuilder(writer).plugins {
                 for (p in plugins) {
-                    plugin (
-                        id: p.key,
-                        directoryName: p.value.directoryName,
-                        implementationDetail: p.value.implementationDetail,
-                    )
+                    plugin(id: p.key, directoryName: p.value.directoryName) {
+                        dependencies {
+                            for (def d in p.value.dependencies) {
+                                dependency(d)
+                            }
+                        }
+                    }
                 }
             }
         } catch (Throwable t) {
@@ -95,15 +96,29 @@ class BuiltinPluginsRegistry implements Serializable {
     }
 
     @Nullable
-    Set<String> getImplementationDetailPluginIds() {
-        return plugins.values().findAll { it.implementationDetail }.collect { it.id }
+    Collection<String> collectBuiltinDependencies(@NotNull Collection<String> pluginIds) {
+        List<String> idsToProcess = new ArrayList<>(pluginIds)
+        Set<String> result = new HashSet<>()
+        while (!idsToProcess.isEmpty()) {
+            def id = idsToProcess.remove(0)
+            def plugin = plugins[id] ?: plugins[directoryNameMapping[id]]
+            if (plugin) {
+                if (result.add(id)) {
+                    idsToProcess.addAll(plugin.dependencies - result)
+                }
+            }
+        }
+        return result
     }
 
     def add(@NotNull File artifact, def loggingContext) {
         Utils.debug(loggingContext, "Adding directory to plugins index: $artifact)")
         def intellijPlugin = Utils.createPlugin(artifact, false, loggingContext)
         if (intellijPlugin != null) {
-            def plugin = new Plugin(intellijPlugin.pluginId, artifact.name, intellijPlugin.implementationDetail)
+            def dependencies = intellijPlugin.dependencies
+                    .findAll { !it.optional }
+                    .collect { it.id }
+            def plugin = new Plugin(intellijPlugin.pluginId, artifact.name, dependencies)
             plugins.put(intellijPlugin.pluginId, plugin)
             if (plugin.directoryName != plugin.id) {
                 directoryNameMapping.put(plugin.directoryName, plugin.id)
@@ -114,12 +129,12 @@ class BuiltinPluginsRegistry implements Serializable {
     private static class Plugin {
         final String id
         final String directoryName
-        final boolean implementationDetail;
+        final Collection<String> dependencies;
 
-        Plugin(String id, String directoryName, boolean implementationDetail) {
+        Plugin(String id, String directoryName, Collection<String> dependencies) {
             this.id = id
             this.directoryName = directoryName
-            this.implementationDetail = implementationDetail
+            this.dependencies = dependencies
         }
     }
 }
