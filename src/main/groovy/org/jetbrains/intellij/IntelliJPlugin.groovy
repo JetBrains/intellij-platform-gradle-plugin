@@ -522,6 +522,8 @@ class IntelliJPlugin implements Plugin<Project> {
                 })
             }
 
+            // A dedicated task ensures that sources substitution is always run,
+            // even when the instrumentCode task is up-to-date.
             def updateTask = project.tasks.create('post' + instrumentTask.name.capitalize())
             updateTask.with {
                 dependsOn instrumentTask
