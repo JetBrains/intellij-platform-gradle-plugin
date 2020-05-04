@@ -111,7 +111,7 @@ Please see [Plugin Dependencies](http://www.jetbrains.org/intellij/sdk/docs/basi
 **Notes:**
     <ul>
         <li>For plugins from the JetBrains Plugin Repository use format `pluginId:version`.</li>
-        <li>For bundled plugins use directory name of the plugin in IDE distribution (e.g. `Groovy` for `IDEA/plugins/Groovy`).</li>
+        <li>For bundled plugins version should be omitted: e.g. `org.intellij.groovy` for `IDEA/plugins/Groovy` plugin.</li>
         <li>For sub-projects use project reference `project(':subproject')`.</li>
         <li>If you need to refer plugin's classes from your project, you also have to define a dependency in your `plugin.xml`.</li>
     </ul>
