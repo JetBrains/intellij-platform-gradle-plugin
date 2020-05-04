@@ -34,6 +34,7 @@ class BuiltinPluginsRegistry {
             Utils.parseXml(cache).children().forEach { node ->
                 def dependencies = node.dependencies.collect { it.text() } as Collection<String>
                 plugins.put(node.@id, new Plugin(node.@id, node.@directoryName, dependencies))
+                directoryNameMapping.put(node.@directoryName, node.@id)
             }
             return true
         }
@@ -87,7 +88,7 @@ class BuiltinPluginsRegistry {
 
     @Nullable
     File findPlugin(def name) {
-        def plugin = plugins.get(name) ?: plugins.get(directoryNameMapping.get(name))
+        def plugin = plugins[name] ?: plugins[directoryNameMapping[name]]
         if (plugin != null) {
             def result = new File(pluginsDirectory, plugin.directoryName)
             return result.exists() && result.isDirectory() ? result : null
