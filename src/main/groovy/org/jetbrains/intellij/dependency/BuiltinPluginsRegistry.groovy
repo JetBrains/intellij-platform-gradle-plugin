@@ -32,8 +32,8 @@ class BuiltinPluginsRegistry {
         Utils.debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
         try {
             Utils.parseXml(cache).children().forEach { node ->
-                def dependencies = node.dependencies.children().collect { it.text() } as Collection<String>
-                plugins.put(node.id, new Plugin(node.id, node.directoryName, dependencies))
+                def dependencies = node.dependencies.collect { it.text() } as Collection<String>
+                plugins.put(node.@id, new Plugin(node.@id, node.@directoryName, dependencies))
             }
             return true
         }
