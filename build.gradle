@@ -27,7 +27,7 @@ repositories {
 dependencies {
     compile localGroovy()
     compile gradleApi()
-    compile 'org.jetbrains:annotations:13.0'
+    compile 'org.jetbrains:annotations:19.0.0'
     compile 'org.jetbrains.intellij.plugins:structure-base:3.105'
     compile 'org.jetbrains.intellij.plugins:structure-intellij:3.105'
     compile('org.jetbrains.intellij:plugin-repository-rest-client:2.0.6') {
