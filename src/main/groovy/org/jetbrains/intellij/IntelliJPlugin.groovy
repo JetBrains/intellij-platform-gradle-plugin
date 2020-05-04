@@ -15,7 +15,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.compile.AbstractCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
@@ -518,8 +517,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 })
                 conventionMapping('outputDir', {
                     def output = sourceSet.output
-                    // @since Gradle 4.0
-                    def classesDir = output.hasProperty('classesDirs') ? output.classesDirs.first() : output.classesDir
+                    def classesDir = output.classesDirs.first()
                     new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
                 })
             }
@@ -528,40 +526,9 @@ class IntelliJPlugin implements Plugin<Project> {
             updateTask.with {
                 dependsOn instrumentTask
                 onlyIf { extension.instrumentCode }
-
                 doLast {
-                    def sourceSetOutput = sourceSet.output
-
-                    // @since Gradle 4.0
-                    def oldClassesDir = sourceSetOutput.hasProperty("classesDirs") ?
-                            sourceSetOutput.classesDirs :
-                            sourceSetOutput.classesDir
-
                     // Set the classes dir to the new one with the instrumented classes
-
-                    // @since Gradle 4.0
-                    if (sourceSetOutput.hasProperty("classesDirs"))
-                        sourceSetOutput.classesDirs.from = instrumentTask.outputDir else
-                        sourceSetOutput.classesDir = instrumentTask.outputDir
-
-                    if (sourceSet.name == SourceSet.MAIN_SOURCE_SET_NAME) {
-                        // When we change the output classes directory, Gradle will automatically configure
-                        // the test compile tasks to use the instrumented classes. Normally this is fine,
-                        // however, it causes problems for Kotlin projects:
-
-                        // The "internal" modifier can be used to restrict access to the same module.
-                        // To make it possible to use internal methods from the main source set in test classes,
-                        // the Kotlin Gradle plugin adds the original output directory of the Java task
-                        // as "friendly directory" which makes it possible to access internal members
-                        // of the main module.
-
-                        // This fails when we change the classes dir. The easiest fix is to prepend the
-                        // classes from the "friendly directory" to the compile classpath.
-                        AbstractCompile testCompile = project.tasks.findByName('compileTestKotlin') as AbstractCompile
-                        if (testCompile) {
-                            testCompile.classpath = project.files(oldClassesDir, testCompile.classpath)
-                        }
-                    }
+                    sourceSet.output.classesDirs.from = instrumentTask.outputDir
                 }
             }
 
