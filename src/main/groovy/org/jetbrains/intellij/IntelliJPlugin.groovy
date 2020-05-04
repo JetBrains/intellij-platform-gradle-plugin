@@ -587,7 +587,7 @@ class IntelliJPlugin implements Plugin<Project> {
             }) { into 'lib' }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
-                archiveBaseName = project.provider { prepareSandboxTask.getPluginName() }
+                archiveBaseName.set(project.provider { prepareSandboxTask.getPluginName() })
             } else {
                 conventionMapping('baseName', { prepareSandboxTask.getPluginName() })
             }
