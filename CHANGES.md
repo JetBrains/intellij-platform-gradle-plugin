@@ -2,6 +2,8 @@
 
 ## 0.4.20 (under development)
 
+- fixed caching builtin plugins data
+
 ## 0.4.19
 
 - Use builtin JBR from alternativeIdePath IDE [#358](../../issues/358)
