@@ -3,6 +3,8 @@
 ## 0.4.20 (under development)
 
 - fixed caching builtin plugins data
+- add annotations-19.0.0 to compile classpath by default 
+- fix setting plugin name for Gradle 5.1..5.3 [#481](../../issues/481)
 
 ## 0.4.19
 
