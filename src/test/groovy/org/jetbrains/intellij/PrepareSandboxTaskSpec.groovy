@@ -23,6 +23,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             """.stripIndent()
         file('settings.gradle') << "include 'nestedProject'"
         file('nestedProject/build.gradle') << """
+            repositories { mavenCentral() }
             apply plugin: 'org.jetbrains.intellij'
             intellij {
                 version = '${getIntellijVersion()}'
@@ -65,6 +66,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
 
         buildFile << """
             allprojects {
+                repositories { mavenCentral() }
                 version='0.42.123'
                 apply plugin: 'org.jetbrains.intellij'
                 intellij { downloadSources = false }
