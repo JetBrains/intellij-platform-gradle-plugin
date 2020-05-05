@@ -2,6 +2,7 @@ package org.jetbrains.intellij.dependency
 
 
 import org.gradle.api.Project
+import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
@@ -46,16 +47,16 @@ class PluginDependencyManager {
         return resolveRemote(project, id, version, channel)
     }
 
-    void register(@NotNull Project project, @NotNull PluginDependency plugin, @NotNull String configuration) {
+    void register(@NotNull Project project, @NotNull PluginDependency plugin, @NotNull DependencySet dependencies) {
         if (plugin.maven && Utils.isJarFile(plugin.artifact)) {
-            project.dependencies.add(configuration, pluginDependency(plugin.id, plugin.version, plugin.channel))
+            dependencies.add(project.dependencies.create(pluginDependency(plugin.id, plugin.version, plugin.channel)))
             return
         }
         registerRepoIfNeeded(project, plugin)
         generateIvyFile(plugin)
-        project.dependencies.add(configuration, [
+        dependencies.add(project.dependencies.create([
                 group: groupId(plugin.channel), name: plugin.id, version: plugin.version, configuration: 'compile'
-        ])
+        ]))
     }
 
     @NotNull

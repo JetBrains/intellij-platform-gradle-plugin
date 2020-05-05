@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
@@ -71,7 +72,7 @@ class IntelliJPlugin implements Plugin<Project> {
             sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
             downloadSources = !System.getenv().containsKey('CI')
         }
-        configureConfigurations(project)
+        configureConfigurations(project, intellijExtension)
         configureTasks(project, intellijExtension)
     }
 
@@ -81,9 +82,13 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureConfigurations(@NotNull Project project) {
+    private static void configureConfigurations(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         def idea = project.configurations.create(IDEA_CONFIGURATION_NAME).setVisible(false)
+        configureIntellijDependency(project, extension, idea)
+
         def ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false)
+        configurePluginDependencies(project, extension, ideaPlugins)
+
         def defaultDependencies = project.configurations.create("intellijDefaultDependencies").setVisible(false)
         defaultDependencies.defaultDependencies { dependencies ->
             dependencies.add(project.dependencies.create('org.jetbrains:annotations:19.0.0'))
@@ -115,8 +120,6 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
-        configureIntellijDependency(project, extension)
-        configurePluginDependencies(project, extension)
         configureDependencyExtensions(project, extension)
         assert !project.state.executed: "afterEvaluate is a no-op for an executed project"
         project.afterEvaluate { Project p -> configureProjectAfterEvaluate(p, extension) }
@@ -188,8 +191,9 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureIntellijDependency(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension) {
-        project.configurations.getByName(IDEA_CONFIGURATION_NAME).withDependencies { dependencies ->
+                                                    @NotNull IntelliJPluginExtension extension,
+                                                    @NotNull Configuration configuration) {
+        configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring IDE dependency")
             def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
             def ideaDependency
@@ -208,7 +212,7 @@ class IntelliJPlugin implements Plugin<Project> {
             extension.ideaDependency = ideaDependency
             if (extension.configureDefaultDependencies) {
                 Utils.info(project, "$ideaDependency.buildNumber is used for building")
-                resolver.register(project, ideaDependency, IDEA_CONFIGURATION_NAME)
+                resolver.register(project, ideaDependency, dependencies)
                 if (!ideaDependency.extraDependencies.empty) {
                     Utils.info(project, "Note: $ideaDependency.buildNumber extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
                 }
@@ -222,8 +226,10 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configurePluginDependencies(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-        project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).withDependencies { dependencies ->
+    private static void configurePluginDependencies(@NotNull Project project,
+                                                    @NotNull IntelliJPluginExtension extension,
+                                                    @NotNull Configuration configuration) {
+        configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring plugin dependencies")
             def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
             def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
@@ -231,7 +237,7 @@ class IntelliJPlugin implements Plugin<Project> {
             extension.plugins.each {
                 Utils.info(project, "Configuring plugin $it")
                 if (it instanceof Project) {
-                    configureProjectPluginDependency(project, it, extension)
+                    configureProjectPluginDependency(project, it, dependencies, extension)
                 } else {
                     def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
                     if (!pluginId) {
@@ -248,11 +254,11 @@ class IntelliJPlugin implements Plugin<Project> {
                     if (ideVersion != null && !plugin.isCompatible(ideVersion)) {
                         throw new BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
                     }
-                    configurePluginDependency(project, plugin, extension, resolver)
+                    configurePluginDependency(project, plugin, extension, dependencies, resolver)
                 }
             }
             if (extension.configureDefaultDependencies) {
-                configureBuiltinPluginsDependencies(project, resolver, extension)
+                configureBuiltinPluginsDependencies(project, dependencies, resolver, extension)
             }
             verifyJavaPluginDependency(extension, project)
         }
@@ -287,6 +293,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureBuiltinPluginsDependencies(@NotNull Project project,
+                                                            @NotNull DependencySet dependencies,
                                                             @NotNull PluginDependencyManager resolver,
                                                             @NotNull IntelliJPluginExtension extension) {
         def configuredPlugins = extension.unresolvedPluginDependencies
@@ -294,16 +301,17 @@ class IntelliJPlugin implements Plugin<Project> {
                 .collect { it.id }
         extension.ideaDependency.pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
             def plugin = resolver.resolve(project, it, null, null)
-            configurePluginDependency(project, plugin, extension, resolver)
+            configurePluginDependency(project, plugin, extension, dependencies, resolver)
         }
     }
 
-    private static void configurePluginDependency(Project project,
-                                                  PluginDependency plugin,
-                                                  IntelliJPluginExtension extension,
-                                                  PluginDependencyManager resolver) {
+    private static void configurePluginDependency(@NotNull Project project,
+                                                  @NotNull PluginDependency plugin,
+                                                  @NotNull IntelliJPluginExtension extension,
+                                                  @NotNull DependencySet dependencies,
+                                                  @NotNull PluginDependencyManager resolver) {
         if (extension.configureDefaultDependencies) {
-            resolver.register(project, plugin, IDEA_PLUGINS_CONFIGURATION_NAME)
+            resolver.register(project, plugin, dependencies)
         }
         extension.addPluginDependency(plugin)
         project.tasks.withType(PrepareSandboxTask).each {
@@ -322,12 +330,15 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureProjectPluginDependency(@NotNull Project project, @NotNull Project dependency, @NotNull IntelliJPluginExtension extension) {
+    private static void configureProjectPluginDependency(@NotNull Project project,
+                                                         @NotNull Project dependency,
+                                                         @NotNull DependencySet dependencies,
+                                                         @NotNull IntelliJPluginExtension extension) {
         // invoke on demand, when plugins artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin) == null) {
             throw new BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
         }
-        project.dependencies.add(IDEA_PLUGINS_CONFIGURATION_NAME, dependency)
+        dependencies.add(project.dependencies.create(dependency))
         def pluginDependency = new PluginProjectDependency(dependency)
         extension.addPluginDependency(pluginDependency)
         project.tasks.withType(PrepareSandboxTask).each {

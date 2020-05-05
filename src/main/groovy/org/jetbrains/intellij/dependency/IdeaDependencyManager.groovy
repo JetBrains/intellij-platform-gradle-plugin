@@ -3,6 +3,7 @@ package org.jetbrains.intellij.dependency
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
@@ -76,7 +77,7 @@ class IdeaDependencyManager {
         return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, Collections.emptyList())
     }
 
-    static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull String configuration) {
+    static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull DependencySet dependencies) {
         def ivyFile = getOrCreateIvyXml(dependency)
         def ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length()) - ".xml"
         project.repositories.ivy { repo ->
@@ -87,9 +88,9 @@ class IdeaDependencyManager {
                 repo.artifactPattern("$dependency.sources.parent/[artifact]-[revision]-[classifier].[ext]")
             }
         }
-        project.dependencies.add(configuration, [
-            group: 'com.jetbrains', name: dependency.name, version: dependency.version, configuration: 'compile'
-        ])
+        dependencies.add(project.dependencies.create([
+                group: 'com.jetbrains', name: dependency.name, version: dependency.version, configuration: 'compile'
+        ]))
     }
 
     static boolean isKotlinRuntime(name) {
