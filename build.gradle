@@ -25,21 +25,21 @@ repositories {
 }
 
 dependencies {
-    compile localGroovy()
-    compile gradleApi()
-    compile 'org.jetbrains:annotations:19.0.0'
-    compile 'org.jetbrains.intellij.plugins:structure-base:3.105'
-    compile 'org.jetbrains.intellij.plugins:structure-intellij:3.105'
-    compile('org.jetbrains.intellij:plugin-repository-rest-client:2.0.6') {
+    implementation localGroovy()
+    api gradleApi()
+    implementation 'org.jetbrains:annotations:19.0.0'
+    implementation 'org.jetbrains.intellij.plugins:structure-base:3.105'
+    implementation 'org.jetbrains.intellij.plugins:structure-intellij:3.105'
+    implementation('org.jetbrains.intellij:plugin-repository-rest-client:2.0.6') {
         exclude group: 'org.jetbrains.kotlin'
     }
-    compile 'de.undercouch:gradle-download-task:4.0.4'
+    implementation 'de.undercouch:gradle-download-task:4.0.4'
 
-    testCompile gradleTestKit()
-    testCompile 'org.spockframework:spock-core:1.0-groovy-2.4', {
+    testImplementation gradleTestKit()
+    testImplementation 'org.spockframework:spock-core:1.0-groovy-2.4', {
         exclude module: 'groovy-all'
     }
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 version = '0.4.19'
