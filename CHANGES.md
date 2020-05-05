@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.4.20 (under development)
+## 0.5.0 (under development)
+
+- do not download dependencies during configuration phase [#123](../../issues/123)
+
+## 0.4.20
 
 - fixed caching builtin plugins data
 - add annotations-19.0.0 to compile classpath by default 
