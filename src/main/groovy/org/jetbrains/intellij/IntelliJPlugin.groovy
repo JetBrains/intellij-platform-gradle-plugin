@@ -81,8 +81,8 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureConfigurations(@NotNull Project project) {
-        def idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
-        def ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
+        def idea = project.configurations.create(IDEA_CONFIGURATION_NAME).setVisible(false)
+        def ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false)
         project.getDependencies().add(IDEA_CONFIGURATION_NAME, 'org.jetbrains:annotations:19.0.0')
         project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
         project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
