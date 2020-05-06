@@ -1,13 +1,11 @@
 plugins {
+    id 'groovy'
     id 'com.gradle.plugin-publish' version '0.11.0'
     id 'synapticloop.documentr' version '2.9.0'
     id 'java-gradle-plugin'
     id 'maven'
     id "com.github.breadmoirai.github-release" version "2.2.9"
 }
-
-apply plugin: 'groovy'
-apply plugin: 'java-gradle-plugin'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
