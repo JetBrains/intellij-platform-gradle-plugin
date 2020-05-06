@@ -95,7 +95,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
 
         project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom defaultDependencies, idea, ideaPlugins
-        project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom idea, ideaPlugins
+        project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom defaultDependencies, idea, ideaPlugins
     }
 
     private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
