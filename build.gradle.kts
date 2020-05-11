@@ -105,8 +105,8 @@ tasks.named<Upload>("uploadArchives") {
         "mavenDeployer" {
             "snapshotRepository"("url" to "https://oss.sonatype.org/content/repositories/snapshots/") {
                 "authentication"(
-                    "userName" to project.property("ossrhUsername"),
-                    "password" to project.property("ossrhPassword")
+                        "userName" to project.property("ossrhUsername"),
+                        "password" to project.property("ossrhPassword")
                 )
             }
 
@@ -152,9 +152,9 @@ tasks.wrapper {
 
 githubRelease {
     setToken(project.property("githubToken") as String)
-    owner by "jetbrains"
-    repo by "gradle-intellij-plugin"
-    body by extractChanges().trim()
+    owner.set("jetbrains")
+    repo.set("gradle-intellij-plugin")
+    body.set(extractChanges().trim())
 }
 
 fun extractChanges(): String {
@@ -168,8 +168,4 @@ fun extractChanges(): String {
     } else {
         changes.substring(startOffset)
     }
-}
-
-infix fun <T> Property<T>.by(value: T) {
-    set(value)
 }
