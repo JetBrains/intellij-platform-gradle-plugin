@@ -614,7 +614,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
             from({
                 if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
-                    "${jarSearchableOptionsTask.getDestinationDirectory()}/${jarSearchableOptionsTask.getArchiveFileName()}"
+                    "${jarSearchableOptionsTask.getDestinationDirectory().getAsFile().get().getPath()}/${jarSearchableOptionsTask.getArchiveFileName()}"
                 } else {
                     "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
                 }
