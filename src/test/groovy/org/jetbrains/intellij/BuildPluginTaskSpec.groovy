@@ -1,9 +1,12 @@
 package org.jetbrains.intellij
 
+import spock.lang.Unroll
+
 import java.util.zip.ZipFile
 
 class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
-    def 'build plugin distribution'() {
+    @Unroll
+    def 'build plugin distribution Gradle #gradleVersion'() {
         given:
         writeJavaFile()
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
@@ -19,10 +22,9 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
                 compile 'joda-time:joda-time:2.8.1'
             }""".stripIndent()
 
-        when:
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        expect:
+        build(gradleVersion, false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
-        then:
         File distribution = new File(buildDirectory, 'distributions/myPluginName-0.42.123.zip')
         distribution.exists()
 
@@ -42,6 +44,9 @@ class BuildPluginTaskSpec extends IntelliJPluginSpecBase {
               <name>MyPluginName</name>
               <depends config-file="other.xml"/>
             </idea-plugin>""".stripIndent()
+
+        where:
+        gradleVersion << ['4.9', '5.1', '6.4']
     }
 
     def 'build plugin distribution with Gradle 4 and Kotlin 1.1.4'() {

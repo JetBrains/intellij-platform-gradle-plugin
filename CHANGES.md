@@ -6,7 +6,7 @@
 
 ## 0.4.21
 
-- fix build task on Windows for Gradle > 5.1 [#487](../../issues/487)
+- fix adding serchable options to the distribution for Gradle > 5.1 [#487](../../issues/487)
 
 ## 0.4.20
 

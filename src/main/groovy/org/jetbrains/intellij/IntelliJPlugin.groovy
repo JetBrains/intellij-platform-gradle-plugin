@@ -506,8 +506,8 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             description = "Jars searchable options."
             if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
-                archiveBaseName.convention('lib/searchableOptions')
-                destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
+                archiveBaseName.set('lib/searchableOptions')
+                destinationDirectory.set(project.layout.buildDirectory.dir("libsSearchableOptions"))
             } else {
                 conventionMapping('baseName', { 'lib/searchableOptions' })
                 destinationDir = new File(project.buildDir, "libsSearchableOptions")
@@ -612,14 +612,9 @@ class IntelliJPlugin implements Plugin<Project> {
             from { "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}" }
             into { prepareSandboxTask.getPluginName() }
 
-            from({
-                if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
-                    "${jarSearchableOptionsTask.getDestinationDirectory().getAsFile().get().getPath()}/${jarSearchableOptionsTask.getArchiveFileName()}"
-                } else {
-                    "${jarSearchableOptionsTask.getDestinationDir()}/${jarSearchableOptionsTask.getArchiveName()}"
-                }
-
-            }) { into 'lib' }
+            def searchableOptionsJar = VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
+                    ? jarSearchableOptionsTask.archiveFile : { jarSearchableOptionsTask.archivePath }
+            from(searchableOptionsJar) { into 'lib' }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
                 archiveBaseName.set(project.provider { prepareSandboxTask.getPluginName() })
@@ -646,7 +641,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
                 def distributionFile =
                         VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
-                                ? buildPluginTask?.archiveFile?.getOrNull()?.getAsFile() : buildPluginTask.archivePath;
+                                ? buildPluginTask?.archiveFile?.getOrNull()?.asFile : buildPluginTask.archivePath;
                 return distributionFile?.exists() ? distributionFile : null
             })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
