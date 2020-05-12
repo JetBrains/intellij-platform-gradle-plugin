@@ -4,6 +4,10 @@
 
 - do not download dependencies during configuration phase [#123](../../issues/123)
 
+## 0.4.21
+
+- fix build task on Windows for Gradle > 5.1 [#487](../../issues/487)
+
 ## 0.4.20
 
 - fixed caching builtin plugins data
