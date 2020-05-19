@@ -60,7 +60,7 @@ Please see [Plugin Compatibility](https://www.jetbrains.org/intellij/sdk/docs/ba
         <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>
     </ul>
 
-<br/><br/>All available JetBrains IDEs versions can be found at [Intellij Artifacts](https://www.jetbrains.org/intellij/sdk/docs/reference_guide/intellij_artifacts.html) page.<br/><br/>
+<br/><br/>All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://www.jetbrains.org/intellij/sdk/docs/reference_guide/intellij_artifacts.html) page.<br/><br/>
 
 **Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>
 |{\n}

@@ -10,34 +10,115 @@ import org.jetbrains.intellij.dependency.PluginDependency
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
  */
 class IntelliJPluginExtension {
+    /**
+     * The list of bundled IDE plugins and plugins from the <a href="https://plugins.jetbrains.com/">JetBrains Plugin Repository</a>.
+     */
     Object[] plugins = []
-    String localPath
-    String localSourcesPath
-    String version
-    String type = 'IC'
-    String pluginName
-    String sandboxDirectory
-    String intellijRepo = IntelliJPlugin.DEFAULT_INTELLIJ_REPO
-    String pluginsRepo = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO
-    String jreRepo
-    String alternativeIdePath
-    String ideaDependencyCachePath
-    boolean instrumentCode = true
-    boolean updateSinceUntilBuild = true
-    boolean sameSinceUntilBuild = false
-    boolean downloadSources = true
 
-    // turning it off disables configuring dependencies to intellij sdk jars automatically,
-    // instead the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration
+    /**
+     * The path to locally installed IDE distribution that should be used as a dependency.
+     */
+    String localPath
+
+    /**
+     * The path to local archive with IDE sources.
+     */
+    String localSourcesPath
+
+    /**
+     * The version of the IntelliJ Platform IDE that will be used to build the plugin.
+     * <p/>
+     * Please see <a href="https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
+     */
+    String version
+
+    /**
+     * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
+     * <p/>
+     * The type might be included as a prefix in {@link #version} value.
+     */
+    String type = 'IC'
+
+    /**
+     * The name of the target zip-archive and defines the name of plugin artifact.
+     * By default: <code>${project.name}</code>
+     */
+    String pluginName
+
+    /**
+     * Patch plugin.xml with since and until build values inferred from IDE version.
+     */
+    boolean updateSinceUntilBuild = true
+
+    /**
+     * Patch plugin.xml with an until build value that is just an "open" since build.
+     */
+    boolean sameSinceUntilBuild = false
+
+    /**
+     * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
+     */
+    boolean instrumentCode = true
+
+    /**
+     * The absolute path to the locally installed JetBrains IDE, which is used for running.
+     * <p/>
+     * @deprecated use `ideDirectory` option in `runIde` and `buildSearchableOptions` task instead.
+     */
+    @Deprecated
+    String alternativeIdePath
+
+    /**
+     * The path of sandbox directory that is used for running IDE with developing plugin.
+     * By default: <code>${project.buildDir}/idea-sandbox</code>.
+     */
+    String sandboxDirectory
+
+    /**
+     * Url of repository for downloading IDE distributions.
+     */
+    String intellijRepo = IntelliJPlugin.DEFAULT_INTELLIJ_REPO
+
+    /**
+     * Url of repository for downloading plugin dependencies.
+     */
+    String pluginsRepo = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO
+
+    /**
+     * Url of repository for downloading JetBrains Java Runtime.
+     */
+    String jreRepo
+
+    /**
+     * The absolute path to the local directory that should be used for storing IDE distributions.
+     */
+    String ideaDependencyCachePath
+
+    /**
+     * Download IntelliJ sources while configuring Gradle project.
+     */
+    boolean downloadSources = !System.getenv().containsKey('CI')
+
+    /**
+     * Turning it off disables configuring dependencies to intellij sdk jars automatically,
+     * instead the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration
+     */
     boolean configureDefaultDependencies = true
-    // configure extra dependency artifacts from intellij repo
-    // the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
+
+    /**
+     * configure extra dependency artifacts from intellij repo
+     *  the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
+     */
     Object[] extraDependencies = []
 
-    Project project
+    private Project project
     private IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
     private boolean pluginDependenciesConfigured = false
+
+    def setExtensionProject(@NotNull Project project) {
+        this.project = project
+    }
 
     String getType() {
         if (version == null) {

@@ -67,10 +67,9 @@ class IntelliJPlugin implements Plugin<Project> {
         project.getPlugins().apply(JavaPlugin)
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension) as IntelliJPluginExtension
         intellijExtension.with {
-            it.project = project
+            extensionProject = project
             pluginName = project.name
             sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
-            downloadSources = !System.getenv().containsKey('CI')
         }
         configureConfigurations(project, intellijExtension)
         configureTasks(project, intellijExtension)

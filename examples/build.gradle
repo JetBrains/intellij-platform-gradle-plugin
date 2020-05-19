@@ -15,6 +15,10 @@ buildscript {
 }
 
 subprojects {
+    repositories {
+        mavenCentral()
+    }
+
     apply plugin: 'java'
     apply plugin: 'org.jetbrains.intellij'
 
