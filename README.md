@@ -137,6 +137,8 @@ In addition to that, following attributes may be used to customize IDE running:
 ### Patching DSL
 The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
 
+> **TIP** To maintain and generate an up-to-date changelog, try using [Gradle Changelog Plugin](https://github.com/JetBrains/gradle-changelog-plugin).
+
 | **Attributes**            | **Default Value** |
 | :------------------------ |  :---------------- |
 | <kbd>version</kbd> is a value for the `<version>` tag.                                | <kbd>project.version</kbd> |
