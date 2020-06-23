@@ -130,7 +130,7 @@ class PublishTask extends ConventionTask {
                     Utils.info(this, "Uploaded successfully")
                 }
                 catch (exception) {
-                    throw new TaskExecutionException(this, new GradleException('Failed to upload plugin', exception))
+                    throw new TaskExecutionException(this, new GradleException("Failed to upload plugin. $exception.message", exception))
                 }
             }
         } else if (creationResult instanceof PluginCreationFail) {
