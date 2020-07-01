@@ -13,6 +13,10 @@
       "value": "[![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)\n "
     },
     {
+      "type": "markup",
+      "value": "[![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat)](https://twitter.com/JBPlatform/)\n "
+    },
+    {
       "type": "inbuilt",
       "value": "badge-shield-io-gradle-plugin"
     },
