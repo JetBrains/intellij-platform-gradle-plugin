@@ -237,6 +237,8 @@ As examples of using this plugin you can check out following projects:
 	- Uses template language
 - [F# plugin](https://github.com/JetBrains/fsharp-support/tree/master/rider-fsharp) for JetBrains Rider
 	- Uses the Gradle Kotlin DSL
+- [T4 plugin](https://github.com/jetbrains/fortea) for JetBrains Rider
+	- Uses the Gradle Kotlin DSL
 - [Intellij Rainbow Brackets](https://github.com/izhangzhihao/intellij-rainbow-brackets)
 	- Fully written in Kotlin
 	- Uses other IntelliJ IDEA plugins as test dependencies
