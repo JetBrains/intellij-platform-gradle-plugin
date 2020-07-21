@@ -32,8 +32,7 @@ class DownloadIntelliJSpec extends IntelliJPluginSpecBase {
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
         then:
-        cacheDir.list() as Set == ['cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a', '6becac80419981b057df9cf0c62efcd94e6075a8', '116a3a8911c3a4bd49b2cb23f9576d13eaa721df'] as Set
-        new File(cacheDir, '116a3a8911c3a4bd49b2cb23f9576d13eaa721df').list() as Set == ['ideaIC-2020.1.pom'] as Set
+        cacheDir.list() as Set == ['cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a', '6becac80419981b057df9cf0c62efcd94e6075a8'] as Set
         new File(cacheDir, 'cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a').list() as Set == ['ideaIC-2020.1', 'ideaIC-2020.1.zip'] as Set
         new File(cacheDir, '6becac80419981b057df9cf0c62efcd94e6075a8').list() as Set == ['ideaIC-2020.1-sources.jar'] as Set
     }
