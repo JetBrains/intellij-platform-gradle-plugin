@@ -1,10 +1,10 @@
 <a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)
  [![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat)](https://twitter.com/JBPlatform/)
- [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.21-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
+ [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.4.22-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
 
 # gradle-intellij-plugin
 
-<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.4.21</h4>
+<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.4.22</h4>
 
 > 
 **This project requires Gradle 4.9 or newer**
@@ -34,7 +34,7 @@ Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.21"
+  id "org.jetbrains.intellij" version "0.4.22"
 }
 ```
  
@@ -61,7 +61,6 @@ buildscript {
 
 apply plugin: 'org.jetbrains.intellij'
 ```
-</details>
 
 ### Tasks
 
@@ -137,6 +136,7 @@ In addition to that, following attributes may be used to customize IDE running:
 | <kbd>configDirectory</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDirectory}/config</kbd> |
 | <kbd>pluginsDirectory</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDirectory}/plugins</kbd> |
 | <kbd>systemDirectory</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDirectory}/system</kbd> |
+| <kbd>autoReloadPlugins</kbd> Enable/disable auto-reload of dynamic plugins. | <kbd>true</kbd> for IDE >= 2020.2 |
 
 ### Patching DSL
 The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
@@ -178,11 +178,11 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.4.21"
+  id "org.jetbrains.intellij" version "0.4.22"
 }
 
 intellij {
-  version 'IC-2018.3'
+  version 'IC-2020.1'
   plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
   pluginName 'MyPlugin'
 
@@ -190,8 +190,29 @@ intellij {
 publishPlugin {
   token 'ssdfhasdfASDaq23jhnasdkjh'
   channels 'nightly'
-} 
+}
 ```
+
+
+### build.gradle.kts
+
+```kotlin
+plugins {
+  id("org.jetbrains.intellij") version "0.4.22"
+}
+
+intellij {
+  version = "2020.1"
+  setPlugins("coverage", "org.intellij.plugins.markdown:8.5.0.20160208")
+  isDownloadSources = true
+  pluginName = "MyPlugin"
+}
+publishPlugin {
+  token = "ssdfhasdfASDaq23jhnasdkjh"
+  channels = "nightly"
+}
+```
+
 
 # Examples
 

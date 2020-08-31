@@ -469,6 +469,10 @@ class IntelliJPlugin implements Plugin<Project> {
         task.conventionMapping("systemDirectory", {
             project.file("${extension.sandboxDirectory}/system")
         })
+        task.conventionMapping("autoReloadPlugins", {
+            def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension))
+            VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("202.0")
+        })
         task.conventionMapping("executable", {
             def jbrResolver = new JbrResolver(project, task)
             def jbrVersion = task.getJbrVersion() ?: task.getJbreVersion()

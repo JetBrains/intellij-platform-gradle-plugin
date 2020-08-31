@@ -20,6 +20,15 @@ runIde {
 }
 ```
 
+### How to disable automatic reload of dynamic plugins
+
+Configure `runIde` task as follows:
+```
+runIde {
+    autoReloadPlugins = false
+}
+```
+
 #### How to disable building searchable options
 
 Building searchable options can be disabled as a task:

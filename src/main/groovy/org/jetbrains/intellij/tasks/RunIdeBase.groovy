@@ -61,6 +61,7 @@ abstract class RunIdeBase extends JavaExec {
     private Object systemDirectory
     private Object pluginsDirectory
     private Object jbrVersion
+    private Boolean myAutoReloadPlugins = false
 
     @Internal
     List<String> getRequiredPluginIds() {
@@ -185,6 +186,21 @@ abstract class RunIdeBase extends JavaExec {
         this.pluginsDirectory = pluginsDirectory
     }
 
+    @Input
+    @Optional
+    Boolean getAutoReloadPlugins() {
+        return this.myAutoReloadPlugins
+    }
+
+    /**
+     * Enables auto-reload of dynamic plugins. Dynamic plugins will be reloaded automatically when their JARs are
+     * modified. This allows a much faster development cycle by avoiding a full restart of the development instance
+     * after code changes. Enabled by default in 2020.2 and higher.
+     */
+    void setAutoReloadPlugins(Boolean value) {
+        this.myAutoReloadPlugins = value
+    }
+
     RunIdeBase(boolean runAlways) {
         setMain("com.intellij.idea.Main")
         enableAssertions = true
@@ -236,7 +252,10 @@ abstract class RunIdeBase extends JavaExec {
         }
         systemPropertyIfNotDefined("idea.classpath.index.enabled", false, userDefinedSystemProperties)
         systemPropertyIfNotDefined("idea.is.internal", true, userDefinedSystemProperties)
-        systemPropertyIfNotDefined("idea.auto.reload.plugins", true, userDefinedSystemProperties)
+
+        if (!userDefinedSystemProperties.containsKey("idea.auto.reload.plugins") && getAutoReloadPlugins()) {
+            systemProperty("idea.auto.reload.plugins", "true")
+        }
 
         if (!getSystemProperties().containsKey('idea.platform.prefix')) {
             def matcher = Utils.VERSION_PATTERN.matcher(Utils.ideBuildNumber(getIdeDirectory()))
