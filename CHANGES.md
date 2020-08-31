@@ -4,6 +4,11 @@
 
 - do not download dependencies during configuration phase [#123](../../issues/123)
 
+## 0.4.22
+
+- add option to disable auto-reload of dynamic plugins
+- documentation improvements
+
 ## 0.4.21
 
 - fix adding serchable options to the distribution for Gradle > 5.1 [#487](../../issues/487)

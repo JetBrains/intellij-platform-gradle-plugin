@@ -34,7 +34,6 @@ buildscript {{{\n}
 apply plugin: 'org.jetbrains.intellij'{\n}
 ```{\n}
 {pre
-</details>
 
 
 pre}
