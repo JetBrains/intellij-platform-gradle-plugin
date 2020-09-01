@@ -1,3 +1,12 @@
+gradlePlugin {
+    plugins {
+        create("gradle-intellij-plugin") {
+            id = "org.jetbrains.intellij"
+            implementationClass = "org.jetbrains.intellij.IntelliJPlugin"
+        }
+    }
+}
+
 plugins {
     groovy
     id("com.gradle.plugin-publish") version "0.11.0"
