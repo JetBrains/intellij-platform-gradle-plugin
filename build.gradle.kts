@@ -1,11 +1,3 @@
-gradlePlugin {
-    plugins {
-        create("gradle-intellij-plugin") {
-            id = "org.jetbrains.intellij"
-            implementationClass = "org.jetbrains.intellij.IntelliJPlugin"
-        }
-    }
-}
 
 plugins {
     groovy
@@ -60,16 +52,19 @@ nullability assertions and forms classes made with IntelliJ GUI Designer and pro
 helpful while developing plugins for IntelliJ platform.
 """
 
+gradlePlugin {
+    plugins.create("intellijPlugin") {
+        id = "org.jetbrains.intellij"
+        displayName = "Gradle IntelliJ Plugin"
+        implementationClass = "org.jetbrains.intellij.IntelliJPlugin"
+    }
+}
+
 pluginBundle {
     website = "https://github.com/JetBrains/gradle-intellij-plugin"
     vcsUrl = "https://github.com/JetBrains/gradle-intellij-plugin"
     description = "Plugin for building plugins for IntelliJ IDEs"
     tags = listOf("intellij", "jetbrains", "idea")
-
-    plugins.create("intellijPlugin") {
-        id = "org.jetbrains.intellij"
-        displayName = "Gradle IntelliJ Plugin"
-    }
 }
 
 val cacheIntolerantTest = tasks.register<Test>("cacheIntolerantTest") {
