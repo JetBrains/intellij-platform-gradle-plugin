@@ -145,6 +145,10 @@ class Utils {
     }
 
     static Node parseXml(File file) {
+        return parseXml(new FileInputStream(file))
+    }
+
+    static Node parseXml(InputStream inputStream) {
         def parser = new XmlParser(false, true, true)
         parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
         parser.setErrorHandler(new ErrorHandler() {
@@ -163,7 +167,6 @@ class Utils {
                 throw e
             }
         })
-        InputStream inputStream = new FileInputStream(file)
         InputSource input = new InputSource(new InputStreamReader(inputStream, "UTF-8"))
         input.setEncoding("UTF-8")
         try {
@@ -249,8 +252,9 @@ class Utils {
                      @NotNull File cacheDirectory,
                      @NotNull Project project,
                      @Nullable Predicate<File> isUpToDate,
-                     @Nullable BiConsumer<File, File> markUpToDate) {
-        def targetDirectory = new File(cacheDirectory, zipFile.name - ".zip")
+                     @Nullable BiConsumer<File, File> markUpToDate,
+                     @Nullable String targetDirName = null) {
+        def targetDirectory = new File(cacheDirectory, targetDirName ?: zipFile.name - ".zip")
         def markerFile = new File(targetDirectory, "markerFile")
         if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
             return targetDirectory
@@ -331,5 +335,32 @@ class Utils {
             warn(loggingContext, "Cannot create plugin from file ($artifact). $creationResult")
         }
         return null
+    }
+
+    @NotNull
+    static File downloadZipArtifact(@NotNull Project project, @NotNull String repoUrl, @NotNull String repoPattern,
+                                    @NotNull String dependency) {
+        debug(project, "Adding pseudo-Ivy repository to download $dependency - $repoUrl/$repoPattern")
+        def pseudoRepo = project.repositories.ivy {
+            url repoUrl
+            layout("pattern") {
+                artifact repoPattern
+            }
+            metadataSources {
+                artifact()
+            }
+        }
+        def projectDependency = project.dependencies.create("$dependency@zip")
+        def zipFile = null
+        try {
+            def configuration = project.configurations.detachedConfiguration(projectDependency)
+            zipFile = configuration.singleFile
+            debug(project, "Downloaded zip artifact: $zipFile")
+        } catch (Exception e) {
+            debug(project, "Couldn't find " + dependency + " in $repoUrl/$repoPattern", e)
+        }
+        debug(project, "Removing pseudo-Ivy repository $repoUrl/$repoPattern")
+        project.repositories.remove(pseudoRepo)
+        return zipFile
     }
 }

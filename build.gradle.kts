@@ -1,7 +1,7 @@
 plugins {
     groovy
     id("com.gradle.plugin-publish") version "0.11.0"
-    id("synapticloop.documentr") version "2.9.0"
+    id("synapticloop.documentr") version "3.1.0"
     `java-gradle-plugin`
     maven
     id("com.github.breadmoirai.github-release") version "2.2.9"

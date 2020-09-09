@@ -1,10 +1,11 @@
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.dependency.IdeaDependency
-import org.jetbrains.intellij.dependency.PluginDependency
+import org.jetbrains.intellij.dependency.*
 
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
@@ -81,8 +82,36 @@ class IntelliJPluginExtension {
 
     /**
      * Url of repository for downloading plugin dependencies.
+     *
+     * @deprecated Use closure syntax to configure multiple repositories
      */
+    @Deprecated
     String pluginsRepo = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO
+
+    /**
+     * Returns object to configure multiple repositories for downloading plugins.
+     */
+    PluginsRepoConfiguration pluginsRepo() {
+        if (pluginsRepoConfiguration == null) {
+            pluginsRepoConfiguration = new PluginsRepoConfigurationImpl(project)
+        }
+        return pluginsRepoConfiguration
+    }
+
+    /**
+     * Configure multiple repositories for downloading plugins.
+     */
+    void pluginsRepo(Closure<?> block) {
+        this.project.configure(pluginsRepo(), block)
+    }
+
+    /**
+     * Configure multiple repositories for downloading plugins.
+     */
+    void pluginsRepo(Action<PluginsRepoConfiguration> block) {
+        block.execute(pluginsRepo())
+    }
+
 
     /**
      * Url of repository for downloading JetBrains Java Runtime.
@@ -115,6 +144,7 @@ class IntelliJPluginExtension {
     private IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
     private boolean pluginDependenciesConfigured = false
+    private PluginsRepoConfigurationImpl pluginsRepoConfiguration = null
 
     def setExtensionProject(@NotNull Project project) {
         this.project = project
@@ -156,6 +186,10 @@ class IntelliJPluginExtension {
         return version
     }
 
+    String getBuildVersion() {
+        return IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
+    }
+
     def addPluginDependency(@NotNull PluginDependency pluginDependency) {
         pluginDependencies.add(pluginDependency)
     }
@@ -180,7 +214,7 @@ class IntelliJPluginExtension {
         this.ideaDependency = ideaDependency
     }
 
-    def getIdeaDependency() {
+    IdeaDependency getIdeaDependency() {
         if (ideaDependency == null) {
             Utils.debug(project, "IDE dependency is resolved", new Throwable())
             project.configurations.getByName(IntelliJPlugin.IDEA_CONFIGURATION_NAME).resolve()
@@ -190,4 +224,34 @@ class IntelliJPluginExtension {
         }
         return ideaDependency
     }
+
+    @NotNull
+    List<PluginsRepository> getPluginsRepos() {
+        if (pluginsRepoConfiguration == null) {
+            //noinspection GrDeprecatedAPIUsage
+            pluginsRepo().maven(this.pluginsRepo)
+        }
+        return pluginsRepoConfiguration.getRepositories()
+    }
+
+    interface PluginsRepoConfiguration {
+
+        /**
+         * Use default marketplace repository
+         */
+        void marketplace()
+
+        /**
+         * Use a Maven repository with plugin artifacts
+         */
+        void maven(@NotNull String url)
+
+        /**
+         * Use custom plugin repository. The URL should point to the `plugins.xml` or `updatePlugins.xml` file.
+         */
+        void custom(@NotNull String url)
+
+        List<PluginsRepository> getRepositories()
+    }
+
 }
