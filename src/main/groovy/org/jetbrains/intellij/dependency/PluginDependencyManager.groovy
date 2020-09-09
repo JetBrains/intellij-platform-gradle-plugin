@@ -18,12 +18,15 @@ class PluginDependencyManager {
     private final String cacheDirectoryPath
     private final String mavenCacheDirectoryPath
     private final IdeaDependency ideaDependency
+    private final List<PluginsRepository> pluginsRepositories
 
     private Set<String> pluginSources = new HashSet<>()
     private IvyArtifactRepository ivyArtifactRepository
 
-    PluginDependencyManager(@NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency) {
+    PluginDependencyManager(@NotNull String gradleHomePath, @Nullable IdeaDependency ideaDependency,
+                            @NotNull List<PluginsRepository> pluginsRepositories) {
         this.ideaDependency = ideaDependency
+        this.pluginsRepositories = pluginsRepositories
         // todo: a better way to define cache directory
         mavenCacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1').toString()
         cacheDirectoryPath = Paths.get(mavenCacheDirectoryPath, 'com.jetbrains.intellij.idea').toString()
@@ -44,7 +47,18 @@ class PluginDependencyManager {
             }
             throw new BuildException("Cannot find builtin plugin $id for IDE: $ideaDependency.classes.absolutePath", null)
         }
-        return resolveRemote(project, id, version, channel)
+        for (def repo in this.pluginsRepositories) {
+            def pluginFile = repo.resolve(id, version, channel)
+            if (pluginFile != null) {
+                if (pluginFile != null && Utils.isZipFile(pluginFile)) {
+                    return zippedPluginDependency(project, pluginFile, id, version, channel)
+                } else if (Utils.isJarFile(pluginFile)) {
+                    return externalPluginDependency(project, pluginFile, channel, true)
+                }
+                throw new BuildException("Invalid type of downloaded plugin: $pluginFile.name", null)
+            }
+        }
+        throw new BuildException("Cannot resolve plugin $id version $version ${channel != null ? "from channel $channel" : ""}", null)
     }
 
     void register(@NotNull Project project, @NotNull PluginDependency plugin, @NotNull DependencySet dependencies) {
@@ -60,17 +74,12 @@ class PluginDependencyManager {
     }
 
     @NotNull
-    private PluginDependency resolveRemote(@NotNull Project project, @NotNull String id, @NotNull String version, @Nullable String channel) {
-        def dependency = project.dependencies.create(pluginDependency(id, version, channel))
-        def configuration = project.configurations.detachedConfiguration(dependency)
-        def pluginFile = configuration.singleFile
-        if (Utils.isZipFile(pluginFile)) {
-            def pluginDir = findSingleDirectory(Utils.unzip(pluginFile, new File(cacheDirectoryPath, groupId(channel)), project, null, null))
-            return externalPluginDependency(project, pluginDir, channel, true)
-        } else if (Utils.isJarFile(pluginFile)) {
-            return externalPluginDependency(project, pluginFile, channel, true)
-        }
-        throw new BuildException("Invalid type of downloaded plugin: $pluginFile.name", null)
+    private PluginDependency zippedPluginDependency(Project project, File pluginFile, @NotNull String id, @Nullable String version, String channel) {
+        def pluginDir = findSingleDirectory(Utils.unzip(
+                pluginFile, new File(cacheDirectoryPath, groupId(channel)),
+                project, null, null,
+                "$id-$version"))
+        return externalPluginDependency(project, pluginDir, channel, true)
     }
 
     private static String groupId(@Nullable String channel) {
@@ -158,7 +167,7 @@ class PluginDependencyManager {
         return null
     }
 
-    private static def pluginDependency(@NotNull String id, @NotNull String version, @Nullable String channel) {
+    protected static def pluginDependency(@NotNull String id, @NotNull String version, @Nullable String channel) {
         def groupPrefix = channel ? "$channel." : ""
         return "${groupPrefix}com.jetbrains.plugins:$id:$version"
     }

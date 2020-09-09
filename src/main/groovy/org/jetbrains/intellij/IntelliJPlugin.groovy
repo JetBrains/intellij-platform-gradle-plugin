@@ -28,6 +28,7 @@ import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginProjectDependency
+import org.jetbrains.intellij.dependency.PluginsRepository
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.tasks.*
 
@@ -231,8 +232,8 @@ class IntelliJPlugin implements Plugin<Project> {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring plugin dependencies")
             def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-            def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency)
-            boolean repoRegistered = false
+            def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath,
+                    extension.ideaDependency, extension.pluginsRepos)
             extension.plugins.each {
                 Utils.info(project, "Configuring plugin $it")
                 if (it instanceof Project) {
@@ -241,10 +242,6 @@ class IntelliJPlugin implements Plugin<Project> {
                     def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
                     if (!pluginId) {
                         throw new BuildException("Failed to resolve plugin $it", null)
-                    }
-                    if (!repoRegistered && (pluginVersion || channel)) {
-                        project.repositories.maven { it.url = extension.pluginsRepo }
-                        repoRegistered = true
                     }
                     def plugin = resolver.resolve(project, pluginId, pluginVersion, channel)
                     if (plugin == null) {
@@ -260,6 +257,9 @@ class IntelliJPlugin implements Plugin<Project> {
                 configureBuiltinPluginsDependencies(project, dependencies, resolver, extension)
             }
             verifyJavaPluginDependency(extension, project)
+            for (PluginsRepository repository: extension.getPluginsRepos()) {
+                repository.postResolve()
+            }
         }
 
         project.afterEvaluate {
@@ -644,7 +644,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
                 def distributionFile =
                         VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
-                                ? buildPluginTask?.archiveFile?.getOrNull()?.asFile : buildPluginTask.archivePath;
+                                ? buildPluginTask?.archiveFile?.getOrNull()?.asFile : buildPluginTask.archivePath
                 return distributionFile?.exists() ? distributionFile : null
             })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }

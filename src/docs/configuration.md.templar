@@ -224,11 +224,24 @@ Please see [Plugin Dependencies](http://www.jetbrains.org/intellij/sdk/docs/basi
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>intellijRepo</kbd>, <kbd>pluginsRepo</kbd>, <kbd>jreRepo</kbd> - Urls of repositories for downloading IDE distributions, plugin dependencies and JetBrains Java Runtime. <br/><br/>
+| <kbd>intellijRepo</kbd>, <kbd>jreRepo</kbd> - Urls of repositories for downloading IDE distributions and JetBrains Java Runtime. <br/><br/>
 |
 **Acceptable Values:** <br/>
 <kbd>url</kbd><br/><br/>
-**Default Value:** <kbd>jetbrains.com/intellij-repository</kbd>, <kbd>plugins.jetbrains.com/maven</kbd>, <kbd>jetbrains.bintray.com/intellij-jdk</kbd>
+**Default Value:** <kbd>jetbrains.com/intellij-repository</kbd>, <kbd>jetbrains.bintray.com/intellij-jdk</kbd>
+|{\n}
+
+{-- --------------------------------------------------------------------------------------------------------------- --}
+{-- --------------------------------------------------------------------------------------------------------------- --}
+
+| <kbd>pluginsRepo {"{"} ... }</kbd> - Configure repositories for downloading plugin dependencies. <br/><br/>
+|
+**Configuration:** <br/>
+<kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/>
+<kbd>maven(repoUrl)</kbd> - use custom Maven repository with plugins<br/>
+<kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/>
+<br/>
+**Default Configuration:** <kbd>pluginsRepo {"{"} marketplace() }</kbd>
 |{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
