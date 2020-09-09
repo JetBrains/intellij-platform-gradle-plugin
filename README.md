@@ -50,9 +50,11 @@ buildscript {
       url "https://oss.sonatype.org/content/repositories/snapshots/"
     }
     maven { 
-      url 'https://dl.bintray.com/jetbrains/intellij-plugin-service' 
+      url 'https://jetbrains.bintray.com/intellij-plugin-service' 
     }
-    
+    maven { 
+      url 'https://jetbrains.bintray.com/intellij-third-party-dependencies' 
+    }
   }
   dependencies {
     classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.5.0-SNAPSHOT"

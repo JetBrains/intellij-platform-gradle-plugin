@@ -1,4 +1,3 @@
-
 plugins {
     groovy
     id("com.gradle.plugin-publish") version "0.11.0"
@@ -16,6 +15,7 @@ plugins.withType<JavaPlugin> {
 }
 
 repositories {
+    maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
     maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
@@ -27,7 +27,7 @@ dependencies {
     implementation("org.jetbrains:annotations:19.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.105")
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.105")
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.7") {
+    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.14") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("de.undercouch:gradle-download-task:4.0.4")

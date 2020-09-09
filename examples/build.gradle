@@ -7,7 +7,9 @@ buildscript {
         maven {
             url 'https://dl.bintray.com/jetbrains/intellij-plugin-service'
         }
-
+        maven {
+            url "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies"
+        }
     }
     dependencies {
         classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:FAKE_VERSION"
