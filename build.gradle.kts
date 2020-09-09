@@ -27,7 +27,7 @@ dependencies {
     implementation("org.jetbrains:annotations:19.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.105")
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.105")
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.6") {
+    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.7") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("de.undercouch:gradle-download-task:4.0.4")
