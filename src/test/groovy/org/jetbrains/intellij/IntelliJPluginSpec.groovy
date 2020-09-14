@@ -22,6 +22,7 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
                                              IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME,
                                              IntelliJPlugin.RUN_IDE_TASK_NAME,
                                              IntelliJPlugin.RUN_IDE_FOR_UI_TESTS_TASK_NAME,
+                                             IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME,
                                              IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME]
     }
 

@@ -44,6 +44,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
     public static final String PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
     public static final String DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
+    public static final String RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
     public static final String VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     public static final String RUN_IDE_TASK_NAME = "runIde"
     public static final String RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
@@ -61,6 +62,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
     public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
     public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
+    public static final String DEFAULT_INTELLIJ_PLUGIN_SERVICE = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
     public static final String PLUGIN_PATH = 'plugin.path'
 
@@ -113,6 +115,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePatchPluginXmlTask(project, extension)
         configureRobotServerDownloadTask(project)
         configurePrepareSandboxTasks(project, extension)
+        configureRunPluginVerifierTask(project)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
         configureRunIdeaForUiTestsTask(project)
@@ -414,6 +417,19 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
+
+    private static void configureRunPluginVerifierTask(@NotNull Project project) {
+        Utils.info(project, "Configuring run plugin verifier task")
+        project.tasks.create(RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask).with {
+            group = GROUP_NAME
+            description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
+//            conventionMapping('pluginDirectory', {
+//                def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
+//                new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName())
+//            })
+            dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
+        }
+    }
 
     private static void configurePluginVerificationTask(@NotNull Project project) {
         Utils.info(project, "Configuring plugin verification task")
