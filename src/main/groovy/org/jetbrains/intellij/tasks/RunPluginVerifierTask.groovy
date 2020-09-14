@@ -7,6 +7,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 
 class RunPluginVerifierTask extends ConventionTask {
@@ -177,11 +178,16 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     private String getVerifierPath() {
-        project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
-        def resolvedVerifierVersion = resolveVerifierVersion()
-        def dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
-        def configuration = project.configurations.detachedConfiguration(dependency)
-        return configuration.singleFile.absolutePath
+        def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
+        try {
+            def resolvedVerifierVersion = resolveVerifierVersion()
+            def dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
+            def configuration = project.configurations.detachedConfiguration(dependency)
+            return configuration.singleFile.absolutePath
+        }
+        finally {
+            project.repositories.remove(repository)
+        }
     }
 
     private String resolveVerifierVersion() {
