@@ -15,4 +15,5 @@ Plugin introduces the following tasks
 | `runIde`                 | Executes an IntelliJ IDEA instance with the plugin you are developing. |
 | `runIdeForUiTests`       | Executes an IntelliJ IDEA instance ready for ui tests run with the plugin you are developing. See [ui tests example](examples/ui-test-example) to know more |
 | `publishPlugin`          | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
+| `runPluginVerifier`      | Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IntelliJ IDE builds. |
 | `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |
