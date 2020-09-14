@@ -423,10 +423,6 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask).with {
             group = GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
-//            conventionMapping('pluginDirectory', {
-//                def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-//                new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName())
-//            })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
         }
     }
