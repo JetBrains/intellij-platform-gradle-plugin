@@ -511,7 +511,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 if (java.exists()) {
                     return java.absolutePath
                 }
-                Utils.warn(task, "Cannot resolve JBR at $java.absolutePath. Falling back to builtin JBR.")
+                Utils.warn(task, "Cannot resolve JBR at $java.absolutePath. Falling back to current JVM.")
             }
             return Jvm.current().javaExecutable.absolutePath
         })
