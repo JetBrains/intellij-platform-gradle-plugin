@@ -1,19 +1,43 @@
 package org.jetbrains.intellij.tasks
 
 import groovy.json.JsonSlurper
+import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
-import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
     private static final String VERIFIER_VERSION_LATEST = "latest"
 
+    public static enum FailureLevel {
+        COMPATIBILITY_WARNINGS("Compatibility warnings"),
+        COMPATIBILITY_PROBLEMS("Compatibility problems"),
+        DEPRECATED_USAGES("Deprecated API usages"),
+        EXPERIMENTAL_API_USAGES("Experimental API usages"),
+        INTERNAL_API_USAGES("Internal API usages"),
+        OVERRIDE_ONLY_USAGES("Override-only API usages"),
+        NON_EXTENDABLE_API_USAGES("Non-extendable API usages"),
+        PLUGIN_STRUCTURE_WARNINGS("Plugin structure warnings"),
+        MISSING_DEPENDENCIES("Missing dependencies"),
+        INVALID_PLUGIN("The following files specified for the verification are not valid plugins"),
+        NOT_DYNAMIC("Plugin cannot be loaded/unloaded without IDE restart");
+
+        public static final EnumSet<FailureLevel> ALL = EnumSet.allOf(FailureLevel.class)
+        public static final EnumSet<FailureLevel> NONE = EnumSet.noneOf(FailureLevel.class)
+
+        public final String testValue
+
+        FailureLevel(String testValue) {
+            this.testValue = testValue
+        }
+    }
+
+    private EnumSet<FailureLevel> failureLevel = EnumSet.of(FailureLevel.INVALID_PLUGIN)
     private List<String> ides = new ArrayList<String>()
     private String verifierVersion = VERIFIER_VERSION_LATEST
     private String verificationReportsDir = "${project.buildDir}/reports/pluginsVerifier"
@@ -27,6 +51,20 @@ class RunPluginVerifierTask extends ConventionTask {
     private String dumpBrokenPluginList = ""
     private String pluginsToCheckFile = ""
     private String subsystemsToCheck = ""
+
+    EnumSet<FailureLevel> getFailureLevel() {
+        return failureLevel
+    }
+
+    @Input
+    void setFailureLevel(EnumSet<FailureLevel> failureLevel) {
+        this.failureLevel = failureLevel
+    }
+
+    @Input
+    void setFailureLevel(FailureLevel failureLevel) {
+        this.failureLevel = EnumSet.of(failureLevel)
+    }
 
     @Input
     List<String> getIdes() {
@@ -170,10 +208,21 @@ class RunPluginVerifierTask extends ConventionTask {
             return dependency.classes.absolutePath
         }
 
-        project.javaexec {
-            classpath = project.files(verifierPath)
-            main = "com.jetbrains.pluginverifier.PluginVerifierMain"
-            args = verifierArgs
+        new ByteArrayOutputStream().withStream { os ->
+            project.javaexec {
+                classpath = project.files(verifierPath)
+                main = "com.jetbrains.pluginverifier.PluginVerifierMain"
+                args = verifierArgs
+                standardOutput = os
+            }
+
+            def output = os.toString()
+            println output
+            for (FailureLevel level : FailureLevel.values()) {
+                if (failureLevel.contains(level) && output.contains(level.testValue)) {
+                    throw new GradleException(level.toString())
+                }
+            }
         }
     }
 
