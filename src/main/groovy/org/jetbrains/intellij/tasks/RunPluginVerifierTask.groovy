@@ -24,7 +24,7 @@ class RunPluginVerifierTask extends ConventionTask {
         DEPRECATED_API_USAGES("Deprecated API usages"),
         EXPERIMENTAL_API_USAGES("Experimental API usages"),
         INTERNAL_API_USAGES("Internal API usages"),
-        OVERRIDE_ONLY_USAGES("Override-only API usages"),
+        OVERRIDE_ONLY_API_USAGES("Override-only API usages"),
         NON_EXTENDABLE_API_USAGES("Non-extendable API usages"),
         PLUGIN_STRUCTURE_WARNINGS("Plugin structure warnings"),
         MISSING_DEPENDENCIES("Missing dependencies"),
