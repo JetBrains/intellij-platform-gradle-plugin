@@ -21,7 +21,7 @@ class RunPluginVerifierTask extends ConventionTask {
     static enum FailureLevel {
         COMPATIBILITY_WARNINGS("Compatibility warnings"),
         COMPATIBILITY_PROBLEMS("Compatibility problems"),
-        DEPRECATED_USAGES("Deprecated API usages"),
+        DEPRECATED_API_USAGES("Deprecated API usages"),
         EXPERIMENTAL_API_USAGES("Experimental API usages"),
         INTERNAL_API_USAGES("Internal API usages"),
         OVERRIDE_ONLY_USAGES("Override-only API usages"),

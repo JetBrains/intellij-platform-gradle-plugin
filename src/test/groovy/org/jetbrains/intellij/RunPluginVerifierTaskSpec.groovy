@@ -67,7 +67,6 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             runPluginVerifier {
                 ides = ["IC-2020.2", "PY-2020.1"]
             }
-
             """.stripIndent()
 
         when:
@@ -88,7 +87,6 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             runPluginVerifier {
                 verificationReportsDir = "\${project.buildDir}/foo"
             }
-
             """.stripIndent()
 
         when:
@@ -124,9 +122,8 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
-                failureLevel = FailureLevel.DEPRECATED_USAGES
+                failureLevel = FailureLevel.DEPRECATED_API_USAGES
             }
-
             """.stripIndent()
 
         when:
@@ -134,7 +131,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Deprecated API usages")
-        result.output.contains("org.gradle.api.GradleException: DEPRECATED_USAGES")
+        result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
     }
 
     def 'pass on Deprecated API usages'() {
@@ -150,7 +147,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Deprecated API usages")
-        !result.output.contains("org.gradle.api.GradleException: DEPRECATED_USAGES")
+        !result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
     }
 
     def 'fail on any failureLevel'() {
@@ -165,7 +162,6 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             runPluginVerifier {
                 failureLevel = FailureLevel.ALL
             }
-
             """.stripIndent()
 
         when:
@@ -173,7 +169,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Deprecated API usages")
-        result.output.contains("org.gradle.api.GradleException: DEPRECATED_USAGES")
+        result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
     }
 
      def 'pass on any failureLevel'() {
@@ -188,7 +184,6 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             runPluginVerifier {
                 failureLevel = FailureLevel.NONE
             }
-
             """.stripIndent()
 
         when:
@@ -196,7 +191,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Deprecated API usages")
-        !result.output.contains("org.gradle.api.GradleException: DEPRECATED_USAGES")
+        !result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
     }
 
     private void writeJavaFileWithDeprecation() {
@@ -220,6 +215,5 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
                 <vendor>JetBrains</vendor>
             </idea-plugin>
             """.stripIndent()
-
     }
 }
