@@ -4,17 +4,21 @@ import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
+import org.jetbrains.intellij.jbr.JbrResolver
 
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
     private static final String VERIFIER_VERSION_LATEST = "latest"
 
-    public static enum FailureLevel {
+    static enum FailureLevel {
         COMPATIBILITY_WARNINGS("Compatibility warnings"),
         COMPATIBILITY_PROBLEMS("Compatibility problems"),
         DEPRECATED_USAGES("Deprecated API usages"),
@@ -41,32 +45,33 @@ class RunPluginVerifierTask extends ConventionTask {
     private List<String> ides = new ArrayList<String>()
     private String verifierVersion = VERIFIER_VERSION_LATEST
     private String verificationReportsDir = "${project.buildDir}/reports/pluginsVerifier"
-    private String runtimeDir = Jvm.current().getJavaHome()
-    private String externalPrefixes = ""
-    private String pluginsToCheckAllBuilds = ""
-    private String pluginsToCheckLastBuilds = ""
-    private String teamCity = ""
-    private String tcGrouping = ""
-    private String excludedPluginsFile = ""
-    private String dumpBrokenPluginList = ""
-    private String pluginsToCheckFile = ""
-    private String subsystemsToCheck = ""
+    private String jbrVersion
+    private String runtimeDir
+    private String externalPrefixes
+    private String pluginsToCheckAllBuilds
+    private String pluginsToCheckLastBuilds
+    private String teamCity
+    private String tcGrouping
+    private String excludedPluginsFile
+    private String dumpBrokenPluginList
+    private String pluginsToCheckFile
+    private String subsystemsToCheck
 
+    @Input
     EnumSet<FailureLevel> getFailureLevel() {
         return failureLevel
     }
 
-    @Input
     void setFailureLevel(EnumSet<FailureLevel> failureLevel) {
         this.failureLevel = failureLevel
     }
 
-    @Input
     void setFailureLevel(FailureLevel failureLevel) {
         this.failureLevel = EnumSet.of(failureLevel)
     }
 
     @Input
+    @Optional
     List<String> getIdes() {
         return ides
     }
@@ -76,6 +81,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getVerifierVersion() {
         return verifierVersion
     }
@@ -85,6 +91,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getVerificationReportsDir() {
         return verificationReportsDir
     }
@@ -94,6 +101,17 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
+    String getJbrVersion() {
+        return jbrVersion
+    }
+
+    void setJbrVersion(String jbrVersion) {
+        this.jbrVersion = jbrVersion
+    }
+
+    @Input
+    @Optional
     String getRuntimeDir() {
         return runtimeDir
     }
@@ -103,6 +121,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getExternalPrefixes() {
         return externalPrefixes
     }
@@ -112,6 +131,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getPluginsToCheckAllBuilds() {
         return pluginsToCheckAllBuilds
     }
@@ -121,6 +141,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getPluginsToCheckLastBuilds() {
         return pluginsToCheckLastBuilds
     }
@@ -130,6 +151,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getTeamCity() {
         return teamCity
     }
@@ -139,6 +161,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getTcGrouping() {
         return tcGrouping
     }
@@ -148,6 +171,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getExcludedPluginsFile() {
         return excludedPluginsFile
     }
@@ -157,6 +181,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getDumpBrokenPluginList() {
         return dumpBrokenPluginList
     }
@@ -166,6 +191,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getPluginsToCheckFile() {
         return pluginsToCheckFile
     }
@@ -175,6 +201,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     @Input
+    @Optional
     String getSubsystemsToCheck() {
         return subsystemsToCheck
     }
@@ -248,37 +275,77 @@ class RunPluginVerifierTask extends ConventionTask {
         return new JsonSlurper().parse(url)["name"]
     }
 
+    private String resolveRuntimeDir() {
+        if (runtimeDir != null) {
+            return runtimeDir
+        }
+
+        def jbrResolver = new JbrResolver(project, this)
+        if (jbrVersion != null) {
+            def jbr = jbrResolver.resolve(jbrVersion)
+            if (jbr != null) {
+                return jbr.javaHome
+            }
+            Utils.warn(this, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
+        }
+
+        def extension = project.extensions.findByType(IntelliJPluginExtension)
+        def jbrPath = OperatingSystem.current().isMacOsX() ? "jbr/Contents/Home" : "jbr"
+
+        def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension))
+        if (builtinJbrVersion != null) {
+            def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
+            if (builtinJbr != null) {
+                def javaHome = new File(builtinJbr.javaHome, jbrPath)
+                if (javaHome.exists()) {
+                    return javaHome
+                }
+            }
+            Utils.warn(this, "Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
+        }
+
+        if (extension.alternativeIdePath) {
+            def javaHome = new File(Utils.ideaDir(extension.alternativeIdePath), jbrPath)
+            if (javaHome.exists()) {
+                return javaHome
+            }
+            Utils.warn(this, "Cannot resolve JBR at $javaHome. Falling back to current JVM.")
+        }
+
+        return Jvm.current().getJavaHome()
+    }
+
     private List<String> getOptions() {
         def args = [
                 "-verification-reports-dir", verificationReportsDir,
-                "-runtime-dir", runtimeDir
+                "-runtime-dir", resolveRuntimeDir()
         ]
 
-        if (!externalPrefixes.isEmpty()) {
+        if (externalPrefixes != null) {
             args += ["-external-prefixes", externalPrefixes]
         }
-        if (!pluginsToCheckAllBuilds.isEmpty()) {
+        if (pluginsToCheckAllBuilds != null) {
             args += ["-plugins-to-check-all-builds", pluginsToCheckAllBuilds]
         }
-        if (!pluginsToCheckLastBuilds.isEmpty()) {
+        if (pluginsToCheckLastBuilds != null) {
             args += ["-plugins-to-check-last-builds", pluginsToCheckLastBuilds]
         }
-        if (!teamCity.isEmpty()) {
+        if (teamCity != null) {
             args += ["-team-city", teamCity]
         }
-        if (!tcGrouping.isEmpty()) {
+        if (tcGrouping != null) {
             args += ["-tc-grouping", tcGrouping]
         }
-        if (!excludedPluginsFile.isEmpty()) {
+        if (excludedPluginsFile != null) {
             args += ["-excluded-plugins-file", excludedPluginsFile]
         }
-        if (!dumpBrokenPluginList.isEmpty()) {
+        if (dumpBrokenPluginList != null) {
             args += ["-dump-broken-plugin-list", dumpBrokenPluginList]
         }
-        if (!pluginsToCheckFile.isEmpty()) {
+        if (pluginsToCheckFile != null) {
             args += ["-plugins-to-check-file", pluginsToCheckFile]
         }
-        if (!subsystemsToCheck.isEmpty()) {
+        if (subsystemsToCheck != null) {
             args += ["-subsystems-to-check", subsystemsToCheck]
         }
 
