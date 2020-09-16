@@ -9,7 +9,6 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
-import org.apache.commons.io.filefilter.TrueFileFilter
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileCollection
@@ -213,14 +212,13 @@ class Utils {
     }
 
     @NotNull
-    static Collection<File> collectJars(@NotNull File directory, @NotNull final Predicate<File> filter,
-                                        boolean recursively) {
+    static Collection<File> collectJars(@NotNull File directory, @NotNull final Predicate<File> filter) {
         return FileUtils.listFiles(directory, new AbstractFileFilter() {
             @Override
             boolean accept(File file) {
                 return isJarFile(file) && filter.test(file)
             }
-        }, recursively ? TrueFileFilter.INSTANCE : FalseFileFilter.FALSE)
+        }, FalseFileFilter.FALSE)
     }
 
     static String resolveToolsJar(String javaExec) {

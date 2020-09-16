@@ -16,7 +16,7 @@ class IdeaExtraDependency {
         this.name = name
         this.classes = classes
         if (classes.isDirectory()) {
-            this.jarFiles = Utils.collectJars(classes, { file -> true }, false)
+            this.jarFiles = Utils.collectJars(classes, { file -> true })
         }
         else {
             this.jarFiles = [classes] as Set

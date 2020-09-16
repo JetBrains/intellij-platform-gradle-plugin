@@ -46,7 +46,7 @@ class IdeaDependency implements Serializable {
                     return (withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name - '.jar')) &&
                             file.name != 'junit.jar' &&
                             file.name != 'annotations.jar'
-                }, false).sort()
+                }).sort()
             }
         }
         return Collections.emptySet()
