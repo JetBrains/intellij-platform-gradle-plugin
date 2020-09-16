@@ -1,11 +1,13 @@
 package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import groovy.transform.CompileStatic
 import groovy.transform.ToString
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.Utils
 
+@CompileStatic
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 class PluginDependencyImpl implements PluginDependency, Serializable {
     @NotNull
@@ -72,6 +74,11 @@ class PluginDependencyImpl implements PluginDependency, Serializable {
         return sinceBuild == null ||
                 IdeVersion.createIdeVersion(sinceBuild) <= ideVersion &&
                 (untilBuild == null || ideVersion <= IdeVersion.createIdeVersion(untilBuild))
+    }
+
+    @Override
+    PluginDependencyNotation getNotation() {
+        return new PluginDependencyNotation(id, version, channel)
     }
 
     String getId() {

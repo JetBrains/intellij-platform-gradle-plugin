@@ -1,9 +1,11 @@
 package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import groovy.transform.CompileStatic
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
+@CompileStatic
 interface PluginDependency {
     @NotNull
     String getId()
@@ -34,4 +36,6 @@ interface PluginDependency {
     boolean isMaven()
 
     boolean isCompatible(@NotNull IdeVersion ideVersion)
+
+    PluginDependencyNotation getNotation()
 }

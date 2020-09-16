@@ -26,15 +26,15 @@ class CustomPluginsRepository implements PluginsRepository {
     }
 
     @Nullable
-    File resolve(@NotNull String id, @NotNull String version, @Nullable String channel) {
+    File resolve(@NotNull PluginDependencyNotation plugin) {
         String downloadUrl = pluginsXml.category."idea-plugin"
-                .find { it.id.text().equalsIgnoreCase(id) && it.version.text() == version }
+                .find { it.id.text().equalsIgnoreCase(plugin.id) && it.version.text() == plugin.version }
                 ?."download-url"?.text()
         if (downloadUrl == null) return null
 
         return Utils.downloadZipArtifact(project, repoUrl,
-                downloadUrl.replace("${version}.zip", "[revision].[ext]"),
-                "com.jetbrains.plugins:$id:$version")
+                downloadUrl.replace("${plugin.version}.zip", "[revision].[ext]"),
+                "com.jetbrains.plugins:$plugin.id:$plugin.version")
     }
 
     @Override

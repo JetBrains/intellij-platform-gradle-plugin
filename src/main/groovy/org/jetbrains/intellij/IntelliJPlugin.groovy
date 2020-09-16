@@ -11,6 +11,7 @@ import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
+import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
+import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.dependency.PluginsRepository
 import org.jetbrains.intellij.jbr.JbrResolver
@@ -54,7 +56,7 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String IDEA_CONFIGURATION_NAME = "idea"
     public static final String IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
 
-    public static final LOG = Logging.getLogger(IntelliJPlugin)
+    public static final Logger LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
     public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
@@ -239,11 +241,11 @@ class IntelliJPlugin implements Plugin<Project> {
                 if (it instanceof Project) {
                     configureProjectPluginDependency(project, it, dependencies, extension)
                 } else {
-                    def (pluginId, pluginVersion, channel) = Utils.parsePluginDependencyString(it.toString())
-                    if (!pluginId) {
+                    def pluginDependency = Utils.parsePluginDependencyString(it.toString())
+                    if (pluginDependency.id == null) {
                         throw new BuildException("Failed to resolve plugin $it", null)
                     }
-                    def plugin = resolver.resolve(project, pluginId, pluginVersion, channel)
+                    def plugin = resolver.resolve(project, pluginDependency)
                     if (plugin == null) {
                         throw new BuildException("Failed to resolve plugin $it", null)
                     }
@@ -299,7 +301,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 .findAll { it.builtin }
                 .collect { it.id }
         extension.ideaDependency.pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
-            def plugin = resolver.resolve(project, it, null, null)
+            def plugin = resolver.resolve(project, new PluginDependencyNotation(it, null, null))
             configurePluginDependency(project, plugin, extension, dependencies, resolver)
         }
     }

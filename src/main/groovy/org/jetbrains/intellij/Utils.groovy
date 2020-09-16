@@ -22,6 +22,7 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.dependency.IntellijIvyArtifact
+import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.xml.sax.ErrorHandler
 import org.xml.sax.InputSource
 import org.xml.sax.SAXException
@@ -186,9 +187,9 @@ class Utils {
     }
 
     @NotNull
-    static parsePluginDependencyString(@NotNull String s) {
+    static PluginDependencyNotation parsePluginDependencyString(@NotNull String s) {
         if (new File(s).exists()) {
-            return new Tuple(s, null, null)
+            return new PluginDependencyNotation(s, null, null)
         }
 
         def id = null, version = null, channel = null
@@ -203,7 +204,7 @@ class Utils {
             version = versionAndChannel[0]
             channel = versionAndChannel.length > 1 ? versionAndChannel[1] : null
         }
-        return new Tuple(id ?: null, version ?: null, channel ?: null)
+        return new PluginDependencyNotation(id ?: null, version ?: null, channel ?: null)
     }
 
     static String stringInput(input) {
@@ -279,7 +280,7 @@ class Utils {
         return targetDirectory
     }
 
-    private static def MAJOR_VERSION_PATTERN = Pattern.compile('(RIDER-)?\\d{4}\\.\\d-SNAPSHOT')
+    private static Pattern MAJOR_VERSION_PATTERN = Pattern.compile('(RIDER-)?\\d{4}\\.\\d-SNAPSHOT')
 
     static String releaseType(@NotNull String version) {
         if (version.endsWith('-EAP-SNAPSHOT') || version.endsWith('-EAP-CANDIDATE-SNAPSHOT') || version.endsWith('-CUSTOM-SNAPSHOT') || MAJOR_VERSION_PATTERN.matcher(version).matches()) {

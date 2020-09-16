@@ -1,12 +1,14 @@
 package org.jetbrains.intellij.dependency
 
+import groovy.transform.CompileStatic
 import org.gradle.api.Project
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.Utils
 
+@CompileStatic
 class MavenPluginsRepository implements PluginsRepository {
-
     private final Project project
     private final String repoUrl
     private boolean resolvedDependency = false
@@ -17,11 +19,11 @@ class MavenPluginsRepository implements PluginsRepository {
     }
 
     @Nullable
-    File resolve(@NotNull String id, @NotNull String version, @Nullable String channel) {
-        def dependency = project.dependencies.create(PluginDependencyManager.pluginDependency(id, version, channel))
+    File resolve(@NotNull PluginDependencyNotation plugin) {
+        def dependency = plugin.toDependency(project)
 
         Utils.debug(project, "Adding Maven repository to download $dependency - $repoUrl")
-        def mavenRepo = project.repositories.maven { it.url = repoUrl }
+        def mavenRepo = project.repositories.maven { MavenArtifactRepository it -> it.url = repoUrl }
 
         def pluginFile = null
         try {
@@ -42,7 +44,7 @@ class MavenPluginsRepository implements PluginsRepository {
     void postResolve() {
         if (resolvedDependency) {
             Utils.debug(project, "Adding Maven plugins repository $repoUrl")
-            project.repositories.maven { it.url = repoUrl }
+            project.repositories.maven { MavenArtifactRepository it -> it.url = repoUrl }
         }
     }
 }
