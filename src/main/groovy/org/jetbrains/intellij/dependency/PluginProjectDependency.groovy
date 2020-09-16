@@ -25,7 +25,7 @@ class PluginProjectDependency implements PluginDependency, Serializable {
     @Lazy
     private transient PluginDependencyImpl pluginDependency = {
         if (pluginDirectory.exists()) {
-            def creationResult = IdePluginManager.createManager().createPlugin(pluginDirectory)
+            def creationResult = IdePluginManager.createManager().createPlugin(pluginDirectory.toPath())
             if (creationResult instanceof PluginCreationSuccess) {
                 def intellijPlugin = creationResult.plugin
                 def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, pluginDirectory)

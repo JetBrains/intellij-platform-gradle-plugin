@@ -119,7 +119,7 @@ class PublishTask extends ConventionTask {
 
         def host = getHost()
         def distributionFile = getDistributionFile()
-        def creationResult = IdePluginManager.createManager().createPlugin(distributionFile)
+        def creationResult = IdePluginManager.createManager().createPlugin(distributionFile.toPath())
         if (creationResult instanceof PluginCreationSuccess) {
             def pluginId = creationResult.plugin.pluginId
             for (String channel : channels) {

@@ -325,7 +325,7 @@ class Utils {
     }
 
     static IdePlugin createPlugin(@NotNull File artifact, boolean validatePluginXml, def loggingContext) {
-        def creationResult = IdePluginManager.createManager().createPlugin(artifact, validatePluginXml)
+        def creationResult = IdePluginManager.createManager().createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
         if (creationResult instanceof PluginCreationSuccess) {
             return creationResult.plugin as IdePlugin
         } else if (creationResult instanceof PluginCreationFail) {

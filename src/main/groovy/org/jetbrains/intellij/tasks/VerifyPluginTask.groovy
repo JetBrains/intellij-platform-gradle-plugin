@@ -49,7 +49,7 @@ class VerifyPluginTask extends ConventionTask implements VerificationTask {
 
     @TaskAction
     void verifyPlugin() {
-        def creationResult = IdePluginManager.createManager().createPlugin(getPluginDirectory())
+        def creationResult = IdePluginManager.createManager().createPlugin(getPluginDirectory().toPath())
         if (creationResult instanceof PluginCreationSuccess) {
             creationResult.warnings.each {
                 Utils.warn(this, it.message)
