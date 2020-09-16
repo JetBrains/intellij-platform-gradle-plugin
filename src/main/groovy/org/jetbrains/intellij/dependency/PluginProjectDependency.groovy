@@ -2,6 +2,7 @@ package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.ToString
 import org.gradle.api.Project
 import org.jetbrains.annotations.NotNull
@@ -97,5 +98,10 @@ class PluginProjectDependency implements PluginDependency, Serializable {
     @Override
     boolean isMaven() {
         return false
+    }
+
+    @Override
+    boolean isCompatible(@NotNull IdeVersion ideVersion) {
+        return true
     }
 }

@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
@@ -31,4 +32,6 @@ interface PluginDependency {
     boolean isBuiltin()
 
     boolean isMaven()
+
+    boolean isCompatible(@NotNull IdeVersion ideVersion)
 }
