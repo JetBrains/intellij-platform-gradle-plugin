@@ -178,11 +178,11 @@ class Utils {
     }
 
     static boolean isJarFile(@NotNull File file) {
-        return FileUtilKt.isJar(file)
+        return FileUtilKt.isJar(file.toPath())
     }
 
     static boolean isZipFile(@NotNull File file) {
-        return FileUtilKt.isZip(file)
+        return FileUtilKt.isZip(file.toPath())
     }
 
     @NotNull
@@ -217,7 +217,7 @@ class Utils {
         return FileUtils.listFiles(directory, new AbstractFileFilter() {
             @Override
             boolean accept(File file) {
-                return FileUtilKt.isJar(file) && filter.test(file)
+                return isJarFile(file) && filter.test(file)
             }
         }, recursively ? TrueFileFilter.INSTANCE : FalseFileFilter.FALSE)
     }
