@@ -15,7 +15,7 @@ import org.jetbrains.intellij.tasks.PrepareSandboxTask
 
 @CompileStatic
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
-class PluginProjectDependency implements PluginDependency, Serializable {
+class PluginProjectDependency implements PluginDependency {
     @NotNull
     private transient Project project
 

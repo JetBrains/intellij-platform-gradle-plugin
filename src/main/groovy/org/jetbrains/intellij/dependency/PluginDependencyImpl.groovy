@@ -9,7 +9,7 @@ import org.jetbrains.intellij.Utils
 
 @CompileStatic
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
-class PluginDependencyImpl implements PluginDependency, Serializable {
+class PluginDependencyImpl implements PluginDependency {
     @NotNull
     private String id
     @NotNull

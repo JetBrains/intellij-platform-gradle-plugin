@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 
 @CompileStatic
-interface PluginDependency {
+interface PluginDependency extends Serializable {
     @NotNull
     String getId()
 
