@@ -9,7 +9,7 @@ pluginManagement {
 include 'simple-plugin', 
         'composite-plugin', 
         'plugin-with-dependencies', 
-        'rider-plugin', 
+        'rider-plugin',
         'kotlin-plugin', 
         'clion-plugin',
         'pycharm-plugin', 
