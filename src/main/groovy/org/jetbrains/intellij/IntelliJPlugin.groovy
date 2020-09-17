@@ -423,7 +423,15 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask).with {
             group = GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
+            conventionMapping('distributionFile', {
+                def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
+                def distributionFile =
+                        VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
+                                ? buildPluginTask?.archiveFile?.getOrNull()?.asFile : buildPluginTask.archivePath;
+                return distributionFile?.exists() ? distributionFile : null
+            })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
+            dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }
         }
     }
 
