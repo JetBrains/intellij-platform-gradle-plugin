@@ -93,8 +93,8 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         then:
-        def directory = file("build/foo").absolutePath
-        result.output.contains("Verification reports directory: /private$directory")
+        def directory = file("build/foo").canonicalPath
+        result.output.contains("Verification reports directory: $directory")
     }
 
     def 'fail on :verifyPlugin task'() {
