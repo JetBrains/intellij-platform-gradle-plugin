@@ -48,13 +48,7 @@ class RunPluginVerifierTask extends ConventionTask {
     private Object jbrVersion
     private Object runtimeDir
     private Object externalPrefixes
-    private Object pluginsToCheckAllBuilds
-    private Object pluginsToCheckLastBuilds
     private Object teamCity
-    private Object tcGrouping
-    private Object excludedPluginsFile
-    private Object dumpBrokenPluginList
-    private Object pluginsToCheckFile
     private Object subsystemsToCheck
 
     /**
@@ -258,34 +252,6 @@ class RunPluginVerifierTask extends ConventionTask {
 
     @Input
     @Optional
-    String getPluginsToCheckAllBuilds() {
-        return Utils.stringInput(pluginsToCheckAllBuilds)
-    }
-
-    void setPluginsToCheckAllBuilds(Object pluginsToCheckAllBuilds) {
-        this.pluginsToCheckAllBuilds = pluginsToCheckAllBuilds
-    }
-
-    void pluginsToCheckAllBuilds(Object pluginsToCheckAllBuilds) {
-        this.pluginsToCheckAllBuilds = pluginsToCheckAllBuilds
-    }
-
-    @Input
-    @Optional
-    String getPluginsToCheckLastBuilds() {
-        return Utils.stringInput(pluginsToCheckLastBuilds)
-    }
-
-    void setPluginsToCheckLastBuilds(Object pluginsToCheckLastBuilds) {
-        this.pluginsToCheckLastBuilds = pluginsToCheckLastBuilds
-    }
-
-    void pluginsToCheckLastBuilds(Object pluginsToCheckLastBuilds) {
-        this.pluginsToCheckLastBuilds = pluginsToCheckLastBuilds
-    }
-
-    @Input
-    @Optional
     String getTeamCity() {
         return Utils.stringInput(teamCity)
     }
@@ -296,62 +262,6 @@ class RunPluginVerifierTask extends ConventionTask {
 
     void teamCity(Object teamCity) {
         this.teamCity = teamCity
-    }
-
-    @Input
-    @Optional
-    String getTcGrouping() {
-        return Utils.stringInput(tcGrouping)
-    }
-
-    void setTcGrouping(Object tcGrouping) {
-        this.tcGrouping = tcGrouping
-    }
-
-    void tcGrouping(Object tcGrouping) {
-        this.tcGrouping = tcGrouping
-    }
-
-    @Input
-    @Optional
-    String getExcludedPluginsFile() {
-        return Utils.stringInput(excludedPluginsFile)
-    }
-
-    void setExcludedPluginsFile(Object excludedPluginsFile) {
-        this.excludedPluginsFile = excludedPluginsFile
-    }
-
-    void excludedPluginsFile(Object excludedPluginsFile) {
-        this.excludedPluginsFile = excludedPluginsFile
-    }
-
-    @Input
-    @Optional
-    String getDumpBrokenPluginList() {
-        return Utils.stringInput(dumpBrokenPluginList)
-    }
-
-    void setDumpBrokenPluginList(Object dumpBrokenPluginList) {
-        this.dumpBrokenPluginList = dumpBrokenPluginList
-    }
-
-    void dumpBrokenPluginList(Object dumpBrokenPluginList) {
-        this.dumpBrokenPluginList = dumpBrokenPluginList
-    }
-
-    @Input
-    @Optional
-    String getPluginsToCheckFile() {
-        return Utils.stringInput(pluginsToCheckFile)
-    }
-
-    void setPluginsToCheckFile(Object pluginsToCheckFile) {
-        this.pluginsToCheckFile = pluginsToCheckFile
-    }
-
-    void pluginsToCheckFile(Object pluginsToCheckFile) {
-        this.pluginsToCheckFile = pluginsToCheckFile
     }
 
     @Input
@@ -506,26 +416,8 @@ class RunPluginVerifierTask extends ConventionTask {
         if (externalPrefixes != null) {
             args += ["-external-prefixes", getExternalPrefixes()]
         }
-        if (pluginsToCheckAllBuilds != null) {
-            args += ["-plugins-to-check-all-builds", getPluginsToCheckAllBuilds()]
-        }
-        if (pluginsToCheckLastBuilds != null) {
-            args += ["-plugins-to-check-last-builds", getPluginsToCheckLastBuilds()]
-        }
         if (teamCity != null) {
             args += ["-team-city", getTeamCity()]
-        }
-        if (tcGrouping != null) {
-            args += ["-tc-grouping", getTcGrouping()]
-        }
-        if (excludedPluginsFile != null) {
-            args += ["-excluded-plugins-file", getExcludedPluginsFile()]
-        }
-        if (dumpBrokenPluginList != null) {
-            args += ["-dump-broken-plugin-list", getDumpBrokenPluginList()]
-        }
-        if (pluginsToCheckFile != null) {
-            args += ["-plugins-to-check-file", getPluginsToCheckFile()]
         }
         if (subsystemsToCheck != null) {
             args += ["-subsystems-to-check", getSubsystemsToCheck()]
