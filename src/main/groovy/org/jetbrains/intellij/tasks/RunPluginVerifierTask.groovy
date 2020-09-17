@@ -4,6 +4,7 @@ import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
@@ -44,6 +45,7 @@ class RunPluginVerifierTask extends ConventionTask {
     private EnumSet<FailureLevel> failureLevel = EnumSet.of(FailureLevel.INVALID_PLUGIN)
     private List<String> ides = new ArrayList<String>()
     private String verifierVersion = VERIFIER_VERSION_LATEST
+    private String distributionFile
     private String verificationReportsDir = "${project.buildDir}/reports/pluginsVerifier"
     private String jbrVersion
     private String runtimeDir
@@ -88,6 +90,19 @@ class RunPluginVerifierTask extends ConventionTask {
 
     void setVerifierVersion(String verifierVersion) {
         this.verifierVersion = verifierVersion
+    }
+
+    @InputFile
+    File getDistributionFile() {
+        distributionFile != null ? project.file(distributionFile) : null
+    }
+
+    void setDistributionFile(String distributionFile) {
+        this.distributionFile = distributionFile
+    }
+
+    void distributionFile(String distributionFile) {
+        this.distributionFile = distributionFile
     }
 
     @Input
@@ -212,13 +227,12 @@ class RunPluginVerifierTask extends ConventionTask {
 
     @TaskAction
     void runPluginVerifier() {
-        def extension = project.extensions.findByType(IntelliJPluginExtension)
-        def pluginFileName = "${extension.pluginName}-${project.version}"
-
-        if (!project.file("${project.buildDir}/distributions/${pluginFileName}.zip").exists()) {
-            throw new IllegalStateException("Plugin file $pluginFileName does not exist.")
+        def file = getDistributionFile()
+        if (file == null || !file.exists()) {
+            throw new IllegalStateException("Plugin file does not exist: $file")
         }
 
+        def extension = project.extensions.findByType(IntelliJPluginExtension)
         if (ides.isEmpty()) {
             ides.add("${extension.type}-${extension.version}")
         }
@@ -228,7 +242,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
-        verifierArgs += ["${project.buildDir}/distributions/${pluginFileName}.zip"]
+        verifierArgs += [file.absolutePath]
         verifierArgs += ides.collect {
             def (String type, String version) = it.split("-")
             def dependency = resolver.resolveRemote(project, version, type, false)

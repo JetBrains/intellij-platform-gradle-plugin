@@ -97,7 +97,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         result.output.contains("Verification reports directory: /private$directory")
     }
 
-    def 'fail on INVALID_PLUGIN by default'() {
+    def 'fail on :verifyPlugin task'() {
         given:
         writeJavaFileWithDeprecation()
         buildFile << """
@@ -109,7 +109,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Plugin descriptor 'plugin.xml' is not found")
-        result.output.contains("org.gradle.api.GradleException: INVALID_PLUGIN")
+        result.output.contains("Task :verifyPlugin FAILED")
     }
 
     def 'fail on Deprecated API usages'() {
