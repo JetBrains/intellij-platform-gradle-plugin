@@ -44,7 +44,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             intellij {
-                type = "CL"
+                type = "IC"
                 version = "2020.2"
             }
             """.stripIndent()
@@ -54,7 +54,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         println result.output
-        result.output.contains("PluginName:1.0.0 against CL-202.6397.106")
+        result.output.contains("PluginName:1.0.0 against IC-202.6397.94")
     }
 
     def 'test plugin against two IDEs'() {
