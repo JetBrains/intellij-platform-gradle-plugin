@@ -57,19 +57,39 @@ class RunPluginVerifierTask extends ConventionTask {
     private Object pluginsToCheckFile
     private Object subsystemsToCheck
 
+    /**
+     * Returns a list of the {@link FailureLevel} values used for failing the task if any reported issue will match.
+     * @return
+     */
     @Input
     EnumSet<FailureLevel> getFailureLevel() {
         return failureLevel
     }
 
+    /**
+     * Sets a list of the {@link FailureLevel} values that will make the task if any reported issue will match.
+     *
+     * @param failureLevel EnumSet of {@link FailureLevel} values
+     */
     void setFailureLevel(EnumSet<FailureLevel> failureLevel) {
         this.failureLevel = failureLevel
     }
 
+    /**
+     * Sets the {@link FailureLevel} value that will make the task if any reported issue will match.
+     *
+     * @param failureLevel {@link FailureLevel} value
+     */
     void setFailureLevel(FailureLevel failureLevel) {
         this.failureLevel = EnumSet.of(failureLevel)
     }
 
+    /**
+     * Returns a list of the specified IDE versions used for the verification.
+     * By default, uses the plugin target IDE version.
+     *
+     * @return IDE versions list
+     */
     @SkipWhenEmpty
     @Input
     List<String> getIdeVersions() {
@@ -78,52 +98,118 @@ class RunPluginVerifierTask extends ConventionTask {
         }.flatten())
     }
 
+    /**
+     * Sets a list of the IDE versions used for the verification. Accepts list of {@link String} or {@link Closure}.
+     *
+     * @param ideVersions list of IDE versions
+     */
     void setIdeVersions(List<Object> ideVersions) {
         this.ideVersions = ideVersions
     }
 
+    /**
+     * Sets a list of the IDE versions used for the verification.
+     * Accepts list of {@link String} or {@link Closure}.
+     *
+     * @param ideVersions list of IDE versions
+     */
     void ideVersions(List<Object> ideVersions) {
         this.ideVersions = ideVersions
     }
 
+    /**
+     * Returns the version of the IntelliJ Plugin Verifier that will be used.
+     * By default, set to "latest".
+     *
+     * @return verifierVersion IntelliJ Plugin Verifier version
+     */
     @Input
     @Optional
     String getVerifierVersion() {
         return Utils.stringInput(verifierVersion)
     }
 
-    void setVerifierVersion(String verifierVersion) {
+    /**
+     * Sets the version of the IntelliJ Plugin Verifier that will be used.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param verifierVersion IntelliJ Plugin Verifier version
+     */
+    void setVerifierVersion(Object verifierVersion) {
         this.verifierVersion = verifierVersion
     }
 
+    /**
+     * Sets the version of the IntelliJ Plugin Verifier that will be used.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param verifierVersion IntelliJ Plugin Verifier version
+     */
     void verifierVersion(Object verifierVersion) {
         this.verifierVersion = verifierVersion
     }
 
+    /**
+     * Returns an instance of the distribution file generated with the build task.
+     * If empty, task will be skipped.
+     *
+     * @return generated plugin artifact
+     */
     @SkipWhenEmpty
     @InputFile
     File getDistributionFile() {
-        distributionFile != null ? project.file(distributionFile) : null
+        def input = distributionFile instanceof Closure ? (distributionFile as Closure).call() : distributionFile
+        return input != null ? project.file(input) : null
     }
 
+    /**
+     * Sets an instance of the distribution file generated with the build task.
+     * Accepts {@link File} or {@link Closure}.
+     *
+     * @param distributionFile generated plugin artifact
+     */
     void setDistributionFile(Object distributionFile) {
         this.distributionFile = distributionFile
     }
 
+    /**
+     * Sets an instance of the distribution file generated with the build task.
+     * Accepts {@link File} or {@link Closure}.
+     *
+     * @param distributionFile generated plugin artifact
+     */
     void distributionFile(Object distributionFile) {
         this.distributionFile = distributionFile
     }
 
+    /**
+     * Returns the path to directory where verification reports will be saved.
+     * By default, set to ${project.buildDir}/reports/pluginsVerifier.
+     *
+     * @return path to verification reports directory
+     */
     @Input
     @Optional
     String getVerificationReportsDir() {
         return Utils.stringInput(verificationReportsDir)
     }
 
+    /**
+     * Sets the path to directory where verification reports will be saved.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param verificationReportsDir path to verification reports directory
+     */
     void setVerificationReportsDir(Object verificationReportsDir) {
         this.verificationReportsDir = verificationReportsDir
     }
 
+    /**
+     * Sets the path to directory where verification reports will be saved.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param verificationReportsDir path to verification reports directory
+     */
     void verificationReportsDir(Object verificationReportsDir) {
         this.verificationReportsDir = verificationReportsDir
     }
@@ -282,6 +368,9 @@ class RunPluginVerifierTask extends ConventionTask {
         this.subsystemsToCheck = subsystemsToCheck
     }
 
+    /**
+     * Runs the IntelliJ Plugin Verifier against the plugin artifact.
+     */
     @TaskAction
     void runPluginVerifier() {
         def file = getDistributionFile()
@@ -320,6 +409,12 @@ class RunPluginVerifierTask extends ConventionTask {
         }
     }
 
+    /**
+     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPlugin#DEFAULT_INTELLIJ_PLUGIN_SERVICE}
+     * repository and resolves the path to verifier-cli jar file.
+     *
+     * @return path to verifier-cli jar
+     */
     private String getVerifierPath() {
         def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
         try {
@@ -333,6 +428,13 @@ class RunPluginVerifierTask extends ConventionTask {
         }
     }
 
+    /**
+     * Resolves Plugin Verifier version.
+     * If set to {@link #VERIFIER_VERSION_LATEST}, there's request to {@link #BINTRAY_API_VERIFIER_VERSION_LATEST}
+     * performed for the latest available verifier version.
+     *
+     * @return Plugin Verifier version
+     */
     private String resolveVerifierVersion() {
         if (getVerifierVersion() != VERIFIER_VERSION_LATEST) {
             return getVerifierVersion()
@@ -342,6 +444,14 @@ class RunPluginVerifierTask extends ConventionTask {
         return new JsonSlurper().parse(url)["name"]
     }
 
+    /**
+     * Resolves the Java Runtime directory. `runtimeDir` property is used if provided with the task configuration.
+     * Otherwise, `jbrVersion` is used for resolving the JBR. If it's not set, or it's impossible to resolve valid
+     * version, built-in JBR will be used.
+     * As a last fallback, current JVM will be used.
+     *
+     * @return path to the Java Runtime directory
+     */
     private String resolveRuntimeDir() {
         if (runtimeDir != null) {
             return getRuntimeDir()
@@ -382,6 +492,11 @@ class RunPluginVerifierTask extends ConventionTask {
         return Jvm.current().getJavaHome()
     }
 
+    /**
+     * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
+     *
+     * @return array with available CLI options
+     */
     private List<String> getOptions() {
         def args = [
                 "-verification-reports-dir", getVerificationReportsDir(),
