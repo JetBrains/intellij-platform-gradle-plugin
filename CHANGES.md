@@ -6,6 +6,10 @@
 - support multiple plugin repositories
 - support enterprise plugin repositories [#15](../../issues/15)
 
+## 0.4.24
+
+- fix plugin-repository-rest-client dependency
+
 ## 0.4.23
 
 - fix compatibility issue with Kotlin 1.4 serialization [#532](../../issues/532)

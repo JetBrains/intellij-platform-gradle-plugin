@@ -15,7 +15,6 @@ plugins.withType<JavaPlugin> {
 }
 
 repositories {
-    maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies")
     maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
@@ -27,7 +26,7 @@ dependencies {
     implementation("org.jetbrains:annotations:19.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.139")
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.139")
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.14") {
+    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.15") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("de.undercouch:gradle-download-task:4.0.4")
@@ -39,7 +38,7 @@ dependencies {
     testImplementation("junit:junit:4.12")
 }
 
-version = "0.4.23"
+version = "0.4.24"
 group = "org.jetbrains.intellij.plugins"
 description = """
 **This project requires Gradle 4.9 or newer**
