@@ -3,10 +3,7 @@ package org.jetbrains.intellij.tasks
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPlugin
@@ -92,6 +89,7 @@ class RunPluginVerifierTask extends ConventionTask {
         this.verifierVersion = verifierVersion
     }
 
+    @SkipWhenEmpty
     @InputFile
     File getDistributionFile() {
         distributionFile != null ? project.file(distributionFile) : null
