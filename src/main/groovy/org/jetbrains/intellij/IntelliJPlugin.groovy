@@ -423,7 +423,7 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
             conventionMapping('failureLevel', { EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN) })
-            conventionMapping('ides', { Arrays.asList("${extension.type}-${extension.version}") })
+            conventionMapping('ideVersions', { Arrays.asList("${extension.type}-${extension.version}") })
             conventionMapping('verifierVersion', { VERIFIER_VERSION_LATEST })
             conventionMapping('distributionFile', { resolveDistributionFile(project) })
             conventionMapping('verificationReportsDir', { "${project.buildDir}/reports/pluginsVerifier".toString() })

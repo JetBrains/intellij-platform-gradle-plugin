@@ -41,7 +41,7 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     private EnumSet<FailureLevel> failureLevel
-    private List<Object> ides = []
+    private List<Object> ideVersions = []
     private Object verifierVersion
     private Object distributionFile
     private Object verificationReportsDir
@@ -72,18 +72,18 @@ class RunPluginVerifierTask extends ConventionTask {
 
     @SkipWhenEmpty
     @Input
-    List<String> getIdes() {
-        return CollectionUtils.stringize(ides.collect {
+    List<String> getIdeVersions() {
+        return CollectionUtils.stringize(ideVersions.collect {
             it instanceof Closure ? (it as Closure).call() : it
         }.flatten())
     }
 
-    void setIdes(List<Object> ides) {
-        this.ides = ides
+    void setIdeVersions(List<Object> ideVersions) {
+        this.ideVersions = ideVersions
     }
 
-    void ides(List<Object> ides) {
-        this.ides = ides
+    void ideVersions(List<Object> ideVersions) {
+        this.ideVersions = ideVersions
     }
 
     @Input
@@ -296,7 +296,7 @@ class RunPluginVerifierTask extends ConventionTask {
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.absolutePath]
-        verifierArgs += getIdes().collect {
+        verifierArgs += getIdeVersions().collect {
             def (String type, String version) = it.split("-")
             def dependency = resolver.resolveRemote(project, version, type, false)
             return dependency.classes.absolutePath
