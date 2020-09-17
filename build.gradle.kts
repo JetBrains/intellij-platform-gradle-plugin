@@ -1,6 +1,6 @@
 plugins {
     groovy
-    id("com.gradle.plugin-publish") version "0.12.0"
+    id("com.gradle.plugin-publish") version "0.11.0"
     id("synapticloop.documentr") version "3.1.0"
     `java-gradle-plugin`
     maven
@@ -38,7 +38,7 @@ dependencies {
     testImplementation("junit:junit:4.12")
 }
 
-version = "0.4.24"
+version = "0.4.25"
 group = "org.jetbrains.intellij.plugins"
 description = """
 **This project requires Gradle 4.9 or newer**
