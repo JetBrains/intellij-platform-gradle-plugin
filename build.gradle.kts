@@ -39,7 +39,7 @@ dependencies {
     testImplementation("junit:junit:4.12")
 }
 
-version = "0.4.22"
+version = "0.4.23"
 group = "org.jetbrains.intellij.plugins"
 description = """
 **This project requires Gradle 4.9 or newer**
