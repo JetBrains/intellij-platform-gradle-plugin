@@ -115,7 +115,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePatchPluginXmlTask(project, extension)
         configureRobotServerDownloadTask(project)
         configurePrepareSandboxTasks(project, extension)
-        configureRunPluginVerifierTask(project)
+        configureRunPluginVerifierTask(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
         configureRunIdeaForUiTestsTask(project)
@@ -417,19 +417,16 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-
-    private static void configureRunPluginVerifierTask(@NotNull Project project) {
+    private static void configureRunPluginVerifierTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring run plugin verifier task")
         project.tasks.create(RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask).with {
             group = GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
-            conventionMapping('distributionFile', {
-                def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
-                def distributionFile =
-                        VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
-                                ? buildPluginTask?.archiveFile?.getOrNull()?.asFile : buildPluginTask.archivePath;
-                return distributionFile?.exists() ? distributionFile : null
-            })
+            conventionMapping('failureLevel', { EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN) })
+            conventionMapping('ides', { Arrays.asList("${extension.type}-${extension.version}") })
+            conventionMapping('verifierVersion', { VERIFIER_VERSION_LATEST })
+            conventionMapping('distributionFile', { resolveDistributionFile(project) })
+            conventionMapping('verificationReportsDir', { "${project.buildDir}/reports/pluginsVerifier".toString() })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
             dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }
         }
@@ -682,13 +679,7 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask).with {
             group = GROUP_NAME
             description = "Publish plugin distribution on plugins.jetbrains.com."
-            conventionMapping('distributionFile', {
-                def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
-                def distributionFile =
-                        VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
-                                ? buildPluginTask?.archiveFile?.getOrNull()?.asFile : buildPluginTask.archivePath
-                return distributionFile?.exists() ? distributionFile : null
-            })
+            conventionMapping('distributionFile', { resolveDistributionFile(project) })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
             dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }
         }
@@ -703,5 +694,13 @@ class IntelliJPlugin implements Plugin<Project> {
                 duplicatesStrategy = DuplicatesStrategy.INCLUDE
             }
         }
+    }
+
+    private static File resolveDistributionFile(@NotNull Project project) {
+        def buildPluginTask = project.tasks.findByName(BUILD_PLUGIN_TASK_NAME) as Zip
+        def distributionFile =
+                VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
+                        ? buildPluginTask?.archiveFile?.getOrNull()?.asFile : buildPluginTask.archivePath
+        return distributionFile?.exists() ? distributionFile : null
     }
 }

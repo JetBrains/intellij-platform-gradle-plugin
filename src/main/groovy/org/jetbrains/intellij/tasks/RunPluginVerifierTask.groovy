@@ -6,6 +6,7 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
@@ -14,7 +15,7 @@ import org.jetbrains.intellij.jbr.JbrResolver
 
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
-    private static final String VERIFIER_VERSION_LATEST = "latest"
+    public static final String VERIFIER_VERSION_LATEST = "latest"
 
     static enum FailureLevel {
         COMPATIBILITY_WARNINGS("Compatibility warnings"),
@@ -39,22 +40,22 @@ class RunPluginVerifierTask extends ConventionTask {
         }
     }
 
-    private EnumSet<FailureLevel> failureLevel = EnumSet.of(FailureLevel.INVALID_PLUGIN)
-    private List<String> ides = new ArrayList<String>()
-    private String verifierVersion = VERIFIER_VERSION_LATEST
-    private String distributionFile
-    private String verificationReportsDir = "${project.buildDir}/reports/pluginsVerifier"
-    private String jbrVersion
-    private String runtimeDir
-    private String externalPrefixes
-    private String pluginsToCheckAllBuilds
-    private String pluginsToCheckLastBuilds
-    private String teamCity
-    private String tcGrouping
-    private String excludedPluginsFile
-    private String dumpBrokenPluginList
-    private String pluginsToCheckFile
-    private String subsystemsToCheck
+    private EnumSet<FailureLevel> failureLevel
+    private List<Object> ides = []
+    private Object verifierVersion
+    private Object distributionFile
+    private Object verificationReportsDir
+    private Object jbrVersion
+    private Object runtimeDir
+    private Object externalPrefixes
+    private Object pluginsToCheckAllBuilds
+    private Object pluginsToCheckLastBuilds
+    private Object teamCity
+    private Object tcGrouping
+    private Object excludedPluginsFile
+    private Object dumpBrokenPluginList
+    private Object pluginsToCheckFile
+    private Object subsystemsToCheck
 
     @Input
     EnumSet<FailureLevel> getFailureLevel() {
@@ -69,23 +70,33 @@ class RunPluginVerifierTask extends ConventionTask {
         this.failureLevel = EnumSet.of(failureLevel)
     }
 
+    @SkipWhenEmpty
     @Input
-    @Optional
     List<String> getIdes() {
-        return ides
+        return CollectionUtils.stringize(ides.collect {
+            it instanceof Closure ? (it as Closure).call() : it
+        }.flatten())
     }
 
-    void setIdes(List<String> ides) {
+    void setIdes(List<Object> ides) {
+        this.ides = ides
+    }
+
+    void ides(List<Object> ides) {
         this.ides = ides
     }
 
     @Input
     @Optional
     String getVerifierVersion() {
-        return verifierVersion
+        return Utils.stringInput(verifierVersion)
     }
 
     void setVerifierVersion(String verifierVersion) {
+        this.verifierVersion = verifierVersion
+    }
+
+    void verifierVersion(Object verifierVersion) {
         this.verifierVersion = verifierVersion
     }
 
@@ -95,131 +106,179 @@ class RunPluginVerifierTask extends ConventionTask {
         distributionFile != null ? project.file(distributionFile) : null
     }
 
-    void setDistributionFile(String distributionFile) {
+    void setDistributionFile(Object distributionFile) {
         this.distributionFile = distributionFile
     }
 
-    void distributionFile(String distributionFile) {
+    void distributionFile(Object distributionFile) {
         this.distributionFile = distributionFile
     }
 
     @Input
     @Optional
     String getVerificationReportsDir() {
-        return verificationReportsDir
+        return Utils.stringInput(verificationReportsDir)
     }
 
-    void setVerificationReportsDir(String verificationReportsDir) {
+    void setVerificationReportsDir(Object verificationReportsDir) {
+        this.verificationReportsDir = verificationReportsDir
+    }
+
+    void verificationReportsDir(Object verificationReportsDir) {
         this.verificationReportsDir = verificationReportsDir
     }
 
     @Input
     @Optional
     String getJbrVersion() {
-        return jbrVersion
+        return Utils.stringInput(jbrVersion)
     }
 
-    void setJbrVersion(String jbrVersion) {
+    void setJbrVersion(Object jbrVersion) {
+        this.jbrVersion = jbrVersion
+    }
+
+    void jbrVersion(Object jbrVersion) {
         this.jbrVersion = jbrVersion
     }
 
     @Input
     @Optional
     String getRuntimeDir() {
-        return runtimeDir
+        return Utils.stringInput(runtimeDir)
     }
 
-    void setRuntimeDir(String runtimeDir) {
+    void setRuntimeDir(Object runtimeDir) {
+        this.runtimeDir = runtimeDir
+    }
+
+    void runtimeDir(Object runtimeDir) {
         this.runtimeDir = runtimeDir
     }
 
     @Input
     @Optional
     String getExternalPrefixes() {
-        return externalPrefixes
+        return Utils.stringInput(externalPrefixes)
     }
 
-    void setExternalPrefixes(String externalPrefixes) {
+    void setExternalPrefixes(Object externalPrefixes) {
+        this.externalPrefixes = externalPrefixes
+    }
+
+    void externalPrefixes(Object externalPrefixes) {
         this.externalPrefixes = externalPrefixes
     }
 
     @Input
     @Optional
     String getPluginsToCheckAllBuilds() {
-        return pluginsToCheckAllBuilds
+        return Utils.stringInput(pluginsToCheckAllBuilds)
     }
 
-    void setPluginsToCheckAllBuilds(String pluginsToCheckAllBuilds) {
+    void setPluginsToCheckAllBuilds(Object pluginsToCheckAllBuilds) {
+        this.pluginsToCheckAllBuilds = pluginsToCheckAllBuilds
+    }
+
+    void pluginsToCheckAllBuilds(Object pluginsToCheckAllBuilds) {
         this.pluginsToCheckAllBuilds = pluginsToCheckAllBuilds
     }
 
     @Input
     @Optional
     String getPluginsToCheckLastBuilds() {
-        return pluginsToCheckLastBuilds
+        return Utils.stringInput(pluginsToCheckLastBuilds)
     }
 
-    void setPluginsToCheckLastBuilds(String pluginsToCheckLastBuilds) {
+    void setPluginsToCheckLastBuilds(Object pluginsToCheckLastBuilds) {
+        this.pluginsToCheckLastBuilds = pluginsToCheckLastBuilds
+    }
+
+    void pluginsToCheckLastBuilds(Object pluginsToCheckLastBuilds) {
         this.pluginsToCheckLastBuilds = pluginsToCheckLastBuilds
     }
 
     @Input
     @Optional
     String getTeamCity() {
-        return teamCity
+        return Utils.stringInput(teamCity)
     }
 
-    void setTeamCity(String teamCity) {
+    void setTeamCity(Object teamCity) {
+        this.teamCity = teamCity
+    }
+
+    void teamCity(Object teamCity) {
         this.teamCity = teamCity
     }
 
     @Input
     @Optional
     String getTcGrouping() {
-        return tcGrouping
+        return Utils.stringInput(tcGrouping)
     }
 
-    void setTcGrouping(String tcGrouping) {
+    void setTcGrouping(Object tcGrouping) {
+        this.tcGrouping = tcGrouping
+    }
+
+    void tcGrouping(Object tcGrouping) {
         this.tcGrouping = tcGrouping
     }
 
     @Input
     @Optional
     String getExcludedPluginsFile() {
-        return excludedPluginsFile
+        return Utils.stringInput(excludedPluginsFile)
     }
 
-    void setExcludedPluginsFile(String excludedPluginsFile) {
+    void setExcludedPluginsFile(Object excludedPluginsFile) {
+        this.excludedPluginsFile = excludedPluginsFile
+    }
+
+    void excludedPluginsFile(Object excludedPluginsFile) {
         this.excludedPluginsFile = excludedPluginsFile
     }
 
     @Input
     @Optional
     String getDumpBrokenPluginList() {
-        return dumpBrokenPluginList
+        return Utils.stringInput(dumpBrokenPluginList)
     }
 
-    void setDumpBrokenPluginList(String dumpBrokenPluginList) {
+    void setDumpBrokenPluginList(Object dumpBrokenPluginList) {
+        this.dumpBrokenPluginList = dumpBrokenPluginList
+    }
+
+    void dumpBrokenPluginList(Object dumpBrokenPluginList) {
         this.dumpBrokenPluginList = dumpBrokenPluginList
     }
 
     @Input
     @Optional
     String getPluginsToCheckFile() {
-        return pluginsToCheckFile
+        return Utils.stringInput(pluginsToCheckFile)
     }
 
-    void setPluginsToCheckFile(String pluginsToCheckFile) {
+    void setPluginsToCheckFile(Object pluginsToCheckFile) {
+        this.pluginsToCheckFile = pluginsToCheckFile
+    }
+
+    void pluginsToCheckFile(Object pluginsToCheckFile) {
         this.pluginsToCheckFile = pluginsToCheckFile
     }
 
     @Input
     @Optional
     String getSubsystemsToCheck() {
-        return subsystemsToCheck
+        return Utils.stringInput(subsystemsToCheck)
     }
 
-    void setSubsystemsToCheck(String subsystemsToCheck) {
+    void setSubsystemsToCheck(Object subsystemsToCheck) {
+        this.subsystemsToCheck = subsystemsToCheck
+    }
+
+    void subsystemsToCheck(Object subsystemsToCheck) {
         this.subsystemsToCheck = subsystemsToCheck
     }
 
@@ -231,17 +290,13 @@ class RunPluginVerifierTask extends ConventionTask {
         }
 
         def extension = project.extensions.findByType(IntelliJPluginExtension)
-        if (ides.isEmpty()) {
-            ides.add("${extension.type}-${extension.version}")
-        }
-
         def resolver = new IdeaDependencyManager(extension.intellijRepo ?: IntelliJPlugin.DEFAULT_INTELLIJ_REPO)
         def verifierPath = getVerifierPath()
 
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.absolutePath]
-        verifierArgs += ides.collect {
+        verifierArgs += getIdes().collect {
             def (String type, String version) = it.split("-")
             def dependency = resolver.resolveRemote(project, version, type, false)
             return dependency.classes.absolutePath
@@ -279,8 +334,8 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     private String resolveVerifierVersion() {
-        if (verifierVersion != VERIFIER_VERSION_LATEST) {
-            return verifierVersion
+        if (getVerifierVersion() != VERIFIER_VERSION_LATEST) {
+            return getVerifierVersion()
         }
 
         def url = new URL(BINTRAY_API_VERIFIER_VERSION_LATEST)
@@ -289,16 +344,16 @@ class RunPluginVerifierTask extends ConventionTask {
 
     private String resolveRuntimeDir() {
         if (runtimeDir != null) {
-            return runtimeDir
+            return getRuntimeDir()
         }
 
         def jbrResolver = new JbrResolver(project, this)
         if (jbrVersion != null) {
-            def jbr = jbrResolver.resolve(jbrVersion)
+            def jbr = jbrResolver.resolve(getJbrVersion())
             if (jbr != null) {
                 return jbr.javaHome
             }
-            Utils.warn(this, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
+            Utils.warn(this, "Cannot resolve JBR ${getJbrVersion()}. Falling back to builtin JBR.")
         }
 
         def extension = project.extensions.findByType(IntelliJPluginExtension)
@@ -329,36 +384,36 @@ class RunPluginVerifierTask extends ConventionTask {
 
     private List<String> getOptions() {
         def args = [
-                "-verification-reports-dir", verificationReportsDir,
+                "-verification-reports-dir", getVerificationReportsDir(),
                 "-runtime-dir", resolveRuntimeDir()
         ]
 
         if (externalPrefixes != null) {
-            args += ["-external-prefixes", externalPrefixes]
+            args += ["-external-prefixes", getExternalPrefixes()]
         }
         if (pluginsToCheckAllBuilds != null) {
-            args += ["-plugins-to-check-all-builds", pluginsToCheckAllBuilds]
+            args += ["-plugins-to-check-all-builds", getPluginsToCheckAllBuilds()]
         }
         if (pluginsToCheckLastBuilds != null) {
-            args += ["-plugins-to-check-last-builds", pluginsToCheckLastBuilds]
+            args += ["-plugins-to-check-last-builds", getPluginsToCheckLastBuilds()]
         }
         if (teamCity != null) {
-            args += ["-team-city", teamCity]
+            args += ["-team-city", getTeamCity()]
         }
         if (tcGrouping != null) {
-            args += ["-tc-grouping", tcGrouping]
+            args += ["-tc-grouping", getTcGrouping()]
         }
         if (excludedPluginsFile != null) {
-            args += ["-excluded-plugins-file", excludedPluginsFile]
+            args += ["-excluded-plugins-file", getExcludedPluginsFile()]
         }
         if (dumpBrokenPluginList != null) {
-            args += ["-dump-broken-plugin-list", dumpBrokenPluginList]
+            args += ["-dump-broken-plugin-list", getDumpBrokenPluginList()]
         }
         if (pluginsToCheckFile != null) {
-            args += ["-plugins-to-check-file", pluginsToCheckFile]
+            args += ["-plugins-to-check-file", getPluginsToCheckFile()]
         }
         if (subsystemsToCheck != null) {
-            args += ["-subsystems-to-check", subsystemsToCheck]
+            args += ["-subsystems-to-check", getSubsystemsToCheck()]
         }
 
         return args
