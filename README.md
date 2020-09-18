@@ -53,9 +53,6 @@ buildscript {
     maven { 
       url 'https://jetbrains.bintray.com/intellij-plugin-service' 
     }
-    maven { 
-      url 'https://jetbrains.bintray.com/intellij-third-party-dependencies' 
-    }
     
   }
   dependencies {
@@ -112,20 +109,12 @@ Values:**    <ul>        <li><kbd>'IC'</kbd> - IntelliJ IDEA Community Edition. 
 Default Value:** <kbd>'IC'</kbd>|
 | <kbd>localPath</kbd> - The path to locally installed IDE distribution that should be used as a dependency. <br/><br/>**
 Notes:**    <ul>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**
-
-Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/IntelliJIDEA.app'`</br></br>**Default Value:** <kbd>
-null</kbd>| | <kbd>plugins</kbd> - The list of bundled IDE plugins and plugins from
-the [JetBrains Plugin Repository](https://plugins.jetbrains.com/). <br/><br/>Please
-see [Plugin Dependencies](http://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html)
-in SDK docs for more details.<br/><br/>**
-Notes:**    <ul>        <li>For plugins from the JetBrains Plugin Repository use format `pluginId:version`
-.</li>        <li>For bundled plugins version should be omitted: e.g. `org.intellij.groovy` for `IDEA/plugins/Groovy`
-plugin.</li>        <li>For sub-projects use project reference `project(':subproject')`.</li>        <li>If you need to
-refer plugin's classes from your project, you also have to define a dependency in your `plugin.xml`.</li>    </ul>|**
-Acceptable Values:**    <ol>        <li><kbd>org.plugin.id:
-version[@channel]</kbd><br/>`'org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly'`</li>        <li><kbd>
-bundledPluginName</kbd><br/>`'android', 'Groovy'`</li>        <li><kbd>project(':
-projectName')</kbd><br/>`project(':plugin-subproject')`</li>    </ol>**
+Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/IntelliJIDEA.app'`</br></br>**Default
+Value:** <kbd>null</kbd>|
+| <kbd>plugins</kbd> - The list of bundled IDE plugins and plugins from the [JetBrains Plugin Repository](https://plugins.jetbrains.com/). <br/><br/>Please see [Plugin Dependencies](http://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html) in SDK docs for more details.<br/><br/>**
+Notes:**    <ul>        <li>For plugins from the JetBrains Plugin Repository use format `pluginId:version`.</li>        <li>For bundled plugins version should be omitted: e.g. `org.intellij.groovy` for `IDEA/plugins/Groovy` plugin.</li>        <li>For sub-projects use project reference `project(':subproject')`.</li>        <li>If you need to refer plugin's classes from your project, you also have to define a dependency in your `plugin.xml`.</li>    </ul>|**
+Acceptable
+Values:**    <ol>        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`'org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly'`</li>        <li><kbd>bundledPluginName</kbd><br/>`'android', 'Groovy'`</li>        <li><kbd>project(':projectName')</kbd><br/>`project(':plugin-subproject')`</li>    </ol>**
 Default Value\:** none|
 
 #### Building Properties
@@ -142,19 +131,28 @@ Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:*
 Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd>|
 
 #### Run/Debug IDE Properties
-
 | Attributes | Values | 
 | :------------- | :--------- | 
 | <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:**    <ul>        <li>Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio.</li>        <li>Empty value means that the IDE that was used for compiling will be used for running/debugging as well.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/Android Studio.app'`<br/><br/>**Default Value:** none|
 | <kbd>sandboxDirectory</kbd> - The path of sandbox directory that is used for running IDE with developing plugin.|**Acceptable Values:** <br/><kbd>path</kbd> - `'${project.rootDir}/.sandbox'` <br/><br/>**Default Value:** <kbd>'${project.buildDir}/idea-sandbox'</kbd>|
 
 #### Infrastructure Properties
+
 | Attributes | Values | 
 | :------------- | :--------- | 
-| <kbd>intellijRepo</kbd>, <kbd>jreRepo</kbd> - Urls of repositories for downloading IDE distributions and JetBrains Java Runtime. <br/><br/>|**Acceptable Values:** <br/><kbd>url</kbd><br/><br/>**Default Value:** <kbd>jetbrains.com/intellij-repository</kbd>, <kbd>jetbrains.bintray.com/intellij-jdk</kbd>|
-| <kbd>pluginsRepo { ... }</kbd> - Configure repositories for downloading plugin dependencies. <br/><br/>|**Configuration:** <br/><kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/><kbd>maven(repoUrl)</kbd> - use custom Maven repository with plugins<br/><kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/><br/>**Default Configuration:** <kbd>pluginsRepo { marketplace() }</kbd>|
-| <kbd>downloadSources</kbd> - Should plugin download IntelliJ sources while initializing Gradle build? <br/><br/>**Notes:**    <ul>        <li>Since sources are not needed while testing on CI, you can set it to `false` for a particular environment.</li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> if `CI` environment variable is not set|
-| <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDE distributions. <br/><br/>**Notes:**    <ul>        <li>Empty value means the Gradle cache directory will be used.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'<example>'`<br/><br/>**Default Value:** none|
+| <kbd>intellijRepo</kbd>, <kbd>jreRepo</kbd> - Urls of repositories for downloading IDE distributions and JetBrains Java Runtime. <br/><br/>|**
+Acceptable Values:** <br/><kbd>url</kbd><br/><br/>**Default
+Value:** <kbd>jetbrains.com/intellij-repository</kbd>, <kbd>jetbrains.bintray.com/intellij-jdk</kbd>|
+| <kbd>pluginsRepo { ... }</kbd> - Configure repositories for downloading plugin dependencies. <br/><br/>|**
+Configuration:** <br/><kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/><kbd>maven(repoUrl)</kbd> - use custom Maven repository with plugins<br/><kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/><br/>**
+Default Configuration:** <kbd>pluginsRepo { marketplace() }</kbd>|
+| <kbd>downloadSources</kbd> - Should plugin download IntelliJ sources while initializing Gradle build? <br/><br/>**
+Notes:**    <ul>        <li>Since sources are not needed while testing on CI, you can set it to `false` for a particular environment.</li>    </ul>|**
+Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default
+Value:** <kbd>true</kbd> if `CI` environment variable is not set|
+| <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDE distributions. <br/><br/>**
+Notes:**    <ul>        <li>Empty value means the Gradle cache directory will be used.</li>    </ul>|**Acceptable
+Values:** <br/><kbd>path</kbd> - `'<example>'`<br/><br/>**Default Value:** none|
 
 
 ### Running DSL

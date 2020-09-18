@@ -24,9 +24,6 @@ buildscript {{{\n}
     maven {{ {\n}
       url 'https://jetbrains.bintray.com/intellij-plugin-service' {\n}
     }{\n}
-    maven {{ {\n}
-      url 'https://jetbrains.bintray.com/intellij-third-party-dependencies' {\n}
-    }{\n}
     {\n}
   }{\n}
   dependencies {{{\n}
