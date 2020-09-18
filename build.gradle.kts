@@ -26,7 +26,10 @@ dependencies {
     implementation("org.jetbrains:annotations:19.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.139")
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.139")
-    implementation("org.jetbrains.intellij:blockmap:1.0.5") // should be changed together with plugin-repository-rest-client
+    // should be changed together with plugin-repository-rest-client
+    implementation("org.jetbrains.intellij:blockmap:1.0.5") {
+        exclude(group = "org.jetbrains.kotlin")
+    }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.15") {
         exclude(group = "org.jetbrains.kotlin")
     }
