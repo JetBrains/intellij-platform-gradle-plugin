@@ -94,9 +94,7 @@ class PublishTask extends ConventionTask {
     @Input
     @Optional
     String[] getChannels() {
-        CollectionUtils.stringize(channels.collect {
-            it instanceof Closure ? (it as Closure).call() : it
-        }.flatten())
+        Utils.stringListInput(channels)
     }
 
     void setChannels(Object... channels) {

@@ -170,9 +170,9 @@ Plugin Verifier DSL `pluginVerifier { ... }` allows to define the list of IDEs u
 | <kbd>failureLevel</kbd> - Defines the verification level at which task should fail. Can be set as `FailureLevel` enum or `EnumSet<FailureLevel>`.                     | <kbd>FailureLevel.INVALID_PLUGIN</kbd>                 |
 | <kbd>verificationReportsDir</kbd> - The path to directory where verification reports will be saved.                                                                   | <kbd>${project.buildDir}/reports/pluginsVerifier</kbd> |
 | <kbd>jbrVersion</kbd> - JBR version used by the Verifier.                                                                                                             | none                                                   |
-| <kbd>runtimeDir</kbd> - The path to directory containing Java runtime jar, overrides JBR.                                                                             | none                                                   |
+| <kbd>runtimeDir</kbd> - The path to directory containing Java runtime, overrides JBR.                                                                                 | none                                                   |
 | <kbd>externalPrefixes</kbd> - The prefixes of classes from the external libraries.                                                                                    | none                                                   |
-| <kbd>teamCity</kbd> - Specify this flag if you want to print the TeamCity compatible output on stdout.                                                                | none                                                   |
+| <kbd>teamCityOutputFormat</kbd> - Specify this flag if you want to print the TeamCity compatible output on stdout.                                                    | none                                                   |
 | <kbd>subsystemsToCheck</kbd> - Specifies which subsystems of IDE should be checked. Available options: `all` (default), `android-only`, `without-android`.            | none                                                   |
 
 ### Publishing DSL
