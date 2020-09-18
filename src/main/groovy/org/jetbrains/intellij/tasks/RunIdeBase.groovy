@@ -65,9 +65,7 @@ abstract class RunIdeBase extends JavaExec {
 
     @Internal
     List<String> getRequiredPluginIds() {
-        CollectionUtils.stringize(requiredPluginIds.collect {
-            it instanceof Closure ? (it as Closure).call() : it
-        }.flatten())
+        Utils.stringListInput(requiredPluginIds)
     }
 
     void setRequiredPluginIds(Object... requiredPluginIds) {

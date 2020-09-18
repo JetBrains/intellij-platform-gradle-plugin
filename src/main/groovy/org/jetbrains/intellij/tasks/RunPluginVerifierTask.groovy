@@ -6,7 +6,6 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.util.CollectionUtils
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
@@ -47,8 +46,8 @@ class RunPluginVerifierTask extends ConventionTask {
     private Object verificationReportsDir
     private Object jbrVersion
     private Object runtimeDir
-    private Object externalPrefixes
-    private Object teamCity
+    private List<Object> externalPrefixes = []
+    private Boolean teamCityOutputFormat = false
     private Object subsystemsToCheck
 
     /**
@@ -87,9 +86,7 @@ class RunPluginVerifierTask extends ConventionTask {
     @SkipWhenEmpty
     @Input
     List<String> getIdeVersions() {
-        return CollectionUtils.stringize(ideVersions.collect {
-            it instanceof Closure ? (it as Closure).call() : it
-        }.flatten())
+        return Utils.stringListInput(ideVersions)
     }
 
     /**
@@ -208,72 +205,166 @@ class RunPluginVerifierTask extends ConventionTask {
         this.verificationReportsDir = verificationReportsDir
     }
 
+    /**
+     * Returns JBR version used by the IntelliJ Plugin Verifier.
+     * If not passed, built-in JBR or current JVM will be used.
+     *
+     * @return JBR Version
+     */
     @Input
     @Optional
     String getJbrVersion() {
         return Utils.stringInput(jbrVersion)
     }
 
+    /**
+     * Sets JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
+     * All JetBrains Java versions are available at BinTray: https://bintray.com/jetbrains/intellij-jbr
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param jbrVersion JBR version
+     */
     void setJbrVersion(Object jbrVersion) {
         this.jbrVersion = jbrVersion
     }
 
+    /**
+     * Sets JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
+     * All JetBrains Java versions are available at BinTray: https://bintray.com/jetbrains/intellij-jbr
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param jbrVersion JBR version
+     */
     void jbrVersion(Object jbrVersion) {
         this.jbrVersion = jbrVersion
     }
 
+    /**
+     * Returns the path to directory containing JVM runtime.
+     *
+     * @return JVM runtime directory
+     */
     @Input
     @Optional
     String getRuntimeDir() {
         return Utils.stringInput(runtimeDir)
     }
 
+    /**
+     * Sets the path to directory containing JVM runtime, overrides {@link #jbrVersion}.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param runtimeDir JVM runtime directory
+     */
     void setRuntimeDir(Object runtimeDir) {
         this.runtimeDir = runtimeDir
     }
 
+    /**
+     * Sets the path to directory containing JVM runtime, overrides {@link #jbrVersion}.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param runtimeDir JVM runtime directory
+     */
     void runtimeDir(Object runtimeDir) {
         this.runtimeDir = runtimeDir
     }
 
+    /**
+     * Returns the prefixes of classes from the external libraries.
+     * The Plugin Verifier will not report 'No such class' for classes of these packages.
+     *
+     * @return list with external prefixes to ignore
+     */
     @Input
     @Optional
-    String getExternalPrefixes() {
-        return Utils.stringInput(externalPrefixes)
+    List<String> getExternalPrefixes() {
+        return Utils.stringListInput(externalPrefixes)
     }
 
-    void setExternalPrefixes(Object externalPrefixes) {
+    /**
+     * Sets the list of classes prefixes from the external libraries.
+     * The Plugin Verifier will not report 'No such class' for classes of these packages.
+     * Accepts list of {@link String} or {@link Closure}.
+     *
+     * @param externalPrefixes list of classes prefixes to ignore
+     */
+    void setExternalPrefixes(List<Object> externalPrefixes) {
         this.externalPrefixes = externalPrefixes
     }
 
-    void externalPrefixes(Object externalPrefixes) {
+    /**
+     * Sets the list of classes prefixes from the external libraries.
+     * The Plugin Verifier will not report 'No such class' for classes of these packages.
+     * Accepts list of {@link String} or {@link Closure}.
+     *
+     * @param externalPrefixes list of classes prefixes to ignore
+     */
+    void externalPrefixes(List<Object> externalPrefixes) {
         this.externalPrefixes = externalPrefixes
     }
 
+    /**
+     * Returns a flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
+     * will be returned to stdout.
+     *
+     * @return prints TeamCity compatible output
+     */
     @Input
     @Optional
-    String getTeamCity() {
-        return Utils.stringInput(teamCity)
+    Boolean getTeamCityOutputFormat() {
+        return Utils.stringInput(teamCityOutputFormat)
     }
 
-    void setTeamCity(Object teamCity) {
-        this.teamCity = teamCity
+    /**
+     * Sets a flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
+     * will be returned to stdout.
+     *
+     * @param teamCityOutputFormat prints TeamCity compatible output
+     */
+    void setTeamCityOutputFormat(Boolean teamCityOutputFormat) {
+        this.teamCityOutputFormat = teamCityOutputFormat
     }
 
-    void teamCity(Object teamCity) {
-        this.teamCity = teamCity
+    /**
+     * Sets a flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
+     * will be returned to stdout.
+     *
+     * @param teamCityOutputFormat prints TeamCity compatible output
+     */
+    void teamCityOutputFormat(Boolean teamCityOutputFormat) {
+        this.teamCityOutputFormat = teamCityOutputFormat
     }
 
+    /**
+     * Returns which subsystems of IDE should be checked.
+     *
+     * @return subsystems to check
+     */
     @Input
     @Optional
     String getSubsystemsToCheck() {
         return Utils.stringInput(subsystemsToCheck)
     }
 
+    /**
+     * Specifies which subsystems of IDE should be checked.
+     * Available options: `all` (default), `android-only`, `without-android`.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param subsystemsToCheck subsystems of IDE should to check
+     */
     void setSubsystemsToCheck(Object subsystemsToCheck) {
         this.subsystemsToCheck = subsystemsToCheck
     }
 
+    /**
+     * Specifies which subsystems of IDE should be checked.
+     * Available options: `all` (default), `android-only`, `without-android`.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param subsystemsToCheck subsystems of IDE should to check
+     */
     void subsystemsToCheck(Object subsystemsToCheck) {
         this.subsystemsToCheck = subsystemsToCheck
     }
@@ -294,7 +385,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
-        verifierArgs += [file.absolutePath]
+        verifierArgs += [file.canonicalPath]
         verifierArgs += getIdeVersions().collect {
             def (String type, String version) = it.split("-")
             def dependency = resolver.resolveRemote(project, version, type, false)
@@ -414,10 +505,10 @@ class RunPluginVerifierTask extends ConventionTask {
         ]
 
         if (externalPrefixes != null) {
-            args += ["-external-prefixes", getExternalPrefixes()]
+            args += ["-external-prefixes", getExternalPrefixes().join(":")]
         }
-        if (teamCity != null) {
-            args += ["-team-city", getTeamCity()]
+        if (teamCityOutputFormat) {
+            args += ["-team-city"]
         }
         if (subsystemsToCheck != null) {
             args += ["-subsystems-to-check", getSubsystemsToCheck()]

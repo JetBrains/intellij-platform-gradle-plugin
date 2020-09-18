@@ -18,6 +18,7 @@ import org.gradle.api.publish.ivy.IvyArtifact
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
+import org.gradle.util.CollectionUtils
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.dependency.IntellijIvyArtifact
@@ -209,6 +210,12 @@ class Utils {
     static String stringInput(input) {
         input = input instanceof Closure ? (input as Closure).call() : input
         return input?.toString()
+    }
+
+    static List<String> stringListInput(input) {
+        return CollectionUtils.stringize(input.collect {
+            it instanceof Closure ? (it as Closure).call() : it
+        }.flatten())
     }
 
     @NotNull
