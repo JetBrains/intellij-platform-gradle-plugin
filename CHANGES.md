@@ -6,6 +6,14 @@
 - support multiple plugin repositories
 - support enterprise plugin repositories [#15](../../issues/15)
 
+## 0.4.26
+
+- fix plugin-repository-rest-client dependency
+
+## 0.4.25
+
+- fix plugin-repository-rest-client dependency
+
 ## 0.4.24
 
 - fix plugin-repository-rest-client dependency
