@@ -83,7 +83,6 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return IDE versions list
      */
-    @SkipWhenEmpty
     @Input
     List<String> getIdeVersions() {
         return Utils.stringListInput(ideVersions)
@@ -146,8 +145,8 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return generated plugin artifact
      */
-    @SkipWhenEmpty
     @InputFile
+    @SkipWhenEmpty
     File getDistributionFile() {
         def input = distributionFile instanceof Closure ? (distributionFile as Closure).call() : distributionFile
         return input != null ? project.file(input) : null
