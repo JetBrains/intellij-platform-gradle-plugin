@@ -1,9 +1,10 @@
+@Suppress("SpellCheckingInspection")
 plugins {
     groovy
     id("com.gradle.plugin-publish") version "0.12.0"
     id("synapticloop.documentr") version "3.1.0"
     `java-gradle-plugin`
-    maven
+    `maven-publish`
     id("com.github.breadmoirai.github-release") version "2.2.9"
 }
 
@@ -20,6 +21,7 @@ repositories {
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 
+@Suppress("SpellCheckingInspection")
 dependencies {
     implementation(localGroovy())
     api(gradleApi())
@@ -93,12 +95,12 @@ fun configureTests(testTask: Test) {
 }
 
 val javadocJar = tasks.register<Jar>("javadocJar") {
-    classifier = "javadoc"
+    archiveClassifier.set("javadoc")
     from(tasks.named("javadoc"))
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
-    classifier = "sources"
+    archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
 }
 
@@ -107,44 +109,45 @@ artifacts {
     archives(sourcesJar)
 }
 
-tasks.named<Upload>("uploadArchives") {
-    repositories.withGroovyBuilder {
-        "mavenDeployer" {
-            "snapshotRepository"("url" to "https://oss.sonatype.org/content/repositories/snapshots/") {
-                "authentication"(
-                        "userName" to project.property("ossrhUsername"),
-                        "password" to project.property("ossrhPassword")
-                )
+publishing {
+    repositories {
+        maven {
+            name = "snapshotRepository"
+            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            credentials {
+                username = project.property("ossrhUsername") as String
+                password = project.property("ossrhPassword") as String
             }
+        }
+    }
+    publications {
+        create<MavenPublication>("project") {
+            pom {
+                name.set("Gradle IntelliJ Plugin")
+                description.set(project.description)
+                version = "${project.property("snapshotVersion")}-SNAPSHOT"
+                url.set("https://github.com/JetBrains/gradle-intellij-plugin")
 
-            "pom" {
-                "project" {
-                    setProperty("artifactId", project.name)
-                    setProperty("name", "Gradle IntelliJ Plugin")
-                    setProperty("description", project.description)
-                    setProperty("version", "${project.property("snapshotVersion")}-SNAPSHOT")
-                    setProperty("url", "https://github.com/JetBrains/gradle-intellij-plugin")
-                    setProperty("packaging", "jar")
+                packaging = "jar"
 
-                    "scm" {
-                        setProperty("connection", "scm:git:https://github.com/JetBrains/gradle-intellij-plugin/")
-                        setProperty("developerConnection", "scm:git:https://github.com/JetBrains/gradle-intellij-plugin/")
-                        setProperty("url", "https://github.com/JetBrains/gradle-intellij-plugin/")
+                scm {
+                    connection.set("scm:git:https://github.com/JetBrains/gradle-intellij-plugin/")
+                    developerConnection.set("scm:git:https://github.com/JetBrains/gradle-intellij-plugin/")
+                    url.set("https://github.com/JetBrains/gradle-intellij-plugin/")
+                }
+
+                licenses {
+                    license {
+                        name.set("The Apache License, Version 2.0")
+                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
+                }
 
-                    "licenses" {
-                        "license" {
-                            setProperty("name", "The Apache License, Version 2.0")
-                            setProperty("url", "http://www.apache.org/licenses/LICENSE-2.0.txt")
-                        }
-                    }
-
-                    "developers" {
-                        "developer" {
-                            setProperty("id", "zolotov")
-                            setProperty("name", "Alexander Zolotov")
-                            setProperty("email", "zolotov@jetbrains.com")
-                        }
+                developers {
+                    developer {
+                        id.set("zolotov")
+                        name.set("Alexander Zolotov")
+                        email.set("zolotov@jetbrains.com")
                     }
                 }
             }
@@ -153,7 +156,7 @@ tasks.named<Upload>("uploadArchives") {
 }
 
 tasks.wrapper {
-    gradleVersion = "6.3"
+    gradleVersion = "6.6.1"
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
