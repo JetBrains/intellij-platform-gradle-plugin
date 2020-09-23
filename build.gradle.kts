@@ -1,4 +1,3 @@
-@Suppress("SpellCheckingInspection")
 plugins {
     groovy
     id("com.gradle.plugin-publish") version "0.12.0"
@@ -21,7 +20,6 @@ repositories {
     maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 
-@Suppress("SpellCheckingInspection")
 dependencies {
     implementation(localGroovy())
     api(gradleApi())
