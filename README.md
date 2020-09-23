@@ -158,7 +158,7 @@ The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ..
 ### Plugin Verifier DSL
 [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) integration task allows to check the binary compatibility of the built plugin against the specified [IntelliJ IDE builds](https://jetbrains.org/intellij/sdk/docs/reference_guide/api_changes_list.html).
 
-Plugin Verifier DSL `pluginVerifier { ... }` allows to define the list of IDEs used for the verification, as well as explicit tool version and any of the available [options](https://github.com/JetBrains/intellij-plugin-verifier#common-options) by proxifying them to the Verifier CLI.
+Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDEs used for the verification, as well as explicit tool version and any of the available [options](https://github.com/JetBrains/intellij-plugin-verifier#common-options) by proxifying them to the Verifier CLI.
 
 > **TIP** For more details, examples or issues reporting, go to the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) repository.
 
