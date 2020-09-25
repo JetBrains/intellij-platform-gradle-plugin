@@ -466,6 +466,9 @@ class RunPluginVerifierTask extends ConventionTask {
         verifierArgs += getIdeVersions().collect {resolveIdePath(it) }
         verifierArgs += getLocalPaths()
 
+        Utils.debug(this, "Distribution file: $file.canonicalPath")
+        Utils.debug(this, "Verifier path: $verifierPath")
+
         new ByteArrayOutputStream().withStream { os ->
             project.javaexec {
                 classpath = project.files(verifierPath)
@@ -476,8 +479,11 @@ class RunPluginVerifierTask extends ConventionTask {
 
             def output = os.toString()
             println output
+
+            Utils.debug(this, "Current failure levels: ${FailureLevel.values().join()}")
             for (FailureLevel level : FailureLevel.values()) {
                 if (failureLevel.contains(level) && output.contains(level.testValue)) {
+                    Utils.debug(this, "Failing task on $failureLevel failure level")
                     throw new GradleException(level.toString())
                 }
             }
@@ -494,6 +500,7 @@ class RunPluginVerifierTask extends ConventionTask {
         def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
         try {
             def resolvedVerifierVersion = resolveVerifierVersion()
+            Utils.debug(this, "Using Verifier in $resolvedVerifierVersion version")
             def dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
             def configuration = project.configurations.detachedConfiguration(dependency)
             return configuration.singleFile.absolutePath
@@ -511,8 +518,11 @@ class RunPluginVerifierTask extends ConventionTask {
      */
     @Nullable
     String resolveIdePath(String ideVersion) {
+        Utils.debug(this, "Resolving IDE path for $ideVersion")
         def (String type, String version) = ideVersion.split("-", 2)
+
         if (!version) {
+            Utils.debug(this, "IDE type not specified, setting type to IC")
             version = type
             type = "IC"
         }
@@ -535,6 +545,7 @@ class RunPluginVerifierTask extends ConventionTask {
     private File downloadIde(String type, String version, String buildType) {
         def name = "$type-$version"
         def ideDir = new File(getDownloadDirectory(), name)
+        Utils.debug(this, "Downloaing IDE: $name")
 
         if (!ideDir.exists()) {
             def isBuild = version.matches("^\\d{3}\\.")
@@ -545,6 +556,7 @@ class RunPluginVerifierTask extends ConventionTask {
                     .addParameter("type", buildType)
                     .addParameter(isBuild ? "build" : "version", version)
                     .toString()
+            Utils.debug(this, "Downloaing IDE from $url")
 
             new DownloadAction(project).with {
                 src(url)
@@ -553,11 +565,15 @@ class RunPluginVerifierTask extends ConventionTask {
                 execute()
             }
 
+            Utils.debug(this, "IDE downloaded, extracting...")
             Utils.untar(project, ideArchive, ideDir)
             def container = ideDir.listFiles().first()
             container.listFiles().each { it.renameTo("$ideDir/$it.name") }
             container.deleteDir()
             ideArchive.delete()
+            Utils.debug(this, "IDE extracted to $ideDir, archive removed")
+        } else {
+            Utils.debug(this, "IDE already available in $ideDir")
         }
 
         return ideDir
@@ -575,6 +591,7 @@ class RunPluginVerifierTask extends ConventionTask {
             return getVerifierVersion()
         }
 
+        Utils.debug(this, "Resolving Verifier version with BinTray")
         def url = new URL(BINTRAY_API_VERIFIER_VERSION_LATEST)
         return new JsonSlurper().parse(url)["name"]
     }
@@ -589,6 +606,7 @@ class RunPluginVerifierTask extends ConventionTask {
      */
     private String resolveRuntimeDir() {
         if (runtimeDir != null) {
+            Utils.debug(this, "Runtime specified with propeties: ${getRuntimeDir()}")
             return getRuntimeDir()
         }
 
@@ -596,9 +614,10 @@ class RunPluginVerifierTask extends ConventionTask {
         if (jbrVersion != null) {
             def jbr = jbrResolver.resolve(getJbrVersion())
             if (jbr != null) {
+                Utils.debug(this, "Runtime specified with JBR Version property: ${getJbrVersion()}")
                 return jbr.javaHome
             }
-            Utils.warn(this, "Cannot resolve JBR ${getJbrVersion()}. Falling back to builtin JBR.")
+            Utils.warn(this, "Cannot resolve JBR ${getJbrVersion()}. Falling back to built-in JBR.")
         }
 
         def extension = project.extensions.findByType(IntelliJPluginExtension)
@@ -610,6 +629,7 @@ class RunPluginVerifierTask extends ConventionTask {
             if (builtinJbr != null) {
                 def javaHome = new File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {
+                    Utils.debug(this, "Using built-in JBR: $javaHome")
                     return javaHome
                 }
             }
@@ -619,11 +639,13 @@ class RunPluginVerifierTask extends ConventionTask {
         if (extension.alternativeIdePath) {
             def javaHome = new File(Utils.ideaDir(extension.alternativeIdePath), jbrPath)
             if (javaHome.exists()) {
+                Utils.debug(this, "Using built-in JBR from alternativeIdePath: $extension.alternativeIdePath")
                 return javaHome
             }
             Utils.warn(this, "Cannot resolve JBR at $javaHome. Falling back to current JVM.")
         }
 
+        Utils.debug(this, "Using current JVM: ${Jvm.current().getJavaHome()}")
         return Jvm.current().getJavaHome()
     }
 
