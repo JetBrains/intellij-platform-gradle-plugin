@@ -1,19 +1,23 @@
 package org.jetbrains.intellij.tasks
 
+import de.undercouch.gradle.tasks.download.DownloadAction
+import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import groovy.json.JsonSlurper
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
-import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.jbr.JbrResolver
 
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
+    private static final String IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+
     public static final String VERIFIER_VERSION_LATEST = "latest"
 
     static enum FailureLevel {
@@ -41,9 +45,11 @@ class RunPluginVerifierTask extends ConventionTask {
 
     private EnumSet<FailureLevel> failureLevel
     private List<Object> ideVersions = []
+    private List<Object> localPaths = []
     private Object verifierVersion
     private Object distributionFile
-    private Object verificationReportsDir
+    private Object verificationReportsDirectory
+    private Object downloadDirectory
     private Object jbrVersion
     private Object runtimeDir
     private List<Object> externalPrefixes = []
@@ -52,7 +58,8 @@ class RunPluginVerifierTask extends ConventionTask {
 
     /**
      * Returns a list of the {@link FailureLevel} values used for failing the task if any reported issue will match.
-     * @return
+     *
+     * @return verification failure level
      */
     @Input
     EnumSet<FailureLevel> getFailureLevel() {
@@ -65,6 +72,15 @@ class RunPluginVerifierTask extends ConventionTask {
      * @param failureLevel EnumSet of {@link FailureLevel} values
      */
     void setFailureLevel(EnumSet<FailureLevel> failureLevel) {
+        this.failureLevel = failureLevel
+    }
+
+    /**
+     * Sets a list of the {@link FailureLevel} values that will make the task if any reported issue will match.
+     *
+     * @param failureLevel EnumSet of {@link FailureLevel} values
+     */
+    void failureLevel(EnumSet<FailureLevel> failureLevel) {
         this.failureLevel = failureLevel
     }
 
@@ -89,7 +105,8 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     /**
-     * Sets a list of the IDE versions used for the verification. Accepts list of {@link String} or {@link Closure}.
+     * Sets a list of the IDE versions used for the verification.
+     * Accepts list of {@link String} or {@link Closure}.
      *
      * @param ideVersions list of IDE versions
      */
@@ -105,6 +122,38 @@ class RunPluginVerifierTask extends ConventionTask {
      */
     void ideVersions(List<Object> ideVersions) {
         this.ideVersions = ideVersions
+    }
+
+    /**
+     * Returns a list of the paths to locally installed IDE distributions that should be used for verification.
+     *
+     * @return locally installed IDEs list
+     */
+    @Input
+    List<String> getLocalPaths() {
+        return Utils.stringListInput(localPaths)
+    }
+
+    /**
+     * Sets a list of the paths to locally installed IDE distributions that should be used for verification.
+     * Property does not override {@link #ideVersions}.
+     * Accepts list of {@link String} or {@link Closure}.
+     *
+     * @param localPaths list of IDE versions
+     */
+    void setLocalPaths(List<Object> localPaths) {
+        this.localPaths = localPaths
+    }
+
+    /**
+     * Sets a list of the paths to locally installed IDE distributions that should be used for verification.
+     * Property does not override {@link #ideVersions}.
+     * Accepts list of {@link String} or {@link Closure}.
+     *
+     * @param localPaths list of IDE versions
+     */
+    void localPaths(List<Object> localPaths) {
+        this.localPaths = localPaths
     }
 
     /**
@@ -174,34 +223,66 @@ class RunPluginVerifierTask extends ConventionTask {
 
     /**
      * Returns the path to directory where verification reports will be saved.
-     * By default, set to ${project.buildDir}/reports/pluginsVerifier.
+     * By default, set to ${project.buildDir}/reports/pluginVerifier.
      *
      * @return path to verification reports directory
      */
     @Input
     @Optional
-    String getVerificationReportsDir() {
-        return Utils.stringInput(verificationReportsDir)
+    String getVerificationReportsDirectory() {
+        return Utils.stringInput(verificationReportsDirectory)
     }
 
     /**
      * Sets the path to directory where verification reports will be saved.
      * Accepts {@link String} or {@link Closure}.
      *
-     * @param verificationReportsDir path to verification reports directory
+     * @param verificationReportsDirectory path to verification reports directory
      */
-    void setVerificationReportsDir(Object verificationReportsDir) {
-        this.verificationReportsDir = verificationReportsDir
+    void setVerificationReportsDirectory(Object verificationReportsDirectory) {
+        this.verificationReportsDirectory = verificationReportsDirectory
     }
 
     /**
      * Sets the path to directory where verification reports will be saved.
      * Accepts {@link String} or {@link Closure}.
      *
-     * @param verificationReportsDir path to verification reports directory
+     * @param verificationReportsDirectory path to verification reports directory
      */
-    void verificationReportsDir(Object verificationReportsDir) {
-        this.verificationReportsDir = verificationReportsDir
+    void verificationReportsDirectory(Object verificationReportsDirectory) {
+        this.verificationReportsDirectory = verificationReportsDirectory
+    }
+
+    /**
+     * Returns the path to directory where IDEs used for the verification will be downloaded.
+     * By default, set to ${project.buildDir}/pluginVerifier.
+     *
+     * @return path to IDEs download directory
+     */
+    @Input
+    @Optional
+    String getDownloadDirectory() {
+        return Utils.stringInput(downloadDirectory)
+    }
+
+    /**
+     * Returns the path to directory where IDEs used for the verification will be downloaded.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param downloadDirectory path to IDEs download directory
+     */
+    void setDownloadDirectory(Object downloadDirectory) {
+        this.downloadDirectory = downloadDirectory
+    }
+
+    /**
+     * Returns the path to directory where IDEs used for the verification will be downloaded.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param downloadDirectory path to IDEs download directory
+     */
+    void downloadDirectory(Object downloadDirectory) {
+        this.downloadDirectory = downloadDirectory
     }
 
     /**
@@ -378,18 +459,12 @@ class RunPluginVerifierTask extends ConventionTask {
             throw new IllegalStateException("Plugin file does not exist: $file")
         }
 
-        def extension = project.extensions.findByType(IntelliJPluginExtension)
-        def resolver = new IdeaDependencyManager(extension.intellijRepo ?: IntelliJPlugin.DEFAULT_INTELLIJ_REPO)
         def verifierPath = getVerifierPath()
-
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.canonicalPath]
-        verifierArgs += getIdeVersions().collect {
-            def (String type, String version) = it.split("-")
-            def dependency = resolver.resolveRemote(project, version, type, false)
-            return dependency.classes.absolutePath
-        }
+        verifierArgs += getIdeVersions().collect {resolveIdePath(it) }
+        verifierArgs += getLocalPaths()
 
         new ByteArrayOutputStream().withStream { os ->
             project.javaexec {
@@ -422,10 +497,70 @@ class RunPluginVerifierTask extends ConventionTask {
             def dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
             def configuration = project.configurations.detachedConfiguration(dependency)
             return configuration.singleFile.absolutePath
+        } catch (Exception e) {
+            println e
         }
-        finally {
-            project.repositories.remove(repository)
+        return project.repositories.remove(repository)
+    }
+
+    /**
+     * Resolves the IDE type and version. If just version is provided, type is set to "IC".
+     *
+     * @param ideVersion IDE version. Can be "2020.2", "IC-2020.2", "202.1234.56"
+     * @return
+     */
+    @Nullable
+    String resolveIdePath(String ideVersion) {
+        def (String type, String version) = ideVersion.split("-", 2)
+        if (!version) {
+            version = type
+            type = "IC"
         }
+
+        for (String buildType in ["release", "rc", "eap"]) {
+            Utils.debug(project, "Downloading IDE '$type-$version' from $buildType channel")
+            try {
+                def dir = downloadIde(type, version, buildType)
+                Utils.debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
+                return dir.absolutePath
+            } catch (IOException e) {
+                Utils.debug(project, "Cannot download IDE '$type-$version' from $buildType channel", e)
+            }
+        }
+
+        Utils.error(project, "Cannot download IDE '$type-$version'")
+        return null
+    }
+
+    private File downloadIde(String type, String version, String buildType) {
+        def name = "$type-$version"
+        def ideDir = new File(getDownloadDirectory(), name)
+
+        if (!ideDir.exists()) {
+            def isBuild = version.matches("^\\d{3}\\.")
+            def ideArchive = new File(getDownloadDirectory(), "${name}.tar.gz")
+            def url = new URIBuilder(IDE_DOWNLOAD_URL)
+                    .addParameter("code", type)
+                    .addParameter("platform", "linux")
+                    .addParameter("type", buildType)
+                    .addParameter(isBuild ? "build" : "version", version)
+                    .toString()
+
+            new DownloadAction(project).with {
+                src(url)
+                dest(ideArchive.absolutePath)
+                tempAndMove(true)
+                execute()
+            }
+
+            Utils.untar(project, ideArchive, ideDir)
+            def container = ideDir.listFiles().first()
+            container.listFiles().each { it.renameTo("$ideDir/$it.name") }
+            container.deleteDir()
+            ideArchive.delete()
+        }
+
+        return ideDir
     }
 
     /**
@@ -499,7 +634,7 @@ class RunPluginVerifierTask extends ConventionTask {
      */
     private List<String> getOptions() {
         def args = [
-                "-verification-reports-dir", getVerificationReportsDir(),
+                "-verification-reports-dir", getVerificationReportsDirectory(),
                 "-runtime-dir", resolveRuntimeDir()
         ]
 

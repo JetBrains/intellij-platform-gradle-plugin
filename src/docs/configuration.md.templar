@@ -319,18 +319,19 @@ Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDE
 
 > **TIP** For more details, examples or issues reporting, go to the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) repository.
 
-| **Attributes**                                                                                                                                                        | **Default Value**                                      |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| <kbd>ideVersions</kbd> - Array of IDEs to check, in `intellij.version` format, like: `IC-2020.2`; if not set, uses `intellij`. Should be set for the best experience. | <kbd>["${intellij.type}-${intellij.version}"]</kbd>    |
-| <kbd>verifierVersion</kbd> - IntelliJ Plugin Verifier version, by default uses the latest available. It's recommended to use always the latest version.               | <kbd>latest</kbd>                                      |
-| <kbd>distributionFile</kbd> - Jar or Zip file of plugin to verify.                                                                                                    | output of `buildPlugin` task                           |
-| <kbd>failureLevel</kbd> - Defines the verification level at which task should fail. Can be set as `FailureLevel` enum or `EnumSet<FailureLevel>`.                     | <kbd>FailureLevel.INVALID_PLUGIN</kbd>                 |
-| <kbd>verificationReportsDir</kbd> - The path to directory where verification reports will be saved.                                                                   | <kbd>${project.buildDir}/reports/pluginsVerifier</kbd> |
-| <kbd>jbrVersion</kbd> - JBR version used by the Verifier.                                                                                                             | none                                                   |
-| <kbd>runtimeDir</kbd> - The path to directory containing Java runtime, overrides JBR.                                                                                 | none                                                   |
-| <kbd>externalPrefixes</kbd> - The prefixes of classes from the external libraries.                                                                                    | none                                                   |
-| <kbd>teamCityOutputFormat</kbd> - Specify this flag if you want to print the TeamCity compatible output on stdout.                                                    | none                                                   |
-| <kbd>subsystemsToCheck</kbd> - Specifies which subsystems of IDE should be checked. Available options: `all` (default), `android-only`, `without-android`.            | none                                                   |
+| **Attributes**                                                                                                                                                        | **Default Value**                                     |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| <kbd>ideVersions</kbd> - Array of IDEs to check, in `intellij.version` format, like: `IC-2020.2`; if not set, uses `intellij`. Should be set for the best experience. | <kbd>["${intellij.type}-${intellij.version}"]</kbd>   |
+| <kbd>verifierVersion</kbd> - IntelliJ Plugin Verifier version, by default uses the latest available. It's recommended to use always the latest version.               | <kbd>latest</kbd>                                     |
+| <kbd>localPaths</kbd> - A list of the paths to locally installed IDE distributions that should be used for verification. Property does not override `ideVersions`.    | <kbd>[]</kbd>                                         |
+| <kbd>distributionFile</kbd> - Jar or Zip file of plugin to verify.                                                                                                    | output of `buildPlugin` task                          |
+| <kbd>failureLevel</kbd> - Defines the verification level at which task should fail. Can be set as `FailureLevel` enum or `EnumSet<FailureLevel>`.                     | <kbd>FailureLevel.INVALID_PLUGIN</kbd>                |
+| <kbd>verificationReportsDirectory</kbd> - The path to directory where verification reports will be saved.                                                             | <kbd>${project.buildDir}/reports/pluginVerifier</kbd> |
+| <kbd>jbrVersion</kbd> - JBR version used by the Verifier.                                                                                                             | none                                                  |
+| <kbd>runtimeDir</kbd> - The path to directory containing Java runtime, overrides JBR.                                                                                 | none                                                  |
+| <kbd>externalPrefixes</kbd> - The prefixes of classes from the external libraries.                                                                                    | none                                                  |
+| <kbd>teamCityOutputFormat</kbd> - Specify this flag if you want to print the TeamCity compatible output on stdout.                                                    | none                                                  |
+| <kbd>subsystemsToCheck</kbd> - Specifies which subsystems of IDE should be checked. Available options: `all` (default), `android-only`, `without-android`.            | none                                                  |
 
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
