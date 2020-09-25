@@ -343,4 +343,25 @@ class Utils {
         return null
     }
 
+    static void untar(@NotNull Project project, @NotNull File from, @NotNull File to) {
+        def tempDir = new File(to.parent, to.name + "-temp")
+        debug(project, "Unpacking $from.absolutePath to $tempDir.absolutePath")
+
+        if (tempDir.exists()) {
+            tempDir.deleteDir()
+        }
+        tempDir.mkdir()
+
+        if (OperatingSystem.current().isWindows()) {
+            project.copy {
+                it.from project.tarTree(from)
+                it.into tempDir
+            }
+        } else {
+            project.exec {
+                commandLine 'tar', '-xpf', from.absolutePath, '--directory', tempDir.absolutePath
+            }
+        }
+        tempDir.renameTo(to)
+    }
 }

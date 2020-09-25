@@ -65,7 +65,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = ["IC-2020.2", "PY-2020.1"]
+                ideVersions = ["IC-2020.2", "PS-2020.1"]
             }
             """.stripIndent()
 
@@ -74,7 +74,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Plugin PluginName:1.0.0 against IC-202.6397.94: Compatible")
-        result.output.contains("Plugin PluginName:1.0.0 against PY-201.6668.115: Compatible")
+        result.output.contains("Plugin PluginName:1.0.0 against PS-201.6668.153: Compatible")
     }
 
     def 'set verification reports directory'() {
@@ -85,7 +85,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
-                verificationReportsDir = "\${project.buildDir}/foo"
+                verificationReportsDirectory = "\${project.buildDir}/foo"
             }
             """.stripIndent()
 
