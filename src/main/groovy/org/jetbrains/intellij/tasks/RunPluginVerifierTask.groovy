@@ -17,6 +17,7 @@ import org.jetbrains.intellij.jbr.JbrResolver
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
     private static final String IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+    private static final String IDE_BUILD_TYPES = ["release", "rc", "eap"]
 
     public static final String VERIFIER_VERSION_LATEST = "latest"
 
@@ -463,7 +464,7 @@ class RunPluginVerifierTask extends ConventionTask {
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.canonicalPath]
-        verifierArgs += getIdeVersions().collect {resolveIdePath(it) }
+        verifierArgs += (getIdeVersions().collect {resolveIdePath(it) } - null)
         verifierArgs += getLocalPaths()
 
         Utils.debug(this, "Distribution file: $file.canonicalPath")
@@ -514,7 +515,7 @@ class RunPluginVerifierTask extends ConventionTask {
      * Resolves the IDE type and version. If just version is provided, type is set to "IC".
      *
      * @param ideVersion IDE version. Can be "2020.2", "IC-2020.2", "202.1234.56"
-     * @return
+     * @return path to the resolved IDE
      */
     @Nullable
     String resolveIdePath(String ideVersion) {
@@ -527,7 +528,7 @@ class RunPluginVerifierTask extends ConventionTask {
             type = "IC"
         }
 
-        for (String buildType in ["release", "rc", "eap"]) {
+        for (String buildType in IDE_BUILD_TYPES) {
             Utils.debug(project, "Downloading IDE '$type-$version' from $buildType channel")
             try {
                 def dir = downloadIde(type, version, buildType)
@@ -542,6 +543,14 @@ class RunPluginVerifierTask extends ConventionTask {
         return null
     }
 
+    /**
+     * Downloads IDE from the {@link #IDE_DOWNLOAD_URL} service by the given parameters.
+     *
+     * @param type IDE type, i.e. IC, PS
+     * @param version IDE version, i.e. 2020.2 or 203.1234.56
+     * @param buildType release, rc, eap
+     * @return {@link File} instance ponting to the IDE directory
+     */
     private File downloadIde(String type, String version, String buildType) {
         def name = "$type-$version"
         def ideDir = new File(getDownloadDirectory(), name)
