@@ -466,6 +466,9 @@ class RunPluginVerifierTask extends ConventionTask {
         verifierArgs += getIdeVersions().collect {resolveIdePath(it) }
         verifierArgs += getLocalPaths()
 
+        println "ARGS:"
+        println verifierArgs.join("\n")
+        println "ARGS end"
         new ByteArrayOutputStream().withStream { os ->
             project.javaexec {
                 classpath = project.files(verifierPath)
