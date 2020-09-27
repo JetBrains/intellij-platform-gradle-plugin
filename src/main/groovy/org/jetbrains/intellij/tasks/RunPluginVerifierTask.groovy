@@ -464,7 +464,7 @@ class RunPluginVerifierTask extends ConventionTask {
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.canonicalPath]
-        verifierArgs += (getIdeVersions().collect {resolveIdePath(it) } - null)
+        verifierArgs += getIdeVersions().collect {resolveIdePath(it) }
         verifierArgs += getLocalPaths()
 
         Utils.debug(this, "Distribution file: $file.canonicalPath")
