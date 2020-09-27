@@ -17,7 +17,6 @@ import org.jetbrains.intellij.jbr.JbrResolver
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
     private static final String IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
-    private static final String IDE_BUILD_TYPES = ["release", "rc", "eap"]
 
     public static final String VERIFIER_VERSION_LATEST = "latest"
 
@@ -528,7 +527,7 @@ class RunPluginVerifierTask extends ConventionTask {
             type = "IC"
         }
 
-        for (String buildType in IDE_BUILD_TYPES) {
+        for (String buildType in ["release", "rc", "eap"]) {
             Utils.debug(project, "Downloading IDE '$type-$version' from $buildType channel")
             try {
                 def dir = downloadIde(type, version, buildType)
