@@ -336,30 +336,4 @@ class Utils {
         return null
     }
 
-    @NotNull
-    static File downloadZipArtifact(@NotNull Project project, @NotNull String repoUrl, @NotNull String repoPattern,
-                                    @NotNull String dependency) {
-        debug(project, "Adding pseudo-Ivy repository to download $dependency - $repoUrl/$repoPattern")
-        def pseudoRepo = project.repositories.ivy {
-            url repoUrl
-            layout("pattern") {
-                artifact repoPattern
-            }
-            metadataSources {
-                artifact()
-            }
-        }
-        def projectDependency = project.dependencies.create("$dependency@zip")
-        def zipFile = null
-        try {
-            def configuration = project.configurations.detachedConfiguration(projectDependency)
-            zipFile = configuration.singleFile
-            debug(project, "Downloaded zip artifact: $zipFile")
-        } catch (Exception e) {
-            debug(project, "Couldn't find " + dependency + " in $repoUrl/$repoPattern", e)
-        }
-        debug(project, "Removing pseudo-Ivy repository $repoUrl/$repoPattern")
-        project.repositories.remove(pseudoRepo)
-        return zipFile
-    }
 }

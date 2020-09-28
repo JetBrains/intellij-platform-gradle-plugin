@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugins>
+    <plugin id="com.intellij.plugins.emacskeymap"
+            url="https://plugins.jetbrains.com/plugin/download?rel=true&amp;updateId=80590"
+            version="201.6251.22">
+        <idea-version since-build="201" until-build="202"/>
+    </plugin>
+</plugins>
