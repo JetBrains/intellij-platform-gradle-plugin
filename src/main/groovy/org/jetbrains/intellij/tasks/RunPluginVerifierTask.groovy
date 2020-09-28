@@ -135,22 +135,22 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     /**
-     * Sets a list of the paths to locally installed IDE distributions that should be used for verification.
-     * Property does not override {@link #ideVersions}.
+     * Sets a list of the paths to locally installed IDE distributions that should be used for verification
+     * in addition to those specified in {@link #ideVersions}.
      * Accepts list of {@link String} or {@link Closure}.
      *
-     * @param localPaths list of IDE versions
+     * @param localPaths list of paths
      */
     void setLocalPaths(List<Object> localPaths) {
         this.localPaths = localPaths
     }
 
     /**
-     * Sets a list of the paths to locally installed IDE distributions that should be used for verification.
-     * Property does not override {@link #ideVersions}.
+     * Sets a list of the paths to locally installed IDE distributions that should be used for verification
+     * in addition to those specified in {@link #ideVersions}.
      * Accepts list of {@link String} or {@link Closure}.
      *
-     * @param localPaths list of IDE versions
+     * @param localPaths list of paths
      */
     void localPaths(List<Object> localPaths) {
         this.localPaths = localPaths
@@ -506,6 +506,7 @@ class RunPluginVerifierTask extends ConventionTask {
             return configuration.singleFile.absolutePath
         } catch (Exception e) {
             println e
+            Utils.error(this, "Error when resolving Plugin Verifier path", e)
         }
         return project.repositories.remove(repository)
     }
@@ -534,11 +535,11 @@ class RunPluginVerifierTask extends ConventionTask {
                 Utils.debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
                 return dir.absolutePath
             } catch (IOException e) {
-                Utils.debug(project, "Cannot download IDE '$type-$version' from $buildType channel", e)
+                Utils.debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...", e)
             }
         }
 
-        Utils.error(project, "Cannot download IDE '$type-$version'")
+        Utils.error(project, "Cannot download IDE '$type-$version'. Please verify provided version with the available versions: https://data.services.jetbrains.com/products/releases?code=$type&type=[release|rc|eap]")
         return null
     }
 
