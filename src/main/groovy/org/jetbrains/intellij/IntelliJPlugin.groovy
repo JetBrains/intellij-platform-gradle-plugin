@@ -427,7 +427,7 @@ class IntelliJPlugin implements Plugin<Project> {
             conventionMapping('verifierVersion', { VERIFIER_VERSION_LATEST })
             conventionMapping('distributionFile', { resolveDistributionFile(project) })
             conventionMapping('verificationReportsDirectory', { "${project.buildDir}/reports/pluginVerifier".toString() })
-            conventionMapping('downloadDirectory', { "${project.buildDir}/pluginVerifier".toString() })
+            conventionMapping('downloadDirectory', { ideDownloadDirectory().toString() })
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
             dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }
         }

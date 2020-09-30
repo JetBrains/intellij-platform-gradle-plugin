@@ -3,6 +3,7 @@ package org.jetbrains.intellij.tasks
 import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import groovy.json.JsonSlurper
+import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
@@ -13,6 +14,10 @@ import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.jbr.JbrResolver
+
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
@@ -680,5 +685,25 @@ class RunPluginVerifierTask extends ConventionTask {
         }
 
         return args
+    }
+
+    static Path verifierHomeDirectory() {
+        def verifierHomeDir = System.getProperty("plugin.verifier.home.dir")
+        if (verifierHomeDir != null) {
+            Paths.get(verifierHomeDir)
+        } else {
+            def userHome = System.getProperty("user.home")
+            if (userHome != null) {
+                Paths.get(userHome, ".pluginVerifier")
+            } else {
+                FileUtils.getTempDirectory().toPath().resolve(".pluginVerifier")
+            }
+        }
+    }
+
+    static Path ideDownloadDirectory() {
+        def path = verifierHomeDirectory().resolve("ides")
+        Files.createDirectories(path)
+        return path
     }
 }
