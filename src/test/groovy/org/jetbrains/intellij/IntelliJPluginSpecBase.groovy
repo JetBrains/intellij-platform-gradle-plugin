@@ -38,6 +38,8 @@ abstract class IntelliJPluginSpecBase extends Specification {
             plugins {
                 id 'org.jetbrains.intellij'
             }
+            sourceCompatibility = 1.8
+            targetCompatibility = 1.8
             apply plugin: 'java'
             apply plugin: 'kotlin'
             repositories { mavenCentral() }
