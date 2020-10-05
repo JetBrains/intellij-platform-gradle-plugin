@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.5.0 (under development)
+## 0.6.0 (under development)
+
+## 0.5.0
 
 - do not download dependencies during configuration phase [#123](../../issues/123)
 - support multiple plugin repositories
