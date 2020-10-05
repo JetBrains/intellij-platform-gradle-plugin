@@ -534,7 +534,7 @@ class RunPluginVerifierTask extends ConventionTask {
         }
 
         for (String buildType in ["release", "rc", "eap"]) {
-            Utils.debug(project, "Downloading IDE '$type-$version' from $buildType channel")
+            Utils.debug(project, "Downloading IDE '$type-$version' from $buildType channel to ${getDownloadDirectory()}")
             try {
                 def dir = downloadIde(type, version, buildType)
                 Utils.debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
