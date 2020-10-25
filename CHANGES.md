@@ -2,6 +2,10 @@
 
 ## 0.6.0 (under development)
 
+## 0.5.1
+
+- fix class-loading in tests for IntelliJ Platform >= 203 
+
 ## 0.5.0
 
 - do not download dependencies during configuration phase [#123](../../issues/123)
