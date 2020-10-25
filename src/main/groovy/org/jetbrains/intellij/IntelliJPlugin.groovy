@@ -167,17 +167,17 @@ class IntelliJPlugin implements Plugin<Project> {
 
         project.dependencies.ext.intellijPlugins = { String... plugins ->
             def selectedPlugins = new HashSet<PluginDependency>()
-            def invalidPlugins = []
+            def nonValidPlugins = []
             for (pluginName in plugins) {
                 def plugin = extension.pluginDependencies.find { it.id == pluginName }
                 if (plugin == null || plugin.jarFiles == null || plugin.jarFiles.empty) {
-                    invalidPlugins.add(pluginName)
+                    nonValidPlugins.add(pluginName)
                 } else {
                     selectedPlugins.add(plugin)
                 }
             }
-            if (!invalidPlugins.empty) {
-                throw new GradleException("intellij plugins $invalidPlugins are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+            if (!nonValidPlugins.empty) {
+                throw new GradleException("intellij plugins $nonValidPlugins are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
             }
             project.files(selectedPlugins.collect { it.jarFiles })
         }
@@ -262,7 +262,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 configureBuiltinPluginsDependencies(project, dependencies, resolver, extension)
             }
             verifyJavaPluginDependency(extension, project)
-            for (PluginsRepository repository: extension.getPluginsRepos()) {
+            for (PluginsRepository repository : extension.getPluginsRepos()) {
                 repository.postResolve()
             }
         }
@@ -603,17 +603,37 @@ class IntelliJPlugin implements Plugin<Project> {
             def systemDirectory = project.file("${extension.sandboxDirectory}/system-test")
             def pluginsDirectory = project.file("${extension.sandboxDirectory}/plugins-test")
             task.enableAssertions = true
-            task.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, Utils.getPluginIds(project)))
-            task.doFirst {
-                task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension))
-                task.classpath += project.files("$extension.ideaDependency.classes/lib/resources.jar",
-                        "$extension.ideaDependency.classes/lib/idea.jar")
-            }
+            def pluginIds = Utils.getPluginIds(project)
+            task.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
+
+
+            // appClassLoader should be used for user's plugins. Otherwise, classes it won't be possible to use
+            // its classes of application components or services in tests: class loaders will be different for
+            // classes references by test code and for classes loaded by the platform (pico container).
+            //
+            // The proper way to handle that is to substitute Gradle's test class-loader and teach it
+            // to understand PluginClassLoaders. Unfortunately, I couldn't find a way to do that.
+            task.systemProperty("idea.use.core.classloader.for", pluginIds.join("$File.pathSeparatorChar,"))
+
             task.outputs.dir(systemDirectory)
             task.outputs.dir(configDirectory)
-            task.dependsOn(project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false))
+
+            PrepareSandboxTask prepareTestingSandboxTask = project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false).find() as PrepareSandboxTask
+            task.dependsOn(prepareTestingSandboxTask)
 
             task.doFirst {
+                task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension))
+                task.classpath =
+                        // this jar with plugin descriptor should be first in classpath, so the plugin will be loaded
+                        // from the sandbox. Otherwise it might be loaded from compilation output and the code
+                        // that relies on plugin's layout (e.g. it may load native libraries from plugins sandbox) will be broken.
+                        project.files(prepareTestingSandboxTask.getPluginJarFromSandbox()) +
+                                task.classpath +
+                                project.files(
+                                        "$extension.ideaDependency.classes/lib/resources.jar",
+                                        "$extension.ideaDependency.classes/lib/idea.jar"
+                                )
+
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as task's the very first source of plugins
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
