@@ -5,6 +5,14 @@
   <vendor url="https://jetbrains.com">JetBrains</vendor>
   <description>Simple plugin with Say hello action</description>
   <change-notes/>
+  <application-components>
+    <component>
+      <implementation-class>DemoComponent</implementation-class>
+    </component>
+  </application-components>
+  <extensions defaultExtensionNs="com.intellij">
+    <applicationService serviceImplementation="DemoService"/>
+  </extensions>
   <actions>
     <action class="org.intellij.examples.simple.plugin.HelloAction" id="SayHello" text="Say Hello">
       <add-to-group group-id="ToolsMenu"/>
