@@ -23,6 +23,7 @@ class PrepareSandboxTask extends Sync {
         configurePlugin()
     }
 
+    @Internal
     File getPluginJarFromSandbox() {
         return new File(getDestinationDir(), "${getPluginName()}/lib/${getPluginJar().getName()}")
     }
