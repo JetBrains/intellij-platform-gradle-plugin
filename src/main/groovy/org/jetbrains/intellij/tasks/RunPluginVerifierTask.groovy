@@ -485,7 +485,7 @@ class RunPluginVerifierTask extends ConventionTask {
             def output = os.toString()
             println output
 
-            Utils.debug(this, "Current failure levels: ${FailureLevel.values().join()}")
+            Utils.debug(this, "Current failure levels: ${FailureLevel.values().join(", ")}")
             for (FailureLevel level : FailureLevel.values()) {
                 if (failureLevel.contains(level) && output.contains(level.testValue)) {
                     Utils.debug(this, "Failing task on $failureLevel failure level")
@@ -580,12 +580,15 @@ class RunPluginVerifierTask extends ConventionTask {
                 execute()
             }
 
-            Utils.debug(this, "IDE downloaded, extracting...")
-            Utils.untar(project, ideArchive, ideDir)
-            def container = ideDir.listFiles().first()
-            container.listFiles().each { it.renameTo("$ideDir/$it.name") }
-            container.deleteDir()
-            ideArchive.delete()
+            try {
+                Utils.debug(this, "IDE downloaded, extracting...")
+                Utils.untar(project, ideArchive, ideDir)
+                def container = ideDir.listFiles().first()
+                container.listFiles().each { it.renameTo("$ideDir/$it.name") }
+                container.deleteDir()
+            } finally {
+                ideArchive.delete()
+            }
             Utils.debug(this, "IDE extracted to $ideDir, archive removed")
         } else {
             Utils.debug(this, "IDE already available in $ideDir")
