@@ -134,7 +134,7 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return locally installed IDEs list
      */
-    @Input
+    @InputFiles
     List<String> getLocalPaths() {
         return Utils.stringListInput(localPaths)
     }
@@ -501,6 +501,7 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verifier-cli jar
      */
+    @InputFile
     private String getVerifierPath() {
         def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
         try {
