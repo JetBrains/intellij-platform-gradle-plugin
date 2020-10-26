@@ -232,7 +232,7 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verification reports directory
      */
-    @Input
+    @OutputDirectory
     @Optional
     String getVerificationReportsDirectory() {
         return Utils.stringInput(verificationReportsDirectory)
