@@ -687,6 +687,12 @@ class RunPluginVerifierTask extends ConventionTask {
         return args
     }
 
+    /**
+     * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
+     * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
+     *
+     * @return Plugin Verifier home directory
+     */
     static Path verifierHomeDirectory() {
         def verifierHomeDir = System.getProperty("plugin.verifier.home.dir")
         if (verifierHomeDir != null) {
@@ -701,6 +707,12 @@ class RunPluginVerifierTask extends ConventionTask {
         }
     }
 
+    /**
+     * Provides target directory used for storing downloaded IDEs.
+     * Path is compatible with the Plugin Verifier approach.
+     *
+     * @return directory for downloaded IDEs
+     */
     static Path ideDownloadDirectory() {
         def path = verifierHomeDirectory().resolve("ides")
         Files.createDirectories(path)
