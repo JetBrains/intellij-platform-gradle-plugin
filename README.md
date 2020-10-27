@@ -40,26 +40,26 @@ plugins {
  
 ### Snapshot version
 
-<summary>Use the following code to get the latest features</summary>
+<summary>In order to get the latest features, use the snapshot version of the plugin</summary>
 
 ```groovy
-buildscript {
-  repositories {
-    mavenCentral()
-    maven {
-      url "https://oss.sonatype.org/content/repositories/snapshots/"
-    }
-    maven { 
-      url 'https://jetbrains.bintray.com/intellij-plugin-service' 
-    }
-    
-  }
-  dependencies {
-    classpath "org.jetbrains.intellij.plugins:gradle-intellij-plugin:0.7.0-SNAPSHOT"
-  }
+plugins {
+  id "org.jetbrains.intellij" version "0.7.0-SNAPSHOT"
 }
+```
 
-apply plugin: 'org.jetbrains.intellij'
+And define the snapshots repository in your `settings.gradle` file
+
+
+```groovy
+pluginManagement {
+    repositories {
+        maven {
+            url 'https://oss.sonatype.org/content/repositories/snapshots/'
+        }
+        gradlePluginPortal()
+    }
+}
 ```
 
 ### Tasks

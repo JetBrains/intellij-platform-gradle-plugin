@@ -102,11 +102,6 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
     from(sourceSets.main.get().allSource)
 }
 
-artifacts {
-    archives(javadocJar)
-    archives(sourcesJar)
-}
-
 publishing {
     repositories {
         maven {
@@ -120,10 +115,17 @@ publishing {
     }
     publications {
         create<MavenPublication>("snapshot") {
+            artifactId = "org.jetbrains.intellij.gradle.plugin"
+            groupId = "org.jetbrains.intellij"
+            version = "${project.property("snapshotVersion")}-SNAPSHOT"
+
+            artifact(tasks.findByName("jar"))
+            artifact(sourcesJar.get())
+            artifact(javadocJar.get())
+
             pom {
                 name.set("Gradle IntelliJ Plugin")
                 description.set(project.description)
-                version = "${project.property("snapshotVersion")}-SNAPSHOT"
                 url.set("https://github.com/JetBrains/gradle-intellij-plugin")
 
                 packaging = "jar"
