@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.6.0 (under development)
+## 0.6.1 (under development)
+
+## 0.6.0
+
+- Introduced runPluginVerifier task that runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds. 
 
 ## 0.5.1
 
