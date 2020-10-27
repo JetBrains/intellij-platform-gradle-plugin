@@ -110,7 +110,7 @@ artifacts {
 publishing {
     repositories {
         maven {
-            name = "snapshotRepository"
+            name = "snapshot"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
             credentials {
                 username = project.property("ossrhUsername") as String
@@ -119,7 +119,7 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("project") {
+        create<MavenPublication>("snapshot") {
             pom {
                 name.set("Gradle IntelliJ Plugin")
                 description.set(project.description)
