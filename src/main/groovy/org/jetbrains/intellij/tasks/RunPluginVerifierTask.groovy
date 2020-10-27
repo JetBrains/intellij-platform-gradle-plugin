@@ -502,7 +502,7 @@ class RunPluginVerifierTask extends ConventionTask {
      * @return path to verifier-cli jar
      */
     @InputFile
-    private String getVerifierPath() {
+    String getVerifierPath() {
         def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
         try {
             def resolvedVerifierVersion = resolveVerifierVersion()
