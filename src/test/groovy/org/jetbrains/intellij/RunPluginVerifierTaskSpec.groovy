@@ -74,7 +74,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Plugin PluginName:1.0.0 against IC-202.7660.26: Compatible")
-        result.output.contains("Plugin PluginName:1.0.0 against PS-201.6668.153: Compatible")
+        result.output.contains("Plugin PluginName:1.0.0 against PS-202.7660.42: Compatible")
     }
 
     def 'set verification reports directory'() {
