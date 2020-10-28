@@ -54,7 +54,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         println result.output
-        result.output.contains("PluginName:1.0.0 against IC-202.6397.94")
+        result.output.contains("PluginName:1.0.0 against IC-202.7660.26")
     }
 
     def 'test plugin against two IDEs'() {
@@ -73,7 +73,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         then:
-        result.output.contains("Plugin PluginName:1.0.0 against IC-202.6397.94: Compatible")
+        result.output.contains("Plugin PluginName:1.0.0 against IC-202.7660.26: Compatible")
         result.output.contains("Plugin PluginName:1.0.0 against PS-201.6668.153: Compatible")
     }
 
