@@ -563,13 +563,12 @@ class RunPluginVerifierTask extends ConventionTask {
         Utils.debug(this, "Downloaing IDE: $name")
 
         if (!ideDir.exists()) {
-            def isBuild = version.matches("^\\d{3}\\.")
             def ideArchive = new File(getDownloadDirectory(), "${name}.tar.gz")
             def url = new URIBuilder(IDE_DOWNLOAD_URL)
                     .addParameter("code", type)
                     .addParameter("platform", "linux")
                     .addParameter("type", buildType)
-                    .addParameter(isBuild ? "build" : "version", version)
+                    .addParameter(versionParameterName(version), version)
                     .toString()
             Utils.debug(this, "Downloaing IDE from $url")
 
@@ -721,5 +720,25 @@ class RunPluginVerifierTask extends ConventionTask {
         def path = verifierHomeDirectory().resolve("ides")
         Files.createDirectories(path)
         return path
+    }
+
+    /**
+     * Obtains version parameter name used for downloading IDE artifact.
+     * Examples:
+     * - 202.7660.26 -> build
+     * - 2020.2, 16.1 -> majorVersion
+     * - 2020.2.3 -> version
+     *
+     * @param version current version
+     * @return version parameter name
+     */
+    static String versionParameterName(String version) {
+        if (version.matches("\\d{3}\\.")) {
+            return "build"
+        }
+        if (version.matches("(\\d{2}){1,2}.\\d")) {
+            return "majorVersion"
+        }
+        return "version"
     }
 }
