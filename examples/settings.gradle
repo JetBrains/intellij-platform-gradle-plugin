@@ -14,7 +14,6 @@ include 'simple-plugin',
         'clion-plugin',
         'pycharm-plugin', 
         'composite-plugin:subplugin',
-        'custom-runide-task',
-        'ui-test-example'
+        'custom-runide-task'
 includeBuild '..'
 
