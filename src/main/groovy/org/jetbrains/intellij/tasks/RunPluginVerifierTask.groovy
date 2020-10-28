@@ -22,6 +22,7 @@ import java.nio.file.Paths
 class RunPluginVerifierTask extends ConventionTask {
     private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
     private static final String IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+    public static final String CACHE_REDIRECTOR = 'https://cache-redirector.jetbrains.com'
 
     public static final String VERIFIER_VERSION_LATEST = "latest"
 
@@ -232,7 +233,7 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verification reports directory
      */
-    @OutputDirectory
+//    @OutputDirectory
     @Optional
     String getVerificationReportsDirectory() {
         return Utils.stringInput(verificationReportsDirectory)
@@ -456,6 +457,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
+     * {@link String}
      */
     @TaskAction
     void runPluginVerifier() {
@@ -501,7 +503,7 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verifier-cli jar
      */
-    @InputFile
+//    @InputFile
     String getVerifierPath() {
         def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
         try {
@@ -552,9 +554,9 @@ class RunPluginVerifierTask extends ConventionTask {
     /**
      * Downloads IDE from the {@link #IDE_DOWNLOAD_URL} service by the given parameters.
      *
-     * @param type IDE type, i.e. IC, PS
-     * @param version IDE version, i.e. 2020.2 or 203.1234.56
-     * @param buildType release, rc, eap
+     * @param type      IDE type, i.e. IC, PS
+     * @param version   IDE version, i.e. 2020.2 or 203.1234.56
+     * @param buildType release, rc, eap, beta
      * @return {@link File} instance pointing to the IDE directory
      */
     private File downloadIde(String type, String version, String buildType) {
@@ -564,12 +566,8 @@ class RunPluginVerifierTask extends ConventionTask {
 
         if (!ideDir.exists()) {
             def ideArchive = new File(getDownloadDirectory(), "${name}.tar.gz")
-            def url = new URIBuilder(IDE_DOWNLOAD_URL)
-                    .addParameter("code", type)
-                    .addParameter("platform", "linux")
-                    .addParameter("type", buildType)
-                    .addParameter(versionParameterName(version), version)
-                    .toString()
+            def url = resolveIdeUrl(type, version, buildType)
+
             Utils.debug(this, "Downloaing IDE from $url")
 
             new DownloadAction(project).with {
@@ -594,6 +592,50 @@ class RunPluginVerifierTask extends ConventionTask {
         }
 
         return ideDir
+    }
+
+    /**
+     * Resolves direct IDE download URL provided by the JetBrains Data Services.
+     * The URL created with {@link #IDE_DOWNLOAD_URL} contains HTTP redirection, which is supposed to be resolved.
+     * Direct download URL is prepended with {@link #CACHE_REDIRECTOR} host for providing caching mechanism.
+     *
+     * @param type      IDE type, i.e. IC, PS
+     * @param version   IDE version, i.e. 2020.2 or 203.1234.56
+     * @param buildType release, rc, eap, beta
+     * @return direct download URL prepended with {@link #CACHE_REDIRECTOR} host
+     */
+    private String resolveIdeUrl(String type, String version, String buildType) {
+        def url = new URIBuilder(IDE_DOWNLOAD_URL)
+                .addParameter("code", type)
+                .addParameter("platform", "linux")
+                .addParameter("type", buildType)
+                .addParameter(versionParameterName(version), version)
+                .toString()
+        Utils.debug(this, "Resolving direct IDE download URL for: $url")
+
+        HttpURLConnection connection = null
+
+        try {
+            connection = new URL(url).openConnection() as HttpURLConnection
+            connection.setInstanceFollowRedirects(false)
+            connection.getInputStream()
+
+            if (connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
+                def redirectUrl = new URL(connection.getHeaderField("Location"))
+                url = "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
+                Utils.debug(this, "Resolved IDE download URL: $url")
+            } else {
+                Utils.debug(this, "IDE download URL has no redirection provided, skipping.")
+            }
+        } catch (Exception e) {
+            Utils.error(this, "Cannot resolve direct download URL for: $url", e)
+        } finally {
+            if (connection != null) {
+                connection.disconnect()
+            }
+        }
+
+        return url
     }
 
     /**
