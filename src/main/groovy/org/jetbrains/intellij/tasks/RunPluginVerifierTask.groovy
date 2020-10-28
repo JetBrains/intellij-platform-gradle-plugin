@@ -468,7 +468,7 @@ class RunPluginVerifierTask extends ConventionTask {
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.canonicalPath]
-        verifierArgs += getIdeVersions().collect {resolveIdePath(it) }
+        verifierArgs += getIdeVersions().collect { resolveIdePath(it) }
         verifierArgs += getLocalPaths()
 
         Utils.debug(this, "Distribution file: $file.canonicalPath")
@@ -534,7 +534,7 @@ class RunPluginVerifierTask extends ConventionTask {
             type = "IC"
         }
 
-        for (String buildType in ["release", "rc", "eap"]) {
+        for (String buildType in ["release", "rc", "eap", "beta"]) {
             Utils.debug(project, "Downloading IDE '$type-$version' from $buildType channel to ${getDownloadDirectory()}")
             try {
                 def dir = downloadIde(type, version, buildType)
@@ -555,7 +555,7 @@ class RunPluginVerifierTask extends ConventionTask {
      * @param type IDE type, i.e. IC, PS
      * @param version IDE version, i.e. 2020.2 or 203.1234.56
      * @param buildType release, rc, eap
-     * @return {@link File} instance ponting to the IDE directory
+     * @return {@link File} instance pointing to the IDE directory
      */
     private File downloadIde(String type, String version, String buildType) {
         def name = "$type-$version"
