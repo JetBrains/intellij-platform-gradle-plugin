@@ -9,7 +9,7 @@ import org.gradle.api.tasks.TaskAction
 class DownloadRobotServerPluginTask extends ConventionTask {
     private final static String ROBOT_SERVER_REPO = "https://jetbrains.bintray.com/intellij-third-party-dependencies"
     private final static String ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
-    public static final String DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = '0.9.35'
+    public static final String DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = '0.10.0'
 
     @Input
     String version = DEFAULT_ROBOT_SERVER_PLUGIN_VERSION
