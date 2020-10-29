@@ -65,7 +65,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = ["IC-2020.2", "PS-2020.1"]
+                ideVersions = "IC-2020.2,PS-2020.1"
             }
             """.stripIndent()
 
