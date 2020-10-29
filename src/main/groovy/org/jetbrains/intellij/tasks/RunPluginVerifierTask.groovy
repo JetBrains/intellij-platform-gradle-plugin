@@ -233,7 +233,7 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verification reports directory
      */
-//    @OutputDirectory
+    @OutputDirectory
     @Optional
     String getVerificationReportsDirectory() {
         return Utils.stringInput(verificationReportsDirectory)
@@ -503,7 +503,7 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verifier-cli jar
      */
-//    @InputFile
+    @InputFile
     String getVerifierPath() {
         def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
         try {
