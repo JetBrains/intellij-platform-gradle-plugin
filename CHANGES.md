@@ -1,6 +1,12 @@
 # Changelog
 
-## 0.6.1 (under development)
+## 0.6.2 (under development)
+
+## 0.6.1
+
+- runPluginVerifier: allow specifying `ideVersions` as comma-separated String
+- runPluginVerifier: specifying EAP build number leads to IllegalArgumentException
+- runPluginVerifier: fix for ArrayIndexOutOfBoundsException when destructuring ideVersion.split
 
 ## 0.6.0
 
