@@ -528,7 +528,7 @@ class RunPluginVerifierTask extends ConventionTask {
     @Nullable
     String resolveIdePath(String ideVersion) {
         Utils.debug(this, "Resolving IDE path for $ideVersion")
-        def (String type, String version) = ideVersion.split("-", 2)
+        def (String type, String version) = ideVersion.split("-", 2) + null
 
         if (!version) {
             Utils.debug(this, "IDE type not specified, setting type to IC")
