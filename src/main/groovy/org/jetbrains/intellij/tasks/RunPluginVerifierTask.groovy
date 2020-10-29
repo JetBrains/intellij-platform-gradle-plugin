@@ -131,6 +131,26 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     /**
+     * Sets a list of the IDE versions used for the verification.
+     * Accepts comma-separated list.
+     *
+     * @param ideVersions string with comma-separated list of IDE versions
+     */
+    void setIdeVersions(String ideVersions) {
+        this.ideVersions = ideVersions.split(",")
+    }
+
+    /**
+     * Sets a list of the IDE versions used for the verification.
+     * Accepts comma-separated list.
+     *
+     * @param ideVersions string with comma-separated list of IDE versions
+     */
+    void ideVersions(String ideVersions) {
+        this.ideVersions = ideVersions.split(",")
+    }
+
+    /**
      * Returns a list of the paths to locally installed IDE distributions that should be used for verification.
      *
      * @return locally installed IDEs list
