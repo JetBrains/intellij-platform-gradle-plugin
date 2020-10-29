@@ -775,7 +775,7 @@ class RunPluginVerifierTask extends ConventionTask {
      * @return version parameter name
      */
     static String versionParameterName(String version) {
-        if (version.matches("\\d{3}\\.")) {
+        if (version.matches("\\d{3}(\\.\\d+)+")) {
             return "build"
         }
         if (version.matches("(\\d{2}){1,2}.\\d")) {
