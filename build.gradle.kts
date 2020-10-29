@@ -5,6 +5,7 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     id("com.github.breadmoirai.github-release") version "2.2.9"
+    id("org.jetbrains.changelog") version "0.6.2"
 }
 
 plugins.withType<JavaPlugin> {
@@ -160,22 +161,13 @@ tasks.wrapper {
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
+changelog {
+    path = "${project.projectDir}/CHANGES.md"
+}
+
 githubRelease {
     setToken(project.property("githubToken") as String)
     owner.set("jetbrains")
     repo.set("gradle-intellij-plugin")
-    body.set(extractChanges().trim())
-}
-
-fun extractChanges(): String {
-    val currentVersionTitle = "## ${project.version}"
-    val changes = file("CHANGES.md").readText()
-    val startOffset = changes.indexOf(currentVersionTitle) + currentVersionTitle.length
-    if (startOffset == -1) return ""
-    val endOffset = changes.indexOf("\n## ", startOffset)
-    return if (endOffset >= 0) {
-        changes.substring(startOffset, endOffset)
-    } else {
-        changes.substring(startOffset)
-    }
+    body.set(changelog.get().toText())
 }
