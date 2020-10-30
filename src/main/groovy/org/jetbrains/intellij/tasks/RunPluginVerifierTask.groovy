@@ -563,12 +563,12 @@ class RunPluginVerifierTask extends ConventionTask {
                 Utils.debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
                 return dir.absolutePath
             } catch (IOException e) {
-                Utils.debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...", e)
+                Utils.debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...")
             }
         }
 
-        Utils.error(project, "Cannot download IDE '$type-$version'. Please verify provided version with the available versions: https://data.services.jetbrains.com/products/releases?code=$type&type=[release|rc|eap]")
-        return null
+        throw new TaskExecutionException(this, new GradleException("IDE '$ideVersion' cannot be downloaded."))
+        // TODO: Suggest navigation to the list of available IDE versions - when provided.
     }
 
     /**
@@ -590,16 +590,11 @@ class RunPluginVerifierTask extends ConventionTask {
 
             Utils.debug(this, "Downloaing IDE from $url")
 
-            try {
-                new DownloadAction(project).with {
-                    src(url)
-                    dest(ideArchive.absolutePath)
-                    tempAndMove(true)
-                    execute()
-                }
-            } catch (IOException e) {
-                throw new TaskExecutionException(this, new GradleException("IDE '$name' cannot be downloaded.", e))
-                // TODO: Suggest navigation to the list of available IDE versions - when provided.
+            new DownloadAction(project).with {
+                src(url)
+                dest(ideArchive.absolutePath)
+                tempAndMove(true)
+                execute()
             }
 
             try {

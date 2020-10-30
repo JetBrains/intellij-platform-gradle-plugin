@@ -168,7 +168,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         then:
-        result.output.contains("IDE 'IC-foo' cannot be downloaded.")
+        result.output.contains("IDE 'foo' cannot be downloaded.")
     }
 
     def 'fail on any failureLevel'() {
