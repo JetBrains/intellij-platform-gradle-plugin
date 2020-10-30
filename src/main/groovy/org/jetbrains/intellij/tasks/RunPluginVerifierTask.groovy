@@ -590,11 +590,16 @@ class RunPluginVerifierTask extends ConventionTask {
 
             Utils.debug(this, "Downloaing IDE from $url")
 
-            new DownloadAction(project).with {
-                src(url)
-                dest(ideArchive.absolutePath)
-                tempAndMove(true)
-                execute()
+            try {
+                new DownloadAction(project).with {
+                    src(url)
+                    dest(ideArchive.absolutePath)
+                    tempAndMove(true)
+                    execute()
+                }
+            } catch (IOException e) {
+                throw new TaskExecutionException(this, new GradleException("IDE '$name' cannot be downloaded.", e))
+                // TODO: Suggest navigation to the list of available IDE versions - when provided.
             }
 
             try {

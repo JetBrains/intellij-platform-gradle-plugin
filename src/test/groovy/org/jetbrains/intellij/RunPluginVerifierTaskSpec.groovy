@@ -65,7 +65,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "IC-2020.2,PS-2020.1"
+                ideVersions = "IC-2020.2.3,PS-2020.1.3"
             }
             """.stripIndent()
 
@@ -74,7 +74,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
         then:
         result.output.contains("Plugin PluginName:1.0.0 against IC-202.7660.26: Compatible")
-        result.output.contains("Plugin PluginName:1.0.0 against PS-202.7660.42: Compatible")
+        result.output.contains("Plugin PluginName:1.0.0 against PS-201.8538.41: Compatible")
     }
 
     def 'set verification reports directory'() {
@@ -148,6 +148,27 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         then:
         result.output.contains("Deprecated API usages")
         !result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
+    }
+
+    def 'fail on incorrect ideVersion'() {
+        given:
+        writeJavaFileWithDeprecation()
+        writePluginXmlFile()
+        buildFile << """
+            import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
+            
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = "foo"
+            }
+            """.stripIndent()
+
+        when:
+        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+
+        then:
+        result.output.contains("IDE 'IC-foo' cannot be downloaded.")
     }
 
     def 'fail on any failureLevel'() {
