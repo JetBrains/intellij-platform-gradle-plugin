@@ -160,7 +160,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "foo"
+                ideVersions = "foo,foo,,foo"
             }
             """.stripIndent()
 

@@ -490,7 +490,7 @@ class RunPluginVerifierTask extends ConventionTask {
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.canonicalPath]
-        verifierArgs += getIdeVersions().collect { resolveIdePath(it) }
+        verifierArgs += getIdeVersions().toUnique().findAll().collect { resolveIdePath(it) }
         verifierArgs += getLocalPaths()
 
         Utils.debug(this, "Distribution file: $file.canonicalPath")
@@ -562,7 +562,7 @@ class RunPluginVerifierTask extends ConventionTask {
                 def dir = downloadIde(type, version, buildType)
                 Utils.debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
                 return dir.absolutePath
-            } catch (IOException e) {
+            } catch (IOException ignored) {
                 Utils.debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...")
             }
         }
