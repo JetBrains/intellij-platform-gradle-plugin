@@ -788,8 +788,7 @@ class RunPluginVerifierTask extends ConventionTask {
      * Obtains version parameter name used for downloading IDE artifact.
      * Examples:
      * - 202.7660.26 -> build
-     * - 2020.2, 16.1 -> majorVersion
-     * - 2020.2.3 -> version
+     * - 2020.1, 2020.2.3 -> version
      *
      * @param version current version
      * @return version parameter name
@@ -797,9 +796,6 @@ class RunPluginVerifierTask extends ConventionTask {
     static String versionParameterName(String version) {
         if (version.matches("\\d{3}(\\.\\d+)+")) {
             return "build"
-        }
-        if (version.matches("(\\d{2}){1,2}.\\d")) {
-            return "majorVersion"
         }
         return "version"
     }
