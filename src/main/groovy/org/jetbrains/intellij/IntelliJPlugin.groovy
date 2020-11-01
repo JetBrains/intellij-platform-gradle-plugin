@@ -619,7 +619,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.outputs.dir(configDirectory)
 
             PrepareSandboxTask prepareTestingSandboxTask = project.getTasksByName(PREPARE_TESTING_SANDBOX_TASK_NAME, false).find() as PrepareSandboxTask
-            task.dependsOn(prepareTestingSandboxTask)
+            task.inputs.files(prepareTestingSandboxTask)
 
             task.doFirst {
                 task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension))
