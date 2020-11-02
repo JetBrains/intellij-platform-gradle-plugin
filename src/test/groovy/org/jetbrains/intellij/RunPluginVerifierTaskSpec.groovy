@@ -9,6 +9,10 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         buildFile << """
             version = "1.0.0"
             
+            intellij {
+                version = "2020.2.3"
+            }
+            
             runPluginVerifier {
                 verifierVersion = "1.241"
             }
@@ -26,6 +30,10 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         writePluginXmlFile()
         buildFile << """
             version = "1.0.0"
+
+            intellij {
+                version = "2020.2.3"
+            }
             """.stripIndent()
 
         when:
@@ -45,7 +53,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             
             intellij {
                 type = "IC"
-                version = "2020.2"
+                version = "2020.2.3"
             }
             """.stripIndent()
 
@@ -86,6 +94,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             
             runPluginVerifier {
                 verificationReportsDirectory = "\${project.buildDir}/foo"
+                ideVersions = ["IC-2020.2.3"]
             }
             """.stripIndent()
 
@@ -123,6 +132,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             
             runPluginVerifier {
                 failureLevel = FailureLevel.DEPRECATED_API_USAGES
+                ideVersions = "2020.2.3"
             }
             """.stripIndent()
 
@@ -140,6 +150,10 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         writePluginXmlFile()
         buildFile << """
             version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = "2020.2.3"
+            }
             """.stripIndent()
 
         when:
@@ -181,6 +195,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
+                ideVersions = "2020.2.3"
                 failureLevel = FailureLevel.ALL
             }
             """.stripIndent()
@@ -203,6 +218,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             version = "1.0.0"
             
             runPluginVerifier {
+                ideVersions = "2020.2.3"
                 failureLevel = FailureLevel.NONE
             }
             """.stripIndent()

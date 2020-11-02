@@ -569,6 +569,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
         throw new TaskExecutionException(this, new GradleException("IDE '$ideVersion' cannot be downloaded."))
         // TODO: Suggest navigation to the list of available IDE versions - when provided.
+        // Please verify the specified IDE version against the products available for testing: https://...
     }
 
     /**
