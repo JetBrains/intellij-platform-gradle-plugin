@@ -686,7 +686,7 @@ class RunPluginVerifierTask extends ConventionTask {
      */
     private String resolveRuntimeDir() {
         if (runtimeDir != null) {
-            Utils.debug(this, "Runtime specified with propeties: ${getRuntimeDir()}")
+            Utils.debug(this, "Runtime specified with properties: ${getRuntimeDir()}")
             return getRuntimeDir()
         }
 
@@ -713,7 +713,7 @@ class RunPluginVerifierTask extends ConventionTask {
                     return javaHome
                 }
             }
-            Utils.warn(this, "Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
+            Utils.warn(this, "Cannot resolve builtin JBR $builtinJbrVersion. Falling back to local Java.")
         }
 
         if (extension.alternativeIdePath) {
