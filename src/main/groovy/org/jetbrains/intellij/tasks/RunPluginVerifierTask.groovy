@@ -533,7 +533,6 @@ class RunPluginVerifierTask extends ConventionTask {
             def configuration = project.configurations.detachedConfiguration(dependency)
             return configuration.singleFile.absolutePath
         } catch (Exception e) {
-            println e
             Utils.error(this, "Error when resolving Plugin Verifier path", e)
         }
         return project.repositories.remove(repository)
