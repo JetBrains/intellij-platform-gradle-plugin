@@ -505,7 +505,7 @@ class RunPluginVerifierTask extends ConventionTask {
             }
 
             def output = os.toString()
-            println output
+            println output // Print output back to stdout since it's been caught for the failure level checker.
 
             Utils.debug(this, "Current failure levels: ${FailureLevel.values().join(", ")}")
             for (FailureLevel level : FailureLevel.values()) {
