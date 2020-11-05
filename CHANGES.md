@@ -1,6 +1,14 @@
 # Changelog
 
-## 0.6.2 (under development)
+## 0.6.3 (under development)
+
+## 0.6.2
+
+- runPluginVerifier: make ideVersions property mandatory
+- runPluginVerifier: better handling of the exception produced by DownloadAction [#553](../../issues/553)
+- runPluginVerifier: provide URL for verifying the available IDE versions [#553](../../issues/553)
+- runPluginVerifier: fix java.nio.file.FileAlreadyExistsException as ERROR in logs [#552](../../issues/552)
+- add prepareTestingSandbox as an input to tests
 
 ## 0.6.1
 
