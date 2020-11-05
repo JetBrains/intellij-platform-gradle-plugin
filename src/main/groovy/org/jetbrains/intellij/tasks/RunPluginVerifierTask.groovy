@@ -566,16 +566,18 @@ class RunPluginVerifierTask extends ConventionTask {
             }
         }
 
-        throw new TaskExecutionException(this, new GradleException("IDE '$ideVersion' cannot be downloaded."))
-        // TODO: Suggest navigation to the list of available IDE versions - when provided.
-        // Please verify the specified IDE version against the products available for testing: https://...
+        throw new TaskExecutionException(this, new GradleException(
+                "IDE '$ideVersion' cannot be downloaded. " +
+                        "Please verify the specified IDE version against the products available for testing: " +
+                        "https://jb.gg/intellij-platform-builds-list"
+        ))
     }
 
     /**
      * Downloads IDE from the {@link #IDE_DOWNLOAD_URL} service by the given parameters.
      *
-     * @param type      IDE type, i.e. IC, PS
-     * @param version   IDE version, i.e. 2020.2 or 203.1234.56
+     * @param type IDE type, i.e. IC, PS
+     * @param version IDE version, i.e. 2020.2 or 203.1234.56
      * @param buildType release, rc, eap, beta
      * @return {@link File} instance pointing to the IDE directory
      */
@@ -619,8 +621,8 @@ class RunPluginVerifierTask extends ConventionTask {
      * The URL created with {@link #IDE_DOWNLOAD_URL} contains HTTP redirection, which is supposed to be resolved.
      * Direct download URL is prepended with {@link #CACHE_REDIRECTOR} host for providing caching mechanism.
      *
-     * @param type      IDE type, i.e. IC, PS
-     * @param version   IDE version, i.e. 2020.2 or 203.1234.56
+     * @param type IDE type, i.e. IC, PS
+     * @param version IDE version, i.e. 2020.2 or 203.1234.56
      * @param buildType release, rc, eap, beta
      * @return direct download URL prepended with {@link #CACHE_REDIRECTOR} host
      */
