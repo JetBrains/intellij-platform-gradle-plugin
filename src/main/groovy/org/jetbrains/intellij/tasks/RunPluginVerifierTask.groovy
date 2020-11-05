@@ -486,11 +486,16 @@ class RunPluginVerifierTask extends ConventionTask {
             throw new IllegalStateException("Plugin file does not exist: $file")
         }
 
+        def ides = getIdeVersions().toUnique().findAll()
+        if (ides.isEmpty()) {
+            throw new GradleException("ideVersions property should not be empty")
+        }
+
         def verifierPath = getVerifierPath()
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.canonicalPath]
-        verifierArgs += getIdeVersions().toUnique().findAll().collect { resolveIdePath(it) }
+        verifierArgs += ides.collect { resolveIdePath(it) }
         verifierArgs += getLocalPaths()
 
         Utils.debug(this, "Distribution file: $file.canonicalPath")

@@ -115,7 +115,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configurePatchPluginXmlTask(project, extension)
         configureRobotServerDownloadTask(project)
         configurePrepareSandboxTasks(project, extension)
-        configureRunPluginVerifierTask(project, extension)
+        configureRunPluginVerifierTask(project)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
         configureRunIdeaForUiTestsTask(project)
@@ -417,13 +417,12 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureRunPluginVerifierTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+    private static void configureRunPluginVerifierTask(@NotNull Project project) {
         Utils.info(project, "Configuring run plugin verifier task")
         project.tasks.create(RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask).with {
             group = GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
             conventionMapping('failureLevel', { EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN) })
-            conventionMapping('ideVersions', { Arrays.asList("${extension.type}-${extension.version}") })
             conventionMapping('verifierVersion', { VERIFIER_VERSION_LATEST })
             conventionMapping('distributionFile', { resolveDistributionFile(project) })
             conventionMapping('verificationReportsDirectory', { "${project.buildDir}/reports/pluginVerifier".toString() })

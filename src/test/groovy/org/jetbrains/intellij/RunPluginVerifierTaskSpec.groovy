@@ -9,11 +9,8 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         buildFile << """
             version = "1.0.0"
             
-            intellij {
-                version = "2020.2.3"
-            }
-            
             runPluginVerifier {
+                ideVersions = "2020.2.3"
                 verifierVersion = "1.241"
             }
             """.stripIndent()
@@ -31,8 +28,8 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         buildFile << """
             version = "1.0.0"
 
-            intellij {
-                version = "2020.2.3"
+            runPluginVerifier {
+                ideVersions = "2020.2.3"
             }
             """.stripIndent()
 
@@ -43,26 +40,6 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def url = new URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
         def version = new JsonSlurper().parse(url)["name"]
         result.output.contains("Starting the IntelliJ Plugin Verifier $version")
-    }
-
-    def 'fallback to ide version specified in intellij configuration'() {
-        given:
-        writePluginXmlFile()
-        buildFile << """
-            version = "1.0.0"
-            
-            intellij {
-                type = "IC"
-                version = "2020.2.3"
-            }
-            """.stripIndent()
-
-        when:
-        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
-        then:
-        println result.output
-        result.output.contains("PluginName:1.0.0 against IC-202.7660.26")
     }
 
     def 'test plugin against two IDEs'() {
@@ -106,9 +83,24 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         result.output.contains("Verification reports directory: $directory")
     }
 
+    def 'fail on missing ideVersions property'() {
+        given:
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile << """
+            version = "1.0.0"
+            """.stripIndent()
+
+        when:
+        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+
+        then:
+        result.output.contains("ideVersions property should not be empty")
+    }
+
     def 'fail on :verifyPlugin task'() {
         given:
-        writeJavaFileWithDeprecation()
+        writeJavaFile()
         buildFile << """
             version = "1.0.0"
             """.stripIndent()
@@ -166,7 +158,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
 
     def 'fail on incorrect ideVersion'() {
         given:
-        writeJavaFileWithDeprecation()
+        writeJavaFile()
         writePluginXmlFile()
         buildFile << """
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
@@ -208,7 +200,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
     }
 
-     def 'pass on any failureLevel'() {
+    def 'pass on any failureLevel'() {
         given:
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
@@ -232,7 +224,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
     }
 
     private void writeJavaFileWithDeprecation() {
-        file('src/main/java/App.java')  << """  
+        file('src/main/java/App.java') << """  
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import com.intellij.openapi.util.text.StringUtil;
