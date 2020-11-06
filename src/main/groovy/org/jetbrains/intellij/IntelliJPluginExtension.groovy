@@ -204,8 +204,8 @@ class IntelliJPluginExtension {
     Set<PluginDependency> getPluginDependencies() {
         if (!pluginDependenciesConfigured) {
             Utils.debug(project, "Plugin dependencies are resolved", new Throwable())
-            pluginDependenciesConfigured = true
             project.configurations.getByName(IntelliJPlugin.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
+            pluginDependenciesConfigured = true
         }
         return pluginDependencies
     }
