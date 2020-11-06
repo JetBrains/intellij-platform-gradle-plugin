@@ -42,7 +42,11 @@ dependencies {
     testImplementation("junit:junit:4.12")
 }
 
-version = "0.6.2"
+version = if (project.property("snapshot")?.toString()?.toBoolean() == true) {
+    "${project.property("snapshotVersion")}-SNAPSHOT"
+} else {
+    project.property("version").toString()
+}
 group = "org.jetbrains.intellij.plugins"
 description = """
 **This project requires Gradle 4.9 or newer**
@@ -115,9 +119,9 @@ publishing {
     }
     publications {
         create<MavenPublication>("snapshot") {
-            artifactId = "org.jetbrains.intellij.gradle.plugin"
-            groupId = "org.jetbrains.intellij"
-            version = "${project.property("snapshotVersion")}-SNAPSHOT"
+            groupId = project.group.toString()
+            artifactId = project.name
+            version = version.toString()
 
             artifact(tasks.findByName("jar"))
             artifact(sourcesJar.get())

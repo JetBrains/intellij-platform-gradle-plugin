@@ -2,7 +2,7 @@
 
 ## 0.6.3 (under development)
 
-- yet another fix for class loading in tests for IntelliJ Platform 203 and higher
+- yet another fix for class-loading in tests for IntelliJ Platform 203 and higher
 
 ## 0.6.2
 
