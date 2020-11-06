@@ -612,7 +612,9 @@ class IntelliJPlugin implements Plugin<Project> {
             //
             // The proper way to handle that is to substitute Gradle's test class-loader and teach it
             // to understand PluginClassLoaders. Unfortunately, I couldn't find a way to do that.
-            task.systemProperty("idea.use.core.classloader.for", pluginIds.join("$File.pathSeparatorChar,"))
+            task.systemProperty("idea.use.core.classloader.for.plugin.path", "true")
+            // the same as previous – setting appClassLoader but outdated. Works for part of 203 builds.
+            task.systemProperty("idea.use.core.classloader.for", pluginIds.join(","))
 
             task.outputs.dir(systemDirectory)
             task.outputs.dir(configDirectory)
