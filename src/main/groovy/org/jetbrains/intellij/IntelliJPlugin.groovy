@@ -624,16 +624,10 @@ class IntelliJPlugin implements Plugin<Project> {
 
             task.doFirst {
                 task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension))
-                task.classpath =
-                        // this jar with plugin descriptor should be first in classpath, so the plugin will be loaded
-                        // from the sandbox. Otherwise it might be loaded from compilation output and the code
-                        // that relies on plugin's layout (e.g. it may load native libraries from plugins sandbox) will be broken.
-                        project.files(prepareTestingSandboxTask.getPluginJarFromSandbox()) +
-                                task.classpath +
-                                project.files(
-                                        "$extension.ideaDependency.classes/lib/resources.jar",
-                                        "$extension.ideaDependency.classes/lib/idea.jar"
-                                )
+                task.classpath += project.files(
+                        "$extension.ideaDependency.classes/lib/resources.jar",
+                        "$extension.ideaDependency.classes/lib/idea.jar"
+                )
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as task's the very first source of plugins
