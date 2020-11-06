@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.6.3 (under development)
+## 0.6.4 (under development)
 
-- yet another fix for class-loading in tests for IntelliJ Platform 203 and higher
+## 0.6.3
+
+- fixed loading dependencies of builtin plugin [#542](../../issues/542)
+- fixed loading file templates from plugins [#554](../../issues/554)
+- yet another fix for class-loading in tests for IntelliJ Platform 203 and higher [#561](../../issues/561)
 
 ## 0.6.2
 
