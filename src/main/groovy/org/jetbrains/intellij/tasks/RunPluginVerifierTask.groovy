@@ -788,7 +788,7 @@ class RunPluginVerifierTask extends ConventionTask {
         if (subsystemsToCheck != null) {
             args += ["-subsystems-to-check", getSubsystemsToCheck()]
         }
-        if (offline != null) {
+        if (offline) {
             args += ["-offline"]
         }
 
