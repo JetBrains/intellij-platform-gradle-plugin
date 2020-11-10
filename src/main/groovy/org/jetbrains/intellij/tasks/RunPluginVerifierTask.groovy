@@ -61,6 +61,7 @@ class RunPluginVerifierTask extends ConventionTask {
     private List<Object> externalPrefixes = []
     private Boolean teamCityOutputFormat = false
     private Object subsystemsToCheck
+    private Boolean offline = false
 
     /**
      * Returns a list of the {@link FailureLevel} values used for failing the task if any reported issue will match.
@@ -419,7 +420,7 @@ class RunPluginVerifierTask extends ConventionTask {
     @Input
     @Optional
     Boolean getTeamCityOutputFormat() {
-        return Utils.stringInput(teamCityOutputFormat)
+        return Utils.stringInput(teamCityOutputFormat).toBoolean()
     }
 
     /**
@@ -473,6 +474,38 @@ class RunPluginVerifierTask extends ConventionTask {
      */
     void subsystemsToCheck(Object subsystemsToCheck) {
         this.subsystemsToCheck = subsystemsToCheck
+    }
+
+    /**
+     * Returns a flag that controls the offline mode.
+     * If true, Plugin Verifier must use only locally downloaded dependencies of plugins and must avoid making HTTP requests.
+     *
+     * @return
+     */
+    @Input
+    @Optional
+    Boolean getOffline() {
+        return Utils.stringInput(offline).toBoolean()
+    }
+
+    /**
+     * Sets a flag that controls the offline mode.
+     * If true, Plugin Verifier must use only locally downloaded dependencies of plugins and must avoid making HTTP requests.
+     *
+     * @param offline prints TeamCity compatible output
+     */
+    void setOffline(Boolean offline) {
+        this.offline = offline
+    }
+
+    /**
+     * Sets a flag that controls the offline mode.
+     * If true, Plugin Verifier must use only locally downloaded dependencies of plugins and must avoid making HTTP requests.
+     *
+     * @param offline prints TeamCity compatible output
+     */
+    void offline(Boolean offline) {
+        this.offline = offline
     }
 
     /**
@@ -754,6 +787,9 @@ class RunPluginVerifierTask extends ConventionTask {
         }
         if (subsystemsToCheck != null) {
             args += ["-subsystems-to-check", getSubsystemsToCheck()]
+        }
+        if (offline != null) {
+            args += ["-offline"]
         }
 
         return args
