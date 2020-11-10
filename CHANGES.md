@@ -3,6 +3,7 @@
 ## 0.6.4 (under development)
 
 - runPluginVerifier: integrate Plugin Verifier offline mode with Gradle `offline` start parameter
+- runPluginVerifier: introduce `verifierPath` property
 
 ## 0.6.3
 

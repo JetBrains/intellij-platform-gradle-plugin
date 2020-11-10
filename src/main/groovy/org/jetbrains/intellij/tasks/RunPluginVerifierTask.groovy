@@ -569,7 +569,7 @@ class RunPluginVerifierTask extends ConventionTask {
     @InputFile
     String resolveVerifierPath() {
         def path = getVerifierPath()
-        if (!path.isEmpty()) {
+        if (path != null && !path.isEmpty()) {
             def verifier = new File(path)
             if (verifier.exists()) {
                 return path
