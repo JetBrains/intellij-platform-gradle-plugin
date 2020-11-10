@@ -2,7 +2,7 @@
 
 ## 0.6.4 (under development)
 
-- runPluginVerifier: support for offline mode
+- runPluginVerifier: integrate Plugin Verifier offline mode with Gradle `offline` start parameter
 
 ## 0.6.3
 
