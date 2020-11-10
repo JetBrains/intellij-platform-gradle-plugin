@@ -96,7 +96,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         then:
-        result.output.contains("ideVersions property should not be empty")
+        result.output.contains("`ideVersions` and `localPaths` properties should not be empty")
     }
 
     def 'fail on :verifyPlugin task'() {
