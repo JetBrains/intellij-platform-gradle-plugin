@@ -2,6 +2,8 @@
 
 ## 0.6.4 (under development)
 
+- runPluginVerifier: support for offline mode
+
 ## 0.6.3
 
 - fixed loading dependencies of builtin plugin [#542](../../issues/542)
