@@ -53,6 +53,7 @@ class RunPluginVerifierTask extends ConventionTask {
     private List<Object> ideVersions = []
     private List<Object> localPaths = []
     private Object verifierVersion
+    private Object verifierPath
     private Object distributionFile
     private Object verificationReportsDirectory
     private Object downloadDirectory
@@ -61,7 +62,6 @@ class RunPluginVerifierTask extends ConventionTask {
     private List<Object> externalPrefixes = []
     private Boolean teamCityOutputFormat = false
     private Object subsystemsToCheck
-    private Boolean offline = false
 
     /**
      * Returns a list of the {@link FailureLevel} values used for failing the task if any reported issue will match.
@@ -216,6 +216,39 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     /**
+     * Returns the local path to the IntelliJ Plugin Verifier that will be used.
+     *
+     * @return verifierPath IntelliJ Plugin Verifier path
+     */
+    @Input
+    @Optional
+    String getVerifierPath() {
+        return Utils.stringInput(verifierPath)
+    }
+
+    /**
+     * Sets the local path to the IntelliJ Plugin Verifier that will be used.
+     * If provided, {@link #verifierVersion} is ignored.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param verifierPath IntelliJ Plugin Verifier path
+     */
+    void setVerifierPath(Object verifierPath) {
+        this.verifierPath = verifierPath
+    }
+
+    /**
+     * Sets the local path to the IntelliJ Plugin Verifier that will be used.
+     * If provided, {@link #verifierVersion} is ignored.
+     * Accepts {@link String} or {@link Closure}.
+     *
+     * @param verifierPath IntelliJ Plugin Verifier path
+     */
+    void verifierPath(Object verifierPath) {
+        this.verifierPath = verifierPath
+    }
+
+    /**
      * Returns an instance of the distribution file generated with the build task.
      * If empty, task will be skipped.
      *
@@ -223,6 +256,7 @@ class RunPluginVerifierTask extends ConventionTask {
      */
     @InputFile
     @SkipWhenEmpty
+    @Nullable
     File getDistributionFile() {
         def input = distributionFile instanceof Closure ? (distributionFile as Closure).call() : distributionFile
         return input != null ? project.file(input) : null
@@ -477,38 +511,6 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     /**
-     * Returns a flag that controls the offline mode.
-     * If true, Plugin Verifier must use only locally downloaded dependencies of plugins and must avoid making HTTP requests.
-     *
-     * @return
-     */
-    @Input
-    @Optional
-    Boolean getOffline() {
-        return Utils.stringInput(offline).toBoolean()
-    }
-
-    /**
-     * Sets a flag that controls the offline mode.
-     * If true, Plugin Verifier must use only locally downloaded dependencies of plugins and must avoid making HTTP requests.
-     *
-     * @param offline prints TeamCity compatible output
-     */
-    void setOffline(Boolean offline) {
-        this.offline = offline
-    }
-
-    /**
-     * Sets a flag that controls the offline mode.
-     * If true, Plugin Verifier must use only locally downloaded dependencies of plugins and must avoid making HTTP requests.
-     *
-     * @param offline prints TeamCity compatible output
-     */
-    void offline(Boolean offline) {
-        this.offline = offline
-    }
-
-    /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
      * {@link String}
      */
@@ -519,17 +521,18 @@ class RunPluginVerifierTask extends ConventionTask {
             throw new IllegalStateException("Plugin file does not exist: $file")
         }
 
-        def ides = getIdeVersions().toUnique().findAll()
-        if (ides.isEmpty()) {
-            throw new GradleException("ideVersions property should not be empty")
+        def ides = getIdeVersions().toUnique().findAll().collect { resolveIdePath(it) }.findAll()
+        def paths = getLocalPaths()
+        if (ides.isEmpty() && paths.isEmpty()) {
+            throw new GradleException("`ideVersions` and `localPaths` properties should not be empty")
         }
 
-        def verifierPath = getVerifierPath()
+        def verifierPath = resolveVerifierPath()
         def verifierArgs = ["check-plugin"]
         verifierArgs += getOptions()
         verifierArgs += [file.canonicalPath]
-        verifierArgs += ides.collect { resolveIdePath(it) }
-        verifierArgs += getLocalPaths()
+        verifierArgs += ides
+        verifierArgs += paths
 
         Utils.debug(this, "Distribution file: $file.canonicalPath")
         Utils.debug(this, "Verifier path: $verifierPath")
@@ -556,13 +559,31 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     /**
+     * Resolves path to the IntelliJ Plugin Verifier file.
+     * At first, checks if it was provided with {@link #verifierPath}.
      * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPlugin#DEFAULT_INTELLIJ_PLUGIN_SERVICE}
      * repository and resolves the path to verifier-cli jar file.
      *
      * @return path to verifier-cli jar
      */
     @InputFile
-    String getVerifierPath() {
+    String resolveVerifierPath() {
+        def path = getVerifierPath()
+        if (!path.isEmpty()) {
+            def verifier = new File(path)
+            if (verifier.exists()) {
+                return path
+            }
+            Utils.warn(this, "Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
+        }
+
+        if (isOffline()) {
+            throw new TaskExecutionException(this, new GradleException(
+                    "Cannot resolve Plugin Verifier in offline mode. " +
+                            "Provide pre-downloaded Plugin Verifier jar file with `verifierPath` property. "
+            ))
+        }
+
         def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
         try {
             def resolvedVerifierVersion = resolveVerifierVersion()
@@ -582,7 +603,6 @@ class RunPluginVerifierTask extends ConventionTask {
      * @param ideVersion IDE version. Can be "2020.2", "IC-2020.2", "202.1234.56"
      * @return path to the resolved IDE
      */
-    @Nullable
     String resolveIdePath(String ideVersion) {
         Utils.debug(this, "Resolving IDE path for $ideVersion")
         def (String type, String version) = ideVersion.trim().split("-", 2) + null
@@ -622,9 +642,16 @@ class RunPluginVerifierTask extends ConventionTask {
     private File downloadIde(String type, String version, String buildType) {
         def name = "$type-$version"
         def ideDir = new File(getDownloadDirectory(), name)
-        Utils.debug(this, "Downloaing IDE: $name")
+        Utils.info(this, "Downloaing IDE: $name")
 
-        if (!ideDir.exists()) {
+        if (ideDir.exists()) {
+            Utils.debug(this, "IDE already available in $ideDir")
+        } else if (isOffline()) {
+            throw new TaskExecutionException(this, new GradleException(
+                    "Cannot download IDE: $name. Gradle runs in offline mode. " +
+                            "Provide pre-downloaded IDEs stored in `downloadDirectory` or use `localPaths` instead."
+            ))
+        } else {
             def ideArchive = new File(getDownloadDirectory(), "${name}.tar.gz")
             def url = resolveIdeUrl(type, version, buildType)
 
@@ -647,8 +674,6 @@ class RunPluginVerifierTask extends ConventionTask {
                 ideArchive.delete()
             }
             Utils.debug(this, "IDE extracted to $ideDir, archive removed")
-        } else {
-            Utils.debug(this, "IDE already available in $ideDir")
         }
 
         return ideDir
@@ -769,6 +794,15 @@ class RunPluginVerifierTask extends ConventionTask {
     }
 
     /**
+     * Checks if Gradle is run with offline start parameter.
+     *
+     * @return Gradle runs in offline mode
+     */
+    private Boolean isOffline() {
+        return project.gradle.startParameter.offline
+    }
+
+    /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with available CLI options
@@ -788,7 +822,7 @@ class RunPluginVerifierTask extends ConventionTask {
         if (subsystemsToCheck != null) {
             args += ["-subsystems-to-check", getSubsystemsToCheck()]
         }
-        if (offline) {
+        if (isOffline()) {
             args += ["-offline"]
         }
 

@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+import de.undercouch.gradle.tasks.download.DownloadAction
 import groovy.json.JsonSlurper
 
 class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
@@ -221,6 +222,44 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         then:
         result.output.contains("Deprecated API usages")
         !result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
+    }
+
+    def 'run plugin verifier in offline mode'() {
+        given:
+        writePluginXmlFile()
+        warmupGradle()
+        buildFile << """
+            version = "1.0.0"
+
+            runPluginVerifier {
+                ideVersions = "2020.1.3"
+                verifierPath = "\${project.buildDir}/pluginVerifier.jar"
+            }
+            """.stripIndent()
+
+        when:
+        def url = new URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
+        def version = new JsonSlurper().parse(url)["name"]
+
+        file("build/pluginVerifier.jar").withOutputStream { out ->
+            out << new URL("https://dl.bintray.com/jetbrains/intellij-plugin-service/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream()
+        }
+
+        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
+
+        then:
+        result.output.contains("Gradle runs in offline mode.")
+    }
+
+    private void warmupGradle() {
+        buildFile << """
+            version = "1.0.0"
+
+            runPluginVerifier {
+                ideVersions = "2020.2.3"
+            }
+            """.stripIndent()
+        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
     }
 
     private void writeJavaFileWithDeprecation() {
