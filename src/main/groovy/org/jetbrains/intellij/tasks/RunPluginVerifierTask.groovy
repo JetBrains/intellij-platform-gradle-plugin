@@ -566,7 +566,6 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verifier-cli jar
      */
-    @InputFile
     String resolveVerifierPath() {
         def path = getVerifierPath()
         if (path != null && !path.isEmpty()) {
