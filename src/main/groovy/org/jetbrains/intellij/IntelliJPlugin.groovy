@@ -282,7 +282,8 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void verifyJavaPluginDependency(IntelliJPluginExtension extension, Project project) {
-        if (!extension.plugins.contains('java') && new File(extension.ideaDependency.classes, "plugins/java").exists()) {
+        def hasJavaPluginDependency = extension.plugins.contains('java') || extension.plugins.contains('com.intellij.java')
+        if (!hasJavaPluginDependency && new File(extension.ideaDependency.classes, "plugins/java").exists()) {
             Utils.sourcePluginXmlFiles(project).each { file ->
                 def pluginXml = Utils.parseXml(file)
                 if (pluginXml) {
