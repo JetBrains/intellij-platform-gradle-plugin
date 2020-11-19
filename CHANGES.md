@@ -1,9 +1,12 @@
 # Changelog
 
-## 0.6.4 (under development)
+## 0.6.5 (under development)
+
+## 0.6.4
 
 - runPluginVerifier: integrate Plugin Verifier offline mode with Gradle `offline` start parameter
 - runPluginVerifier: introduce `verifierPath` property
+- support for Rider for Unreal Engine as an SDK
 
 ## 0.6.3
 
