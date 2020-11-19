@@ -53,7 +53,7 @@ abstract class RunIdeBase extends JavaExec {
                                          AI: 'AndroidStudio',
                                          GO: 'GoLand',
                                          RD: 'Rider',
-                                         RS: 'Rider']
+                                         RDCPPP: 'Rider']
 
     private List<Object> requiredPluginIds = []
     private Object ideDirectory
@@ -262,12 +262,6 @@ abstract class RunIdeBase extends JavaExec {
                 def prefix = PREFIXES.get(abbreviation)
                 if (prefix) {
                     systemProperty('idea.platform.prefix', prefix)
-
-                    if (abbreviation == 'RD') {
-                        // Allow debugging Rider's out of process ReSharper host
-                        systemPropertyIfNotDefined('rider.debug.mono.debug', true, userDefinedSystemProperties)
-                        systemPropertyIfNotDefined('rider.debug.mono.allowConnect', true, userDefinedSystemProperties)
-                    }
                 }
             }
         }

@@ -33,7 +33,7 @@ import java.util.function.Predicate
 import java.util.regex.Pattern
 
 class Utils {
-    public static final Pattern VERSION_PATTERN = Pattern.compile('^([A-Z]{2})-([0-9.A-z]+)\\s*$')
+    public static final Pattern VERSION_PATTERN = Pattern.compile('^([A-Z]+)-([0-9.A-z]+)\\s*$')
 
     @NotNull
     static SourceSet mainSourceSet(@NotNull Project project) {
