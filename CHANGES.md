@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.6.5 (under development)
+## 0.6.6 (under development)
+
+## 0.6.5
+
+- fixed not found classes from plugin dependencies in tests [#570](../../issues/570)
 
 ## 0.6.4
 
