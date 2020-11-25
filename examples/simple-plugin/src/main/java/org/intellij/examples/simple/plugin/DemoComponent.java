@@ -1,4 +1,7 @@
+package org.intellij.examples.simple.plugin;
+
 public class DemoComponent {
+
     private final DemoService service;
 
     public DemoComponent(DemoService service) {

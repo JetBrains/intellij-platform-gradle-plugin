@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class HelloAction extends AnAction {
+
     @Override
     public void actionPerformed(AnActionEvent e) {
         DialogWrapper dialogWrapper = new DialogWrapper(PlatformDataKeys.PROJECT.getData(e.getDataContext())) {

@@ -7,11 +7,11 @@
     <change-notes/>
     <application-components>
         <component>
-            <implementation-class>DemoComponent</implementation-class>
+            <implementation-class>org.intellij.examples.simple.plugin.DemoComponent</implementation-class>
         </component>
     </application-components>
     <extensions defaultExtensionNs="com.intellij">
-        <applicationService serviceImplementation="DemoService"/>
+        <applicationService serviceImplementation="org.intellij.examples.simple.plugin.DemoService"/>
     </extensions>
     <actions>
         <action class="org.intellij.examples.simple.plugin.HelloAction" id="SayHello" text="Say Hello">

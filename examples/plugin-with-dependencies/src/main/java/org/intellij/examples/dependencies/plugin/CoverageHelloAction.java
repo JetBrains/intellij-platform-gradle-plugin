@@ -8,6 +8,7 @@ import com.intellij.openapi.ui.Messages;
 import org.jetbrains.annotations.NotNull;
 
 public class CoverageHelloAction extends AnAction {
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Messages.showInfoMessage("Hello Coverage Plugin!\n" +

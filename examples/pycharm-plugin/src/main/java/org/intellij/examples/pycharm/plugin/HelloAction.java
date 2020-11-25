@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class HelloAction extends AnAction {
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         DialogWrapper dialogWrapper = new DialogWrapper(PlatformDataKeys.PROJECT.getData(e.getDataContext())) {
@@ -30,6 +31,6 @@ public class HelloAction extends AnAction {
     @Override
     public void update(@NotNull AnActionEvent e) {
         super.update(e);
-        e.getPresentation().setIcon(AllIcons.Ide.Info_notifications);
+        e.getPresentation().setIcon(AllIcons.General.NotificationInfo);
     }
 }

@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.idea.KotlinLanguage;
 
 public class KotlinHelloAction extends AnAction {
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent e) {
         Messages.showInfoMessage("Hello Kotlin Plugin!\n" +
