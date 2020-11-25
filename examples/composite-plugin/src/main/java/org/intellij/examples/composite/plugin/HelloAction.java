@@ -8,15 +8,15 @@ import com.intellij.openapi.ui.Messages;
 import org.intellij.examples.subplugin.MessageProvider;
 
 public class HelloAction extends AnAction {
-  @Override
-  public void actionPerformed(AnActionEvent e) {
-    MessageProvider service = ServiceManager.getService(MessageProvider.class);
-    Messages.showInfoMessage(service != null ? service.getMessage() : "Service is not found", "Hello");
-  }
+    @Override
+    public void actionPerformed(AnActionEvent e) {
+        MessageProvider service = ServiceManager.getService(MessageProvider.class);
+        Messages.showInfoMessage(service != null ? service.getMessage() : "Service is not found", "Hello");
+    }
 
-  @Override
-  public void update(AnActionEvent e) {
-    super.update(e);
-    e.getPresentation().setIcon(AllIcons.Ide.Info_notifications);
-  }
+    @Override
+    public void update(AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setIcon(AllIcons.Ide.Info_notifications);
+    }
 }

@@ -1,6 +1,6 @@
 # Custom runIde task plugin
 
-The plugin adds custom `runIde` task  that uses custom JVM while running IDE.
+The plugin adds custom `runIde` task that uses custom JVM while running IDE.
 
 `runIde` runs IDE under Gradle java
 

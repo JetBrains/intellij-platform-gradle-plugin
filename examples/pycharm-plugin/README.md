@@ -1,4 +1,4 @@
-# Simple plugin for PyCharm 
+# Simple plugin for PyCharm
 
 The plugin adds `Say Hello` action in `Tools` menu and to Welcome Screen.
 

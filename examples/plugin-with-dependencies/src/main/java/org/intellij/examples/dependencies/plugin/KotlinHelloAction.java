@@ -8,15 +8,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.kotlin.idea.KotlinLanguage;
 
 public class KotlinHelloAction extends AnAction {
-  @Override
-  public void actionPerformed(@NotNull AnActionEvent e) {
-    Messages.showInfoMessage("Hello Kotlin Plugin!\n" +
-        "I know about " + KotlinLanguage.NAME, "Hello");
-  }
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent e) {
+        Messages.showInfoMessage("Hello Kotlin Plugin!\n" +
+                "I know about " + KotlinLanguage.NAME, "Hello");
+    }
 
-  @Override
-  public void update(@NotNull AnActionEvent e) {
-    super.update(e);
-    e.getPresentation().setIcon(AllIcons.Ide.Notification.InfoEvents);
-  }
+    @Override
+    public void update(@NotNull AnActionEvent e) {
+        super.update(e);
+        e.getPresentation().setIcon(AllIcons.Ide.Notification.InfoEvents);
+    }
 }
