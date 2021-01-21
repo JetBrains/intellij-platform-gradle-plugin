@@ -29,7 +29,7 @@ class IntelliJPluginExtension {
     /**
      * The version of the IntelliJ Platform IDE that will be used to build the plugin.
      * <p/>
-     * Please see <a href="https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
+     * Please see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
      */
     String version
 

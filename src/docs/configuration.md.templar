@@ -45,7 +45,7 @@ pre}
 
 | <kbd>version</kbd> - The version of the IntelliJ Platform IDE that will be used to build the plugin. <br/><br/>
 
-Please see [Plugin Compatibility](https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html) in SDK docs for more details.<br/><br/>
+Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html) in SDK docs for more details.<br/><br/>
 
 **Notes:**
     <ul>
@@ -60,7 +60,7 @@ Please see [Plugin Compatibility](https://www.jetbrains.org/intellij/sdk/docs/ba
         <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>
     </ul>
 
-<br/><br/>All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://www.jetbrains.org/intellij/sdk/docs/reference_guide/intellij_artifacts.html) page.<br/><br/>
+<br/><br/>All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://plugins.jetbrains.com/docs/intellij/intellij-artifacts.html) page.<br/><br/>
 
 **Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>
 |{\n}
@@ -106,7 +106,7 @@ Please see [Plugin Compatibility](https://www.jetbrains.org/intellij/sdk/docs/ba
 
 | <kbd>plugins</kbd> - The list of bundled IDE plugins and plugins from the [JetBrains Plugin Repository](https://plugins.jetbrains.com/). <br/><br/>
 
-Please see [Plugin Dependencies](http://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html) in SDK docs for more details.<br/><br/>
+Please see [Plugin Dependencies](https://plugins.jetbrains.com/docs/intellij/plugin-dependencies.html) in SDK docs for more details.<br/><br/>
 
 **Notes:**
     <ul>
@@ -313,7 +313,7 @@ The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ..
 | <kbd>destinationDir</kbd> is a directory to store patched xml files.                  | <kbd>'${project.buildDir}/patchedPluginXmlFiles'</kbd> |
 
 ### Plugin Verifier DSL
-[IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) integration task allows to check the binary compatibility of the built plugin against the specified [IntelliJ IDE builds](https://jetbrains.org/intellij/sdk/docs/reference_guide/api_changes_list.html).
+[IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) integration task allows to check the binary compatibility of the built plugin against the specified [IntelliJ IDE builds](https://plugins.jetbrains.com/docs/intellij/api-changes-list.html).
 
 Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDEs used for the verification, as well as explicit tool version and any of the available [options](https://github.com/JetBrains/intellij-plugin-verifier#common-options) by proxifying them to the Verifier CLI.
 
@@ -342,7 +342,7 @@ The following attributes are a part of the Publishing DSL <kbd>publishPlugin { .
 
 See the instruction on how to generate authentication token: https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html
 
-See [Publishing Plugins with Gradle](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html) tutorial for step-by-step instructions.
+See [Publishing Plugins with Gradle](https://plugins.jetbrains.com/docs/intellij/deployment.html) tutorial for step-by-step instructions.
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |

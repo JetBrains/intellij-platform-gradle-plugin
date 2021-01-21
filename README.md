@@ -23,8 +23,7 @@ helpful while developing plugins for IntelliJ platform.
 > **TIP** Create new plugins with a preconfigured project scaffold and CI using
 > [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template).
 
-Here is [the manual](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/prerequisites.html) on how
-to start developing plugins for IntelliJ Platform using Gradle.
+Here is [the manual](https://plugins.jetbrains.com/docs/intellij/gradle-prerequisites.html) on how to start developing plugins for IntelliJ Platform using Gradle.
 
 Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
@@ -97,10 +96,10 @@ The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd>
 #### IntelliJ Platform Properties
 | Attributes | Values | 
 | :------------- | :--------- | 
-| <kbd>version</kbd> - The version of the IntelliJ Platform IDE that will be used to build the plugin. <br/><br/>Please see [Plugin Compatibility](https://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html) in SDK docs for more details.<br/><br/>**Notes:**    <ul>        <li>Value may have `IC-`, `IU-`, `CL-`, `PY-`, `PC-`, `RD-` or `JPS-` prefix in order to define IDE distribution type.</li>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:**    <ul>        <li><kbd>version #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>        <li><kbd>build #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>        <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>    </ul><br/><br/>All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://www.jetbrains.org/intellij/sdk/docs/reference_guide/intellij_artifacts.html) page.<br/><br/>**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>|
+| <kbd>version</kbd> - The version of the IntelliJ Platform IDE that will be used to build the plugin. <br/><br/>Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html) in SDK docs for more details.<br/><br/>**Notes:**    <ul>        <li>Value may have `IC-`, `IU-`, `CL-`, `PY-`, `PC-`, `RD-` or `JPS-` prefix in order to define IDE distribution type.</li>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:**    <ul>        <li><kbd>version #</kbd><br/>`'2017.2.5'` or `'IC-2017.2.5'` </li>        <li><kbd>build #</kbd><br/>`'172.4343'` or `'IU-172.4343'` </li>        <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>    </ul><br/><br/>All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://plugins.jetbrains.com/docs/intellij/intellij-artifacts.html) page.<br/><br/>**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>|
 | <kbd>type</kbd> - The type of IDE distribution.|**Acceptable Values:**    <ul>        <li><kbd>'IC'</kbd> - IntelliJ IDEA Community Edition. </li>        <li><kbd>'IU'</kbd> - IntelliJ IDEA Ultimate Edition. </li>        <li><kbd>'JPS'</kbd> - JPS-only. </li>        <li><kbd>'CL'</kbd> - CLion. </li>        <li><kbd>'PY'</kbd> - PyCharm Professional Edition. </li>        <li><kbd>'PC'</kbd> - PyCharm Community Edition. </li>        <li><kbd>'RD'</kbd> - Rider.</li>    </ul>**Default Value:** <kbd>'IC'</kbd>|
 | <kbd>localPath</kbd> - The path to locally installed IDE distribution that should be used as a dependency. <br/><br/>**Notes:**    <ul>        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/IntelliJIDEA.app'`</br></br>**Default Value:** <kbd>null</kbd>|
-| <kbd>plugins</kbd> - The list of bundled IDE plugins and plugins from the [JetBrains Plugin Repository](https://plugins.jetbrains.com/). <br/><br/>Please see [Plugin Dependencies](http://www.jetbrains.org/intellij/sdk/docs/basics/plugin_structure/plugin_dependencies.html) in SDK docs for more details.<br/><br/>**Notes:**    <ul>        <li>For plugins from the JetBrains Plugin Repository use format `pluginId:version`.</li>        <li>For bundled plugins version should be omitted: e.g. `org.intellij.groovy` for `IDEA/plugins/Groovy` plugin.</li>        <li>For sub-projects use project reference `project(':subproject')`.</li>        <li>If you need to refer plugin's classes from your project, you also have to define a dependency in your `plugin.xml`.</li>    </ul>|**Acceptable Values:**    <ol>        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`'org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly'`</li>        <li><kbd>bundledPluginName</kbd><br/>`'android', 'Groovy'`</li>        <li><kbd>project(':projectName')</kbd><br/>`project(':plugin-subproject')`</li>    </ol>**Default Value\:** none|
+| <kbd>plugins</kbd> - The list of bundled IDE plugins and plugins from the [JetBrains Plugin Repository](https://plugins.jetbrains.com/). <br/><br/>Please see [Plugin Dependencies](https://plugins.jetbrains.com/docs/intellij/plugin-dependencies.html) in SDK docs for more details.<br/><br/>**Notes:**    <ul>        <li>For plugins from the JetBrains Plugin Repository use format `pluginId:version`.</li>        <li>For bundled plugins version should be omitted: e.g. `org.intellij.groovy` for `IDEA/plugins/Groovy` plugin.</li>        <li>For sub-projects use project reference `project(':subproject')`.</li>        <li>If you need to refer plugin's classes from your project, you also have to define a dependency in your `plugin.xml`.</li>    </ul>|**Acceptable Values:**    <ol>        <li><kbd>org.plugin.id:version[@channel]</kbd><br/>`'org.intellij.plugins.markdown:8.5.0', 'org.intellij.scala:2017.2.638@nightly'`</li>        <li><kbd>bundledPluginName</kbd><br/>`'android', 'Groovy'`</li>        <li><kbd>project(':projectName')</kbd><br/>`project(':plugin-subproject')`</li>    </ol>**Default Value\:** none|
 
 #### Building Properties
 | Attributes | Values | 
@@ -156,7 +155,7 @@ The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ..
 | <kbd>destinationDir</kbd> is a directory to store patched xml files.                  | <kbd>'${project.buildDir}/patchedPluginXmlFiles'</kbd> |
 
 ### Plugin Verifier DSL
-[IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) integration task allows to check the binary compatibility of the built plugin against the specified [IntelliJ IDE builds](https://jetbrains.org/intellij/sdk/docs/reference_guide/api_changes_list.html).
+[IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) integration task allows to check the binary compatibility of the built plugin against the specified [IntelliJ IDE builds](https://plugins.jetbrains.com/docs/intellij/api-changes-list.html).
 
 Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDEs used for the verification, as well as explicit tool version and any of the available [options](https://github.com/JetBrains/intellij-plugin-verifier#common-options) by proxifying them to the Verifier CLI.
 
@@ -185,7 +184,7 @@ The following attributes are a part of the Publishing DSL <kbd>publishPlugin { .
 
 See the instruction on how to generate authentication token: https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html
 
-See [Publishing Plugins with Gradle](https://www.jetbrains.org/intellij/sdk/docs/tutorials/build_system/deployment.html) tutorial for step-by-step instructions.
+See [Publishing Plugins with Gradle](https://plugins.jetbrains.com/docs/intellij/deployment.html) tutorial for step-by-step instructions.
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
@@ -315,7 +314,7 @@ includeBuild '/path/to/gradle-intellij-plugin'
 
 
 ```
-Copyright 2020 org.jetbrains.intellij.plugins
+Copyright 2021 org.jetbrains.intellij.plugins
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
