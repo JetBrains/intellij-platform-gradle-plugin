@@ -1,5 +1,8 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
     groovy
+    kotlin("jvm") version "1.4.21"
     id("com.gradle.plugin-publish") version "0.12.0"
     id("synapticloop.documentr") version "3.1.0"
     `java-gradle-plugin`
@@ -8,9 +11,14 @@ plugins {
 }
 
 plugins.withType<JavaPlugin> {
-    tasks.withType<GroovyCompile> {
-        sourceCompatibility = "1.7"
-        targetCompatibility = "1.7"
+    tasks {
+        withType<GroovyCompile> {
+            sourceCompatibility = "1.7"
+            targetCompatibility = "1.7"
+        }
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = "1.8"
+        }
     }
 }
 
@@ -39,7 +47,8 @@ dependencies {
     testImplementation("org.spockframework:spock-core:1.0-groovy-2.4") {
         exclude(module = "groovy-all")
     }
-    testImplementation("junit:junit:4.12")
+    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }
 
 version = if (project.property("snapshot")?.toString()?.toBoolean() == true) {
