@@ -139,7 +139,7 @@ abstract class IntelliJPluginSpecBase {
         }
     """)
 
-    fun adjustWindowsPath(s: String) = s.replace("\\\\", "/")
+    fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
         assertEquals(expectedContent.trimIndent(), file?.readText()?.trim())
