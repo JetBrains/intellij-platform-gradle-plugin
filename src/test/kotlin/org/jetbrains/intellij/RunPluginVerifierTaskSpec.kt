@@ -247,7 +247,9 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import com.intellij.openapi.util.text.StringUtil;
+
             class App {
+
                 public static void main(@NotNull String[] strings) {
                     StringUtil.firstLetterToUpperCase("foo");
                 }
