@@ -40,7 +40,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        listOf("4.9", "5.1", "6.4").forEach { gradleVersion ->
+        listOf("6.6").forEach { gradleVersion ->
             build(gradleVersion, false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
 
             val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
