@@ -44,6 +44,9 @@ class IdeaDependencyManager {
         } else if (type == 'PY' || type == 'PC') {
             dependencyGroup = 'com.jetbrains.intellij.pycharm'
             dependencyName = 'pycharm' + type
+        } else if (type == 'GO') {
+            dependencyGroup = 'com.jetbrains.intellij.goland'
+            dependencyName = 'goland'
         } else if (type == 'RD') {
             dependencyGroup = 'com.jetbrains.intellij.rider'
             dependencyName = 'riderRD'
