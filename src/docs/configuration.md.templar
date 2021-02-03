@@ -49,7 +49,7 @@ Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/pl
 
 **Notes:**
     <ul>
-        <li>Value may have `IC-`, `IU-`, `CL-`, `PY-`, `PC-`, `RD-` or `JPS-` prefix in order to define IDE distribution type.</li>
+        <li>Value may have `IC-`, `IU-`, `CL-`, `PY-`, `PC-`, `RD-`, `GO-` or `JPS-` prefix in order to define IDE distribution type.</li>
         <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>
     </ul>
 |
@@ -74,11 +74,12 @@ Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/pl
     <ul>
         <li><kbd>'IC'</kbd> - IntelliJ IDEA Community Edition. </li>
         <li><kbd>'IU'</kbd> - IntelliJ IDEA Ultimate Edition. </li>
-        <li><kbd>'JPS'</kbd> - JPS-only. </li>
         <li><kbd>'CL'</kbd> - CLion. </li>
         <li><kbd>'PY'</kbd> - PyCharm Professional Edition. </li>
         <li><kbd>'PC'</kbd> - PyCharm Community Edition. </li>
         <li><kbd>'RD'</kbd> - Rider.</li>
+        <li><kbd>'GO'</kbd> - GoLand.</li>
+        <li><kbd>'JPS'</kbd> - JPS-only. </li>
     </ul>
 
 **Default Value:** <kbd>'IC'</kbd>
