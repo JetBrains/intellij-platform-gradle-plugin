@@ -8,7 +8,7 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     id("com.github.breadmoirai.github-release") version "2.2.9"
-    id("org.jetbrains.changelog") version "0.6.2"
+    id("org.jetbrains.changelog") version "1.0.1"
 }
 
 plugins.withType<JavaPlugin> {
@@ -170,11 +170,12 @@ publishing {
 }
 
 tasks.wrapper {
-    gradleVersion = "6.6.1"
+    gradleVersion = "6.8"
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
 changelog {
+    version = project.version.toString()
     path = "${project.projectDir}/CHANGES.md"
 }
 
