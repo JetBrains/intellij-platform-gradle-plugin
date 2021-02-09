@@ -175,13 +175,19 @@ tasks.wrapper {
 }
 
 changelog {
-    version = project.version.toString()
+    version = "${project.version}"
     path = "${project.projectDir}/CHANGES.md"
 }
 
 githubRelease {
+    val releaseNote = if (changelog.has("${project.version}")) {
+        changelog.get("${project.version}").toText()
+    } else {
+        ""
+    }
+
     setToken(project.property("githubToken") as String)
     owner.set("jetbrains")
     repo.set("gradle-intellij-plugin")
-    body.set(changelog.get().toText())
+    body.set(releaseNote)
 }
