@@ -5,7 +5,7 @@ plugins {
     `java-gradle-plugin`
     `maven-publish`
     id("com.github.breadmoirai.github-release") version "2.2.9"
-    id("org.jetbrains.changelog") version "1.0.1"
+    id("org.jetbrains.changelog") version "1.1.1"
 }
 
 plugins.withType<JavaPlugin> {
