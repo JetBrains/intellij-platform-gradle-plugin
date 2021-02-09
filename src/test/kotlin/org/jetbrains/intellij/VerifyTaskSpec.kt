@@ -1,86 +1,109 @@
 package org.jetbrains.intellij
 
-class VerifyTaskSpec extends IntelliJPluginSpecBase {
-    def 'skip verifying empty directory'() {
-        given:
-        buildFile << "verifyPlugin { pluginDirectory = null }"
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-        when:
-        def result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+// foo
+class VerifyTaskSpec : IntelliJPluginSpecBase() {
 
-        then:
-        result.output.contains('verifyPlugin NO-SOURCE')
+    @Test
+    fun `skip verifying empty directory`() {
+        buildFile.groovy("""
+            verifyPlugin {
+                pluginDirectory = null
+            }
+        """)
+
+        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+
+        assertTrue(result.output.contains("verifyPlugin NO-SOURCE"))
     }
 
-    def 'do not fail on warning by default'() {
-        given:
-        buildFile << "version '1.0'"
-        pluginXml << """
+    @Test
+    fun `do not fail on warning by default`() {
+        buildFile.groovy("""
+            version '1.0'
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <name>PluginName</name>
+                <description>Lorem ipsum.</description>
+                <vendor>JetBrains</vendor>
+            </idea-plugin>
+        """)
+
+        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+
+        assertTrue(result.output.contains("Description is too short"))
+    }
+
+    @Test
+    fun `fail on warning if option is disabled`() {
+        buildFile.groovy("""
+            version '1.0'
+
+            verifyPlugin {
+                ignoreWarnings = false
+            }
+        """)
+
+        pluginXml.xml("""
             <idea-plugin version="2">
                 <name>PluginName</name>
                 <description>Привет, Мир!</description>
                 <vendor>Zolotov</vendor>
-            </idea-plugin>""".stripIndent()
+            </idea-plugin>
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
 
-        then:
-        result.output.contains('Description is too short')
-    }
-
-    def 'fail on warning if option is disabled'() {
-        given:
-        buildFile << "version '1.0'\nverifyPlugin { ignoreWarnings = false }"
-        pluginXml << """
-            <idea-plugin version="2">
-                <name>PluginName</name>
-                <description>Привет, Мир!</description>
-                <vendor>Zolotov</vendor>
-            </idea-plugin>""".stripIndent()
-
-        when:
-        def result = buildAndFail(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
-
-        then:
-        result.output.contains('Description is too short')
+        assertTrue(result.output.contains("Description is too short"))
     }
 
 
-    def 'fail on errors by default'() {
-        when:
-        def result = buildAndFail(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+    @Test
+    fun `fail on errors by default`() {
+        val result = buildAndFail(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
 
-        then:
         result.output.contains("Plugin descriptor 'plugin.xml' is not found")
     }
 
-    def 'do not fail on errors if option is enabled'() {
-        given:
-        buildFile << "verifyPlugin { ignoreFailures = true }"
+    @Test
+    fun `do not fail on errors if option is enabled`() {
+        buildFile.groovy("""
+            verifyPlugin {
+                ignoreFailures = true
+            }
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
 
-        then:
         result.output.contains("Plugin descriptor 'plugin.xml' is not found")
     }
 
-    def 'do not fail if there are no errors and warnings'() {
-        given:
-        buildFile << "version '1.0'\nverifyPlugin { ignoreWarnings = false }"
-        pluginXml << """
-            <idea-plugin version="2">
+    @Test
+    fun `do not fail if there are no errors and warnings`() {
+        buildFile.groovy("""
+            version '1.0'
+
+            verifyPlugin { 
+                ignoreWarnings = false 
+            }
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
                 <name>PluginName</name>
-                <description>some description longlonglonglonglonglonglonglonglonglong enough</description>
-                <vendor>Zolotov</vendor>
+                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                <vendor>JetBrains</vendor>
                 <depends>com.intellij.modules.lang</depends>
-            </idea-plugin>""".stripIndent()
+            </idea-plugin>
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
 
-        then:
-        !result.output.contains('Plugin verification')
+        assertFalse(result.output.contains("Plugin verification"))
     }
 }
