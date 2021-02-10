@@ -31,10 +31,10 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         val pluginDir = File(mavenCacheDir, "nightly.com.jetbrains.plugins/CSS-X-Fire/1.55")
         pluginDir.list()?.let {
-            assertTrue(it.contains("b36713d18b7845349268d9ba4ce4fedaff50d7a5"))
+            assertTrue(it.contains("9cab70cc371b245cd808ade65630f505a6443b0d"))
         }
 
-        File(pluginDir, "b36713d18b7845349268d9ba4ce4fedaff50d7a5").list()?.let {
+        File(pluginDir, "9cab70cc371b245cd808ade65630f505a6443b0d").list()?.let {
             assertTrue(it.contains("CSS-X-Fire-1.55.zip"))
         }
         File(pluginsCacheDir, "unzipped.nightly.com.jetbrains.plugins").list()?.let {
@@ -54,10 +54,10 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         val pluginDir = File(mavenCacheDir, "com.jetbrains.plugins/org.intellij.plugins.markdown/201.6668.74")
         pluginDir.list()?.let {
-            assertTrue(it.contains("5c9f1865c461d37e60c7083e8db9ad40c4bed98c"))
+            assertTrue(it.contains("17328855fcd031f39a805db934c121eaa25dedfb"))
         }
 
-        File(pluginDir, "5c9f1865c461d37e60c7083e8db9ad40c4bed98c").list()?.let {
+        File(pluginDir, "17328855fcd031f39a805db934c121eaa25dedfb").list()?.let {
             assertTrue(it.contains("org.intellij.plugins.markdown-201.6668.74.zip"))
         }
         File(pluginsCacheDir, "unzipped.com.jetbrains.plugins").list()?.let {
@@ -77,9 +77,9 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         val pluginDir = File(mavenCacheDir, "com.jetbrains.plugins/org.jetbrains.postfixCompletion/0.8-beta")
         pluginDir.list()?.let {
-            assertTrue(it.contains("4c0b55a3dea095dd8e085b1c65fcc7b917b74dd5"))
+            assertTrue(it.contains("dd37fa3fb1ecbf3d1c2fdb0049ba821fd32f2565"))
         }
-        File(pluginDir, "4c0b55a3dea095dd8e085b1c65fcc7b917b74dd5").list()?.let {
+        File(pluginDir, "dd37fa3fb1ecbf3d1c2fdb0049ba821fd32f2565").list()?.let {
             assertTrue(it.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
         }
     }
