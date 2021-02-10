@@ -1,32 +1,41 @@
 package org.jetbrains.intellij
 
-class BuildSearchableOptionsTaskSpec extends SearchableOptionsSpecBase {
-    def 'skip building searchable options using IDEA prior 2019.1'() {
-        given:
-        buildFile << "intellij { version = '14.1.4' }"
+import kotlin.test.Test
+import kotlin.test.assertTrue
 
-        when:
-        def result = build(IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+class BuildSearchableOptionsTaskSpec: SearchableOptionsSpecBase() {
 
-        then:
-        result.output.contains("$IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME SKIPPED")
+    @Test
+    fun `skip building searchable options using IDEA prior 2019_1`() {
+        buildFile.groovy("""
+           intellij {
+                version = '14.1.4'
+            } 
+        """)
+
+        val result = build(IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+
+        assertTrue(result.output.contains("${IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
     }
 
-    def 'build searchable options produces XML'() {
-        given:
-        pluginXml << pluginXmlWithSearchableConfigurable
-        buildFile << "intellij { version = '$intellijVersion' }"
-        testSearchableConfigurableJava << searchableConfigurableCode
+    @Test
+    fun `build searchable options produces XML`() {
+        pluginXml.xml(getPluginXmlWithSearchableConfigurable())
 
-        when:
-        def result = build(IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+        buildFile.groovy("""
+            intellij {
+                version = '$intellijVersion'
+            }
+        """)
 
-        then:
-        result.output.contains("Starting searchable options index builder")
-        result.output.contains("Searchable options index builder completed")
+        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        def text = getSearchableOptionsXml("projectName").getText("UTF-8")
-        text.contains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">")
-        text.contains("hit=\"Label for Test Searchable Configurable\"")
+        val result = build(IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+        assertTrue(result.output.contains("Starting searchable options index builder"))
+        assertTrue(result.output.contains("Searchable options index builder completed"))
+
+        val text = getSearchableOptionsXml("projectName").readText()
+        assertTrue(text.contains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">"))
+        assertTrue(text.contains("hit=\"Label for Test Searchable Configurable\""))
     }
 }
