@@ -1,19 +1,17 @@
 package org.jetbrains.intellij
 
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class UtilsTest {
+
     @Test
-    void 'dependency parsing'() {
-        assert Utils.parsePluginDependencyString("hello:1.23@alpha") == new PluginDependencyNotation('hello', '1.23', 'alpha')
-        assert Utils.parsePluginDependencyString("hello:@alpha") == new PluginDependencyNotation('hello', null, 'alpha')
-        assert Utils.parsePluginDependencyString("hello@alpha") == new PluginDependencyNotation('hello', null, 'alpha')
-        assert Utils.parsePluginDependencyString("hello") == new PluginDependencyNotation('hello', null, null)
-        assert Utils.parsePluginDependencyString("hello:1.23") == new PluginDependencyNotation('hello', '1.23', null)
-        assert Utils.parsePluginDependencyString("@alpha") == new PluginDependencyNotation(null, null, 'alpha')
-        assert Utils.parsePluginDependencyString(":1.23") == new PluginDependencyNotation(null, '1.23', null)
-        assert Utils.parsePluginDependencyString(":1.23@alpha") == new PluginDependencyNotation(null, '1.23', 'alpha')
-        assert Utils.parsePluginDependencyString(":@alpha") == new PluginDependencyNotation(null, null, 'alpha')
+    fun `dependency parsing`() {
+        assertEquals(PluginDependencyNotation("hello", "1.23", "alpha"), Utils.parsePluginDependencyString("hello:1.23@alpha"))
+        assertEquals(PluginDependencyNotation("hello", null, "alpha"), Utils.parsePluginDependencyString("hello:@alpha"))
+        assertEquals(PluginDependencyNotation("hello", null, "alpha"), Utils.parsePluginDependencyString("hello@alpha"))
+        assertEquals(PluginDependencyNotation("hello", null, null), Utils.parsePluginDependencyString("hello"))
+        assertEquals(PluginDependencyNotation("hello", "1.23", null), Utils.parsePluginDependencyString("hello:1.23"))
     }
 }
