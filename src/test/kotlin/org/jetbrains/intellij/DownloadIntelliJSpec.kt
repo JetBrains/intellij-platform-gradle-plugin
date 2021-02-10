@@ -1,64 +1,112 @@
 package org.jetbrains.intellij
 
 import org.gradle.api.plugins.BasePlugin
-import org.junit.Assume
-import spock.lang.Stepwise
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
-@Stepwise
-class DownloadIntelliJSpec extends IntelliJPluginSpecBase {
-    def 'download idea dependencies'() {
-        given:
-        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1')
-        Assume.assumeFalse("it was already cached. test is senseless until gradle clean", cacheDir.exists())
+class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
 
-        when:
+    @Test
+    fun `download idea dependencies`() {
+        val cacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1")
+
+        assertFalse(cacheDir.exists(), "it was already cached. test is senseless until gradle clean")
+
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        then:
-        cacheDir.list() as Set == ['cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a', '116a3a8911c3a4bd49b2cb23f9576d13eaa721df'] as Set
-        new File(cacheDir, '116a3a8911c3a4bd49b2cb23f9576d13eaa721df').list() as Set == ['ideaIC-2020.1.pom'] as Set
-        new File(cacheDir, 'cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a').list() as Set == ['ideaIC-2020.1', 'ideaIC-2020.1.zip'] as Set
+        assertEquals(
+            setOf("cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a", "116a3a8911c3a4bd49b2cb23f9576d13eaa721df"),
+            cacheDir.list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIC-2020.1.pom"),
+            File(cacheDir, "116a3a8911c3a4bd49b2cb23f9576d13eaa721df").list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIC-2020.1", "ideaIC-2020.1.zip"),
+            File(cacheDir, "cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a").list()?.toSet(),
+        )
     }
 
-    def 'download sources if option is enabled'() {
-        given:
-        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1')
-        def sourcesJar = new File(cacheDir, 'a2c781ea46fb47d00ee87bfe0d9e43283928657f/ideaIC-2020.1-sources.jar')
-        Assume.assumeFalse("it was already cached. test is senseless until gradle clean", sourcesJar.exists())
+    @Test
+    fun `download sources if option is enabled`() {
+        val cacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1")
+        val sourcesJar = File(cacheDir, "a2c781ea46fb47d00ee87bfe0d9e43283928657f/ideaIC-2020.1-sources.jar")
 
-        buildFile << 'intellij { downloadSources = true }'
+        assertFalse(sourcesJar.exists(), "it was already cached. test is senseless until gradle clean")
 
-        when:
+        buildFile.groovy("""
+            intellij {
+                downloadSources = true
+            }
+        """)
+
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        then:
-        cacheDir.list() as Set == ['cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a', '6becac80419981b057df9cf0c62efcd94e6075a8', '116a3a8911c3a4bd49b2cb23f9576d13eaa721df'] as Set
-        new File(cacheDir, '116a3a8911c3a4bd49b2cb23f9576d13eaa721df').list() as Set == ['ideaIC-2020.1.pom'] as Set
-        new File(cacheDir, 'cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a').list() as Set == ['ideaIC-2020.1', 'ideaIC-2020.1.zip'] as Set
-        new File(cacheDir, '6becac80419981b057df9cf0c62efcd94e6075a8').list() as Set == ['ideaIC-2020.1-sources.jar'] as Set
+        assertEquals(
+            setOf(
+                "cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a",
+                "6becac80419981b057df9cf0c62efcd94e6075a8",
+                "116a3a8911c3a4bd49b2cb23f9576d13eaa721df",
+            ),
+            cacheDir.list()?.toSet()
+        )
+        assertEquals(
+            setOf("ideaIC-2020.1.pom"),
+            File(cacheDir, "116a3a8911c3a4bd49b2cb23f9576d13eaa721df").list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIC-2020.1", "ideaIC-2020.1.zip"),
+            File(cacheDir, "cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a").list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIC-2020.1-sources.jar"),
+            File(cacheDir, "6becac80419981b057df9cf0c62efcd94e6075a8").list()?.toSet(),
+        )
     }
 
-    def 'download ultimate idea dependencies'() {
-        given:
-        def cacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU/14.1.4')
-        def ideaCommunityCacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.4')
-        Assume.assumeFalse("it was already cached. test is senseless until gradle clean", cacheDir.exists() || ideaCommunityCacheDir.exists())
+    @Test
+    fun `download ultimate idea dependencies`() {
+        val cacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU/14.1.4")
+        val ideaCommunityCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.4")
 
-        buildFile << """intellij { 
-            version 'IU-14.1.4'
-            downloadSources true 
-}"""
-        when:
+        assertFalse(cacheDir.exists() || ideaCommunityCacheDir.exists(), "it was already cached. test is senseless until gradle clean")
+
+        buildFile.groovy("""
+            intellij { 
+                version 'IU-14.1.4'
+                downloadSources true 
+            }
+        """)
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        then:
-        cacheDir.list() as Set == ['b8993c44c83fe4a39dbb6b72ab6d87a117769534', 'f8eb5ad49abba6374eeec643cecf20f7268cbfee'] as Set
-        new File(cacheDir, 'b8993c44c83fe4a39dbb6b72ab6d87a117769534').list() as Set == ['ideaIU-14.1.4.pom'] as Set
-        new File(cacheDir, 'f8eb5ad49abba6374eeec643cecf20f7268cbfee').list() as Set == ['ideaIU-14.1.4', 'ideaIU-14.1.4.zip'] as Set
+        assertEquals(
+            setOf("b8993c44c83fe4a39dbb6b72ab6d87a117769534", "f8eb5ad49abba6374eeec643cecf20f7268cbfee"),
+            cacheDir.list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIU-14.1.4.pom"),
+            File(cacheDir, "b8993c44c83fe4a39dbb6b72ab6d87a117769534").list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIU-14.1.4", "ideaIU-14.1.4.zip"),
+            File(cacheDir, "f8eb5ad49abba6374eeec643cecf20f7268cbfee").list()?.toSet(),
+        )
 
         // do not download ideaIC dist
-        ideaCommunityCacheDir.list() as Set == ['87ce88382f970b94fc641304e0a80af1d70bfba7', 'f5169c4a780da12ca4eec17553de9f6d43a49d52'] as Set
-        new File(ideaCommunityCacheDir, '87ce88382f970b94fc641304e0a80af1d70bfba7').list() as Set == ['ideaIC-14.1.4.pom'] as Set
-        new File(ideaCommunityCacheDir, 'f5169c4a780da12ca4eec17553de9f6d43a49d52').list() as Set == ['ideaIC-14.1.4-sources.jar'] as Set
+        assertEquals(
+            setOf("87ce88382f970b94fc641304e0a80af1d70bfba7", "f5169c4a780da12ca4eec17553de9f6d43a49d52"),
+            ideaCommunityCacheDir.list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIC-14.1.4.pom"),
+            File(ideaCommunityCacheDir, "87ce88382f970b94fc641304e0a80af1d70bfba7").list()?.toSet(),
+        )
+        assertEquals(
+            setOf("ideaIC-14.1.4-sources.jar"),
+            File(ideaCommunityCacheDir, "f5169c4a780da12ca4eec17553de9f6d43a49d52").list()?.toSet(),
+        )
     }
 }
