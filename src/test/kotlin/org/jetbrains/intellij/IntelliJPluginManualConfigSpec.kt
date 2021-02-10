@@ -1,10 +1,16 @@
 package org.jetbrains.intellij
 
-class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
-    def 'configure sdk manually test'() {
-        given:
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
+
+class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
+
+    @Test
+    fun `configure sdk manually test`() {
         writeTestFile()
-        buildFile << """
+
+        buildFile.groovy("""
             intellij { version = '14.1.4' }
             intellij.configureDefaultDependencies = false
             afterEvaluate {
@@ -20,41 +26,45 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
             task printMainRuntimeClassPath { doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testCompile: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntime: ' + sourceSets.test.runtimeClasspath.asPath } }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build('printMainCompileClassPath', 'printTestCompileClassPath', 'printTestRuntimeClassPath', 'printMainRuntimeClassPath')
-        def mainClasspath = result.output.readLines().find { it.startsWith('compile:') }
-        def mainRuntimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
-        def testClasspath = result.output.readLines().find { it.startsWith('testCompile:') }
-        def testRuntimeClasspath = result.output.readLines().find { it.startsWith('testRuntime:') }
+        build(
+            "printMainCompileClassPath",
+            "printTestCompileClassPath",
+            "printTestRuntimeClassPath",
+            "printMainRuntimeClassPath",
+        ).output.lines().let { lines ->
+            val mainClasspath = lines.find { it.startsWith("compile:") } ?: ""
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val testClasspath = lines.find { it.startsWith("testCompile:") } ?: ""
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntime:") } ?: ""
 
-        then:
-        assert  mainClasspath.contains('openapi.jar')           // included explicitly in compileOnly 
-        assert  mainRuntimeClasspath.contains('openapi.jar')    // includes all but idea.jar
-        assert !testClasspath.contains('openapi.jar')
-        assert  testRuntimeClasspath.contains('openapi.jar')    // includes all
+            assertTrue(mainClasspath.contains("openapi.jar"))           // included explicitly in compileOnly
+            assertTrue(mainRuntimeClasspath.contains("openapi.jar"))    // includes all but idea.jar
+            assertFalse(testClasspath.contains("openapi.jar"))
+            assertTrue(testRuntimeClasspath.contains("openapi.jar"))    // includes all
 
-        assert  mainClasspath.contains('asm-all.jar')           // included explicitly 
-        assert  testClasspath.contains('asm-all.jar')
-        assert  testRuntimeClasspath.contains('asm-all.jar')    // includes all
+            assertTrue(mainClasspath.contains("asm-all.jar"))           // included explicitly
+            assertTrue(testClasspath.contains("asm-all.jar"))
+            assertTrue(testRuntimeClasspath.contains("asm-all.jar"))    // includes all
 
-        assert !mainClasspath.contains('boot.jar')
-        assert  testClasspath.contains('boot.jar')              // included explicitly
-        assert  testRuntimeClasspath.contains('boot.jar')       // includes all
+            assertFalse(mainClasspath.contains("boot.jar"))
+            assertTrue(testClasspath.contains("boot.jar"))              // included explicitly
+            assertTrue(testRuntimeClasspath.contains("boot.jar"))       // includes all
 
-        assert !mainClasspath.contains('idea.jar')
-        assert !mainRuntimeClasspath.contains('idea.jar')       // excluded explicitly
-        assert !testClasspath.contains('idea.jar')
-        assert  testRuntimeClasspath.contains('idea.jar')       // includes all
+            assertFalse(mainClasspath.contains("idea.jar"))
+            assertFalse(mainRuntimeClasspath.contains("idea.jar"))      // excluded explicitly
+            assertFalse(testClasspath.contains("idea.jar"))
+            assertTrue(testRuntimeClasspath.contains("idea.jar"))       // includes all
 
-        assert mainRuntimeClasspath.contains('idea_rt.jar')     // includes all but idea.jar
+            assertTrue(mainRuntimeClasspath.contains("idea_rt.jar"))    // includes all but idea.jar
+        }
     }
 
-    def 'configure plugins manually test'() {
-        given:
+    @Test
+    fun `configure plugins manually test`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij {
                 version = '14.1.4'
                 configureDefaultDependencies = false
@@ -73,45 +83,50 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
             task printMainRuntimeClassPath { doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testCompile: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntime: ' + sourceSets.test.runtimeClasspath.asPath } }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build('printMainCompileClassPath', 'printTestCompileClassPath', 'printTestRuntimeClassPath', 'printMainRuntimeClassPath')
-        def mainClasspath = result.output.readLines().find { it.startsWith('compile:') }
-        def mainRuntimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
-        def testClasspath = result.output.readLines().find { it.startsWith('testCompile:') }
-        def testRuntimeClasspath = result.output.readLines().find { it.startsWith('testRuntime:') }
 
-        then:
-        assert  mainClasspath.contains('junit-rt.jar')          // included explicitly in compileOnly
-        assert !mainRuntimeClasspath.contains('junit-rt.jar')
-        assert !testClasspath.contains('junit-rt.jar')
-        assert  testRuntimeClasspath.contains('junit-rt.jar')   // includes all
+        build(
+            "printMainCompileClassPath",
+            "printTestCompileClassPath",
+            "printTestRuntimeClassPath",
+            "printMainRuntimeClassPath",
+        ).output.lines().let { lines ->
+            val mainClasspath = lines.find { it.startsWith("compile:") } ?: ""
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val testClasspath = lines.find { it.startsWith("testCompile:") } ?: ""
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntime:") } ?: ""
 
-        assert  mainClasspath.contains('idea-junit.jar')        // included explicitly in compile
-        assert  testClasspath.contains('idea-junit.jar')        // inherited from compile
-        assert  testRuntimeClasspath.contains('idea-junit.jar') // includes all
+            assertTrue(mainClasspath.contains("junit-rt.jar"))              // included explicitly in compileOnly
+            assertFalse(mainRuntimeClasspath.contains("junit-rt.jar"))
+            assertFalse(testClasspath.contains("junit-rt.jar"))
+            assertTrue(testRuntimeClasspath.contains("junit-rt.jar"))       // includes all
 
-        assert !mainClasspath.contains('testng-plugin.jar')
-        assert !mainRuntimeClasspath.contains('testng-plugin.jar') // excluded explicitly
-        assert !testClasspath.contains('testng-plugin.jar')
-        assert  testRuntimeClasspath.contains('testng-plugin.jar') // includes all
+            assertTrue(mainClasspath.contains("idea-junit.jar"))            // included explicitly in compile
+            assertTrue(testClasspath.contains("idea-junit.jar"))            // inherited from compile
+            assertTrue(testRuntimeClasspath.contains("idea-junit.jar"))     // includes all
 
-        assert !mainClasspath.contains('testng.jar')
-        assert  mainRuntimeClasspath.contains('testng.jar')     // includes testng
-        assert  testClasspath.contains('testng.jar')            // included explicitly
-        assert  testRuntimeClasspath.contains('testng.jar')     // includes all
+            assertFalse(mainClasspath.contains("testng-plugin.jar"))
+            assertFalse(mainRuntimeClasspath.contains("testng-plugin.jar")) // excluded explicitly
+            assertFalse(testClasspath.contains("testng-plugin.jar"))
+            assertTrue(testRuntimeClasspath.contains("testng-plugin.jar"))  // includes all
 
-        assert !mainClasspath.contains('copyright.jar')         // not included (same for all below)
-        assert !mainRuntimeClasspath.contains('copyright.jar')
-        assert !testClasspath.contains('copyright.jar')
-        assert !testRuntimeClasspath.contains('copyright.jar')
+            assertFalse(mainClasspath.contains("testng.jar"))
+            assertTrue(mainRuntimeClasspath.contains("testng.jar"))         // includes testng
+            assertTrue(testClasspath.contains("testng.jar"))                // included explicitly
+            assertTrue(testRuntimeClasspath.contains("testng.jar"))         // includes all
+
+            assertFalse(mainClasspath.contains("copyright.jar"))            // not included (same for all below)
+            assertFalse(mainRuntimeClasspath.contains("copyright.jar"))
+            assertFalse(testClasspath.contains("copyright.jar"))
+            assertFalse(testRuntimeClasspath.contains("copyright.jar"))
+        }
     }
 
-    def 'configure extra dependencies manually test'() {
-        given:
+    @Test
+    fun `configure extra dependencies manually test`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['intellij-core', 'jps-build-test']
@@ -129,74 +144,77 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
             task printMainRuntimeClassPath { doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testCompile: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntime: ' + sourceSets.test.runtimeClasspath.asPath } }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build('printMainCompileClassPath', 'printTestCompileClassPath', 'printTestRuntimeClassPath', 'printMainRuntimeClassPath')
-        def mainClasspath = result.output.readLines().find { it.startsWith('compile:') }
-        def mainRuntimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
-        def testClasspath = result.output.readLines().find { it.startsWith('testCompile:') }
-        def testRuntimeClasspath = result.output.readLines().find { it.startsWith('testRuntime:') }
 
-        then:
-        assert  mainClasspath.contains('jps-build-test')            // included explicitly in compileOnly (note - versioned jar, checking by name only)
-        assert !mainRuntimeClasspath.contains('jps-build-test')
-        assert !testClasspath.contains('jps-build-test')
-        assert  testRuntimeClasspath.contains('jps-build-test')     // includes all
+        build(
+            "printMainCompileClassPath",
+            "printTestCompileClassPath",
+            "printTestRuntimeClassPath",
+            "printMainRuntimeClassPath",
+        ).output.lines().let { lines ->
+            val mainClasspath = lines.find { it.startsWith("compile:") } ?: ""
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val testClasspath = lines.find { it.startsWith("testCompile:") } ?: ""
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntime:") } ?: ""
 
-        assert !mainClasspath.contains('intellij-core.jar')
-        assert !mainRuntimeClasspath.contains('intellij-core.jar')  // excluded explicitly
-        assert !testClasspath.contains('intellij-core.jar')         // not included
-        assert  testRuntimeClasspath.contains('intellij-core.jar')  // includes all
+            assertTrue(mainClasspath.contains("jps-build-test"))            // included explicitly in compileOnly (note - versioned jar, checking by name only)
+            assertFalse(mainRuntimeClasspath.contains("jps-build-test"))
+            assertFalse(testClasspath.contains("jps-build-test"))
+            assertTrue(testRuntimeClasspath.contains("jps-build-test"))     // includes all
 
-        assert !mainClasspath.contains('annotations.jar')
-        assert  testClasspath.contains('annotations.jar')           // included explicitly
-        assert  testRuntimeClasspath.contains('annotations.jar')    // includes all
+            assertFalse(mainClasspath.contains("intellij-core.jar"))
+            assertFalse(mainRuntimeClasspath.contains("intellij-core.jar")) // excluded explicitly
+            assertFalse(testClasspath.contains("intellij-core.jar"))        // not included
+            assertTrue(testRuntimeClasspath.contains("intellij-core.jar"))  // includes all
 
-        assert !mainClasspath.contains('intellij-core-analysis-deprecated.jar')
-        assert  mainRuntimeClasspath.contains('intellij-core-analysis-deprecated.jar') // includes intellij-core
-        assert !testClasspath.contains('intellij-core-analysis-deprecated.jar')
-        assert  testRuntimeClasspath.contains('intellij-core-analysis-deprecated.jar') // includes all
+            assertFalse(mainClasspath.contains("annotations.jar"))
+            assertTrue(testClasspath.contains("annotations.jar"))           // included explicitly
+            assertTrue(testRuntimeClasspath.contains("annotations.jar"))    // includes all
+
+            assertFalse(mainClasspath.contains("intellij-core-analysis-deprecated.jar"))
+            assertTrue(mainRuntimeClasspath.contains("intellij-core-analysis-deprecated.jar")) // includes intellij-core
+            assertFalse(testClasspath.contains("intellij-core-analysis-deprecated.jar"))
+            assertTrue(testRuntimeClasspath.contains("intellij-core-analysis-deprecated.jar")) // includes all
+        }
     }
 
-    def 'configure sdk manually fail without afterEvaluate'() {
-        given:
+    @Test
+    fun `configure sdk manually fail without afterEvaluate`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij.configureDefaultDependencies = false
             dependencies {
                 compile intellij { include('asm-all.jar') }
             } 
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail('tasks')
-
-        then:
-        result.output.contains('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
+        val result = buildAndFail("tasks")
+        assertTrue(
+            result.output.contains("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
+        )
     }
 
-    def 'configure plugins manually fail without afterEvaluate'() {
-        given:
+    @Test
+    fun `configure plugins manually fail without afterEvaluate`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij.configureDefaultDependencies = false
             dependencies {
                 compile intellijPlugin('junit')
             } 
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail('tasks')
-
-        then:
-        result.output.contains('intellij plugin \'junit\' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block')
+        val result = buildAndFail("tasks")
+        assertTrue(
+            result.output.contains("intellij plugin 'junit' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+        )
     }
 
-    def 'configure plugins manually fail on unconfigured plugin'() {
-        given:
+    @Test
+    fun `configure plugins manually fail on unconfigured plugin`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij {
                 configureDefaultDependencies = false
                 plugins = []
@@ -206,19 +224,18 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
                     compile intellijPlugin('junit')
                 }
             } 
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail('tasks')
-
-        then:
-        result.output.contains('intellij plugin \'junit\' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block')
+        val result = buildAndFail("tasks")
+        assertTrue(
+            result.output.contains("intellij plugin 'junit' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+        )
     }
 
-    def 'configure plugins manually fail on some unconfigured plugins'() {
-        given:
+    @Test
+    fun `configure plugins manually fail on some unconfigured plugins`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij {
                 configureDefaultDependencies = false
                 plugins = ['junit']
@@ -228,19 +245,18 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
                     compile intellijPlugins('testng', 'junit', 'copyright')
                 }
             } 
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail('tasks')
-
-        then:
-        result.output.contains('intellij plugins [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block')
+        val result = buildAndFail("tasks")
+        assertTrue(
+            result.output.contains("intellij plugins [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+        )
     }
 
-    def 'configure extra manually fail without afterEvaluate'() {
-        given:
+    @Test
+    fun `configure extra manually fail without afterEvaluate`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['intellij-core']
@@ -248,19 +264,18 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
             dependencies {
                 compile intellijExtra('intellij-core')
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail('tasks')
-
-        then:
-        result.output.contains('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
+        val result = buildAndFail("tasks")
+        assertTrue(
+            result.output.contains("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
+        )
     }
 
-    def 'configure extra manually fail on unconfigured extra dependency'() {
-        given:
+    @Test
+    fun `configure extra manually fail on unconfigured extra dependency`() {
         writeTestFile()
-        buildFile << """
+        buildFile.groovy("""
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['jps-build-test']
@@ -270,12 +285,11 @@ class IntelliJPluginManualConfigSpec extends IntelliJPluginSpecBase {
                     compile intellijExtra('intellij-core')
                 }
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail('tasks')
-
-        then:
-        result.output.contains('intellij extra artifact \'intellij-core\' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block')
+        val result = buildAndFail("tasks")
+        assertTrue(
+            result.output.contains("intellij extra artifact 'intellij-core' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
+        )
     }
 }
