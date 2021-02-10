@@ -7,7 +7,7 @@
             <version>201.6251.22</version>
             <idea-version since-build="201" until-build="202"/>
             <vendor>JetBrains</vendor>
-            <download-url>EmacsKeymap.zip</download-url>
+            <download-url>../custom-repo/EmacsKeymap.zip</download-url>
             <description><![CDATA[
     Emacs keymap for all IntelliJ-based IDEs.
     Use this plugin if Emacs keymap is not pre-installed in your IDE.
