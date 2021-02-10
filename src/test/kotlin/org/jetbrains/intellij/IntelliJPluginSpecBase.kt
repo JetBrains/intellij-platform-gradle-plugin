@@ -1,31 +1,33 @@
 package org.jetbrains.intellij
 
-import groovy.io.FileType
+import org.apache.commons.io.FileUtils
 import org.gradle.api.internal.project.ProjectInternal
-import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.jetbrains.annotations.NotNull
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
-import spock.lang.Specification
-
+import org.intellij.lang.annotations.Language
+import java.io.BufferedReader
+import java.io.File
 import java.util.zip.ZipFile
+import kotlin.test.BeforeTest
+import kotlin.test.assertEquals
 
-abstract class IntelliJPluginSpecBase extends Specification {
-    protected final String gradleHome = System.properties.get('test.gradle.home')
-    protected String pluginsRepo = System.properties.get('plugins.repo', IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO)
+abstract class IntelliJPluginSpecBase {
 
-    String getIntellijVersion() {
-        return '2020.1'
-    }
+    val gradleHome: String = System.getProperty("test.gradle.home")
+    val pluginsRepo: String = System.getProperty("plugins.repo", IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO)
+    val intellijVersion = "2020.1"
 
-    @Rule
-    final TemporaryFolder dir = new TemporaryFolder()
-    private boolean debugEnabled = true
+    val dir = createTempDir()
+    var debugEnabled = true
 
-    def setup() {
-        file("settings.gradle") << "rootProject.name='projectName'\n"
-        buildFile << """
+    val buildFile = file("build.gradle")
+    val pluginXml = file("src/main/resources/META-INF/plugin.xml")
+    val buildDirectory = File(dir, "build")
+
+    @BeforeTest
+    open fun setUp() {
+        file("settings.gradle").groovy("rootProject.name = 'projectName'")
+
+        buildFile.groovy("""
             buildscript {
                 repositories { 
                     maven { url 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service' } 
@@ -54,156 +56,126 @@ abstract class IntelliJPluginSpecBase extends Specification {
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
-
-        """.stripIndent()
+        """)
     }
 
-    def cleanup() {
+    fun writeTestFile() = file("src/test/java/AppTest.java").java("""
+        import java.lang.String;
+        import org.junit.Test;
+        import org.jetbrains.annotations.NotNull;
 
-    }
+        public class AppTest {
+            @Test
+            public void testSomething() {}
+        
+            private void print(@NotNull String s) { System.out.println(s); }
+        }
+    """)
 
-    protected File writeTestFile() {
-        file('src/test/java/AppTest.java') << """
-import java.lang.String;
-import org.junit.Test;
-import org.jetbrains.annotations.NotNull;
-public class AppTest {
-    @Test
-    public void testSomething() {}
-    
-    private void print(@NotNull String s) { System.out.println(s); }
-}
-"""
-    }
-
-    protected disableDebug(String reason) {
+    protected fun disableDebug(reason: String) {
         println("Debugging is disable for test with the following reason: $reason")
         debugEnabled = false
     }
 
-    protected BuildResult buildAndFail(String... tasks) {
-        return build(true, tasks)
-    }
+    protected fun buildAndFail(vararg tasks: String) = build(true, *tasks)
 
-    protected BuildResult build(String... tasks) {
-        return build(false, tasks)
-    }
+    protected fun build(vararg tasks: String) = build(false, *tasks)
 
-    protected BuildResult build(boolean fail, String... tasks) {
-        return build('4.9', fail, tasks)
-    }
+    protected fun build(fail: Boolean, vararg tasks: String) = build("6.6", fail, *tasks)
 
-    protected BuildResult build(String gradleVersion, boolean fail, String... tasks) {
-        GradleRunner builder = builder(gradleVersion, tasks)
-        return fail ? builder.buildAndFail() : builder.build()
-    }
-
-    private GradleRunner builder(String gradleVersion, String[] tasks) {
-        tasks += ['--stacktrace']
-        def builder = GradleRunner.create().withProjectDir(dir.root).withGradleVersion(gradleVersion)
-                .withPluginClasspath()
-                .withDebug(debugEnabled)
-                .withTestKitDir(new File(gradleHome))
-                .withArguments(tasks)
-        return builder
-    }
-
-    protected File getBuildFile() {
-        file('build.gradle')
-    }
-
-    protected File getBuildDirectory() {
-        return new File(dir.root, "build")
-    }
-
-    protected File getPluginXml() {
-        file('src/main/resources/META-INF/plugin.xml')
-    }
-
-    protected List<String> tasks(@NotNull String groupName) {
-        def buildResult = build(ProjectInternal.TASKS_TASK)
-        List<String> result = new ArrayList<>()
-        boolean targetGroupAppeared = false
-        for (String line : buildResult.output.readLines()) {
-            if (!targetGroupAppeared) {
-                targetGroupAppeared = line.equalsIgnoreCase(groupName + " tasks")
-            } else if (line != ("-" * (groupName + " tasks").length())) {
-                if (!line) break
-                def spaceIndex = line.indexOf(' ')
-                result.add(spaceIndex > 0 ? line.substring(0, spaceIndex) : line)
+    protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String) =
+        builder(gradleVersion, *tasks).run {
+            when (fail) {
+                true -> buildAndFail()
+                false -> build()
             }
         }
-        return targetGroupAppeared ? result : null
+
+    private fun builder(gradleVersion: String, vararg tasks: String) =
+        GradleRunner.create().withProjectDir(dir).withGradleVersion(gradleVersion)
+            .withPluginClasspath()
+            .withDebug(debugEnabled)
+            .withTestKitDir(File(gradleHome))
+            .withArguments(*tasks, "--stacktrace")
+
+    fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
+        val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
+        drop(start).takeWhile(String::isNotEmpty).map { it.substringBefore(' ') }
     }
 
 
-    protected File directory(String path) {
-        new File(dir.root, path).with {
-            mkdirs()
-            it
+    protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
+    //
+    protected fun file(path: String) = path
+        .run { takeIf { startsWith('/') } ?: "${dir.path}/$this" }
+        .split('/')
+        .run { File(dropLast(1).joinToString("/")) to last() }
+        .apply { if (!first.exists()) first.mkdirs() }
+        .run { File(first, second) }
+        .apply { createNewFile() }
+
+    protected fun writeJavaFile() = file("src/main/java/App.java").java("""
+        import java.lang.String;
+        import java.util.Arrays;
+        import org.jetbrains.annotations.NotNull;
+
+        class App {
+            public static void main(@NotNull String[] strings) {
+                System.out.println(Arrays.toString(strings));
+            }
         }
-    }
+    """)
 
-    protected File file(String path) {
-        def splitted = path.split('/')
-        def directory = splitted.size() > 1 ? directory(splitted[0..-2].join('/')) : dir.root
-        def file = new File(directory, splitted[-1])
-        file.createNewFile()
-        file
-    }
+    protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin("""
+        package pack
 
-    protected File writeJavaFile() {
-        file('src/main/java/App.java') << """  
-import java.lang.String;
-import org.jetbrains.annotations.NotNull;
-class App {
-    public static void main(@NotNull String[] strings) {
-        System.out.println(strings);    
-    }
-}
-"""
-    }
+        import javax.swing.JPanel
 
-    protected File writeKotlinUIFile() {
-        file('src/main/kotlin/pack/AppKt.kt') << """package pack
-import javax.swing.JPanel
-class AppKt {
-    private lateinit var panel: JPanel
-    init {
-        panel.toString()
-    }
-}"""
-    }
-
-    protected static String adjustWindowsPath(@NotNull String s) {
-        return s.replaceAll('\\\\', '/')
-    }
-
-    protected static void assertFileContent(File file, String expectedContent) {
-        assert file.text.trim() == expectedContent.stripIndent()
-    }
-
-    protected static File extractFile(ZipFile zipFile, String path) {
-        def tmp = File.createTempFile("gradle-test", "")
-        tmp.deleteOnExit()
-        tmp << zipFile.getInputStream(zipFile.getEntry(path))
-        return tmp
-    }
-
-    protected static String fileText(ZipFile zipFile, String path) {
-        zipFile.getInputStream(zipFile.getEntry(path)).text.trim()
-    }
-
-    protected static Set<String> collectPaths(ZipFile zipFile) {
-        return zipFile.entries().collect { it.name } as Set
-    }
-
-    protected static Set collectPaths(File directory) {
-        assert directory.exists()
-        def paths = new HashSet()
-        directory.eachFileRecurse(FileType.FILES) {
-            paths << adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length()))
+        class AppKt {
+            private lateinit var panel: JPanel
+            init {
+                panel.toString()
+            }
         }
-        paths
+    """)
+
+    fun adjustWindowsPath(s: String) = s.replace("\\", "/")
+
+    protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
+        assertEquals(expectedContent.trimIndent(), file?.readText()?.trim())
+
+    protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
+        assertEquals(expectedContent.trimIndent(), fileText(zip, path))
+
+    protected fun extractFile(zipFile: ZipFile, path: String) =
+        createTempFile("gradle-test", "").apply {
+            deleteOnExit()
+            FileUtils.copyInputStreamToFile(zipFile.getInputStream(zipFile.getEntry(path)), this)
+        }
+
+    protected fun fileText(zipFile: ZipFile, path: String) = zipFile
+        .getInputStream(zipFile.getEntry(path))
+        .bufferedReader()
+        .use(BufferedReader::readText)
+        .trim()
+
+    protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
+
+    protected fun collectPaths(directory: File): Set<String> {
+        assert(directory.exists())
+        // TODO: check if directories are skipped
+        return directory.walkTopDown().filterNot { it.isDirectory }.map {
+            adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length))
+        }.toSet()
     }
+
+    fun File.xml(@Language("XML") content: String) = append(content)
+
+    fun File.groovy(@Language("Groovy") content: String) = append(content)
+
+    fun File.java(@Language("Java") content: String) = append(content)
+
+    fun File.kotlin(@Language("kotlin") content: String) = append(content)
+
+    private fun File.append(content: String) = appendText(content.trimIndent() + "\n")
 }
