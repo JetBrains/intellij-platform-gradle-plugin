@@ -1,29 +1,38 @@
 package org.jetbrains.intellij
 
-class JarSearchableOptionsTaskSpec extends SearchableOptionsSpecBase {
-    def 'skip jarring searchable options using IDEA prior 2019.1'() {
-        given:
-        buildFile << "intellij { version = '14.1.4' }"
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-        when:
-        def result = build(IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
-        then:
-        result.output.contains("$IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME SKIPPED")
+    @Test
+    fun `skip jarring searchable options using IDEA prior 2019_1`() {
+        buildFile.groovy("""
+            intellij {
+                version = '14.1.4'
+            }
+        """)
+
+        val result = build(IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+        assertTrue(result.output.contains("${IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
     }
 
-    def 'jar searchable options produces archive'() {
-        given:
-        pluginXml << pluginXmlWithSearchableConfigurable
-        buildFile << "intellij { version = '$intellijVersion' }"
-        testSearchableConfigurableJava << searchableConfigurableCode
+    @Test
+    fun `jar searchable options produces archive`() {
+        pluginXml.xml(getPluginXmlWithSearchableConfigurable())
+        buildFile.groovy("""
+            intellij {
+                version = '$intellijVersion'
+            }
+        """)
+        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        when:
         build(IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
 
-        then:
-        def libsSearchableOptions = new File(buildDirectory, 'libsSearchableOptions')
-        libsSearchableOptions.exists()
-        collectPaths(libsSearchableOptions) == ['/lib/searchableOptions.jar'] as Set
+        val libsSearchableOptions = File(buildDirectory, "libsSearchableOptions")
+        assertTrue(libsSearchableOptions.exists())
+        assertEquals(setOf("/lib/searchableOptions.jar"), collectPaths(libsSearchableOptions))
     }
 }
