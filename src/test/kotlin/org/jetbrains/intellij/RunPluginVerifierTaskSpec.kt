@@ -1,124 +1,118 @@
 package org.jetbrains.intellij
 
-import de.undercouch.gradle.tasks.download.DownloadAction
-import groovy.json.JsonSlurper
+import org.apache.commons.io.FileUtils
+import org.gradle.internal.impldep.com.google.gson.JsonParser
+import java.io.InputStream
+import java.io.InputStreamReader
+import java.net.URL
+import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
-class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
-    def 'run plugin verifier in specified version'() {
-        given:
+class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
+
+    @Test
+    fun `run plugin verifier in specified version`() {
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = "2020.2.3"
                 verifierVersion = "1.241"
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("Starting the IntelliJ Plugin Verifier 1.241")
+        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.241"))
     }
 
-    def 'run plugin verifier in the latest version'() {
-        given:
+    @Test
+    fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = "2020.2.3"
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
-        then:
-        def url = new URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
-        def version = new JsonSlurper().parse(url)["name"]
-        result.output.contains("Starting the IntelliJ Plugin Verifier $version")
+        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val version = requestPluginVerifierVersion()
+        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier $version"))
     }
 
-    def 'test plugin against two IDEs'() {
-        given:
+    @Test
+    fun `test plugin against two IDEs`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = "IC-2020.2.3,PS-2020.1.3"
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("Plugin PluginName:1.0.0 against IC-202.7660.26: Compatible")
-        result.output.contains("Plugin PluginName:1.0.0 against PS-201.8538.41: Compatible")
+        assertTrue(result.output.contains("Plugin PluginName:1.0.0 against IC-202.7660.26: Compatible"))
+        assertTrue(result.output.contains("Plugin PluginName:1.0.0 against PS-201.8538.41: Compatible"))
     }
 
-    def 'set verification reports directory'() {
-        given:
+    @Test
+    fun `set verification reports directory`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             version = "1.0.0"
             
             runPluginVerifier {
-                verificationReportsDirectory = "\${project.buildDir}/foo"
+                verificationReportsDirectory = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        def directory = file("build/foo").canonicalPath
-        result.output.contains("Verification reports directory: $directory")
+        val directory = file("build/foo").canonicalPath
+        assertTrue(result.output.contains("Verification reports directory: $directory"))
     }
 
-    def 'fail on missing ideVersions property'() {
-        given:
+    @Test
+    fun `fail on missing ideVersions property`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             version = "1.0.0"
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("`ideVersions` and `localPaths` properties should not be empty")
+        assertTrue(result.output.contains("`ideVersions` and `localPaths` properties should not be empty"))
     }
 
-    def 'fail on :verifyPlugin task'() {
-        given:
+    @Test
+    fun `fail on verifyPlugin task`() {
         writeJavaFile()
-        buildFile << """
+        pluginXml.delete()
+        buildFile.groovy("""
             version = "1.0.0"
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("Plugin descriptor 'plugin.xml' is not found")
-        result.output.contains("Task :verifyPlugin FAILED")
+        assertTrue(result.output.contains("Plugin descriptor 'plugin.xml' is not found"))
+        assertTrue(result.output.contains("Task :verifyPlugin FAILED"))
     }
 
-    def 'fail on Deprecated API usages'() {
-        given:
+    @Test
+    fun `fail on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -127,41 +121,37 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
                 failureLevel = FailureLevel.DEPRECATED_API_USAGES
                 ideVersions = "2020.2.3"
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("Deprecated API usages")
-        result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
+        assertTrue(result.output.contains("Deprecated API usages"))
+        assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
     }
 
-    def 'pass on Deprecated API usages'() {
-        given:
+    @Test
+    fun `pass on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = "2020.2.3"
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("Deprecated API usages")
-        !result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
+        assertTrue(result.output.contains("Deprecated API usages"))
+        assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
     }
 
-    def 'fail on incorrect ideVersion'() {
-        given:
+    @Test
+    fun `fail on incorrect ideVersion`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -169,20 +159,18 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             runPluginVerifier {
                 ideVersions = "foo,foo,,foo"
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("IDE 'foo' cannot be downloaded.")
+        assertTrue(result.output.contains("IDE 'foo' cannot be downloaded."))
     }
 
-    def 'fail on any failureLevel'() {
-        given:
+    @Test
+    fun `fail on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -191,21 +179,19 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
                 ideVersions = "2020.2.3"
                 failureLevel = FailureLevel.ALL
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("Deprecated API usages")
-        result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
+        assertTrue(result.output.contains("Deprecated API usages"))
+        assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
     }
 
-    def 'pass on any failureLevel'() {
-        given:
+    @Test
+    fun `pass on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile << """
+        buildFile.groovy("""
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -214,74 +200,81 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
                 ideVersions = "2020.2.3"
                 failureLevel = FailureLevel.NONE
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        then:
-        result.output.contains("Deprecated API usages")
-        !result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES")
+        assertTrue(result.output.contains("Deprecated API usages"))
+        assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
     }
 
-    def 'run plugin verifier in offline mode'() {
-        given:
+    @Test
+    fun `run plugin verifier in offline mode`() {
         writePluginXmlFile()
         warmupGradle()
-        buildFile << """
+        buildFile.groovy("""
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = "2020.1.3"
-                verifierPath = "\${project.buildDir}/pluginVerifier.jar"
+                verifierPath = "${'$'}{project.buildDir}/pluginVerifier.jar"
             }
-            """.stripIndent()
+        """)
 
-        when:
-        def url = new URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
-        def version = new JsonSlurper().parse(url)["name"]
+        val version = requestPluginVerifierVersion()
+        FileUtils.copyInputStreamToFile(
+            URL("https://dl.bintray.com/jetbrains/intellij-plugin-service/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
+            file("build/pluginVerifier.jar")
+        )
 
-        file("build/pluginVerifier.jar").withOutputStream { out ->
-            out << new URL("https://dl.bintray.com/jetbrains/intellij-plugin-service/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream()
-        }
-
-        def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
-
-        then:
-        result.output.contains("Gradle runs in offline mode.")
+        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
+        assertTrue(result.output.contains("Gradle runs in offline mode."))
     }
 
-    private void warmupGradle() {
-        buildFile << """
+    private fun warmupGradle() {
+        buildFile.groovy("""
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = "2020.2.3"
             }
-            """.stripIndent()
+        """)
         build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
     }
 
-    private void writeJavaFileWithDeprecation() {
-        file('src/main/java/App.java') << """  
+    private fun writeJavaFileWithDeprecation() {
+        file("src/main/java/App.java").java("""  
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import com.intellij.openapi.util.text.StringUtil;
+
             class App {
+
                 public static void main(@NotNull String[] strings) {
                     StringUtil.firstLetterToUpperCase("foo");
                 }
             }
-            """.stripIndent()
+        """)
     }
 
-    private void writePluginXmlFile() {
-        pluginXml << """
-            <idea-plugin version="2">
+    private fun writePluginXmlFile() {
+        pluginXml.xml("""
+            <idea-plugin>
                 <name>PluginName</name>
-                <description>Plugin description</description>
+                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """.stripIndent()
+        """)
+    }
+
+    private fun requestPluginVerifierVersion(): String {
+        val url = URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
+        val request = url.openConnection()
+        request.connect()
+
+        val jp = JsonParser() //from gson
+        val root = jp.parse(InputStreamReader(request.content as InputStream)) //Convert the input stream to a json element
+        val rootobj = root.asJsonObject //May be an array, may be an object.
+        return rootobj.get("name").asString //just grab the zipcode
     }
 }
