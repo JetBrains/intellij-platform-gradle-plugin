@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.6.6 (under development)
+## 0.7.0 (under development)
+
+- support GoLand as an SDK
+- fix javac2 dependency for project with implicit IntelliJ version [#592](../../issues/592)
+- fix using query parameters in custom repository urls [#589](../../issues/589)
 
 ## 0.6.5
 

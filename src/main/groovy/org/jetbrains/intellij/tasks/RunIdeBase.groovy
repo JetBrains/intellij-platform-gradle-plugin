@@ -3,7 +3,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.util.CollectionUtils
+import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.Utils
 
 class RunIdeTask extends RunIdeBase {
@@ -225,15 +225,39 @@ abstract class RunIdeBase extends JavaExec {
         if (toolsJar != null) {
             classpath += project.files(toolsJar)
         }
-        classpath += project.files("$ideDirectory/lib/idea_rt.jar",
-                "$ideDirectory/lib/idea.jar",
-                "$ideDirectory/lib/bootstrap.jar",
-                "$ideDirectory/lib/extensions.jar",
-                "$ideDirectory/lib/util.jar",
-                "$ideDirectory/lib/openapi.jar",
-                "$ideDirectory/lib/trove4j.jar",
-                "$ideDirectory/lib/jdom.jar",
-                "$ideDirectory/lib/log4j.jar")
+
+        def buildNumber = Utils.ideBuildNumber(getIdeDirectory())
+        def version = VersionNumber.parse(buildNumber[buildNumber.indexOf('-') + 1..-1])
+        if (version > VersionNumber.parse("203.0")) {
+            classpath += project.files(
+                    "$ideDirectory/lib/bootstrap.jar",
+                    "$ideDirectory/lib/util.jar",
+                    "$ideDirectory/lib/jdom.jar",
+                    "$ideDirectory/lib/log4j.jar",
+                    "$ideDirectory/lib/jna.jar",
+            )
+        }
+        else if (version >= VersionNumber.parse("202.0")) {
+            classpath += project.files(
+                    "$ideDirectory/lib/bootstrap.jar",
+                    "$ideDirectory/lib/extensions.jar",
+                    "$ideDirectory/lib/util.jar",
+                    "$ideDirectory/lib/jdom.jar",
+                    "$ideDirectory/lib/log4j.jar",
+                    "$ideDirectory/lib/jna.jar",
+            )
+        }
+        else {
+            classpath += project.files(
+                    "$ideDirectory/lib/bootstrap.jar",
+                    "$ideDirectory/lib/extensions.jar",
+                    "$ideDirectory/lib/util.jar",
+                    "$ideDirectory/lib/jdom.jar",
+                    "$ideDirectory/lib/log4j.jar",
+                    "$ideDirectory/lib/jna.jar",
+                    "$ideDirectory/lib/trove4j.jar",
+            )
+        }
     }
 
     def configureSystemProperties() {

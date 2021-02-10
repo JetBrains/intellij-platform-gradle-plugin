@@ -6,9 +6,9 @@ import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.Utils
 
 class BuiltinPluginsRegistry {
-    private final Map<String, Plugin> plugins = new HashMap<>();
+    private final Map<String, Plugin> plugins = new HashMap<>()
 
-    private final Map<String, String> directoryNameMapping = new HashMap<>();
+    private final Map<String, String> directoryNameMapping = new HashMap<>()
     private final File pluginsDirectory;
 
     BuiltinPluginsRegistry(def pluginsDirectory) {

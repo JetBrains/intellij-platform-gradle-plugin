@@ -16,16 +16,18 @@ class CustomPluginsRepository implements PluginsRepository {
 
     CustomPluginsRepository(@NotNull Project project, @NotNull String repoUrl) {
         this.project = project
-        def pluginsXmlUrl
-        if (repoUrl.endsWith(".xml")) {
+        URI pluginsXmlUri
+        def uri = new URI(repoUrl)
+        if (uri.path.endsWith('.xml')) {
             this.repoUrl = repoUrl.substring(0, repoUrl.lastIndexOf('/'))
-            pluginsXmlUrl = repoUrl
+            pluginsXmlUri = uri
         } else {
             this.repoUrl = repoUrl
-            pluginsXmlUrl = repoUrl + "/updatePlugins.xml"
+            pluginsXmlUri = new URI(uri.scheme, uri.userInfo, uri.host, uri.port, "$uri.path/", uri.query, uri.fragment)
+                    .resolve("updatePlugins.xml")
         }
-        Utils.debug(project, "Loading list of plugins from: ${pluginsXmlUrl}")
-        pluginsXml = Utils.parseXml(new URI("${pluginsXmlUrl}").toURL().openStream())
+        Utils.debug(project, "Loading list of plugins from: ${pluginsXmlUri}")
+        pluginsXml = Utils.parseXml(pluginsXmlUri.toURL().openStream())
     }
 
     @Nullable
