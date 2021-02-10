@@ -3,7 +3,7 @@ package org.jetbrains.intellij
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class BuildSearchableOptionsTaskSpec: SearchableOptionsSpecBase() {
+class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `skip building searchable options using IDEA prior 2019_1`() {
