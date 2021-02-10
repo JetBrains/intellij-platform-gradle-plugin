@@ -2,56 +2,74 @@ package org.jetbrains.intellij
 
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
+import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 
-class ProcessResourcesTaskSpec extends IntelliJPluginSpecBase {
-    def 'use patched plugin xml files'() {
-        given:
-        pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
+class ProcessResourcesTaskSpec: IntelliJPluginSpecBase() {
 
-        when:
+    private val outputPluginXml = lazy { File(buildDirectory, "resources/main/META-INF/").listFiles()?.first() }
+
+    @Test
+    fun `use patched plugin xml files`() {
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        then:
-        outputPluginXml.text == '''
-            <idea-plugin version="2">
+        assertFileContent(outputPluginXml.value, """
+            <idea-plugin>
               <idea-version since-build="201.6668" until-build="201.*"/>
             </idea-plugin>
-            '''[1..-1].stripIndent()
+        """)
     }
 
-    def 'do not break incremental processing'() {
-        given:
-        pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
+    @Test
+    fun `do not break incremental processing`() {
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
 
-        when:
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
-        def result = build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        then:
-        result.task(":$JavaPlugin.PROCESS_RESOURCES_TASK_NAME").outcome == TaskOutcome.UP_TO_DATE
+        val result = build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+
+        assertEquals(
+            TaskOutcome.UP_TO_DATE,
+            result.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
+        )
     }
 
-    def 'update resources on updated patched xml files'() {
-        given:
-        pluginXml << "<idea-plugin version=\"2\"></idea-plugin>"
-        buildFile << "version='0.42.123'\n"
+    @Test
+    fun `update resources on updated patched xml files`() {
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
 
-        when:
+        buildFile.groovy("""
+            version = '0.42.123'
+        """)
+
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
-        buildFile << "patchPluginXml { sinceBuild 'Oh' }"
-        def result = build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        then:
-        result.task(":$JavaPlugin.PROCESS_RESOURCES_TASK_NAME").outcome != TaskOutcome.UP_TO_DATE
-        outputPluginXml.text == '''
-            <idea-plugin version="2">
+        buildFile.groovy("""
+            patchPluginXml { sinceBuild 'Oh' }
+        """)
+
+        val result = build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+
+        assertNotEquals(
+            TaskOutcome.UP_TO_DATE,
+            result.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
+        )
+
+        assertFileContent(outputPluginXml.value, """
+            <idea-plugin>
               <version>0.42.123</version>
               <idea-version since-build="Oh" until-build="201.*"/>
             </idea-plugin>
-            '''[1..-1].stripIndent()
-    }
-
-    private File getOutputPluginXml() {
-        new File(buildDirectory, "resources/main/META-INF/").listFiles().first()
+        """)
     }
 }
