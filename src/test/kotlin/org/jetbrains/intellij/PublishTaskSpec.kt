@@ -1,36 +1,53 @@
 package org.jetbrains.intellij
 
-class PublishTaskSpec extends IntelliJPluginSpecBase {
-    def setup() {
-        pluginXml << """<idea-plugin version=\"2\">
-    <name>PluginName</name>
-    <version>0.0.1</version>
-    <description>PluginName</description>
-    <vendor>Alexander Zolotov</vendor>
-</idea-plugin>"""
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertTrue
+
+class PublishTaskSpec : IntelliJPluginSpecBase() {
+
+    @BeforeTest
+    override fun setUp() {
+        super.setUp()
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <name>PluginName</name>
+                <version>0.0.1</version>
+                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                <vendor>JetBrains</vendor>
+            </idea-plugin>
+        """)
     }
 
-    def 'skip publishing plugin is distribution file is missing'() {
-        given:
-        buildFile << "publishPlugin { token = 'asd'; distributionFile = null; }\n" +
-                "verifyPlugin { ignoreFailures = true }"
+    @Test
+    fun `skip publishing plugin is distribution file is missing`() {
+        buildFile.groovy("""
+            publishPlugin {
+                token = 'asd'
+                distributionFile = null
+            }
+            verifyPlugin {
+                ignoreFailures = true
+            }
+        """)
 
-        when:
-        def result = buildAndFail(IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)
 
-        then:
-        result.output.contains('No value has been specified for property \'distributionFile\'')
+        assertTrue(result.output.contains("No value has been specified for property 'distributionFile'"))
     }
 
-    def 'skip publishing if token is missing'() {
-        given:
-        buildFile << "publishPlugin { }\nverifyPlugin { ignoreFailures = true }"
+    @Test
+    fun `skip publishing if token is missing`() {
+        buildFile.groovy("""
+            publishPlugin { }
+            verifyPlugin {
+                ignoreFailures = true
+            }
+        """)
 
-        when:
-        def result = buildAndFail(IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)
+        val result = buildAndFail(IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME)
 
-        then:
-        result.output.contains('token property must be specified for plugin publishing')
+        assertTrue(result.output.contains("token property must be specified for plugin publishing"))
     }
-
 }
