@@ -1,6 +1,8 @@
 package org.jetbrains.intellij
 
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.internal.os.OperatingSystem
+import org.junit.Assume
 
 class DownloadIntelliJPluginsSpec extends IntelliJPluginSpecBase {
     def pluginsRepoCacheDir = new File(gradleHome, 'caches/modules-2/files-2.1/com.jetbrains.plugins')
@@ -84,6 +86,8 @@ class DownloadIntelliJPluginsSpec extends IntelliJPluginSpecBase {
     }
 
     def 'download plugin from custom repository with query'() {
+        Assume.assumeFalse(OperatingSystem.current().isWindows())
+
         URL resource = this.getClass().getClassLoader().getResource("custom-repo-2/plugins.xml")
 
         given:
