@@ -16,6 +16,9 @@ plugins.withType<JavaPlugin> {
         withType<GroovyCompile> {
             sourceCompatibility = "1.7"
             targetCompatibility = "1.7"
+            // TODO: remove after migration
+            dependsOn(compileKotlin)
+            classpath += files(compileKotlin.get().destinationDir)
         }
         withType<KotlinCompile> {
             kotlinOptions.jvmTarget = "1.8"
