@@ -766,7 +766,7 @@ class RunPluginVerifierTask extends ConventionTask {
         def extension = project.extensions.findByType(IntelliJPluginExtension)
         def jbrPath = OperatingSystem.current().isMacOsX() ? "jbr/Contents/Home" : "jbr"
 
-        def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension))
+        def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
         if (builtinJbrVersion != null) {
             def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
             if (builtinJbr != null) {

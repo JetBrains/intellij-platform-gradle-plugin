@@ -221,7 +221,7 @@ class IdeaDependencyManager {
         }, { unzippedDirectory, markerFile ->
             resetExecutablePermissions(project, unzippedDirectory, type)
             storeCache(unzippedDirectory, markerFile)
-        })
+        }, null)
     }
 
     private static boolean isCacheUpToDate(File zipFile, File markerFile, boolean checkVersion) {
@@ -287,7 +287,7 @@ class IdeaDependencyManager {
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             dependency.jarFiles.each {
-                generator.addArtifact(Utils.createJarDependency(it, "compile", dependency.classes))
+                generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes))
             }
             if (dependency.sources) {
                 def artifact = new IntellijIvyArtifact(dependency.sources, 'ideaIC', "jar", "sources", "sources")

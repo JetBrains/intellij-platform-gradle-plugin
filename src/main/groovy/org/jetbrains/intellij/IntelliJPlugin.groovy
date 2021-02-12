@@ -244,7 +244,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 if (it instanceof Project) {
                     configureProjectPluginDependency(project, it, dependencies, extension)
                 } else {
-                    def pluginDependency = Utils.parsePluginDependencyString(it.toString())
+                    def pluginDependency = PluginDependencyNotation.parsePluginDependencyString(it.toString())
                     if (pluginDependency.id == null) {
                         throw new BuildException("Failed to resolve plugin $it", null)
                     }
@@ -473,7 +473,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.outputs.dir("$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME")
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
-                def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension))
+                def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
                 VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752")
             }
         }
@@ -482,7 +482,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
                                                                @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
         def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
-        task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension) })
+        task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes) })
         task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
         task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory()) })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
@@ -490,7 +490,7 @@ class IntelliJPlugin implements Plugin<Project> {
             project.file("${extension.sandboxDirectory}/system")
         })
         task.conventionMapping("autoReloadPlugins", {
-            def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension))
+            def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
             VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("202.0")
         })
         task.conventionMapping("executable", {
@@ -503,7 +503,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 }
                 Utils.warn(task, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
             }
-            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension))
+            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
             if (builtinJbrVersion != null) {
                 def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
                 if (builtinJbr != null) {
@@ -624,7 +624,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.inputs.files(prepareTestingSandboxTask)
 
             task.doFirst {
-                task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension))
+                task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
                 task.classpath += project.files(
                         "$extension.ideaDependency.classes/lib/resources.jar",
                         "$extension.ideaDependency.classes/lib/idea.jar"

@@ -133,13 +133,13 @@ class PluginDependencyManager {
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             generator.addConfiguration(new DefaultIvyConfiguration("default"))
             plugin.jarFiles.each {
-                generator.addArtifact(Utils.createJarDependency(it, configuration.name, baseDir, groupId))
+                generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, configuration.name, baseDir, groupId))
             }
             if (plugin.classesDirectory) {
-                generator.addArtifact(Utils.createDirectoryDependency(plugin.classesDirectory, configuration.name, baseDir, groupId))
+                generator.addArtifact(IntellijIvyArtifact.createDirectoryDependency(plugin.classesDirectory, configuration.name, baseDir, groupId))
             }
             if (plugin.metaInfDirectory) {
-                generator.addArtifact(Utils.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir, groupId))
+                generator.addArtifact(IntellijIvyArtifact.createDirectoryDependency(plugin.metaInfDirectory, configuration.name, baseDir, groupId))
             }
             if (plugin.builtin && ideaDependency.sources) {
                 def artifact = new IntellijIvyArtifact(ideaDependency.sources, "ideaIC", "jar", "sources", "sources")
