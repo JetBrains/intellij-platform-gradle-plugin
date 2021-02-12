@@ -46,6 +46,8 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("de.undercouch:gradle-download-task:4.0.4")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
 
     testImplementation(gradleTestKit())
     testImplementation("org.spockframework:spock-core:1.0-groovy-2.4") {
