@@ -1,6 +1,8 @@
 package org.jetbrains.intellij
 
 import org.gradle.api.plugins.BasePlugin
+import org.gradle.internal.os.OperatingSystem
+import org.junit.Assume.assumeFalse
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -131,6 +133,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download plugin from custom repository with query`() {
+        assumeFalse(OperatingSystem.current().isWindows)
         val resource = javaClass.classLoader.getResource("custom-repo-2/plugins.xml")
 
         buildFile.groovy("""
