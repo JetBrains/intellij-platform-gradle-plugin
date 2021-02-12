@@ -84,7 +84,7 @@ fun getIdeaSystemProperties(
 
 fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirectory: File): List<String> {
     options.maxHeapSize = options.maxHeapSize ?: "512m"
-    options.minHeapSize = options.minHeapSize ?: "512m"
+    options.minHeapSize = options.minHeapSize ?: "256m"
 
     val bootJar = File(ideDirectory, "lib/boot.jar")
     if (bootJar.exists()) {
