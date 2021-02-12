@@ -42,7 +42,7 @@ class Utils {
     }
 
     @NotNull
-    static IvyArtifact createJarDependency(File file, String configuration, File baseDir, String classifier = null) {
+    static IvyArtifact createjardependency(File file, String configuration, File baseDir, String classifier = null) {
         return createDependency(baseDir, file, configuration, "jar", "jar", classifier)
     }
 
