@@ -66,6 +66,12 @@ class JbrResolver {
         if (javaArchive.exists()) {
             return javaArchive
         }
+
+        if (project.gradle.startParameter.offline) {
+            Utils.warn(context, "Cannot download JetBrains Java Runtime $artifactName. Gradle runs in offline mode.")
+            return null
+        }
+
         def intellijExtension = project.extensions.findByType(IntelliJPluginExtension)
         def repo = intellijExtension != null ? intellijExtension.jreRepo : null
         def url = "${repo ?: jbrArtifact.repoUrl}/$archiveName"
