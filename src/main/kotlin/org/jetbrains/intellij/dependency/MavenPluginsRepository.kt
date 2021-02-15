@@ -2,49 +2,40 @@ package org.jetbrains.intellij.dependency
 
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
-import org.jetbrains.intellij.Utils
+import org.jetbrains.intellij.debug
+import java.io.File
+import java.net.URI
 
 @CompileStatic
-class MavenPluginsRepository implements PluginsRepository {
-    private final Project project
-    private final String repoUrl
-    private boolean resolvedDependency = false
+class MavenPluginsRepository(val project: Project, private val repoUrl: String) : PluginsRepository {
 
-    MavenPluginsRepository(@NotNull Project project, @NotNull String repoUrl) {
-        this.repoUrl = repoUrl
-        this.project = project
-    }
+    private var resolvedDependency = false
 
-    @Nullable
-    File resolve(@NotNull PluginDependencyNotation plugin) {
-        def dependency = plugin.toDependency(project)
+    override fun resolve(plugin: PluginDependencyNotation): File? {
+        val dependency = plugin.toDependency(project)
 
-        Utils.debug(project, "Adding Maven repository to download $dependency - $repoUrl")
-        def mavenRepo = project.repositories.maven { MavenArtifactRepository it -> it.url = repoUrl }
+        debug(project, "Adding Maven repository to download $dependency - $repoUrl")
+        val mavenRepo = project.repositories.maven { it.url = URI.create(repoUrl) }
 
-        def pluginFile = null
+        var pluginFile: File? = null
         try {
-            def configuration = project.configurations.detachedConfiguration(dependency)
+            val configuration = project.configurations.detachedConfiguration(dependency)
             pluginFile = configuration.singleFile
             resolvedDependency = true
-        } catch (Exception e) {
-            Utils.debug(project, "Couldn't find " + dependency + " in $repoUrl", e)
+        } catch (e: Exception) {
+            debug(project, "Couldn't find $dependency in $repoUrl", e)
         }
 
-        Utils.debug(project, "Removing Maven repository $repoUrl")
+        debug(project, "Removing Maven repository $repoUrl")
         project.repositories.remove(mavenRepo)
 
         return pluginFile
     }
 
-    @Override
-    void postResolve() {
+    override fun postResolve() {
         if (resolvedDependency) {
-            Utils.debug(project, "Adding Maven plugins repository $repoUrl")
-            project.repositories.maven { MavenArtifactRepository it -> it.url = repoUrl }
+            debug(project, "Adding Maven plugins repository $repoUrl")
+            project.repositories.maven { it.url = URI.create(repoUrl) }
         }
     }
 }
