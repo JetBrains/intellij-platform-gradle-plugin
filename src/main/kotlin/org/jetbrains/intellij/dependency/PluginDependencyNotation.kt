@@ -3,87 +3,47 @@ package org.jetbrains.intellij.dependency
 import groovy.transform.CompileStatic
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
+import java.io.File
 
 @CompileStatic
-class PluginDependencyNotation {
-    @NotNull
-    final String id
+class PluginDependencyNotation(val id: String, val version: String?, val channel: String?) {
 
-    @Nullable
-    final String version
+    companion object {
+        fun parsePluginDependencyString(s: String): PluginDependencyNotation {
+            if (File(s).exists()) {
+                return PluginDependencyNotation(s, null, null)
+            }
 
-    @Nullable
-    final String channel
-
-    PluginDependencyNotation(@NotNull String id, @Nullable String version, @Nullable String channel) {
-        this.id = id
-        this.version = version
-        this.channel = channel
+            val (idVersion, channel) = s.split('@', limit = 2) + null
+            val (id, version) = (idVersion ?: s).split(':', limit = 2) + null
+            return PluginDependencyNotation(id ?: s, version, channel)
+        }
     }
 
-    Dependency toDependency(Project project) {
-        return project.dependencies.create(toString())
-    }
+    fun toDependency(project: Project): Dependency = project.dependencies.create(toString())
 
-    @Override
-    String toString() {
-        def groupPrefix = channel ? "$channel." : ""
+    override fun toString(): String {
+        val groupPrefix = channel.takeUnless { channel.isNullOrBlank() }?.let { "$it." } ?: ""
         return "${groupPrefix}com.jetbrains.plugins:$id:$version"
     }
 
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (getClass() != o.class) return false
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-        PluginDependencyNotation that = (PluginDependencyNotation) o
+        other as PluginDependencyNotation
 
-        if (channel != that.channel) return false
-        if (id != that.id) return false
-        if (version != that.version) return false
+        if (id != other.id) return false
+        if (version != other.version) return false
+        if (channel != other.channel) return false
 
         return true
     }
 
-    int hashCode() {
-        int result
-        result = id.hashCode()
-        result = 31 * result + (version != null ? version.hashCode() : 0)
-        result = 31 * result + (channel != null ? channel.hashCode() : 0)
+    override fun hashCode(): Int {
+        var result = id.hashCode()
+        result = 31 * result + (version?.hashCode() ?: 0)
+        result = 31 * result + (channel?.hashCode() ?: 0)
         return result
     }
-
-    @NotNull
-    static PluginDependencyNotation parsePluginDependencyString(@NotNull String s) {
-        if (new File(s).exists()) {
-            return new PluginDependencyNotation(s, null, null)
-        }
-
-        String id = null, version = null, channel = null
-        def idAndVersion = s.split('[:]', 2)
-        if (idAndVersion.length == 1) {
-            def idAndChannel = idAndVersion[0].split('[@]', 2)
-            id = idAndChannel[0]
-            channel = idAndChannel.length > 1 ? idAndChannel[1] : null
-        } else if (idAndVersion.length == 2) {
-            def versionAndChannel = idAndVersion[1].split('[@]', 2)
-            id = idAndVersion[0]
-            version = versionAndChannel[0]
-            channel = versionAndChannel.length > 1 ? versionAndChannel[1] : null
-        }
-        return new PluginDependencyNotation(id ?: null, version ?: null, channel ?: null)
-    }
-
-// TODO: Replace with the following Kotlin snippet
-//
-//    fun parsePluginDependencyString(s: String): PluginDependencyNotation {
-//        if (File(s).exists()) {
-//            return PluginDependencyNotation(s, null, null)
-//        }
-//
-//        val (idVersion, channel) = s.split('@', limit = 2) + null
-//        val (id, version) = (idVersion ?: s).split(':', limit = 2) + null
-//        return PluginDependencyNotation(id ?: s, version, channel)
-//    }
 }
