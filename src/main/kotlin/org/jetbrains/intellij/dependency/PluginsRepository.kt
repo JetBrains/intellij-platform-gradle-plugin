@@ -1,11 +1,10 @@
 package org.jetbrains.intellij.dependency
 
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
+import java.io.File
 
 interface PluginsRepository {
-    @Nullable
-    File resolve(@NotNull PluginDependencyNotation plugin)
 
-    void postResolve()
+    fun resolve(plugin: PluginDependencyNotation): File
+
+    fun postResolve()
 }
