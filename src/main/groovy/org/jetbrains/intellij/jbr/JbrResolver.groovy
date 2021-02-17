@@ -140,7 +140,13 @@ class JbrResolver {
             }
 
             if (!prefix) {
-                prefix = isJava8 ? "jbrx-" : "jbr-"
+                if (isJava8) {
+                    prefix = "jbrx-"
+                } else if (buildNumber < VersionNumber.parse('1319.6')) {
+                    prefix = "jbr-"
+                } else {
+                    prefix = "jbr_jcef-"
+                }
             }
             return new JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
         }
