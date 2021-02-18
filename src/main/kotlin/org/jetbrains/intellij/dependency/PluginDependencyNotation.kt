@@ -9,6 +9,7 @@ import java.io.File
 class PluginDependencyNotation(val id: String, val version: String?, val channel: String?) {
 
     companion object {
+        @JvmStatic
         fun parsePluginDependencyString(s: String): PluginDependencyNotation {
             if (File(s).exists()) {
                 return PluginDependencyNotation(s, null, null)
@@ -16,7 +17,7 @@ class PluginDependencyNotation(val id: String, val version: String?, val channel
 
             val (idVersion, channel) = s.split('@', limit = 2) + null
             val (id, version) = (idVersion ?: s).split(':', limit = 2) + null
-            return PluginDependencyNotation(id ?: s, version, channel)
+            return PluginDependencyNotation(id ?: s, version.takeIf { it?.isNotEmpty() ?: false }, channel)
         }
     }
 

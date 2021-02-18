@@ -27,6 +27,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.model.IdeaPlugin
 import org.xml.sax.ErrorHandler
 import org.xml.sax.InputSource
 import org.xml.sax.SAXParseException
@@ -124,13 +125,16 @@ fun ideaDir(path: String) = File(path).let {
 }
 
 fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).files.map {
-    parsePluginXml(it).id
+    parsePluginXml(it, IdeaPlugin::class.java).id
 }
 
-fun parsePluginXml(file: File): PluginXml = XmlMapper()
+fun <T> parsePluginXml(stream: InputStream, valueType: Class<T>): T = XmlMapper()
     .registerKotlinModule()
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    .readValue(file, PluginXml::class.java)
+    .readValue(stream, valueType)
+
+// TODO: rename to parseXml
+fun <T> parsePluginXml(file: File, valueType: Class<T>) = parsePluginXml(file.inputStream(), valueType)
 
 // TODO: migrate to parsePluginXml
 fun parseXml(file: File) = parseXml(FileInputStream(file))

@@ -1,71 +1,74 @@
 package org.jetbrains.intellij.dependency
 
 import org.gradle.api.Project
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
-import org.jetbrains.intellij.Utils
-
+import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.model.Category
+import org.jetbrains.intellij.model.PluginRepository
+import org.jetbrains.intellij.model.Plugins
+import org.jetbrains.intellij.parsePluginXml
+import java.io.File
+import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class CustomPluginsRepository implements PluginsRepository {
+class CustomPluginsRepository(val project: Project, repoUrl: String) : PluginsRepository {
 
-    private final Project project
-    private final String repoUrl
-    private final Node pluginsXml
+    private var pluginsXmlUri: URI
+    private val repoUrl: String
 
-    CustomPluginsRepository(@NotNull Project project, @NotNull String repoUrl) {
-        this.project = project
-        URI pluginsXmlUri
-        def uri = new URI(repoUrl)
-        if (uri.path.endsWith('.xml')) {
+    init {
+        val uri = URI(repoUrl)
+        if (uri.path.endsWith(".xml")) {
             this.repoUrl = repoUrl.substring(0, repoUrl.lastIndexOf('/'))
             pluginsXmlUri = uri
         } else {
             this.repoUrl = repoUrl
-            pluginsXmlUri = new URI(uri.scheme, uri.userInfo, uri.host, uri.port, "$uri.path/", uri.query, uri.fragment)
-                    .resolve("updatePlugins.xml")
+            pluginsXmlUri = URI(uri.scheme, uri.userInfo, uri.host, uri.port, "${uri.path}/", uri.query, uri.fragment).resolve("updatePlugins.xml")
         }
-        Utils.debug(project, "Loading list of plugins from: ${pluginsXmlUri}")
-        pluginsXml = Utils.parseXml(pluginsXmlUri.toURL().openStream())
+
+        debug(project, "Loading list of plugins from: $pluginsXmlUri")
     }
 
-    @Nullable
-    File resolve(@NotNull PluginDependencyNotation plugin) {
-        String downloadUrl
-        if (pluginsXml.name() == "plugin-repository") {
-            downloadUrl = pluginsXml.category."idea-plugin"
-                    .find { it.id.text().equalsIgnoreCase(plugin.id) && it.version.text() == plugin.version }
-                    ?."download-url"?.text()
-            if (downloadUrl == null) return null
-            downloadUrl = repoUrl + "/" + downloadUrl
-        } else {
-            downloadUrl = pluginsXml.plugin
-                    .find { it.@id.equalsIgnoreCase(plugin.id) && it.@version.equalsIgnoreCase(plugin.version) }
-                    ?."@url"
-            if (downloadUrl == null) return null
+    override fun resolve(plugin: PluginDependencyNotation): File? {
+        var downloadUrl: String?
+
+        // Try to parse file as <plugin-repository>
+        val pluginRepository = parsePluginXml(pluginsXmlUri.toURL().openStream(), PluginRepository::class.java)
+        downloadUrl = pluginRepository.categories.flatMap(Category::plugins).find {
+            it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
+        }?.downloadUrl?.let { "$repoUrl/$it" }
+
+        if (downloadUrl == null) {
+            // Try to parse XML file as <plugins>
+            val plugins = parsePluginXml(pluginsXmlUri.toURL().openStream(), Plugins::class.java)
+            downloadUrl = plugins.items.find {
+                it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
+            }?.url
         }
+
+        if (downloadUrl == null) {
+            return null
+        }
+
         return downloadZipArtifact(downloadUrl, plugin)
     }
 
-    private String getCacheDirectoryPath() {
+    private fun getCacheDirectoryPath(): String {
         // todo: a better way to define cache directory
-        String gradleHomePath = project.gradle.gradleUserHomeDir.absolutePath
-        String mavenCacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1').toString()
-        return Paths.get(mavenCacheDirectoryPath, 'com.jetbrains.intellij.idea').toString()
+        val gradleHomePath = project.gradle.gradleUserHomeDir.absolutePath
+        val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
+        return Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea").toString()
     }
 
-    @NotNull
-    private File downloadZipArtifact(@NotNull String url, @NotNull PluginDependencyNotation plugin) {
-        def targetFile = Paths.get(getCacheDirectoryPath(), "com.jetbrains.plugins", "${plugin.id}-${plugin.version}.zip").toFile()
-        if (!targetFile.isFile()) {
+    private fun downloadZipArtifact(url: String, plugin: PluginDependencyNotation): File {
+        val targetFile = Paths.get(getCacheDirectoryPath(), "com.jetbrains.plugins", "${plugin.id}-${plugin.version}.zip").toFile()
+        if (!targetFile.isFile) {
             targetFile.parentFile.mkdirs()
             Files.copy(URI.create(url).toURL().openStream(), targetFile.toPath())
         }
         return targetFile
     }
 
-    @Override
-    void postResolve() {
+    override fun postResolve() {
     }
 }
