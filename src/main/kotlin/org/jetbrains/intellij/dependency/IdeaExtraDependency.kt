@@ -1,57 +1,32 @@
 package org.jetbrains.intellij.dependency
 
 
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.Utils
+import org.jetbrains.intellij.collectJars
+import java.io.File
 
-class IdeaExtraDependency {
-    @NotNull
-    private final String name
-    @NotNull
-    private final File classes
-    @NotNull
-    private final Collection<File> jarFiles
+class IdeaExtraDependency(val name: String, val classes: File) {
 
-    IdeaExtraDependency(@NotNull String name, @NotNull File classes) {
-        this.name = name
-        this.classes = classes
-        if (classes.isDirectory()) {
-            this.jarFiles = Utils.collectJars(classes, { file -> true })
-        }
-        else {
-            this.jarFiles = [classes] as Set
-        }
+    val jarFiles: Collection<File> = if (classes.isDirectory) {
+        collectJars(classes) { true }
+    } else {
+        setOf(classes)
     }
 
-    @NotNull
-    String getName() {
-        return name
-    }
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
 
-    @NotNull
-    File getClasses() {
-        return classes
-    }
+        other as IdeaExtraDependency
 
-    @SuppressWarnings("GroovyUnusedDeclaration")
-    @NotNull
-    Collection<File> getJarFiles() {
-        return jarFiles
-    }
+        if (name != other.name) return false
+        if (classes != other.classes) return false
+        if (jarFiles != other.jarFiles) return false
 
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof IdeaExtraDependency)) return false
-        IdeaExtraDependency that = (IdeaExtraDependency) o
-        if (classes != that.classes) return false
-        if (jarFiles != that.jarFiles) return false
-        if (name != that.name) return false
         return true
     }
 
-    int hashCode() {
-        int result
-        result = name.hashCode()
+    override fun hashCode(): Int {
+        var result = name.hashCode()
         result = 31 * result + classes.hashCode()
         result = 31 * result + jarFiles.hashCode()
         return result
