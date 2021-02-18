@@ -1,143 +1,79 @@
 package org.jetbrains.intellij.dependency
 
-import groovy.transform.ToString
-import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-import org.jetbrains.intellij.Utils
+import org.jetbrains.intellij.collectJars
+import org.jetbrains.intellij.isKotlinRuntime
+import java.io.File
 
-@ToString(includeNames = true, includeFields = true, ignoreNulls = true)
-class IdeaDependency implements Serializable {
-    @NotNull
-    private final String name
-    @NotNull
-    private final String version
-    @NotNull
-    private final String buildNumber
-    @NotNull
-    private final File classes
-    @Nullable
-    private final File sources
-    @NotNull
-    private final Collection<File> jarFiles
-    private final boolean withKotlin
-    private final Collection<IdeaExtraDependency> extraDependencies
+class IdeaDependency(
+    val name: String,
+    val version: String,
+    val buildNumber: String,
+    val classes: File,
+    val sources: File?,
+    val withKotlin: Boolean,
+    val pluginsRegistry: BuiltinPluginsRegistry,
+    val extraDependencies: Collection<IdeaExtraDependency>,
+) {
 
-    transient private final BuiltinPluginsRegistry pluginsRegistry
+    private val jarFiles = collectJarFiles()
 
-    IdeaDependency(@NotNull String name, @NotNull String version, @NotNull String buildNumber, @NotNull File classes,
-                   @Nullable File sources, boolean withKotlin, @NotNull BuiltinPluginsRegistry pluginsRegistry,
-                   @NotNull Collection<IdeaExtraDependency> extraDependencies) {
-        this.name = name
-        this.version = version
-        this.buildNumber = buildNumber
-        this.classes = classes
-        this.sources = sources
-        this.withKotlin = withKotlin
-        this.jarFiles = collectJarFiles()
-        this.pluginsRegistry = pluginsRegistry
-        this.extraDependencies = extraDependencies
-    }
-
-    protected Collection<File> collectJarFiles() {
-        if (classes.isDirectory()) {
-            File lib = new File(classes, "lib")
-            if (lib.isDirectory()) {
-                return Utils.collectJars(lib, { file ->
-                    return (withKotlin || !Utils.isKotlinRuntime(file.name - '.jar')) &&
-                            file.name != 'junit.jar' &&
-                            file.name != 'annotations.jar'
-                }).sort()
+    private fun collectJarFiles(): Collection<File> {
+        if (classes.isDirectory) {
+            val lib = File(classes, "lib")
+            if (lib.isDirectory) {
+                return (collectJars(lib) { file ->
+                    (withKotlin || !isKotlinRuntime(file.name.removeSuffix(".jar"))) && file.name != "junit.jar" && file.name != "annotations.jar"
+                }).sorted()
             }
         }
-        return Collections.emptySet()
-    }
-
-    @NotNull
-    BuiltinPluginsRegistry getPluginsRegistry() {
-        return pluginsRegistry
-    }
-
-    @NotNull
-    String getName() {
-        return name
-    }
-
-    @NotNull
-    String getVersion() {
-        return version
-    }
-
-    @NotNull
-    String getBuildNumber() {
-        return buildNumber
-    }
-
-    @NotNull
-    File getClasses() {
-        return classes
+        return emptyList()
     }
 
     @Nullable
-    File getSources() {
-        return sources
-    }
+    fun getIvyRepositoryDirectory() = classes
 
-    @NotNull
-    Collection<File> getJarFiles() {
-        return jarFiles
-    }
-
-    boolean isWithKotlin() {
-        return withKotlin
-    }
-
-    @NotNull
-    Collection<IdeaExtraDependency> getExtraDependencies() {
-        return extraDependencies
-    }
-
-    @Nullable
-    File getIvyRepositoryDirectory() {
-        classes
-    }
-
-    String getFqn() {
-        def fqn = "$name-$version"
+    fun getFqn(): String {
+        var fqn = "$name-$version"
         if (withKotlin) {
-            fqn += '-withKotlin'
+            fqn += "-withKotlin"
         }
-        if (sources) {
-            fqn += '-withSources'
+        if (sources != null) {
+            fqn += "-withSources"
         }
-        fqn += '-withoutAnnotations'
+        fqn += "-withoutAnnotations"
         return fqn
     }
 
-    boolean equals(o) {
-        if (this.is(o)) return true
-        if (!(o instanceof IdeaDependency)) return false
-        IdeaDependency that = (IdeaDependency) o
-        if (extraDependencies != that.extraDependencies) return false
-        if (withKotlin != that.withKotlin) return false
-        if (buildNumber != that.buildNumber) return false
-        if (classes != that.classes) return false
-        if (jarFiles != that.jarFiles) return false
-        if (sources != that.sources) return false
-        if (version != that.version) return false
-        if (name != that.name) return false
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as IdeaDependency
+
+        if (name != other.name) return false
+        if (version != other.version) return false
+        if (buildNumber != other.buildNumber) return false
+        if (classes != other.classes) return false
+        if (sources != other.sources) return false
+        if (withKotlin != other.withKotlin) return false
+        if (pluginsRegistry != other.pluginsRegistry) return false
+        if (extraDependencies != other.extraDependencies) return false
+        if (jarFiles != other.jarFiles) return false
+
         return true
     }
 
-    int hashCode() {
-        int result
-        result = version.hashCode()
-        result = 31 * result + name.hashCode()
+    override fun hashCode(): Int {
+        var result = name.hashCode()
+        result = 31 * result + version.hashCode()
         result = 31 * result + buildNumber.hashCode()
         result = 31 * result + classes.hashCode()
-        result = 31 * result + (sources != null ? sources.hashCode() : 0)
-        result = 31 * result + jarFiles.hashCode()
-        result = 31 * result + (withKotlin ? 1 : 0)
+        result = 31 * result + sources.hashCode()
+        result = 31 * result + withKotlin.hashCode()
+        result = 31 * result + pluginsRegistry.hashCode()
         result = 31 * result + extraDependencies.hashCode()
+        result = 31 * result + jarFiles.hashCode()
         return result
     }
 }
