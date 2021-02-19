@@ -3,6 +3,7 @@ package org.jetbrains.intellij.dependency
 import org.jetbrains.intellij.collectJars
 import org.jetbrains.intellij.isKotlinRuntime
 import java.io.File
+import java.io.Serializable
 
 open class IdeaDependency(
     val name: String,
@@ -13,7 +14,7 @@ open class IdeaDependency(
     val withKotlin: Boolean,
     val pluginsRegistry: BuiltinPluginsRegistry,
     val extraDependencies: Collection<IdeaExtraDependency>,
-) {
+) : Serializable {
 
     private val jarFiles = collectJarFiles()
 
