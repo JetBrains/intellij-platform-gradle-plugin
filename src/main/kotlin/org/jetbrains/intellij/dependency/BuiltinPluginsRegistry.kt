@@ -10,9 +10,9 @@ import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.parsePluginXml
 import org.jetbrains.intellij.warn
 import java.io.File
+import java.io.Serializable
 
-
-class BuiltinPluginsRegistry(private val pluginsDirectory: File) {
+class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable {
 
     private val plugins = mutableMapOf<String, Plugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
@@ -119,7 +119,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) {
     data class PluginsCache(
         @JacksonXmlElementWrapper(useWrapping = false)
         var plugin: List<Plugin> = emptyList(),
-    )
+    ) : Serializable
 
     data class Plugin(
         @JacksonXmlProperty(isAttribute = true)
@@ -127,11 +127,11 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) {
         @JacksonXmlProperty(isAttribute = true)
         val directoryName: String,
         val dependencies: Dependencies,
-    )
+    ) : Serializable
 
     data class Dependencies(
         @JacksonXmlElementWrapper(useWrapping = false)
         @JacksonXmlProperty(localName = "dependency")
         val dependencies: List<String> = emptyList()
-    )
+    ) : Serializable
 }
