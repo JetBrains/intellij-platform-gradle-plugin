@@ -2,98 +2,79 @@ package org.jetbrains.intellij.dependency
 
 import org.gradle.api.internal.tasks.DefaultTaskDependency
 import org.gradle.api.publish.ivy.IvyArtifact
-import org.gradle.api.tasks.TaskDependency
-import org.jetbrains.annotations.NotNull
+import java.io.File
 
-class IntellijIvyArtifact implements IvyArtifact {
-    private final DefaultTaskDependency buildDependencies = new DefaultTaskDependency()
-    private final File file
-    private String name
-    private String extension
-    private String type
-    private String classifier
-    private String conf
+class IntellijIvyArtifact(
+    internal val file: File,
+    internal var name: String,
+    private var extension: String,
+    internal var type: String,
+    private var classifier: String?,
+) : IvyArtifact {
 
-    IntellijIvyArtifact(File file, String name, String extension, String type, String classifier) {
-        this.file = file
-        this.name = name
-        this.extension = extension
-        this.type = type
-        this.classifier = classifier ?: null
+    private var conf: String? = null
+    private val buildDependencies = DefaultTaskDependency()
+
+    companion object {
+        fun createJarDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
+            createDependency(baseDir, file, configuration, "jar", "jar", classifier)
+
+        fun createDirectoryDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
+            createDependency(baseDir, file, configuration, "", "directory", classifier)
+
+        private fun createDependency(
+            baseDir: File,
+            file: File,
+            configuration: String,
+            extension: String,
+            type: String,
+            classifier: String?,
+        ): IvyArtifact {
+            val relativePath = baseDir.toURI().relativize(file.toURI()).path
+            val name = relativePath.removeSuffix(".$extension")
+            return IntellijIvyArtifact(file, name, extension, type, classifier).apply {
+                conf = configuration
+            }
+        }
     }
 
-    File getFile() {
-        return file
-    }
+    override fun getBuildDependencies() = buildDependencies
 
-    String getName() {
-        return name
-    }
+    override fun getFile() = file
 
-    void setName(String name) {
-        this.name = name
-    }
-
-    String getType() {
-        return type
-    }
-
-    void setType(String type) {
-        this.type = type
-    }
-
-    String getExtension() {
-        return extension
-    }
-
-    void setExtension(String extension) {
-        this.extension = extension
-    }
-
-    String getClassifier() {
-        return classifier
-    }
-
-    void setClassifier(String classifier) {
-        this.classifier = classifier
-    }
-
-    String getConf() {
-        return conf
-    }
-
-    void setConf(String conf) {
-        this.conf = conf
-    }
-
-    void builtBy(Object... tasks) {
+    override fun builtBy(vararg tasks: Any) {
         buildDependencies.add(tasks)
     }
 
-    TaskDependency getBuildDependencies() {
-        return buildDependencies
+    override fun getName() = name
+
+    override fun setName(name: String) {
+        this.name = name
     }
 
-    @Override
-    String toString() {
-        return String.format("%s %s:%s:%s:%s", getClass().getSimpleName(), getName(), getType(), getExtension(), getClassifier())
+    override fun getType() = type
+
+    override fun setType(type: String) {
+        this.type = type
     }
 
-    @NotNull
-    static IvyArtifact createJarDependency(File file, String configuration, File baseDir, String classifier = null) {
-        return createDependency(baseDir, file, configuration, "jar", "jar", classifier)
+    override fun getExtension() = extension
+
+    override fun setExtension(extension: String) {
+        this.extension = extension
     }
 
-    @NotNull
-    static IvyArtifact createDirectoryDependency(File file, String configuration, File baseDir, String classifier = null) {
-        return createDependency(baseDir, file, configuration, "", "directory", classifier)
+    override fun getClassifier() = classifier
+
+    override fun setClassifier(classifier: String?) {
+        this.classifier = classifier
     }
 
-    private static IvyArtifact createDependency(File baseDir, File file, String configuration, String extension, String type, String classifier) {
-        def relativePath = baseDir.toURI().relativize(file.toURI()).getPath()
-        def name = extension ? relativePath - ".$extension" : relativePath
-        def artifact = new IntellijIvyArtifact(file, name, extension, type, classifier)
-        artifact.conf = configuration
-        return artifact
+    override fun getConf() = conf
+
+    override fun setConf(conf: String?) {
+        this.conf = conf
     }
+
+    override fun toString() = "IntellijIvyArtifact $name:$type:$extension:$classifier"
 }
