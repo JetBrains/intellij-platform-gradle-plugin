@@ -11,7 +11,6 @@ class LocalIdeaDependency extends IdeaDependency {
         super(name, version, buildNumber, classes, sources, withKotlin, builtinPluginsRegistry, extraDependencies)
     }
 
-    @Nullable
     File getIvyRepositoryDirectory() {
         version.endsWith(".SNAPSHOT") ? null : super.getIvyRepositoryDirectory()
     }

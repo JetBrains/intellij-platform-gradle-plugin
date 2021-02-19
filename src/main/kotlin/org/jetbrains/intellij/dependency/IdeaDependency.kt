@@ -1,11 +1,10 @@
 package org.jetbrains.intellij.dependency
 
-import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.collectJars
 import org.jetbrains.intellij.isKotlinRuntime
 import java.io.File
 
-class IdeaDependency(
+open class IdeaDependency(
     val name: String,
     val version: String,
     val buildNumber: String,
@@ -18,7 +17,7 @@ class IdeaDependency(
 
     private val jarFiles = collectJarFiles()
 
-    private fun collectJarFiles(): Collection<File> {
+    protected open fun collectJarFiles(): Collection<File> {
         if (classes.isDirectory) {
             val lib = File(classes, "lib")
             if (lib.isDirectory) {
@@ -30,8 +29,7 @@ class IdeaDependency(
         return emptyList()
     }
 
-    @Nullable
-    fun getIvyRepositoryDirectory() = classes
+    protected open fun getIvyRepositoryDirectory() = classes
 
     fun getFqn(): String {
         var fqn = "$name-$version"

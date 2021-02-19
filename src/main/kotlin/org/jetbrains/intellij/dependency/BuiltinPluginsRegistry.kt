@@ -1,141 +1,137 @@
 package org.jetbrains.intellij.dependency
 
-import groovy.xml.MarkupBuilder
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
-import org.jetbrains.intellij.Utils
+import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
+import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import org.jetbrains.intellij.createPlugin
+import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.warn
+import java.io.File
 
-class BuiltinPluginsRegistry {
-    private final Map<String, Plugin> plugins = new HashMap<>()
 
-    private final Map<String, String> directoryNameMapping = new HashMap<>()
-    private final File pluginsDirectory;
+class BuiltinPluginsRegistry(private val pluginsDirectory: File) {
 
-    BuiltinPluginsRegistry(def pluginsDirectory) {
-        this.pluginsDirectory = pluginsDirectory
-    }
+    private val plugins = mutableMapOf<String, Plugin>()
+    private val directoryNameMapping = mutableMapOf<String, String>()
 
-    static BuiltinPluginsRegistry fromDirectory(File pluginsDirectory, def loggingContext) {
-        def result = new BuiltinPluginsRegistry(pluginsDirectory)
-        if (!result.fillFromCache(loggingContext)) {
-            Utils.debug(loggingContext, "Builtin registry cache is missing")
-            result.fillFromDirectory(loggingContext)
-            result.dumpToCache(loggingContext)
-        }
-        return result
-    }
-
-    private boolean fillFromCache(def loggingContext) {
-        def cache = cacheFile()
-        if (cache == null) return false
-
-        Utils.debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
-        try {
-            Utils.parseXml(cache).children().forEach { node ->
-                def dependencies = node.dependencies.first().dependency*.text() as Collection<String>
-                plugins.put(node.@id, new Plugin(node.@id, node.@directoryName, dependencies))
-                directoryNameMapping.put(node.@directoryName, node.@id)
+    companion object {
+        @JvmStatic
+        fun fromDirectory(pluginsDirectory: File, loggingContext: Any): BuiltinPluginsRegistry {
+            val result = BuiltinPluginsRegistry(pluginsDirectory)
+            if (!result.fillFromCache(loggingContext)) {
+                debug(loggingContext, "Builtin registry cache is missing")
+                result.fillFromDirectory(loggingContext)
+                result.dumpToCache(loggingContext)
             }
-            return true
+            return result
         }
-        catch (Throwable t) {
-            Utils.warn(loggingContext, "Cannot read builtin registry cache", t)
+    }
+
+    private fun fillFromCache(loggingContext: Any): Boolean {
+        val cache = cacheFile()
+        if (!cache.exists()) {
             return false
         }
+
+        debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
+        return try {
+            parsePluginXml(cache, PluginsCache::class.java).plugin.forEach {
+                plugins[it.id] = it
+                directoryNameMapping[it.directoryName] = it.id
+            }
+            true
+        } catch (t: Throwable) {
+            warn(loggingContext, "Cannot read builtin registry cache", t)
+            false
+        }
     }
 
-    private void fillFromDirectory(loggingContext) {
-        def files = pluginsDirectory.listFiles()
+    private fun fillFromDirectory(loggingContext: Any) {
+        val files = pluginsDirectory.listFiles()
         if (files != null) {
             for (file in files) {
-                if (file.isDirectory()) {
+                if (file.isDirectory) {
                     add(file, loggingContext)
                 }
             }
         }
-        Utils.debug(loggingContext, "Builtin registry populated with ${plugins.size()} plugins")
+        debug(loggingContext, "Builtin registry populated with ${plugins.size} plugins")
     }
 
-    private void dumpToCache(def loggingContext) {
-        Utils.debug(loggingContext, "Dumping cache for builtin plugin")
-        def cacheFile = cacheFile()
-        def writer = null
+    private fun dumpToCache(loggingContext: Any) {
+        debug(loggingContext, "Dumping cache for builtin plugin")
         try {
-            writer = new FileWriter(cacheFile)
-            new MarkupBuilder(writer).plugins {
-                for (p in plugins) {
-                    plugin(id: p.key, directoryName: p.value.directoryName) {
-                        dependencies {
-                            for (def d in p.value.dependencies) {
-                                dependency(d)
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (Throwable t) {
-            Utils.warn(loggingContext, "Failed to dump cache for builtin plugin", t)
-        } finally {
-            if (writer != null) {
-                writer.close()
-            }
+            XmlMapper()
+                .registerKotlinModule()
+                .writeValue(cacheFile(), PluginsCache(plugins.values.toList()))
+        } catch (t: Throwable) {
+            warn(loggingContext, "Failed to dump cache for builtin plugin", t)
         }
     }
 
-    private File cacheFile() {
-        new File(pluginsDirectory, "builtinRegistry.xml")
-    }
+    private fun cacheFile() = File(pluginsDirectory, "builtinRegistry.xml")
 
-    @Nullable
-    File findPlugin(def name) {
-        def plugin = plugins[name] ?: plugins[directoryNameMapping[name]]
+    fun findPlugin(name: String): File? {
+        val plugin = plugins[name] ?: plugins[directoryNameMapping[name]]
         if (plugin != null) {
-            def result = new File(pluginsDirectory, plugin.directoryName)
-            return result.exists() && result.isDirectory() ? result : null
+            val result = File(pluginsDirectory, plugin.directoryName)
+            return if (result.exists() && result.isDirectory) {
+                result
+            } else {
+                return null
+            }
         }
         return null
     }
 
-    @Nullable
-    Collection<String> collectBuiltinDependencies(@NotNull Collection<String> pluginIds) {
-        List<String> idsToProcess = new ArrayList<>(pluginIds)
-        Set<String> result = new HashSet<>()
-        while (!idsToProcess.isEmpty()) {
-            def id = idsToProcess.remove(0)
-            def plugin = plugins[id] ?: plugins[directoryNameMapping[id]]
-            if (plugin) {
-                if (result.add(id)) {
-                    idsToProcess.addAll(plugin.dependencies - result)
-                }
+    fun collectBuiltinDependencies(pluginIds: Collection<String>): Collection<String> {
+        val idsToProcess = pluginIds.toMutableList()
+        val result = mutableSetOf<String>()
+
+        while (idsToProcess.isNotEmpty()) {
+            val id = idsToProcess.removeAt(0)
+            val plugin = plugins[id] ?: plugins[directoryNameMapping[id]] ?: continue
+            if (result.add(id)) {
+                idsToProcess.addAll(plugin.dependencies.dependencies - result)
             }
         }
+
         return result
     }
 
-    def add(@NotNull File artifact, def loggingContext) {
-        Utils.debug(loggingContext, "Adding directory to plugins index: $artifact)")
-        def intellijPlugin = Utils.createPlugin(artifact, false, loggingContext)
-        if (intellijPlugin != null) {
-            def dependencies = intellijPlugin.dependencies
-                    .findAll { !it.optional }
-                    .collect { it.id }
-            def plugin = new Plugin(intellijPlugin.pluginId, artifact.name, dependencies)
-            plugins.put(intellijPlugin.pluginId, plugin)
-            if (plugin.directoryName != plugin.id) {
-                directoryNameMapping.put(plugin.directoryName, plugin.id)
-            }
+    fun add(artifact: File, loggingContext: Any) {
+        debug(loggingContext, "Adding directory to plugins index: $artifact)")
+        val intellijPlugin = createPlugin(artifact, false, loggingContext) ?: return
+        val id = intellijPlugin.pluginId ?: return
+        val dependencies = intellijPlugin.dependencies.filter { !it.isOptional }.map { it.id }
+        val plugin = Plugin(id, artifact.name, Dependencies(dependencies))
+
+        plugins[id] = plugin
+        if (plugin.directoryName != id) {
+            directoryNameMapping[plugin.directoryName] = id
         }
     }
 
-    private static class Plugin {
-        final String id
-        final String directoryName
-        final Collection<String> dependencies;
+    @JacksonXmlRootElement(localName = "plugins")
+    data class PluginsCache(
+        @JacksonXmlElementWrapper(useWrapping = false)
+        var plugin: List<Plugin> = emptyList(),
+    )
 
-        Plugin(String id, String directoryName, Collection<String> dependencies) {
-            this.id = id
-            this.directoryName = directoryName
-            this.dependencies = dependencies
-        }
-    }
+    data class Plugin(
+        @JacksonXmlProperty(isAttribute = true)
+        val id: String,
+        @JacksonXmlProperty(isAttribute = true)
+        val directoryName: String,
+        val dependencies: Dependencies,
+    )
+
+    data class Dependencies(
+        @JacksonXmlElementWrapper(useWrapping = false)
+        @JacksonXmlProperty(localName = "dependency")
+        val dependencies: List<String> = emptyList()
+    )
 }
