@@ -7,6 +7,8 @@ import org.jetbrains.intellij.Utils
 
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 class IdeaDependency implements Serializable {
+    private static final int FORMAT_VERSION = 1
+
     @NotNull
     private final String name
     @NotNull
@@ -42,11 +44,13 @@ class IdeaDependency implements Serializable {
         if (classes.isDirectory()) {
             File lib = new File(classes, "lib")
             if (lib.isDirectory()) {
-                return Utils.collectJars(lib, { file ->
+                def baseFiles = Utils.collectJars(lib, { file ->
                     return (withKotlin || !IdeaDependencyManager.isKotlinRuntime(file.name - '.jar')) &&
                             file.name != 'junit.jar' &&
                             file.name != 'annotations.jar'
                 }).sort()
+                def antFiles = Utils.collectJars(new File(lib, "ant/lib"), { true }).sort()
+                return baseFiles + antFiles
             }
         }
         return Collections.emptySet()
@@ -102,14 +106,13 @@ class IdeaDependency implements Serializable {
     }
 
     String getFqn() {
-        def fqn = "$name-$version"
+        def fqn = "$name-$version-$FORMAT_VERSION"
         if (withKotlin) {
             fqn += '-withKotlin'
         }
         if (sources) {
             fqn += '-withSources'
         }
-        fqn += '-withoutAnnotations'
         return fqn
     }
 

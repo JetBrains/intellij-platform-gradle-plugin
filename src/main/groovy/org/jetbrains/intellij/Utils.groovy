@@ -220,6 +220,10 @@ class Utils {
 
     @NotNull
     static Collection<File> collectJars(@NotNull File directory, @NotNull final Predicate<File> filter) {
+        if (!directory.isDirectory()) {
+            Collections.emptyList();
+        }
+
         return FileUtils.listFiles(directory, new AbstractFileFilter() {
             @Override
             boolean accept(File file) {

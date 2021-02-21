@@ -213,6 +213,21 @@ class IntelliJPluginSpec extends IntelliJPluginSpecBase {
         assert runtimeClasspath.contains('git4idea.jar')
     }
 
+    def 'add ant dependencies to classpath'() {
+        given:
+        buildFile << 'task printTestRuntimeClassPath { doLast { println \'runtime: \' + sourceSets.test.runtimeClasspath.asPath } }\n'
+        buildFile << 'task printTestCompileClassPath { doLast { println \'compile: \' + sourceSets.test.compileClasspath.asPath } }\n'
+
+        when:
+        def result = build('printTestRuntimeClassPath', 'printTestCompileClassPath')
+        def compileClasspath = result.output.readLines().find { it.startsWith('compile:') }
+        def runtimeClasspath = result.output.readLines().find { it.startsWith('runtime:') }
+
+        then:
+        assert compileClasspath.contains('ant.jar')
+        assert runtimeClasspath.contains('ant.jar')
+    }
+
     def 'use test compile classpath for non-builtin plugins if Gradle >= 2.12'() {
         given:
         writeTestFile()
