@@ -5,6 +5,8 @@
 - support GoLand as an SDK
 - fix javac2 dependency for project with implicit IntelliJ version [#592](../../issues/592)
 - fix using query parameters in custom repository urls [#589](../../issues/589)
+- support downloading JBR for aarch64 [#600](../../issues/600)
+- added ant dependencies to testing classpath
 
 ## 0.6.5
 
