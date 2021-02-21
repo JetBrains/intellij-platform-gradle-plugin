@@ -148,7 +148,7 @@ class JbrResolver {
                     prefix = "jbr_jcef-"
                 }
             }
-            return new JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(true)}-b${buildNumberString}", repoUrl)
+            return new JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}", repoUrl)
         }
 
         private static String getPrefix(String version) {
@@ -179,7 +179,13 @@ class JbrResolver {
 
         private static def arch(boolean newFormat) {
             def arch = System.getProperty("os.arch")
-            return 'x86' == arch ? (newFormat ? 'i586' : 'x86') : 'x64'
+            if ('aarch64' == arch || 'arm64' == arch) {
+                return 'aarch64'
+            }
+            if ('x86_64' == arch || 'x86_64' == arch) {
+                return 'x64'
+            }
+            return newFormat ? 'i586' : 'x86'
         }
     }
 }
