@@ -1,17 +1,20 @@
 package org.jetbrains.intellij.dependency
 
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
+import java.io.File
 
-class LocalIdeaDependency extends IdeaDependency {
-    LocalIdeaDependency(@NotNull String name, @NotNull String version, @NotNull String buildNumber,
-                        @NotNull File classes, @Nullable File sources, boolean withKotlin,
-                        @NotNull BuiltinPluginsRegistry builtinPluginsRegistry,
-                        @NotNull Collection<IdeaExtraDependency> extraDependencies) {
-        super(name, version, buildNumber, classes, sources, withKotlin, builtinPluginsRegistry, extraDependencies)
-    }
+class LocalIdeaDependency(
+    name: String,
+    version: String,
+    buildNumber: String,
+    classes: File,
+    sources: File?,
+    withKotlin: Boolean,
+    builtinPluginsRegistry: BuiltinPluginsRegistry,
+    extraDependencies: Collection<IdeaExtraDependency>,
+) : IdeaDependency(name, version, buildNumber, classes, sources, withKotlin, builtinPluginsRegistry, extraDependencies) {
 
-    File getIvyRepositoryDirectory() {
-        version.endsWith(".SNAPSHOT") ? null : super.getIvyRepositoryDirectory()
+    override fun getIvyRepositoryDirectory() = when {
+        version.endsWith(".SNAPSHOT") -> null
+        else -> super.getIvyRepositoryDirectory()
     }
 }

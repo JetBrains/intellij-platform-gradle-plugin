@@ -30,7 +30,7 @@ open class IdeaDependency(
         return emptyList()
     }
 
-    protected open fun getIvyRepositoryDirectory() = classes
+    protected open fun getIvyRepositoryDirectory(): File? = classes
 
     fun getFqn(): String {
         var fqn = "$name-$version"
