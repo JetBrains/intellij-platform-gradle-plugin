@@ -16,15 +16,18 @@ open class IdeaDependency(
     val extraDependencies: Collection<IdeaExtraDependency>,
 ) : Serializable {
 
+    private val formatVersion = 1
     private val jarFiles = collectJarFiles()
 
     protected open fun collectJarFiles(): Collection<File> {
         if (classes.isDirectory) {
             val lib = File(classes, "lib")
             if (lib.isDirectory) {
-                return (collectJars(lib) { file ->
+                val baseFiles = (collectJars(lib) { file ->
                     (withKotlin || !isKotlinRuntime(file.name.removeSuffix(".jar"))) && file.name != "junit.jar" && file.name != "annotations.jar"
                 }).sorted()
+                val antFiles = collectJars(File(lib, "ant/lib")) { true }.sorted()
+                return baseFiles + antFiles
             }
         }
         return emptyList()
@@ -33,14 +36,13 @@ open class IdeaDependency(
     protected open fun getIvyRepositoryDirectory(): File? = classes
 
     fun getFqn(): String {
-        var fqn = "$name-$version"
+        var fqn = "$name-$version-$formatVersion"
         if (withKotlin) {
             fqn += "-withKotlin"
         }
         if (sources != null) {
             fqn += "-withSources"
         }
-        fqn += "-withoutAnnotations"
         return fqn
     }
 
