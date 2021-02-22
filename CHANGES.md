@@ -1,10 +1,13 @@
 # Changelog
 
-## 0.7.0 (under development)
+## 0.7.0
 
 - support GoLand as an SDK
 - fix javac2 dependency for project with implicit IntelliJ version [#592](../../issues/592)
 - fix using query parameters in custom repository urls [#589](../../issues/589)
+- support downloading JBR for aarch64 [#600](../../issues/600)
+- added ant dependencies to testing classpath
+- fix JBR resolving after removing JavaFX from JBR in IDEA 2021.1 [#599](../../issues/599)
 
 ## 0.6.5
 
