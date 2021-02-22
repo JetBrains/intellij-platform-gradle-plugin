@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.2
+
+- fix classpath for IDE without `ant` inside distribution
+
 ## 0.7.1
 
 - fix classpath for IDE 2020.2 [#601](../../issues/601)
