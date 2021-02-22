@@ -2,40 +2,33 @@ package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.CompileStatic
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
+import java.io.File
+import java.io.Serializable
 
 @CompileStatic
-interface PluginDependency extends Serializable {
-    @NotNull
-    String getId()
+interface PluginDependency : Serializable {
 
-    @NotNull
-    String getVersion()
+    fun getId(): String
 
-    @Nullable
-    String getChannel()
+    fun getVersion(): String
 
-    @NotNull
-    File getArtifact()
+    fun getChannel(): String?
 
-    @NotNull
-    Collection<File> getJarFiles()
+    fun getArtifact(): File
 
-    @Nullable
-    File getClassesDirectory()
+    fun getJarFiles(): Collection<File>
 
-    @Nullable
-    File getMetaInfDirectory()
+    fun getClassesDirectory(): File?
 
-    @Nullable
-    File getSourcesDirectory()
+    fun getMetaInfDirectory(): File?
 
-    boolean isBuiltin()
+    fun getSourcesDirectory(): File?
 
-    boolean isMaven()
+    fun isBuiltin(): Boolean
 
-    boolean isCompatible(@NotNull IdeVersion ideVersion)
+    fun isMaven(): Boolean
 
-    PluginDependencyNotation getNotation()
+    fun isCompatible(ideVersion: IdeVersion): Boolean
+
+    fun getNotation(): PluginDependencyNotation
 }
