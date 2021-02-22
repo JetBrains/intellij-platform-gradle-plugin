@@ -237,16 +237,6 @@ abstract class RunIdeBase extends JavaExec {
                     "$ideDirectory/lib/jna.jar",
             )
         }
-        else if (version >= VersionNumber.parse("202.0")) {
-            classpath += project.files(
-                    "$ideDirectory/lib/bootstrap.jar",
-                    "$ideDirectory/lib/extensions.jar",
-                    "$ideDirectory/lib/util.jar",
-                    "$ideDirectory/lib/jdom.jar",
-                    "$ideDirectory/lib/log4j.jar",
-                    "$ideDirectory/lib/jna.jar",
-            )
-        }
         else {
             classpath += project.files(
                     "$ideDirectory/lib/bootstrap.jar",
