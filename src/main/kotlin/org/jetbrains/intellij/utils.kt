@@ -174,10 +174,12 @@ fun stringInput(input: Any?) = when (input) {
 
 fun stringListInput(input: List<Any>) = input.map { stringInput(it) }
 
-fun collectJars(directory: File, filter: Predicate<File>): Collection<File> =
-    FileUtils.listFiles(directory, object : AbstractFileFilter() {
+fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = when {
+    !directory.isDirectory -> emptyList()
+    else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
         override fun accept(file: File) = isJarFile(file) && filter.test(file)
     }, FalseFileFilter.FALSE)
+}
 
 fun resolveToolsJar(javaExec: String): String {
     val binDir = File(javaExec).parent

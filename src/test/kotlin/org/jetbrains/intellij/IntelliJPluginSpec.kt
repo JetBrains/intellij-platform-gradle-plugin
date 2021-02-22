@@ -237,12 +237,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add builtin plugin dependencies to classpath`() {
         buildFile.groovy("""
-            intellij.plugins = ['com.jetbrains.changeReminder']
+            intellij.plugins = ["com.jetbrains.changeReminder"]
             task printTestRuntimeClassPath {
-                doLast { println 'runtime: ' + sourceSets.test.runtimeClasspath.asPath }
+                doLast { println "runtime: " + sourceSets.test.runtimeClasspath.asPath }
             }
             task printTestCompileClassPath {
-                doLast { println 'compile: ' + sourceSets.test.compileClasspath.asPath }
+                doLast { println "compile: " + sourceSets.test.compileClasspath.asPath }
             }
         """)
 
@@ -256,6 +256,30 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             assertTrue(compileClasspath.contains ("git4idea.jar"))
             assertTrue(runtimeClasspath.contains ("git4idea.jar"))
         }
+    }
+
+    @Test
+    fun `add ant dependencies to classpath`() {
+        buildFile.groovy("""
+            task printTestRuntimeClassPath {
+                doLast {
+                    println "runtime: " + sourceSets.test.runtimeClasspath.asPath
+                }
+            }
+            
+            task printTestCompileClassPath {
+                doLast {
+                    println "compile: " + sourceSets.test.compileClasspath.asPath
+                }
+            }
+        """)
+
+        val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
+        val compileClasspath = result.output.lines().find { it.startsWith("compile:") } ?: ""
+        val runtimeClasspath = result.output.lines().find { it.startsWith("runtime:") } ?: ""
+
+        assertTrue(compileClasspath.contains("ant.jar"))
+        assertTrue(runtimeClasspath.contains("ant.jar"))
     }
 
     @Test
