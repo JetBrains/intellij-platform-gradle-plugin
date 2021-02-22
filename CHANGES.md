@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.7.1
+
+- fix classpath for IDE 2020.2 [#601](../../issues/601)
+
 ## 0.7.0
 
 - support GoLand as an SDK
