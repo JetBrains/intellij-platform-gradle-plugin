@@ -1,18 +1,16 @@
 package org.jetbrains.intellij.dependency
 
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
+import java.io.File
 
-class JpsIdeaDependency extends IdeaDependency {
-    public static final Set<String> ALLOWED_JAR_NAMES = ['jps-builders.jar', 'jps-model.jar', 'util.jar']
+class JpsIdeaDependency(
+    version: String,
+    buildNumber: String,
+    classes: File,
+    sources: File?,
+    withKotlin: Boolean,
+) : IdeaDependency("ideaJPS", version, buildNumber, classes, sources, withKotlin, BuiltinPluginsRegistry(classes), emptyList()) {
 
-    JpsIdeaDependency(@NotNull String version, @NotNull String buildNumber, @NotNull File classes,
-                      @Nullable File sources, boolean withKotlin) {
-        super("ideaJPS", version, buildNumber, classes, sources, withKotlin, new BuiltinPluginsRegistry(classes), Collections.emptyList())
-    }
+    private val allowedJarNames = listOf("jps-builders.jar", "jps-model.jar", "util.jar")
 
-    @Override
-    protected Collection<File> collectJarFiles() {
-        return super.collectJarFiles().findAll { ALLOWED_JAR_NAMES.contains(it.name) }
-    }
+    override fun collectJarFiles() = super.collectJarFiles().filter { allowedJarNames.contains(it.name) }
 }
