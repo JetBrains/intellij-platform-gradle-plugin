@@ -45,6 +45,13 @@ plugins {
 plugins {
   id "org.jetbrains.intellij" version "0.8.0-SNAPSHOT"
 }
+
+buildscript {
+    dependencies {
+        classpath("org.jetbrains.intellij.plugins:structure-base:3.139")
+        classpath("org.jetbrains.intellij.plugins:structure-intellij:3.139")
+    }
+}
 ```
 
 And define the snapshots repository in your `settings.gradle` file
