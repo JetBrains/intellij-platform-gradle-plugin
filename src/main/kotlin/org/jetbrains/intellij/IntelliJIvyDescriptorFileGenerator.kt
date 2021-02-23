@@ -1,61 +1,57 @@
 package org.jetbrains.intellij
 
-import org.gradle.api.Action
-import org.gradle.api.UncheckedIOException
 import org.gradle.api.publish.ivy.IvyArtifact
 import org.gradle.api.publish.ivy.IvyConfiguration
 import org.gradle.api.publish.ivy.internal.publisher.IvyPublicationIdentity
 import org.gradle.internal.xml.SimpleXmlWriter
 import org.gradle.internal.xml.XmlTransformer
-import org.gradle.util.CollectionUtils
-
+import java.io.File
+import java.io.IOException
+import java.io.UncheckedIOException
+import java.io.Writer
 import java.text.SimpleDateFormat
+import java.util.Date
 
-class IntelliJIvyDescriptorFileGenerator {
-    private static final String IVY_FILE_ENCODING = "UTF-8"
-    private static final String IVY_DATE_PATTERN = "yyyyMMddHHmmss"
+class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublicationIdentity) {
 
-    private final IvyPublicationIdentity projectIdentity
-    private final SimpleDateFormat ivyDateFormat = new SimpleDateFormat(IVY_DATE_PATTERN)
-    private final XmlTransformer xmlTransformer = new XmlTransformer()
-    private final List<IvyConfiguration> configurations = new ArrayList<IvyConfiguration>()
-    private final List<IvyArtifact> artifacts = new ArrayList<IvyArtifact>()
+    private val ivyFileEncoding = "UTF-8"
+    private val ivyDatePattern = "yyyyMMddHHmmss"
 
-    IntelliJIvyDescriptorFileGenerator(IvyPublicationIdentity projectIdentity) {
-        this.projectIdentity = projectIdentity
-    }
+    private val ivyDateFormat = SimpleDateFormat(ivyDatePattern)
+    private val xmlTransformer = XmlTransformer()
+    private val configurations = mutableListOf<IvyConfiguration>()
+    private val artifacts = mutableListOf<IvyArtifact>()
 
-    void addConfiguration(IvyConfiguration ivyConfiguration) {
+    fun addConfiguration(ivyConfiguration: IvyConfiguration) {
         configurations.add(ivyConfiguration)
     }
 
-    void addArtifact(IvyArtifact ivyArtifact) {
+    fun addArtifact(ivyArtifact: IvyArtifact) {
         artifacts.add(ivyArtifact)
     }
 
-    void writeTo(File file) {
-        xmlTransformer.transform(file, IVY_FILE_ENCODING, new Action<Writer>() {
-            void execute(Writer writer) {
-                try {
-                    writeDescriptor(writer)
-                } catch (IOException e) {
-                    throw new UncheckedIOException(e)
-                }
+    fun writeTo(file: File) {
+        xmlTransformer.transform(file, ivyFileEncoding) { writer ->
+            try {
+                writeDescriptor(writer)
+            } catch (e: IOException) {
+                throw UncheckedIOException(e)
             }
-        })
+        }
     }
 
-    private void writeDescriptor(final Writer writer) throws IOException {
-        OptionalAttributeXmlWriter xmlWriter = new OptionalAttributeXmlWriter(writer, "  ", IVY_FILE_ENCODING)
+    @Throws(IOException::class)
+    private fun writeDescriptor(writer: Writer) {
+        val xmlWriter = OptionalAttributeXmlWriter(writer, "  ", ivyFileEncoding)
         xmlWriter.startElement("ivy-module").attribute("version", "2.0")
         if (usesClassifier()) {
-            xmlWriter.attribute("xmlns:m", "http://ant.apache.org/ivy/maven")
+            xmlWriter.attribute("xmlns:m", "https://ant.apache.org/ivy/maven")
         }
         xmlWriter.startElement("info")
-                .attribute("organisation", projectIdentity.getOrganisation())
-                .attribute("module", projectIdentity.getModule())
-                .attribute("revision", projectIdentity.getRevision())
-                .attribute("publication", ivyDateFormat.format(new Date()))
+            .attribute("organisation", projectIdentity.organisation)
+            .attribute("module", projectIdentity.module)
+            .attribute("revision", projectIdentity.revision)
+            .attribute("publication", ivyDateFormat.format(Date()))
         xmlWriter.endElement()
 
         writeConfigurations(xmlWriter)
@@ -63,56 +59,47 @@ class IntelliJIvyDescriptorFileGenerator {
         xmlWriter.endElement()
     }
 
-    private boolean usesClassifier() {
-        for (IvyArtifact artifact : artifacts) {
-            if (artifact.getClassifier() != null) {
-                return true
-            }
-        }
-        return false
-    }
+    private fun usesClassifier() = artifacts.any { it.classifier != null }
 
-    private void writeConfigurations(OptionalAttributeXmlWriter xmlWriter) throws IOException {
+    @Throws(IOException::class)
+    private fun writeConfigurations(xmlWriter: OptionalAttributeXmlWriter) {
         xmlWriter.startElement("configurations")
-        for (IvyConfiguration configuration : configurations) {
+        configurations.forEach {
             xmlWriter.startElement("conf")
-                    .attribute("name", configuration.getName())
-                    .attribute("visibility", "public")
-            if (configuration.getExtends().size() > 0) {
-                xmlWriter.attribute("extends", CollectionUtils.join(",", configuration.getExtends()))
+                .attribute("name", it.name)
+                .attribute("visibility", "public")
+            if (it.extends.size > 0) {
+                xmlWriter.attribute("extends", it.extends.joinToString(","))
             }
             xmlWriter.endElement()
         }
         xmlWriter.endElement()
     }
 
-    private void writePublications(OptionalAttributeXmlWriter xmlWriter) throws IOException {
+    @Throws(IOException::class)
+    private fun writePublications(xmlWriter: OptionalAttributeXmlWriter) {
         xmlWriter.startElement("publications")
-        for (IvyArtifact artifact : artifacts) {
+        artifacts.forEach {
             xmlWriter.startElement("artifact")
-                    .attribute("name", artifact.getName())
-                    .attribute("type", artifact.getType())
-                    .attribute("ext", artifact.getExtension())
-                    .attribute("conf", artifact.getConf())
-                    .attribute("m:classifier", artifact.getClassifier())
-                    .endElement()
+                .attribute("name", it.name)
+                .attribute("type", it.type)
+                .attribute("ext", it.extension)
+                .attribute("conf", it.conf)
+                .attribute("m:classifier", it.classifier)
+                .endElement()
         }
         xmlWriter.endElement()
     }
 
-    private static class OptionalAttributeXmlWriter extends SimpleXmlWriter {
-        OptionalAttributeXmlWriter(Writer writer, String indent, String encoding) throws IOException {
-            super(writer, indent, encoding)
-        }
+    class OptionalAttributeXmlWriter(writer: Writer, indent: String, encoding: String) :
+        SimpleXmlWriter(writer, indent, encoding) {
 
-        @Override
-        OptionalAttributeXmlWriter startElement(String name) throws IOException {
+        override fun startElement(name: String?): OptionalAttributeXmlWriter {
             super.startElement(name)
             return this
         }
 
-        @Override
-        OptionalAttributeXmlWriter attribute(String name, String value) throws IOException {
+        override fun attribute(name: String?, value: String?): OptionalAttributeXmlWriter {
             if (value != null) {
                 super.attribute(name, value)
             }
