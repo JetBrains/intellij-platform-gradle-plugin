@@ -182,7 +182,11 @@ class JbrResolver {
             if ('aarch64' == arch || 'arm64' == arch) {
                 return 'aarch64'
             }
-            if ('x86_64' == arch || 'x86_64' == arch) {
+            if ('x86_64' == arch || 'amd64' == arch) {
+                return 'x64'
+            }
+            def name = System.getProperty("os.name")
+            if (name.contains("Windows") && System.getenv("ProgramFiles(x86)") != null) {
                 return 'x64'
             }
             return newFormat ? 'i586' : 'x86'
