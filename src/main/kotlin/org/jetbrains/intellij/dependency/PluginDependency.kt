@@ -8,27 +8,27 @@ import java.io.Serializable
 @CompileStatic
 interface PluginDependency : Serializable {
 
-    fun getId(): String
+    val id: String
 
-    fun getVersion(): String
+    val version: String
 
-    fun getChannel(): String?
+    val channel: String?
 
-    fun getArtifact(): File
+    val artifact: File
 
-    fun getJarFiles(): Collection<File>
+    val jarFiles: Collection<File>
 
-    fun getClassesDirectory(): File?
+    val classesDirectory: File?
 
-    fun getMetaInfDirectory(): File?
+    val metaInfDirectory: File?
 
-    fun getSourcesDirectory(): File?
+    val sourcesDirectory: File?
 
-    fun isBuiltin(): Boolean
+    val builtin: Boolean
 
-    fun isMaven(): Boolean
+    val maven: Boolean
+
+    val notation: PluginDependencyNotation
 
     fun isCompatible(ideVersion: IdeVersion): Boolean
-
-    fun getNotation(): PluginDependencyNotation
 }
