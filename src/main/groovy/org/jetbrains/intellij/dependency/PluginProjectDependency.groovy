@@ -33,7 +33,7 @@ class PluginProjectDependency implements PluginDependency {
             if (creationResult instanceof PluginCreationSuccess) {
                 def intellijPlugin = creationResult.getPlugin()
                 if (intellijPlugin instanceof IdePlugin) {
-                    def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, pluginDirectory)
+                    def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, pluginDirectory, false, false)
                     pluginDependency.sinceBuild = intellijPlugin.getSinceBuild()?.asStringWithoutProductCode()
                     pluginDependency.untilBuild = intellijPlugin.getUntilBuild()?.asStringWithoutProductCode()
                     return pluginDependency
@@ -96,12 +96,12 @@ class PluginProjectDependency implements PluginDependency {
     }
 
     @Override
-    boolean isBuiltin() {
+    boolean getBuiltin() {
         return false
     }
 
     @Override
-    boolean isMaven() {
+    boolean getMaven() {
         return false
     }
 
