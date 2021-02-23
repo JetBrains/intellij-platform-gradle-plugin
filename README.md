@@ -50,6 +50,7 @@ buildscript {
     dependencies {
         classpath("org.jetbrains.intellij.plugins:structure-base:3.139")
         classpath("org.jetbrains.intellij.plugins:structure-intellij:3.139")
+        classpath("org.jetbrains.intellij:plugin-repository-rest-client:2.0.15")
     }
 }
 ```
