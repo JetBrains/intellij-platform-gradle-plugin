@@ -20,7 +20,7 @@ class PluginDependencyImpl(
     override var classesDirectory: File? = null
     override var metaInfDirectory: File? = null
     override val sourcesDirectory: File? = null
-    override val notation: PluginDependencyNotation = PluginDependencyNotation(id, version, channel)
+    override val notation = PluginDependencyNotation(id, version, channel)
     var sinceBuild: String? = null
     var untilBuild: String? = null
 

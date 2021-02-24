@@ -283,7 +283,7 @@ class IdeaDependencyManager {
             generator.addConfiguration(new DefaultIvyConfiguration("compile"))
             generator.addConfiguration(new DefaultIvyConfiguration("sources"))
             dependency.jarFiles.each {
-                generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes))
+                generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes, null))
             }
             if (dependency.sources) {
                 def artifact = new IntellijIvyArtifact(dependency.sources, 'ideaIC', "jar", "sources", "sources")

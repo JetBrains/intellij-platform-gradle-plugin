@@ -16,6 +16,7 @@ class IntellijIvyArtifact(
     private val buildDependencies = DefaultTaskDependency()
 
     companion object {
+        @JvmStatic
         fun createJarDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
             createDependency(baseDir, file, configuration, "jar", "jar", classifier)
 
