@@ -47,7 +47,7 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Run Linters and Test
-        run: ./gradlew test --debug
+        run: ./gradlew test
 
   build:
     name: Build
