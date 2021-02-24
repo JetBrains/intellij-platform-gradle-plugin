@@ -10,300 +10,317 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.tooling.BuildException
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.Utils
-
+import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.ideBuildNumber
+import org.jetbrains.intellij.ideaDir
+import org.jetbrains.intellij.info
+import org.jetbrains.intellij.isKotlinRuntime
+import org.jetbrains.intellij.releaseType
+import org.jetbrains.intellij.unzip
+import org.jetbrains.intellij.warn
+import java.io.File
+import java.net.URI
 import java.util.zip.ZipFile
 
-class IdeaDependencyManager {
-    private final String repoUrl
-    private final String ideaDependencyCachePath
-    private static final String[] mainDependencies = ["ideaIC", "ideaIU", "riderRD", "riderRS"]
+class IdeaDependencyManager(val repoUrl: String, val ideaDependencyCachePath: String?) {
 
-    IdeaDependencyManager(@NotNull String repoUrl, @Nullable String ideaDependencyCachePath) {
-        this.repoUrl = repoUrl
-        this.ideaDependencyCachePath = ideaDependencyCachePath
-    }
+    private val mainDependencies = listOf("ideaIC", "ideaIU", "riderRD", "riderRS")
 
-    @NotNull
-    IdeaDependency resolveRemote(@NotNull Project project, @NotNull String version, @NotNull String type, boolean sources,
-                                 @NotNull Object[] extraDependencies) {
-        def releaseType = Utils.releaseType(version)
-        Utils.debug(project, "Adding IDE repository: ${repoUrl}/$releaseType")
-        project.repositories.maven { it.url = "${repoUrl}/$releaseType" }
+    companion object {
+        @JvmStatic
+        fun register(project: Project, dependency: IdeaDependency, dependencies: DependencySet) {
+            val ivyFile = getOrCreateIvyXml(dependency)
+            val ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
+            project.repositories.ivy { repo ->
+                repo.url = dependency.classes.toURI()
+                repo.ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
+                repo.artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
+                if (dependency.sources != null) {
+                    repo.artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
+                }
+            }
+            dependencies.add(project.dependencies.create(mapOf(
+                "group" to "com.jetbrains",
+                "name" to dependency.name,
+                "version" to dependency.version,
+                "configuration" to "compile"
+            )))
+        }
 
-        Utils.debug(project, "Adding IDE dependency")
-        def dependencyGroup = 'com.jetbrains.intellij.idea'
-        def dependencyName = 'ideaIC'
-        if (type == 'IU') {
-            dependencyName = 'ideaIU'
-        } else if (type == 'CL') {
-            dependencyGroup = 'com.jetbrains.intellij.clion'
-            dependencyName = 'clion'
-        } else if (type == 'PY' || type == 'PC') {
-            dependencyGroup = 'com.jetbrains.intellij.pycharm'
-            dependencyName = 'pycharm' + type
-        } else if (type == 'GO') {
-            dependencyGroup = 'com.jetbrains.intellij.goland'
-            dependencyName = 'goland'
-        } else if (type == 'RD') {
-            dependencyGroup = 'com.jetbrains.intellij.rider'
-            dependencyName = 'riderRD'
-            if (sources && releaseType == 'snapshots') {
-                Utils.warn(project, "IDE sources are not available for Rider SNAPSHOTS")
-                sources = false
+        private fun createDependency(
+            name: String, type: String?, version: String,
+            buildNumber: String,
+            classesDirectory: File, sourcesDirectory: File?, project: Project,
+            extraDependencies: Collection<IdeaExtraDependency>,
+        ): IdeaDependency {
+            if (type == "JPS") {
+                return JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project))
+            } else if (type == null) {
+                val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project)
+                return LocalIdeaDependency(name,
+                    version,
+                    buildNumber,
+                    classesDirectory,
+                    sourcesDirectory,
+                    !hasKotlinDependency(project),
+                    pluginsRegistry,
+                    extraDependencies)
+            }
+            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project)
+            return IdeaDependency(name,
+                version,
+                buildNumber,
+                classesDirectory,
+                sourcesDirectory,
+                !hasKotlinDependency(project),
+                pluginsRegistry,
+                extraDependencies)
+        }
+
+        private fun resolveSources(project: Project, version: String): File? {
+            info(project, "Adding IDE sources repository")
+            try {
+                val dependency = project.dependencies.create("com.jetbrains.intellij.idea:ideaIC:$version:sources@jar")
+                val sourcesConfiguration = project.configurations.detachedConfiguration(dependency)
+                val sourcesFiles = sourcesConfiguration.files
+                if (sourcesFiles.size == 1) {
+                    val sourcesDirectory = sourcesFiles.first()
+                    debug(project, "IDE sources jar: " + sourcesDirectory.path)
+                    return sourcesDirectory
+                } else {
+                    warn(project, "Cannot attach IDE sources. Found files: $sourcesFiles")
+                }
+            } catch (e: ResolveException) {
+                warn(project, "Cannot resolve IDE sources dependency", e)
+            }
+            return null
+        }
+
+        private fun unzipDependencyFile(
+            cacheDirectory: File,
+            project: Project,
+            zipFile: File,
+            type: String,
+            checkVersionChange: Boolean,
+        ) = unzip(zipFile, cacheDirectory, project, { markerFile ->
+            isCacheUpToDate(zipFile, markerFile, checkVersionChange)
+        }, { unzippedDirectory, markerFile ->
+            resetExecutablePermissions(project, unzippedDirectory, type)
+            storeCache(unzippedDirectory, markerFile)
+        }, null)
+
+        private fun isCacheUpToDate(zipFile: File, markerFile: File, checkVersion: Boolean): Boolean {
+            if (!checkVersion) {
+                return markerFile.exists()
+            }
+            if (!markerFile.exists()) {
+                return false
+            }
+            ZipFile(zipFile).use { zip ->
+                val entry = zip.getEntry("build.txt")
+                if (entry != null && zip.getInputStream(entry).bufferedReader().use { it.readText() } != markerFile.readText()) {
+                    return false
+                }
+            }
+            return true
+        }
+
+        private fun storeCache(directoryToCache: File, markerFile: File) {
+            val buildTxt = File(directoryToCache, "build.txt")
+            if (buildTxt.exists()) {
+                markerFile.writeText(buildTxt.readText().trim())
             }
         }
-        def dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
 
-        def configuration = project.configurations.detachedConfiguration(dependency)
-
-        def classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
-        Utils.info(project, "IDE dependency cache directory: $classesDirectory")
-        def buildNumber = Utils.ideBuildNumber(classesDirectory)
-        def sourcesDirectory = sources ? resolveSources(project, version) : null
-        def resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
-        return createDependency(dependencyName, type, version, buildNumber, classesDirectory, sourcesDirectory, project, resolvedExtraDependencies)
-    }
-
-
-    @NotNull
-    IdeaDependency resolveLocal(@NotNull Project project, @NotNull String localPath, @Nullable String localPathSources) {
-        Utils.debug(project, "Adding local IDE dependency")
-        def ideaDir = Utils.ideaDir(localPath)
-        if (!ideaDir.exists() || !ideaDir.isDirectory()) {
-            throw new BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
-        }
-        def buildNumber = Utils.ideBuildNumber(ideaDir)
-        def sources = localPathSources ? new File(localPathSources) : null
-        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, Collections.emptyList())
-    }
-
-    static void register(@NotNull Project project, @NotNull IdeaDependency dependency, @NotNull DependencySet dependencies) {
-        def ivyFile = getOrCreateIvyXml(dependency)
-        def ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length()) - ".xml"
-        project.repositories.ivy { repo ->
-            repo.url = dependency.classes
-            repo.ivyPattern("$ivyFile.parent/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
-            repo.artifactPattern("$dependency.classes.path/[artifact].[ext]") // idea libs
-            if (dependency.sources) {
-                repo.artifactPattern("$dependency.sources.parent/[artifact]-[revision]-[classifier].[ext]")
+        private fun resetExecutablePermissions(project: Project, cacheDirectory: File, type: String) {
+            if (type == "RD") {
+                val operatingSystem = OperatingSystem.current()
+                if (!operatingSystem.isWindows) {
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/dupfinder.sh")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/inspectcode.sh")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/runtime.sh")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen")
+                    setExecutable(project, cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py")
+                }
             }
         }
-        dependencies.add(project.dependencies.create([
-                group: 'com.jetbrains', name: dependency.name, version: dependency.version, configuration: 'compile'
-        ]))
-    }
 
-    @NotNull
-    private static IdeaDependency createDependency(String name, String type, String version,
-                                                   String buildNumber,
-                                                   File classesDirectory, File sourcesDirectory, Project project,
-                                                   Collection<IdeaExtraDependency> extraDependencies) {
-        if (type == 'JPS') {
-            return new JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory,
-                    !hasKotlinDependency(project))
-        } else if (type == null) {
-            def pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(new File(classesDirectory, "plugins"), project)
-            return new LocalIdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
-                    !hasKotlinDependency(project), pluginsRegistry, extraDependencies)
+        private fun setExecutable(project: Project, parent: File, child: String) {
+            val file = File(parent, child)
+            debug(project, "Resetting executable permissions for $file.path")
+            file.setExecutable(true, true)
         }
-        def pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(new File(classesDirectory, "plugins"), project)
-        return new IdeaDependency(name, version, buildNumber, classesDirectory, sourcesDirectory,
-                !hasKotlinDependency(project), pluginsRegistry, extraDependencies)
-    }
 
-    @Nullable
-    private static File resolveSources(@NotNull Project project, @NotNull String version) {
-        Utils.info(project, "Adding IDE sources repository")
-        try {
-            def dependency = project.dependencies.create("com.jetbrains.intellij.idea:ideaIC:$version:sources@jar")
-            def sourcesConfiguration = project.configurations.detachedConfiguration(dependency)
-            def sourcesFiles = sourcesConfiguration.files
-            if (sourcesFiles.size() == 1) {
-                File sourcesDirectory = sourcesFiles.first()
-                Utils.debug(project, "IDE sources jar: " + sourcesDirectory.path)
-                return sourcesDirectory
+        private fun getOrCreateIvyXml(dependency: IdeaDependency): File {
+            val directory = dependency.getIvyRepositoryDirectory()
+            val ivyFile = if (directory != null) {
+
+                File(directory, "${dependency.getFqn()}.xml")
             } else {
-                Utils.warn(project, "Cannot attach IDE sources. Found files: " + sourcesFiles)
+                File.createTempFile(dependency.getFqn(), ".xml")
             }
-        } catch (ResolveException e) {
-            Utils.warn(project, "Cannot resolve IDE sources dependency", e)
+
+            if (directory == null || !ivyFile.exists()) {
+                val identity = DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version)
+                val generator = IntelliJIvyDescriptorFileGenerator(identity)
+                generator.addConfiguration(DefaultIvyConfiguration("default"))
+                generator.addConfiguration(DefaultIvyConfiguration("compile"))
+                generator.addConfiguration(DefaultIvyConfiguration("sources"))
+                dependency.jarFiles.forEach {
+                    generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes, null))
+                }
+                if (dependency.sources != null) {
+                    val artifact = IntellijIvyArtifact(dependency.sources, "ideaIC", "jar", "sources", "sources")
+                    artifact.conf = "sources"
+                    generator.addArtifact(artifact)
+                }
+                generator.writeTo(ivyFile)
+            }
+            return ivyFile
         }
-        return null
+
+        private fun hasKotlinDependency(project: Project): Boolean {
+            val configurations = project.configurations
+            val dependencies = configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).allDependencies +
+                configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).allDependencies
+            return dependencies.any { "org.jetbrains.kotlin" == it.group && isKotlinRuntime(it.name) }
+        }
     }
 
-    @NotNull
-    private File extractClassesFromRemoteDependency(@NotNull Project project,
-                                                           @NotNull Configuration configuration,
-                                                           @NotNull String type,
-                                                           @NotNull String version) {
-        File zipFile = configuration.singleFile
-        Utils.debug(project, "IDE zip: " + zipFile.path)
+    fun resolveRemote(project: Project, version: String, type: String, sources: Boolean, extraDependencies: List<String>): IdeaDependency {
+        val releaseType = releaseType(version)
+        debug(project, "Adding IDE repository: $repoUrl/$releaseType")
+        project.repositories.maven { it.url = URI.create("$repoUrl/$releaseType") }
+
+        debug(project, "Adding IDE dependency")
+        var dependencyGroup = "com.jetbrains.intellij.idea"
+        var dependencyName = "ideaIC"
+        var hasSources = sources
+        if (type == "IU") {
+            dependencyName = "ideaIU"
+        } else if (type == "CL") {
+            dependencyGroup = "com.jetbrains.intellij.clion"
+            dependencyName = "clion"
+        } else if (type == "PY" || type == "PC") {
+            dependencyGroup = "com.jetbrains.intellij.pycharm"
+            dependencyName = "pycharm$type"
+        } else if (type == "GO") {
+            dependencyGroup = "com.jetbrains.intellij.goland"
+            dependencyName = "goland"
+        } else if (type == "RD") {
+            dependencyGroup = "com.jetbrains.intellij.rider"
+            dependencyName = "riderRD"
+            if (sources && releaseType == "snapshots") {
+                warn(project, "IDE sources are not available for Rider SNAPSHOTS")
+                hasSources = false
+            }
+        }
+        val dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
+
+        val configuration = project.configurations.detachedConfiguration(dependency)
+
+        val classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
+        info(project, "IDE dependency cache directory: $classesDirectory")
+        val buildNumber = ideBuildNumber(classesDirectory)
+        val sourcesDirectory = if (hasSources) {
+            resolveSources(project, version)
+        } else {
+            null
+        }
+        val resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
+        return createDependency(dependencyName,
+            type,
+            version,
+            buildNumber,
+            classesDirectory,
+            sourcesDirectory,
+            project,
+            resolvedExtraDependencies)
+    }
+
+    fun resolveLocal(project: Project, localPath: String, localPathSources: String?): IdeaDependency {
+        debug(project, "Adding local IDE dependency")
+        val ideaDir = ideaDir(localPath)
+        if (!ideaDir.exists() || !ideaDir.isDirectory) {
+            throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
+        }
+        val buildNumber = ideBuildNumber(ideaDir)
+        val sources = if (!localPathSources.isNullOrEmpty()) {
+            File(localPathSources)
+        } else {
+            null
+        }
+        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, emptyList())
+    }
+
+    private fun extractClassesFromRemoteDependency(project: Project, configuration: Configuration, type: String, version: String): File {
+        val zipFile = configuration.singleFile
+        debug(project, "IDE zip: " + zipFile.path)
         return unzipDependencyFile(getZipCacheDirectory(zipFile, project, type), project, zipFile, type, version.endsWith("-SNAPSHOT"))
     }
 
-    @NotNull
-    private File getZipCacheDirectory(@NotNull File zipFile, @NotNull Project project, @NotNull String type) {
-        if (ideaDependencyCachePath) {
-            def customCacheParent = new File(ideaDependencyCachePath)
+    private fun getZipCacheDirectory(zipFile: File, project: Project, type: String): File {
+        if (!ideaDependencyCachePath.isNullOrEmpty()) {
+            val customCacheParent = File(ideaDependencyCachePath)
             if (customCacheParent.exists()) {
-                return new File(customCacheParent.absolutePath)
+                return File(customCacheParent.absolutePath)
             }
-        } else if (type == 'RD' && OperatingSystem.current().isWindows()) {
+        } else if (type == "RD" && OperatingSystem.current().isWindows) {
             return project.buildDir
         }
         return zipFile.parentFile
     }
 
-    @NotNull
-    private Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project,
-                                                                            @NotNull String version,
-                                                                            @NotNull Object[] extraDependencies) {
-        if (extraDependencies.length == 0) {
-            return []
+    private fun resolveExtraDependencies(
+        project: Project,
+        version: String,
+        extraDependencies: List<String>,
+    ): Collection<IdeaExtraDependency> {
+        if (extraDependencies.isEmpty()) {
+            return emptyList()
         }
-        Utils.info(project, "Configuring IDE extra dependencies $extraDependencies")
-        def mainInExtraDeps = extraDependencies.findAll { dep -> mainDependencies.any { it == dep } }
-        if (!mainInExtraDeps.empty) {
-            throw new GradleException("The items $mainInExtraDeps cannot be used as extra dependencies")
+        info(project, "Configuring IDE extra dependencies $extraDependencies")
+        val mainInExtraDeps = extraDependencies.filter { dep -> mainDependencies.any { it == dep } }
+        if (mainInExtraDeps.isNotEmpty()) {
+            throw GradleException("The items $mainInExtraDeps cannot be used as extra dependencies")
         }
-        def resolvedExtraDependencies = new ArrayList<IdeaExtraDependency>()
-        extraDependencies.each {
-            def name = it as String
-            def dependencyFile = resolveExtraDependency(project, version, name)
-            def extraDependency = new IdeaExtraDependency(name, dependencyFile)
-            Utils.debug(project, "IDE extra dependency $name in $dependencyFile files: ${extraDependency.jarFiles}")
-            resolvedExtraDependencies.add(extraDependency)
+        val resolvedExtraDependencies = ArrayList<IdeaExtraDependency>()
+        extraDependencies.forEach {
+            resolveExtraDependency(project, version, it)?.let { dependencyFile ->
+                val extraDependency = IdeaExtraDependency(it, dependencyFile)
+                debug(project, "IDE extra dependency $it in $dependencyFile files: ${extraDependency.jarFiles}")
+                resolvedExtraDependencies.add(extraDependency)
+            } ?: debug(project, "IDE extra dependency for $it was resolved as null")
         }
         return resolvedExtraDependencies
     }
 
-    @Nullable
-    private File resolveExtraDependency(@NotNull Project project, @NotNull String version, @NotNull String name) {
+    private fun resolveExtraDependency(project: Project, version: String, name: String): File? {
         try {
-            def dependency = project.dependencies.create("com.jetbrains.intellij.idea:$name:$version")
-            def extraDepConfiguration = project.configurations.detachedConfiguration(dependency)
-            def files = extraDepConfiguration.files
-            if (files.size() == 1) {
-                File depFile = files.first()
+            val dependency = project.dependencies.create("com.jetbrains.intellij.idea:$name:$version")
+            val extraDepConfiguration = project.configurations.detachedConfiguration(dependency)
+            val files = extraDepConfiguration.files
+            if (files.size == 1) {
+                val depFile = files.first()
                 if (depFile.name.endsWith(".zip")) {
-                    def cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
-                    Utils.debug(project, "IDE extra dependency $name: " + cacheDirectory.path)
+                    val cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
+                    debug(project, "IDE extra dependency $name: " + cacheDirectory.path)
                     return unzipDependencyFile(cacheDirectory, project, depFile, "IC", version.endsWith("-SNAPSHOT"))
                 } else {
-                    Utils.debug(project, "IDE extra dependency $name: " + depFile.path)
+                    debug(project, "IDE extra dependency $name: " + depFile.path)
                     return depFile
                 }
             } else {
-                Utils.warn(project, "Cannot attach IDE extra dependency $name. Found files: " + files)
+                warn(project, "Cannot attach IDE extra dependency $name. Found files: $files")
             }
-        } catch (ResolveException e) {
-            Utils.warn(project, "Cannot resolve IDE extra dependency $name", e)
+        } catch (e: ResolveException) {
+            warn(project, "Cannot resolve IDE extra dependency $name", e)
         }
         return null
-    }
-
-    @NotNull
-    private static File unzipDependencyFile(@NotNull File cacheDirectory,
-                                            @NotNull Project project,
-                                            @NotNull File zipFile,
-                                            @NotNull String type,
-                                            boolean checkVersionChange) {
-        return Utils.unzip(zipFile, cacheDirectory, project, {
-            markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange)
-        }, { unzippedDirectory, markerFile ->
-            resetExecutablePermissions(project, unzippedDirectory, type)
-            storeCache(unzippedDirectory, markerFile)
-        }, null)
-    }
-
-    private static boolean isCacheUpToDate(File zipFile, File markerFile, boolean checkVersion) {
-        if (!checkVersion) {
-            return markerFile.exists()
-        }
-        if (!markerFile.exists()) {
-            return false
-        }
-        def zip
-        try {
-            zip = new ZipFile(zipFile)
-            def entry = zip.getEntry("build.txt")
-            if (entry != null && zip.getInputStream(entry).text.trim() != markerFile.text.trim()) {
-                return false
-            }
-        }
-        finally {
-            if (zip) {
-                zip.close()
-            }
-        }
-        return true
-    }
-
-    private static void storeCache(File directoryToCache, File markerFile) {
-        def buildTxt = new File(directoryToCache, "build.txt")
-        if (buildTxt.exists()) {
-            markerFile.text = buildTxt.text.trim()
-        }
-    }
-
-    private static void resetExecutablePermissions(@NotNull Project project, @NotNull File cacheDirectory, @NotNull String type) {
-        if (type == 'RD') {
-            def operatingSystem = OperatingSystem.current()
-            if (!operatingSystem.isWindows()) {
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/dupfinder.sh")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/inspectcode.sh")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/runtime.sh")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen")
-                setExecutable(project, cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py")
-            }
-        }
-    }
-
-    static def setExecutable(@Nullable Project project, File parent, String child) {
-        def file = new File(parent, child)
-        Utils.debug(project, "Resetting executable permissions for $file.path")
-        file.setExecutable(true, true)
-    }
-
-    private static File getOrCreateIvyXml(@NotNull IdeaDependency dependency) {
-        def directory = dependency.getIvyRepositoryDirectory()
-        File ivyFile = directory != null ? new File(directory, "${dependency.fqn}.xml") : File.createTempFile(dependency.fqn, ".xml")
-        if (directory == null || !ivyFile.exists()) {
-            def identity = new DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version)
-            def generator = new IntelliJIvyDescriptorFileGenerator(identity)
-            generator.addConfiguration(new DefaultIvyConfiguration("default"))
-            generator.addConfiguration(new DefaultIvyConfiguration("compile"))
-            generator.addConfiguration(new DefaultIvyConfiguration("sources"))
-            dependency.jarFiles.each {
-                generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes, null))
-            }
-            if (dependency.sources) {
-                def artifact = new IntellijIvyArtifact(dependency.sources, 'ideaIC', "jar", "sources", "sources")
-                artifact.conf = "sources"
-                generator.addArtifact(artifact)
-            }
-            generator.writeTo(ivyFile)
-        }
-        return ivyFile
-    }
-
-    private static def hasKotlinDependency(@NotNull Project project) {
-        def configurations = project.configurations
-        def closure = {
-            if ("org.jetbrains.kotlin" == it.group) {
-                return Utils.isKotlinRuntime(it.name)
-            }
-            return false
-        }
-        return configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).getAllDependencies().find(closure) ||
-                configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).getAllDependencies().find(closure)
     }
 }

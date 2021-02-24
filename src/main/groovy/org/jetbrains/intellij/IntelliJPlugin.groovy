@@ -211,8 +211,8 @@ class IntelliJPlugin implements Plugin<Project> {
             } else {
                 Utils.info(project, "Using IDE from remote repository")
                 def version = extension.version ?: DEFAULT_IDEA_VERSION
-                ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources,
-                        extension.extraDependencies)
+                def extraDependencies = extension.extraDependencies.collect { it.toString() }
+                ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources, extraDependencies)
             }
             extension.ideaDependency = ideaDependency
             if (extension.configureDefaultDependencies) {

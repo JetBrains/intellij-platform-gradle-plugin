@@ -17,7 +17,7 @@ open class IdeaDependency(
 ) : Serializable {
 
     private val formatVersion = 1
-    private val jarFiles = collectJarFiles()
+    val jarFiles = collectJarFiles()
 
     protected open fun collectJarFiles(): Collection<File> {
         if (classes.isDirectory) {
@@ -33,7 +33,7 @@ open class IdeaDependency(
         return emptyList()
     }
 
-    protected open fun getIvyRepositoryDirectory(): File? = classes
+    open fun getIvyRepositoryDirectory(): File? = classes
 
     fun getFqn(): String {
         var fqn = "$name-$version-$formatVersion"
