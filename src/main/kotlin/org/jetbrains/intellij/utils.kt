@@ -207,13 +207,13 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
 
 fun unzip(
     zipFile: File,
-    cacheDirectory: File,
+    directory: File,
     project: Project,
-    isUpToDate: Predicate<File>?,
-    markUpToDate: BiConsumer<File, File>?,
+    isUpToDate: Predicate<File>? = null,
+    markUpToDate: BiConsumer<File, File>? = null,
     targetDirName: String? = null,
 ): File {
-    val targetDirectory = File(cacheDirectory, targetDirName ?: zipFile.name.removeSuffix(".zip"))
+    val targetDirectory = File(directory, targetDirName ?: zipFile.name.removeSuffix(".zip"))
     val markerFile = File(targetDirectory, "markerFile")
     if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
         return targetDirectory

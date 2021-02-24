@@ -4,27 +4,30 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.intellij.unzip
+import java.io.File
+import java.net.URI
 
+open class DownloadRobotServerPluginTask : ConventionTask() {
 
-class DownloadRobotServerPluginTask extends ConventionTask {
-    private final static String ROBOT_SERVER_REPO = "https://jetbrains.bintray.com/intellij-third-party-dependencies"
-    private final static String ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
-    public static final String DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = '0.10.0'
+    val ROBOT_SERVER_REPO = "https://jetbrains.bintray.com/intellij-third-party-dependencies"
+    val ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
+    val DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = "0.10.0"
 
     @Input
-    String version = DEFAULT_ROBOT_SERVER_PLUGIN_VERSION
+    var version = DEFAULT_ROBOT_SERVER_PLUGIN_VERSION
 
     @OutputDirectory
-    File outputDir = new File(project.buildDir, "robotServerPlugin")
+    val outputDir = File(project.buildDir, "robotServerPlugin")
 
     @TaskAction
-    void downloadPlugin() {
-        def dependency = project.dependencies.create("$ROBOT_SERVER_DEPENDENCY:$version")
-        def repo = project.repositories.maven { it.url = "$ROBOT_SERVER_REPO" }
+    fun downloadPlugin() {
+        val dependency = project.dependencies.create("$ROBOT_SERVER_DEPENDENCY:$version")
+        val repo = project.repositories.maven { it.url = URI.create(ROBOT_SERVER_REPO) }
         project.delete(outputDir)
         try {
-            def zipFile = project.configurations.detachedConfiguration(dependency).singleFile
-            ant.unzip(src: zipFile, dest: outputDir)
+            val zipFile = project.configurations.detachedConfiguration(dependency).singleFile
+            unzip(zipFile, outputDir, project, targetDirName = "")
         }
         finally {
             project.repositories.remove(repo)
