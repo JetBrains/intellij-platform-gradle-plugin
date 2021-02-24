@@ -200,7 +200,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull Configuration configuration) {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring IDE dependency")
-            def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO)
+            def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO, extension.ideaDependencyCachePath)
             def ideaDependency
             if (extension.localPath != null) {
                 if (extension.version != null) {

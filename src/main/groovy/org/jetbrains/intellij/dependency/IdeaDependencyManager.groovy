@@ -13,17 +13,18 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 
 import java.util.zip.ZipFile
 
 class IdeaDependencyManager {
     private final String repoUrl
+    private final String ideaDependencyCachePath
     private static final String[] mainDependencies = ["ideaIC", "ideaIU", "riderRD", "riderRS"]
 
-    IdeaDependencyManager(@NotNull String repoUrl) {
+    IdeaDependencyManager(@NotNull String repoUrl, @Nullable String ideaDependencyCachePath) {
         this.repoUrl = repoUrl
+        this.ideaDependencyCachePath = ideaDependencyCachePath
     }
 
     @NotNull
@@ -135,7 +136,7 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    private static File extractClassesFromRemoteDependency(@NotNull Project project,
+    private File extractClassesFromRemoteDependency(@NotNull Project project,
                                                            @NotNull Configuration configuration,
                                                            @NotNull String type,
                                                            @NotNull String version) {
@@ -145,10 +146,9 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    private static File getZipCacheDirectory(@NotNull File zipFile, @NotNull Project project, @NotNull String type) {
-        def intellijExtension = project.extensions.findByType(IntelliJPluginExtension.class)
-        if (intellijExtension && intellijExtension.ideaDependencyCachePath) {
-            def customCacheParent = new File(intellijExtension.ideaDependencyCachePath)
+    private File getZipCacheDirectory(@NotNull File zipFile, @NotNull Project project, @NotNull String type) {
+        if (ideaDependencyCachePath) {
+            def customCacheParent = new File(ideaDependencyCachePath)
             if (customCacheParent.exists()) {
                 return new File(customCacheParent.absolutePath)
             }
@@ -159,7 +159,7 @@ class IdeaDependencyManager {
     }
 
     @NotNull
-    private static Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project,
+    private Collection<IdeaExtraDependency> resolveExtraDependencies(@NotNull Project project,
                                                                             @NotNull String version,
                                                                             @NotNull Object[] extraDependencies) {
         if (extraDependencies.length == 0) {
@@ -182,7 +182,7 @@ class IdeaDependencyManager {
     }
 
     @Nullable
-    private static File resolveExtraDependency(@NotNull Project project, @NotNull String version, @NotNull String name) {
+    private File resolveExtraDependency(@NotNull Project project, @NotNull String version, @NotNull String name) {
         try {
             def dependency = project.dependencies.create("com.jetbrains.intellij.idea:$name:$version")
             def extraDepConfiguration = project.configurations.detachedConfiguration(dependency)
