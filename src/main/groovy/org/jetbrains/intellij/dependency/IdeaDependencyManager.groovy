@@ -97,7 +97,10 @@ class IdeaDependencyManager {
     }
 
     static boolean isKotlinRuntime(name) {
-        return 'kotlin-runtime' == name || 'kotlin-reflect' == name || name.startsWith('kotlin-stdlib')
+        return 'kotlin-runtime' == name ||
+            name == 'kotlin-reflect' || name.startsWith('kotlin-reflect-') ||
+            name == 'kotlin-stdlib' || name.startsWith('kotlin-stdlib-') ||
+            name == 'kotlin-test' || name.startsWith('kotlin-test-')
     }
 
     @NotNull
