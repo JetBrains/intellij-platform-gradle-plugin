@@ -28,7 +28,7 @@ class JbrResolver {
 
     @Nullable
     Jbr resolve(@Nullable String version) {
-        if (version == null) {
+        if (version == null || version.isEmpty()) {
             return null
         }
         def jbrArtifact = JbrArtifact.from(version.startsWith('u') ? "8$version" : version, operatingSystem)
