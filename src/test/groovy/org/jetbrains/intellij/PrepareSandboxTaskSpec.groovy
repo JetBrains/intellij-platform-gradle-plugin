@@ -159,7 +159,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
             </idea-plugin>""".stripIndent()
     }
 
-    def 'download robot server plugin task'() {
+    def 'download old robot server plugin task'() {
         given:
         writeJavaFile()
         file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
@@ -185,6 +185,32 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 ['/robot-server-plugin/lib/robot-server-plugin-0.10.0.jar'] as Set)
     }
 
+    def 'download new robot server plugin task'() {
+        given:
+        writeJavaFile()
+        file('src/main/resources/META-INF/other.xml') << '<idea-plugin></idea-plugin>'
+        file('src/main/resources/META-INF/nonIncluded.xml') << '<idea-plugin></idea-plugin>'
+        pluginXml << '<idea-plugin version="2"><depends config-file="other.xml"/></idea-plugin>'
+        buildFile << """
+            version='0.42.123'
+            intellij { 
+                pluginName = 'myPluginName' 
+                plugins = ['copyright'] 
+            }
+            downloadRobotServerPlugin.version = '0.11.1'
+            dependencies { 
+                compile 'joda-time:joda-time:2.8.1'
+            }\
+            """.stripIndent()
+
+        when:
+        build(IntelliJPlugin.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+
+        then:
+        collectPaths(new File(buildDirectory, "robotServerPlugin")).containsAll(
+                ['/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar'] as Set)
+    }
+
     def 'prepare ui tests sandbox task'() {
         given:
         writeJavaFile()
@@ -197,7 +223,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 pluginName = 'myPluginName' 
                 plugins = ['copyright'] 
             }
-            downloadRobotServerPlugin.version = '0.10.0'
+            downloadRobotServerPlugin.version = '0.11.1'
             dependencies { 
                 compile 'joda-time:joda-time:2.8.1'
             }\
@@ -210,7 +236,7 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
         collectPaths(sandbox).containsAll(['/plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar',
                                            '/plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar',
                                            '/config-uiTest/options/updates.xml',
-                                           '/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.10.0.jar'] as Set)
+                                           '/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar'] as Set)
     }
 
     def 'prepare sandbox with external jar-type plugin'() {
