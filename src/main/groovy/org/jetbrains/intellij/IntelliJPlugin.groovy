@@ -60,9 +60,8 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final Logger LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
-    public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
-    public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
-    public static final String DEFAULT_INTELLIJ_PLUGIN_SERVICE = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service'
+    public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/intellij-jbr'
+    public static final String DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO = 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
     public static final String PLUGIN_PATH = 'plugin.path'
 

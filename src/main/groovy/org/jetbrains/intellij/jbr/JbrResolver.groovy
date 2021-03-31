@@ -130,10 +130,7 @@ class JbrResolver {
             def buildNumber = VersionNumber.parse(buildNumberString)
             def isJava8 = majorVersion.startsWith('8')
 
-            String repoUrl = !isJava8 || buildNumber >= VersionNumber.parse('1483.31')
-                    ? IntelliJPlugin.DEFAULT_NEW_JBR_REPO
-                    : IntelliJPlugin.DEFAULT_JBR_REPO
-
+            String repoUrl = IntelliJPlugin.DEFAULT_JBR_REPO
             boolean oldFormat = prefix == 'jbrex' || isJava8 && buildNumber < VersionNumber.parse('1483.24')
             if (oldFormat) {
                 return new JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)

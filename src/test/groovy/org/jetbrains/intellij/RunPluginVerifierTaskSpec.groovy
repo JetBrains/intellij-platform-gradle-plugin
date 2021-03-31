@@ -1,7 +1,5 @@
 package org.jetbrains.intellij
 
-import de.undercouch.gradle.tasks.download.DownloadAction
-import groovy.json.JsonSlurper
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
@@ -39,9 +37,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         then:
-        def url = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
-        def metadata = new XmlParser().parse(url)
-        def version = metadata.versioning.latest[0].text()
+        def version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         result.output.contains("Starting the IntelliJ Plugin Verifier $version")
     }
 
@@ -240,12 +236,10 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             """.stripIndent()
 
         when:
-        def url = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
-        def metadata = new XmlParser().parse(url)
-        def version = metadata.versioning.latest[0].text()
+        def version = RunPluginVerifierTask.resolveLatestVerifierVersion()
 
         file("build/pluginVerifier.jar").withOutputStream { out ->
-            out << new URL("${RunPluginVerifierTask.SPACE_PACKAGES_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream()
+            out << new URL("${IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream()
         }
 
         def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")

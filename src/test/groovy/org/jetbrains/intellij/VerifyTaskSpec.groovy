@@ -71,7 +71,7 @@ class VerifyTaskSpec extends IntelliJPluginSpecBase {
         buildFile << "version '1.0'\nverifyPlugin { ignoreWarnings = false }"
         pluginXml << """
             <idea-plugin version="2">
-                <name>PluginName</name>
+                <name>Verification test</name>
                 <description>some description longlonglonglonglonglonglonglonglonglong enough</description>
                 <vendor>Zolotov</vendor>
                 <depends>com.intellij.modules.lang</depends>

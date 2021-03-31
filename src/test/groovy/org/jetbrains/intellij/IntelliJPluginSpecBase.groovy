@@ -28,7 +28,7 @@ abstract class IntelliJPluginSpecBase extends Specification {
         buildFile << """
             buildscript {
                 repositories { 
-                    maven { url 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service' } 
+                    maven { url 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure' } 
                     mavenCentral()
                 }
                 dependencies {

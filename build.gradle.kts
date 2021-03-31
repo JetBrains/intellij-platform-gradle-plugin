@@ -16,17 +16,17 @@ plugins.withType<JavaPlugin> {
 }
 
 repositories {
-    maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service")
+    maven("https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure")
+    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
-    maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 
 dependencies {
     implementation(localGroovy())
     api(gradleApi())
     implementation("org.jetbrains:annotations:19.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.139")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.139")
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.169")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.169")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")

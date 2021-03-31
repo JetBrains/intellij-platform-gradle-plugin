@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.3, not published
+
+- migrate from bintray [#594](../../issues/594)
+- exclude kotlin-reflect and kotlin-text from the runtime if kotlin is used in plugin [#585](../../issues/585)
+
 ## 0.7.2
 
 - fix classpath for IDE without `ant` inside distribution

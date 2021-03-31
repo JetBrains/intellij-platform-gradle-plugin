@@ -5,7 +5,7 @@ buildscript {
             url "https://oss.sonatype.org/content/repositories/snapshots/"
         }
         maven {
-            url 'https://dl.bintray.com/jetbrains/intellij-plugin-service'
+            url "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure"
         }
         maven {
             url "https://cache-redirector.jetbrains.com/intellij-dependencies"
