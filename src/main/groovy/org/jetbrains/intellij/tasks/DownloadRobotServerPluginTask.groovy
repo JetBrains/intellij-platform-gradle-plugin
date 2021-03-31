@@ -7,7 +7,7 @@ import org.gradle.api.tasks.TaskAction
 
 
 class DownloadRobotServerPluginTask extends ConventionTask {
-    private final static String ROBOT_SERVER_REPO = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
+    private final static String ROBOT_SERVER_REPO = "https://cache-redirector.jetbrains.com/intellij-dependencies"
     private final static String OLD_ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
     private final static String NEW_ROBOT_SERVER_DEPENDENCY = "com.intellij.remoterobot:robot-server-plugin"
 
