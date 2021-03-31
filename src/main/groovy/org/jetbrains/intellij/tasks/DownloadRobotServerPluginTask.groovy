@@ -7,8 +7,10 @@ import org.gradle.api.tasks.TaskAction
 
 
 class DownloadRobotServerPluginTask extends ConventionTask {
-    private final static String ROBOT_SERVER_REPO = "https://jetbrains.bintray.com/intellij-third-party-dependencies"
-    private final static String ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
+    private final static String ROBOT_SERVER_REPO = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
+    private final static String OLD_ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
+    private final static String NEW_ROBOT_SERVER_DEPENDENCY = "com.intellij.remoterobot:robot-server-plugin"
+
     public static final String DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = '0.10.0'
 
     @Input
@@ -19,7 +21,7 @@ class DownloadRobotServerPluginTask extends ConventionTask {
 
     @TaskAction
     void downloadPlugin() {
-        def dependency = project.dependencies.create("$ROBOT_SERVER_DEPENDENCY:$version")
+        def dependency = project.dependencies.create("${getDependency()}:$version")
         def repo = project.repositories.maven { it.url = "$ROBOT_SERVER_REPO" }
         project.delete(outputDir)
         try {
@@ -28,6 +30,14 @@ class DownloadRobotServerPluginTask extends ConventionTask {
         }
         finally {
             project.repositories.remove(repo)
+        }
+    }
+
+    private String getDependency() {
+        if (version.startsWith("0.10.")) {
+            return OLD_ROBOT_SERVER_DEPENDENCY
+        } else {
+            return NEW_ROBOT_SERVER_DEPENDENCY
         }
     }
 }
