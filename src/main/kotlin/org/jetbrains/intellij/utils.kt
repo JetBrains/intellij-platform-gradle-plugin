@@ -314,4 +314,7 @@ fun untar(project: Project, from: File, to: File) {
     tempDir.renameTo(to)
 }
 
-fun isKotlinRuntime(name: String) = "kotlin-runtime" == name || "kotlin-reflect" == name || name.startsWith("kotlin-stdlib")
+fun isKotlinRuntime(name: String) = "kotlin-runtime" == name ||
+    name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
+    name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
+    name == "kotlin-test" || name.startsWith("kotlin-test-")
