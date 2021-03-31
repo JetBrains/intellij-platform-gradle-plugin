@@ -2,13 +2,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     groovy
-    kotlin("jvm") version "1.4.30"
-    id("com.gradle.plugin-publish") version "0.13.0"
+    kotlin("jvm") version "1.4.32"
+    id("com.gradle.plugin-publish") version "0.14.0"
     id("synapticloop.documentr") version "3.1.0"
     `java-gradle-plugin`
     `maven-publish`
-    id("com.github.breadmoirai.github-release") version "2.2.9"
-    id("org.jetbrains.changelog") version "1.1.1"
+    id("com.github.breadmoirai.github-release") version "2.2.12"
+    id("org.jetbrains.changelog") version "1.1.2"
 }
 
 plugins.withType<JavaPlugin> {
