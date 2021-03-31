@@ -92,7 +92,9 @@ abstract class IntelliJPluginSpecBase {
         }
 
     private fun builder(gradleVersion: String, vararg tasks: String) =
-        GradleRunner.create().withProjectDir(dir).withGradleVersion(gradleVersion)
+        GradleRunner.create()
+            .withProjectDir(dir)
+            .withGradleVersion(gradleVersion)
             .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
@@ -169,6 +171,9 @@ abstract class IntelliJPluginSpecBase {
         }.toSet()
     }
 
+    // Methods can be simplified, when following tickets will be handled:
+    // https://youtrack.jetbrains.com/issue/KT-24517
+    // https://youtrack.jetbrains.com/issue/IDEA-260011
     fun File.xml(@Language("XML") content: String) = append(content)
 
     fun File.groovy(@Language("Groovy") content: String) = append(content)
