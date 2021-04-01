@@ -10,17 +10,17 @@ import java.net.URI
 
 open class DownloadRobotServerPluginTask : ConventionTask() {
 
-    @Input
-    var version = DEFAULT_ROBOT_SERVER_PLUGIN_VERSION
-
-    @OutputDirectory
-    val outputDir = File(project.buildDir, "robotServerPlugin")
-
     companion object {
         const val ROBOT_SERVER_REPO = "https://jetbrains.bintray.com/intellij-third-party-dependencies"
         const val ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
         const val DEFAULT_ROBOT_SERVER_PLUGIN_VERSION = "0.10.0"
     }
+
+    @Input
+    var version = DEFAULT_ROBOT_SERVER_PLUGIN_VERSION
+
+    @OutputDirectory
+    val outputDir = File(project.buildDir, "robotServerPlugin")
 
     @TaskAction
     fun downloadPlugin() {

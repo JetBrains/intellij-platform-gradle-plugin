@@ -5,70 +5,53 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.*
-import org.jetbrains.intellij.Utils
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.VerificationTask
+import org.jetbrains.intellij.error
+import org.jetbrains.intellij.warn
 
-@SuppressWarnings("GroovyUnusedDeclaration")
-class VerifyPluginTask extends ConventionTask implements VerificationTask {
-    private Object pluginDirectory
-    private Object ignoreFailures = false
-    private Object ignoreWarnings = true
-
-    @Input
-    boolean getIgnoreFailures() {
-        return this.ignoreFailures
-    }
-
-    void setIgnoreFailures(boolean ignoreFailures) {
-        this.ignoreFailures = ignoreFailures
-    }
+@Suppress("UnstableApiUsage")
+open class VerifyPluginTask : ConventionTask(), VerificationTask {
 
     @Input
-    boolean getIgnoreWarnings() {
-        return this.ignoreWarnings
+    val ignoreFailures: Property<Boolean> = project.objects.property(Boolean::class.java).convention(false)
+
+    override fun getIgnoreFailures(): Boolean = ignoreFailures.get()
+
+    override fun setIgnoreFailures(ignoreFailures: Boolean) {
+        this.ignoreFailures.set(ignoreFailures)
     }
 
-    void setIgnoreWarnings(boolean ignoreWarnings) {
-        this.ignoreWarnings = ignoreWarnings
-    }
+    @Input
+    val ignoreWarnings: Property<Boolean> = project.objects.property(Boolean::class.java).convention(true)
 
-    @SkipWhenEmpty
     @InputDirectory
-    File getPluginDirectory() {
-        this.pluginDirectory != null ? project.file(this.pluginDirectory) : null
-    }
-
-    void setPluginDirectory(Object pluginDirectory) {
-        this.pluginDirectory = pluginDirectory
-    }
-
-    void pluginDirectory(Object pluginDirectory) {
-        this.pluginDirectory = pluginDirectory
-    }
+    val pluginDirectory: DirectoryProperty = project.objects.directoryProperty()
 
     @TaskAction
-    void verifyPlugin() {
-        def creationResult = IdePluginManager.createManager().createPlugin(getPluginDirectory().toPath())
-        if (creationResult instanceof PluginCreationSuccess) {
-            creationResult.warnings.each {
-                Utils.warn(this, it.message)
+    fun verifyPlugin() {
+        val creationResult = pluginDirectory.get().let { IdePluginManager.createManager().createPlugin(it.asFile.toPath()) }
+        when (creationResult) {
+            is PluginCreationSuccess -> creationResult.warnings.forEach {
+                warn(this, it.message)
             }
-        } else if (creationResult instanceof PluginCreationFail) {
-            creationResult.errorsAndWarnings.each {
+            is PluginCreationFail -> creationResult.errorsAndWarnings.forEach {
                 if (it.level == PluginProblem.Level.ERROR) {
-                    Utils.error(this, it.message)
+                    error(this, it.message)
                 } else {
-                    Utils.warn(this, it.message)
+                    warn(this, it.message)
                 }
             }
-        } else {
-            Utils.error(this, creationResult.toString())
+            else -> error(this, creationResult.toString())
         }
-        boolean failBuild = !(creationResult instanceof PluginCreationSuccess) ||
-                !getIgnoreWarnings() && !creationResult.warnings.empty
-        if (failBuild && !getIgnoreFailures()) {
-            throw new GradleException("Plugin verification failed.")
+        val failBuild = creationResult !is PluginCreationSuccess || !ignoreWarnings.get() && creationResult.warnings.isNotEmpty()
+        if (failBuild && !ignoreFailures.get()) {
+            throw GradleException("Plugin verification failed.")
         }
     }
 }

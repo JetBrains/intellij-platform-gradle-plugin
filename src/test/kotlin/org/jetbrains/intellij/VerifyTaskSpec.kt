@@ -7,19 +7,6 @@ import kotlin.test.assertTrue
 class VerifyTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
-    fun `skip verifying empty directory`() {
-        buildFile.groovy("""
-            verifyPlugin {
-                pluginDirectory = null
-            }
-        """)
-
-        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("verifyPlugin NO-SOURCE"))
-    }
-
-    @Test
     fun `do not fail on warning by default`() {
         buildFile.groovy("""
             version '1.0'

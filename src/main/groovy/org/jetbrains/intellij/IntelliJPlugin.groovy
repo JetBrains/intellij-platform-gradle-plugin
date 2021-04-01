@@ -1,6 +1,6 @@
 package org.jetbrains.intellij
 
-import com.jetbrains.plugin.structure.intellij.version.*
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -438,10 +438,13 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(VERIFY_PLUGIN_TASK_NAME, VerifyPluginTask).with {
             group = GROUP_NAME
             description = "Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure."
-            conventionMapping('pluginDirectory', {
+
+            it.pluginDirectory.convention(project.provider({
                 def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-                new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName())
-            })
+                def path = new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName()).path
+                project.layout.projectDirectory.dir(path)
+            }))
+
             dependsOn { project.getTasksByName(PREPARE_SANDBOX_TASK_NAME, false) }
         }
     }
