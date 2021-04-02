@@ -7,8 +7,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
-import org.jetbrains.intellij.IntelliJPlugin
-import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Utils
 
 import java.nio.file.Paths
@@ -18,12 +17,14 @@ class JbrResolver {
     private final String cacheDirectoryPath
     private final OperatingSystem operatingSystem
     private final def context
+    private final String jreRepository
 
-    JbrResolver(@NotNull Project project, @Nullable Task context) {
+    JbrResolver(@NotNull Project project, @Nullable Task context, @Nullable String jreRepository) {
         this.context = context ?: project
         this.project = project
         this.cacheDirectoryPath = Paths.get(project.gradle.gradleUserHomeDir.absolutePath, 'caches/modules-2/files-2.1/com.jetbrains/jbre').toString()
         this.operatingSystem = OperatingSystem.current()
+        this.jreRepository = jreRepository
     }
 
     @Nullable
@@ -72,9 +73,7 @@ class JbrResolver {
             return null
         }
 
-        def intellijExtension = project.extensions.findByType(IntelliJPluginExtension)
-        def repo = intellijExtension != null ? intellijExtension.jreRepo : null
-        def url = "${repo ?: jbrArtifact.repoUrl}/$archiveName"
+        def url = "${jreRepository ?: jbrArtifact.repoUrl}/$archiveName"
         try {
             new DownloadAction(project).with {
                 src(url)
@@ -131,8 +130,8 @@ class JbrResolver {
             def isJava8 = majorVersion.startsWith('8')
 
             String repoUrl = !isJava8 || buildNumber >= VersionNumber.parse('1483.31')
-                    ? IntelliJPlugin.DEFAULT_NEW_JBR_REPO
-                    : IntelliJPlugin.DEFAULT_JBR_REPO
+                    ? IntelliJPluginConstants.DEFAULT_NEW_JBR_REPO
+                    : IntelliJPluginConstants.DEFAULT_JBR_REPO
 
             boolean oldFormat = prefix == 'jbrex' || isJava8 && buildNumber < VersionNumber.parse('1483.24')
             if (oldFormat) {

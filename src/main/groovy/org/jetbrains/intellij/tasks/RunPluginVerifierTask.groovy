@@ -753,7 +753,8 @@ class RunPluginVerifierTask extends ConventionTask {
             return getRuntimeDir()
         }
 
-        def jbrResolver = new JbrResolver(project, this)
+        def extension = project.extensions.findByType(IntelliJPluginExtension)
+        def jbrResolver = new JbrResolver(project, this, extension.jreRepo)
         if (jbrVersion != null) {
             def jbr = jbrResolver.resolve(getJbrVersion())
             if (jbr != null) {
@@ -763,7 +764,6 @@ class RunPluginVerifierTask extends ConventionTask {
             Utils.warn(this, "Cannot resolve JBR ${getJbrVersion()}. Falling back to built-in JBR.")
         }
 
-        def extension = project.extensions.findByType(IntelliJPluginExtension)
         def jbrPath = OperatingSystem.current().isMacOsX() ? "jbr/Contents/Home" : "jbr"
 
         def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))

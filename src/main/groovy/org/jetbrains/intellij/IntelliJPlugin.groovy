@@ -60,8 +60,6 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final Logger LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
-    public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
-    public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGIN_SERVICE = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
     public static final String PLUGIN_PATH = 'plugin.path'
@@ -497,7 +495,7 @@ class IntelliJPlugin implements Plugin<Project> {
             VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("202.0")
         })
         task.conventionMapping("executable", {
-            def jbrResolver = new JbrResolver(project, task)
+            def jbrResolver = new JbrResolver(project, task, extension.jreRepo)
             def jbrVersion = task.getJbrVersion() ?: task.getJbreVersion()
             if (jbrVersion != null) {
                 def jbr = jbrResolver.resolve(jbrVersion)
