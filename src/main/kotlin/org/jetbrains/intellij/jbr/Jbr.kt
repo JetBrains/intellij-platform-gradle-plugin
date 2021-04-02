@@ -1,13 +1,9 @@
 package org.jetbrains.intellij.jbr
 
-class Jbr {
-    final String version
-    final String javaHome
-    final String javaExecutable
+import java.io.File
 
-    Jbr(String version, File javaHome, String javaExecutable) {
-        this.version = version
-        this.javaHome = javaHome.path
-        this.javaExecutable = javaExecutable
-    }
-}
+data class Jbr(
+    val version: String,
+    val javaHome: File,
+    val javaExecutable: String,
+)
