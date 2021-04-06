@@ -1,151 +1,142 @@
 package org.jetbrains.intellij.tasks
 
-
-import org.apache.tools.ant.BuildException
+//import org.jetbrains.intellij.IntelliJPluginExtension
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.*
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.IntelliJPlugin
-import org.jetbrains.intellij.IntelliJPluginExtension
-import org.jetbrains.intellij.Utils
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.SkipWhenEmpty
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.TaskAction
+import org.gradle.tooling.BuildException
+import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.releaseType
+import java.io.File
+import java.net.URI
 
-class IntelliJInstrumentCodeTask extends ConventionTask {
-    private static final String FILTER_ANNOTATION_REGEXP_CLASS = 'com.intellij.ant.ClassFilterAnnotationRegexp'
-    private static final LOADER_REF = "java2.loader"
-    private static final ASM_REPO_URL = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies"
-    private static final FORMS_REPO_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
+@Suppress("UnstableApiUsage")
+open class IntelliJInstrumentCodeTask : ConventionTask() {
+
+    companion object {
+        const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
+        const val LOADER_REF = "java2.loader"
+        const val ASM_REPO_URL = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies"
+        const val FORMS_REPO_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
+    }
+
+//    private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
 
     @Internal
-    SourceSet sourceSet
+    val sourceSet: Property<SourceSet> = project.objects.property(SourceSet::class.java)
 
     @Input
     @Optional
-    IdeaDependency ideaDependency
-
-    Object javac2
-    Object compilerVersion
-
-    @OutputDirectory
-    File outputDir
-
-    @InputFiles
-    @SkipWhenEmpty
-    FileTree getOriginalClasses() {
-        def output = sourceSet.output
-        return output.hasProperty("classesDirs") ?
-                project.files(output.classesDirs.from).asFileTree :
-                project.fileTree(output.classesDir)
-    }
+    val ideaDependency: Property<IdeaDependency> = project.objects.property(IdeaDependency::class.java)
 
     @InputFile
     @Optional
-    File getJavac2() {
-        javac2 != null ? project.file(javac2) : null
-    }
-
-    @Deprecated
-    void setJavac2(Object javac2) {
-        this.javac2 = javac2
-    }
-
-    @Deprecated
-    void javac2(Object javac2) {
-        this.javac2 = javac2
-    }
+    val javac2: RegularFileProperty = project.objects.fileProperty()
 
     @Input
-    String getCompilerVersion() {
-        Utils.stringInput(compilerVersion)
-    }
+    val compilerVersion: Property<String> = project.objects.property(String::class.java)
 
-    void setCompilerVersion(Object compilerVersion) {
-        this.compilerVersion = compilerVersion
-    }
-
-    void compilerVersion(Object compilerVersion) {
-        this.compilerVersion = compilerVersion
-    }
-
+    @OutputDirectory
+    val outputDir: DirectoryProperty = project.objects.directoryProperty()
 
     @InputFiles
-    FileCollection getSourceDirs() {
-        return project.files(sourceSet.allSource.srcDirs.findAll { !sourceSet.resources.contains(it) && it.exists() })
-    }
+    @SkipWhenEmpty
+    fun getOriginalClasses(): FileTree = sourceSet.get().output.classesDirs.asFileTree
 
-    @SuppressWarnings("GroovyUnusedDeclaration")
+    @InputFiles
+    fun getSourceDirs(): FileCollection =
+        project.files(sourceSet.get().allSource.srcDirs.filter { !sourceSet.get().resources.contains(it) && it.exists() })
+
+    //    @SuppressWarnings("GroovyUnusedDeclaration")
     @TaskAction
-    void instrumentClasses() {
-        def outputDir = getOutputDir()
-        copyOriginalClasses(outputDir)
+    fun instrumentClasses() {
+        copyOriginalClasses(outputDir.get().asFile)
 
-        def classpath = compilerClassPath()
-        ant.taskdef(name: 'instrumentIdeaExtensions',
-                classpath: classpath.asPath,
-                loaderref: LOADER_REF,
-                classname: 'com.intellij.ant.InstrumentIdeaExtensions')
+        val classpath = compilerClassPath()
+
+        ant.invokeMethod("taskdef", mapOf(
+            "name" to "instrumentIdeaExtensions",
+            "classpath" to classpath.asPath,
+            "loaderref" to LOADER_REF,
+            "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
+        ))
 
         logger.info("Compiling forms and instrumenting code with nullability preconditions")
-        boolean instrumentNotNull = prepareNotNullInstrumenting(classpath)
-        instrumentCode(getSourceDirs(), outputDir, instrumentNotNull)
+        val instrumentNotNull = prepareNotNullInstrumenting(classpath)
+        instrumentCode(getSourceDirs(), outputDir.get().asFile, instrumentNotNull)
     }
 
-    private FileCollection compilerClassPath() {
+    private fun compilerClassPath(): FileCollection {
         // local compiler
-        def ideaDependency = getIdeaDependency()
-        def javac2 = getJavac2()
-        if (ideaDependency != null && javac2?.exists()) {
+        if (javac2.get().asFile.exists()) {
             return project.files(
-                    javac2,
-                    project.fileTree("$ideaDependency.classes/lib").include(
-                            'jdom.jar',
-                            'asm-all.jar',
-                            'asm-all-*.jar',
-                            'jgoodies-forms.jar',
-                            'forms-*.jar',
-                    )
+                javac2,
+                project.fileTree("$ideaDependency.classes/lib").include(
+                    "jdom.jar",
+                    "asm-all.jar",
+                    "asm-all-*.jar",
+                    "jgoodies-forms.jar",
+                    "forms-*.jar",
+                )
             )
         }
 
         return compilerClassPathFromMaven()
     }
 
-    private ConfigurableFileCollection compilerClassPathFromMaven() {
-        def compilerVersion = getCompilerVersion()
-        def dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:$compilerVersion")
-        def intellijRepoUrl = project.extensions.findByType(IntelliJPluginExtension)?.intellijRepo ?: IntelliJPlugin.DEFAULT_INTELLIJ_REPO
-        def repos = [project.repositories.maven { it.url = "$intellijRepoUrl/${Utils.releaseType(compilerVersion)}" },
-                     project.repositories.maven { it.url = ASM_REPO_URL },
-                     project.repositories.maven { it.url = FORMS_REPO_URL }]
+    private fun compilerClassPathFromMaven(): ConfigurableFileCollection {
+        val dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
+        // TODO: use extension
+//        val intellijRepoUrl = extension?.intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
+        val intellijRepo = null
+        val intellijRepoUrl = intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
+        val repos = listOf(
+            project.repositories.maven { it.url = URI("$intellijRepoUrl/${releaseType(compilerVersion.get())}") },
+            project.repositories.maven { it.url = URI(ASM_REPO_URL) },
+            project.repositories.maven { it.url = URI(FORMS_REPO_URL) },
+        )
         try {
             return project.files(project.configurations.detachedConfiguration(dependency).files)
-        }
-        finally {
+        } finally {
             project.repositories.removeAll(repos)
         }
     }
 
-
-    private void copyOriginalClasses(@NotNull File outputDir) {
-        outputDir.deleteDir()
+    private fun copyOriginalClasses(outputDir: File) {
+        outputDir.deleteRecursively()
         project.copy {
-            from getOriginalClasses()
-            into outputDir
+            it.from(getOriginalClasses())
+            it.into(outputDir)
         }
     }
 
-    private boolean prepareNotNullInstrumenting(@NotNull FileCollection classpath) {
+    private fun prepareNotNullInstrumenting(classpath: FileCollection): Boolean {
         try {
-            ant.typedef(name: 'skip', classpath: classpath.asPath, loaderref: LOADER_REF,
-                    classname: FILTER_ANNOTATION_REGEXP_CLASS)
-        } catch (BuildException e) {
-            def cause = e.getCause()
-            if (cause instanceof ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.getMessage()) {
+            ant.invokeMethod("typedef", mapOf(
+                "name" to "skip",
+                "classpath" to classpath.asPath,
+                "loaderref" to LOADER_REF,
+                "classname" to FILTER_ANNOTATION_REGEXP_CLASS,
+            ))
+        } catch (e: BuildException) {
+            val cause = e.cause
+            if (cause is ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.message) {
                 logger.info("Old version of Javac2 is used, " +
-                        "instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
+                    "instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
                 return false
             } else {
                 throw e
@@ -154,20 +145,26 @@ class IntelliJInstrumentCodeTask extends ConventionTask {
         return true
     }
 
-    private void instrumentCode(@NotNull FileCollection srcDirs, @NotNull File outputDir, boolean instrumentNotNull) {
-        def headlessOldValue = System.setProperty('java.awt.headless', 'true')
-        ant.instrumentIdeaExtensions(srcdir: srcDirs.asPath,
-                destdir: outputDir, classpath: sourceSet.compileClasspath.asPath,
-                includeantruntime: false, instrumentNotNull: instrumentNotNull) {
-            if (instrumentNotNull) {
-                ant.skip(pattern: 'kotlin/Metadata')
-            }
+    private fun instrumentCode(srcDirs: FileCollection, outputDir: File, instrumentNotNull: Boolean) {
+        val headlessOldValue = System.setProperty("java.awt.headless", "true")
+        ant.invokeMethod("instrumentIdeaExtensions", mapOf(
+            "srcdir" to srcDirs.asPath,
+            "destdir" to outputDir,
+            "classpath" to sourceSet.get().compileClasspath.asPath,
+            "includeantruntime" to false,
+            "instrumentNotNull" to instrumentNotNull,
+        ))
+
+        if (instrumentNotNull) {
+            ant.invokeMethod("skip", mapOf(
+                "pattern" to "kotlin/Metadata"
+            ))
         }
+
         if (headlessOldValue != null) {
-            System.setProperty('java.awt.headless', headlessOldValue)
+            System.setProperty("java.awt.headless", headlessOldValue)
         } else {
-            System.clearProperty('java.awt.headless')
+            System.clearProperty("java.awt.headless")
         }
     }
-
 }

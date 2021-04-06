@@ -11,8 +11,6 @@ import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.SourceSet
@@ -25,12 +23,7 @@ import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.dependency.IdeaDependencyManager
-import org.jetbrains.intellij.dependency.PluginDependency
-import org.jetbrains.intellij.dependency.PluginDependencyManager
-import org.jetbrains.intellij.dependency.PluginDependencyNotation
-import org.jetbrains.intellij.dependency.PluginProjectDependency
-import org.jetbrains.intellij.dependency.PluginsRepository
+import org.jetbrains.intellij.dependency.*
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.tasks.*
 
@@ -57,9 +50,11 @@ class IntelliJPlugin implements Plugin<Project> {
     public static final String IDEA_CONFIGURATION_NAME = "idea"
     public static final String IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
 
-    public static final Logger LOG = Logging.getLogger(IntelliJPlugin)
+//    public static final Logger LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-    public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
+//    public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
+//    public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk'
+//    public static final String DEFAULT_NEW_JBR_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGIN_SERVICE = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service'
     public static final String DEFAULT_INTELLIJ_PLUGINS_REPO = 'https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven'
     public static final String PLUGIN_PATH = 'plugin.path'
@@ -198,7 +193,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull Configuration configuration) {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring IDE dependency")
-            def resolver = new IdeaDependencyManager(extension.intellijRepo ?: DEFAULT_INTELLIJ_REPO, extension.ideaDependencyCachePath)
+            def resolver = new IdeaDependencyManager(extension.intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO, extension.ideaDependencyCachePath)
             def ideaDependency
             if (extension.localPath != null) {
                 if (extension.version != null) {
@@ -546,11 +541,11 @@ class IntelliJPlugin implements Plugin<Project> {
         Utils.info(project, "Configuring compile tasks")
         project.sourceSets.all { SourceSet sourceSet ->
             def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
-            instrumentTask.sourceSet = sourceSet
+            instrumentTask.sourceSet.convention(sourceSet)
             instrumentTask.with {
                 dependsOn sourceSet.classesTaskName
                 onlyIf { extension.instrumentCode }
-                conventionMapping('compilerVersion', {
+                it.compilerVersion.convention(project.provider({
                     def version = extension.version ?: DEFAULT_IDEA_VERSION
                     if (!extension.localPath && version && version.endsWith('-SNAPSHOT')) {
                         if (extension.type == 'CL') {
@@ -565,19 +560,25 @@ class IntelliJPlugin implements Plugin<Project> {
                         return version
                     }
                     return IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode()
-                })
-                conventionMapping('ideaDependency', { extension.ideaDependency })
-                conventionMapping('javac2', {
-                    def javac2 = project.file("$extension.ideaDependency.classes/lib/javac2.jar")
-                    if (javac2?.exists()) {
-                        return javac2
-                    }
-                })
-                conventionMapping('outputDir', {
-                    def output = sourceSet.output
-                    def classesDir = output.classesDirs.first()
-                    new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
-                })
+                }))
+                it.ideaDependency.convention(project.provider({
+                    extension.ideaDependency
+                }))
+                it.javac2.convention(
+                        project.layout.file(project.provider({
+                            def javac2 = project.file("$extension.ideaDependency.classes/lib/javac2.jar")
+                            if (javac2?.exists()) {
+                                return javac2
+                            }
+                        }))
+                )
+                it.outputDir.convention(
+                        project.layout.dir(project.provider({
+                            def output = sourceSet.output
+                            def classesDir = output.classesDirs.first()
+                            new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
+                        }))
+                )
             }
 
             // A dedicated task ensures that sources substitution is always run,

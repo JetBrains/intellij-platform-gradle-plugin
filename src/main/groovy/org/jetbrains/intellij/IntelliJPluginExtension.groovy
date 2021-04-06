@@ -78,7 +78,7 @@ class IntelliJPluginExtension {
     /**
      * Url of repository for downloading IDE distributions.
      */
-    String intellijRepo = IntelliJPlugin.DEFAULT_INTELLIJ_REPO
+    String intellijRepo = IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
 
     /**
      * Url of repository for downloading plugin dependencies.
