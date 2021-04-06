@@ -573,11 +573,11 @@ class IntelliJPlugin implements Plugin<Project> {
                         }))
                 )
                 it.outputDir.convention(
-                        project.layout.dir(project.provider({
-                            def output = sourceSet.output
-                            def classesDir = output.classesDirs.first()
-                            new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
-                        }))
+                    project.layout.dir(project.provider({
+                        def output = sourceSet.output
+                        def classesDir = output.classesDirs.first()
+                        new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
+                    }))
                 )
             }
 

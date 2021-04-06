@@ -55,7 +55,7 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
 
     @InputFiles
     @SkipWhenEmpty
-    fun getOriginalClasses(): FileTree = sourceSet.get().output.classesDirs.asFileTree
+    fun getOriginalClasses(): FileTree = project.fileTree(sourceSet.get().output.classesDirs)
 
     @InputFiles
     fun getSourceDirs(): FileCollection =
