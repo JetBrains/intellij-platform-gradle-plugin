@@ -7,6 +7,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
+import org.gradle.api.internal.file.collections.DefaultConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -55,7 +56,13 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
 
     @InputFiles
     @SkipWhenEmpty
-    fun getOriginalClasses(): FileTree = project.fileTree(sourceSet.get().output.classesDirs)
+    fun getOriginalClasses(): FileTree = sourceSet.get().output.classesDirs.let {
+        if (it is DefaultConfigurableFileCollection) {
+            project.files(it.from).asFileTree
+        } else {
+            project.fileTree(it)
+        }
+    }
 
     @InputFiles
     fun getSourceDirs(): FileCollection =
@@ -85,7 +92,7 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
         if (javac2.get().asFile.exists()) {
             return project.files(
                 javac2,
-                project.fileTree("$ideaDependency.classes/lib").include(
+                project.fileTree("${ideaDependency.get().classes}/lib").include(
                     "jdom.jar",
                     "asm-all.jar",
                     "asm-all-*.jar",

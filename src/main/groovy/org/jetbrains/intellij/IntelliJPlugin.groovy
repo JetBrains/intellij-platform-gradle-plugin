@@ -559,7 +559,7 @@ class IntelliJPlugin implements Plugin<Project> {
                         }
                         return version
                     }
-                    return IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode()
+                    return IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber).asStringWithoutProductCode()
                 }))
                 it.ideaDependency.convention(project.provider({
                     extension.ideaDependency
@@ -572,13 +572,10 @@ class IntelliJPlugin implements Plugin<Project> {
                             }
                         }))
                 )
-                it.outputDir.convention(
-                    project.layout.dir(project.provider({
-                        def output = sourceSet.output
-                        def classesDir = output.classesDirs.first()
-                        new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
-                    }))
-                )
+                def output = sourceSet.output
+                def classesDir = output.classesDirs.first()
+                def outputDir = new File(classesDir.parentFile, "${sourceSet.name}-instrumented")
+                it.outputDir.convention(project.layout.projectDirectory.dir(outputDir.path))
             }
 
             // A dedicated task ensures that sources substitution is always run,
