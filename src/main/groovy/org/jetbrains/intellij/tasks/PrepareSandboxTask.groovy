@@ -57,8 +57,8 @@ class PrepareSandboxTask extends Sync {
 
     @Input
     String getConfigDirectory() {
-        def pluginName = Utils.stringInput(pluginName)
-        pluginName != null ? FileUtils.toSafeFileName(pluginName) : null
+        def configDirectory = Utils.stringInput(configDirectory)
+        configDirectory != null ? FileUtils.toSafeFileName(configDirectory) : null
     }
 
     void setConfigDirectory(Object configDirectory) {
