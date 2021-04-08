@@ -34,24 +34,21 @@ class PluginDependencyManager(
                 return externalPluginDependency(project, File(dependency.id), null, false)
             } else if (ideaDependency != null) {
                 info(project, "Looking for builtin $dependency.id in $ideaDependency.classes.absolutePath")
-                val pluginDirectory = ideaDependency.pluginsRegistry.findPlugin(dependency.id)
-                if (pluginDirectory != null) {
+                ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
                         ("-withSources".takeIf { ideaDependency.sources != null } ?: "")
-                    return PluginDependencyImpl(pluginDirectory.name, builtinPluginVersion, pluginDirectory, true)
+                    return PluginDependencyImpl(it.name, builtinPluginVersion, it, true)
                 }
             }
             throw BuildException("Cannot find builtin plugin ${dependency.id} for IDE: ${ideaDependency?.classes?.absolutePath}", null)
         }
         pluginsRepositories.forEach { repo ->
-            val pluginFile = repo.resolve(dependency)
-            if (pluginFile != null) {
-                if (isZipFile(pluginFile)) {
-                    return zippedPluginDependency(project, pluginFile, dependency)
-                } else if (isJarFile(pluginFile)) {
-                    return externalPluginDependency(project, pluginFile, dependency.channel, true)
+            repo.resolve(dependency)?.let {
+                return when {
+                    isZipFile(it) -> zippedPluginDependency(project, it, dependency)
+                    isJarFile(it) -> externalPluginDependency(project, it, dependency.channel, true)
+                    else -> throw BuildException("Invalid type of downloaded plugin: ${it.name}", null)
                 }
-                throw BuildException("Invalid type of downloaded plugin: ${pluginFile.name}", null)
             }
         }
         throw BuildException(
@@ -127,25 +124,27 @@ class PluginDependencyManager(
         if (!ivyFile.exists()) {
             val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
             val configuration = DefaultIvyConfiguration("compile")
-            val generator = IntelliJIvyDescriptorFileGenerator(identity)
-            generator.addConfiguration(configuration)
-            generator.addConfiguration(DefaultIvyConfiguration("sources"))
-            generator.addConfiguration(DefaultIvyConfiguration("default"))
-            plugin.jarFiles.forEach {
-                generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, configuration.name, baseDir, groupId))
+
+            IntelliJIvyDescriptorFileGenerator(identity).apply {
+                addConfiguration(configuration)
+                addConfiguration(DefaultIvyConfiguration("sources"))
+                addConfiguration(DefaultIvyConfiguration("default"))
+                plugin.jarFiles.forEach {
+                    addArtifact(IntellijIvyArtifact.createJarDependency(it, configuration.name, baseDir, groupId))
+                }
+                plugin.classesDirectory?.let {
+                    addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
+                }
+                plugin.metaInfDirectory?.let {
+                    addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
+                }
+                ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
+                    val artifact = IntellijIvyArtifact(it, "ideaIC", "jar", "sources", "sources")
+                    artifact.conf = "sources"
+                    addArtifact(artifact)
+                }
+                writeTo(ivyFile)
             }
-            plugin.classesDirectory?.let {
-                generator.addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
-            }
-            plugin.metaInfDirectory?.let {
-                generator.addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
-            }
-            ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
-                val artifact = IntellijIvyArtifact(it, "ideaIC", "jar", "sources", "sources")
-                artifact.conf = "sources"
-                generator.addArtifact(artifact)
-            }
-            generator.writeTo(ivyFile)
         }
     }
 

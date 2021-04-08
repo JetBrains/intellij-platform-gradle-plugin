@@ -59,9 +59,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
                 "/config/options/updates.xml",
+                "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
+                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
             ),
             collectPaths(sandbox),
         )

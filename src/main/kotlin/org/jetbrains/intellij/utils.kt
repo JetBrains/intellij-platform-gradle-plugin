@@ -128,6 +128,7 @@ fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).files.map {
     parsePluginXml(it, IdeaPlugin::class.java).id
 }
 
+// TODO: rename to parseXml
 fun <T> parsePluginXml(stream: InputStream, valueType: Class<T>): T = XmlMapper()
     .registerKotlinModule()
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)

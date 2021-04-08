@@ -397,16 +397,28 @@ class IntelliJPlugin implements Plugin<Project> {
         return project.tasks.create(taskName, PrepareSandboxTask).with { task ->
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
-            conventionMapping('pluginName', { extension.pluginName })
-            conventionMapping('pluginJar', {
-                return VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
-                        ? (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archiveFile.getOrNull()?.getAsFile()
-                        : (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath
+            task.pluginName.convention(project.provider({
+                extension.pluginName
+            }))
+            task.pluginJar.convention(
+                    project.layout.file(project.provider({
+                        VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
+                                ? (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archiveFile.getOrNull().asFile
+                                : (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath
+                    }))
+            )
+            conventionMapping('destinationDir', {
+                project.file("${extension.sandboxDirectory}/plugins$testSuffix")
             })
-            conventionMapping('destinationDir', { project.file("${extension.sandboxDirectory}/plugins$testSuffix") })
-            conventionMapping('configDirectory', { "${extension.sandboxDirectory}/config$testSuffix".toString() })
-            conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
-            conventionMapping('pluginDependencies', { extension.pluginDependencies })
+            task.configDirectory.convention(project.provider({
+                "${extension.sandboxDirectory}/config$testSuffix"
+            }))
+            conventionMapping('librariesToIgnore', {
+                project.files(extension.ideaDependency.jarFiles)
+            })
+            task.pluginDependencies.convention(project.provider({
+                extension.pluginDependencies
+            }))
             dependsOn(JavaPlugin.JAR_TASK_NAME)
         }
     }
@@ -434,7 +446,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
             it.pluginDirectory.convention(project.provider({
                 def prepareSandboxTask = project.tasks.findByName(PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-                def path = new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName()).path
+                def path = new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName().get()).path
                 project.layout.projectDirectory.dir(path)
             }))
 
@@ -480,7 +492,7 @@ class IntelliJPlugin implements Plugin<Project> {
         def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
         task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes) })
         task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
-        task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory()) })
+        task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory().get()) })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
         task.conventionMapping("systemDirectory", {
             project.file("${extension.sandboxDirectory}/system")
@@ -647,17 +659,17 @@ class IntelliJPlugin implements Plugin<Project> {
         Zip zip = project.tasks.create(BUILD_PLUGIN_TASK_NAME, Zip).with {
             description = "Bundles the project as a distribution."
             group = GROUP_NAME
-            from { "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName()}" }
-            into { prepareSandboxTask.getPluginName() }
+            from { "${prepareSandboxTask.getDestinationDir()}/${prepareSandboxTask.getPluginName().get()}" }
+            into { prepareSandboxTask.getPluginName().get() }
 
             def searchableOptionsJar = VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")
                     ? jarSearchableOptionsTask.archiveFile : { jarSearchableOptionsTask.archivePath }
             from(searchableOptionsJar) { into 'lib' }
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
-                archiveBaseName.set(project.provider { prepareSandboxTask.getPluginName() })
+                archiveBaseName.set(project.provider { prepareSandboxTask.getPluginName().get() })
             } else {
-                conventionMapping('baseName', { prepareSandboxTask.getPluginName() })
+                conventionMapping('baseName', { prepareSandboxTask.getPluginName().get() })
             }
             it
         }

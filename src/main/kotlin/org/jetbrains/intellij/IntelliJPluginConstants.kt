@@ -6,7 +6,7 @@ object IntelliJPluginConstants {
 //        const val DEFAULT_SANDBOX = "idea-sandbox"
 //        const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
 //        const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
-//        const val PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
+        const val PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
 //        const val PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
 //        const val PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
 //        const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"

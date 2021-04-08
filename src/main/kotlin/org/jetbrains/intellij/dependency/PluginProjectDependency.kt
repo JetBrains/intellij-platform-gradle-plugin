@@ -1,117 +1,82 @@
 package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
-import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
+import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.annotations.Nullable
-import org.jetbrains.intellij.IntelliJPlugin
-import org.jetbrains.intellij.Utils
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.error
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
+import java.io.File
 
 @CompileStatic
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
-class PluginProjectDependency implements PluginDependency {
-    @NotNull
-    private transient Project project
+@Suppress("UnstableApiUsage")
+class PluginProjectDependency(@Transient val project: Project) : PluginDependency {
 
-    @Lazy
-    private File pluginDirectory = {
-        def prepareSandboxTask = project?.tasks?.findByName(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
-        return prepareSandboxTask instanceof PrepareSandboxTask ?
-                new File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName()) : null
-    }()
-
-    @Lazy
-    private transient PluginDependencyImpl pluginDependency = {
-        if (pluginDirectory.exists()) {
-            def creationResult = IdePluginManager.createManager().createPlugin(pluginDirectory.toPath())
-            if (creationResult instanceof PluginCreationSuccess) {
-                def intellijPlugin = creationResult.getPlugin()
-                if (intellijPlugin instanceof IdePlugin) {
-                    def pluginDependency = new PluginDependencyImpl(intellijPlugin.pluginId, intellijPlugin.pluginVersion, pluginDirectory, false, false)
-                    pluginDependency.sinceBuild = intellijPlugin.getSinceBuild()?.asStringWithoutProductCode()
-                    pluginDependency.untilBuild = intellijPlugin.getUntilBuild()?.asStringWithoutProductCode()
-                    return pluginDependency
-                }
-            }
-            Utils.error(project, "Cannot use $pluginDirectory as a plugin dependency. " + creationResult)
+    private val pluginDirectory: File by lazy {
+        val prepareSandboxTask = project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        if (prepareSandboxTask is PrepareSandboxTask) {
+            File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get())
+        } else {
+            throw GradleException("Error accessing PrepareSandboxTask")
         }
-        return null
-    }()
-
-    PluginProjectDependency(@NotNull Project project) {
-        this.project = project
     }
 
-    @NotNull
-    @Override
-    String getId() {
-        return pluginDependency ? pluginDependency.id : "<unknown plugin id>"
+    private val pluginDependency: PluginDependencyImpl? by lazy {
+        pluginDirectory.takeIf { it.exists() }?.let {
+            val creationResult = IdePluginManager.createManager().createPlugin(it.toPath())
+            if (creationResult is PluginCreationSuccess) {
+                val intellijPlugin = creationResult.plugin
+                val pluginId = intellijPlugin.pluginId ?: return@let null
+                val pluginVersion = intellijPlugin.pluginVersion ?: return@let null
+
+                val pluginDependency = PluginDependencyImpl(pluginId, pluginVersion, it, builtin = false, maven = false)
+                pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
+                pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
+                pluginDependency
+            } else {
+                error(project, "Cannot use $pluginDirectory as a plugin dependency. $creationResult")
+                null
+            }
+        }
     }
 
-    @NotNull
-    @Override
-    String getVersion() {
-        return pluginDependency ? pluginDependency.version : "<unknown plugin version>"
-    }
+    override val id: String
+        get() = pluginDependency?.id ?: "<unknown plugin id>"
 
-    @Nullable
-    @Override
-    String getChannel() {
-        return pluginDependency?.channel
-    }
+    override val version: String
+        get() = pluginDependency?.version ?: "<unknown plugin version>"
 
-    @NotNull
-    @Override
-    File getArtifact() {
-        return this.pluginDirectory
-    }
+    override val channel: String?
+        get() = pluginDependency?.channel
 
-    @NotNull
-    @Override
-    Collection<File> getJarFiles() {
-        return pluginDependency ? pluginDependency.jarFiles : Collections.<File>emptyList()
-    }
+    override val artifact: File
+        get() = pluginDirectory
 
-    @Nullable
-    @Override
-    File getClassesDirectory() {
-        return pluginDependency?.classesDirectory
-    }
+    override val jarFiles: Collection<File>
+        get() = pluginDependency?.jarFiles ?: emptyList()
 
-    @Nullable
-    @Override
-    File getMetaInfDirectory() {
-        return pluginDependency?.metaInfDirectory
-    }
+    override val classesDirectory: File?
+        get() = pluginDependency?.classesDirectory
 
-    @Override
-    File getSourcesDirectory() {
-        return pluginDependency?.sourcesDirectory
-    }
+    override val metaInfDirectory: File?
+        get() = pluginDependency?.metaInfDirectory
 
-    @Override
-    boolean getBuiltin() {
-        return false
-    }
+    override val sourcesDirectory: File?
+        get() = pluginDependency?.sourcesDirectory
 
-    @Override
-    boolean getMaven() {
-        return false
-    }
+    override val builtin: Boolean
+        get() = false
 
-    @Override
-    boolean isCompatible(@NotNull IdeVersion ideVersion) {
-        return true
-    }
+    override val maven: Boolean
+        get() = false
 
-    @Override
-    PluginDependencyNotation getNotation() {
-        return new PluginDependencyNotation(id, null, null)
-    }
+    override val notation: PluginDependencyNotation
+        get() = PluginDependencyNotation(id, null, null)
+
+    override fun isCompatible(ideVersion: IdeVersion) = true
 }

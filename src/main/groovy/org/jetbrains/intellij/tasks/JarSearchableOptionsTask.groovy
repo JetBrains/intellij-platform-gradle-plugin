@@ -16,7 +16,7 @@ class JarSearchableOptionsTask extends Jar {
                 if (element.name.endsWith(suffix)) {
                     if (pluginJarFiles == null) {
                         def prepareSandboxTask = project.tasks.findByName(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-                        def lib = "${prepareSandboxTask.getPluginName()}/lib"
+                        def lib = "${prepareSandboxTask.getPluginName().get()}/lib"
                         def files = new File(prepareSandboxTask.getDestinationDir(), lib).list()
                         pluginJarFiles = files != null ? files as Set : []
                     }

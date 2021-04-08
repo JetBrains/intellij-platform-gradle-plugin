@@ -107,7 +107,7 @@ abstract class IntelliJPluginSpecBase {
 
 
     protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
-    //
+
     protected fun file(path: String) = path
         .run { takeIf { startsWith('/') } ?: "${dir.path}/$this" }
         .split('/')
@@ -165,7 +165,6 @@ abstract class IntelliJPluginSpecBase {
 
     protected fun collectPaths(directory: File): Set<String> {
         assert(directory.exists())
-        // TODO: check if directories are skipped
         return directory.walkTopDown().filterNot { it.isDirectory }.map {
             adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length))
         }.toSet()
