@@ -144,7 +144,7 @@ abstract class IntelliJPluginSpecBase {
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.trim(Character::isWhitespace))
+        assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.replace("\r", "")?.trim())
 
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
         assertEquals(expectedContent.trimIndent(), fileText(zip, path))
