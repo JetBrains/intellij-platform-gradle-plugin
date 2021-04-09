@@ -91,7 +91,7 @@ class IntelliJPluginExtension {
     /**
      * Returns object to configure multiple repositories for downloading plugins.
      */
-    PluginsRepoConfiguration pluginsRepo() {
+    PluginsRepositoryConfiguration pluginsRepo() {
         if (pluginsRepoConfiguration == null) {
             pluginsRepoConfiguration = new PluginsRepoConfigurationImpl(project)
         }
@@ -108,7 +108,7 @@ class IntelliJPluginExtension {
     /**
      * Configure multiple repositories for downloading plugins.
      */
-    void pluginsRepo(Action<PluginsRepoConfiguration> block) {
+    void pluginsRepo(Action<PluginsRepositoryConfiguration> block) {
         block.execute(pluginsRepo())
     }
 
@@ -235,25 +235,4 @@ class IntelliJPluginExtension {
         }
         return pluginsRepoConfiguration.getRepositories()
     }
-
-    interface PluginsRepoConfiguration {
-
-        /**
-         * Use default marketplace repository
-         */
-        void marketplace()
-
-        /**
-         * Use a Maven repository with plugin artifacts
-         */
-        void maven(@NotNull String url)
-
-        /**
-         * Use custom plugin repository. The URL should point to the `plugins.xml` or `updatePlugins.xml` file.
-         */
-        void custom(@NotNull String url)
-
-        List<PluginsRepository> getRepositories()
-    }
-
 }

@@ -5,7 +5,7 @@ import org.gradle.api.Project
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
 
-open class PluginsRepoConfigurationImpl(val project: Project) : IntelliJPluginExtension.PluginsRepoConfiguration {
+open class PluginsRepoConfigurationImpl(val project: Project) : PluginsRepositoryConfiguration {
 
     private val pluginsRepositories = mutableListOf<PluginsRepository>()
 
