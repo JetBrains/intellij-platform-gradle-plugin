@@ -687,7 +687,11 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(PUBLISH_PLUGIN_TASK_NAME, PublishTask).with {
             group = GROUP_NAME
             description = "Publish plugin distribution on plugins.jetbrains.com."
-            conventionMapping('distributionFile', { resolveDistributionFile(project) })
+            it.distributionFile.convention(
+                    project.layout.file(project.provider({
+                        resolveDistributionFile(project)
+                    }))
+            )
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
             dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }
         }

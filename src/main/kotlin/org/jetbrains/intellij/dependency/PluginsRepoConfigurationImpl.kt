@@ -3,7 +3,6 @@ package org.jetbrains.intellij.dependency
 import okhttp3.internal.toImmutableList
 import org.gradle.api.Project
 import org.jetbrains.intellij.IntelliJPluginConstants
-import org.jetbrains.intellij.IntelliJPluginExtension
 
 open class PluginsRepoConfigurationImpl(val project: Project) : PluginsRepositoryConfiguration {
 

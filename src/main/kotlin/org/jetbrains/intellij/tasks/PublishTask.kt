@@ -5,143 +5,82 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.*
-import org.gradle.util.CollectionUtils
-import org.jetbrains.intellij.Utils
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
+import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
 
-class PublishTask extends ConventionTask {
-    private Object distributionFile
-    private Object host = "https://plugins.jetbrains.com"
-    private Object username
-    private Object password
-    private Object token
-    private List<Object> channels = new ArrayList<Object>()
-
-    PublishTask() {
-        enabled = !project.gradle.startParameter.offline
-    }
-
-    @Input
-    String getHost() {
-        Utils.stringInput(host)
-    }
-
-    void setHost(Object host) {
-        this.host = host
-    }
-
-    void host(Object host) {
-        this.host = host
-    }
+@Suppress("UnstableApiUsage")
+open class PublishTask : ConventionTask() {
 
     @InputFile
-    File getDistributionFile() {
-        distributionFile != null ? project.file(distributionFile) : null
-    }
+    val distributionFile: RegularFileProperty = project.objects.fileProperty()
 
-    void setDistributionFile(Object distributionFile) {
-        this.distributionFile = distributionFile
-    }
+    @Input
+    val host: Property<String> = project.objects.property(String::class.java).convention("https://plugins.jetbrains.com")
 
-    void distributionFile(Object distributionFile) {
-        this.distributionFile = distributionFile
-    }
+    // TODO: remove
+    @Input
+    @Optional
+    val username: Property<String> = project.objects.property(String::class.java)
+
+    // TODO: remove
+    @Input
+    @Optional
+    val password: Property<String> = project.objects.property(String::class.java)
 
     @Input
     @Optional
-    String getToken() {
-        Utils.stringInput(token)
-    }
-
-    void setToken(Object token) {
-        this.token = token
-    }
-
-    void token(Object token) {
-        this.token = token
-    }
+    val token: Property<String> = project.objects.property(String::class.java)
 
     @Input
     @Optional
-    String getUsername() {
-        Utils.stringInput(username)
+    val channels: ListProperty<String> = project.objects.listProperty(String::class.java).convention(listOf("default"))
+
+    init {
+        enabled = !project.gradle.startParameter.isOffline
     }
 
-    void setUsername(Object username) {
-        this.username = username
-    }
-
-    void username(Object username) {
-        this.username = username
-    }
-
-    @Input
-    @Optional
-    String getPassword() {
-        Utils.stringInput(password)
-    }
-
-    void setPassword(Object password) {
-        this.password = password
-    }
-
-    void password(Object password) {
-        this.password = password
-    }
-
-    @Input
-    @Optional
-    String[] getChannels() {
-        Utils.stringListInput(channels)
-    }
-
-    void setChannels(Object... channels) {
-        this.channels.clear()
-        this.channels.addAll(channels as List)
-    }
-
-    void channels(Object... channels) {
-        this.channels.addAll(channels as List)
-    }
-
-    @SuppressWarnings("GroovyUnusedDeclaration")
     @TaskAction
-    protected void publishPlugin() {
+    fun publishPlugin() {
         validateInput()
-        def channels = getChannels()
-        if (!channels || channels.length == 0) {
-            channels = ['default']
-        }
 
-        def host = getHost()
-        def distributionFile = getDistributionFile()
-        def creationResult = IdePluginManager.createManager().createPlugin(distributionFile.toPath())
-        if (creationResult instanceof PluginCreationSuccess) {
-            def pluginId = creationResult.plugin.pluginId
-            for (String channel : channels) {
-                Utils.info(this, "Uploading plugin ${pluginId} from $distributionFile.absolutePath to $host, channel: $channel")
-                try {
-                    def repoClient = PluginRepositoryFactory.create(host, getToken())
-                    repoClient.uploader.uploadPlugin(pluginId, distributionFile, channel && 'default' != channel ? channel : null, null)
-                    Utils.info(this, "Uploaded successfully")
-                }
-                catch (exception) {
-                    throw new TaskExecutionException(this, new GradleException("Failed to upload plugin. $exception.message", exception))
+        val file = distributionFile.get().asFile
+        when (val creationResult = IdePluginManager.createManager().createPlugin(file.toPath())) {
+            is PluginCreationSuccess -> {
+                val pluginId = creationResult.plugin.pluginId
+                channels.get().forEach { channel ->
+                    info(this, "Uploading plugin $pluginId from ${file.absolutePath} to ${host.get()}, channel: $channel")
+                    try {
+                        val repoClient = PluginRepositoryFactory.create(host.get(), token.get())
+                        repoClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
+                        info(this, "Uploaded successfully")
+                    } catch (exception: Exception) {
+                        throw TaskExecutionException(this, GradleException("Failed to upload plugin. $exception.message", exception))
+                    }
                 }
             }
-        } else if (creationResult instanceof PluginCreationFail) {
-            def problems = creationResult.errorsAndWarnings.findAll { it.level == PluginProblem.Level.ERROR }.join(", ")
-            throw new TaskExecutionException(this, new GradleException("Cannot upload plugin. $problems"))
-        } else {
-            throw new TaskExecutionException(this, new GradleException("Cannot upload plugin. $creationResult"))
+            is PluginCreationFail -> {
+                val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
+                throw TaskExecutionException(this, GradleException("Cannot upload plugin. $problems"))
+            }
+            else -> {
+                throw TaskExecutionException(this, GradleException("Cannot upload plugin. $creationResult"))
+            }
         }
     }
 
-    private void validateInput() {
-        if (!getToken()) {
-            throw new TaskExecutionException(this, new GradleException('token property must be specified for plugin publishing'))
+    private fun validateInput() {
+        if (token.orNull.isNullOrEmpty()) {
+            throw TaskExecutionException(this, GradleException("token property must be specified for plugin publishing"))
         }
     }
 }
