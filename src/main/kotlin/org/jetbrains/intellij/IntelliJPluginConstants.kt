@@ -29,6 +29,6 @@ object IntelliJPluginConstants {
     const val DEFAULT_JBR_REPO = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jdk"
     const val DEFAULT_NEW_JBR_REPO = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-jbr"
 //        const val DEFAULT_INTELLIJ_PLUGIN_SERVICE = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service"
-//        const val DEFAULT_INTELLIJ_PLUGINS_REPO = "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven"
+        const val DEFAULT_INTELLIJ_PLUGINS_REPO = "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven"
 //        const val PLUGIN_PATH = "plugin.path"
 }

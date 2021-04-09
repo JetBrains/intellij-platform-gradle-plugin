@@ -1,36 +1,25 @@
 package org.jetbrains.intellij.dependency
 
+import okhttp3.internal.toImmutableList
 import org.gradle.api.Project
-import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
 
-class PluginsRepoConfigurationImpl implements IntelliJPluginExtension.PluginsRepoConfiguration {
+open class PluginsRepoConfigurationImpl(val project: Project) : IntelliJPluginExtension.PluginsRepoConfiguration {
 
-    private List<PluginsRepository> pluginsRepositories = new ArrayList<>()
-    private Project project
+    private val pluginsRepositories = mutableListOf<PluginsRepository>()
 
-    PluginsRepoConfigurationImpl(Project project) {
-        this.project = project
+    override fun marketplace() {
+        pluginsRepositories.add(MavenPluginsRepository(project, IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPO))
     }
 
-    @Override
-    void marketplace() {
-        pluginsRepositories.add(new MavenPluginsRepository(project, IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO))
+    override fun maven(url: String) {
+        pluginsRepositories.add(MavenPluginsRepository(project, url))
     }
 
-    @Override
-    void maven(@NotNull String url) {
-        pluginsRepositories.add(new MavenPluginsRepository(project, url))
+    override fun custom(url: String) {
+        pluginsRepositories.add(CustomPluginsRepository(project, url))
     }
 
-    @Override
-    void custom(@NotNull String url) {
-        pluginsRepositories.add(new CustomPluginsRepository(project, url))
-    }
-
-    @Override
-    List<PluginsRepository> getRepositories() {
-        return Collections.unmodifiableList(pluginsRepositories)
-    }
+    override fun getRepositories() = pluginsRepositories.toImmutableList()
 }
