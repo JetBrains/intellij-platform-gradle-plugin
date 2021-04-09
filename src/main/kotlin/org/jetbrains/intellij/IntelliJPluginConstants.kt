@@ -15,7 +15,7 @@ object IntelliJPluginConstants {
 //        const val RUN_IDE_TASK_NAME = "runIde"
 //        const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
 //        const val BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
-//        const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
+        const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
 //        const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
 //        const val BUILD_PLUGIN_TASK_NAME = "buildPlugin"
 //        const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
