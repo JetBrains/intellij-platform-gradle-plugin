@@ -16,7 +16,7 @@ import org.jetbrains.intellij.dependency.IdeaDependency
 class IntelliJInstrumentCodeTask extends ConventionTask {
     private static final String FILTER_ANNOTATION_REGEXP_CLASS = 'com.intellij.ant.ClassFilterAnnotationRegexp'
     private static final LOADER_REF = "java2.loader"
-    private static final ASM_REPO_URL = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies"
+    private static final ASM_REPO_URL = "https://cache-redirector.jetbrains.com/intellij-dependencies"
     private static final FORMS_REPO_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
 
     @Internal
