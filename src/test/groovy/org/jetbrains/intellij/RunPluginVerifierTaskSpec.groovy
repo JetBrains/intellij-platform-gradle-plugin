@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import de.undercouch.gradle.tasks.download.DownloadAction
 import groovy.json.JsonSlurper
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 
 class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
     def 'run plugin verifier in specified version'() {
@@ -12,7 +13,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             
             runPluginVerifier {
                 ideVersions = "2020.2.3"
-                verifierVersion = "1.241"
+                verifierVersion = "1.255"
             }
             """.stripIndent()
 
@@ -20,7 +21,7 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         then:
-        result.output.contains("Starting the IntelliJ Plugin Verifier 1.241")
+        result.output.contains("Starting the IntelliJ Plugin Verifier 1.255")
     }
 
     def 'run plugin verifier in the latest version'() {
@@ -38,8 +39,9 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         then:
-        def url = new URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
-        def version = new JsonSlurper().parse(url)["name"]
+        def url = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
+        def metadata = new XmlParser().parse(url)
+        def version = metadata.versioning.latest[0].text()
         result.output.contains("Starting the IntelliJ Plugin Verifier $version")
     }
 
@@ -238,11 +240,12 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
             """.stripIndent()
 
         when:
-        def url = new URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
-        def version = new JsonSlurper().parse(url)["name"]
+        def url = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
+        def metadata = new XmlParser().parse(url)
+        def version = metadata.versioning.latest[0].text()
 
         file("build/pluginVerifier.jar").withOutputStream { out ->
-            out << new URL("https://dl.bintray.com/jetbrains/intellij-plugin-service/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream()
+            out << new URL("${RunPluginVerifierTask.SPACE_PACKAGES_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream()
         }
 
         def result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
