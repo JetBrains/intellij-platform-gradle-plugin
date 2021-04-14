@@ -26,7 +26,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val result = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -35,7 +35,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        assertFalse(output.contains("will be overwritten"))
+        assertFalse(result.output.contains("will be overwritten"))
     }
 
     @Test
@@ -154,8 +154,8 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
     fun `do not update id if pluginId is undefined`() {
         pluginXml.xml("""
             <idea-plugin>
-                <id>my.plugin.id</id>
-                <vendor>JetBrains</vendor>
+              <id>my.plugin.id</id>
+              <vendor>JetBrains</vendor>
             </idea-plugin>
         """)
 
@@ -209,8 +209,8 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
     fun `add version tags in the beginning of file`() {
         pluginXml.xml("""
             <idea-plugin>
-                <id>org.jetbrains.erlang</id>
-                <vendor>JetBrains</vendor>
+              <id>org.jetbrains.erlang</id>
+              <vendor>JetBrains</vendor>
             </idea-plugin>
         """)
 
@@ -268,8 +268,8 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
     fun `take extension setting into account while patching`() {
         pluginXml.xml("""
             <idea-plugin>
-                <version>my_version</version>
-                <idea-version since-build='1' until-build='2'>my_version</idea-version>
+              <version>my_version</version>
+              <idea-version since-build='1' until-build='2'>my_version</idea-version>
             </idea-plugin>
         """)
 
@@ -372,30 +372,5 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
               <idea-version since-build="141.1532" until-build="141.*"/>
             </idea-plugin>
         """)
-    }
-
-    @Test
-    fun `patch plugin xml with doctype`() {
-        pluginXml.xml("""
-            <!DOCTYPE idea-plugin PUBLIC "Plugin/DTD" "http://plugins.jetbrains.com/plugin.dtd">
-            <idea-plugin />
-        """)
-
-        buildFile.groovy("""
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-        """)
-
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
-
-        assertFileContent(patchedPluginXml.value, """
-            <idea-plugin>
-              <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
-            </idea-plugin>
-        """)
-        assertFalse(output.contains("will be overwritten"))
     }
 }

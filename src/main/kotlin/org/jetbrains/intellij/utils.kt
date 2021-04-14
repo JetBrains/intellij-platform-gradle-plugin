@@ -2,7 +2,11 @@
 
 package org.jetbrains.intellij
 
+import com.ctc.wstx.stax.WstxInputFactory
+import com.ctc.wstx.stax.WstxOutputFactory
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.dataformat.xml.XmlFactory
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
@@ -13,14 +17,11 @@ import com.jetbrains.plugin.structure.base.utils.isZip
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import groovy.lang.Closure
-import groovy.util.Node
-import groovy.util.XmlParser
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileCollection
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -28,18 +29,17 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.model.IdeaPlugin
-import org.xml.sax.ErrorHandler
-import org.xml.sax.InputSource
-import org.xml.sax.SAXParseException
+import org.w3c.dom.Node
+import org.w3c.dom.NodeList
+import org.xml.sax.SAXException
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileReader
 import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
 import java.util.Properties
 import java.util.function.BiConsumer
 import java.util.function.Predicate
+import javax.xml.parsers.DocumentBuilderFactory
 
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
 val MAJOR_VERSION_PATTERN = "(RIDER-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
@@ -49,21 +49,24 @@ fun mainSourceSet(project: Project): SourceSet {
     return javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 }
 
-fun sourcePluginXmlFiles(project: Project): FileCollection {
-    val result = HashSet<File>()
-    mainSourceSet(project).resources.srcDirs.forEach {
+fun sourcePluginXmlFiles(project: Project): List<File> {
+    val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+    return mainSourceSet(project).resources.srcDirs.mapNotNull {
         val pluginXml = File(it, "META-INF/plugin.xml")
-        if (pluginXml.exists()) {
-            try {
-                if (parseXml(pluginXml).name() == "idea-plugin") {
-                    result += pluginXml
+        try {
+            return@mapNotNull pluginXml.takeIf {
+                val document = builder.parse(pluginXml)
+                document.childNodes.asSequence().any { node ->
+                    node.nodeName == "idea-plugin"
                 }
-            } catch (e: SAXParseException) {
-                warn(project, "Cannot read ${pluginXml}. Skipping", e)
             }
+        } catch (e: SAXException) {
+            warn(project, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+        } catch (e: IOException) {
+            warn(project, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
         }
+        null
     }
-    return project.files(result)
 }
 
 fun getIdeaSystemProperties(
@@ -124,44 +127,30 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).files.map {
-    parsePluginXml(it, IdeaPlugin::class.java).id
+fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).map {
+    parseXml(it, IdeaPlugin::class.java).id
 }
 
-// TODO: rename to parseXml
-fun <T> parsePluginXml(stream: InputStream, valueType: Class<T>): T = XmlMapper()
+fun <T> parseXml(stream: InputStream, valueType: Class<T>): T = XmlMapper()
     .registerKotlinModule()
     .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     .readValue(stream, valueType)
 
-// TODO: rename to parseXml
-fun <T> parsePluginXml(file: File, valueType: Class<T>) = parsePluginXml(file.inputStream(), valueType)
+fun <T> parseXml(file: File, valueType: Class<T>) = parseXml(file.inputStream(), valueType)
 
-// TODO: migrate to parsePluginXml
-fun parseXml(file: File) = parseXml(FileInputStream(file))
-
-// TODO: migrate to parsePluginXml
-fun parseXml(inputStream: InputStream): Node {
-    val parser = XmlParser(false, true, true)
-    parser.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false)
-    parser.errorHandler = object : ErrorHandler {
-        override fun warning(exception: SAXParseException) {
-        }
-
-        override fun error(exception: SAXParseException) {
-            throw exception
-        }
-
-        override fun fatalError(exception: SAXParseException) {
-            throw exception
-        }
-    }
-    val input = InputSource(InputStreamReader(inputStream, "UTF-8"))
-    input.encoding = "UTF-8"
-    inputStream.use {
-        return parser.parse(input)
-    }
+fun writeXml(file: File, value: Any) {
+    XmlMapper(XmlFactory(WstxInputFactory(), WstxOutputFactory()))
+        .registerKotlinModule()
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+        .writerWithDefaultPrettyPrinter()
+        .writeValue(file, value)
 }
+
+fun NodeList.asSequence() = (0 until length).asSequence().map { item(it) }
+
+fun Node.get(name: String) = childNodes.asSequence().find { it.nodeName == name }
+
+fun Node.attribute(name: String) = attributes.getNamedItem(name)?.textContent
 
 fun isJarFile(file: File) = file.toPath().isJar()
 

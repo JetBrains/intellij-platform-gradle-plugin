@@ -68,7 +68,6 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
     fun getSourceDirs(): FileCollection =
         project.files(sourceSet.get().allSource.srcDirs.filter { !sourceSet.get().resources.contains(it) && it.exists() })
 
-    //    @SuppressWarnings("GroovyUnusedDeclaration")
     @TaskAction
     fun instrumentClasses() {
         copyOriginalClasses(outputDir.get().asFile)

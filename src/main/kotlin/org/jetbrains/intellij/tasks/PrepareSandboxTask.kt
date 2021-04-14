@@ -1,14 +1,8 @@
 package org.jetbrains.intellij.tasks
 
-import com.ctc.wstx.stax.WstxInputFactory
-import com.ctc.wstx.stax.WstxOutputFactory
 import com.fasterxml.jackson.core.exc.StreamReadException
-import com.fasterxml.jackson.dataformat.xml.XmlFactory
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import groovy.lang.Closure
 import org.gradle.api.Task
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
@@ -27,7 +21,8 @@ import org.jetbrains.intellij.error
 import org.jetbrains.intellij.model.Component
 import org.jetbrains.intellij.model.Option
 import org.jetbrains.intellij.model.UpdatesConfigurable
-import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.parseXml
+import org.jetbrains.intellij.writeXml
 import java.io.File
 
 @Suppress("UnstableApiUsage")
@@ -44,7 +39,7 @@ open class PrepareSandboxTask : Sync() {
 
     @InputFiles
     @Optional
-    val librariesToIgnore: ConfigurableFileCollection = project.objects.fileCollection()
+    val librariesToIgnore: ListProperty<File> = project.objects.listProperty(File::class.java)
 
     @Input
     @Optional
@@ -65,7 +60,7 @@ open class PrepareSandboxTask : Sync() {
     private fun configurePlugin() {
         val plugin = mainSpec.addChild().into(project.provider { "${pluginName.get()}/lib" })
         val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
-        val librariesToIgnore = librariesToIgnore.toSet() + Jvm.current().toolsJar
+        val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
         val pluginDirectories = pluginDependencies.get().map { it.artifact.absolutePath }
 
         plugin.from(project.provider {
@@ -116,7 +111,7 @@ open class PrepareSandboxTask : Sync() {
         }
 
         val updatesConfigurable = try {
-            parsePluginXml(updatesConfig, UpdatesConfigurable::class.java)
+            parseXml(updatesConfig, UpdatesConfigurable::class.java)
         } catch (ignore: StreamReadException) { // TODO: SAXParseException?
             UpdatesConfigurable()
         }
@@ -129,9 +124,6 @@ open class PrepareSandboxTask : Sync() {
 
         option.value = false
 
-        XmlMapper(XmlFactory(WstxInputFactory(), WstxOutputFactory()))
-            .registerKotlinModule()
-            .writerWithDefaultPrettyPrinter()
-            .writeValue(updatesConfig, updatesConfigurable)
+        writeXml(updatesConfig, updatesConfigurable)
     }
 }

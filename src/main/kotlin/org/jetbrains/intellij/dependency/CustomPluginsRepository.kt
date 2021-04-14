@@ -5,7 +5,7 @@ import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.model.Category
 import org.jetbrains.intellij.model.PluginRepository
 import org.jetbrains.intellij.model.Plugins
-import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.parseXml
 import java.io.File
 import java.net.URI
 import java.nio.file.Files
@@ -33,14 +33,14 @@ class CustomPluginsRepository(val project: Project, repoUrl: String) : PluginsRe
         var downloadUrl: String?
 
         // Try to parse file as <plugin-repository>
-        val pluginRepository = parsePluginXml(pluginsXmlUri.toURL().openStream(), PluginRepository::class.java)
+        val pluginRepository = parseXml(pluginsXmlUri.toURL().openStream(), PluginRepository::class.java)
         downloadUrl = pluginRepository.categories.flatMap(Category::plugins).find {
             it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
         }?.downloadUrl?.let { "$repoUrl/$it" }
 
         if (downloadUrl == null) {
             // Try to parse XML file as <plugins>
-            val plugins = parsePluginXml(pluginsXmlUri.toURL().openStream(), Plugins::class.java)
+            val plugins = parseXml(pluginsXmlUri.toURL().openStream(), Plugins::class.java)
             downloadUrl = plugins.items.find {
                 it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
             }?.url

@@ -98,7 +98,7 @@ abstract class IntelliJPluginSpecBase {
             .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
-            .withArguments(*tasks, "--stacktrace")
+            .withArguments(*tasks, "--stacktrace")//, "-Dorg.gradle.debug=true")
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2

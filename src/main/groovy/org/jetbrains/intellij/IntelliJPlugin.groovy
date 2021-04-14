@@ -25,6 +25,7 @@ import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.*
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.model.IdeaPlugin
 import org.jetbrains.intellij.tasks.*
 
 class IntelliJPlugin implements Plugin<Project> {
@@ -277,13 +278,11 @@ class IntelliJPlugin implements Plugin<Project> {
         def hasJavaPluginDependency = extension.plugins.contains('java') || extension.plugins.contains('com.intellij.java')
         if (!hasJavaPluginDependency && new File(extension.ideaDependency.classes, "plugins/java").exists()) {
             Utils.sourcePluginXmlFiles(project).each { file ->
-                def pluginXml = Utils.parseXml(file)
-                if (pluginXml) {
-                    pluginXml.depends.each {
-                        if (it.text() == 'com.intellij.modules.java') {
-                            throw new BuildException("The project depends on `com.intellij.modules.java` module but doesn't declare a compile dependency on it.\n" +
-                                    "Please delete `depends` tag from $file.absolutePath or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })", null)
-                        }
+                def pluginXml = Utils.parseXml(file, IdeaPlugin)
+                pluginXml.depends.each {
+                    if (it.value == 'com.intellij.modules.java') {
+                        throw new BuildException("The project depends on `com.intellij.modules.java` module but doesn't declare a compile dependency on it.\n" +
+                                "Please delete `depends` tag from $file.absolutePath or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })", null)
                     }
                 }
             }
@@ -344,28 +343,35 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configurePatchPluginXmlTask(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtension extension) {
+    private static void configurePatchPluginXmlTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring patch plugin.xml task")
         project.tasks.create(PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask).with {
             group = GROUP_NAME
             description = "Patch plugin xml files with corresponding since/until build numbers and version attributes"
-            conventionMapping('version', { project.version?.toString() })
-            conventionMapping('pluginXmlFiles', { Utils.sourcePluginXmlFiles(project) })
-            conventionMapping('destinationDir', { new File(project.buildDir, PLUGIN_XML_DIR_NAME) })
-            conventionMapping('sinceBuild', {
+            it.version.convention(project.provider({
+                project.version?.toString()
+            }))
+            it.pluginXmlFiles.convention(project.provider({
+                Utils.sourcePluginXmlFiles(project)
+            }))
+            it.destinationDir.convention(
+                project.layout.dir(project.provider({
+                    new File(project.buildDir, PLUGIN_XML_DIR_NAME)
+                }))
+            )
+            it.sinceBuild.convention(project.provider({
                 if (extension.updateSinceUntilBuild) {
                     def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
                     return "$ideVersion.baselineVersion.$ideVersion.build".toString()
                 }
-            })
-            conventionMapping('untilBuild', {
+            }))
+            it.untilBuild.convention(project.provider({
                 if (extension.updateSinceUntilBuild) {
                     def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-                    return extension.sameSinceUntilBuild ? "${getSinceBuild()}.*".toString()
+                    return extension.sameSinceUntilBuild ? "${sinceBuild.get()}.*".toString()
                             : "$ideVersion.baselineVersion.*".toString()
                 }
-            })
+            }))
         }
     }
 
@@ -413,9 +419,9 @@ class IntelliJPlugin implements Plugin<Project> {
             task.configDirectory.convention(project.provider({
                 "${extension.sandboxDirectory}/config$testSuffix"
             }))
-            conventionMapping('librariesToIgnore', {
+            task.librariesToIgnore.convention(project.provider({
                 project.files(extension.ideaDependency.jarFiles)
-            })
+            }))
             task.pluginDependencies.convention(project.provider({
                 extension.pluginDependencies
             }))
