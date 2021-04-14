@@ -206,7 +206,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <depends config-file="other.xml"/>
+              <depends config-file="other.xml"/>
             </idea-plugin>    
         """)
 
