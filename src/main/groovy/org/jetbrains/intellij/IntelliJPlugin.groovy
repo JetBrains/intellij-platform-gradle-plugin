@@ -497,19 +497,25 @@ class IntelliJPlugin implements Plugin<Project> {
                                                                @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
         def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
         task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes) })
-        task.conventionMapping("requiredPluginIds", { Utils.getPluginIds(project) })
-        task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory().get()) })
-        task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
-        task.conventionMapping("systemDirectory", {
-            project.file("${extension.sandboxDirectory}/system")
+        task.requiredPluginIds.convention(project.provider({
+            Utils.getPluginIds(project)
+        }))
+        task.configDirectory.convention(project.provider({
+            project.file(prepareSandboxTask.getConfigDirectory().get())
+        }))
+        conventionMapping('pluginsDirectory', {
+            prepareSandboxTask.getDestinationDir()
         })
-        task.conventionMapping("autoReloadPlugins", {
+        task.systemDirectory.convention(project.provider({
+            project.file("${extension.sandboxDirectory}/system")
+        }))
+        task.autoReloadPlugins.convention(project.provider({
             def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
             VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("202.0")
-        })
+        }))
         task.conventionMapping("executable", {
             def jbrResolver = new JbrResolver(project, task, extension.jreRepo)
-            def jbrVersion = task.getJbrVersion() ?: task.getJbreVersion()
+            def jbrVersion = task.getJbrVersion().get()
             if (jbrVersion != null) {
                 def jbr = jbrResolver.resolve(jbrVersion)
                 if (jbr != null) {

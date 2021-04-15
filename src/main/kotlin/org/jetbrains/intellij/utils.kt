@@ -111,17 +111,10 @@ fun ideSdkDirectory(project: Project, alternativeIdePath: String?, ideDirectory:
     return ideDirectory
 }
 
-fun ideBuildNumber(ideDirectory: File): String {
-    if (!OperatingSystem.current().isMacOsX) {
-        return File(ideDirectory, "build.txt").readText().trim()
-    }
-    File(ideDirectory, "Resources/build.txt").run {
-        if (exists()) {
-            return readText().trim()
-        }
-    }
-    return File(ideDirectory, "build.txt").readText().trim()
-}
+fun ideBuildNumber(ideDirectory: File) = (
+    File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+        ?: File(ideDirectory, "build.txt")
+    ).readText().trim()
 
 fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
