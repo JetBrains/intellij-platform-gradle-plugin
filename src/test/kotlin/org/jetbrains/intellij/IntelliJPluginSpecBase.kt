@@ -172,7 +172,7 @@ abstract class IntelliJPluginSpecBase {
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517
-    // https://youtrack.jetbrains.com/issue/IDEA-260011
+    // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun File.xml(@Language("XML") content: String) = append(content)
 
     fun File.groovy(@Language("Groovy") content: String) = append(content)

@@ -1,7 +1,6 @@
 package org.jetbrains.intellij
 
 import org.gradle.testkit.runner.TaskOutcome
-import org.intellij.lang.annotations.Language
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
