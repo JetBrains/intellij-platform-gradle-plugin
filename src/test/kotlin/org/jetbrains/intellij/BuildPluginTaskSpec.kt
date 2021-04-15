@@ -22,9 +22,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-                <depends config-file="other.xml" />
+              <name>MyPluginName</name>
+              <vendor>JetBrains</vendor>
+              <depends config-file="other.xml" />
             </idea-plugin>
         """)
 
