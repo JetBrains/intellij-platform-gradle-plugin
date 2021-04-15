@@ -159,6 +159,7 @@ abstract class IntelliJPluginSpecBase {
         .getInputStream(zipFile.getEntry(path))
         .bufferedReader()
         .use(BufferedReader::readText)
+        .replace("\r", "")
         .trim()
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
