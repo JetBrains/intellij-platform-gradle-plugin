@@ -414,10 +414,10 @@ class IntelliJPlugin implements Plugin<Project> {
                     }))
             )
             conventionMapping('destinationDir', {
-                project.file("${extension.sandboxDirectory}/plugins$testSuffix")
+                project.file("${Utils.stringInput(extension.sandboxDirectory)}/plugins$testSuffix")
             })
             task.configDirectory.convention(project.provider({
-                "${extension.sandboxDirectory}/config$testSuffix"
+                "${Utils.stringInput(extension.sandboxDirectory)}/config$testSuffix"
             }))
             task.librariesToIgnore.convention(project.provider({
                 project.files(extension.ideaDependency.jarFiles)

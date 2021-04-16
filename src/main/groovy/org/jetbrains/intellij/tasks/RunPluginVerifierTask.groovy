@@ -14,6 +14,7 @@ import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.model.PluginVerifierRepository
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -740,7 +741,7 @@ class RunPluginVerifierTask extends ConventionTask {
         Utils.debug(this, "Resolving Latest Verifier version")
         def url = new URL(VERIFIER_METADATA_URL)
         return url.withInputStream {
-            Utils.parseXml(it).versioning.latest.text()
+            Utils.parseXml(it, PluginVerifierRepository.class).versioning.latest
         }
     }
 

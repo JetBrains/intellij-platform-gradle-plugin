@@ -37,7 +37,7 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin version="2">
-                <name>Verification test</name>
+                <name>PluginName</name>
                 <description>Привет, Мир!</description>
                 <vendor>Zolotov</vendor>
             </idea-plugin>
@@ -81,7 +81,7 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <name>PluginName</name>
+                <name>Verification test</name>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
                 <depends>com.intellij.modules.lang</depends>

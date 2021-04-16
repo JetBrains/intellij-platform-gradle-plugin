@@ -1,8 +1,7 @@
 package org.jetbrains.intellij
 
 import org.apache.commons.io.FileUtils
-import org.jetbrains.intellij.model.PluginVerifierRepository
-import java.io.InputStream
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -56,7 +55,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
-        val version = requestPluginVerifierVersion()
+        val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier $version"))
     }
 
@@ -237,7 +236,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val version = requestPluginVerifierVersion()
+        val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         FileUtils.copyInputStreamToFile(
             URL("${IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")
@@ -281,14 +280,5 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 <vendor>JetBrains</vendor>
             </idea-plugin>
         """)
-    }
-
-    private fun requestPluginVerifierVersion(): String {
-        val url = URL("https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml")
-        val request = url.openConnection()
-        request.connect()
-
-        val pv = parseXml(request.content as InputStream, PluginVerifierRepository::class.java)
-        return pv.versioning?.latest ?: ""
     }
 }
