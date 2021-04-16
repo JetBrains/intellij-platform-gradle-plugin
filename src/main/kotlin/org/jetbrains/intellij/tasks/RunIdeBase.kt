@@ -81,7 +81,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
     @Override
     override fun exec() {
-        workingDir = project.file("${ideDirectory.get()}/bin/")
+        workingDir = project.file("${ideDirectory.get().asFile}/bin/")
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()

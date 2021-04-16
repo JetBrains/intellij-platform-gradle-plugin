@@ -10,7 +10,7 @@ open class JarSearchableOptionsTask : Jar() {
     init {
         val pluginJarFiles = mutableSetOf<String>()
 
-        from(project.provider {
+        from({
             include {
                 if (it.isDirectory) {
                     true

@@ -4,15 +4,17 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.JavaExec
 
 @CacheableTask
-class BuildSearchableOptionsTask : RunIdeBase(false) {
+open class BuildSearchableOptionsTask : RunIdeBase(false) {
 
     private val traverseUIArgs = listOf("traverseUI")
 
     init {
-        args = traverseUIArgs
+        setArgs(traverseUIArgs)
     }
 
-    override fun setArgs(applicationArgs: List<String>?): JavaExec = super.setArgs(traverseUIArgs + applicationArgs)
+    override fun setArgs(applicationArgs: List<String>?): JavaExec =
+        super.setArgs(traverseUIArgs.union(applicationArgs?.toList() ?: emptyList()))
 
-    override fun setArgs(applicationArgs: MutableIterable<*>?): JavaExec = super.setArgs(traverseUIArgs + applicationArgs)
+    override fun setArgs(applicationArgs: MutableIterable<*>?): JavaExec =
+        super.setArgs(traverseUIArgs.union(applicationArgs?.toList() ?: emptyList()))
 }

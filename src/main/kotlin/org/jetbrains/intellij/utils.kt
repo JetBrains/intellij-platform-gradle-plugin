@@ -120,7 +120,7 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).map {
+fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).mapNotNull {
     parseXml(it, IdeaPlugin::class.java).id
 }
 

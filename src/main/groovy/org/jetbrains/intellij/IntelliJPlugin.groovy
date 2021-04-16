@@ -483,7 +483,7 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask).with { BuildSearchableOptionsTask task ->
             task.group = GROUP_NAME
             task.description = "Builds searchable options for plugin."
-            task.args(["$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME", "true"])
+            task.setArgs(["$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME", "true"])
             task.outputs.dir("$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME")
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
@@ -496,16 +496,20 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
                                                                @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
         def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
-        task.conventionMapping("ideDirectory", { Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes) })
+        task.ideDirectory.convention(project.provider({
+            def path = Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes).path
+            project.layout.projectDirectory.dir(path)
+        }))
         task.requiredPluginIds.convention(project.provider({
             Utils.getPluginIds(project)
         }))
         task.configDirectory.convention(project.provider({
             project.file(prepareSandboxTask.getConfigDirectory().get())
         }))
-        conventionMapping('pluginsDirectory', {
-            prepareSandboxTask.getDestinationDir()
-        })
+        task.pluginsDirectory.convention(project.provider({
+            def path = prepareSandboxTask.getDestinationDir().path
+            project.layout.projectDirectory.dir(path)
+        }))
         task.systemDirectory.convention(project.provider({
             project.file("${extension.sandboxDirectory}/system")
         }))
@@ -515,7 +519,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }))
         task.conventionMapping("executable", {
             def jbrResolver = new JbrResolver(project, task, extension.jreRepo)
-            def jbrVersion = task.getJbrVersion().get()
+            def jbrVersion = task.getJbrVersion().getOrNull()
             if (jbrVersion != null) {
                 def jbr = jbrResolver.resolve(jbrVersion)
                 if (jbr != null) {

@@ -1,3 +1,3 @@
 package org.jetbrains.intellij.tasks
 
-class RunIdeForUiTestTask : RunIdeBase(true)
+open class RunIdeForUiTestTask : RunIdeBase(true)
