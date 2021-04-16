@@ -67,7 +67,12 @@ class IntelliJPlugin implements Plugin<Project> {
         def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtensionGr, project.objects) as IntelliJPluginExtensionGr
         intellijExtension.with {
             extensionProject = project
-            pluginName = project.name
+            pluginName.convention(project.provider {
+                project.name
+            })
+            updateSinceUntilBuild.convention(true)
+            sameSinceUntilBuild.convention(false)
+            instrumentCode.convention(true)
             sandboxDirectory = { new File(project.buildDir, DEFAULT_SANDBOX).absolutePath }
         }
         configureConfigurations(project, intellijExtension)
@@ -362,15 +367,15 @@ class IntelliJPlugin implements Plugin<Project> {
                 }))
             )
             it.sinceBuild.convention(project.provider({
-                if (extension.updateSinceUntilBuild) {
+                if (extension.updateSinceUntilBuild.get()) {
                     def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
                     return "$ideVersion.baselineVersion.$ideVersion.build".toString()
                 }
             }))
             it.untilBuild.convention(project.provider({
-                if (extension.updateSinceUntilBuild) {
+                if (extension.updateSinceUntilBuild.get()) {
                     def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-                    return extension.sameSinceUntilBuild ? "${sinceBuild.get()}.*".toString()
+                    return extension.sameSinceUntilBuild.get() ? "${sinceBuild.get()}.*".toString()
                             : "$ideVersion.baselineVersion.*".toString()
                 }
             }))
@@ -406,7 +411,7 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             description = "Prepare sandbox directory with installed plugin and its dependencies."
             task.pluginName.convention(project.provider({
-                extension.pluginName
+                extension.pluginName.get()
             }))
             task.pluginJar.convention(
                     project.layout.file(project.provider({
@@ -574,7 +579,7 @@ class IntelliJPlugin implements Plugin<Project> {
             instrumentTask.sourceSet.convention(sourceSet)
             instrumentTask.with {
                 dependsOn sourceSet.classesTaskName
-                onlyIf { extension.instrumentCode }
+                onlyIf { extension.instrumentCode.get() }
                 it.compilerVersion.convention(project.provider({
                     def version = extension.version ?: DEFAULT_IDEA_VERSION
                     if (!extension.localPath.orNull && version && version.endsWith('-SNAPSHOT')) {
@@ -613,7 +618,7 @@ class IntelliJPlugin implements Plugin<Project> {
             def updateTask = project.tasks.create('post' + instrumentTask.name.capitalize())
             updateTask.with {
                 dependsOn instrumentTask
-                onlyIf { extension.instrumentCode }
+                onlyIf { extension.instrumentCode.get() }
                 doLast {
                     // Set the classes dir to the new one with the instrumented classes
                     sourceSet.output.classesDirs.from = instrumentTask.outputDir

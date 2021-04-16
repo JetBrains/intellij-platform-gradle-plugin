@@ -29,27 +29,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
     String type = 'IC'
 
     /**
-     * The name of the target zip-archive and defines the name of plugin artifact.
-     * By default: <code>${project.name}</code>
-     */
-    String pluginName
-
-    /**
-     * Patch plugin.xml with since and until build values inferred from IDE version.
-     */
-    boolean updateSinceUntilBuild = true
-
-    /**
-     * Patch plugin.xml with an until build value that is just an "open" since build.
-     */
-    boolean sameSinceUntilBuild = false
-
-    /**
-     * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
-     */
-    boolean instrumentCode = true
-
-    /**
      * The absolute path to the locally installed JetBrains IDE, which is used for running.
      * <p/>
      * @deprecated use `ideDirectory` option in `runIde` and `buildSearchableOptions` task instead.

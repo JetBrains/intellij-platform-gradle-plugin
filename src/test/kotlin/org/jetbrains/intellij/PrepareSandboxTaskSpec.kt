@@ -43,7 +43,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 version = '$intellijVersion'
                 downloadSources = false
                 pluginName = 'myNestedPluginName'
-                instrumentCode false
+                instrumentCode = false
             }
         """)
 

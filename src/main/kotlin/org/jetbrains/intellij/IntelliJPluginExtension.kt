@@ -39,28 +39,28 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //     * The type might be included as a prefix in {@link #version} value.
 //     */
 //    String type = 'IC'
-//
-//    /**
-//     * The name of the target zip-archive and defines the name of plugin artifact.
-//     * By default: <code>${project.name}</code>
-//     */
-//    String pluginName
-//
-//    /**
-//     * Patch plugin.xml with since and until build values inferred from IDE version.
-//     */
-//    boolean updateSinceUntilBuild = true
-//
-//    /**
-//     * Patch plugin.xml with an until build value that is just an "open" since build.
-//     */
-//    boolean sameSinceUntilBuild = false
-//
-//    /**
-//     * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
-//     */
-//    boolean instrumentCode = true
-//
+
+    /**
+     * The name of the target zip-archive and defines the name of plugin artifact.
+     * By default: <code>${project.name}</code>
+     */
+    val pluginName: Property<String> = objects.property(String::class.java)
+
+    /**
+     * Patch plugin.xml with since and until build values inferred from IDE version.
+     */
+    val updateSinceUntilBuild: Property<Boolean> = objects.property(Boolean::class.java)
+
+    /**
+     * Patch plugin.xml with an until build value that is just an "open" since build.
+     */
+    val sameSinceUntilBuild: Property<Boolean> = objects.property(Boolean::class.java)
+
+    /**
+     * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
+     */
+    val instrumentCode: Property<Boolean> = objects.property(Boolean::class.java)
+
 //    /**
 //     * The absolute path to the locally installed JetBrains IDE, which is used for running.
 //     * <p/>
