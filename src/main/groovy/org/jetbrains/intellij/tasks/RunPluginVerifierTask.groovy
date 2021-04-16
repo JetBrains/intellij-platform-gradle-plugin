@@ -2,13 +2,13 @@ package org.jetbrains.intellij.tasks
 
 import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
-import groovy.json.JsonSlurper
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
@@ -20,10 +20,9 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class RunPluginVerifierTask extends ConventionTask {
-    private static final String SPACE_PACKAGES_VERIFIER_VERSION_LATEST = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
-    private static final String IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
-    public static final String CACHE_REDIRECTOR = 'https://cache-redirector.jetbrains.com'
-    public static final String SPACE_PACKAGES_REPOSITORY = 'https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier'
+    private static final String VERIFIER_METADATA_URL = 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml'
+    private static final String IDE_DOWNLOAD_URL = 'https://data.services.jetbrains.com/products/download'
+    private static final String CACHE_REDIRECTOR = 'https://cache-redirector.jetbrains.com'
 
     public static final String VERIFIER_VERSION_LATEST = "latest"
 
@@ -361,7 +360,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
     /**
      * Sets JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
-     * All JetBrains Java versions are available at BinTray: https://bintray.com/jetbrains/intellij-jbr
+     * All JetBrains Java versions are available at JetBrains Space Packages: https://cache-redirector.jetbrains.com/intellij-jbr
      * Accepts {@link String} or {@link Closure}.
      *
      * @param jbrVersion JBR version
@@ -372,7 +371,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
     /**
      * Sets JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
-     * All JetBrains Java versions are available at BinTray: https://bintray.com/jetbrains/intellij-jbr
+     * All JetBrains Java versions are available at JetBrains Space Packages: https://cache-redirector.jetbrains.com/intellij-jbr
      * Accepts {@link String} or {@link Closure}.
      *
      * @param jbrVersion JBR version
@@ -562,7 +561,7 @@ class RunPluginVerifierTask extends ConventionTask {
     /**
      * Resolves path to the IntelliJ Plugin Verifier file.
      * At first, checks if it was provided with {@link #verifierPath}.
-     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPlugin#DEFAULT_INTELLIJ_PLUGIN_SERVICE}
+     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPlugin#DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}
      * repository and resolves the path to verifier-cli jar file.
      *
      * @return path to verifier-cli jar
@@ -584,9 +583,9 @@ class RunPluginVerifierTask extends ConventionTask {
             ))
         }
 
-        def repository = project.repositories.maven { it.url = SPACE_PACKAGES_REPOSITORY }
+        def resolvedVerifierVersion = resolveVerifierVersion()
+        def repository = project.repositories.maven { it.url = getPluginVerifierRepository(resolvedVerifierVersion) }
         try {
-            def resolvedVerifierVersion = resolveVerifierVersion()
             Utils.debug(this, "Using Verifier in $resolvedVerifierVersion version")
             def dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
             def configuration = project.configurations.detachedConfiguration(dependency)
@@ -725,7 +724,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
     /**
      * Resolves Plugin Verifier version.
-     * If set to {@link #VERIFIER_VERSION_LATEST}, there's request to {@link #SPACE_PACKAGES_VERIFIER_VERSION_LATEST}
+     * If set to {@link #VERIFIER_VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
      * performed for the latest available verifier version.
      *
      * @return Plugin Verifier version
@@ -734,10 +733,15 @@ class RunPluginVerifierTask extends ConventionTask {
         if (getVerifierVersion() != VERIFIER_VERSION_LATEST) {
             return getVerifierVersion()
         }
+        return resolveLatestVerifierVersion()
+    }
 
-        Utils.debug(this, "Resolving Verifier version with BinTray")
-        def metadata = new XmlParser().parse(SPACE_PACKAGES_VERIFIER_VERSION_LATEST)
-        return metadata.versioning.latest[0].text()
+    static String resolveLatestVerifierVersion() {
+        Utils.debug(this, "Resolving Latest Verifier version")
+        def url = new URL(VERIFIER_METADATA_URL)
+        return url.withInputStream {
+            Utils.parseXml(it).versioning.latest.text()
+        }
     }
 
     /**
@@ -875,5 +879,13 @@ class RunPluginVerifierTask extends ConventionTask {
             return "build"
         }
         return "version"
+    }
+
+    static String getPluginVerifierRepository(String version) {
+        if (VersionNumber.parse(version) >= VersionNumber.parse("1.255")) {
+            return IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO
+        } else {
+            return IntelliJPlugin.OLD_INTELLIJ_PLUGIN_VERIFIER_REPO
+        }
     }
 }

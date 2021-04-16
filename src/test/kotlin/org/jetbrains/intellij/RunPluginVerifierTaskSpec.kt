@@ -2,7 +2,6 @@ package org.jetbrains.intellij
 
 import org.apache.commons.io.FileUtils
 import org.jetbrains.intellij.model.PluginVerifierRepository
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import java.io.InputStream
 import java.net.URL
 import kotlin.test.Test
@@ -26,6 +25,23 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.255"))
+    }
+
+    @Test
+    fun `run plugin verifier in old version hosted on Bintray`() {
+        writePluginXmlFile()
+        buildFile.groovy("""
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = "2020.2.3"
+                verifierVersion = "1.254"
+            }
+        """)
+
+        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+
+        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.254"))
     }
 
     @Test
@@ -223,7 +239,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val version = requestPluginVerifierVersion()
         FileUtils.copyInputStreamToFile(
-            URL("${RunPluginVerifierTask.SPACE_PACKAGES_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
+            URL("${IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")
         )
 
