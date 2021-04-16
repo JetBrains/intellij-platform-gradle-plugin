@@ -60,28 +60,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
         block.execute(pluginsRepo())
     }
 
-
-    /**
-     * Url of repository for downloading JetBrains Java Runtime.
-     */
-    String jreRepo
-
-    /**
-     * The absolute path to the local directory that should be used for storing IDE distributions.
-     */
-    String ideaDependencyCachePath
-
-    /**
-     * Download IntelliJ sources while configuring Gradle project.
-     */
-    boolean downloadSources = !System.getenv().containsKey('CI')
-
-    /**
-     * Turning it off disables configuring dependencies to intellij sdk jars automatically,
-     * instead the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration
-     */
-    boolean configureDefaultDependencies = true
-
     /**
      * configure extra dependency artifacts from intellij repo
      *  the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block

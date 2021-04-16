@@ -761,7 +761,7 @@ class RunPluginVerifierTask extends ConventionTask {
         }
 
         def extension = project.extensions.findByType(IntelliJPluginExtensionGr)
-        def jbrResolver = new JbrResolver(project, this, extension.jreRepo)
+        def jbrResolver = new JbrResolver(project, this, extension.jreRepo.orNull)
         if (jbrVersion != null) {
             def jbr = jbrResolver.resolve(getJbrVersion())
             if (jbr != null) {

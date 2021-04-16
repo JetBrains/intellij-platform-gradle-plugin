@@ -77,6 +77,8 @@ class IntelliJPlugin implements Plugin<Project> {
                 new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
             }))
             intellijRepo.convention(DEFAULT_INTELLIJ_REPO)
+            downloadSources.convention(!System.getenv().containsKey("CI"))
+            configureDefaultDependencies.convention(true)
         }
         configureConfigurations(project, intellijExtension)
         configureTasks(project, intellijExtension)
@@ -202,7 +204,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull Configuration configuration) {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring IDE dependency")
-            def resolver = new IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath)
+            def resolver = new IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath.orNull)
             def ideaDependency
             def localPath = extension.localPath.orNull
             if (localPath != null) {
@@ -215,10 +217,10 @@ class IntelliJPlugin implements Plugin<Project> {
                 Utils.info(project, "Using IDE from remote repository")
                 def version = extension.version ?: DEFAULT_IDEA_VERSION
                 def extraDependencies = extension.extraDependencies.collect { it.toString() }
-                ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources, extraDependencies)
+                ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources.get(), extraDependencies)
             }
             extension.ideaDependency = ideaDependency
-            if (extension.configureDefaultDependencies) {
+            if (extension.configureDefaultDependencies.get()) {
                 Utils.info(project, "$ideaDependency.buildNumber is used for building")
                 resolver.register(project, ideaDependency, dependencies)
                 if (!ideaDependency.extraDependencies.empty) {
@@ -261,7 +263,7 @@ class IntelliJPlugin implements Plugin<Project> {
                     configurePluginDependency(project, plugin, extension, dependencies, resolver)
                 }
             }
-            if (extension.configureDefaultDependencies) {
+            if (extension.configureDefaultDependencies.get()) {
                 configureBuiltinPluginsDependencies(project, dependencies, resolver, extension)
             }
             verifyJavaPluginDependency(extension, project)
@@ -317,7 +319,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                   @NotNull IntelliJPluginExtensionGr extension,
                                                   @NotNull DependencySet dependencies,
                                                   @NotNull PluginDependencyManager resolver) {
-        if (extension.configureDefaultDependencies) {
+        if (extension.configureDefaultDependencies.get()) {
             resolver.register(project, plugin, dependencies)
         }
         extension.addPluginDependency(plugin)
@@ -528,7 +530,7 @@ class IntelliJPlugin implements Plugin<Project> {
             VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("202.0")
         }))
         task.conventionMapping("executable", {
-            def jbrResolver = new JbrResolver(project, task, extension.jreRepo)
+            def jbrResolver = new JbrResolver(project, task, extension.jreRepo.orNull)
             def jbrVersion = task.getJbrVersion().getOrNull()
             if (jbrVersion != null) {
                 def jbr = jbrResolver.resolve(jbrVersion)

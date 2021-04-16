@@ -103,29 +103,28 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //    void pluginsRepo(Action<PluginsRepositoryConfiguration> block) {
 //        block.execute(pluginsRepo())
 //    }
-//
-//
-//    /**
-//     * Url of repository for downloading JetBrains Java Runtime.
-//     */
-//    String jreRepo
-//
-//    /**
-//     * The absolute path to the local directory that should be used for storing IDE distributions.
-//     */
-//    String ideaDependencyCachePath
-//
-//    /**
-//     * Download IntelliJ sources while configuring Gradle project.
-//     */
-//    boolean downloadSources = !System.getenv().containsKey('CI')
-//
-//    /**
-//     * Turning it off disables configuring dependencies to intellij sdk jars automatically,
-//     * instead the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration
-//     */
-//    boolean configureDefaultDependencies = true
-//
+
+    /**
+     * Url of repository for downloading JetBrains Java Runtime.
+     */
+    val jreRepo: Property<String> = objects.property(String::class.java)
+
+    /**
+     * The absolute path to the local directory that should be used for storing IDE distributions.
+     */
+    val ideaDependencyCachePath: Property<String> = objects.property(String::class.java)
+
+    /**
+     * Download IntelliJ sources while configuring Gradle project.
+     */
+    val downloadSources: Property<Boolean> = objects.property(Boolean::class.java)
+
+    /**
+     * Turning it off disables configuring dependencies to intellij sdk jars automatically,
+     * instead the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration
+     */
+    val configureDefaultDependencies: Property<Boolean> = objects.property(Boolean::class.java)
+
 //    /**
 //     * configure extra dependency artifacts from intellij repo
 //     *  the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
