@@ -62,14 +62,6 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
     val instrumentCode: Property<Boolean> = objects.property(Boolean::class.java)
 
 //    /**
-//     * The absolute path to the locally installed JetBrains IDE, which is used for running.
-//     * <p/>
-//     * @deprecated use `ideDirectory` option in `runIde` and `buildSearchableOptions` task instead.
-//     */
-//    @Deprecated
-//    String alternativeIdePath
-//
-//    /**
 //     * The path of sandbox directory that is used for running IDE with developing plugin.
 //     * By default: <code>${project.buildDir}/idea-sandbox</code>.
 //     */

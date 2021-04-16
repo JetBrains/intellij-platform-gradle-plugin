@@ -494,7 +494,7 @@ class IntelliJPlugin implements Plugin<Project> {
             task.outputs.dir("$project.buildDir/$SEARCHABLE_OPTIONS_DIR_NAME")
             task.dependsOn(PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
-                def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
+                def number = Utils.ideBuildNumber(task.ideDirectory.get().asFile)
                 VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752")
             }
         }
@@ -504,7 +504,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                                @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
         def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
         task.ideDirectory.convention(project.provider({
-            def path = Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes).path
+            def path = extension.ideaDependency.classes.path
             project.layout.projectDirectory.dir(path)
         }))
         task.requiredPluginIds.convention(project.provider({
@@ -521,7 +521,7 @@ class IntelliJPlugin implements Plugin<Project> {
             project.file("${Utils.stringInput(extension.sandboxDirectory)}/system")
         }))
         task.autoReloadPlugins.convention(project.provider({
-            def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
+            def number = Utils.ideBuildNumber(task.ideDirectory.get().asFile)
             VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("202.0")
         }))
         task.conventionMapping("executable", {
@@ -534,21 +534,13 @@ class IntelliJPlugin implements Plugin<Project> {
                 }
                 Utils.warn(task, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
             }
-            def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
+            def builtinJbrVersion = Utils.getBuiltinJbrVersion(task.ideDirectory.get().asFile)
             if (builtinJbrVersion != null) {
                 def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
                 if (builtinJbr != null) {
                     return builtinJbr.javaExecutable
                 }
                 Utils.warn(task, "Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
-            }
-            if (extension.alternativeIdePath) {
-                def jbrPath = OperatingSystem.current().isMacOsX() ? "jbr/Contents/Home/bin/java" : "jbr/bin/java"
-                def java = new File(Utils.ideaDir(extension.alternativeIdePath), jbrPath)
-                if (java.exists()) {
-                    return java.absolutePath
-                }
-                Utils.warn(task, "Cannot resolve JBR at $java.absolutePath. Falling back to current JVM.")
             }
             return Jvm.current().javaExecutable.absolutePath
         })
@@ -658,7 +650,9 @@ class IntelliJPlugin implements Plugin<Project> {
             task.inputs.files(prepareTestingSandboxTask)
 
             task.doFirst {
-                task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
+                def runIdeTask = project.tasks.findByName(RUN_IDE_TASK_NAME) as RunIdeTask
+                def ideDirectory = runIdeTask.ideDirectory.get().asFile
+                task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, ideDirectory)
                 task.classpath += project.files(
                         "$extension.ideaDependency.classes/lib/resources.jar",
                         "$extension.ideaDependency.classes/lib/idea.jar"

@@ -29,14 +29,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
     String type = 'IC'
 
     /**
-     * The absolute path to the locally installed JetBrains IDE, which is used for running.
-     * <p/>
-     * @deprecated use `ideDirectory` option in `runIde` and `buildSearchableOptions` task instead.
-     */
-    @Deprecated
-    String alternativeIdePath
-
-    /**
      * The path of sandbox directory that is used for running IDE with developing plugin.
      * By default: <code>${project.buildDir}/idea-sandbox</code>.
      */

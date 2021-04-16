@@ -86,29 +86,17 @@ fun getIdeaSystemProperties(
     return result
 }
 
-fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirectory: File): List<String> {
+fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirectory: File?): List<String> {
     options.maxHeapSize = options.maxHeapSize ?: "512m"
     options.minHeapSize = options.minHeapSize ?: "256m"
 
-    val bootJar = File(ideDirectory, "lib/boot.jar")
-    if (bootJar.exists()) {
-        return arguments + "-Xbootclasspath/a:${bootJar.absolutePath}"
+    ideDirectory?.let {
+        val bootJar = File(ideDirectory, "lib/boot.jar")
+        if (bootJar.exists()) {
+            return arguments + "-Xbootclasspath/a:${bootJar.absolutePath}"
+        }
     }
     return arguments
-}
-
-fun ideSdkDirectory(project: Project, alternativeIdePath: String?, ideDirectory: File): File {
-    if (alternativeIdePath.isNullOrEmpty()) {
-        return ideDirectory
-    }
-
-    val dir = ideaDir(alternativeIdePath)
-    if (dir.exists()) {
-        return dir
-    }
-
-    error(project, "Cannot find alternate SDK path: $dir. Default IDE will be used : $ideDirectory")
-    return ideDirectory
 }
 
 fun ideBuildNumber(ideDirectory: File) = (

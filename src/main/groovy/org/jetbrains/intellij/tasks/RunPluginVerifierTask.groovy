@@ -6,6 +6,7 @@ import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.bundling.Zip
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
@@ -772,7 +773,8 @@ class RunPluginVerifierTask extends ConventionTask {
 
         def jbrPath = OperatingSystem.current().isMacOsX() ? "jbr/Contents/Home" : "jbr"
 
-        def builtinJbrVersion = Utils.getBuiltinJbrVersion(Utils.ideSdkDirectory(project, extension.alternativeIdePath, extension.ideaDependency.classes))
+        def runIdeTask = project.tasks.findByName(IntelliJPlugin.RUN_IDE_TASK_NAME) as RunIdeTask
+        def builtinJbrVersion = Utils.getBuiltinJbrVersion(runIdeTask.ideDirectory.get().asFile)
         if (builtinJbrVersion != null) {
             def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
             if (builtinJbr != null) {
@@ -783,15 +785,6 @@ class RunPluginVerifierTask extends ConventionTask {
                 }
             }
             Utils.warn(this, "Cannot resolve builtin JBR $builtinJbrVersion. Falling back to local Java.")
-        }
-
-        if (extension.alternativeIdePath) {
-            def javaHome = new File(Utils.ideaDir(extension.alternativeIdePath), jbrPath)
-            if (javaHome.exists()) {
-                Utils.debug(this, "Using built-in JBR from alternativeIdePath: $extension.alternativeIdePath")
-                return javaHome
-            }
-            Utils.warn(this, "Cannot resolve JBR at $javaHome. Falling back to current JVM.")
         }
 
         Utils.debug(this, "Using current JVM: ${Jvm.current().getJavaHome()}")
