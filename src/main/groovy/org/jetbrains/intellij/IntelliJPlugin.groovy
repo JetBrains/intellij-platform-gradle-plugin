@@ -73,7 +73,7 @@ class IntelliJPlugin implements Plugin<Project> {
         intellijExtension.with {
             extensionProject = project
             pluginName = project.name
-            sandboxDirectory = new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
+            sandboxDirectory = { new File(project.buildDir, DEFAULT_SANDBOX).absolutePath }
         }
         configureConfigurations(project, intellijExtension)
         configureTasks(project, intellijExtension)
@@ -409,8 +409,8 @@ class IntelliJPlugin implements Plugin<Project> {
                         ? (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archiveFile.getOrNull()?.getAsFile()
                         : (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archivePath
             })
-            conventionMapping('destinationDir', { project.file("${extension.sandboxDirectory}/plugins$testSuffix") })
-            conventionMapping('configDirectory', { "${extension.sandboxDirectory}/config$testSuffix".toString() })
+            conventionMapping('destinationDir', { project.file("${Utils.stringInput(extension.sandboxDirectory)}/plugins$testSuffix") })
+            conventionMapping('configDirectory', { "${Utils.stringInput(extension.sandboxDirectory)}/config$testSuffix".toString() })
             conventionMapping('librariesToIgnore', { project.files(extension.ideaDependency.jarFiles) })
             conventionMapping('pluginDependencies', { extension.pluginDependencies })
             dependsOn(JavaPlugin.JAR_TASK_NAME)
@@ -486,7 +486,7 @@ class IntelliJPlugin implements Plugin<Project> {
         task.conventionMapping("configDirectory", { project.file(prepareSandboxTask.getConfigDirectory()) })
         task.conventionMapping("pluginsDirectory", { prepareSandboxTask.getDestinationDir() })
         task.conventionMapping("systemDirectory", {
-            project.file("${extension.sandboxDirectory}/system")
+            project.file("${Utils.stringInput(extension.sandboxDirectory)}/system")
         })
         task.conventionMapping("autoReloadPlugins", {
             def number = Utils.ideBuildNumber(Utils.ideSdkDirectory(project, extension))
@@ -598,9 +598,9 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring tests tasks")
         project.tasks.withType(Test).each { task ->
-            def configDirectory = project.file("${extension.sandboxDirectory}/config-test")
-            def systemDirectory = project.file("${extension.sandboxDirectory}/system-test")
-            def pluginsDirectory = project.file("${extension.sandboxDirectory}/plugins-test")
+            def configDirectory = project.file("${Utils.stringInput(extension.sandboxDirectory)}/config-test")
+            def systemDirectory = project.file("${Utils.stringInput(extension.sandboxDirectory)}/system-test")
+            def pluginsDirectory = project.file("${Utils.stringInput(extension.sandboxDirectory)}/plugins-test")
             task.enableAssertions = true
             def pluginIds = Utils.getPluginIds(project)
             task.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))

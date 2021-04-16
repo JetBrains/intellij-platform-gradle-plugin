@@ -73,7 +73,7 @@ class IntelliJPluginExtension {
      * The path of sandbox directory that is used for running IDE with developing plugin.
      * By default: <code>${project.buildDir}/idea-sandbox</code>.
      */
-    String sandboxDirectory
+    Object sandboxDirectory
 
     /**
      * Url of repository for downloading IDE distributions.

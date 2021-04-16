@@ -4,6 +4,7 @@
 
 - migrate from bintray [#594](../../issues/594)
 - exclude kotlin-reflect and kotlin-text from the runtime if kotlin is used in plugin [#585](../../issues/585)
+- respect overridden `build` directory [#602](../../issues/602)
 
 ## 0.7.2
 
