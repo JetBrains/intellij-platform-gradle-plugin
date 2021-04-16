@@ -31,7 +31,7 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
     companion object {
         const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
         const val LOADER_REF = "java2.loader"
-        const val ASM_REPO_URL = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-third-party-dependencies"
+        const val ASM_REPO_URL = "https://cache-redirector.jetbrains.com/intellij-dependencies"
         const val FORMS_REPO_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
     }
 

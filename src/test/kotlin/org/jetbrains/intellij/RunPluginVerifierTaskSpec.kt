@@ -1,9 +1,9 @@
 package org.jetbrains.intellij
 
 import org.apache.commons.io.FileUtils
-import org.gradle.internal.impldep.com.google.gson.JsonParser
+import org.jetbrains.intellij.model.PluginVerifierRepository
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import java.io.InputStream
-import java.io.InputStreamReader
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -19,13 +19,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             
             runPluginVerifier {
                 ideVersions = "2020.2.3"
-                verifierVersion = "1.241"
+                verifierVersion = "1.255"
             }
         """)
 
         val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.241"))
+        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.255"))
     }
 
     @Test
@@ -223,7 +223,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val version = requestPluginVerifierVersion()
         FileUtils.copyInputStreamToFile(
-            URL("https://dl.bintray.com/jetbrains/intellij-plugin-service/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
+            URL("${RunPluginVerifierTask.SPACE_PACKAGES_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")
         )
 
@@ -268,13 +268,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun requestPluginVerifierVersion(): String {
-        val url = URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
+        val url = URL("https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml")
         val request = url.openConnection()
         request.connect()
 
-        val jp = JsonParser() //from gson
-        val root = jp.parse(InputStreamReader(request.content as InputStream)) //Convert the input stream to a json element
-        val rootobj = root.asJsonObject //May be an array, may be an object.
-        return rootobj.get("name").asString //just grab the zipcode
+        val pv = parseXml(request.content as InputStream, PluginVerifierRepository::class.java)
+        return pv.versioning?.latest ?: ""
     }
 }

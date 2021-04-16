@@ -255,7 +255,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `download robot server plugin task`() {
+    fun `download old robot server plugin task`() {
         writeJavaFile()
 
         file("src/main/resources/META-INF/other.xml").xml("""
@@ -293,6 +293,44 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `download new robot server plugin task`() {
+        writeJavaFile()
+
+        file("src/main/resources/META-INF/other.xml").xml("""
+            <idea-plugin />
+        """)
+
+        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+            <idea-plugin />
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <depends config-file="other.xml"/>
+            </idea-plugin>
+        """)
+
+        buildFile.groovy("""
+            version = '0.42.123'
+            intellij {
+                pluginName = 'myPluginName'
+                plugins = ['copyright']
+            }
+            downloadRobotServerPlugin.version = '0.11.1'
+            dependencies {
+                compile 'joda-time:joda-time:2.8.1'
+            }
+        """)
+
+        build(IntelliJPlugin.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+
+        assertTrue(
+            collectPaths(File(buildDirectory, "robotServerPlugin"))
+                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar"))
+        )
+    }
+
+    @Test
     fun `prepare ui tests sandbox task`() {
         writeJavaFile()
 
@@ -316,7 +354,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myPluginName'
                 plugins = ['copyright']
             }
-            downloadRobotServerPlugin.version = '0.10.0'
+            downloadRobotServerPlugin.version = '0.11.1'
             dependencies {
                 compile 'joda-time:joda-time:2.8.1'
             }
@@ -329,7 +367,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 "/plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar",
                 "/plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar",
                 "/config-uiTest/options/updates.xml",
-                "/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.10.0.jar",
+                "/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
             ))
         )
     }

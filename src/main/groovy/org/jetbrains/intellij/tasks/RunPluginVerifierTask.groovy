@@ -20,9 +20,10 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 class RunPluginVerifierTask extends ConventionTask {
-    private static final String BINTRAY_API_VERIFIER_VERSION_LATEST = "https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest"
+    private static final String SPACE_PACKAGES_VERIFIER_VERSION_LATEST = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
     private static final String IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
     public static final String CACHE_REDIRECTOR = 'https://cache-redirector.jetbrains.com'
+    public static final String SPACE_PACKAGES_REPOSITORY = 'https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier'
 
     public static final String VERIFIER_VERSION_LATEST = "latest"
 
@@ -583,7 +584,7 @@ class RunPluginVerifierTask extends ConventionTask {
             ))
         }
 
-        def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_SERVICE }
+        def repository = project.repositories.maven { it.url = SPACE_PACKAGES_REPOSITORY }
         try {
             def resolvedVerifierVersion = resolveVerifierVersion()
             Utils.debug(this, "Using Verifier in $resolvedVerifierVersion version")
@@ -724,7 +725,7 @@ class RunPluginVerifierTask extends ConventionTask {
 
     /**
      * Resolves Plugin Verifier version.
-     * If set to {@link #VERIFIER_VERSION_LATEST}, there's request to {@link #BINTRAY_API_VERIFIER_VERSION_LATEST}
+     * If set to {@link #VERIFIER_VERSION_LATEST}, there's request to {@link #SPACE_PACKAGES_VERIFIER_VERSION_LATEST}
      * performed for the latest available verifier version.
      *
      * @return Plugin Verifier version
@@ -735,8 +736,8 @@ class RunPluginVerifierTask extends ConventionTask {
         }
 
         Utils.debug(this, "Resolving Verifier version with BinTray")
-        def url = new URL(BINTRAY_API_VERIFIER_VERSION_LATEST)
-        return new JsonSlurper().parse(url)["name"]
+        def metadata = new XmlParser().parse(SPACE_PACKAGES_VERIFIER_VERSION_LATEST)
+        return metadata.versioning.latest[0].text()
     }
 
     /**
