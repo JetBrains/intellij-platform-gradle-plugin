@@ -22,6 +22,25 @@ class RunPluginVerifierTaskSpec extends IntelliJPluginSpecBase {
         result.output.contains("Starting the IntelliJ Plugin Verifier 1.255")
     }
 
+    def 'run plugin verifier in old version hosted on Bintray'() {
+        given:
+        writePluginXmlFile()
+        buildFile << """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = "2020.2.3"
+                verifierVersion = "1.254"
+            }
+            """.stripIndent()
+
+        when:
+        def result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+
+        then:
+        result.output.contains("Starting the IntelliJ Plugin Verifier 1.254")
+    }
+
     def 'run plugin verifier in the latest version'() {
         given:
         writePluginXmlFile()

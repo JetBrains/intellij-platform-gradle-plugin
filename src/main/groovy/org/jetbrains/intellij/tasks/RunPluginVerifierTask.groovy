@@ -8,6 +8,7 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
@@ -582,9 +583,9 @@ class RunPluginVerifierTask extends ConventionTask {
             ))
         }
 
-        def repository = project.repositories.maven { it.url = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO }
+        def resolvedVerifierVersion = resolveVerifierVersion()
+        def repository = project.repositories.maven { it.url = getPluginVerifierRepository(resolvedVerifierVersion) }
         try {
-            def resolvedVerifierVersion = resolveVerifierVersion()
             Utils.debug(this, "Using Verifier in $resolvedVerifierVersion version")
             def dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
             def configuration = project.configurations.detachedConfiguration(dependency)
@@ -878,5 +879,13 @@ class RunPluginVerifierTask extends ConventionTask {
             return "build"
         }
         return "version"
+    }
+
+    static String getPluginVerifierRepository(String version) {
+        if (VersionNumber.parse(version) >= VersionNumber.parse("1.255")) {
+            return IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO
+        } else {
+            return IntelliJPlugin.OLD_INTELLIJ_PLUGIN_VERIFIER_REPO
+        }
     }
 }

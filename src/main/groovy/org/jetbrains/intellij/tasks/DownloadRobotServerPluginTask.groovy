@@ -4,6 +4,7 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.util.VersionNumber
 
 
 class DownloadRobotServerPluginTask extends ConventionTask {
@@ -34,7 +35,7 @@ class DownloadRobotServerPluginTask extends ConventionTask {
     }
 
     private String getDependency() {
-        if (version.startsWith("0.10.")) {
+        if (VersionNumber.parse(version) < VersionNumber.parse("0.11.0")) {
             return OLD_ROBOT_SERVER_DEPENDENCY
         } else {
             return NEW_ROBOT_SERVER_DEPENDENCY
