@@ -53,7 +53,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
 //    public static final Logger LOG = Logging.getLogger(IntelliJPlugin)
     public static final String DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-//    public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
+    public static final String DEFAULT_INTELLIJ_REPO = 'https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository'
 //    public static final String DEFAULT_JBR_REPO = 'https://cache-redirector.jetbrains.com/intellij-jbr'
     public static final String DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO = 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier'
     public static final String OLD_INTELLIJ_PLUGIN_VERIFIER_REPO = 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service'
@@ -73,7 +73,10 @@ class IntelliJPlugin implements Plugin<Project> {
             updateSinceUntilBuild.convention(true)
             sameSinceUntilBuild.convention(false)
             instrumentCode.convention(true)
-            sandboxDirectory = { new File(project.buildDir, DEFAULT_SANDBOX).absolutePath }
+            sandboxDirectory.convention(project.provider({
+                new File(project.buildDir, DEFAULT_SANDBOX).absolutePath
+            }))
+            intellijRepo.convention(DEFAULT_INTELLIJ_REPO)
         }
         configureConfigurations(project, intellijExtension)
         configureTasks(project, intellijExtension)
@@ -199,7 +202,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull Configuration configuration) {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring IDE dependency")
-            def resolver = new IdeaDependencyManager(extension.intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO, extension.ideaDependencyCachePath)
+            def resolver = new IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath)
             def ideaDependency
             def localPath = extension.localPath.orNull
             if (localPath != null) {
@@ -421,10 +424,10 @@ class IntelliJPlugin implements Plugin<Project> {
                     }))
             )
             conventionMapping('destinationDir', {
-                project.file("${Utils.stringInput(extension.sandboxDirectory)}/plugins$testSuffix")
+                project.file("${extension.sandboxDirectory.get()}/plugins$testSuffix")
             })
             task.configDirectory.convention(project.provider({
-                "${Utils.stringInput(extension.sandboxDirectory)}/config$testSuffix"
+                "${extension.sandboxDirectory.get()}/config$testSuffix"
             }))
             task.librariesToIgnore.convention(project.provider({
                 project.files(extension.ideaDependency.jarFiles)
@@ -518,7 +521,7 @@ class IntelliJPlugin implements Plugin<Project> {
             project.layout.projectDirectory.dir(path)
         }))
         task.systemDirectory.convention(project.provider({
-            project.file("${Utils.stringInput(extension.sandboxDirectory)}/system")
+            project.file("${extension.sandboxDirectory.get()}/system")
         }))
         task.autoReloadPlugins.convention(project.provider({
             def number = Utils.ideBuildNumber(task.ideDirectory.get().asFile)
@@ -625,9 +628,9 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension) {
         Utils.info(project, "Configuring tests tasks")
         project.tasks.withType(Test).each { task ->
-            def configDirectory = project.file("${Utils.stringInput(extension.sandboxDirectory)}/config-test")
-            def systemDirectory = project.file("${Utils.stringInput(extension.sandboxDirectory)}/system-test")
-            def pluginsDirectory = project.file("${Utils.stringInput(extension.sandboxDirectory)}/plugins-test")
+            def configDirectory = project.file("${extension.sandboxDirectory.get()}/config-test")
+            def systemDirectory = project.file("${extension.sandboxDirectory.get()}/system-test")
+            def pluginsDirectory = project.file("${extension.sandboxDirectory.get()}/plugins-test")
             task.enableAssertions = true
             def pluginIds = Utils.getPluginIds(project)
             task.systemProperties(Utils.getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))

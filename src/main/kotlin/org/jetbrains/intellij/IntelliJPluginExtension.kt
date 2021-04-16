@@ -61,17 +61,17 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
      */
     val instrumentCode: Property<Boolean> = objects.property(Boolean::class.java)
 
-//    /**
-//     * The path of sandbox directory that is used for running IDE with developing plugin.
-//     * By default: <code>${project.buildDir}/idea-sandbox</code>.
-//     */
-//    Object sandboxDirectory
-//
-//    /**
-//     * Url of repository for downloading IDE distributions.
-//     */
-//    String intellijRepo = IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
-//
+    /**
+     * The path of sandbox directory that is used for running IDE with developing plugin.
+     * By default: <code>${project.buildDir}/idea-sandbox</code>.
+     */
+    val sandboxDirectory: Property<String> = objects.property(String::class.java)
+
+    /**
+     * Url of repository for downloading IDE distributions.
+     */
+    val intellijRepo: Property<String> = objects.property(String::class.java)
+
 //    /**
 //     * Url of repository for downloading plugin dependencies.
 //     *
