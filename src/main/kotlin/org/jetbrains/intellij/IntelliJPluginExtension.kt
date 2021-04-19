@@ -2,13 +2,15 @@ package org.jetbrains.intellij
 
 import groovy.lang.Closure
 import org.gradle.api.Action
+import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.util.ConfigureUtil
+import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginsRepoConfiguration
-
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
  * TODO: Annotate props properly with @Input, @Optional, etc
@@ -137,7 +139,6 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //    private Project project
 //    private IdeaDependency ideaDependency
 //    private final Set<PluginDependency> pluginDependencies = new HashSet<>()
-//    private boolean pluginDependenciesConfigured = false
 //
 //    def setExtensionProject(@NotNull Project project) {
 //        this.project = project
@@ -160,28 +161,33 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
         return keys.find { v.startsWith("$it-") || it == t } ?: "IC"
     }
 
+    @Internal
+    val pluginDependencies: ListProperty<PluginDependency> = objects.listProperty(PluginDependency::class.java)
+
 //    fun getBuildVersion() = IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
 
-//    def addPluginDependency(@NotNull PluginDependency pluginDependency) {
-//        pluginDependencies.add(pluginDependency)
-//    }
-//
-//    Set<PluginDependency> getUnresolvedPluginDependencies() {
-//        if (pluginDependenciesConfigured) {
-//            return []
-//        }
-//        return pluginDependencies
-//    }
-//
-//    Set<PluginDependency> getPluginDependencies() {
-//        if (!pluginDependenciesConfigured) {
-//            Utils.debug(project, "Plugin dependencies are resolved", new Throwable())
-//            project.configurations.getByName(IntelliJPlugin.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
-//            pluginDependenciesConfigured = true
-//        }
-//        return pluginDependencies
-//    }
-//
+    private var pluginDependenciesConfigured = false
+
+    fun addPluginDependency(pluginDependency: PluginDependency) {
+        pluginDependencies.add(pluginDependency)
+    }
+
+    fun getUnresolvedPluginDependencies(): Set<PluginDependency> {
+        if (pluginDependenciesConfigured) {
+            return emptySet()
+        }
+        return pluginDependencies.orNull?.toSet() ?: emptySet()
+    }
+
+    fun getPluginDependenciesList(project: Project): Set<PluginDependency> {
+        if (!pluginDependenciesConfigured) {
+            debug(project, "Plugin dependencies are resolved", Throwable())
+            project.configurations.getByName(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
+            pluginDependenciesConfigured = true
+        }
+        return pluginDependencies.orNull?.toSet() ?: emptySet()
+    }
+
 //    def setIdeaDependency(IdeaDependency ideaDependency) {
 //        this.ideaDependency = ideaDependency
 //    }
@@ -197,3 +203,4 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //        return ideaDependency
 //    }
 }
+

@@ -21,7 +21,7 @@ object IntelliJPluginConstants {
 //        const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
 //        const val IDEA_CONFIGURATION_NAME = "idea"
-//        const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
+        const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
 
 //        const val LOG = Logging.getLogger(IntelliJPlugin::class.java)
 //        const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"

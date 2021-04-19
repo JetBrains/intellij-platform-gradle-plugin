@@ -6,7 +6,6 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.intellij.dependency.IdeaDependency
-import org.jetbrains.intellij.dependency.PluginDependency
 
 class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
 
@@ -16,8 +15,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
 
     private Project project
     private IdeaDependency ideaDependency
-    private final Set<PluginDependency> pluginDependencies = new HashSet<>()
-    private boolean pluginDependenciesConfigured = false
 
     def setExtensionProject(@NotNull Project project) {
         this.project = project
@@ -25,26 +22,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
 
     String getBuildVersion() {
         return IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
-    }
-
-    def addPluginDependency(@NotNull PluginDependency pluginDependency) {
-        pluginDependencies.add(pluginDependency)
-    }
-
-    Set<PluginDependency> getUnresolvedPluginDependencies() {
-        if (pluginDependenciesConfigured) {
-            return []
-        }
-        return pluginDependencies
-    }
-
-    Set<PluginDependency> getPluginDependencies() {
-        if (!pluginDependenciesConfigured) {
-            Utils.debug(project, "Plugin dependencies are resolved", new Throwable())
-            project.configurations.getByName(IntelliJPlugin.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
-            pluginDependenciesConfigured = true
-        }
-        return pluginDependencies
     }
 
     def setIdeaDependency(IdeaDependency ideaDependency) {

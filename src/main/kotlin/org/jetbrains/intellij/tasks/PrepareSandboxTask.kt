@@ -50,7 +50,6 @@ open class PrepareSandboxTask : Sync() {
 
     override fun configure(closure: Closure<*>): Task {
         return super.configure(closure)
-
     }
 
     init {

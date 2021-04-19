@@ -163,7 +163,7 @@ class IntelliJPlugin implements Plugin<Project> {
             if (!project.state.executed) {
                 throw new GradleException("intellij plugin '$plugin' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
             }
-            def pluginDep = extension.pluginDependencies.find { it.id == plugin }
+            def pluginDep = extension.getPluginDependenciesList(project).find { it.id == plugin }
             if (pluginDep == null || pluginDep.jarFiles == null || pluginDep.jarFiles.empty) {
                 throw new GradleException("intellij plugin '$plugin' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
             }
@@ -174,7 +174,7 @@ class IntelliJPlugin implements Plugin<Project> {
             def selectedPlugins = new HashSet<PluginDependency>()
             def nonValidPlugins = []
             for (pluginName in plugins) {
-                def plugin = extension.pluginDependencies.find { it.id == pluginName }
+                def plugin = extension.getPluginDependenciesList(project).find { it.id == pluginName }
                 if (plugin == null || plugin.jarFiles == null || plugin.jarFiles.empty) {
                     nonValidPlugins.add(pluginName)
                 } else {
@@ -306,6 +306,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                             @NotNull PluginDependencyManager resolver,
                                                             @NotNull IntelliJPluginExtensionGr extension) {
         def configuredPlugins = extension.unresolvedPluginDependencies
+                .get()
                 .findAll { it.builtin }
                 .collect { it.id }
         extension.ideaDependency.pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
@@ -435,7 +436,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 project.files(extension.ideaDependency.jarFiles)
             }))
             task.pluginDependencies.convention(project.provider({
-                extension.pluginDependencies
+                extension.getPluginDependenciesList(project)
             }))
             dependsOn(JavaPlugin.JAR_TASK_NAME)
         }
