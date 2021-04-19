@@ -79,6 +79,7 @@ class IntelliJPlugin implements Plugin<Project> {
             intellijRepo.convention(DEFAULT_INTELLIJ_REPO)
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
+            type.convention("IC")
         }
         configureConfigurations(project, intellijExtension)
         configureTasks(project, intellijExtension)
@@ -217,7 +218,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 Utils.info(project, "Using IDE from remote repository")
                 def version = extension.getVersionNumber() ?: DEFAULT_IDEA_VERSION
                 def extraDependencies = extension.extraDependencies.get()
-                ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources.get(), extraDependencies)
+                ideaDependency = resolver.resolveRemote(project, version, extension.getVersionType(), extension.downloadSources.get(), extraDependencies)
             }
             extension.ideaDependency = ideaDependency
             if (extension.configureDefaultDependencies.get()) {
@@ -579,13 +580,14 @@ class IntelliJPlugin implements Plugin<Project> {
                 it.compilerVersion.convention(project.provider({
                     def version = extension.getVersionNumber() ?: DEFAULT_IDEA_VERSION
                     if (!extension.localPath.orNull && version && version.endsWith('-SNAPSHOT')) {
-                        if (extension.type == 'CL') {
+                        def type = extension.getVersionType()
+                        if (type == 'CL') {
                             return "CLION-$version".toString()
                         }
-                        if (extension.type == 'RD') {
+                        if (type == 'RD') {
                             return "RIDER-$version".toString()
                         }
-                        if (extension.type == 'PY' || extension.type == 'PC') {
+                        if (type == 'PY' || type == 'PC') {
                             return "PYCHARM-$version".toString()
                         }
                         return version

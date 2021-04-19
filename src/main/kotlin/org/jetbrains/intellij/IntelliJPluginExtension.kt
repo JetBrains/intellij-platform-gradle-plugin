@@ -39,12 +39,12 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
      */
     val version: Property<String> = objects.property(String::class.java)
 
-//    /**
-//     * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
-//     * <p/>
-//     * The type might be included as a prefix in {@link #version} value.
-//     */
-//    String type = 'IC'
+    /**
+     * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
+     * <p/>
+     * The type might be included as a prefix in {@link #version} value.
+     */
+    val type: Property<String> = objects.property(String::class.java)
 
     /**
      * The name of the target zip-archive and defines the name of plugin artifact.
@@ -143,19 +143,25 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //        this.project = project
 //    }
 
-    fun getVersionNumber() = version.orNull?.let {
-        val keys = listOf("JPS-", "IU-", "IC-", "RD-", "CL-", "PY-", "PC-", "GO-")
-        val key = keys.find { key -> it.startsWith(key) }
+    fun getVersionNumber() = version.orNull?.let { v ->
+        val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO") // TODO: move somewhere
+        val key = keys.find { v.startsWith("$it-") }
         when {
-            key != null -> it.substring(key.length)
-            else -> it
+            key != null -> v.substring(key.length + 1)
+            else -> v
         }
     }
 
-//    String getBuildVersion() {
-//        return IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
-//    }
-//
+    fun getVersionType(): String {
+        val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
+        val v = version.orNull ?: return "IC"
+        val t = type.orNull
+
+        return keys.find { v.startsWith("$it-") || it == t } ?: "IC"
+    }
+
+//    fun getBuildVersion() = IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
+
 //    def addPluginDependency(@NotNull PluginDependency pluginDependency) {
 //        pluginDependencies.add(pluginDependency)
 //    }

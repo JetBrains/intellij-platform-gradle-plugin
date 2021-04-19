@@ -14,13 +14,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
         super(objects)
     }
 
-    /**
-     * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
-     * <p/>
-     * The type might be included as a prefix in {@link #version} value.
-     */
-    String type = 'IC'
-
     private Project project
     private IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
@@ -28,30 +21,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
 
     def setExtensionProject(@NotNull Project project) {
         this.project = project
-    }
-
-    String getType() {
-        def v = version.orNull
-        if (v == null) {
-            return 'IC'
-        }
-        if (v.startsWith('IU-') || 'IU' == type) {
-            return 'IU'
-        } else if (v.startsWith('JPS-') || 'JPS' == type) {
-            return "JPS"
-        } else if (v.startsWith('CL-') || 'CL' == type) {
-            return 'CL'
-        } else if (v.startsWith('PY-') || 'PY' == type) {
-            return 'PY'
-        } else if (v.startsWith('PC-') || 'PC' == type) {
-            return 'PC'
-        } else if (v.startsWith('RD-') || 'RD' == type) {
-            return 'RD'
-        } else if (v.startsWith('GO-') || 'GO' == type) {
-            return 'GO'
-        } else {
-            return 'IC'
-        }
     }
 
     String getBuildVersion() {
