@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -8,7 +9,9 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
+import org.gradle.tooling.BuildException
 import org.gradle.util.ConfigureUtil
+import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginsRepoConfiguration
 /**
@@ -136,14 +139,6 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
      */
     val extraDependencies: ListProperty<String> = objects.listProperty(String::class.java)
 
-//    private Project project
-//    private IdeaDependency ideaDependency
-//    private final Set<PluginDependency> pluginDependencies = new HashSet<>()
-//
-//    def setExtensionProject(@NotNull Project project) {
-//        this.project = project
-//    }
-
     fun getVersionNumber() = version.orNull?.let { v ->
         val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO") // TODO: move somewhere
         val key = keys.find { v.startsWith("$it-") }
@@ -164,7 +159,7 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
     @Internal
     val pluginDependencies: ListProperty<PluginDependency> = objects.listProperty(PluginDependency::class.java)
 
-//    fun getBuildVersion() = IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
+    fun getBuildVersion(project: Project) = IdeVersion.createIdeVersion(getIdeaDependency(project).buildNumber).asStringWithoutProductCode()
 
     private var pluginDependenciesConfigured = false
 
@@ -188,19 +183,17 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
         return pluginDependencies.orNull?.toSet() ?: emptySet()
     }
 
-//    def setIdeaDependency(IdeaDependency ideaDependency) {
-//        this.ideaDependency = ideaDependency
-//    }
-//
-//    IdeaDependency getIdeaDependency() {
-//        if (ideaDependency == null) {
-//            Utils.debug(project, "IDE dependency is resolved", new Throwable())
-//            project.configurations.getByName(IntelliJPlugin.IDEA_CONFIGURATION_NAME).resolve()
-//            if (ideaDependency == null) {
-//                throw new BuildException("Cannot resolve ideaDependency", null)
-//            }
-//        }
-//        return ideaDependency
-//    }
+        private val ideaDependency: Property<IdeaDependency> = objects.property(IdeaDependency::class.java)
+
+    fun getIdeaDependency(project: Project): IdeaDependency {
+        if (ideaDependency.orNull == null) {
+            debug(project, "IDE dependency is resolved",  Throwable())
+            project.configurations.getByName(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).resolve()
+            if (ideaDependency.orNull == null) {
+                throw BuildException("Cannot resolve ideaDependency", null)
+            }
+        }
+        return ideaDependency.get()
+    }
 }
 

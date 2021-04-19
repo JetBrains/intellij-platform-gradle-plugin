@@ -14,7 +14,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
     }
 
     private Project project
-    private IdeaDependency ideaDependency
 
     def setExtensionProject(@NotNull Project project) {
         this.project = project
@@ -22,20 +21,5 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
 
     String getBuildVersion() {
         return IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
-    }
-
-    def setIdeaDependency(IdeaDependency ideaDependency) {
-        this.ideaDependency = ideaDependency
-    }
-
-    IdeaDependency getIdeaDependency() {
-        if (ideaDependency == null) {
-            Utils.debug(project, "IDE dependency is resolved", new Throwable())
-            project.configurations.getByName(IntelliJPlugin.IDEA_CONFIGURATION_NAME).resolve()
-            if (ideaDependency == null) {
-                throw new BuildException("Cannot resolve ideaDependency", null)
-            }
-        }
-        return ideaDependency
     }
 }

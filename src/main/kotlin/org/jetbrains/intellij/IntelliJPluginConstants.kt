@@ -20,7 +20,7 @@ object IntelliJPluginConstants {
 //        const val BUILD_PLUGIN_TASK_NAME = "buildPlugin"
 //        const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
-//        const val IDEA_CONFIGURATION_NAME = "idea"
+        const val IDEA_CONFIGURATION_NAME = "idea"
         const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
 
 //        const val LOG = Logging.getLogger(IntelliJPlugin::class.java)

@@ -156,7 +156,7 @@ class IntelliJPlugin implements Plugin<Project> {
             if (!project.state.executed) {
                 throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
             }
-            project.files(extension.ideaDependency.jarFiles).asFileTree.matching(filter)
+            project.files(extension.getIdeaDependency(project).jarFiles).asFileTree.matching(filter)
         }
 
         project.dependencies.ext.intellijPlugin = { String plugin, Closure filter = {} ->
@@ -191,7 +191,7 @@ class IntelliJPlugin implements Plugin<Project> {
             if (!project.state.executed) {
                 throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
             }
-            def dependency = extension.ideaDependency
+            def dependency = extension.ideaDependency.orNull
             def extraDep = dependency != null ? dependency.extraDependencies.find { it.name == extra } : null
             if (extraDep == null || extraDep.jarFiles == null || extraDep.jarFiles.empty) {
                 throw new GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
@@ -242,8 +242,8 @@ class IntelliJPlugin implements Plugin<Project> {
                                                     @NotNull Configuration configuration) {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring plugin dependencies")
-            def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-            def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency, extension.pluginsRepos)
+            def ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
+            def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.getIdeaDependency(project), extension.pluginsRepos)
             extension.plugins.get().each {
                 Utils.info(project, "Configuring plugin $it")
                 if (it instanceof Project) {
@@ -288,7 +288,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void verifyJavaPluginDependency(IntelliJPluginExtensionGr extension, Project project) {
         def plugins = extension.plugins.get()
         def hasJavaPluginDependency = plugins.contains('java') || plugins.contains('com.intellij.java')
-        if (!hasJavaPluginDependency && new File(extension.ideaDependency.classes, "plugins/java").exists()) {
+        if (!hasJavaPluginDependency && new File(extension.getIdeaDependency(project).classes, "plugins/java").exists()) {
             Utils.sourcePluginXmlFiles(project).each { file ->
                 def pluginXml = Utils.parseXml(file, IdeaPlugin)
                 pluginXml.depends.each {
@@ -309,7 +309,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 .get()
                 .findAll { it.builtin }
                 .collect { it.id }
-        extension.ideaDependency.pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
+        extension.ideaDependenc.get().pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
             def plugin = resolver.resolve(project, new PluginDependencyNotation(it, null, null))
             configurePluginDependency(project, plugin, extension, dependencies, resolver)
         }
@@ -374,13 +374,13 @@ class IntelliJPlugin implements Plugin<Project> {
             )
             it.sinceBuild.convention(project.provider({
                 if (extension.updateSinceUntilBuild.get()) {
-                    def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                    def ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
                     return "$ideVersion.baselineVersion.$ideVersion.build".toString()
                 }
             }))
             it.untilBuild.convention(project.provider({
                 if (extension.updateSinceUntilBuild.get()) {
-                    def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                    def ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
                     return extension.sameSinceUntilBuild.get() ? "${sinceBuild.get()}.*".toString()
                             : "$ideVersion.baselineVersion.*".toString()
                 }
@@ -433,7 +433,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 "${extension.sandboxDirectory.get()}/config$testSuffix"
             }))
             task.librariesToIgnore.convention(project.provider({
-                project.files(extension.ideaDependency.jarFiles)
+                project.files(extension.getIdeaDependency(project).jarFiles)
             }))
             task.pluginDependencies.convention(project.provider({
                 extension.getPluginDependenciesList(project)
@@ -510,7 +510,7 @@ class IntelliJPlugin implements Plugin<Project> {
                                                                @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
         def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
         task.ideDirectory.convention(project.provider({
-            def path = extension.ideaDependency.classes.path
+            def path = extension.getIdeaDependency(project).classes.path
             project.layout.projectDirectory.dir(path)
         }))
         task.requiredPluginIds.convention(project.provider({
@@ -593,14 +593,14 @@ class IntelliJPlugin implements Plugin<Project> {
                         }
                         return version
                     }
-                    return IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber).asStringWithoutProductCode()
+                    return IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber).asStringWithoutProductCode()
                 }))
                 it.ideaDependency.convention(project.provider({
-                    extension.ideaDependency
+                    extension.getIdeaDependency(project)
                 }))
                 it.javac2.convention(
                         project.layout.file(project.provider({
-                            def javac2 = project.file("$extension.ideaDependency.classes/lib/javac2.jar")
+                            def javac2 = project.file("${extension.getIdeaDependency(project).classes}/lib/javac2.jar")
                             if (javac2?.exists()) {
                                 return javac2
                             }
@@ -661,14 +661,14 @@ class IntelliJPlugin implements Plugin<Project> {
                 def ideDirectory = runIdeTask.ideDirectory.get().asFile
                 task.jvmArgs = Utils.getIdeJvmArgs(task, task.jvmArgs, ideDirectory)
                 task.classpath += project.files(
-                        "$extension.ideaDependency.classes/lib/resources.jar",
-                        "$extension.ideaDependency.classes/lib/idea.jar"
+                        "${extension.getIdeaDependency(project).classes}/lib/resources.jar",
+                        "${extension.getIdeaDependency(project).classes}/lib/idea.jar"
                 )
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as task's the very first source of plugins
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
-                def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
+                def ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
                 if (ideVersion.baselineVersion >= 193) {
                     task.systemProperty(PLUGIN_PATH, pluginsDirectory.listFiles().collect { it.path }.join("$File.pathSeparator,"))
                 }
