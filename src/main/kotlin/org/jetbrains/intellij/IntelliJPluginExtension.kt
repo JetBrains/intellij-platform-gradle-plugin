@@ -11,6 +11,7 @@ import org.jetbrains.intellij.dependency.PluginsRepoConfiguration
 
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
+ * TODO: Annotate props properly with @Input, @Optional, etc
  */
 @Suppress("UnstableApiUsage")
 abstract class IntelliJPluginExtension(objects: ObjectFactory) {
@@ -127,12 +128,12 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
      */
     val configureDefaultDependencies: Property<Boolean> = objects.property(Boolean::class.java)
 
-//    /**
-//     * configure extra dependency artifacts from intellij repo
-//     *  the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
-//     */
-//    Object[] extraDependencies = []
-//
+    /**
+     * Configure extra dependency artifacts from intellij repo
+     * The dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
+     */
+    val extraDependencies: ListProperty<String> = objects.listProperty(String::class.java)
+
 //    private Project project
 //    private IdeaDependency ideaDependency
 //    private final Set<PluginDependency> pluginDependencies = new HashSet<>()
