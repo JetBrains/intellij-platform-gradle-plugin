@@ -1,8 +1,13 @@
 package org.jetbrains.intellij
 
+import groovy.lang.Closure
+import org.gradle.api.Action
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Nested
+import org.gradle.util.ConfigureUtil
+import org.jetbrains.intellij.dependency.PluginsRepoConfiguration
 
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
@@ -72,37 +77,34 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
      */
     val intellijRepo: Property<String> = objects.property(String::class.java)
 
-//    /**
-//     * Url of repository for downloading plugin dependencies.
-//     *
-//     * @deprecated Use closure syntax to configure multiple repositories
-//     */
-//    @Deprecated
-//    String pluginsRepo = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO
-//
-//    /**
-//     * Returns object to configure multiple repositories for downloading plugins.
-//     */
-//    PluginsRepositoryConfiguration pluginsRepo() {
-//        if (pluginsRepoConfiguration == null) {
-//            pluginsRepoConfiguration = new PluginsRepoConfigurationImpl(project)
-//        }
-//        return pluginsRepoConfiguration
-//    }
-//
-//    /**
-//     * Configure multiple repositories for downloading plugins.
-//     */
-//    void pluginsRepo(Closure<?> block) {
-//        this.project.configure(pluginsRepo(), block)
-//    }
-//
-//    /**
-//     * Configure multiple repositories for downloading plugins.
-//     */
-//    void pluginsRepo(Action<PluginsRepositoryConfiguration> block) {
-//        block.execute(pluginsRepo())
-//    }
+    /**
+     * Object to configure multiple repositories for downloading plugins.
+     */
+    @Nested
+    // TODO: rename to pluginsRepositories
+    val pluginsRepo: PluginsRepoConfiguration = objects.newInstance(PluginsRepoConfiguration::class.java)
+
+    // TODO: make it as property and use convention?
+    fun getPluginsRepos() = pluginsRepo.run {
+        getRepositories().ifEmpty {
+            marketplace()
+            getRepositories()
+        }
+    }
+
+    /**
+     * Configure multiple repositories for downloading plugins.
+     */
+    fun pluginsRepo(block: Closure<Any>) {
+        ConfigureUtil.configure(block, pluginsRepo)
+    }
+
+    /**
+     * Configure multiple repositories for downloading plugins.
+     */
+    fun pluginsRepo(block: Action<PluginsRepoConfiguration>) {
+        block.execute(pluginsRepo)
+    }
 
     /**
      * Url of repository for downloading JetBrains Java Runtime.
@@ -135,7 +137,6 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //    private IdeaDependency ideaDependency
 //    private final Set<PluginDependency> pluginDependencies = new HashSet<>()
 //    private boolean pluginDependenciesConfigured = false
-//    private PluginsRepoConfigurationImpl pluginsRepoConfiguration = null
 //
 //    def setExtensionProject(@NotNull Project project) {
 //        this.project = project
@@ -216,14 +217,5 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //            }
 //        }
 //        return ideaDependency
-//    }
-//
-//    @NotNull
-//    List<PluginsRepository> getPluginsRepos() {
-//        if (pluginsRepoConfiguration == null) {
-//            //noinspection GrDeprecatedAPIUsage
-//            pluginsRepo().maven(this.pluginsRepo)
-//        }
-//        return pluginsRepoConfiguration.getRepositories()
 //    }
 }

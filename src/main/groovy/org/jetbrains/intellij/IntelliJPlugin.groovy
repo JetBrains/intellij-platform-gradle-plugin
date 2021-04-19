@@ -242,8 +242,7 @@ class IntelliJPlugin implements Plugin<Project> {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring plugin dependencies")
             def ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.buildNumber)
-            def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath,
-                    extension.ideaDependency, extension.pluginsRepos)
+            def resolver = new PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath, extension.ideaDependency, extension.pluginsRepos)
             extension.plugins.get().each {
                 Utils.info(project, "Configuring plugin $it")
                 if (it instanceof Project) {
@@ -268,7 +267,7 @@ class IntelliJPlugin implements Plugin<Project> {
             }
             verifyJavaPluginDependency(extension, project)
             for (PluginsRepository repository : extension.getPluginsRepos()) {
-                repository.postResolve()
+                repository.postResolve(project)
             }
         }
 

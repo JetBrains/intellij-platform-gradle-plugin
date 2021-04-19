@@ -43,7 +43,7 @@ class PluginDependencyManager(
             throw BuildException("Cannot find builtin plugin ${dependency.id} for IDE: ${ideaDependency?.classes?.absolutePath}", null)
         }
         pluginsRepositories.forEach { repo ->
-            repo.resolve(dependency)?.let {
+            repo.resolve(project, dependency)?.let {
                 return when {
                     isZipFile(it) -> zippedPluginDependency(project, it, dependency)
                     isJarFile(it) -> externalPluginDependency(project, it, dependency.channel, true)

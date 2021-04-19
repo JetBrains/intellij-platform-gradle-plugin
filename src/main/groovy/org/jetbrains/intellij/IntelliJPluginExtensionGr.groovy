@@ -1,12 +1,12 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.tooling.BuildException
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.dependency.*
+import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.dependency.PluginDependency
 
 class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
 
@@ -29,38 +29,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
     String type = 'IC'
 
     /**
-     * Url of repository for downloading plugin dependencies.
-     *
-     * @deprecated Use closure syntax to configure multiple repositories
-     */
-    @Deprecated
-    String pluginsRepo = IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO
-
-    /**
-     * Returns object to configure multiple repositories for downloading plugins.
-     */
-    PluginsRepositoryConfiguration pluginsRepo() {
-        if (pluginsRepoConfiguration == null) {
-            pluginsRepoConfiguration = new PluginsRepoConfigurationImpl(project)
-        }
-        return pluginsRepoConfiguration
-    }
-
-    /**
-     * Configure multiple repositories for downloading plugins.
-     */
-    void pluginsRepo(Closure<?> block) {
-        this.project.configure(pluginsRepo(), block)
-    }
-
-    /**
-     * Configure multiple repositories for downloading plugins.
-     */
-    void pluginsRepo(Action<PluginsRepositoryConfiguration> block) {
-        block.execute(pluginsRepo())
-    }
-
-    /**
      * configure extra dependency artifacts from intellij repo
      *  the dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
      */
@@ -70,7 +38,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
     private IdeaDependency ideaDependency
     private final Set<PluginDependency> pluginDependencies = new HashSet<>()
     private boolean pluginDependenciesConfigured = false
-    private PluginsRepoConfigurationImpl pluginsRepoConfiguration = null
 
     def setExtensionProject(@NotNull Project project) {
         this.project = project
@@ -151,14 +118,5 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
             }
         }
         return ideaDependency
-    }
-
-    @NotNull
-    List<PluginsRepository> getPluginsRepos() {
-        if (pluginsRepoConfiguration == null) {
-            //noinspection GrDeprecatedAPIUsage
-            pluginsRepo().maven(this.pluginsRepo)
-        }
-        return pluginsRepoConfiguration.getRepositories()
     }
 }
