@@ -208,14 +208,14 @@ class IntelliJPlugin implements Plugin<Project> {
             def ideaDependency
             def localPath = extension.localPath.orNull
             if (localPath != null) {
-                if (extension.version != null) {
+                if (extension.version.orNull != null) {
                     Utils.warn(project, "Both `localPath` and `version` specified, second would be ignored")
                 }
                 Utils.info(project, "Using path to locally installed IDE: '$localPath'")
                 ideaDependency = resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
             } else {
                 Utils.info(project, "Using IDE from remote repository")
-                def version = extension.version ?: DEFAULT_IDEA_VERSION
+                def version = extension.getVersionNumber() ?: DEFAULT_IDEA_VERSION
                 def extraDependencies = extension.extraDependencies.get()
                 ideaDependency = resolver.resolveRemote(project, version, extension.type, extension.downloadSources.get(), extraDependencies)
             }
@@ -577,7 +577,7 @@ class IntelliJPlugin implements Plugin<Project> {
                 dependsOn sourceSet.classesTaskName
                 onlyIf { extension.instrumentCode.get() }
                 it.compilerVersion.convention(project.provider({
-                    def version = extension.version ?: DEFAULT_IDEA_VERSION
+                    def version = extension.getVersionNumber() ?: DEFAULT_IDEA_VERSION
                     if (!extension.localPath.orNull && version && version.endsWith('-SNAPSHOT')) {
                         if (extension.type == 'CL') {
                             return "CLION-$version".toString()

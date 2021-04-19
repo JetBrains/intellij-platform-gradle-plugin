@@ -32,13 +32,13 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
      */
     val localSourcesPath: Property<String> = objects.property(String::class.java)
 
-//    /**
-//     * The version of the IntelliJ Platform IDE that will be used to build the plugin.
-//     * <p/>
-//     * Please see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
-//     */
-//    String version
-//
+    /**
+     * The version of the IntelliJ Platform IDE that will be used to build the plugin.
+     * <p/>
+     * Please see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
+     */
+    val version: Property<String> = objects.property(String::class.java)
+
 //    /**
 //     * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
 //     * <p/>
@@ -142,45 +142,16 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
 //    def setExtensionProject(@NotNull Project project) {
 //        this.project = project
 //    }
-//
-//    String getType() {
-//        if (version == null) {
-//            return 'IC'
-//        }
-//        if (version.startsWith('IU-') || 'IU' == type) {
-//            return 'IU'
-//        } else if (version.startsWith('JPS-') || 'JPS' == type) {
-//            return "JPS"
-//        } else if (version.startsWith('CL-') || 'CL' == type) {
-//            return 'CL'
-//        } else if (version.startsWith('PY-') || 'PY' == type) {
-//            return 'PY'
-//        } else if (version.startsWith('PC-') || 'PC' == type) {
-//            return 'PC'
-//        } else if (version.startsWith('RD-') || 'RD' == type) {
-//            return 'RD'
-//        } else if (version.startsWith('GO-') || 'GO' == type) {
-//            return 'GO'
-//        } else {
-//            return 'IC'
-//        }
-//    }
-//
-//    String getVersion() {
-//        if (version == null) {
-//            return null
-//        }
-//        if (version.startsWith('JPS-')) {
-//            return version.substring(4)
-//        }
-//        if (version.startsWith('IU-') || version.startsWith('IC-') ||
-//                version.startsWith('RD-') || version.startsWith('CL-')
-//                || version.startsWith('PY-') || version.startsWith('PC-') || version.startsWith('GO-')) {
-//            return version.substring(3)
-//        }
-//        return version
-//    }
-//
+
+    fun getVersionNumber() = version.orNull?.let {
+        val keys = listOf("JPS-", "IU-", "IC-", "RD-", "CL-", "PY-", "PC-", "GO-")
+        val key = keys.find { key -> it.startsWith(key) }
+        when {
+            key != null -> it.substring(key.length)
+            else -> it
+        }
+    }
+
 //    String getBuildVersion() {
 //        return IdeVersion.createIdeVersion(getIdeaDependency().buildNumber).asStringWithoutProductCode()
 //    }

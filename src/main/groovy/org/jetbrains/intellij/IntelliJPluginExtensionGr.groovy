@@ -15,13 +15,6 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
     }
 
     /**
-     * The version of the IntelliJ Platform IDE that will be used to build the plugin.
-     * <p/>
-     * Please see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
-     */
-    String version
-
-    /**
      * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
      * <p/>
      * The type might be included as a prefix in {@link #version} value.
@@ -38,41 +31,27 @@ class IntelliJPluginExtensionGr extends IntelliJPluginExtension {
     }
 
     String getType() {
-        if (version == null) {
+        def v = version.orNull
+        if (v == null) {
             return 'IC'
         }
-        if (version.startsWith('IU-') || 'IU' == type) {
+        if (v.startsWith('IU-') || 'IU' == type) {
             return 'IU'
-        } else if (version.startsWith('JPS-') || 'JPS' == type) {
+        } else if (v.startsWith('JPS-') || 'JPS' == type) {
             return "JPS"
-        } else if (version.startsWith('CL-') || 'CL' == type) {
+        } else if (v.startsWith('CL-') || 'CL' == type) {
             return 'CL'
-        } else if (version.startsWith('PY-') || 'PY' == type) {
+        } else if (v.startsWith('PY-') || 'PY' == type) {
             return 'PY'
-        } else if (version.startsWith('PC-') || 'PC' == type) {
+        } else if (v.startsWith('PC-') || 'PC' == type) {
             return 'PC'
-        } else if (version.startsWith('RD-') || 'RD' == type) {
+        } else if (v.startsWith('RD-') || 'RD' == type) {
             return 'RD'
-        } else if (version.startsWith('GO-') || 'GO' == type) {
+        } else if (v.startsWith('GO-') || 'GO' == type) {
             return 'GO'
         } else {
             return 'IC'
         }
-    }
-
-    String getVersion() {
-        if (version == null) {
-            return null
-        }
-        if (version.startsWith('JPS-')) {
-            return version.substring(4)
-        }
-        if (version.startsWith('IU-') || version.startsWith('IC-') ||
-                version.startsWith('RD-') || version.startsWith('CL-')
-                || version.startsWith('PY-') || version.startsWith('PC-') || version.startsWith('GO-')) {
-            return version.substring(3)
-        }
-        return version
     }
 
     String getBuildVersion() {
