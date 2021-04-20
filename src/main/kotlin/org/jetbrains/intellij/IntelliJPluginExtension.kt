@@ -183,7 +183,8 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
         return pluginDependencies.orNull?.toSet() ?: emptySet()
     }
 
-        private val ideaDependency: Property<IdeaDependency> = objects.property(IdeaDependency::class.java)
+    @Internal
+    val ideaDependency: Property<IdeaDependency> = objects.property(IdeaDependency::class.java)
 
     fun getIdeaDependency(project: Project): IdeaDependency {
         if (ideaDependency.orNull == null) {

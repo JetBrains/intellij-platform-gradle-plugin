@@ -64,9 +64,8 @@ class IntelliJPlugin implements Plugin<Project> {
     void apply(Project project) {
         checkGradleVersion(project)
         project.getPlugins().apply(JavaPlugin)
-        def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtensionGr, project.objects) as IntelliJPluginExtensionGr
+        def intellijExtension = project.extensions.create(EXTENSION_NAME, IntelliJPluginExtension, project.objects) as IntelliJPluginExtension
         intellijExtension.with {
-            extensionProject = project
             pluginName.convention(project.provider {
                 project.name
             })
@@ -91,7 +90,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureConfigurations(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension) {
+    private static void configureConfigurations(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         def idea = project.configurations.create(IDEA_CONFIGURATION_NAME).setVisible(false)
         configureIntellijDependency(project, extension, idea)
 
@@ -107,7 +106,7 @@ class IntelliJPlugin implements Plugin<Project> {
         project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom defaultDependencies, idea, ideaPlugins
     }
 
-    private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension) {
+    private static def configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring plugin")
         project.tasks.whenTaskAdded {
             if (it instanceof RunIdeBase) {
@@ -136,12 +135,12 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureProjectAfterEvaluate(@NotNull Project project,
-                                                      @NotNull IntelliJPluginExtensionGr extension) {
+                                                      @NotNull IntelliJPluginExtension extension) {
         for (def subproject : project.subprojects) {
             if (subproject.plugins.findPlugin(IntelliJPlugin) != null) {
                 continue
             }
-            def subprojectExtension = subproject.extensions.findByType(IntelliJPluginExtensionGr)
+            def subprojectExtension = subproject.extensions.findByType(IntelliJPluginExtension)
             if (subprojectExtension) {
                 configureProjectAfterEvaluate(subproject, subprojectExtension)
             }
@@ -151,7 +150,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureDependencyExtensions(@NotNull Project project,
-                                                      @NotNull IntelliJPluginExtensionGr extension) {
+                                                      @NotNull IntelliJPluginExtension extension) {
         project.dependencies.ext.intellij = { Closure filter = {} ->
             if (!project.state.executed) {
                 throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
@@ -191,7 +190,7 @@ class IntelliJPlugin implements Plugin<Project> {
             if (!project.state.executed) {
                 throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
             }
-            def dependency = extension.ideaDependency.orNull
+            def dependency = extension.getIdeaDependency(project)
             def extraDep = dependency != null ? dependency.extraDependencies.find { it.name == extra } : null
             if (extraDep == null || extraDep.jarFiles == null || extraDep.jarFiles.empty) {
                 throw new GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
@@ -201,7 +200,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configureIntellijDependency(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtensionGr extension,
+                                                    @NotNull IntelliJPluginExtension extension,
                                                     @NotNull Configuration configuration) {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring IDE dependency")
@@ -238,7 +237,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configurePluginDependencies(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtensionGr extension,
+                                                    @NotNull IntelliJPluginExtension extension,
                                                     @NotNull Configuration configuration) {
         configuration.withDependencies { dependencies ->
             Utils.info(project, "Configuring plugin dependencies")
@@ -285,7 +284,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void verifyJavaPluginDependency(IntelliJPluginExtensionGr extension, Project project) {
+    private static void verifyJavaPluginDependency(IntelliJPluginExtension extension, Project project) {
         def plugins = extension.plugins.get()
         def hasJavaPluginDependency = plugins.contains('java') || plugins.contains('com.intellij.java')
         if (!hasJavaPluginDependency && new File(extension.getIdeaDependency(project).classes, "plugins/java").exists()) {
@@ -304,12 +303,11 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureBuiltinPluginsDependencies(@NotNull Project project,
                                                             @NotNull DependencySet dependencies,
                                                             @NotNull PluginDependencyManager resolver,
-                                                            @NotNull IntelliJPluginExtensionGr extension) {
+                                                            @NotNull IntelliJPluginExtension extension) {
         def configuredPlugins = extension.unresolvedPluginDependencies
-                .get()
                 .findAll { it.builtin }
                 .collect { it.id }
-        extension.ideaDependenc.get().pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
+        extension.ideaDependency.get().pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
             def plugin = resolver.resolve(project, new PluginDependencyNotation(it, null, null))
             configurePluginDependency(project, plugin, extension, dependencies, resolver)
         }
@@ -317,7 +315,7 @@ class IntelliJPlugin implements Plugin<Project> {
 
     private static void configurePluginDependency(@NotNull Project project,
                                                   @NotNull PluginDependency plugin,
-                                                  @NotNull IntelliJPluginExtensionGr extension,
+                                                  @NotNull IntelliJPluginExtension extension,
                                                   @NotNull DependencySet dependencies,
                                                   @NotNull PluginDependencyManager resolver) {
         if (extension.configureDefaultDependencies.get()) {
@@ -343,7 +341,7 @@ class IntelliJPlugin implements Plugin<Project> {
     private static void configureProjectPluginDependency(@NotNull Project project,
                                                          @NotNull Project dependency,
                                                          @NotNull DependencySet dependencies,
-                                                         @NotNull IntelliJPluginExtensionGr extension) {
+                                                         @NotNull IntelliJPluginExtension extension) {
         // invoke on demand, when plugins artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin) == null) {
             throw new BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
@@ -356,7 +354,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configurePatchPluginXmlTask(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension) {
+    private static void configurePatchPluginXmlTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring patch plugin.xml task")
         project.tasks.create(PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask).with {
             group = GROUP_NAME
@@ -389,7 +387,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static void configurePrepareSandboxTasks(@NotNull Project project,
-                                                     @NotNull IntelliJPluginExtensionGr extension) {
+                                                     @NotNull IntelliJPluginExtension extension) {
         configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
         configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest").with { task ->
@@ -409,7 +407,7 @@ class IntelliJPlugin implements Plugin<Project> {
     }
 
     private static Task configurePrepareSandboxTask(@NotNull Project project,
-                                                    @NotNull IntelliJPluginExtensionGr extension,
+                                                    @NotNull IntelliJPluginExtension extension,
                                                     String taskName,
                                                     String testSuffix) {
         Utils.info(project, "Configuring $taskName task")
@@ -491,7 +489,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension) {
+    private static void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring build searchable options task")
         project.tasks.create(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask).with { BuildSearchableOptionsTask task ->
             task.group = GROUP_NAME
@@ -506,7 +504,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension,
+    private static void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
                                                                @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
         def prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
         task.ideDirectory.convention(project.provider({
@@ -570,7 +568,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension) {
+    private static void configureInstrumentation(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring compile tasks")
         project.sourceSets.all { SourceSet sourceSet ->
             def instrumentTask = project.tasks.create(sourceSet.getTaskName('instrument', 'code'), IntelliJInstrumentCodeTask)
@@ -629,7 +627,7 @@ class IntelliJPlugin implements Plugin<Project> {
         }
     }
 
-    private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtensionGr extension) {
+    private static void configureTestTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
         Utils.info(project, "Configuring tests tasks")
         project.tasks.withType(Test).each { task ->
             def configDirectory = project.file("${extension.sandboxDirectory.get()}/config-test")

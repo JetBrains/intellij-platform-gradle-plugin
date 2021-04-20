@@ -12,7 +12,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.Nullable
 import org.jetbrains.intellij.IntelliJPlugin
-import org.jetbrains.intellij.IntelliJPluginExtensionGr
+import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Utils
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.PluginVerifierRepository
@@ -760,7 +760,7 @@ class RunPluginVerifierTask extends ConventionTask {
             return getRuntimeDir()
         }
 
-        def extension = project.extensions.findByType(IntelliJPluginExtensionGr)
+        def extension = project.extensions.findByType(IntelliJPluginExtension)
         def jbrResolver = new JbrResolver(project, this, extension.jreRepo.orNull)
         if (jbrVersion != null) {
             def jbr = jbrResolver.resolve(getJbrVersion())
