@@ -291,7 +291,7 @@ open class RunPluginVerifierTask : ConventionTask() {
     private fun downloadIde(type: String, version: String, buildType: String): File {
         val name = "$type-$version"
         val ideDir = File(downloadDirectory.get(), name)
-        info(this, "Downloaing IDE: $name")
+        info(this, "Downloading IDE: $name")
 
         when {
             ideDir.exists() -> debug(this, "IDE already available in $ideDir")
@@ -303,7 +303,7 @@ open class RunPluginVerifierTask : ConventionTask() {
                 val ideArchive = File(downloadDirectory.get(), "${name}.tar.gz")
                 val url = resolveIdeUrl(type, version, buildType)
 
-                debug(this, "Downloaing IDE from $url")
+                debug(this, "Downloading IDE from $url")
 
                 DownloadAction(project).apply {
                     src(url)
@@ -317,7 +317,7 @@ open class RunPluginVerifierTask : ConventionTask() {
                     untar(project, ideArchive, ideDir)
                     ideDir.listFiles()?.first()?.let { container ->
                         container.listFiles()?.forEach {
-                            it.renameTo(File(ideDir, it.canonicalPath))
+                            it.renameTo(File(ideDir, it.name))
                         }
                         container.deleteRecursively()
                     }
