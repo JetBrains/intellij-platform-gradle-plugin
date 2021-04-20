@@ -16,7 +16,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
                 verifierVersion = "1.255"
             }
         """)
@@ -33,7 +33,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
                 verifierVersion = "1.254"
             }
         """)
@@ -50,7 +50,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
 
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
             }
         """)
 
@@ -67,14 +67,14 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "IC-2020.2.3,PS-2020.1.3"
+                ideVersions = ["IC-2020.2.3", "PS-2020.1.3"]
             }
         """)
 
         val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Plugin PluginName:1.0.0 against IC-202.7660.26: Compatible"))
-        assertTrue(result.output.contains("Plugin PluginName:1.0.0 against PS-201.8538.41: Compatible"))
+        assertTrue(result.output.contains("Plugin MyName:1.0.0 against IC-202.7660.26: Compatible"))
+        assertTrue(result.output.contains("Plugin MyName:1.0.0 against PS-201.8538.41: Compatible"))
     }
 
     @Test
@@ -133,8 +133,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                failureLevel = FailureLevel.DEPRECATED_API_USAGES
-                ideVersions = "2020.2.3"
+                failureLevel = [FailureLevel.DEPRECATED_API_USAGES]
+                ideVersions = ["2020.2.3"]
             }
         """)
 
@@ -152,7 +152,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
             }
         """)
 
@@ -172,7 +172,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "foo,foo,,foo"
+                ideVersions = ["foo", "foo", "", "foo"]
             }
         """)
 
@@ -191,7 +191,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.ALL
             }
         """)
@@ -212,7 +212,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.NONE
             }
         """)
@@ -231,7 +231,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
 
             runPluginVerifier {
-                ideVersions = "2020.1.3"
+                ideVersions = ["2020.1.3"]
                 verifierPath = "${'$'}{project.buildDir}/pluginVerifier.jar"
             }
         """)
@@ -251,7 +251,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
 
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
             }
         """)
         build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
@@ -275,9 +275,10 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     private fun writePluginXmlFile() {
         pluginXml.xml("""
             <idea-plugin>
-                <name>PluginName</name>
+                <name>MyName</name>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
+                <depends>com.intellij.modules.platform</depends>
             </idea-plugin>
         """)
     }

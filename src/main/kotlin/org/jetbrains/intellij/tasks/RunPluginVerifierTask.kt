@@ -4,557 +4,203 @@ import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.tasks.*
-import org.gradle.api.tasks.bundling.Zip
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.SkipWhenEmpty
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
-import org.jetbrains.annotations.Nullable
-import org.jetbrains.intellij.IntelliJPlugin
+import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
-import org.jetbrains.intellij.Utils
+import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.error
+import org.jetbrains.intellij.getBuiltinJbrVersion
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.PluginVerifierRepository
-
+import org.jetbrains.intellij.parseXml
+import org.jetbrains.intellij.untar
+import org.jetbrains.intellij.warn
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
+import java.net.URI
+import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.EnumSet
 
-class RunPluginVerifierTask extends ConventionTask {
-    private static final String VERIFIER_METADATA_URL = 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml'
-    private static final String IDE_DOWNLOAD_URL = 'https://data.services.jetbrains.com/products/download'
-    private static final String CACHE_REDIRECTOR = 'https://cache-redirector.jetbrains.com'
+@Suppress("UnstableApiUsage")
+open class RunPluginVerifierTask : ConventionTask() {
 
-    public static final String VERIFIER_VERSION_LATEST = "latest"
+    companion object {
+        private const val VERIFIER_METADATA_URL =
+            "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
+        private const val IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+        private const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
+        const val VERIFIER_VERSION_LATEST = "latest"
 
-    static enum FailureLevel {
-        COMPATIBILITY_WARNINGS("Compatibility warnings"),
-        COMPATIBILITY_PROBLEMS("Compatibility problems"),
-        DEPRECATED_API_USAGES("Deprecated API usages"),
-        EXPERIMENTAL_API_USAGES("Experimental API usages"),
-        INTERNAL_API_USAGES("Internal API usages"),
-        OVERRIDE_ONLY_API_USAGES("Override-only API usages"),
-        NON_EXTENDABLE_API_USAGES("Non-extendable API usages"),
-        PLUGIN_STRUCTURE_WARNINGS("Plugin structure warnings"),
-        MISSING_DEPENDENCIES("Missing dependencies"),
-        INVALID_PLUGIN("The following files specified for the verification are not valid plugins"),
-        NOT_DYNAMIC("Plugin cannot be loaded/unloaded without IDE restart");
-
-        public static final EnumSet<FailureLevel> ALL = EnumSet.allOf(FailureLevel.class)
-        public static final EnumSet<FailureLevel> NONE = EnumSet.noneOf(FailureLevel.class)
-
-        public final String testValue
-
-        FailureLevel(String testValue) {
-            this.testValue = testValue
+        fun resolveLatestVerifierVersion(): String {
+            debug(this, "Resolving Latest Verifier version")
+            val url = URL(VERIFIER_METADATA_URL)
+            return parseXml(url.openStream(), PluginVerifierRepository::class.java).versioning?.latest
+                ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
     }
 
-    private EnumSet<FailureLevel> failureLevel
-    private List<Object> ideVersions = []
-    private List<Object> localPaths = []
-    private Object verifierVersion
-    private Object verifierPath
-    private Object distributionFile
-    private Object verificationReportsDirectory
-    private Object downloadDirectory
-    private Object jbrVersion
-    private Object runtimeDir
-    private List<Object> externalPrefixes = []
-    private Boolean teamCityOutputFormat = false
-    private Object subsystemsToCheck
-
     /**
-     * Returns a list of the {@link FailureLevel} values used for failing the task if any reported issue will match.
-     *
-     * @return verification failure level
+     * List of the {@link FailureLevel} values used for failing the task if any reported issue will match.
      */
     @Input
-    EnumSet<FailureLevel> getFailureLevel() {
-        return failureLevel
-    }
+    val failureLevel: ListProperty<FailureLevel> = project.objects.listProperty(FailureLevel::class.java)
 
     /**
-     * Sets a list of the {@link FailureLevel} values that will make the task if any reported issue will match.
-     *
-     * @param failureLevel EnumSet of {@link FailureLevel} values
-     */
-    void setFailureLevel(EnumSet<FailureLevel> failureLevel) {
-        this.failureLevel = failureLevel
-    }
-
-    /**
-     * Sets a list of the {@link FailureLevel} values that will make the task if any reported issue will match.
-     *
-     * @param failureLevel EnumSet of {@link FailureLevel} values
-     */
-    void failureLevel(EnumSet<FailureLevel> failureLevel) {
-        this.failureLevel = failureLevel
-    }
-
-    /**
-     * Sets the {@link FailureLevel} value that will make the task if any reported issue will match.
-     *
-     * @param failureLevel {@link FailureLevel} value
-     */
-    void setFailureLevel(FailureLevel failureLevel) {
-        this.failureLevel = EnumSet.of(failureLevel)
-    }
-
-    /**
-     * Returns a list of the specified IDE versions used for the verification.
-     * By default, uses the plugin target IDE version.
-     *
-     * @return IDE versions list
+     * List of the specified IDE versions used for the verification.
+     * By default, it uses the plugin target IDE version.
      */
     @Input
-    List<String> getIdeVersions() {
-        return Utils.stringListInput(ideVersions)
-    }
+    val ideVersions: SetProperty<String> = project.objects.setProperty(String::class.java)
 
     /**
-     * Sets a list of the IDE versions used for the verification.
-     * Accepts list of {@link String} or {@link Closure}.
-     *
-     * @param ideVersions list of IDE versions
-     */
-    void setIdeVersions(List<Object> ideVersions) {
-        this.ideVersions = ideVersions
-    }
-
-    /**
-     * Sets a list of the IDE versions used for the verification.
-     * Accepts list of {@link String} or {@link Closure}.
-     *
-     * @param ideVersions list of IDE versions
-     */
-    void ideVersions(List<Object> ideVersions) {
-        this.ideVersions = ideVersions
-    }
-
-    /**
-     * Sets a list of the IDE versions used for the verification.
-     * Accepts comma-separated list.
-     *
-     * @param ideVersions string with comma-separated list of IDE versions
-     */
-    void setIdeVersions(String ideVersions) {
-        this.ideVersions = ideVersions.split(",")
-    }
-
-    /**
-     * Sets a list of the IDE versions used for the verification.
-     * Accepts comma-separated list.
-     *
-     * @param ideVersions string with comma-separated list of IDE versions
-     */
-    void ideVersions(String ideVersions) {
-        this.ideVersions = ideVersions.split(",")
-    }
-
-    /**
-     * Returns a list of the paths to locally installed IDE distributions that should be used for verification.
-     *
-     * @return locally installed IDEs list
+     * List of the paths to locally installed IDE distributions that should be used for verification
+     * in addition to those specified in {@link #ideVersions}.
      */
     @InputFiles
-    List<String> getLocalPaths() {
-        return Utils.stringListInput(localPaths)
-    }
-
-    /**
-     * Sets a list of the paths to locally installed IDE distributions that should be used for verification
-     * in addition to those specified in {@link #ideVersions}.
-     * Accepts list of {@link String} or {@link Closure}.
-     *
-     * @param localPaths list of paths
-     */
-    void setLocalPaths(List<Object> localPaths) {
-        this.localPaths = localPaths
-    }
-
-    /**
-     * Sets a list of the paths to locally installed IDE distributions that should be used for verification
-     * in addition to those specified in {@link #ideVersions}.
-     * Accepts list of {@link String} or {@link Closure}.
-     *
-     * @param localPaths list of paths
-     */
-    void localPaths(List<Object> localPaths) {
-        this.localPaths = localPaths
-    }
+    val localPaths: ConfigurableFileCollection = project.objects.fileCollection()
 
     /**
      * Returns the version of the IntelliJ Plugin Verifier that will be used.
      * By default, set to "latest".
-     *
-     * @return verifierVersion IntelliJ Plugin Verifier version
      */
     @Input
     @Optional
-    String getVerifierVersion() {
-        return Utils.stringInput(verifierVersion)
-    }
+    val verifierVersion: Property<String> = project.objects.property(String::class.java)
 
     /**
-     * Sets the version of the IntelliJ Plugin Verifier that will be used.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param verifierVersion IntelliJ Plugin Verifier version
-     */
-    void setVerifierVersion(Object verifierVersion) {
-        this.verifierVersion = verifierVersion
-    }
-
-    /**
-     * Sets the version of the IntelliJ Plugin Verifier that will be used.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param verifierVersion IntelliJ Plugin Verifier version
-     */
-    void verifierVersion(Object verifierVersion) {
-        this.verifierVersion = verifierVersion
-    }
-
-    /**
-     * Returns the local path to the IntelliJ Plugin Verifier that will be used.
-     *
-     * @return verifierPath IntelliJ Plugin Verifier path
+     * Local path to the IntelliJ Plugin Verifier that will be used.
+     * If provided, {@link #verifierVersion} is ignored.
      */
     @Input
     @Optional
-    String getVerifierPath() {
-        return Utils.stringInput(verifierPath)
-    }
+    val verifierPath: Property<String> = project.objects.property(String::class.java)
 
     /**
-     * Sets the local path to the IntelliJ Plugin Verifier that will be used.
-     * If provided, {@link #verifierVersion} is ignored.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param verifierPath IntelliJ Plugin Verifier path
-     */
-    void setVerifierPath(Object verifierPath) {
-        this.verifierPath = verifierPath
-    }
-
-    /**
-     * Sets the local path to the IntelliJ Plugin Verifier that will be used.
-     * If provided, {@link #verifierVersion} is ignored.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param verifierPath IntelliJ Plugin Verifier path
-     */
-    void verifierPath(Object verifierPath) {
-        this.verifierPath = verifierPath
-    }
-
-    /**
-     * Returns an instance of the distribution file generated with the build task.
+     * An instance of the distribution file generated with the build task.
      * If empty, task will be skipped.
-     *
-     * @return generated plugin artifact
      */
     @InputFile
     @SkipWhenEmpty
-    @Nullable
-    File getDistributionFile() {
-        def input = distributionFile instanceof Closure ? (distributionFile as Closure).call() : distributionFile
-        return input != null ? project.file(input) : null
-    }
+    val distributionFile: RegularFileProperty = project.objects.fileProperty()
 
     /**
-     * Sets an instance of the distribution file generated with the build task.
-     * Accepts {@link File} or {@link Closure}.
-     *
-     * @param distributionFile generated plugin artifact
-     */
-    void setDistributionFile(Object distributionFile) {
-        this.distributionFile = distributionFile
-    }
-
-    /**
-     * Sets an instance of the distribution file generated with the build task.
-     * Accepts {@link File} or {@link Closure}.
-     *
-     * @param distributionFile generated plugin artifact
-     */
-    void distributionFile(Object distributionFile) {
-        this.distributionFile = distributionFile
-    }
-
-    /**
-     * Returns the path to directory where verification reports will be saved.
+     * The path to directory where verification reports will be saved.
      * By default, set to ${project.buildDir}/reports/pluginVerifier.
-     *
-     * @return path to verification reports directory
      */
     @OutputDirectory
     @Optional
-    String getVerificationReportsDirectory() {
-        return Utils.stringInput(verificationReportsDirectory)
-    }
+    val verificationReportsDirectory: Property<String> = project.objects.property(String::class.java)
 
     /**
-     * Sets the path to directory where verification reports will be saved.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param verificationReportsDirectory path to verification reports directory
-     */
-    void setVerificationReportsDirectory(Object verificationReportsDirectory) {
-        this.verificationReportsDirectory = verificationReportsDirectory
-    }
-
-    /**
-     * Sets the path to directory where verification reports will be saved.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param verificationReportsDirectory path to verification reports directory
-     */
-    void verificationReportsDirectory(Object verificationReportsDirectory) {
-        this.verificationReportsDirectory = verificationReportsDirectory
-    }
-
-    /**
-     * Returns the path to directory where IDEs used for the verification will be downloaded.
+     * The path to directory where IDEs used for the verification will be downloaded.
      * By default, set to ${project.buildDir}/pluginVerifier.
-     *
-     * @return path to IDEs download directory
      */
     @Input
     @Optional
-    String getDownloadDirectory() {
-        return Utils.stringInput(downloadDirectory)
-    }
+    val downloadDirectory: Property<String> = project.objects.property(String::class.java)
 
     /**
-     * Returns the path to directory where IDEs used for the verification will be downloaded.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param downloadDirectory path to IDEs download directory
-     */
-    void setDownloadDirectory(Object downloadDirectory) {
-        this.downloadDirectory = downloadDirectory
-    }
-
-    /**
-     * Returns the path to directory where IDEs used for the verification will be downloaded.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param downloadDirectory path to IDEs download directory
-     */
-    void downloadDirectory(Object downloadDirectory) {
-        this.downloadDirectory = downloadDirectory
-    }
-
-    /**
-     * Returns JBR version used by the IntelliJ Plugin Verifier.
-     * If not passed, built-in JBR or current JVM will be used.
-     *
-     * @return JBR Version
-     */
-    @Input
-    @Optional
-    String getJbrVersion() {
-        return Utils.stringInput(jbrVersion)
-    }
-
-    /**
-     * Sets JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
+     * JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
      * All JetBrains Java versions are available at JetBrains Space Packages: https://cache-redirector.jetbrains.com/intellij-jbr
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param jbrVersion JBR version
-     */
-    void setJbrVersion(Object jbrVersion) {
-        this.jbrVersion = jbrVersion
-    }
-
-    /**
-     * Sets JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
-     * All JetBrains Java versions are available at JetBrains Space Packages: https://cache-redirector.jetbrains.com/intellij-jbr
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param jbrVersion JBR version
-     */
-    void jbrVersion(Object jbrVersion) {
-        this.jbrVersion = jbrVersion
-    }
-
-    /**
-     * Returns the path to directory containing JVM runtime.
-     *
-     * @return JVM runtime directory
      */
     @Input
     @Optional
-    String getRuntimeDir() {
-        return Utils.stringInput(runtimeDir)
-    }
+    val jbrVersion: Property<String> = project.objects.property(String::class.java)
 
     /**
-     * Sets the path to directory containing JVM runtime, overrides {@link #jbrVersion}.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param runtimeDir JVM runtime directory
-     */
-    void setRuntimeDir(Object runtimeDir) {
-        this.runtimeDir = runtimeDir
-    }
-
-    /**
-     * Sets the path to directory containing JVM runtime, overrides {@link #jbrVersion}.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param runtimeDir JVM runtime directory
-     */
-    void runtimeDir(Object runtimeDir) {
-        this.runtimeDir = runtimeDir
-    }
-
-    /**
-     * Returns the prefixes of classes from the external libraries.
-     * The Plugin Verifier will not report 'No such class' for classes of these packages.
-     *
-     * @return list with external prefixes to ignore
+     * The path to directory containing JVM runtime, overrides {@link #jbrVersion}.
+     * TODO: fileProperty?
      */
     @Input
     @Optional
-    List<String> getExternalPrefixes() {
-        return Utils.stringListInput(externalPrefixes)
-    }
+    val runtimeDir: Property<String> = project.objects.property(String::class.java)
 
     /**
-     * Sets the list of classes prefixes from the external libraries.
+     * The list of classes prefixes from the external libraries.
      * The Plugin Verifier will not report 'No such class' for classes of these packages.
-     * Accepts list of {@link String} or {@link Closure}.
-     *
-     * @param externalPrefixes list of classes prefixes to ignore
      */
-    void setExternalPrefixes(List<Object> externalPrefixes) {
-        this.externalPrefixes = externalPrefixes
-    }
+    @Input
+    @Optional
+    val externalPrefixes: ListProperty<String> = project.objects.listProperty(String::class.java)
 
     /**
-     * Sets the list of classes prefixes from the external libraries.
-     * The Plugin Verifier will not report 'No such class' for classes of these packages.
-     * Accepts list of {@link String} or {@link Closure}.
-     *
-     * @param externalPrefixes list of classes prefixes to ignore
-     */
-    void externalPrefixes(List<Object> externalPrefixes) {
-        this.externalPrefixes = externalPrefixes
-    }
-
-    /**
-     * Returns a flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
+     * A flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
      * will be returned to stdout.
      *
-     * @return prints TeamCity compatible output
+     * TODO: false by default
      */
-    @Input
-    @Optional
-    Boolean getTeamCityOutputFormat() {
-        return Utils.stringInput(teamCityOutputFormat).toBoolean()
-    }
-
-    /**
-     * Sets a flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
-     * will be returned to stdout.
-     *
-     * @param teamCityOutputFormat prints TeamCity compatible output
-     */
-    void setTeamCityOutputFormat(Boolean teamCityOutputFormat) {
-        this.teamCityOutputFormat = teamCityOutputFormat
-    }
-
-    /**
-     * Sets a flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
-     * will be returned to stdout.
-     *
-     * @param teamCityOutputFormat prints TeamCity compatible output
-     */
-    void teamCityOutputFormat(Boolean teamCityOutputFormat) {
-        this.teamCityOutputFormat = teamCityOutputFormat
-    }
-
-    /**
-     * Returns which subsystems of IDE should be checked.
-     *
-     * @return subsystems to check
-     */
-    @Input
-    @Optional
-    String getSubsystemsToCheck() {
-        return Utils.stringInput(subsystemsToCheck)
-    }
+    val teamCityOutputFormat: Property<Boolean> = project.objects.property(Boolean::class.java)
 
     /**
      * Specifies which subsystems of IDE should be checked.
      * Available options: `all` (default), `android-only`, `without-android`.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param subsystemsToCheck subsystems of IDE should to check
      */
-    void setSubsystemsToCheck(Object subsystemsToCheck) {
-        this.subsystemsToCheck = subsystemsToCheck
-    }
-
-    /**
-     * Specifies which subsystems of IDE should be checked.
-     * Available options: `all` (default), `android-only`, `without-android`.
-     * Accepts {@link String} or {@link Closure}.
-     *
-     * @param subsystemsToCheck subsystems of IDE should to check
-     */
-    void subsystemsToCheck(Object subsystemsToCheck) {
-        this.subsystemsToCheck = subsystemsToCheck
-    }
+    val subsystemsToCheck: Property<String> = project.objects.property(String::class.java)
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
      * {@link String}
      */
     @TaskAction
-    void runPluginVerifier() {
-        def file = getDistributionFile()
-        if (file == null || !file.exists()) {
-            throw new IllegalStateException("Plugin file does not exist: $file")
+    fun runPluginVerifier() {
+        val file = distributionFile.orNull
+        if (file == null || !file.asFile.exists()) {
+            throw IllegalStateException("Plugin file does not exist: $file")
         }
 
-        def ides = getIdeVersions().toUnique().findAll().collect { resolveIdePath(it) }.findAll()
-        def paths = getLocalPaths()
-        if (ides.isEmpty() && paths.isEmpty()) {
-            throw new GradleException("`ideVersions` and `localPaths` properties should not be empty")
+        val ides = ideVersions.get().map { resolveIdePath(it) }
+        if (ides.isEmpty() && localPaths.isEmpty) {
+            throw GradleException("`ideVersions` and `localPaths` properties should not be empty")
         }
 
-        def verifierPath = resolveVerifierPath()
-        def verifierArgs = ["check-plugin"]
+        val verifierPath = resolveVerifierPath()
+        val verifierArgs = mutableListOf("check-plugin")
         verifierArgs += getOptions()
-        verifierArgs += [file.canonicalPath]
+        verifierArgs += file.asFile.canonicalPath
         verifierArgs += ides
-        verifierArgs += paths
+        verifierArgs += localPaths.toList().map { it.canonicalPath }
 
-        Utils.debug(this, "Distribution file: $file.canonicalPath")
-        Utils.debug(this, "Verifier path: $verifierPath")
+        debug(this, "Distribution file: $file.canonicalPath")
+        debug(this, "Verifier path: $verifierPath")
 
-        new ByteArrayOutputStream().withStream { os ->
+        ByteArrayOutputStream().use { os ->
             project.javaexec {
-                classpath = project.files(verifierPath)
-                main = "com.jetbrains.pluginverifier.PluginVerifierMain"
-                args = verifierArgs
-                standardOutput = os
+                it.classpath = project.files(verifierPath)
+                it.main = "com.jetbrains.pluginverifier.PluginVerifierMain"
+                it.args = verifierArgs
+                it.standardOutput = os
             }
 
-            def output = os.toString()
-            println output // Print output back to stdout since it's been caught for the failure level checker.
+            val output = os.toString()
+            println(output) // Print output back to stdout since it's been caught for the failure level checker.
 
-            Utils.debug(this, "Current failure levels: ${FailureLevel.values().join(", ")}")
-            for (FailureLevel level : FailureLevel.values()) {
-                if (failureLevel.contains(level) && output.contains(level.testValue)) {
-                    Utils.debug(this, "Failing task on $failureLevel failure level")
-                    throw new GradleException(level.toString())
+            debug(this, "Current failure levels: ${FailureLevel.values().joinToString(", ")}")
+            FailureLevel.values().forEach { level ->
+                if (failureLevel.get().contains(level) && output.contains(level.testValue)) {
+                    debug(this, "Failing task on $failureLevel failure level")
+                    throw GradleException(level.toString())
                 }
             }
         }
@@ -568,34 +214,36 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to verifier-cli jar
      */
-    String resolveVerifierPath() {
-        def path = getVerifierPath()
-        if (path != null && !path.isEmpty()) {
-            def verifier = new File(path)
+    fun resolveVerifierPath(): String {
+        val path = verifierPath.orNull
+        if (path != null && path.isNotEmpty()) {
+            val verifier = File(path)
             if (verifier.exists()) {
                 return path
             }
-            Utils.warn(this, "Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
+            warn(this, "Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
         }
 
         if (isOffline()) {
-            throw new TaskExecutionException(this, new GradleException(
-                    "Cannot resolve Plugin Verifier in offline mode. " +
-                            "Provide pre-downloaded Plugin Verifier jar file with `verifierPath` property. "
+            throw TaskExecutionException(this, GradleException(
+                "Cannot resolve Plugin Verifier in offline mode. " +
+                    "Provide pre-downloaded Plugin Verifier jar file with `verifierPath` property. "
             ))
         }
 
-        def resolvedVerifierVersion = resolveVerifierVersion()
-        def repository = project.repositories.maven { it.url = getPluginVerifierRepository(resolvedVerifierVersion) }
+        val resolvedVerifierVersion = resolveVerifierVersion()
+        val repository = project.repositories.maven { it.url = URI(getPluginVerifierRepository(resolvedVerifierVersion)) }
         try {
-            Utils.debug(this, "Using Verifier in $resolvedVerifierVersion version")
-            def dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
-            def configuration = project.configurations.detachedConfiguration(dependency)
+            debug(this, "Using Verifier in $resolvedVerifierVersion version")
+            val dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
+            val configuration = project.configurations.detachedConfiguration(dependency)
             return configuration.singleFile.absolutePath
-        } catch (Exception e) {
-            Utils.error(this, "Error when resolving Plugin Verifier path", e)
+        } catch (e: Exception) {
+            error(this, "Error when resolving Plugin Verifier path", e)
+            throw e
+        } finally {
+            project.repositories.remove(repository)
         }
-        return project.repositories.remove(repository)
     }
 
     /**
@@ -604,31 +252,31 @@ class RunPluginVerifierTask extends ConventionTask {
      * @param ideVersion IDE version. Can be "2020.2", "IC-2020.2", "202.1234.56"
      * @return path to the resolved IDE
      */
-    String resolveIdePath(String ideVersion) {
-        Utils.debug(this, "Resolving IDE path for $ideVersion")
-        def (String type, String version) = ideVersion.trim().split("-", 2) + null
+    fun resolveIdePath(ideVersion: String): String {
+        debug(this, "Resolving IDE path for $ideVersion")
+        var (type, version) = ideVersion.trim().split('-', limit = 2) + null
 
-        if (!version) {
-            Utils.debug(this, "IDE type not specified, setting type to IC")
+        if (version == null) {
+            debug(this, "IDE type not specified, setting type to IC")
             version = type
             type = "IC"
         }
 
-        for (String buildType in ["release", "rc", "eap", "beta"]) {
-            Utils.debug(project, "Downloading IDE '$type-$version' from $buildType channel to ${getDownloadDirectory()}")
+        listOf("release", "rc", "eap", "beta").forEach { buildType ->
+            debug(project, "Downloading IDE '$type-$version' from $buildType channel to ${downloadDirectory.get()}")
             try {
-                def dir = downloadIde(type, version, buildType)
-                Utils.debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
+                val dir = downloadIde(type!!, version!!, buildType)
+                debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
                 return dir.absolutePath
-            } catch (IOException ignored) {
-                Utils.debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...")
+            } catch (ignored: IOException) {
+                debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...")
             }
         }
 
-        throw new TaskExecutionException(this, new GradleException(
-                "IDE '$ideVersion' cannot be downloaded. " +
-                        "Please verify the specified IDE version against the products available for testing: " +
-                        "https://jb.gg/intellij-platform-builds-list"
+        throw TaskExecutionException(this, GradleException(
+            "IDE '$ideVersion' cannot be downloaded. " +
+                "Please verify the specified IDE version against the products available for testing: " +
+                "https://jb.gg/intellij-platform-builds-list"
         ))
     }
 
@@ -640,41 +288,44 @@ class RunPluginVerifierTask extends ConventionTask {
      * @param buildType release, rc, eap, beta
      * @return {@link File} instance pointing to the IDE directory
      */
-    private File downloadIde(String type, String version, String buildType) {
-        def name = "$type-$version"
-        def ideDir = new File(getDownloadDirectory(), name)
-        Utils.info(this, "Downloaing IDE: $name")
+    private fun downloadIde(type: String, version: String, buildType: String): File {
+        val name = "$type-$version"
+        val ideDir = File(downloadDirectory.get(), name)
+        info(this, "Downloaing IDE: $name")
 
-        if (ideDir.exists()) {
-            Utils.debug(this, "IDE already available in $ideDir")
-        } else if (isOffline()) {
-            throw new TaskExecutionException(this, new GradleException(
-                    "Cannot download IDE: $name. Gradle runs in offline mode. " +
-                            "Provide pre-downloaded IDEs stored in `downloadDirectory` or use `localPaths` instead."
+        when {
+            ideDir.exists() -> debug(this, "IDE already available in $ideDir")
+            isOffline() -> throw TaskExecutionException(this, GradleException(
+                "Cannot download IDE: $name. Gradle runs in offline mode. " +
+                    "Provide pre-downloaded IDEs stored in `downloadDirectory` or use `localPaths` instead."
             ))
-        } else {
-            def ideArchive = new File(getDownloadDirectory(), "${name}.tar.gz")
-            def url = resolveIdeUrl(type, version, buildType)
+            else -> {
+                val ideArchive = File(downloadDirectory.get(), "${name}.tar.gz")
+                val url = resolveIdeUrl(type, version, buildType)
 
-            Utils.debug(this, "Downloaing IDE from $url")
+                debug(this, "Downloaing IDE from $url")
 
-            new DownloadAction(project).with {
-                src(url)
-                dest(ideArchive.absolutePath)
-                tempAndMove(true)
-                execute()
+                DownloadAction(project).apply {
+                    src(url)
+                    dest(ideArchive.absolutePath)
+                    tempAndMove(true)
+                    execute()
+                }
+
+                try {
+                    debug(this, "IDE downloaded, extracting...")
+                    untar(project, ideArchive, ideDir)
+                    ideDir.listFiles()?.first()?.let { container ->
+                        container.listFiles()?.forEach {
+                            it.renameTo(File(ideDir, it.canonicalPath))
+                        }
+                        container.deleteRecursively()
+                    }
+                } finally {
+                    ideArchive.delete()
+                }
+                debug(this, "IDE extracted to $ideDir, archive removed")
             }
-
-            try {
-                Utils.debug(this, "IDE downloaded, extracting...")
-                Utils.untar(project, ideArchive, ideDir)
-                def container = ideDir.listFiles().first()
-                container.listFiles().each { it.renameTo("$ideDir/$it.name") }
-                container.deleteDir()
-            } finally {
-                ideArchive.delete()
-            }
-            Utils.debug(this, "IDE extracted to $ideDir, archive removed")
         }
 
         return ideDir
@@ -690,35 +341,34 @@ class RunPluginVerifierTask extends ConventionTask {
      * @param buildType release, rc, eap, beta
      * @return direct download URL prepended with {@link #CACHE_REDIRECTOR} host
      */
-    private String resolveIdeUrl(String type, String version, String buildType) {
-        def url = new URIBuilder(IDE_DOWNLOAD_URL)
-                .addParameter("code", type)
-                .addParameter("platform", "linux")
-                .addParameter("type", buildType)
-                .addParameter(versionParameterName(version), version)
-                .toString()
-        Utils.debug(this, "Resolving direct IDE download URL for: $url")
+    private fun resolveIdeUrl(type: String, version: String, buildType: String): String {
+        val url = URIBuilder(IDE_DOWNLOAD_URL)
+            .addParameter("code", type)
+            .addParameter("platform", "linux")
+            .addParameter("type", buildType)
+            .addParameter(versionParameterName(version), version)
+            .toString()
+        debug(this, "Resolving direct IDE download URL for: $url")
 
-        HttpURLConnection connection = null
+        var connection: HttpURLConnection? = null
 
         try {
-            connection = new URL(url).openConnection() as HttpURLConnection
-            connection.setInstanceFollowRedirects(false)
-            connection.getInputStream()
+            connection = URL(url).openConnection() as HttpURLConnection
+            connection.instanceFollowRedirects = false
+            connection.inputStream
 
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_PERM || connection.getResponseCode() == HttpURLConnection.HTTP_MOVED_TEMP) {
-                def redirectUrl = new URL(connection.getHeaderField("Location"))
-                url = "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
-                Utils.debug(this, "Resolved IDE download URL: $url")
-            } else {
-                Utils.debug(this, "IDE download URL has no redirection provided, skipping.")
-            }
-        } catch (Exception e) {
-            Utils.error(this, "Cannot resolve direct download URL for: $url", e)
-        } finally {
-            if (connection != null) {
+            if (connection.responseCode == HttpURLConnection.HTTP_MOVED_PERM || connection.responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
+                val redirectUrl = URL(connection.getHeaderField("Location"))
                 connection.disconnect()
+                debug(this, "Resolved IDE download URL: $url")
+                return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
+            } else {
+                debug(this, "IDE download URL has no redirection provided, skipping.")
             }
+        } catch (e: Exception) {
+            error(this, "Cannot resolve direct download URL for: $url", e)
+        } finally {
+            connection?.disconnect()
         }
 
         return url
@@ -731,19 +381,13 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return Plugin Verifier version
      */
-    private String resolveVerifierVersion() {
-        if (getVerifierVersion() != VERIFIER_VERSION_LATEST) {
-            return getVerifierVersion()
+    private fun resolveVerifierVersion(): String {
+        verifierVersion.orNull?.let {
+            if (it != VERIFIER_VERSION_LATEST) {
+                return it
+            }
         }
         return resolveLatestVerifierVersion()
-    }
-
-    static String resolveLatestVerifierVersion() {
-        Utils.debug(this, "Resolving Latest Verifier version")
-        def url = new URL(VERIFIER_METADATA_URL)
-        return url.withInputStream {
-            Utils.parseXml(it, PluginVerifierRepository.class).versioning.latest
-        }
     }
 
     /**
@@ -754,41 +398,44 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return path to the Java Runtime directory
      */
-    private String resolveRuntimeDir() {
-        if (runtimeDir != null) {
-            Utils.debug(this, "Runtime specified with properties: ${getRuntimeDir()}")
-            return getRuntimeDir()
+    private fun resolveRuntimeDir(): String {
+        runtimeDir.orNull?.let {
+            debug(this, "Runtime specified with properties: $it")
+            return it
         }
 
-        def extension = project.extensions.findByType(IntelliJPluginExtension)
-        def jbrResolver = new JbrResolver(project, this, extension.jreRepo.orNull)
-        if (jbrVersion != null) {
-            def jbr = jbrResolver.resolve(getJbrVersion())
-            if (jbr != null) {
-                Utils.debug(this, "Runtime specified with JBR Version property: ${getJbrVersion()}")
-                return jbr.javaHome
+        val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
+            ?: throw GradleException("Cannot access IntelliJPluginExtension")
+
+        val jbrResolver = JbrResolver(project, this, extension.jreRepo.orNull)
+        jbrVersion.orNull?.let {
+            jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
+                debug(this, "Runtime specified with JBR Version property: $it")
+                return jbr.javaHome.canonicalPath
             }
-            Utils.warn(this, "Cannot resolve JBR ${getJbrVersion()}. Falling back to built-in JBR.")
+            warn(this, "Cannot resolve JBR $it. Falling back to built-in JBR.")
         }
 
-        def jbrPath = OperatingSystem.current().isMacOsX() ? "jbr/Contents/Home" : "jbr"
+        val jbrPath = when (OperatingSystem.current().isMacOsX) {
+            true -> "jbr/Contents/Home"
+            false -> "jbr"
+        }
 
-        def runIdeTask = project.tasks.findByName(IntelliJPlugin.RUN_IDE_TASK_NAME) as RunIdeTask
-        def builtinJbrVersion = Utils.getBuiltinJbrVersion(runIdeTask.ideDirectory.get().asFile)
+        val runIdeTask = project.tasks.findByName(IntelliJPluginConstants.RUN_IDE_TASK_NAME) as RunIdeTask
+        val builtinJbrVersion = getBuiltinJbrVersion(runIdeTask.ideDirectory.get().asFile)
         if (builtinJbrVersion != null) {
-            def builtinJbr = jbrResolver.resolve(builtinJbrVersion)
-            if (builtinJbr != null) {
-                def javaHome = new File(builtinJbr.javaHome, jbrPath)
+            jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
+                val javaHome = File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {
-                    Utils.debug(this, "Using built-in JBR: $javaHome")
-                    return javaHome
+                    debug(this, "Using built-in JBR: $javaHome")
+                    return javaHome.canonicalPath
                 }
             }
-            Utils.warn(this, "Cannot resolve builtin JBR $builtinJbrVersion. Falling back to local Java.")
+            warn(this, "Cannot resolve builtin JBR $builtinJbrVersion. Falling back to local Java.")
         }
 
-        Utils.debug(this, "Using current JVM: ${Jvm.current().getJavaHome()}")
-        return Jvm.current().getJavaHome()
+        debug(this, "Using current JVM: ${Jvm.current().javaHome}")
+        return Jvm.current().javaHome.canonicalPath
     }
 
     /**
@@ -796,32 +443,32 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return Gradle runs in offline mode
      */
-    private Boolean isOffline() {
-        return project.gradle.startParameter.offline
-    }
+    private fun isOffline() = project.gradle.startParameter.isOffline
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with available CLI options
      */
-    private List<String> getOptions() {
-        def args = [
-                "-verification-reports-dir", getVerificationReportsDirectory(),
-                "-runtime-dir", resolveRuntimeDir()
-        ]
+    private fun getOptions(): List<String> {
+        val args = mutableListOf(
+            "-verification-reports-dir", verificationReportsDirectory.get(),
+            "-runtime-dir", resolveRuntimeDir(),
+        )
 
-        if (!externalPrefixes.empty) {
-            args += ["-external-prefixes", getExternalPrefixes().join(":")]
+        externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {
+            args.add("-external-prefixes")
+            args.add(it.joinToString(":"))
         }
-        if (teamCityOutputFormat) {
-            args += ["-team-city"]
+        if (teamCityOutputFormat.get()) {
+            args.add("-team-city")
         }
-        if (subsystemsToCheck != null) {
-            args += ["-subsystems-to-check", getSubsystemsToCheck()]
+        if (subsystemsToCheck.orNull != null) {
+            args.add("-subsystems-to-check")
+            args.add(subsystemsToCheck.get())
         }
         if (isOffline()) {
-            args += ["-offline"]
+            args.add("-offline")
         }
 
         return args
@@ -833,18 +480,16 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return Plugin Verifier home directory
      */
-    static Path verifierHomeDirectory() {
-        def verifierHomeDir = System.getProperty("plugin.verifier.home.dir")
-        if (verifierHomeDir != null) {
-            Paths.get(verifierHomeDir)
-        } else {
-            def userHome = System.getProperty("user.home")
-            if (userHome != null) {
-                Paths.get(userHome, ".pluginVerifier")
-            } else {
-                FileUtils.getTempDirectory().toPath().resolve(".pluginVerifier")
-            }
+    private fun verifierHomeDirectory(): Path {
+        System.getProperty("plugin.verifier.home.dir")?.let {
+            return Paths.get(it)
         }
+
+        System.getProperty("user.home")?.let {
+            return Paths.get(it, ".pluginVerifier")
+        }
+
+        return FileUtils.getTempDirectory().toPath().resolve(".pluginVerifier")
     }
 
     /**
@@ -853,8 +498,8 @@ class RunPluginVerifierTask extends ConventionTask {
      *
      * @return directory for downloaded IDEs
      */
-    static Path ideDownloadDirectory() {
-        def path = verifierHomeDirectory().resolve("ides")
+    fun ideDownloadDirectory(): Path {
+        val path = verifierHomeDirectory().resolve("ides")
         Files.createDirectories(path)
         return path
     }
@@ -868,18 +513,32 @@ class RunPluginVerifierTask extends ConventionTask {
      * @param version current version
      * @return version parameter name
      */
-    static String versionParameterName(String version) {
-        if (version.matches("\\d{3}(\\.\\d+)+")) {
-            return "build"
-        }
-        return "version"
+    fun versionParameterName(version: String) = when {
+        version.matches("\\d{3}(\\.\\d+)+".toRegex()) -> "build"
+        else -> "version"
     }
 
-    static String getPluginVerifierRepository(String version) {
-        if (VersionNumber.parse(version) >= VersionNumber.parse("1.255")) {
-            return IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO
-        } else {
-            return IntelliJPlugin.OLD_INTELLIJ_PLUGIN_VERIFIER_REPO
+    fun getPluginVerifierRepository(version: String) = when {
+        VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO
+        else -> IntelliJPluginConstants.OLD_INTELLIJ_PLUGIN_VERIFIER_REPO
+    }
+
+    enum class FailureLevel(val testValue: String) {
+        COMPATIBILITY_WARNINGS("Compatibility warnings"),
+        COMPATIBILITY_PROBLEMS("Compatibility problems"),
+        DEPRECATED_API_USAGES("Deprecated API usages"),
+        EXPERIMENTAL_API_USAGES("Experimental API usages"),
+        INTERNAL_API_USAGES("Internal API usages"),
+        OVERRIDE_ONLY_API_USAGES("Override-only API usages"),
+        NON_EXTENDABLE_API_USAGES("Non-extendable API usages"),
+        PLUGIN_STRUCTURE_WARNINGS("Plugin structure warnings"),
+        MISSING_DEPENDENCIES("Missing dependencies"),
+        INVALID_PLUGIN("The following files specified for the verification are not valid plugins"),
+        NOT_DYNAMIC("Plugin cannot be loaded/unloaded without IDE restart");
+
+        companion object {
+            val ALL = EnumSet.allOf(FailureLevel::class.java)
+            val NONE = EnumSet.noneOf(FailureLevel::class.java)
         }
     }
 }

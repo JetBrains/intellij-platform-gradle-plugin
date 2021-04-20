@@ -445,11 +445,24 @@ class IntelliJPlugin implements Plugin<Project> {
         project.tasks.create(RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask).with {
             group = GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
-            conventionMapping('failureLevel', { EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN) })
-            conventionMapping('verifierVersion', { VERIFIER_VERSION_LATEST })
-            conventionMapping('distributionFile', { resolveDistributionFile(project) })
-            conventionMapping('verificationReportsDirectory', { "${project.buildDir}/reports/pluginVerifier".toString() })
-            conventionMapping('downloadDirectory', { ideDownloadDirectory().toString() })
+
+            it.failureLevel.convention (
+                EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN)
+            )
+            it.verifierVersion.convention(VERIFIER_VERSION_LATEST)
+            it.distributionFile.convention(
+                    project.layout.file(project.provider({
+                        resolveDistributionFile(project)
+                    }))
+            )
+            it.verificationReportsDirectory.convention(project.provider({
+                "${project.buildDir}/reports/pluginVerifier".toString()
+            }))
+            it.downloadDirectory.convention(project.provider({
+                ideDownloadDirectory().toString()
+            }))
+            it.teamCityOutputFormat.convention(false)
+
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
             dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }
         }
@@ -710,9 +723,9 @@ class IntelliJPlugin implements Plugin<Project> {
             group = GROUP_NAME
             description = "Publish plugin distribution on plugins.jetbrains.com."
             it.distributionFile.convention(
-                    project.layout.file(project.provider({
-                        resolveDistributionFile(project)
-                    }))
+                project.layout.file(project.provider({
+                    resolveDistributionFile(project)
+                }))
             )
             dependsOn { project.getTasksByName(BUILD_PLUGIN_TASK_NAME, false) }
             dependsOn { project.getTasksByName(VERIFY_PLUGIN_TASK_NAME, false) }

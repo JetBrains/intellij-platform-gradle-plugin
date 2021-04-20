@@ -16,4 +16,3 @@ data class Plugin(
     var url: String,
     var version: String,
 )
-
