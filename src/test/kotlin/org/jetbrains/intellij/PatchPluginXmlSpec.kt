@@ -10,7 +10,7 @@ import kotlin.test.assertTrue
 
 class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
 
-    private val patchedPluginXml = lazy { File(buildDirectory, IntelliJPlugin.PLUGIN_XML_DIR_NAME).listFiles()?.first() }
+    private val patchedPluginXml = lazy { File(buildDirectory, IntelliJPluginConstants.PLUGIN_XML_DIR_NAME).listFiles()?.first() }
 
     @Test
     fun `patch version and since until builds`() {
@@ -25,7 +25,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        val result = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -53,7 +53,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -79,7 +79,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin someattr="\u2202">
@@ -107,7 +107,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -136,7 +136,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -165,7 +165,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -193,7 +193,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
@@ -220,7 +220,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
@@ -249,7 +249,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
@@ -280,7 +280,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -305,7 +305,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME).output
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
@@ -329,10 +329,10 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
-        val result = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
+        val result = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
 
-        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":${IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME}")?.outcome)
+        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":${IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME}")?.outcome)
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
@@ -354,7 +354,7 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
 
         buildFile.groovy("""
             intellij {
@@ -362,9 +362,9 @@ class PatchPluginXmlSpec: IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME)
+        val result = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
 
-        assertNotEquals(TaskOutcome.UP_TO_DATE, result.task(":${IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME}")?.outcome)
+        assertNotEquals(TaskOutcome.UP_TO_DATE, result.task(":${IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME}")?.outcome)
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>

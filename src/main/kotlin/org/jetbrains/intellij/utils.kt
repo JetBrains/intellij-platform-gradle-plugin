@@ -36,7 +36,6 @@ import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.io.InputStream
-import java.util.EnumSet
 import java.util.Properties
 import java.util.function.BiConsumer
 import java.util.function.Predicate
@@ -242,7 +241,7 @@ fun log(level: LogLevel, context: Any, message: String, e: Throwable?) {
         else -> "gradle-intellij-plugin"
     }
 
-    // TODO: Use IntelliJPlugin.LOG
+    // TODO: Use IntelliJPluginConstants.LOG
     val LOG = Logging.getLogger("IntelliJPlugin")
     if (e != null && level != LogLevel.ERROR && !LOG.isDebugEnabled) {
         LOG.log(level, "[$category] $message. Run with --debug option to get more log output.")

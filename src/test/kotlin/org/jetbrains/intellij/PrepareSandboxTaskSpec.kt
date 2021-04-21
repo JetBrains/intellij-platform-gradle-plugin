@@ -8,7 +8,7 @@ import kotlin.test.assertTrue
 
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox = File(buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
+    private val sandbox = File(buildDirectory, IntelliJPluginConstants.DEFAULT_SANDBOX)
 
     @Test
     fun `prepare sandbox for two plugins`() {
@@ -55,7 +55,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             pluginXml.text
         """)
 
-        build(":${IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME}")
+        build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
         assertEquals(
             setOf(
@@ -131,7 +131,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
-        build(":${IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME}")
+        build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
         assertEquals(
             setOf(
@@ -180,7 +180,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -221,7 +221,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -284,7 +284,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
             collectPaths(File(buildDirectory, "robotServerPlugin"))
@@ -322,7 +322,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
             collectPaths(File(buildDirectory, "robotServerPlugin"))
@@ -360,7 +360,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
 
         assertTrue(
             collectPaths(sandbox).containsAll(setOf(
@@ -387,7 +387,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -414,7 +414,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -445,7 +445,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -510,7 +510,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         val sandbox = File(sandboxPath)
         assertEquals(
@@ -529,7 +529,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -546,10 +546,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPlugin.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -566,7 +566,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPlugin.DEFAULT_SANDBOX}/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
         updatesFile.xml("""
             <application>
                 <component name="SomeOtherComponent">
@@ -575,10 +575,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             </application>
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPlugin.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="SomeOtherComponent">
@@ -598,7 +598,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPlugin.DEFAULT_SANDBOX}/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
         updatesFile.xml("""
             <application>
                 <component name="UpdatesConfigurable">
@@ -607,10 +607,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             </application>
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPlugin.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -628,7 +628,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPlugin.DEFAULT_SANDBOX}/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
 
         updatesFile.xml("""
             <application>
@@ -638,10 +638,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             </application>
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPlugin.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -658,7 +658,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPlugin.DEFAULT_SANDBOX}/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
 
         updatesFile.xml("""
             <application>
@@ -668,10 +668,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             </application>
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPlugin.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -692,13 +692,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             version = '0.42.123'
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         buildFile.groovy("""
             version = '0.42.124'
         """)
 
-        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(

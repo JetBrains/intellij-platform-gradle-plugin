@@ -16,21 +16,21 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `intellij-specific tasks`() {
         assertEquals(
             listOf(
-                IntelliJPlugin.BUILD_PLUGIN_TASK_NAME,
-                IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
-                IntelliJPlugin.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
-                IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME,
-                IntelliJPlugin.PATCH_PLUGIN_XML_TASK_NAME,
-                IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME,
-                IntelliJPlugin.PREPARE_TESTING_SANDBOX_TASK_NAME,
-                IntelliJPlugin.PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
-                IntelliJPlugin.PUBLISH_PLUGIN_TASK_NAME,
-                IntelliJPlugin.RUN_IDE_TASK_NAME,
-                IntelliJPlugin.RUN_IDE_FOR_UI_TESTS_TASK_NAME,
-                IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME,
-                IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME,
+                IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME,
+                IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
+                IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
+                IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME,
+                IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME,
+                IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME,
+                IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME,
+                IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
+                IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME,
+                IntelliJPluginConstants.RUN_IDE_TASK_NAME,
+                IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME,
+                IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME,
+                IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME,
             ),
-            tasks(IntelliJPlugin.GROUP_NAME.toString()),
+            tasks(IntelliJPluginConstants.GROUP_NAME.toString()),
         )
     }
 

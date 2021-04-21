@@ -21,7 +21,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.255"))
     }
@@ -38,7 +38,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.254"))
     }
@@ -54,7 +54,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
         val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier $version"))
     }
@@ -71,7 +71,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Plugin MyName:1.0.0 against IC-202.7660.26: Compatible"))
         assertTrue(result.output.contains("Plugin MyName:1.0.0 against PS-201.8538.41: Compatible"))
@@ -90,7 +90,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         val directory = file("build/foo").canonicalPath
         assertTrue(result.output.contains("Verification reports directory: $directory"))
@@ -104,7 +104,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("`ideVersions` and `localPaths` properties should not be empty"))
     }
@@ -117,7 +117,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Plugin descriptor 'plugin.xml' is not found"))
         assertTrue(result.output.contains("Task :verifyPlugin FAILED"))
@@ -138,7 +138,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -156,7 +156,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -176,7 +176,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("IDE 'foo' cannot be downloaded."))
     }
@@ -196,7 +196,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -217,7 +217,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -238,11 +238,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         FileUtils.copyInputStreamToFile(
-            URL("${IntelliJPlugin.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
+            URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")
         )
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
         assertTrue(result.output.contains("Gradle runs in offline mode."))
     }
 
@@ -254,7 +254,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.2.3"]
             }
         """)
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
     }
 
     private fun writeJavaFileWithDeprecation() {

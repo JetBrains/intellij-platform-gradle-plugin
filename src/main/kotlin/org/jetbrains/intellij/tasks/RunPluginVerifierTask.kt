@@ -209,7 +209,7 @@ open class RunPluginVerifierTask : ConventionTask() {
     /**
      * Resolves path to the IntelliJ Plugin Verifier file.
      * At first, checks if it was provided with {@link #verifierPath}.
-     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPlugin#DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}
+     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}
      * repository and resolves the path to verifier-cli jar file.
      *
      * @return path to verifier-cli jar

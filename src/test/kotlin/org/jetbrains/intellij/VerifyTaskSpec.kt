@@ -20,7 +20,7 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
         assertTrue(result.output.contains("Description is too short"))
     }
@@ -43,7 +43,7 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = buildAndFail(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
         assertTrue(result.output.contains("Description is too short"))
     }
@@ -51,7 +51,7 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `fail on errors by default`() {
-        val result = buildAndFail(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
         result.output.contains("Plugin descriptor 'plugin.xml' is not found")
     }
@@ -64,7 +64,7 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
         result.output.contains("Plugin descriptor 'plugin.xml' is not found")
     }
@@ -88,7 +88,7 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = build(IntelliJPlugin.VERIFY_PLUGIN_TASK_NAME)
+        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
         assertFalse(result.output.contains("Plugin verification"))
     }

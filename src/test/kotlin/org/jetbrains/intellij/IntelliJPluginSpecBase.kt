@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 abstract class IntelliJPluginSpecBase {
 
     val gradleHome: String = System.getProperty("test.gradle.home")
-    val pluginsRepo: String = System.getProperty("plugins.repo", IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO)
+    val pluginsRepo: String = System.getProperty("plugins.repo", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPO)
     val intellijVersion = "2020.1"
 
     val dir = createTempDir()
