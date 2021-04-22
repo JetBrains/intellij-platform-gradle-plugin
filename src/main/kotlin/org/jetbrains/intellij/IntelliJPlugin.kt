@@ -13,20 +13,27 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
+import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.gradle.util.VersionNumber
+import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
 import org.jetbrains.intellij.tasks.JarSearchableOptionsTask
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.intellij.tasks.RunIdeBase
+import org.jetbrains.intellij.tasks.RunIdeForUiTestTask
 import org.jetbrains.intellij.tasks.RunIdeTask
+import org.jetbrains.intellij.tasks.VerifyPluginTask
 import java.io.File
 
 @Suppress("UnstableApiUsage")
 abstract class IntelliJPlugin : Plugin<Project> {
 
-//    @Override
-//    void apply(Project project) {
+    //    @Override
+//    void apply(project: Project) {
 //        checkGradleVersion(project)
 //        project.getPlugins().apply(JavaPlugin)
 //        val intellijExtension = project.extensions.create(IntelliJPluginConstants.EXTENSION_NAME, IntelliJPluginExtension, project.objects) as IntelliJPluginExtension
@@ -49,13 +56,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        configureTasks(project, intellijExtension)
 //    }
 //
-//    fun void checkGradleVersion(@NotNull Project project) {
+//    fun checkGradleVersion(project: Project) {
 //        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("5.1")) {
 //            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 5.1 and higher")
 //        }
 //    }
 //
-//    fun void configureConfigurations(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+//    fun configureConfigurations(project: Project, extension: IntelliJPluginExtension) {
 //        val idea = project.configurations.create(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).setVisible(false)
 //        configureIntellijDependency(project, extension, idea)
 //
@@ -71,7 +78,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom defaultDependencies, idea, ideaPlugins
 //    }
 //
-//    fun val configureTasks(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+//    fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
 //        info(project, "Configuring plugin")
 //        project.tasks.whenTaskAdded {
 //            if (it instanceof RunIdeBase) {
@@ -99,8 +106,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        project.afterEvaluate { Project p -> configureProjectAfterEvaluate(p, extension) }
 //    }
 //
-//    fun void configureProjectAfterEvaluate(@NotNull Project project,
-//    @NotNull IntelliJPluginExtension extension) {
+//    fun configureProjectAfterEvaluate(project: Project,
+//    extension: IntelliJPluginExtension) {
 //        for (val subproject : project.subprojects) {
 //            if (subproject.plugins.findPlugin(IntelliJPluginGr) != null) {
 //                continue
@@ -114,8 +121,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        configureTestTasks(project, extension)
 //    }
 //
-//    fun void configureDependencyExtensions(@NotNull Project project,
-//    @NotNull IntelliJPluginExtension extension) {
+//    fun configureDependencyExtensions(project: Project,
+//    extension: IntelliJPluginExtension) {
 //        project.dependencies.ext.intellij = { Closure filter = {} ->
 //            if (!project.state.executed) {
 //                throw GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
@@ -164,9 +171,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configureIntellijDependency(@NotNull Project project,
-//    @NotNull IntelliJPluginExtension extension,
-//    @NotNull Configuration configuration) {
+//    fun configureIntellijDependency(project: Project,
+//    extension: IntelliJPluginExtension,
+//    configuration: Configuration) {
 //        configuration.withDependencies { dependencies ->
 //            info(project, "Configuring IDE dependency")
 //            val resolver = IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath.orNull)
@@ -201,9 +208,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configurePluginDependencies(@NotNull Project project,
-//    @NotNull IntelliJPluginExtension extension,
-//    @NotNull Configuration configuration) {
+//    fun configurePluginDependencies(project: Project,
+//    extension: IntelliJPluginExtension,
+//    configuration: Configuration) {
 //        configuration.withDependencies { dependencies ->
 //            info(project, "Configuring plugin dependencies")
 //            val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
@@ -249,7 +256,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void verifyJavaPluginDependency(IntelliJPluginExtension extension, Project project) {
+//    fun verifyJavaPluginDependency(extension: IntelliJPluginExtension, project: Project) {
 //        val plugins = extension.plugins.get()
 //        val hasJavaPluginDependency = plugins.contains('java') || plugins.contains('com.intellij.java')
 //        if (!hasJavaPluginDependency && File(extension.getIdeaDependency(project).classes, "plugins/java").exists()) {
@@ -265,10 +272,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configureBuiltinPluginsDependencies(@NotNull Project project,
+//    fun configureBuiltinPluginsDependencies(project: Project,
 //    @NotNull DependencySet dependencies,
 //    @NotNull PluginDependencyManager resolver,
-//    @NotNull IntelliJPluginExtension extension) {
+//    extension: IntelliJPluginExtension) {
 //        val configuredPlugins = extension.unresolvedPluginDependencies
 //            .findAll { it.builtin }
 //            .collect { it.id }
@@ -278,11 +285,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configurePluginDependency(@NotNull Project project,
-//    @NotNull PluginDependency plugin,
-//    @NotNull IntelliJPluginExtension extension,
-//    @NotNull DependencySet dependencies,
-//    @NotNull PluginDependencyManager resolver) {
+//    fun configurePluginDependency(project: Project,
+//    plugin: PluginDependency,
+//    extension: IntelliJPluginExtension,
+//    dependencies: DependencySet,
+//    resolver: PluginDependencyManager) {
 //        if (extension.configureDefaultDependencies.get()) {
 //            resolver.register(project, plugin, dependencies)
 //        }
@@ -292,7 +299,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configureProjectPluginTasksDependency(@NotNull Project project, @NotNull Project dependency) {
+//    fun configureProjectPluginTasksDependency(project: Project, @NotNull Project dependency) {
 //        // invoke before tasks graph is ready
 //        if (dependency.plugins.findPlugin(IntelliJPluginGr) == null) {
 //            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
@@ -303,10 +310,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configureProjectPluginDependency(@NotNull Project project,
+//    fun configureProjectPluginDependency(project: Project,
 //    @NotNull Project dependency,
 //    @NotNull DependencySet dependencies,
-//    @NotNull IntelliJPluginExtension extension) {
+//    extension: IntelliJPluginExtension) {
 //        // invoke on demand, when plugins artifacts are needed
 //        if (dependency.plugins.findPlugin(IntelliJPluginGr) == null) {
 //            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
@@ -319,7 +326,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configurePatchPluginXmlTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
+//    fun configurePatchPluginXmlTask(project: Project, extension: IntelliJPluginExtension) {
 //        info(project, "Configuring patch plugin.xml task")
 //        project.tasks.create(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask).with {
 //            group = IntelliJPluginConstants.GROUP_NAME
@@ -351,8 +358,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configurePrepareSandboxTasks(@NotNull Project project,
-//    @NotNull IntelliJPluginExtension extension) {
+//    fun configurePrepareSandboxTasks(project: Project,
+//    extension: IntelliJPluginExtension) {
 //        configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "")
 //        configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
 //        configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest").with { task ->
@@ -362,7 +369,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configureRobotServerDownloadTask(@NotNull Project project) {
+//    fun configureRobotServerDownloadTask(project: Project) {
 //        info(project, "Configuring robot-server download Task")
 //
 //        project.tasks.create(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, DownloadRobotServerPluginTask).with { task ->
@@ -371,10 +378,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun Task configurePrepareSandboxTask(@NotNull Project project,
-//    @NotNull IntelliJPluginExtension extension,
-//    String taskName,
-//    String testSuffix) {
+//    fun configurePrepareSandboxTask(project: Project,
+//    extension: IntelliJPluginExtension,
+//    taskName: String,
+//    testSuffix: String): Task {
 //        info(project, "Configuring $taskName task")
 //        return project.tasks.create(taskName, PrepareSandboxTask).with { task ->
 //            group = IntelliJPluginConstants.GROUP_NAME
@@ -405,7 +412,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void configureRunPluginVerifierTask(@NotNull Project project) {
+//    fun configureRunPluginVerifierTask(project: Project) {
 //        info(project, "Configuring run plugin verifier task")
 //        project.tasks.create(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask).with {
 //            group = IntelliJPluginConstants.GROUP_NAME
@@ -432,117 +439,124 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //            dependsOn { project.getTasksByName(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, false) }
 //        }
 //    }
-//
-//    fun void configurePluginVerificationTask(@NotNull Project project) {
-//        info(project, "Configuring plugin verification task")
-//        project.tasks.create(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, VerifyPluginTask).with {
-//            group = IntelliJPluginConstants.GROUP_NAME
-//            description = "Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure."
-//
-//            it.pluginDirectory.convention(project.provider({
-//                val prepareSandboxTask = project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-//                val path = File(prepareSandboxTask.getDestinationDir(), prepareSandboxTask.getPluginName().get()).path
-//                project.layout.projectDirectory.dir(path)
-//            }))
-//
-//            dependsOn { project.getTasksByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, false) }
-//        }
-//    }
-//
-//    fun void configureRunIdeaTask(@NotNull Project project) {
-//        info(project, "Configuring run IDE task")
-//        project.tasks.create(IntelliJPluginConstants.RUN_IDE_TASK_NAME, RunIdeTask).with { RunIdeTask task ->
-//            task.group = IntelliJPluginConstants.GROUP_NAME
-//            task.description = "Runs Intellij IDEA with installed plugin."
-//            task.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-//        }
-//    }
-//
-//    fun void configureRunIdeaForUiTestsTask(@NotNull Project project) {
-//        info(project, "Configuring run IDE for ui tests task")
-//        project.tasks.create(IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME, RunIdeForUiTestTask).with { RunIdeForUiTestTask task ->
-//            task.group = IntelliJPluginConstants.GROUP_NAME
-//            task.description = "Runs Intellij IDEA with installed plugin and robot-server plugin for ui tests."
-//            task.dependsOn(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
-//        }
-//    }
-//
-//    fun void configureBuildSearchableOptionsTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension) {
-//        info(project, "Configuring build searchable options task")
-//        project.tasks.create(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask).with { BuildSearchableOptionsTask task ->
-//            task.group = IntelliJPluginConstants.GROUP_NAME
-//            task.description = "Builds searchable options for plugin."
-//            task.setArgs(["${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}", "true"])
-//            task.outputs.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
-//            task.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-//            task.onlyIf {
-//                val number = ideBuildNumber(task.ideDirectory.get().asFile)
-//                VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("191.2752")
-//            }
-//        }
-//    }
-//
-//    fun prepareConventionMappingsForRunIdeTask(
-//        project: Project,
-//        extension: IntelliJPluginExtension,
-//        task: RunIdeBase,
-//        prepareSandBoxTaskName: String,
-//    ) {
-//        val prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
-//
-//        task.ideDirectory.convention(project.provider {
-//            val path = extension.getIdeaDependency(project).classes.path
-//            project.layout.projectDirectory.dir(path)
-//        })
-//        task.requiredPluginIds.convention(project.provider {
-//            getPluginIds(project)
-//        })
-//        task.configDirectory.convention(project.provider {
-//            project.file(prepareSandboxTask.configDirectory.get())
-//        })
-//        task.pluginsDirectory.convention(project.provider {
-//            val path = prepareSandboxTask.destinationDir.path
-//            project.layout.projectDirectory.dir(path)
-//        })
-//        task.systemDirectory.convention(project.provider {
-//            project.file("${extension.sandboxDirectory.get()}/system")
-//        })
-//        task.autoReloadPlugins.convention(project.provider {
-//            val number = ideBuildNumber(task.ideDirectory.get().asFile)
-//            VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("202.0")
-//        })
-//        task.conventionMapping("executable") {
-//            val jbrResolver = JbrResolver(project, task, extension.jreRepo.orNull)
-//            task.jbrVersion.orNull?.let { jbrVersion ->
-//                jbrResolver.resolve(jbrVersion)?.let { jbr ->
-//                    return@conventionMapping jbr.javaExecutable
-//                }
-//                warn(task, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
-//            }
-//            getBuiltinJbrVersion(task.ideDirectory.get().asFile)?.let { builtinJbrVersion ->
-//                jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
-//                    return@conventionMapping builtinJbr.javaExecutable
-//                }
-//                warn(task, "Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
-//            }
-//            Jvm.current().javaExecutable.absolutePath
-//        }
-//    }
-//
-//    fun configureJarSearchableOptionsTask(project: Project) {
-//        info(project, "Configuring jar searchable options task")
-//        val jarSearchableOptionsTask =
-//            project.tasks.create(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask::class.java)
-//
-//        jarSearchableOptionsTask.also { task ->
-//            task.group = IntelliJPluginConstants.GROUP_NAME
-//            task.description = "Jars searchable options."
-//            task.archiveBaseName.convention("lib/searchableOptions")
-//            task.destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
-//            task.dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-//            task.onlyIf { File(project.buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory }
-//        }
-//    }
+
+    fun configurePluginVerificationTask(project: Project) {
+        info(project, "Configuring plugin verification task")
+        val verifyPluginTask = project.tasks.create(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, VerifyPluginTask::class.java)
+
+        verifyPluginTask.also { task ->
+            task.group = IntelliJPluginConstants.GROUP_NAME
+            task.description = "Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure."
+
+            task.pluginDirectory.convention(project.provider {
+                val prepareSandboxTask = project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
+                val path = File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get()).path
+                project.layout.projectDirectory.dir(path)
+            })
+
+            task.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        }
+    }
+
+    fun configureRunIdeaTask(project: Project) {
+        info(project, "Configuring run IDE task")
+        val runIdeTask = project.tasks.create(IntelliJPluginConstants.RUN_IDE_TASK_NAME, RunIdeTask::class.java)
+
+        runIdeTask.also { task ->
+            task.group = IntelliJPluginConstants.GROUP_NAME
+            task.description = "Runs Intellij IDEA with installed plugin."
+            task.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        }
+    }
+
+    fun configureRunIdeaForUiTestsTask(project: Project) {
+        info(project, "Configuring run IDE for ui tests task")
+        val runIdeForUiTestsTaskName =
+            project.tasks.create(IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME, RunIdeForUiTestTask::class.java)
+
+        runIdeForUiTestsTaskName.also { task ->
+            task.group = IntelliJPluginConstants.GROUP_NAME
+            task.description = "Runs Intellij IDEA with installed plugin and robot-server plugin for ui tests."
+            task.dependsOn(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+        }
+    }
+
+    fun configureBuildSearchableOptionsTask(project: Project, extension: IntelliJPluginExtension) {
+        info(project, "Configuring build searchable options task")
+        val buildSearchableOptionsTask =
+            project.tasks.create(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, BuildSearchableOptionsTask::class.java)
+
+        buildSearchableOptionsTask.also { task ->
+            task.group = IntelliJPluginConstants.GROUP_NAME
+            task.description = "Builds searchable options for plugin."
+            task.args = listOf("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}", "true")
+            task.outputs.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+            task.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+            task.onlyIf {
+                val number = ideBuildNumber(task.ideDirectory.get().asFile)
+                VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("191.2752")
+            }
+        }
+    }
+
+    fun prepareConventionMappingsForRunIdeTask(
+        project: Project,
+        extension: IntelliJPluginExtension,
+        task: RunIdeBase,
+        prepareSandBoxTaskName: String,
+    ) {
+        val prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
+
+        task.ideDirectory.convention(project.provider {
+            val path = extension.getIdeaDependency(project).classes.path
+            project.layout.projectDirectory.dir(path)
+        })
+        task.requiredPluginIds.convention(project.provider {
+            getPluginIds(project)
+        })
+        task.configDirectory.convention(project.provider {
+            project.file(prepareSandboxTask.configDirectory.get())
+        })
+        task.pluginsDirectory.convention(project.provider {
+            val path = prepareSandboxTask.destinationDir.path
+            project.layout.projectDirectory.dir(path)
+        })
+        task.systemDirectory.convention(project.provider {
+            project.file("${extension.sandboxDirectory.get()}/system")
+        })
+        task.autoReloadPlugins.convention(project.provider {
+            val number = ideBuildNumber(task.ideDirectory.get().asFile)
+            VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("202.0")
+        })
+        task.conventionMapping("executable") {
+            val jbrResolver = JbrResolver(project, task, extension.jreRepo.orNull)
+
+            task.jbrVersion.orNull?.let {
+                jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
+                    warn(task, "Cannot resolve JBR $it. Falling back to builtin JBR.")
+                }
+            } ?: getBuiltinJbrVersion(task.ideDirectory.get().asFile)?.let {
+                jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
+                    warn(task, "Cannot resolve builtin JBR $it. Falling local Java.")
+                }
+            } ?: Jvm.current().javaExecutable.absolutePath
+        }
+    }
+
+    fun configureJarSearchableOptionsTask(project: Project) {
+        info(project, "Configuring jar searchable options task")
+        val jarSearchableOptionsTask =
+            project.tasks.create(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask::class.java)
+
+        jarSearchableOptionsTask.also { task ->
+            task.group = IntelliJPluginConstants.GROUP_NAME
+            task.description = "Jars searchable options."
+            task.archiveBaseName.convention("lib/searchableOptions")
+            task.destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
+            task.dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+            task.onlyIf { File(project.buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory }
+        }
+    }
 
     fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
         info(project, "Configuring compile tasks")

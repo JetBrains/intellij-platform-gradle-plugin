@@ -9,7 +9,7 @@ open class BuildSearchableOptionsTask : RunIdeBase(false) {
     private val traverseUIArgs = listOf("traverseUI")
 
     init {
-        setArgs(traverseUIArgs)
+        args = traverseUIArgs
     }
 
     override fun setArgs(applicationArgs: List<String>?): JavaExec =
