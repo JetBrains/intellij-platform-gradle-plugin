@@ -161,7 +161,7 @@ publishing {
 }
 
 tasks.wrapper {
-    gradleVersion = "7.0"
+    gradleVersion = "6.8"
     distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
