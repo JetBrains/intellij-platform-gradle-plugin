@@ -25,8 +25,8 @@ dependencies {
     implementation(localGroovy())
     api(gradleApi())
     implementation("org.jetbrains:annotations:19.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.169")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.169")
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.170")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.170")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
