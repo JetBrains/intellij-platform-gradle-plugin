@@ -9,7 +9,7 @@ class BuiltinPluginsRegistry {
     private final Map<String, Plugin> plugins = new HashMap<>()
 
     private final Map<String, String> directoryNameMapping = new HashMap<>()
-    private final File pluginsDirectory;
+    private final File pluginsDirectory
 
     BuiltinPluginsRegistry(def pluginsDirectory) {
         this.pluginsDirectory = pluginsDirectory
@@ -27,7 +27,7 @@ class BuiltinPluginsRegistry {
 
     private boolean fillFromCache(def loggingContext) {
         def cache = cacheFile()
-        if (cache == null) return false
+        if (cache == null || !cache.exists()) return false
 
         Utils.debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
         try {
@@ -130,7 +130,7 @@ class BuiltinPluginsRegistry {
     private static class Plugin {
         final String id
         final String directoryName
-        final Collection<String> dependencies;
+        final Collection<String> dependencies
 
         Plugin(String id, String directoryName, Collection<String> dependencies) {
             this.id = id
