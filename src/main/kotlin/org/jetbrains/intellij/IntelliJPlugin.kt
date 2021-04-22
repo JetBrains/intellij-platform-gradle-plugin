@@ -10,11 +10,12 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
+import org.jetbrains.intellij.tasks.JarSearchableOptionsTask
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishTask
@@ -481,67 +482,65 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //        }
 //    }
 //
-//    fun void prepareConventionMappingsForRunIdeTask(@NotNull Project project, @NotNull IntelliJPluginExtension extension,
-//    @NotNull RunIdeBase task, @NotNull String prepareSandBoxTaskName) {
+//    fun prepareConventionMappingsForRunIdeTask(
+//        project: Project,
+//        extension: IntelliJPluginExtension,
+//        task: RunIdeBase,
+//        prepareSandBoxTaskName: String,
+//    ) {
 //        val prepareSandboxTask = project.tasks.findByName(prepareSandBoxTaskName) as PrepareSandboxTask
-//        task.ideDirectory.convention(project.provider({
+//
+//        task.ideDirectory.convention(project.provider {
 //            val path = extension.getIdeaDependency(project).classes.path
 //            project.layout.projectDirectory.dir(path)
-//        }))
-//        task.requiredPluginIds.convention(project.provider({
+//        })
+//        task.requiredPluginIds.convention(project.provider {
 //            getPluginIds(project)
-//        }))
-//        task.configDirectory.convention(project.provider({
-//            project.file(prepareSandboxTask.getConfigDirectory().get())
-//        }))
-//        task.pluginsDirectory.convention(project.provider({
-//            val path = prepareSandboxTask.getDestinationDir().path
+//        })
+//        task.configDirectory.convention(project.provider {
+//            project.file(prepareSandboxTask.configDirectory.get())
+//        })
+//        task.pluginsDirectory.convention(project.provider {
+//            val path = prepareSandboxTask.destinationDir.path
 //            project.layout.projectDirectory.dir(path)
-//        }))
-//        task.systemDirectory.convention(project.provider({
+//        })
+//        task.systemDirectory.convention(project.provider {
 //            project.file("${extension.sandboxDirectory.get()}/system")
-//        }))
-//        task.autoReloadPlugins.convention(project.provider({
+//        })
+//        task.autoReloadPlugins.convention(project.provider {
 //            val number = ideBuildNumber(task.ideDirectory.get().asFile)
-//            VersionNumber.parse(number[number.indexOf('-') + 1..-1]) >= VersionNumber.parse("202.0")
-//        }))
-//        task.conventionMapping("executable", {
+//            VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("202.0")
+//        })
+//        task.conventionMapping("executable") {
 //            val jbrResolver = JbrResolver(project, task, extension.jreRepo.orNull)
-//            val jbrVersion = task.getJbrVersion().getOrNull()
-//            if (jbrVersion != null) {
-//                val jbr = jbrResolver.resolve(jbrVersion)
-//                if (jbr != null) {
-//                    return jbr.javaExecutable
+//            task.jbrVersion.orNull?.let { jbrVersion ->
+//                jbrResolver.resolve(jbrVersion)?.let { jbr ->
+//                    return@conventionMapping jbr.javaExecutable
 //                }
 //                warn(task, "Cannot resolve JBR $jbrVersion. Falling back to builtin JBR.")
 //            }
-//            val builtinJbrVersion = getBuiltinJbrVersion(task.ideDirectory.get().asFile)
-//            if (builtinJbrVersion != null) {
-//                val builtinJbr = jbrResolver.resolve(builtinJbrVersion)
-//                if (builtinJbr != null) {
-//                    return builtinJbr.javaExecutable
+//            getBuiltinJbrVersion(task.ideDirectory.get().asFile)?.let { builtinJbrVersion ->
+//                jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
+//                    return@conventionMapping builtinJbr.javaExecutable
 //                }
 //                warn(task, "Cannot resolve builtin JBR $builtinJbrVersion. Falling local Java.")
 //            }
-//            return Jvm.current().javaExecutable.absolutePath
-//        })
+//            Jvm.current().javaExecutable.absolutePath
+//        }
 //    }
 //
-//    fun void configureJarSearchableOptionsTask(@NotNull Project project) {
+//    fun configureJarSearchableOptionsTask(project: Project) {
 //        info(project, "Configuring jar searchable options task")
-//        project.tasks.create(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask).with {
-//            group = IntelliJPluginConstants.GROUP_NAME
-//            description = "Jars searchable options."
-//            if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1")) {
-//                archiveBaseName.set('lib/searchableOptions')
-//                destinationDirectory.set(project.layout.buildDirectory.dir("libsSearchableOptions"))
-//            } else {
-//                conventionMapping('baseName', { 'lib/searchableOptions' })
-//                destinationDir = File(project.buildDir, "libsSearchableOptions")
-//            }
+//        val jarSearchableOptionsTask =
+//            project.tasks.create(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask::class.java)
 //
-//            dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-//            onlyIf { File(project.buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory() }
+//        jarSearchableOptionsTask.also { task ->
+//            task.group = IntelliJPluginConstants.GROUP_NAME
+//            task.description = "Jars searchable options."
+//            task.archiveBaseName.convention("lib/searchableOptions")
+//            task.destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
+//            task.dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+//            task.onlyIf { File(project.buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory }
 //        }
 //    }
 
@@ -586,7 +585,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             // even when the instrumentCode task is up-to-date.
             val updateTask = project.tasks.create("post${instrumentTask.name.capitalize()}")
             updateTask.also { task ->
-                task.dependsOn (instrumentTask)
+                task.dependsOn(instrumentTask)
                 task.onlyIf { extension.instrumentCode.get() }
                 task.doLast {
                     // Set the classes dir to the one with the instrumented classes
@@ -601,16 +600,17 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
     fun configureTestTasks(project: Project, extension: IntelliJPluginExtension) {
         info(project, "Configuring tests tasks")
-        val testTask = project.tasks.withType(Test::class.java) as Test
+        val testTasks = project.tasks.withType(Test::class.java) as TaskCollection
         val prepareTestingSandboxTask =
             project.tasks.findByName(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME) as PrepareSandboxTask
         val runIdeTask = project.tasks.findByName(IntelliJPluginConstants.RUN_IDE_TASK_NAME) as RunIdeTask
-        val pluginIds = getPluginIds(project)
 
-        testTask.let { task ->
-            val configDirectory = project.file("${extension.sandboxDirectory.get()}/config-test")
-            val systemDirectory = project.file("${extension.sandboxDirectory.get()}/system-test")
-            val pluginsDirectory = project.file("${extension.sandboxDirectory.get()}/plugins-test")
+        val pluginIds = getPluginIds(project)
+        val configDirectory = project.file("${extension.sandboxDirectory.get()}/config-test")
+        val systemDirectory = project.file("${extension.sandboxDirectory.get()}/system-test")
+        val pluginsDirectory = project.file("${extension.sandboxDirectory.get()}/plugins-test")
+
+        testTasks.forEach { task ->
             task.enableAssertions = true
             task.systemProperties(getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
 
@@ -652,16 +652,21 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(project, "Configuring building plugin task")
         val buildPluginTask = project.tasks.create(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, Zip::class.java)
         val prepareSandboxTask = project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-        val jarSearchableOptionsTask = project.tasks.findByName(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME) as Jar
+        val jarSearchableOptionsTask =
+            project.tasks.findByName(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME) as JarSearchableOptionsTask
 
         buildPluginTask.let { task ->
             task.description = "Bundles the project as a distribution."
             task.group = IntelliJPluginConstants.GROUP_NAME
-            task.from({ "${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName.get()}" })
-            task.into { prepareSandboxTask.pluginName.get() }
+            task.from(project.provider {
+                "${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName.get()}"
+            })
+            task.into(project.provider {
+                prepareSandboxTask.pluginName.get()
+            })
             task.from(jarSearchableOptionsTask.archiveFile) { copy -> copy.into("lib") }
             task.dependsOn(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
-            task.archiveBaseName.set(project.provider {
+            task.archiveBaseName.convention(project.provider {
                 prepareSandboxTask.pluginName.get()
             })
         }
