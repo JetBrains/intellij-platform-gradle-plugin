@@ -124,7 +124,7 @@ publishing {
             artifactId = project.name
             version = version.toString()
 
-            artifact(tasks.findByName("jar"))
+            from(components["java"])
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
@@ -144,7 +144,7 @@ publishing {
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
                 }
 
