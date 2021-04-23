@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import de.undercouch.gradle.tasks.download.org.apache.commons.codec.binary.Hex
 import org.gradle.api.Project
 import org.jetbrains.annotations.NotNull
 import org.jetbrains.annotations.Nullable
@@ -54,7 +55,8 @@ class CustomPluginsRepository implements PluginsRepository {
         // todo: a better way to define cache directory
         String gradleHomePath = project.gradle.gradleUserHomeDir.absolutePath
         String mavenCacheDirectoryPath = Paths.get(gradleHomePath, 'caches/modules-2/files-2.1').toString()
-        String hash = new String(MessageDigest.getInstance("SHA-1").digest(repoUrl.getBytes(Charset.forName("UTF-8"))))
+        def digest = MessageDigest.getInstance("SHA-1").digest(repoUrl.getBytes(Charset.forName("UTF-8")))
+        String hash = String.valueOf(Hex.encodeHex(digest))
         return Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea", hash).toString()
     }
 
