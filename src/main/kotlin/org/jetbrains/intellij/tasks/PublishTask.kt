@@ -27,16 +27,6 @@ open class PublishTask : ConventionTask() {
     @Input
     val host: Property<String> = project.objects.property(String::class.java).convention("https://plugins.jetbrains.com")
 
-    // TODO: remove
-    @Input
-    @Optional
-    val username: Property<String> = project.objects.property(String::class.java)
-
-    // TODO: remove
-    @Input
-    @Optional
-    val password: Property<String> = project.objects.property(String::class.java)
-
     @Input
     @Optional
     val token: Property<String> = project.objects.property(String::class.java)
