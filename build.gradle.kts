@@ -19,7 +19,6 @@ plugins.withType<JavaPlugin> {
 }
 
 repositories {
-    maven("https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure")
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
 }
@@ -27,8 +26,8 @@ repositories {
 dependencies {
     api(gradleApi())
     implementation("org.jetbrains:annotations:19.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.170")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.170")
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.169")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.169")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
