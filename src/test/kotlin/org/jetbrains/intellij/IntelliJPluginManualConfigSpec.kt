@@ -11,15 +11,20 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         writeTestFile()
 
         buildFile.groovy("""
-            intellij { version = '14.1.4' }
-            intellij.configureDefaultDependencies = false
+            import org.jetbrains.intellij.DependenciesUtils
+            
+            intellij {
+                version = '14.1.4'
+                configureDefaultDependencies = false
+            }
+            
             afterEvaluate {
                 dependencies {
-                    compileOnly intellij { include('openapi.jar') }
-                    compile     intellij { include('asm-all.jar') }
-                    runtime     intellij { exclude('idea.jar') }
-                    testCompile intellij { include('boot.jar') }
-                    testRuntime intellij()
+                    compileOnly DependenciesUtils.intellij(project) { include('openapi.jar') }
+                    compile     DependenciesUtils.intellij(project) { include('asm-all.jar') }
+                    runtime     DependenciesUtils.intellij(project) { exclude('idea.jar') }
+                    testCompile DependenciesUtils.intellij(project) { include('boot.jar') }
+                    testRuntime DependenciesUtils.intellij(project)
                 } 
             }
             task printMainCompileClassPath { doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath } }
@@ -65,6 +70,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure plugins manually test`() {
         writeTestFile()
         buildFile.groovy("""
+            import org.jetbrains.intellij.DependenciesUtils
+            
             intellij {
                 version = '14.1.4'
                 configureDefaultDependencies = false
@@ -72,11 +79,11 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             }
             afterEvaluate {
                 dependencies {
-                    compileOnly intellijPlugin('junit')  { include('junit-rt.jar') }
-                    compile     intellijPlugin('junit')  { include('idea-junit.jar') }
-                    runtime     intellijPlugin('testng') { exclude('testng-plugin.jar') }
-                    testCompile intellijPlugin('testng') { include("testng.jar") }
-                    testRuntime intellijPlugins('junit', 'testng')
+                    compileOnly DependenciesUtils.intellijPlugin(project, 'junit') { include('junit-rt.jar') }
+                    compile     DependenciesUtils.intellijPlugin(project, 'junit')  { include('idea-junit.jar') }
+                    runtime     DependenciesUtils.intellijPlugin(project, 'testng') { exclude('testng-plugin.jar') }
+                    testCompile DependenciesUtils.intellijPlugin(project, 'testng') { include("testng.jar") }
+                    testRuntime DependenciesUtils.intellijPlugins(project, 'junit', 'testng')
                 } 
             }
             task printMainCompileClassPath { doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath } }
@@ -127,17 +134,19 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure extra dependencies manually test`() {
         writeTestFile()
         buildFile.groovy("""
+            import org.jetbrains.intellij.DependenciesUtils
+            
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['intellij-core', 'jps-build-test']
             }
             afterEvaluate {
                 dependencies {
-                    compileOnly intellijExtra('jps-build-test') { include('jps-build-test*.jar') }
-                    runtime     intellijExtra('intellij-core')  { exclude('intellij-core.jar') }
-                    testCompile intellijExtra('intellij-core')  { include("annotations.jar") }
-                    testRuntime intellijExtra('jps-build-test')
-                    testRuntime intellijExtra('intellij-core')
+                    compileOnly DependenciesUtils.intellijExtra(project, 'jps-build-test') { include('jps-build-test*.jar') }
+                    runtime     DependenciesUtils.intellijExtra(project, 'intellij-core')  { exclude('intellij-core.jar') }
+                    testCompile DependenciesUtils.intellijExtra(project, 'intellij-core')  { include("annotations.jar") }
+                    testRuntime DependenciesUtils.intellijExtra(project, 'jps-build-test')
+                    testRuntime DependenciesUtils.intellijExtra(project, 'intellij-core')
                 } 
             }
             task printMainCompileClassPath { doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath } }
@@ -183,9 +192,13 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure sdk manually fail without afterEvaluate`() {
         writeTestFile()
         buildFile.groovy("""
-            intellij.configureDefaultDependencies = false
+            import org.jetbrains.intellij.DependenciesUtils
+            
+            intellij {
+                configureDefaultDependencies = false
+            }
             dependencies {
-                compile intellij { include('asm-all.jar') }
+                compile DependenciesUtils.intellij(project) { include('asm-all.jar') }
             } 
         """)
 
@@ -199,9 +212,11 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure plugins manually fail without afterEvaluate`() {
         writeTestFile()
         buildFile.groovy("""
+            import org.jetbrains.intellij.DependenciesUtils
+            
             intellij.configureDefaultDependencies = false
             dependencies {
-                compile intellijPlugin('junit')
+                compile DependenciesUtils.intellijPlugin(project, 'junit')
             } 
         """)
 
@@ -215,13 +230,15 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure plugins manually fail on unconfigured plugin`() {
         writeTestFile()
         buildFile.groovy("""
+            import org.jetbrains.intellij.DependenciesUtils
+
             intellij {
                 configureDefaultDependencies = false
                 plugins = []
             }
             afterEvaluate {
                 dependencies {
-                    compile intellijPlugin('junit')
+                    compile DependenciesUtils.intellijPlugin(project, 'junit')
                 }
             } 
         """)
@@ -236,13 +253,15 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure plugins manually fail on some unconfigured plugins`() {
         writeTestFile()
         buildFile.groovy("""
+            import org.jetbrains.intellij.DependenciesUtils
+
             intellij {
                 configureDefaultDependencies = false
                 plugins = ['junit']
             }
             afterEvaluate {
                 dependencies {
-                    compile intellijPlugins('testng', 'junit', 'copyright')
+                    compile DependenciesUtils.intellijPlugins(project, 'testng', 'junit', 'copyright')
                 }
             } 
         """)
@@ -257,12 +276,14 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure extra manually fail without afterEvaluate`() {
         writeTestFile()
         buildFile.groovy("""
+            import org.jetbrains.intellij.DependenciesUtils
+            
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['intellij-core']
             }
             dependencies {
-                compile intellijExtra('intellij-core')
+                compile DependenciesUtils.intellijExtra(project, 'intellij-core')
             }
         """)
 
@@ -276,13 +297,15 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     fun `configure extra manually fail on unconfigured extra dependency`() {
         writeTestFile()
         buildFile.groovy("""
+            import org.jetbrains.intellij.DependenciesUtils
+            
             intellij {
                 configureDefaultDependencies = false
                 extraDependencies = ['jps-build-test']
             }
             afterEvaluate {
                 dependencies {
-                    compile intellijExtra('intellij-core')
+                    compile DependenciesUtils.intellijExtra(project, 'intellij-core')
                 }
             }
         """)

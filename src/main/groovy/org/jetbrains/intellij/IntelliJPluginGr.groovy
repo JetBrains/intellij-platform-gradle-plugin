@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.plugins.JavaPlugin
@@ -8,7 +7,6 @@ import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.tooling.BuildException
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeBase
@@ -85,7 +83,6 @@ class IntelliJPluginGr extends IntelliJPlugin {
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
-        configureDependencyExtensions(project, extension)
         assert !project.state.executed: "afterEvaluate is a no-op for an executed project"
         project.afterEvaluate { Project p -> configureProjectAfterEvaluate(p, extension) }
     }
@@ -103,56 +100,6 @@ class IntelliJPluginGr extends IntelliJPlugin {
         }
 
         configureTestTasks(project, extension)
-    }
-
-    private void configureDependencyExtensions(@NotNull Project project,
-                                               @NotNull IntelliJPluginExtension extension) {
-        project.dependencies.ext.intellij = { Closure filter = {} ->
-            if (!project.state.executed) {
-                throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
-            }
-            project.files(extension.getIdeaDependency(project).jarFiles).asFileTree.matching(filter)
-        }
-
-        project.dependencies.ext.intellijPlugin = { String plugin, Closure filter = {} ->
-            if (!project.state.executed) {
-                throw new GradleException("intellij plugin '$plugin' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
-            }
-            def pluginDep = extension.getPluginDependenciesList(project).find { it.id == plugin }
-            if (pluginDep == null || pluginDep.jarFiles == null || pluginDep.jarFiles.empty) {
-                throw new GradleException("intellij plugin '$plugin' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
-            }
-            project.files(pluginDep.jarFiles).asFileTree.matching(filter)
-        }
-
-        project.dependencies.ext.intellijPlugins = { String... plugins ->
-            def selectedPlugins = new HashSet<PluginDependency>()
-            def nonValidPlugins = []
-            for (pluginName in plugins) {
-                def plugin = extension.getPluginDependenciesList(project).find { it.id == pluginName }
-                if (plugin == null || plugin.jarFiles == null || plugin.jarFiles.empty) {
-                    nonValidPlugins.add(pluginName)
-                } else {
-                    selectedPlugins.add(plugin)
-                }
-            }
-            if (!nonValidPlugins.empty) {
-                throw new GradleException("intellij plugins $nonValidPlugins are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
-            }
-            project.files(selectedPlugins.collect { it.jarFiles })
-        }
-
-        project.dependencies.ext.intellijExtra = { String extra, Closure filter = {} ->
-            if (!project.state.executed) {
-                throw new GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
-            }
-            def dependency = extension.getIdeaDependency(project)
-            def extraDep = dependency != null ? dependency.extraDependencies.find { it.name == extra } : null
-            if (extraDep == null || extraDep.jarFiles == null || extraDep.jarFiles.empty) {
-                throw new GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
-            }
-            project.files(extraDep.jarFiles).asFileTree.matching(filter)
-        }
     }
 
     void configureProjectPluginTasksDependency(@NotNull Project project, @NotNull Project dependency) {
