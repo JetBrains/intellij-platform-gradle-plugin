@@ -10,7 +10,6 @@ import java.io.Serializable
 class PluginDependencyNotation(val id: String, val version: String?, val channel: String?) : Serializable {
 
     companion object {
-        @JvmStatic
         fun parsePluginDependencyString(s: String): PluginDependencyNotation {
             if (File(s).exists()) {
                 return PluginDependencyNotation(s, null, null)

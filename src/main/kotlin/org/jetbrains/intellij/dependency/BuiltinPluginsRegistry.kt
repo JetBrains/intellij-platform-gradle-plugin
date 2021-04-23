@@ -18,7 +18,6 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
     private val directoryNameMapping = mutableMapOf<String, String>()
 
     companion object {
-        @JvmStatic
         fun fromDirectory(pluginsDirectory: File, loggingContext: Any): BuiltinPluginsRegistry {
             val result = BuiltinPluginsRegistry(pluginsDirectory)
             if (!result.fillFromCache(loggingContext)) {
