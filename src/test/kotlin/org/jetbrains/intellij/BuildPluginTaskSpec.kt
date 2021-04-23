@@ -347,7 +347,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             
             intellij {
                 pluginName = 'myPluginName'
-}
+            }
         """)
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)

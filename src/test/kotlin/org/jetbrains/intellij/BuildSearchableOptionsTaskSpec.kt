@@ -8,7 +8,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
     @Test
     fun `skip building searchable options using IDEA prior 2019_1`() {
         buildFile.groovy("""
-           intellij {
+            intellij {
                 version = '14.1.4'
             } 
         """)
