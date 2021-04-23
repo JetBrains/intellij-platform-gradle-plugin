@@ -1,25 +1,17 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    groovy
     kotlin("jvm") version "1.4.32"
+    id("java-gradle-plugin")
+    id("maven-publish")
     id("com.gradle.plugin-publish") version "0.14.0"
     id("synapticloop.documentr") version "3.1.0"
-    `java-gradle-plugin`
-    `maven-publish`
     id("com.github.breadmoirai.github-release") version "2.2.12"
     id("org.jetbrains.changelog") version "1.1.2"
 }
 
 plugins.withType<JavaPlugin> {
     tasks {
-        withType<GroovyCompile> {
-            sourceCompatibility = "1.7"
-            targetCompatibility = "1.7"
-            // TODO: remove after migration
-            dependsOn(compileKotlin)
-            classpath += files(compileKotlin.get().destinationDir)
-        }
         withType<KotlinCompile> {
             kotlinOptions.jvmTarget = "1.8"
         }
@@ -33,7 +25,6 @@ repositories {
 }
 
 dependencies {
-    implementation(localGroovy())
     api(gradleApi())
     implementation("org.jetbrains:annotations:19.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.169")
@@ -51,9 +42,6 @@ dependencies {
     implementation("com.fasterxml.woodstox:woodstox-core:6.2.4")
 
     testImplementation(gradleTestKit())
-    testImplementation("org.spockframework:spock-core:1.0-groovy-2.4") {
-        exclude(module = "groovy-all")
-    }
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
 }
