@@ -16,7 +16,6 @@ plugins.withType<JavaPlugin> {
 }
 
 repositories {
-    maven("https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure")
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
 }
