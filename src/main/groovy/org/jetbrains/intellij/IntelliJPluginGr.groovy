@@ -1,18 +1,15 @@
 package org.jetbrains.intellij
 
-import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
-import org.gradle.internal.jvm.Jvm
 import org.gradle.tooling.BuildException
 import org.gradle.util.VersionNumber
 import org.jetbrains.annotations.NotNull
-import org.jetbrains.intellij.dependency.*
-import org.jetbrains.intellij.model.IdeaPlugin
+import org.jetbrains.intellij.dependency.PluginDependency
+import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.RunIdeBase
 import org.jetbrains.intellij.tasks.RunIdeForUiTestTask
@@ -158,40 +155,30 @@ class IntelliJPluginGr extends IntelliJPlugin {
         }
     }
 
-    private void configureIntellijDependency(@NotNull Project project,
-                                             @NotNull IntelliJPluginExtension extension,
-                                             @NotNull Configuration configuration) {
-        configuration.withDependencies { dependencies ->
-            Utils.info(project, "Configuring IDE dependency")
-            def resolver = new IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath.orNull)
-            def ideaDependency
-            def localPath = extension.localPath.orNull
-            if (localPath != null) {
-                if (extension.version.orNull != null) {
-                    Utils.warn(project, "Both `localPath` and `version` specified, second would be ignored")
-                }
-                Utils.info(project, "Using path to locally installed IDE: '$localPath'")
-                ideaDependency = resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
-            } else {
-                Utils.info(project, "Using IDE from remote repository")
-                def version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-                def extraDependencies = extension.extraDependencies.get()
-                ideaDependency = resolver.resolveRemote(project, version, extension.getVersionType(), extension.downloadSources.get(), extraDependencies)
-            }
-            extension.ideaDependency = ideaDependency
-            if (extension.configureDefaultDependencies.get()) {
-                Utils.info(project, "$ideaDependency.buildNumber is used for building")
-                resolver.register(project, ideaDependency, dependencies)
-                if (!ideaDependency.extraDependencies.empty) {
-                    Utils.info(project, "Note: $ideaDependency.buildNumber extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
-                }
-            } else {
-                Utils.info(project, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
-            }
+    void configureProjectPluginTasksDependency(@NotNull Project project, @NotNull Project dependency) {
+        // invoke before tasks graph is ready
+        if (dependency.plugins.findPlugin(IntelliJPluginGr) == null) {
+            throw new BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
         }
-        def toolsJar = Jvm.current().toolsJar
-        if (toolsJar) {
-            project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
+        def dependencySandboxTask = dependency.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        project.tasks.withType(PrepareSandboxTask).each {
+            it.dependsOn(dependencySandboxTask)
+        }
+    }
+
+    void configureProjectPluginDependency(@NotNull Project project,
+                                          @NotNull Project dependency,
+                                          @NotNull DependencySet dependencies,
+                                          @NotNull IntelliJPluginExtension extension) {
+        // invoke on demand, when plugins artifacts are needed
+        if (dependency.plugins.findPlugin(IntelliJPluginGr) == null) {
+            throw new BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+        }
+        dependencies.add(project.dependencies.create(dependency))
+        def pluginDependency = new PluginProjectDependency(dependency)
+        extension.addPluginDependency(pluginDependency)
+        project.tasks.withType(PrepareSandboxTask).each {
+            it.configureCompositePlugin(pluginDependency)
         }
     }
 }

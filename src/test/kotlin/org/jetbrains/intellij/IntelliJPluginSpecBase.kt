@@ -97,6 +97,7 @@ abstract class IntelliJPluginSpecBase {
         GradleRunner.create()
             .withProjectDir(dir)
             .withGradleVersion(gradleVersion)
+            .forwardOutput()
             .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))

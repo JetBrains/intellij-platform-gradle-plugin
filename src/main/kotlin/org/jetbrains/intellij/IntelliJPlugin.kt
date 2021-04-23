@@ -21,10 +21,10 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.gradle.util.VersionNumber
+import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
-import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.IdeaPlugin
 import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
@@ -134,93 +134,40 @@ abstract class IntelliJPlugin : Plugin<Project> {
 //
 //        configureTestTasks(project, extension)
 //    }
-//
-//    fun configureDependencyExtensions(project: Project,
-//    extension: IntelliJPluginExtension) {
-//        project.dependencies.ext.intellij = { Closure filter = {} ->
-//            if (!project.state.executed) {
-//                throw GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
-//            }
-//            project.files(extension.getIdeaDependency(project).jarFiles).asFileTree.matching(filter)
-//        }
-//
-//        project.dependencies.ext.intellijPlugin = { String plugin, Closure filter = {} ->
-//            if (!project.state.executed) {
-//                throw GradleException("intellij plugin '$plugin' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
-//            }
-//            val pluginDep = extension.getPluginDependenciesList(project).find { it.id == plugin }
-//            if (pluginDep == null || pluginDep.jarFiles == null || pluginDep.jarFiles.empty) {
-//                throw GradleException("intellij plugin '$plugin' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
-//            }
-//            project.files(pluginDep.jarFiles).asFileTree.matching(filter)
-//        }
-//
-//        project.dependencies.ext.intellijPlugins = { String... plugins ->
-//            val selectedPlugins = HashSet<PluginDependency>()
-//            val nonValidPlugins = []
-//            for (pluginName in plugins) {
-//                val plugin = extension.getPluginDependenciesList(project).find { it.id == pluginName }
-//                if (plugin == null || plugin.jarFiles == null || plugin.jarFiles.empty) {
-//                    nonValidPlugins.add(pluginName)
-//                } else {
-//                    selectedPlugins.add(plugin)
-//                }
-//            }
-//            if (!nonValidPlugins.empty) {
-//                throw GradleException("intellij plugins $nonValidPlugins are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
-//            }
-//            project.files(selectedPlugins.collect { it.jarFiles })
-//        }
-//
-//        project.dependencies.ext.intellijExtra = { String extra, Closure filter = {} ->
-//            if (!project.state.executed) {
-//                throw GradleException('intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block')
-//            }
-//            val dependency = extension.getIdeaDependency(project)
-//            val extraDep = dependency != null ? dependency.extraDependencies.find { it.name == extra } : null
-//            if (extraDep == null || extraDep.jarFiles == null || extraDep.jarFiles.empty) {
-//                throw GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
-//            }
-//            project.files(extraDep.jarFiles).asFileTree.matching(filter)
-//        }
-//    }
-//
-//    fun configureIntellijDependency(project: Project,
-//    extension: IntelliJPluginExtension,
-//    configuration: Configuration) {
-//        configuration.withDependencies { dependencies ->
-//            info(project, "Configuring IDE dependency")
-//            val resolver = IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath.orNull)
-//            val ideaDependency
-//                val localPath = extension.localPath.orNull
-//                if (localPath != null) {
-//                    if (extension.version.orNull != null) {
-//                        warn(project, "Both `localPath` and `version` specified, second would be ignored")
-//                    }
-//                    info(project, "Using path to locally installed IDE: '$localPath'")
-//                    ideaDependency = resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
-//                } else {
-//                    info(project, "Using IDE from remote repository")
-//                    val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-//                    val extraDependencies = extension.extraDependencies.get()
-//                    ideaDependency = resolver.resolveRemote(project, version, extension.getVersionType(), extension.downloadSources.get(), extraDependencies)
-//                }
-//            extension.ideaDependency = ideaDependency
-//            if (extension.configureDefaultDependencies.get()) {
-//                info(project, "$ideaDependency.buildNumber is used for building")
-//                resolver.register(project, ideaDependency, dependencies)
-//                if (!ideaDependency.extraDependencies.empty) {
-//                    info(project, "Note: $ideaDependency.buildNumber extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
-//                }
-//            } else {
-//                info(project, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
-//            }
-//        }
-//        val toolsJar = Jvm.current().toolsJar
-//        if (toolsJar) {
-//            project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
-//        }
-//    }
+
+    fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
+        configuration.withDependencies { dependencies ->
+            info(project, "Configuring IDE dependency")
+            val resolver = IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath.orNull)
+            val localPath = extension.localPath.orNull
+            val ideaDependency = if (localPath != null) {
+                if (extension.version.orNull != null) {
+                    warn(project, "Both `localPath` and `version` specified, second would be ignored")
+                }
+                info(project, "Using path to locally installed IDE: '$localPath'")
+                resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
+            } else {
+                info(project, "Using IDE from remote repository")
+                val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
+                val extraDependencies = extension.extraDependencies.get()
+                resolver.resolveRemote(project, version, extension.getVersionType(), extension.downloadSources.get(), extraDependencies)
+            }
+            extension.ideaDependency.set(ideaDependency)
+            if (extension.configureDefaultDependencies.get()) {
+                info(project, "$ideaDependency.buildNumber is used for building")
+                resolver.register(project, ideaDependency, dependencies)
+                if (!ideaDependency.extraDependencies.isEmpty()) {
+                    info(project,
+                        "Note: $ideaDependency.buildNumber extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+                }
+            } else {
+                info(project, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
+            }
+        }
+        Jvm.current().toolsJar?.let { toolsJar ->
+            project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
+        }
+    }
 
     fun configurePluginDependencies(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
@@ -316,34 +263,41 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    fun configureProjectPluginTasksDependency(project: Project, dependency: Project) {
-        // invoke before tasks graph is ready
-        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
-        }
-        val dependencySandboxTask = dependency.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
-            it.dependsOn(dependencySandboxTask)
-        }
-    }
+    abstract fun configureProjectPluginTasksDependency(project: Project, dependency: Project)
+//    fun configureProjectPluginTasksDependency(project: Project, dependency: Project) {
+//        // invoke before tasks graph is ready
+//        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
+//            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+//        }
+//        val dependencySandboxTask = dependency.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+//        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
+//            it.dependsOn(dependencySandboxTask)
+//        }
+//    }
 
-    fun configureProjectPluginDependency(
+    abstract fun configureProjectPluginDependency(
         project: Project,
         dependency: Project,
         dependencies: DependencySet,
         extension: IntelliJPluginExtension,
-    ) {
-        // invoke on demand, when plugins artifacts are needed
-        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
-        }
-        dependencies.add(project.dependencies.create(dependency))
-        val pluginDependency = PluginProjectDependency(dependency)
-        extension.addPluginDependency(pluginDependency)
-        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
-            it.configureCompositePlugin(pluginDependency)
-        }
-    }
+    )
+//    fun configureProjectPluginDependency(
+//        project: Project,
+//        dependency: Project,
+//        dependencies: DependencySet,
+//        extension: IntelliJPluginExtension,
+//    ) {
+//        // invoke on demand, when plugins artifacts are needed
+//        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
+//            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+//        }
+//        dependencies.add(project.dependencies.create(dependency))
+//        val pluginDependency = PluginProjectDependency(dependency)
+//        extension.addPluginDependency(pluginDependency)
+//        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
+//            it.configureCompositePlugin(pluginDependency)
+//        }
+//    }
 
     fun configurePatchPluginXmlTask(project: Project, extension: IntelliJPluginExtension) {
         info(project, "Configuring patch plugin.xml task")
