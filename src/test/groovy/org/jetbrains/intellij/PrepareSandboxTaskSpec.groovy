@@ -489,6 +489,38 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                                   '/config/options/updates.xml'] as Set
     }
 
+    def 'rename jars with same names'() {
+        given:
+        emptyZipFile("one/core.jar")
+        emptyZipFile("two/core.jar")
+        emptyZipFile("three/core.jar")
+        writeJavaFile()
+        buildFile << """
+            version='0.42.123'
+            intellij { 
+                pluginName = 'myPluginName' 
+            }
+            dependencies { 
+                compile 'joda-time:joda-time:2.8.1'
+                compile fileTree('one')
+                compile fileTree('two')
+                compile fileTree('three')
+            }
+            """.stripIndent()
+
+        when:
+        build(IntelliJPlugin.PREPARE_SANDBOX_TASK_NAME)
+
+        then:
+        collectPaths(sandbox) == ['/plugins/myPluginName/lib/projectName-0.42.123.jar',
+                                  '/plugins/myPluginName/lib/joda-time-2.8.1.jar',
+                                  '/plugins/myPluginName/lib/core.jar',
+                                  '/plugins/myPluginName/lib/core_1.jar',
+                                  '/plugins/myPluginName/lib/core_2.jar',
+                                  '/config/options/updates.xml'] as Set
+    }
+
+
     private File getSandbox() {
         return new File(buildDirectory, IntelliJPlugin.DEFAULT_SANDBOX)
     }

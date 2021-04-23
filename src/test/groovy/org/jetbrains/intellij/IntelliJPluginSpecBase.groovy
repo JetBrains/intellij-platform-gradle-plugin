@@ -10,6 +10,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 
 abstract class IntelliJPluginSpecBase extends Specification {
     protected final String gradleHome = System.properties.get('test.gradle.home')
@@ -142,6 +143,17 @@ public class AppTest {
             mkdirs()
             it
         }
+    }
+
+    protected File emptyZipFile(String path) {
+        def splitted = path.split('/')
+        def directory = splitted.size() > 1 ? directory(splitted[0..-2].join('/')) : dir.root
+        def file = new File(directory, splitted[-1])
+        def outputStream = new FileOutputStream(file)
+        def zipOutputStream = new ZipOutputStream(outputStream)
+        zipOutputStream.close()
+        outputStream.close()
+        file
     }
 
     protected File file(String path) {

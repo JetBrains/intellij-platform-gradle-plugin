@@ -1,7 +1,10 @@
 package org.jetbrains.intellij.tasks
 
+import kotlin.text.StringsKt
 import org.gradle.api.file.CopySpec
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
+import org.gradle.api.file.FileCopyDetails
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.*
 import org.gradle.internal.FileUtils
@@ -20,6 +23,7 @@ class PrepareSandboxTask extends Sync {
     List<Object> pluginDependencies = []
 
     PrepareSandboxTask() {
+        duplicatesStrategy = DuplicatesStrategy.FAIL
         configurePlugin()
     }
 
@@ -109,6 +113,7 @@ class PrepareSandboxTask extends Sync {
 
     private void configurePlugin() {
         CopySpec plugin = mainSpec.addChild().into { "${getPluginName()}/lib" }
+        def usedNames = new HashSet()
         plugin.from {
             def runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
             def librariesToIgnore = getLibrariesToIgnore().toSet()
@@ -132,6 +137,14 @@ class PrepareSandboxTask extends Sync {
                 })
             }
             result
+        }.eachFile { FileCopyDetails details ->
+            def originalName = StringsKt.substringBeforeLast(details.name, '.', details.name)
+            def originalExtension = StringsKt.substringAfterLast(details.name, '.', details.name)
+            def index = 1
+            while (!usedNames.add(details.name)) {
+                details.name = "${originalName}_${index}.${originalExtension}"
+                index++
+            }
         }
     }
 

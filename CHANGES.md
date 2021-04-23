@@ -6,6 +6,7 @@
 - exclude kotlin-reflect and kotlin-text from the runtime if kotlin is used in plugin [#585](../../issues/585)
 - respect overridden `build` directory [#602](../../issues/602)
 - store cache of plugins from different custom repositories in different directories [#579](../../issues/579)
+- rename dependency jars with the same name [#497](../../issues/497)
 
 ## 0.7.2
 
