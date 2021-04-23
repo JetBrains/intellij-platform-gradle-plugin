@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-//import org.jetbrains.intellij.IntelliJPluginExtension
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
@@ -20,6 +19,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.releaseType
 import java.io.File
@@ -35,7 +35,7 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
         const val FORMS_REPO_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
     }
 
-//    private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
+    private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
 
     @Internal
     val sourceSet: Property<SourceSet> = project.objects.property(SourceSet::class.java)
@@ -106,10 +106,7 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
 
     private fun compilerClassPathFromMaven(): ConfigurableFileCollection {
         val dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
-        // TODO: use extension
-//        val intellijRepoUrl = extension?.intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
-        val intellijRepo = null
-        val intellijRepoUrl = intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
+        val intellijRepoUrl = extension?.intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
         val repos = listOf(
             project.repositories.maven { it.url = URI("$intellijRepoUrl/${releaseType(compilerVersion.get())}") },
             project.repositories.maven { it.url = URI(ASM_REPO_URL) },

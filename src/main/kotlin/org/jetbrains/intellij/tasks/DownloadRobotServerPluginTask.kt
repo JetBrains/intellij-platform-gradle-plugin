@@ -29,6 +29,7 @@ open class DownloadRobotServerPluginTask : ConventionTask() {
         val dependency = project.dependencies.create("${getDependency()}:$version")
         val repo = project.repositories.maven { it.url = URI.create(ROBOT_SERVER_REPO) }
         project.delete(outputDir)
+
         try {
             val zipFile = project.configurations.detachedConfiguration(dependency).singleFile
             unzip(zipFile, outputDir, project, targetDirName = "")

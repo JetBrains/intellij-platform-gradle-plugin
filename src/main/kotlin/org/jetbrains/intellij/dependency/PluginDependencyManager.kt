@@ -24,7 +24,6 @@ class PluginDependencyManager(
 
     private val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
     private val cacheDirectoryPath = Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea").toString()
-
     private val pluginSources = mutableSetOf<String>()
     private var ivyArtifactRepository: IvyArtifactRepository? = null
 
@@ -120,32 +119,31 @@ class PluginDependencyManager(
         }
         val pluginFqn = "${plugin.id}-${plugin.version}"
         val groupId = groupId(plugin.channel)
-        val ivyFile = File(File(cacheDirectoryPath, groupId), "$pluginFqn.xml")
-        if (!ivyFile.exists()) {
-            val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
-            val configuration = DefaultIvyConfiguration("compile")
+        val ivyFile = File(File(cacheDirectoryPath, groupId), "$pluginFqn.xml").takeIf { it.exists() } ?: return
+        val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
+        val configuration = DefaultIvyConfiguration("compile")
 
-            IntelliJIvyDescriptorFileGenerator(identity).apply {
-                addConfiguration(configuration)
-                addConfiguration(DefaultIvyConfiguration("sources"))
-                addConfiguration(DefaultIvyConfiguration("default"))
-                plugin.jarFiles.forEach {
-                    addArtifact(IntellijIvyArtifact.createJarDependency(it, configuration.name, baseDir, groupId))
-                }
-                plugin.classesDirectory?.let {
-                    addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
-                }
-                plugin.metaInfDirectory?.let {
-                    addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
-                }
-                ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
-                    val artifact = IntellijIvyArtifact(it, "ideaIC", "jar", "sources", "sources")
-                    artifact.conf = "sources"
-                    addArtifact(artifact)
-                }
-                writeTo(ivyFile)
+        IntelliJIvyDescriptorFileGenerator(identity).apply {
+            addConfiguration(configuration)
+            addConfiguration(DefaultIvyConfiguration("sources"))
+            addConfiguration(DefaultIvyConfiguration("default"))
+            plugin.jarFiles.forEach {
+                addArtifact(IntellijIvyArtifact.createJarDependency(it, configuration.name, baseDir, groupId))
             }
+            plugin.classesDirectory?.let {
+                addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
+            }
+            plugin.metaInfDirectory?.let {
+                addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
+            }
+            ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
+                val artifact = IntellijIvyArtifact(it, "ideaIC", "jar", "sources", "sources")
+                artifact.conf = "sources"
+                addArtifact(artifact)
+            }
+            writeTo(ivyFile)
         }
+
     }
 
     private fun externalPluginDependency(project: Project, artifact: File, channel: String?, maven: Boolean): PluginDependency? {

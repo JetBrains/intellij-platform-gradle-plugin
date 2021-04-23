@@ -16,7 +16,6 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
 
     private val ivyFileEncoding = "UTF-8"
     private val ivyDatePattern = "yyyyMMddHHmmss"
-
     private val ivyDateFormat = SimpleDateFormat(ivyDatePattern)
     private val xmlTransformer = XmlTransformer()
     private val configurations = mutableListOf<IvyConfiguration>()
@@ -91,8 +90,7 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
         xmlWriter.endElement()
     }
 
-    class OptionalAttributeXmlWriter(writer: Writer, indent: String, encoding: String) :
-        SimpleXmlWriter(writer, indent, encoding) {
+    class OptionalAttributeXmlWriter(writer: Writer, indent: String, encoding: String) : SimpleXmlWriter(writer, indent, encoding) {
 
         override fun startElement(name: String?): OptionalAttributeXmlWriter {
             super.startElement(name)

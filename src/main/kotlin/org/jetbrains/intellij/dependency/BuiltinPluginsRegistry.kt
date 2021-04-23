@@ -18,22 +18,18 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
     private val directoryNameMapping = mutableMapOf<String, String>()
 
     companion object {
-        fun fromDirectory(pluginsDirectory: File, loggingContext: Any): BuiltinPluginsRegistry {
-            val result = BuiltinPluginsRegistry(pluginsDirectory)
-            if (!result.fillFromCache(loggingContext)) {
-                debug(loggingContext, "Builtin registry cache is missing")
-                result.fillFromDirectory(loggingContext)
-                result.dumpToCache(loggingContext)
+        fun fromDirectory(pluginsDirectory: File, loggingContext: Any) =
+            BuiltinPluginsRegistry(pluginsDirectory).apply {
+                if (!fillFromCache(loggingContext)) {
+                    debug(loggingContext, "Builtin registry cache is missing")
+                    fillFromDirectory(loggingContext)
+                    dumpToCache(loggingContext)
+                }
             }
-            return result
-        }
     }
 
     private fun fillFromCache(loggingContext: Any): Boolean {
-        val cache = cacheFile()
-        if (!cache.exists()) {
-            return false
-        }
+        val cache = cacheFile().takeIf { it.exists() } ?: return false
 
         debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
         return try {
@@ -49,13 +45,10 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
     }
 
     private fun fillFromDirectory(loggingContext: Any) {
-        val files = pluginsDirectory.listFiles()
-        if (files != null) {
-            for (file in files) {
-                if (file.isDirectory) {
-                    add(file, loggingContext)
-                }
-            }
+        pluginsDirectory.listFiles()?.apply {
+            asSequence()
+                .filter { it.isDirectory }
+                .forEach { add(it, loggingContext) }
         }
         debug(loggingContext, "Builtin registry populated with ${plugins.size} plugins")
     }
@@ -74,16 +67,13 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
     private fun cacheFile() = File(pluginsDirectory, "builtinRegistry.xml")
 
     fun findPlugin(name: String): File? {
-        val plugin = plugins[name] ?: plugins[directoryNameMapping[name]]
-        if (plugin != null) {
-            val result = File(pluginsDirectory, plugin.directoryName)
-            return if (result.exists() && result.isDirectory) {
-                result
-            } else {
-                return null
-            }
+        val plugin = plugins[name] ?: plugins[directoryNameMapping[name]] ?: return null
+        val result = File(pluginsDirectory, plugin.directoryName)
+
+        return when {
+            result.exists() && result.isDirectory -> result
+            else -> null
         }
-        return null
     }
 
     fun collectBuiltinDependencies(pluginIds: Collection<String>): Collection<String> {
@@ -131,6 +121,6 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
     data class Dependencies(
         @JacksonXmlElementWrapper(useWrapping = false)
         @JacksonXmlProperty(localName = "dependency")
-        val dependencies: List<String> = emptyList()
+        val dependencies: List<String> = emptyList(),
     ) : Serializable
 }

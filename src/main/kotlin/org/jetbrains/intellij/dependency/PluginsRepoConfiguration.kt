@@ -11,7 +11,6 @@ abstract class PluginsRepoConfiguration {
      */
     fun marketplace() {
         pluginsRepositories.add(MavenPluginsRepository(IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPO))
-
     }
 
     /**
@@ -19,7 +18,6 @@ abstract class PluginsRepoConfiguration {
      */
     fun maven(url: String) {
         pluginsRepositories.add(MavenPluginsRepository(url))
-
     }
 
     /**
@@ -27,7 +25,6 @@ abstract class PluginsRepoConfiguration {
      */
     fun custom(url: String) {
         pluginsRepositories.add(CustomPluginsRepository(url))
-
     }
 
     fun getRepositories() = pluginsRepositories.toList()

@@ -15,7 +15,7 @@ import java.nio.file.Paths
 
 class JbrResolver(val project: Project, val task: Task?, private val jreRepository: String?) {
 
-    val context: ExtensionAware = task ?: project
+    private val context: ExtensionAware = task ?: project
     private val cacheDirectoryPath = Paths.get(
         project.gradle.gradleUserHomeDir.absolutePath,
         "caches/modules-2/files-2.1/com.jetbrains/jbre",

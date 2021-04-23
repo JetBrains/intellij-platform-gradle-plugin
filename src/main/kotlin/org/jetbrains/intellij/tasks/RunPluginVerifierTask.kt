@@ -382,14 +382,8 @@ open class RunPluginVerifierTask : ConventionTask() {
      *
      * @return Plugin Verifier version
      */
-    private fun resolveVerifierVersion(): String {
-        verifierVersion.orNull?.let {
-            if (it != VERIFIER_VERSION_LATEST) {
-                return it
-            }
-        }
-        return resolveLatestVerifierVersion()
-    }
+    private fun resolveVerifierVersion() =
+        verifierVersion.orNull?.takeIf { it != VERIFIER_VERSION_LATEST } ?: resolveLatestVerifierVersion()
 
     /**
      * Resolves the Java Runtime directory. `runtimeDir` property is used if provided with the task configuration.
@@ -423,8 +417,7 @@ open class RunPluginVerifierTask : ConventionTask() {
         }
 
         val runIdeTask = project.tasks.findByName(IntelliJPluginConstants.RUN_IDE_TASK_NAME) as RunIdeTask
-        val builtinJbrVersion = getBuiltinJbrVersion(runIdeTask.ideDirectory.get().asFile)
-        if (builtinJbrVersion != null) {
+        getBuiltinJbrVersion(runIdeTask.ideDirectory.get().asFile)?.let { builtinJbrVersion ->
             jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
                 val javaHome = File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {
@@ -499,10 +492,8 @@ open class RunPluginVerifierTask : ConventionTask() {
      *
      * @return directory for downloaded IDEs
      */
-    fun ideDownloadDirectory(): Path {
-        val path = verifierHomeDirectory().resolve("ides")
-        Files.createDirectories(path)
-        return path
+    fun ideDownloadDirectory(): Path = verifierHomeDirectory().resolve("ides").also {
+        Files.createDirectories(it)
     }
 
     /**
@@ -514,12 +505,12 @@ open class RunPluginVerifierTask : ConventionTask() {
      * @param version current version
      * @return version parameter name
      */
-    fun versionParameterName(version: String) = when {
+    private fun versionParameterName(version: String) = when {
         version.matches("\\d{3}(\\.\\d+)+".toRegex()) -> "build"
         else -> "version"
     }
 
-    fun getPluginVerifierRepository(version: String) = when {
+    private fun getPluginVerifierRepository(version: String) = when {
         VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO
         else -> IntelliJPluginConstants.OLD_INTELLIJ_PLUGIN_VERIFIER_REPO
     }
@@ -538,8 +529,8 @@ open class RunPluginVerifierTask : ConventionTask() {
         NOT_DYNAMIC("Plugin cannot be loaded/unloaded without IDE restart");
 
         companion object {
-            val ALL = EnumSet.allOf(FailureLevel::class.java)
-            val NONE = EnumSet.noneOf(FailureLevel::class.java)
+            val ALL: EnumSet<FailureLevel> = EnumSet.allOf(FailureLevel::class.java)
+            val NONE: EnumSet<FailureLevel> = EnumSet.noneOf(FailureLevel::class.java)
         }
     }
 }

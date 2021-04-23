@@ -143,8 +143,6 @@ fun stringInput(input: Any?) = when (input) {
     else -> input.toString()
 }
 
-fun stringListInput(input: List<Any>) = input.map { stringInput(it) }
-
 fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = when {
     !directory.isDirectory -> emptyList()
     else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
