@@ -501,10 +501,10 @@ class PrepareSandboxTaskSpec extends IntelliJPluginSpecBase {
                 pluginName = 'myPluginName' 
             }
             dependencies { 
-                compile 'joda-time:joda-time:2.8.1'
-                compile fileTree('one')
-                compile fileTree('two')
-                compile fileTree('three')
+                implementation 'joda-time:joda-time:2.8.1'
+                implementation fileTree('one')
+                implementation fileTree('two')
+                implementation fileTree('three')
             }
             """.stripIndent()
 

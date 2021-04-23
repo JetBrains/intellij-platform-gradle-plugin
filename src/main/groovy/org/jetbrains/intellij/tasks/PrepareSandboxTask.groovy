@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-import kotlin.text.StringsKt
 import org.gradle.api.file.CopySpec
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileCollection
@@ -138,8 +137,9 @@ class PrepareSandboxTask extends Sync {
             }
             result
         }.eachFile { FileCopyDetails details ->
-            def originalName = StringsKt.substringBeforeLast(details.name, '.', details.name)
-            def originalExtension = StringsKt.substringAfterLast(details.name, '.', details.name)
+            def dotIndex = details.name.lastIndexOf('.')
+            def originalName = dotIndex != -1 ? details.name.substring(0, dotIndex) : details.name
+            def originalExtension = dotIndex != -1 ? details.name.substring(dotIndex + 1) : ""
             def index = 1
             while (!usedNames.add(details.name)) {
                 details.name = "${originalName}_${index}.${originalExtension}"
