@@ -708,4 +708,41 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(sandbox),
         )
     }
+
+    @Test
+    fun `rename jars with same names`() {
+        emptyZipFile("one/core.jar")
+        emptyZipFile("two/core.jar")
+        emptyZipFile("three/core.jar")
+        writeJavaFile()
+
+        buildFile.groovy("""
+            version = '0.42.123'
+            
+            intellij { 
+                pluginName = 'myPluginName' 
+            }
+            
+            dependencies { 
+                implementation 'joda-time:joda-time:2.8.1'
+                implementation fileTree('one')
+                implementation fileTree('two')
+                implementation fileTree('three')
+            }
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+
+        assertEquals(
+            setOf(
+                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
+                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
+                "/plugins/myPluginName/lib/core.jar",
+                "/plugins/myPluginName/lib/core_1.jar",
+                "/plugins/myPluginName/lib/core_2.jar",
+                "/config/options/updates.xml",
+            ),
+            collectPaths(sandbox),
+        )
+    }
 }

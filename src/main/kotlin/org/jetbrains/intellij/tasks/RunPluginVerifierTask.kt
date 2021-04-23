@@ -268,8 +268,8 @@ open class RunPluginVerifierTask : ConventionTask() {
                 val dir = downloadIde(type!!, version!!, buildType)
                 debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
                 return dir.absolutePath
-            } catch (ignored: IOException) {
-                debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...")
+            } catch (e: IOException) {
+                debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...", e)
             }
         }
 
@@ -366,7 +366,8 @@ open class RunPluginVerifierTask : ConventionTask() {
                 debug(this, "IDE download URL has no redirection provided, skipping.")
             }
         } catch (e: Exception) {
-            error(this, "Cannot resolve direct download URL for: $url", e)
+            info(this, "Cannot resolve direct download URL for: $url")
+            debug(this, "Download exception stacktrace:", e)
         } finally {
             connection?.disconnect()
         }

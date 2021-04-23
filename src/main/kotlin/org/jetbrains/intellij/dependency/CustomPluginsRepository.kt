@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import de.undercouch.gradle.tasks.download.org.apache.commons.codec.binary.Hex
 import org.gradle.api.Project
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.model.Category
@@ -10,6 +11,7 @@ import java.io.File
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.security.MessageDigest
 
 class CustomPluginsRepository(repoUrl: String) : PluginsRepository {
 
@@ -23,7 +25,8 @@ class CustomPluginsRepository(repoUrl: String) : PluginsRepository {
             pluginsXmlUri = uri
         } else {
             this.repoUrl = repoUrl
-            pluginsXmlUri = URI(uri.scheme, uri.userInfo, uri.host, uri.port, "${uri.path}/", uri.query, uri.fragment).resolve("updatePlugins.xml")
+            pluginsXmlUri =
+                URI(uri.scheme, uri.userInfo, uri.host, uri.port, "${uri.path}/", uri.query, uri.fragment).resolve("updatePlugins.xml")
         }
     }
 
@@ -56,7 +59,9 @@ class CustomPluginsRepository(repoUrl: String) : PluginsRepository {
         // todo: a better way to define cache directory
         val gradleHomePath = project.gradle.gradleUserHomeDir.absolutePath
         val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
-        return Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea").toString()
+        val digest = MessageDigest.getInstance("SHA-1").digest(repoUrl.toByteArray())
+        val hash = Hex.encodeHex(digest).toString()
+        return Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea", hash).toString()
     }
 
     private fun downloadZipArtifact(project: Project, url: String, plugin: PluginDependencyNotation): File {

@@ -27,8 +27,8 @@ repositories {
 dependencies {
     api(gradleApi())
     implementation("org.jetbrains:annotations:19.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.169")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.169")
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.170")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.170")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
@@ -127,7 +127,7 @@ publishing {
             artifactId = project.name
             version = version.toString()
 
-            artifact(tasks.findByName("jar"))
+            from(components["java"])
             artifact(sourcesJar.get())
             artifact(javadocJar.get())
 
@@ -147,7 +147,7 @@ publishing {
                 licenses {
                     license {
                         name.set("The Apache License, Version 2.0")
-                        url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0.txt")
                     }
                 }
 

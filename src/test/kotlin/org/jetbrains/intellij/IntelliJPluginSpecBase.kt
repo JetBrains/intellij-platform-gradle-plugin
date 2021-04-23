@@ -6,7 +6,9 @@ import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
 import java.io.BufferedReader
 import java.io.File
+import java.io.FileOutputStream
 import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -108,8 +110,21 @@ abstract class IntelliJPluginSpecBase {
         drop(start).takeWhile(String::isNotEmpty).map { it.substringBefore(' ') }
     }
 
-
     protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
+
+    protected fun emptyZipFile(path: String): File {
+        val splitted = path.split('/')
+        val directory = when {
+            splitted.size > 1 -> directory(splitted.dropLast(1).joinToString("/"))
+            else -> dir
+        }
+        val file = File(directory, splitted.last())
+        val outputStream = FileOutputStream(file)
+        val zipOutputStream = ZipOutputStream(outputStream)
+        zipOutputStream.close()
+        outputStream.close()
+        return file
+    }
 
     protected fun file(path: String) = path
         .run { takeIf { startsWith('/') } ?: "${dir.path}/$this" }
