@@ -7,7 +7,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-class ProcessResourcesTaskSpec: IntelliJPluginSpecBase() {
+class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     private val outputPluginXml = lazy { File(buildDirectory, "resources/main/META-INF/").listFiles()?.first() }
 
@@ -55,7 +55,7 @@ class ProcessResourcesTaskSpec: IntelliJPluginSpecBase() {
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
         buildFile.groovy("""
-            patchPluginXml { sinceBuild 'Oh' }
+            patchPluginXml { sinceBuild = 'Oh' }
         """)
 
         val result = build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)

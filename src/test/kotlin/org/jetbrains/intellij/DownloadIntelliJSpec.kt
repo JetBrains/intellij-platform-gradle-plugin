@@ -76,8 +76,8 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij { 
-                version 'IU-14.1.4'
-                downloadSources true 
+                version = 'IU-14.1.4'
+                downloadSources = true 
             }
         """)
         build(BasePlugin.ASSEMBLE_TASK_NAME)

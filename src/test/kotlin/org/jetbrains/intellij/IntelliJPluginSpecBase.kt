@@ -13,7 +13,7 @@ import kotlin.test.assertEquals
 abstract class IntelliJPluginSpecBase {
 
     val gradleHome: String = System.getProperty("test.gradle.home")
-    val pluginsRepo: String = System.getProperty("plugins.repo", IntelliJPlugin.DEFAULT_INTELLIJ_PLUGINS_REPO)
+    val pluginsRepo: String = System.getProperty("plugins.repo", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPO)
     val intellijVersion = "2020.1"
 
     val dir = createTempDir()
@@ -30,7 +30,7 @@ abstract class IntelliJPluginSpecBase {
         buildFile.groovy("""
             buildscript {
                 repositories { 
-                    maven { url 'https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service' } 
+                    maven { url 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure' } 
                     mavenCentral()
                 }
                 dependencies {
@@ -48,7 +48,9 @@ abstract class IntelliJPluginSpecBase {
             intellij {
                 version = '$intellijVersion'
                 downloadSources = false
-                pluginsRepo = '$pluginsRepo'
+                pluginsRepo {
+                    marketplace()
+                }
                 instrumentCode = false
             }
 
@@ -92,11 +94,14 @@ abstract class IntelliJPluginSpecBase {
         }
 
     private fun builder(gradleVersion: String, vararg tasks: String) =
-        GradleRunner.create().withProjectDir(dir).withGradleVersion(gradleVersion)
+        GradleRunner.create()
+            .withProjectDir(dir)
+            .withGradleVersion(gradleVersion)
+            .forwardOutput()
             .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
-            .withArguments(*tasks, "--stacktrace")
+            .withArguments(*tasks, "--stacktrace")//, "-Dorg.gradle.debug=true")
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
@@ -105,7 +110,7 @@ abstract class IntelliJPluginSpecBase {
 
 
     protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
-    //
+
     protected fun file(path: String) = path
         .run { takeIf { startsWith('/') } ?: "${dir.path}/$this" }
         .split('/')
@@ -142,7 +147,7 @@ abstract class IntelliJPluginSpecBase {
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trimIndent(), file?.readText()?.trim())
+        assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.replace("\r", "")?.trim())
 
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
         assertEquals(expectedContent.trimIndent(), fileText(zip, path))
@@ -157,18 +162,21 @@ abstract class IntelliJPluginSpecBase {
         .getInputStream(zipFile.getEntry(path))
         .bufferedReader()
         .use(BufferedReader::readText)
+        .replace("\r", "")
         .trim()
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
 
     protected fun collectPaths(directory: File): Set<String> {
         assert(directory.exists())
-        // TODO: check if directories are skipped
         return directory.walkTopDown().filterNot { it.isDirectory }.map {
             adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length))
         }.toSet()
     }
 
+    // Methods can be simplified, when following tickets will be handled:
+    // https://youtrack.jetbrains.com/issue/KT-24517
+    // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun File.xml(@Language("XML") content: String) = append(content)
 
     fun File.groovy(@Language("Groovy") content: String) = append(content)

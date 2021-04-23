@@ -15,8 +15,8 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
-        assertTrue(result.output.contains("${IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
+        val result = build(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+        assertTrue(result.output.contains("${IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
     }
 
     @Test
@@ -29,7 +29,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         """)
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        build(IntelliJPlugin.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+        build(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
 
         val libsSearchableOptions = File(buildDirectory, "libsSearchableOptions")
         assertTrue(libsSearchableOptions.exists())

@@ -2,13 +2,13 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     groovy
-    kotlin("jvm") version "1.4.30"
-    id("com.gradle.plugin-publish") version "0.13.0"
+    kotlin("jvm") version "1.4.32"
+    id("com.gradle.plugin-publish") version "0.14.0"
     id("synapticloop.documentr") version "3.1.0"
     `java-gradle-plugin`
     `maven-publish`
-    id("com.github.breadmoirai.github-release") version "2.2.9"
-    id("org.jetbrains.changelog") version "1.1.1"
+    id("com.github.breadmoirai.github-release") version "2.2.12"
+    id("org.jetbrains.changelog") version "1.1.2"
 }
 
 plugins.withType<JavaPlugin> {
@@ -27,17 +27,17 @@ plugins.withType<JavaPlugin> {
 }
 
 repositories {
-    maven("https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service")
+    maven("https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure")
+    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
-    maven("https://cache-redirector.jetbrains.com/jcenter.bintray.com")
 }
 
 dependencies {
     implementation(localGroovy())
     api(gradleApi())
     implementation("org.jetbrains:annotations:19.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.139")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.139")
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.169")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.169")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
@@ -48,6 +48,7 @@ dependencies {
     implementation("de.undercouch:gradle-download-task:4.0.4")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("com.fasterxml.woodstox:woodstox-core:6.2.4")
 
     testImplementation(gradleTestKit())
     testImplementation("org.spockframework:spock-core:1.0-groovy-2.4") {
@@ -64,7 +65,7 @@ version = if (project.property("snapshot")?.toString()?.toBoolean() == true) {
 }
 group = "org.jetbrains.intellij.plugins"
 description = """
-**This project requires Gradle 4.9 or newer**
+**This project requires Gradle 5.1 or newer**
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 

@@ -119,7 +119,6 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                 pluginsRepo {
                     custom('${resource}')
                 }
-                
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             } 
         """)

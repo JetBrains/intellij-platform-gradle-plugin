@@ -7,11 +7,11 @@ import java.io.File
 import java.net.URI
 
 @CompileStatic
-class MavenPluginsRepository(val project: Project, private val repoUrl: String) : PluginsRepository {
+class MavenPluginsRepository(private val repoUrl: String) : PluginsRepository {
 
     private var resolvedDependency = false
 
-    override fun resolve(plugin: PluginDependencyNotation): File? {
+    override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
         val dependency = plugin.toDependency(project)
 
         debug(project, "Adding Maven repository to download $dependency - $repoUrl")
@@ -32,7 +32,7 @@ class MavenPluginsRepository(val project: Project, private val repoUrl: String) 
         return pluginFile
     }
 
-    override fun postResolve() {
+    override fun postResolve(project: Project) {
         if (resolvedDependency) {
             debug(project, "Adding Maven plugins repository $repoUrl")
             project.repositories.maven { it.url = URI.create(repoUrl) }

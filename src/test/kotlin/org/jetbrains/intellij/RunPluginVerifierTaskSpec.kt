@@ -1,9 +1,7 @@
 package org.jetbrains.intellij
 
 import org.apache.commons.io.FileUtils
-import org.gradle.internal.impldep.com.google.gson.JsonParser
-import java.io.InputStream
-import java.io.InputStreamReader
+import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -18,14 +16,31 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
-                verifierVersion = "1.241"
+                ideVersions = ["2020.2.3"]
+                verifierVersion = "1.255"
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.241"))
+        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.255"))
+    }
+
+    @Test
+    fun `run plugin verifier in old version hosted on Bintray`() {
+        writePluginXmlFile()
+        buildFile.groovy("""
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["2020.2.3"]
+                verifierVersion = "1.254"
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
+
+        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.254"))
     }
 
     @Test
@@ -35,12 +50,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
 
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
-        val version = requestPluginVerifierVersion()
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier $version"))
     }
 
@@ -52,14 +67,14 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "IC-2020.2.3,PS-2020.1.3"
+                ideVersions = ["IC-2020.2.3", "PS-2020.1.3"]
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Plugin PluginName:1.0.0 against IC-202.7660.26: Compatible"))
-        assertTrue(result.output.contains("Plugin PluginName:1.0.0 against PS-201.8538.41: Compatible"))
+        assertTrue(result.output.contains("Plugin MyName:1.0.0 against IC-202.7660.26: Compatible"))
+        assertTrue(result.output.contains("Plugin MyName:1.0.0 against PS-201.8538.41: Compatible"))
     }
 
     @Test
@@ -75,7 +90,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         val directory = file("build/foo").canonicalPath
         assertTrue(result.output.contains("Verification reports directory: $directory"))
@@ -89,7 +104,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("`ideVersions` and `localPaths` properties should not be empty"))
     }
@@ -102,7 +117,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Plugin descriptor 'plugin.xml' is not found"))
         assertTrue(result.output.contains("Task :verifyPlugin FAILED"))
@@ -118,12 +133,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                failureLevel = FailureLevel.DEPRECATED_API_USAGES
-                ideVersions = "2020.2.3"
+                failureLevel = [FailureLevel.DEPRECATED_API_USAGES]
+                ideVersions = ["2020.2.3"]
             }
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -137,11 +152,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -157,11 +172,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "foo,foo,,foo"
+                ideVersions = ["foo", "foo", "", "foo"]
             }
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("IDE 'foo' cannot be downloaded."))
     }
@@ -176,12 +191,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.ALL
             }
         """)
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -197,12 +212,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.NONE
             }
         """)
 
-        val result = build(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("Deprecated API usages"))
         assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
@@ -216,18 +231,18 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
 
             runPluginVerifier {
-                ideVersions = "2020.1.3"
+                ideVersions = ["2020.1.3"]
                 verifierPath = "${'$'}{project.buildDir}/pluginVerifier.jar"
             }
         """)
 
-        val version = requestPluginVerifierVersion()
+        val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         FileUtils.copyInputStreamToFile(
-            URL("https://dl.bintray.com/jetbrains/intellij-plugin-service/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
+            URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")
         )
 
-        val result = buildAndFail(IntelliJPlugin.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
         assertTrue(result.output.contains("Gradle runs in offline mode."))
     }
 
@@ -236,10 +251,10 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
 
             runPluginVerifier {
-                ideVersions = "2020.2.3"
+                ideVersions = ["2020.2.3"]
             }
         """)
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
     }
 
     private fun writeJavaFileWithDeprecation() {
@@ -260,21 +275,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     private fun writePluginXmlFile() {
         pluginXml.xml("""
             <idea-plugin>
-                <name>PluginName</name>
+                <name>MyName</name>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
+                <depends>com.intellij.modules.platform</depends>
             </idea-plugin>
         """)
-    }
-
-    private fun requestPluginVerifierVersion(): String {
-        val url = URL("https://api.bintray.com/packages/jetbrains/intellij-plugin-service/intellij-plugin-verifier/versions/_latest")
-        val request = url.openConnection()
-        request.connect()
-
-        val jp = JsonParser() //from gson
-        val root = jp.parse(InputStreamReader(request.content as InputStream)) //Convert the input stream to a json element
-        val rootobj = root.asJsonObject //May be an array, may be an object.
-        return rootobj.get("name").asString //just grab the zipcode
     }
 }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.parseXml
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
@@ -38,7 +38,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
 
         debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
         return try {
-            parsePluginXml(cache, PluginsCache::class.java).plugin.forEach {
+            parseXml(cache, PluginsCache::class.java).plugin.forEach {
                 plugins[it.id] = it
                 directoryNameMapping[it.directoryName] = it.id
             }

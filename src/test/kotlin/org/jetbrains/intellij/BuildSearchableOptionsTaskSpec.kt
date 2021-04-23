@@ -8,14 +8,14 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
     @Test
     fun `skip building searchable options using IDEA prior 2019_1`() {
         buildFile.groovy("""
-           intellij {
+            intellij {
                 version = '14.1.4'
             } 
         """)
 
-        val result = build(IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+        val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
 
-        assertTrue(result.output.contains("${IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
+        assertTrue(result.output.contains("${IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
     }
 
     @Test
@@ -30,7 +30,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        val result = build(IntelliJPlugin.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+        val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
         assertTrue(result.output.contains("Starting searchable options index builder"))
         assertTrue(result.output.contains("Searchable options index builder completed"))
 

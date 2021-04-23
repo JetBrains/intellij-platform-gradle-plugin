@@ -22,9 +22,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-                <depends config-file="other.xml" />
+              <name>MyPluginName</name>
+              <vendor>JetBrains</vendor>
+              <depends config-file="other.xml" />
             </idea-plugin>
         """)
 
@@ -41,7 +41,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         listOf("6.6").forEach { gradleVersion ->
-            build(gradleVersion, false, IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+            build(gradleVersion, false, IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
             val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
             assertTrue(distribution.exists())
@@ -106,7 +106,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -172,7 +172,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -202,7 +202,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -241,7 +241,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -280,7 +280,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -306,7 +306,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             } 
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -347,10 +347,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             
             intellij {
                 pluginName = 'myPluginName'
-}
+            }
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         buildFile.groovy("""
             version = '0.42.123'
@@ -360,7 +360,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPlugin.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())

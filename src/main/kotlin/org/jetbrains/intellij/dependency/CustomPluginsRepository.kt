@@ -5,13 +5,13 @@ import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.model.Category
 import org.jetbrains.intellij.model.PluginRepository
 import org.jetbrains.intellij.model.Plugins
-import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.parseXml
 import java.io.File
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Paths
 
-class CustomPluginsRepository(val project: Project, repoUrl: String) : PluginsRepository {
+class CustomPluginsRepository(repoUrl: String) : PluginsRepository {
 
     private var pluginsXmlUri: URI
     private val repoUrl: String
@@ -25,22 +25,21 @@ class CustomPluginsRepository(val project: Project, repoUrl: String) : PluginsRe
             this.repoUrl = repoUrl
             pluginsXmlUri = URI(uri.scheme, uri.userInfo, uri.host, uri.port, "${uri.path}/", uri.query, uri.fragment).resolve("updatePlugins.xml")
         }
-
-        debug(project, "Loading list of plugins from: $pluginsXmlUri")
     }
 
-    override fun resolve(plugin: PluginDependencyNotation): File? {
+    override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
+        debug(project, "Loading list of plugins from: $pluginsXmlUri")
         var downloadUrl: String?
 
         // Try to parse file as <plugin-repository>
-        val pluginRepository = parsePluginXml(pluginsXmlUri.toURL().openStream(), PluginRepository::class.java)
+        val pluginRepository = parseXml(pluginsXmlUri.toURL().openStream(), PluginRepository::class.java)
         downloadUrl = pluginRepository.categories.flatMap(Category::plugins).find {
             it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
         }?.downloadUrl?.let { "$repoUrl/$it" }
 
         if (downloadUrl == null) {
             // Try to parse XML file as <plugins>
-            val plugins = parsePluginXml(pluginsXmlUri.toURL().openStream(), Plugins::class.java)
+            val plugins = parseXml(pluginsXmlUri.toURL().openStream(), Plugins::class.java)
             downloadUrl = plugins.items.find {
                 it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
             }?.url
@@ -50,18 +49,18 @@ class CustomPluginsRepository(val project: Project, repoUrl: String) : PluginsRe
             return null
         }
 
-        return downloadZipArtifact(downloadUrl, plugin)
+        return downloadZipArtifact(project, downloadUrl, plugin)
     }
 
-    private fun getCacheDirectoryPath(): String {
+    private fun getCacheDirectoryPath(project: Project): String {
         // todo: a better way to define cache directory
         val gradleHomePath = project.gradle.gradleUserHomeDir.absolutePath
         val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
         return Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea").toString()
     }
 
-    private fun downloadZipArtifact(url: String, plugin: PluginDependencyNotation): File {
-        val targetFile = Paths.get(getCacheDirectoryPath(), "com.jetbrains.plugins", "${plugin.id}-${plugin.version}.zip").toFile()
+    private fun downloadZipArtifact(project: Project, url: String, plugin: PluginDependencyNotation): File {
+        val targetFile = Paths.get(getCacheDirectoryPath(project), "com.jetbrains.plugins", "${plugin.id}-${plugin.version}.zip").toFile()
         if (!targetFile.isFile) {
             targetFile.parentFile.mkdirs()
             Files.copy(URI.create(url).toURL().openStream(), targetFile.toPath())
@@ -69,6 +68,6 @@ class CustomPluginsRepository(val project: Project, repoUrl: String) : PluginsRe
         return targetFile
     }
 
-    override fun postResolve() {
+    override fun postResolve(project: Project) {
     }
 }
