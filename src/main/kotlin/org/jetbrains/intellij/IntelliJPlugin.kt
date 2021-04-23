@@ -12,6 +12,7 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.bundling.Jar
@@ -25,6 +26,7 @@ import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
+import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.IdeaPlugin
 import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
@@ -44,96 +46,96 @@ import java.io.File
 import java.util.EnumSet
 
 @Suppress("UnstableApiUsage")
-abstract class IntelliJPlugin : Plugin<Project> {
+open class IntelliJPlugin : Plugin<Project> {
 
-    //    @Override
-//    void apply(project: Project) {
-//        checkGradleVersion(project)
-//        project.getPlugins().apply(JavaPlugin)
-//        val intellijExtension = project.extensions.create(IntelliJPluginConstants.EXTENSION_NAME, IntelliJPluginExtension, project.objects) as IntelliJPluginExtension
-//        intellijExtension.with {
-//            pluginName.convention(project.provider {
-//                project.name
-//            })
-//            updateSinceUntilBuild.convention(true)
-//            sameSinceUntilBuild.convention(false)
-//            instrumentCode.convention(true)
-//            sandboxDirectory.convention(project.provider({
-//                File(project.buildDir, IntelliJPluginConstants.DEFAULT_SANDBOX).absolutePath
-//            }))
-//            intellijRepo.convention(IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO)
-//            downloadSources.convention(!System.getenv().containsKey("CI"))
-//            configureDefaultDependencies.convention(true)
-//            type.convention("IC")
-//        }
-//        configureConfigurations(project, intellijExtension)
-//        configureTasks(project, intellijExtension)
-//    }
-//
-//    fun checkGradleVersion(project: Project) {
-//        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("5.1")) {
-//            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 5.1 and higher")
-//        }
-//    }
-//
-//    fun configureConfigurations(project: Project, extension: IntelliJPluginExtension) {
-//        val idea = project.configurations.create(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).setVisible(false)
-//        configureIntellijDependency(project, extension, idea)
-//
-//        val ideaPlugins = project.configurations.create(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false)
-//        configurePluginDependencies(project, extension, ideaPlugins)
-//
-//        val defaultDependencies = project.configurations.create("intellijDefaultDependencies").setVisible(false)
-//        defaultDependencies.defaultDependencies { dependencies ->
-//            dependencies.add(project.dependencies.create('org.jetbrains:annotations:19.0.0'))
-//        }
-//
-//        project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom defaultDependencies, idea, ideaPlugins
-//        project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom defaultDependencies, idea, ideaPlugins
-//    }
-//
-//    fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
-//        info(project, "Configuring plugin")
-//        project.tasks.whenTaskAdded {
-//            if (it instanceof RunIdeBase) {
-//                prepareConventionMappingsForRunIdeTask(project, extension, it, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-//            }
-//            if (it instanceof RunIdeForUiTestTask) {
-//                prepareConventionMappingsForRunIdeTask(project, extension, it, IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
-//            }
-//        }
-//        configurePatchPluginXmlTask(project, extension)
-//        configureRobotServerDownloadTask(project)
-//        configurePrepareSandboxTasks(project, extension)
-//        configureRunPluginVerifierTask(project)
-//        configurePluginVerificationTask(project)
-//        configureRunIdeaTask(project)
-//        configureRunIdeaForUiTestsTask(project)
-//        configureBuildSearchableOptionsTask(project, extension)
-//        configureJarSearchableOptionsTask(project)
-//        configureBuildPluginTask(project)
-//        configurePublishPluginTask(project)
-//        configureProcessResources(project)
-//        configureInstrumentation(project, extension)
-//        configureDependencyExtensions(project, extension)
-//        assert !project.state.executed: "afterEvaluate is a no-op for an executed project"
-//        project.afterEvaluate { Project p -> configureProjectAfterEvaluate(p, extension) }
-//    }
-//
-//    fun configureProjectAfterEvaluate(project: Project,
-//    extension: IntelliJPluginExtension) {
-//        for (val subproject : project.subprojects) {
-//            if (subproject.plugins.findPlugin(IntelliJPluginGr) != null) {
-//                continue
-//            }
-//            val subprojectExtension = subproject.extensions.findByType(IntelliJPluginExtension)
-//            if (subprojectExtension) {
-//                configureProjectAfterEvaluate(subproject, subprojectExtension)
-//            }
-//        }
-//
-//        configureTestTasks(project, extension)
-//    }
+    override fun apply(project: Project) {
+        checkGradleVersion(project)
+        project.plugins.apply(JavaPlugin::class.java)
+        val intellijExtension = project.extensions.create(IntelliJPluginConstants.EXTENSION_NAME,
+            IntelliJPluginExtension::class.java,
+            project.objects) as IntelliJPluginExtension
+        intellijExtension.apply {
+            pluginName.convention(project.provider {
+                project.name
+            })
+            updateSinceUntilBuild.convention(true)
+            sameSinceUntilBuild.convention(false)
+            instrumentCode.convention(true)
+            sandboxDirectory.convention(project.provider {
+                File(project.buildDir, IntelliJPluginConstants.DEFAULT_SANDBOX).absolutePath
+            })
+            intellijRepo.convention(IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO)
+            downloadSources.convention(!System.getenv().containsKey("CI"))
+            configureDefaultDependencies.convention(true)
+            type.convention("IC")
+        }
+        configureConfigurations(project, intellijExtension)
+        configureTasks(project, intellijExtension)
+    }
+
+    fun checkGradleVersion(project: Project) {
+        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("5.1")) {
+            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 5.1 and higher")
+        }
+    }
+
+    fun configureConfigurations(project: Project, extension: IntelliJPluginExtension) {
+        val idea = project.configurations.create(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).setVisible(false)
+        configureIntellijDependency(project, extension, idea)
+
+        val ideaPlugins = project.configurations.create(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false)
+        configurePluginDependencies(project, extension, ideaPlugins)
+
+        val defaultDependencies = project.configurations.create("intellijDefaultDependencies").setVisible(false)
+        defaultDependencies.defaultDependencies { dependencies ->
+            dependencies.add(project.dependencies.create("org.jetbrains:annotations:19.0.0"))
+        }
+
+        project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
+        project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+            .extendsFrom(defaultDependencies, idea, ideaPlugins)
+    }
+
+    fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
+        info(project, "Configuring plugin")
+        project.tasks.whenTaskAdded {
+            if (it is RunIdeBase) {
+                prepareConventionMappingsForRunIdeTask(project, extension, it, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+            }
+            if (it is RunIdeForUiTestTask) {
+                prepareConventionMappingsForRunIdeTask(project, extension, it, IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+            }
+        }
+        configurePatchPluginXmlTask(project, extension)
+        configureRobotServerDownloadTask(project)
+        configurePrepareSandboxTasks(project, extension)
+        configureRunPluginVerifierTask(project)
+        configurePluginVerificationTask(project)
+        configureRunIdeaTask(project)
+        configureRunIdeaForUiTestsTask(project)
+        configureBuildSearchableOptionsTask(project, extension)
+        configureJarSearchableOptionsTask(project)
+        configureBuildPluginTask(project)
+        configurePublishPluginTask(project)
+        configureProcessResources(project)
+        configureInstrumentation(project, extension)
+        assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
+        project.afterEvaluate {
+            configureProjectAfterEvaluate(it, extension)
+        }
+    }
+
+    fun configureProjectAfterEvaluate(project: Project, extension: IntelliJPluginExtension) {
+        project.subprojects.forEach { subproject ->
+            if (subproject.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
+                subproject.extensions.findByType(IntelliJPluginExtension::class.java)?.let {
+                    configureProjectAfterEvaluate(subproject, it)
+                }
+            }
+        }
+
+        configureTestTasks(project, extension)
+    }
 
     fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
@@ -263,41 +265,34 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    abstract fun configureProjectPluginTasksDependency(project: Project, dependency: Project)
-//    fun configureProjectPluginTasksDependency(project: Project, dependency: Project) {
-//        // invoke before tasks graph is ready
-//        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-//            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
-//        }
-//        val dependencySandboxTask = dependency.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-//        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
-//            it.dependsOn(dependencySandboxTask)
-//        }
-//    }
+    fun configureProjectPluginTasksDependency(project: Project, dependency: Project) {
+        // invoke before tasks graph is ready
+        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
+            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+        }
+        val dependencySandboxTask = dependency.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
+            it.dependsOn(dependencySandboxTask)
+        }
+    }
 
-    abstract fun configureProjectPluginDependency(
+    fun configureProjectPluginDependency(
         project: Project,
         dependency: Project,
         dependencies: DependencySet,
         extension: IntelliJPluginExtension,
-    )
-//    fun configureProjectPluginDependency(
-//        project: Project,
-//        dependency: Project,
-//        dependencies: DependencySet,
-//        extension: IntelliJPluginExtension,
-//    ) {
-//        // invoke on demand, when plugins artifacts are needed
-//        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-//            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
-//        }
-//        dependencies.add(project.dependencies.create(dependency))
-//        val pluginDependency = PluginProjectDependency(dependency)
-//        extension.addPluginDependency(pluginDependency)
-//        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
-//            it.configureCompositePlugin(pluginDependency)
-//        }
-//    }
+    ) {
+        // invoke on demand, when plugins artifacts are needed
+        if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
+            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+        }
+        dependencies.add(project.dependencies.create(dependency))
+        val pluginDependency = PluginProjectDependency(dependency)
+        extension.addPluginDependency(pluginDependency)
+        project.tasks.withType(PrepareSandboxTask::class.java).forEach {
+            it.configureCompositePlugin(pluginDependency)
+        }
+    }
 
     fun configurePatchPluginXmlTask(project: Project, extension: IntelliJPluginExtension) {
         info(project, "Configuring patch plugin.xml task")

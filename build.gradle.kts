@@ -79,7 +79,7 @@ gradlePlugin {
     plugins.create("intellijPlugin") {
         id = "org.jetbrains.intellij"
         displayName = "Gradle IntelliJ Plugin"
-        implementationClass = "org.jetbrains.intellij.IntelliJPluginGr"
+        implementationClass = "org.jetbrains.intellij.IntelliJPlugin"
     }
 }
 
