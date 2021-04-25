@@ -51,7 +51,7 @@ abstract class IntelliJPluginSpecBase {
                 version = '$intellijVersion'
                 downloadSources = false
                 pluginsRepo {
-                    marketplace()
+                    maven('$pluginsRepo')
                 }
                 instrumentCode = false
             }
