@@ -72,22 +72,22 @@ open class PrepareSandboxTask : Sync() {
                         file.absolutePath == p || file.absolutePath.startsWith("$p${File.separator}")
                     })
                 }
-            }.flatten().onEach { details ->
-                val dotIndex = details.name.lastIndexOf('.')
-                val originalName = when {
-                    dotIndex != -1 -> details.name.substring(0, dotIndex)
-                    else -> details.name
-                }
-                val originalExtension = when {
-                    dotIndex != -1 -> details.name.substring(dotIndex + 1)
-                    else -> ""
-                }
-                var index = 1
-                while (!usedNames.add(details.name)) {
-                    details.renameTo(File("${originalName}_${++index}.${originalExtension}"))
-                }
+            }.flatten()
+        }).eachFile { details ->
+            val dotIndex = details.name.lastIndexOf('.')
+            val originalName = when {
+                dotIndex != -1 -> details.name.substring(0, dotIndex)
+                else -> details.name
             }
-        })
+            val originalExtension = when {
+                dotIndex != -1 -> details.name.substring(dotIndex + 1)
+                else -> ""
+            }
+            var index = 1
+            while (!usedNames.add(details.name)) {
+                details.name = "${originalName}_${index++}.${originalExtension}"
+            }
+        }
     }
 
     @TaskAction
