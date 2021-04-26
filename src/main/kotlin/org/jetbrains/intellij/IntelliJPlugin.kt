@@ -419,6 +419,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 task.ideDownloadDirectory().toString()
             })
             task.teamCityOutputFormat.convention(false)
+            task.subsystemsToCheck.convention("all")
 
             task.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             task.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)

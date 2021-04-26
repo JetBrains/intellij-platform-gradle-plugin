@@ -148,15 +148,17 @@ open class RunPluginVerifierTask : ConventionTask() {
     /**
      * A flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
      * will be returned to stdout.
-     *
-     * TODO: false by default
      */
+    @Input
+    @Optional
     val teamCityOutputFormat: Property<Boolean> = project.objects.property(Boolean::class.java)
 
     /**
      * Specifies which subsystems of IDE should be checked.
      * Available options: `all` (default), `android-only`, `without-android`.
      */
+    @Input
+    @Optional
     val subsystemsToCheck: Property<String> = project.objects.property(String::class.java)
 
     /**
