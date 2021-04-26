@@ -85,7 +85,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
-        executable(executable)
+        executable(executable ?: "")
         super.exec()
     }
 

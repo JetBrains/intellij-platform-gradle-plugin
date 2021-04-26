@@ -378,6 +378,7 @@ open class IntelliJPlugin : Plugin<Project> {
             task.pluginJar.convention(project.layout.file(project.provider {
                 (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archiveFile.orNull?.asFile
             }))
+            task.destinationDir = File("${extension.sandboxDirectory.get()}/plugins$testSuffix")
             task.conventionMapping("destinationDir") {
                 project.file("${extension.sandboxDirectory.get()}/plugins$testSuffix")
             }
@@ -554,7 +555,10 @@ open class IntelliJPlugin : Plugin<Project> {
             val instrumentTask = project.tasks.create(sourceSet.getTaskName("instrument", "code"), IntelliJInstrumentCodeTask::class.java)
 
             instrumentTask.also { task ->
-                task.sourceSet.convention(sourceSet)
+                task.sourceSetOutputClassesDirs.convention(sourceSet.output.classesDirs.files)
+                task.sourceSetAllDirs.convention(sourceSet.allSource.srcDirs)
+                task.sourceSetResources.convention(sourceSet.resources.files)
+                task.sourceSetCompileClasspath.convention(sourceSet.compileClasspath)
                 task.compilerVersion.convention(project.provider {
                     val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
                     if (extension.localPath.orNull.isNullOrEmpty() && version.isEmpty() && version.endsWith("-SNAPSHOT")) {
@@ -586,14 +590,14 @@ open class IntelliJPlugin : Plugin<Project> {
 
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
+            val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
+            val outputDir = instrumentTask.outputDir
             val updateTask = project.tasks.create("post${instrumentTask.name.capitalize()}")
             updateTask.also { task ->
                 task.dependsOn(instrumentTask)
                 task.onlyIf { extension.instrumentCode.get() }
-                task.doLast {
-                    // Set the classes dir to the one with the instrumented classes
-                    (sourceSet.output.classesDirs as ConfigurableFileCollection).from(instrumentTask.outputDir)
-                }
+                // Set the classes dir to the one with the instrumented classes
+                task.doLast { classesDirs.from(outputDir) }
             }
 
             // Ensure that our task is invoked when the source set is built
