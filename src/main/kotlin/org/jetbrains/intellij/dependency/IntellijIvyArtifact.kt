@@ -12,7 +12,7 @@ class IntellijIvyArtifact(
     private var classifier: String?,
 ) : IvyArtifact {
 
-    private var conf: String? = null
+    private var configuration: String? = null
     private val buildDependencies = DefaultTaskDependency()
 
     companion object {
@@ -33,7 +33,7 @@ class IntellijIvyArtifact(
             val relativePath = baseDir.toURI().relativize(file.toURI()).path
             val name = relativePath.removeSuffix(".$extension")
             return IntellijIvyArtifact(file, name, extension, type, classifier).apply {
-                conf = configuration
+                this.configuration = configuration
             }
         }
     }
@@ -70,10 +70,10 @@ class IntellijIvyArtifact(
         this.classifier = classifier
     }
 
-    override fun getConf() = conf
+    override fun getConf() = configuration
 
     override fun setConf(conf: String?) {
-        this.conf = conf
+        this.configuration = conf
     }
 
     override fun toString() = "IntellijIvyArtifact $name:$type:$extension:$classifier"

@@ -528,7 +528,7 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    fun configureJarSearchableOptionsTask(project: Project) {
+    private fun configureJarSearchableOptionsTask(project: Project) {
         info(project, "Configuring jar searchable options task")
         val jarSearchableOptionsTask =
             project.tasks.create(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask::class.java)
@@ -545,7 +545,7 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
+    private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
         info(project, "Configuring compile tasks")
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
 

@@ -51,7 +51,7 @@ fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     val extension = extensions.findByType(IntelliJPluginExtension::class.java)
         ?: throw GradleException("IntelliJPluginExtension cannot be resolved")
 
-    val selectedPlugins = HashSet<PluginDependency>()
+    val selectedPlugins = mutableSetOf<PluginDependency>()
     val nonValidPlugins = mutableListOf<String>()
     plugins.forEach { pluginName ->
         val plugin = extension.getPluginDependenciesList(this).find { it.id == pluginName }

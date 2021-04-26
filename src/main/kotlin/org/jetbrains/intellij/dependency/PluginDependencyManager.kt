@@ -62,7 +62,7 @@ class PluginDependencyManager(
             dependencies.add(plugin.notation.toDependency(project))
             return
         }
-        registerRepoIfNeeded(project, plugin)
+        registerRepositoryIfNeeded(project, plugin)
         generateIvyFile(plugin)
         dependencies.add(project.dependencies.create(mapOf(
             "group" to groupId(plugin.channel),
@@ -92,7 +92,7 @@ class PluginDependencyManager(
     private fun findSingleDirectory(dir: File) =
         dir.listFiles()?.singleOrNull { it.isDirectory } ?: throw BuildException("Single directory expected in $dir", null)
 
-    private fun registerRepoIfNeeded(project: Project, plugin: PluginDependency) {
+    private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy { repo ->
                 repo.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision].[ext]") // ivy xml

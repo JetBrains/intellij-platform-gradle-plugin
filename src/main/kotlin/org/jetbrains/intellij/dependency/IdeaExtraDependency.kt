@@ -6,10 +6,9 @@ import java.io.File
 
 class IdeaExtraDependency(val name: String, val classes: File) {
 
-    val jarFiles: Collection<File> = if (classes.isDirectory) {
-        collectJars(classes) { true }
-    } else {
-        setOf(classes)
+    val jarFiles = when {
+        classes.isDirectory -> collectJars(classes) { true }
+        else -> setOf(classes)
     }
 
     override fun equals(other: Any?): Boolean {

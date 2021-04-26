@@ -214,7 +214,7 @@ open class RunPluginVerifierTask : ConventionTask() {
      *
      * @return path to verifier-cli jar
      */
-    fun resolveVerifierPath(): String {
+    private fun resolveVerifierPath(): String {
         val path = verifierPath.orNull
         if (path != null && path.isNotEmpty()) {
             val verifier = File(path)
@@ -252,7 +252,7 @@ open class RunPluginVerifierTask : ConventionTask() {
      * @param ideVersion IDE version. Can be "2020.2", "IC-2020.2", "202.1234.56"
      * @return path to the resolved IDE
      */
-    fun resolveIdePath(ideVersion: String): String {
+    private fun resolveIdePath(ideVersion: String): String {
         debug(this, "Resolving IDE path for $ideVersion")
         var (type, version) = ideVersion.trim().split('-', limit = 2) + null
 

@@ -15,7 +15,7 @@ import java.security.MessageDigest
 
 class CustomPluginsRepository(repoUrl: String) : PluginsRepository {
 
-    private var pluginsXmlUri: URI
+    private val pluginsXmlUri: URI
     private val repoUrl: String
 
     init {
