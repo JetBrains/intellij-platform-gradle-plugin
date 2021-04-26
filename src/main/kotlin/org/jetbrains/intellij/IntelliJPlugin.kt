@@ -175,9 +175,11 @@ open class IntelliJPlugin : Plugin<Project> {
         configuration.withDependencies { dependencies ->
             info(project, "Configuring plugin dependencies")
             val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
-            val resolver = PluginDependencyManager(project.gradle.gradleUserHomeDir.absolutePath,
+            val resolver = PluginDependencyManager(
+                project.gradle.gradleUserHomeDir.absolutePath,
                 extension.getIdeaDependency(project),
-                extension.getPluginsRepos())
+                extension.getPluginsRepos()
+            )
             extension.plugins.get().forEach {
                 info(project, "Configuring plugin $it")
                 if (it is Project) {
@@ -241,8 +243,8 @@ open class IntelliJPlugin : Plugin<Project> {
         extension: IntelliJPluginExtension,
     ) {
         val configuredPlugins = extension.getUnresolvedPluginDependencies()
-            .filter { it.builtin }
-            .map { it.id }
+            .filter(PluginDependency::builtin)
+            .map(PluginDependency::id)
         extension.ideaDependency.get().pluginsRegistry.collectBuiltinDependencies(configuredPlugins).forEach {
             val plugin = resolver.resolve(project, PluginDependencyNotation(it, null, null)) ?: return
             configurePluginDependency(project, plugin, extension, dependencies, resolver)

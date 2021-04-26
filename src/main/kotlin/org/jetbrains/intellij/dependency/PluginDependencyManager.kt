@@ -32,7 +32,7 @@ class PluginDependencyManager(
             if (Paths.get(dependency.id).isAbsolute) {
                 return externalPluginDependency(project, File(dependency.id), null, false)
             } else if (ideaDependency != null) {
-                info(project, "Looking for builtin $dependency.id in $ideaDependency.classes.absolutePath")
+                info(project, "Looking for builtin ${dependency.id} in ${ideaDependency.classes.absolutePath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
                         ("-withSources".takeIf { ideaDependency.sources != null } ?: "")
@@ -119,7 +119,7 @@ class PluginDependencyManager(
         }
         val pluginFqn = "${plugin.id}-${plugin.version}"
         val groupId = groupId(plugin.channel)
-        val ivyFile = File(File(cacheDirectoryPath, groupId), "$pluginFqn.xml").takeIf { it.exists() } ?: return
+        val ivyFile = File(File(cacheDirectoryPath, groupId), "$pluginFqn.xml").takeUnless { it.exists() } ?: return
         val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
         val configuration = DefaultIvyConfiguration("compile")
 
