@@ -50,7 +50,7 @@ abstract class IntelliJPluginSpecBase {
             intellij {
                 version = '$intellijVersion'
                 downloadSources = false
-                pluginsRepository {
+                pluginsRepositories {
                     maven('$pluginsRepository')
                 }
                 instrumentCode = false

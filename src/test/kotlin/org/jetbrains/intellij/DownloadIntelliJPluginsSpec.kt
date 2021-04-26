@@ -96,7 +96,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepository {
+                pluginsRepositories {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -116,7 +116,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepository {
+                pluginsRepositories {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -137,7 +137,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepository {
+                pluginsRepositories {
                     custom('${resource}?query=1')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -157,7 +157,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepository {
+                pluginsRepositories {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -177,7 +177,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepository {
+                pluginsRepositories {
                     custom('${resource}?query=1')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
