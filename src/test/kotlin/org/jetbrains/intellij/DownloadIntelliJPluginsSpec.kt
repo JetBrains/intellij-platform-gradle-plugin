@@ -10,8 +10,8 @@ import kotlin.test.assertTrue
 
 class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
-    private val pluginsRepoCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.plugins")
-    private val pluginsNightlyRepoCacheDir = File(gradleHome, "caches/modules-2/files-2.1/nightly.com.jetbrains.plugins")
+    private val pluginsRepositoryCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.plugins")
+    private val pluginsNightlyRepositoryCacheDir = File(gradleHome, "caches/modules-2/files-2.1/nightly.com.jetbrains.plugins")
     private val pluginsCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
     private val pluginsNightlyCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.nightly.com.jetbrains.plugins")
 
@@ -19,8 +19,8 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     override fun setUp() {
         super.setUp()
 
-        pluginsRepoCacheDir.delete()
-        pluginsNightlyRepoCacheDir.delete()
+        pluginsRepositoryCacheDir.delete()
+        pluginsNightlyRepositoryCacheDir.delete()
         pluginsCacheDir.delete()
         pluginsNightlyCacheDir.delete()
     }
@@ -35,7 +35,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        val pluginDir = File(pluginsNightlyRepoCacheDir, "nightly.com.jetbrains.plugins/CSS-X-Fire/1.55")
+        val pluginDir = File(pluginsNightlyRepositoryCacheDir, "nightly.com.jetbrains.plugins/CSS-X-Fire/1.55")
         pluginDir.list()?.let {
             assertTrue(it.contains("9cab70cc371b245cd808ade65630f505a6443b0d"))
         }
@@ -58,7 +58,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        val pluginDir = File(pluginsRepoCacheDir, "com.jetbrains.plugins/org.intellij.plugins.markdown/201.6668.74")
+        val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.intellij.plugins.markdown/201.6668.74")
         pluginDir.list()?.let {
             assertTrue(it.contains("17328855fcd031f39a805db934c121eaa25dedfb"))
         }
@@ -81,7 +81,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        val pluginDir = File(pluginsRepoCacheDir, "com.jetbrains.plugins/org.jetbrains.postfixCompletion/0.8-beta")
+        val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.jetbrains.postfixCompletion/0.8-beta")
         pluginDir.list()?.let {
             assertTrue(it.contains("dd37fa3fb1ecbf3d1c2fdb0049ba821fd32f2565"))
         }
@@ -96,7 +96,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepo {
+                pluginsRepository {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -116,7 +116,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepo {
+                pluginsRepository {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -137,7 +137,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepo {
+                pluginsRepository {
                     custom('${resource}?query=1')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -157,7 +157,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepo {
+                pluginsRepository {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
@@ -177,7 +177,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                pluginsRepo {
+                pluginsRepository {
                     custom('${resource}?query=1')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]

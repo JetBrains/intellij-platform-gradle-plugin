@@ -31,8 +31,8 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
     companion object {
         const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
         const val LOADER_REF = "java2.loader"
-        const val ASM_REPO_URL = "https://cache-redirector.jetbrains.com/intellij-dependencies"
-        const val FORMS_REPO_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
+        const val ASM_REPOSITORY_URL = "https://cache-redirector.jetbrains.com/intellij-dependencies"
+        const val FORMS_REPOSITORY_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
     }
 
     private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
@@ -106,11 +106,11 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
 
     private fun compilerClassPathFromMaven(): ConfigurableFileCollection {
         val dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
-        val intellijRepoUrl = extension?.intellijRepo ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO
+        val intellijRepositoryUrl = extension?.intellijRepository ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
-            project.repositories.maven { it.url = URI("$intellijRepoUrl/${releaseType(compilerVersion.get())}") },
-            project.repositories.maven { it.url = URI(ASM_REPO_URL) },
-            project.repositories.maven { it.url = URI(FORMS_REPO_URL) },
+            project.repositories.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
+            project.repositories.maven { it.url = URI(ASM_REPOSITORY_URL) },
+            project.repositories.maven { it.url = URI(FORMS_REPOSITORY_URL) },
         )
         try {
             return project.files(project.configurations.detachedConfiguration(dependency).files)

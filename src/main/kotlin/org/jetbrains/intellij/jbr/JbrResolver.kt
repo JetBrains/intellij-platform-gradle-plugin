@@ -68,7 +68,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
             return null
         }
 
-        val url = "${jreRepository ?: jbrArtifact.repoUrl}/$archiveName"
+        val url = "${jreRepository ?: jbrArtifact.repositoryUrl}/$archiveName"
         return try {
             DownloadAction(project).apply {
                 src(url)
@@ -107,7 +107,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
         })
     }
 
-    private class JbrArtifact(val name: String, val repoUrl: String) {
+    private class JbrArtifact(val name: String, val repositoryUrl: String) {
 
         companion object {
             fun from(version: String, operatingSystem: OperatingSystem): JbrArtifact {
@@ -123,11 +123,11 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
                 }
                 val buildNumber = VersionNumber.parse(buildNumberString)
                 val isJava8 = majorVersion.startsWith('8')
-                val repoUrl = IntelliJPluginConstants.DEFAULT_JBR_REPO
+                val repositoryUrl = IntelliJPluginConstants.DEFAULT_JBR_REPO
 
                 val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < VersionNumber.parse("1483.24")
                 if (oldFormat) {
-                    return JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repoUrl)
+                    return JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repositoryUrl)
                 }
 
                 if (prefix.isEmpty()) {
@@ -137,7 +137,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
                         else -> "jbr_jcef-"
                     }
                 }
-                return JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}", repoUrl)
+                return JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}", repositoryUrl)
             }
 
             private fun getPrefix(version: String) = when {

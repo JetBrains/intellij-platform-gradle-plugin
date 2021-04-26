@@ -50,8 +50,8 @@ open class PublishTask : ConventionTask() {
                 channels.get().forEach { channel ->
                     info(this, "Uploading plugin $pluginId from ${file.absolutePath} to ${host.get()}, channel: $channel")
                     try {
-                        val repoClient = PluginRepositoryFactory.create(host.get(), token.get())
-                        repoClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
+                        val repositoryClient = PluginRepositoryFactory.create(host.get(), token.get())
+                        repositoryClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
                         info(this, "Uploaded successfully")
                     } catch (exception: Exception) {
                         throw TaskExecutionException(this, GradleException("Failed to upload plugin. $exception.message", exception))

@@ -13,7 +13,7 @@ import org.gradle.tooling.BuildException
 import org.gradle.util.ConfigureUtil
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
-import org.jetbrains.intellij.dependency.PluginsRepoConfiguration
+import org.jetbrains.intellij.dependency.PluginsRepositoryConfiguration
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
  * TODO: Annotate props properly with @Input, @Optional, etc
@@ -81,17 +81,15 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
     /**
      * Url of repository for downloading IDE distributions.
      */
-    val intellijRepo: Property<String> = objects.property(String::class.java)
+    val intellijRepository: Property<String> = objects.property(String::class.java)
 
     /**
      * Object to configure multiple repositories for downloading plugins.
      */
     @Nested
-    // TODO: rename to pluginsRepositories
-    val pluginsRepo: PluginsRepoConfiguration = objects.newInstance(PluginsRepoConfiguration::class.java)
+    val pluginsRepositories: PluginsRepositoryConfiguration = objects.newInstance(PluginsRepositoryConfiguration::class.java)
 
-    // TODO: make it as property and use convention?
-    fun getPluginsRepos() = pluginsRepo.run {
+    fun getPluginsRepositories() = pluginsRepositories.run {
         getRepositories().ifEmpty {
             marketplace()
             getRepositories()
@@ -101,21 +99,21 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
     /**
      * Configure multiple repositories for downloading plugins.
      */
-    fun pluginsRepo(block: Closure<Any>) {
-        ConfigureUtil.configure(block, pluginsRepo)
+    fun pluginsRepositories(block: Closure<Any>) {
+        ConfigureUtil.configure(block, pluginsRepositories)
     }
 
     /**
      * Configure multiple repositories for downloading plugins.
      */
-    fun pluginsRepo(block: Action<PluginsRepoConfiguration>) {
-        block.execute(pluginsRepo)
+    fun pluginsRepositories(block: Action<PluginsRepositoryConfiguration>) {
+        block.execute(pluginsRepositories)
     }
 
     /**
      * Url of repository for downloading JetBrains Java Runtime.
      */
-    val jreRepo: Property<String> = objects.property(String::class.java)
+    val jreRepository: Property<String> = objects.property(String::class.java)
 
     /**
      * The absolute path to the local directory that should be used for storing IDE distributions.
@@ -134,7 +132,7 @@ abstract class IntelliJPluginExtension(objects: ObjectFactory) {
     val configureDefaultDependencies: Property<Boolean> = objects.property(Boolean::class.java)
 
     /**
-     * Configure extra dependency artifacts from intellij repo
+     * Configure extra dependency artifacts from intellij repository
      * The dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
      */
     val extraDependencies: ListProperty<String> = objects.listProperty(String::class.java)

@@ -30,12 +30,12 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
     fun register(project: Project, dependency: IdeaDependency, dependencies: DependencySet) {
         val ivyFile = getOrCreateIvyXml(dependency)
         val ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
-        project.repositories.ivy { repo ->
-            repo.url = dependency.classes.toURI()
-            repo.ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
-            repo.artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
+        project.repositories.ivy {
+            it.url = dependency.classes.toURI()
+            it.ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
+            it.artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
             if (dependency.sources != null) {
-                repo.artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
+                it.artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
             }
         }
         dependencies.add(project.dependencies.create(mapOf(

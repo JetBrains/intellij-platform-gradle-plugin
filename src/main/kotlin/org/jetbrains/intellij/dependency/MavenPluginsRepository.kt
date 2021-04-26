@@ -15,7 +15,7 @@ class MavenPluginsRepository(private val repositoryUrl: String) : PluginsReposit
         val dependency = plugin.toDependency(project)
 
         debug(project, "Adding Maven repository to download $dependency - $repositoryUrl")
-        val mavenRepo = project.repositories.maven { it.url = URI.create(repositoryUrl) }
+        val mavenRepository = project.repositories.maven { it.url = URI.create(repositoryUrl) }
 
         var pluginFile: File? = null
         try {
@@ -27,7 +27,7 @@ class MavenPluginsRepository(private val repositoryUrl: String) : PluginsReposit
         }
 
         debug(project, "Removing Maven repository $repositoryUrl")
-        project.repositories.remove(mavenRepo)
+        project.repositories.remove(mavenRepository)
 
         return pluginFile
     }

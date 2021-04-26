@@ -41,8 +41,8 @@ class PluginDependencyManager(
             }
             throw BuildException("Cannot find builtin plugin ${dependency.id} for IDE: ${ideaDependency?.classes?.absolutePath}", null)
         }
-        pluginsRepositories.forEach { repo ->
-            repo.resolve(project, dependency)?.let {
+        pluginsRepositories.forEach { repository ->
+            repository.resolve(project, dependency)?.let {
                 return when {
                     isZipFile(it) -> zippedPluginDependency(project, it, dependency)
                     isJarFile(it) -> externalPluginDependency(project, it, dependency.channel, true)
@@ -94,12 +94,12 @@ class PluginDependencyManager(
 
     private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
         if (ivyArtifactRepository == null) {
-            ivyArtifactRepository = project.repositories.ivy { repo ->
-                repo.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision].[ext]") // ivy xml
-                repo.artifactPattern("${ideaDependency?.classes}/plugins/[module]/[artifact](.[ext])") // builtin plugins
-                repo.artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
+            ivyArtifactRepository = project.repositories.ivy {
+                it.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision].[ext]") // ivy xml
+                it.artifactPattern("${ideaDependency?.classes}/plugins/[module]/[artifact](.[ext])") // builtin plugins
+                it.artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency?.sources != null) {
-                    repo.artifactPattern("${ideaDependency.sources.parent}/[artifact]-${ideaDependency.version}(-[classifier]).[ext]")
+                    it.artifactPattern("${ideaDependency.sources.parent}/[artifact]-${ideaDependency.version}(-[classifier]).[ext]")
                 }
             }
         }

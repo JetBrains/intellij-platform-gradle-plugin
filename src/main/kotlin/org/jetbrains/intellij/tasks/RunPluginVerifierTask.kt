@@ -209,7 +209,7 @@ open class RunPluginVerifierTask : ConventionTask() {
     /**
      * Resolves path to the IntelliJ Plugin Verifier file.
      * At first, checks if it was provided with {@link #verifierPath}.
-     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}
+     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY}
      * repository and resolves the path to verifier-cli jar file.
      *
      * @return path to verifier-cli jar
@@ -402,7 +402,7 @@ open class RunPluginVerifierTask : ConventionTask() {
         val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
             ?: throw GradleException("Cannot access IntelliJPluginExtension")
 
-        val jbrResolver = JbrResolver(project, this, extension.jreRepo.orNull)
+        val jbrResolver = JbrResolver(project, this, extension.jreRepository.orNull)
         jbrVersion.orNull?.let {
             jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
                 debug(this, "Runtime specified with JBR Version property: $it")
@@ -511,8 +511,8 @@ open class RunPluginVerifierTask : ConventionTask() {
     }
 
     private fun getPluginVerifierRepository(version: String) = when {
-        VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO
-        else -> IntelliJPluginConstants.OLD_INTELLIJ_PLUGIN_VERIFIER_REPO
+        VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
+        else -> IntelliJPluginConstants.OLD_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
     }
 
     enum class FailureLevel(val testValue: String) {

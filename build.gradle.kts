@@ -95,7 +95,7 @@ fun configureTests(testTask: Test) {
         File(testGradleHomePath).mkdir()
     }
     testTask.systemProperties["test.gradle.home"] = testGradleHomePath
-    testTask.systemProperties["plugins.repo"] = project.property("pluginsRepo")
+    testTask.systemProperties["plugins.repository"] = project.property("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)
 }
 

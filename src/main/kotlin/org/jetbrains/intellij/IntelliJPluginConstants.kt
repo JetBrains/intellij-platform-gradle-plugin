@@ -25,10 +25,10 @@ object IntelliJPluginConstants {
 
     //    const val Logger LOG = Logging.getLogger(IntelliJPlugin)
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-    const val DEFAULT_INTELLIJ_REPO = "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository"
+    const val DEFAULT_INTELLIJ_REPOSITORY = "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository"
     const val DEFAULT_JBR_REPO = "https://cache-redirector.jetbrains.com/intellij-jbr"
-    const val DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO = "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
-    const val OLD_INTELLIJ_PLUGIN_VERIFIER_REPO = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service"
-    const val DEFAULT_INTELLIJ_PLUGINS_REPO = "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven"
+    const val DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY = "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
+    const val OLD_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY = "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service"
+    const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven"
     const val PLUGIN_PATH = "plugin.path"
 }

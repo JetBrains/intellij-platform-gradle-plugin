@@ -64,7 +64,7 @@ open class IntelliJPlugin : Plugin<Project> {
             sandboxDirectory.convention(project.provider {
                 File(project.buildDir, IntelliJPluginConstants.DEFAULT_SANDBOX).absolutePath
             })
-            intellijRepo.convention(IntelliJPluginConstants.DEFAULT_INTELLIJ_REPO)
+            intellijRepository.convention(IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY)
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
             type.convention("IC")
@@ -140,7 +140,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
             info(project, "Configuring IDE dependency")
-            val resolver = IdeaDependencyManager(extension.intellijRepo.get(), extension.ideaDependencyCachePath.orNull)
+            val resolver = IdeaDependencyManager(extension.intellijRepository.get(), extension.ideaDependencyCachePath.orNull)
             val localPath = extension.localPath.orNull
             val ideaDependency = if (localPath != null) {
                 if (extension.version.orNull != null) {
@@ -178,7 +178,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val resolver = PluginDependencyManager(
                 project.gradle.gradleUserHomeDir.absolutePath,
                 extension.getIdeaDependency(project),
-                extension.getPluginsRepos()
+                extension.getPluginsRepositories()
             )
             extension.plugins.get().forEach {
                 info(project, "Configuring plugin $it")
@@ -201,7 +201,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 configureBuiltinPluginsDependencies(project, dependencies, resolver, extension)
             }
             verifyJavaPluginDependency(extension, project)
-            extension.getPluginsRepos().forEach {
+            extension.getPluginsRepositories().forEach {
                 it.postResolve(project)
             }
         }
@@ -514,7 +514,7 @@ open class IntelliJPlugin : Plugin<Project> {
             VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("202.0")
         })
         task.conventionMapping("executable") {
-            val jbrResolver = JbrResolver(project, task, extension.jreRepo.orNull)
+            val jbrResolver = JbrResolver(project, task, extension.jreRepository.orNull)
 
             task.jbrVersion.orNull?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {

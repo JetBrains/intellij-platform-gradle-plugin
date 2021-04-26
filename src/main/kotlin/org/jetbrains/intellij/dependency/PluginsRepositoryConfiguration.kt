@@ -2,7 +2,7 @@ package org.jetbrains.intellij.dependency
 
 import org.jetbrains.intellij.IntelliJPluginConstants
 
-abstract class PluginsRepoConfiguration {
+abstract class PluginsRepositoryConfiguration {
 
     private val pluginsRepositories = mutableListOf<PluginsRepository>()
 
@@ -10,7 +10,7 @@ abstract class PluginsRepoConfiguration {
      * Use default marketplace repository
      */
     fun marketplace() {
-        pluginsRepositories.add(MavenPluginsRepository(IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPO))
+        pluginsRepositories.add(MavenPluginsRepository(IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY))
     }
 
     /**

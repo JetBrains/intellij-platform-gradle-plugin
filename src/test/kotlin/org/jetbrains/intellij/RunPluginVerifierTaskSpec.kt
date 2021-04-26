@@ -238,7 +238,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
         FileUtils.copyInputStreamToFile(
-            URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPO}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
+            URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")
         )
 
