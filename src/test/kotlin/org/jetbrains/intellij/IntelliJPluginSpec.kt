@@ -30,7 +30,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME,
                 IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME,
             ),
-            tasks(IntelliJPluginConstants.GROUP_NAME.toString()),
+            tasks(IntelliJPluginConstants.GROUP_NAME),
         )
     }
 

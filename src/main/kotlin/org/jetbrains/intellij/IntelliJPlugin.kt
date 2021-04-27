@@ -515,7 +515,10 @@ open class IntelliJPlugin : Plugin<Project> {
             val number = ideBuildNumber(task.ideDirectory.get().asFile)
             VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("202.0")
         })
-        task.conventionMapping("executable") {
+        task.projectWorkingDir.convention(project.provider {
+            project.file("${task.ideDirectory.get().asFile}/bin/")
+        })
+        task.projectExecutable.convention(project.provider {
             val jbrResolver = JbrResolver(project, task, extension.jreRepository.orNull)
 
             task.jbrVersion.orNull?.let {
@@ -527,13 +530,14 @@ open class IntelliJPlugin : Plugin<Project> {
                     warn(task, "Cannot resolve builtin JBR $it. Falling local Java.")
                 }
             } ?: Jvm.current().javaExecutable.absolutePath
-        }
+        })
     }
 
     private fun configureJarSearchableOptionsTask(project: Project) {
         info(project, "Configuring jar searchable options task")
         val jarSearchableOptionsTask =
             project.tasks.create(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask::class.java)
+        val buildDir = project.buildDir
 
         jarSearchableOptionsTask.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
@@ -543,7 +547,7 @@ open class IntelliJPlugin : Plugin<Project> {
             task.destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
 
             task.dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-            task.onlyIf { File(project.buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory }
+            task.onlyIf { File(buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory }
         }
     }
 
@@ -648,8 +652,10 @@ open class IntelliJPlugin : Plugin<Project> {
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
                 val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
                 if (ideVersion.baselineVersion >= 193) {
-                    task.systemProperty(IntelliJPluginConstants.PLUGIN_PATH,
-                        pluginsDirectory.listFiles().joinToString("${File.pathSeparator},") { it.path })
+                    task.systemProperty(
+                        IntelliJPluginConstants.PLUGIN_PATH,
+                        pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
+                    )
                 }
             }
         }
