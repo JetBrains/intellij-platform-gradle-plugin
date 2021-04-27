@@ -35,11 +35,11 @@ open class VerifyPluginTask @Inject constructor(
     val ignoreWarnings: Property<Boolean> = objectFactory.property(Boolean::class.java).convention(true)
 
     @InputDirectory
-    val pluginDirectory: DirectoryProperty = objectFactory.directoryProperty()
+    val pluginDir: DirectoryProperty = objectFactory.directoryProperty()
 
     @TaskAction
     fun verifyPlugin() {
-        val creationResult = pluginDirectory.get().let { IdePluginManager.createManager().createPlugin(it.asFile.toPath()) }
+        val creationResult = pluginDir.get().let { IdePluginManager.createManager().createPlugin(it.asFile.toPath()) }
         when (creationResult) {
             is PluginCreationSuccess -> creationResult.warnings.forEach {
                 warn(this, it.message)

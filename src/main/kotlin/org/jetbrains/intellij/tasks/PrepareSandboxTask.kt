@@ -37,7 +37,7 @@ open class PrepareSandboxTask @Inject constructor(
     val pluginName: Property<String> = objectFactory.property(String::class.java)
 
     @Input
-    val configDirectory: Property<String> = objectFactory.property(String::class.java)
+    val configDir: Property<String> = objectFactory.property(String::class.java)
 
     @InputFile
     val pluginJar: RegularFileProperty = objectFactory.fileProperty()
@@ -116,7 +116,7 @@ open class PrepareSandboxTask @Inject constructor(
     }
 
     private fun disableIdeUpdate() {
-        val optionsDir = File(configDirectory.get(), "/options").apply {
+        val optionsDir = File(configDir.get(), "/options").apply {
             if (!exists() && !mkdirs()) {
                 error(this, "Cannot disable update checking in host IDE")
                 return

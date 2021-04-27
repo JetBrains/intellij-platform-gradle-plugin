@@ -115,7 +115,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @OutputDirectory
     @Optional
-    val verificationReportsDirectory: Property<String> = objectFactory.property(String::class.java)
+    val verificationReportsDir: Property<String> = objectFactory.property(String::class.java)
 
     /**
      * The path to directory where IDEs used for the verification will be downloaded.
@@ -123,7 +123,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val downloadDirectory: Property<String> = objectFactory.property(String::class.java)
+    val downloadDir: Property<String> = objectFactory.property(String::class.java)
 
     /**
      * JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
@@ -269,7 +269,7 @@ open class RunPluginVerifierTask @Inject constructor(
         }
 
         listOf("release", "rc", "eap", "beta").forEach { buildType ->
-            debug(project, "Downloading IDE '$type-$version' from $buildType channel to ${downloadDirectory.get()}")
+            debug(project, "Downloading IDE '$type-$version' from $buildType channel to ${downloadDir.get()}")
             try {
                 val dir = downloadIde(type!!, version!!, buildType)
                 debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
@@ -296,17 +296,17 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     private fun downloadIde(type: String, version: String, buildType: String): File {
         val name = "$type-$version"
-        val ideDir = File(downloadDirectory.get(), name)
+        val ideDir = File(downloadDir.get(), name)
         info(this, "Downloading IDE: $name")
 
         when {
             ideDir.exists() -> debug(this, "IDE already available in $ideDir")
             isOffline() -> throw TaskExecutionException(this, GradleException(
                 "Cannot download IDE: $name. Gradle runs in offline mode. " +
-                    "Provide pre-downloaded IDEs stored in `downloadDirectory` or use `localPaths` instead."
+                    "Provide pre-downloaded IDEs stored in `downloadDir` or use `localPaths` instead."
             ))
             else -> {
-                val ideArchive = File(downloadDirectory.get(), "${name}.tar.gz")
+                val ideArchive = File(downloadDir.get(), "${name}.tar.gz")
                 val url = resolveIdeUrl(type, version, buildType)
 
                 debug(this, "Downloading IDE from $url")
@@ -423,7 +423,7 @@ open class RunPluginVerifierTask @Inject constructor(
         }
 
         val runIdeTask = project.tasks.findByName(IntelliJPluginConstants.RUN_IDE_TASK_NAME) as RunIdeTask
-        getBuiltinJbrVersion(runIdeTask.ideDirectory.get().asFile)?.let { builtinJbrVersion ->
+        getBuiltinJbrVersion(runIdeTask.ideDir.get().asFile)?.let { builtinJbrVersion ->
             jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
                 val javaHome = File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {
@@ -452,7 +452,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
-            "-verification-reports-dir", verificationReportsDirectory.get(),
+            "-verification-reports-dir", verificationReportsDir.get(),
             "-runtime-dir", resolveRuntimeDir(),
         )
 
@@ -480,7 +480,7 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return Plugin Verifier home directory
      */
-    private fun verifierHomeDirectory(): Path {
+    private fun verifierHomeDir(): Path {
         System.getProperty("plugin.verifier.home.dir")?.let {
             return Paths.get(it)
         }
@@ -498,7 +498,7 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return directory for downloaded IDEs
      */
-    fun ideDownloadDirectory(): Path = verifierHomeDirectory().resolve("ides").also {
+    fun ideDownloadDir(): Path = verifierHomeDir().resolve("ides").also {
         Files.createDirectories(it)
     }
 

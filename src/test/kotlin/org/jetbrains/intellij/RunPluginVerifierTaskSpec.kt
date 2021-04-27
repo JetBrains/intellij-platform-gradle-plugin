@@ -85,7 +85,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                verificationReportsDirectory = "${'$'}{project.buildDir}/foo"
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
             }
         """)

@@ -168,7 +168,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             intellij { 
                 pluginName = 'myPluginName' 
                 plugins = ['copyright'] 
-                sandboxDirectory = '$sandboxPath'
+                sandboxDir = '$sandboxPath'
             }
         """)
 

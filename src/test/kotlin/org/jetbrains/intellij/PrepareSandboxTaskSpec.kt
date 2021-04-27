@@ -503,7 +503,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 pluginName = 'myPluginName'
                 plugins = ['copyright']
-                sandboxDirectory = '$sandboxPath'
+                sandboxDir = '$sandboxPath'
             }
             dependencies {
                 compile 'joda-time:joda-time:2.8.1'

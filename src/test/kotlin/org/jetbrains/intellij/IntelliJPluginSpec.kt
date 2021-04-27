@@ -405,7 +405,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
         buildFile.xml("""
             intellij {
-                sandboxDirectory = '$sandboxPath'    
+                sandboxDir = '$sandboxPath'    
             }
         """)
         val result = build(JavaPlugin.TEST_TASK_NAME, "--info")

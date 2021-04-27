@@ -80,7 +80,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * The path of sandbox directory that is used for running IDE with developing plugin.
      * By default: <code>${project.buildDir}/idea-sandbox</code>.
      */
-    val sandboxDirectory: Property<String> = objectFactory.property(String::class.java)
+    val sandboxDir: Property<String> = objectFactory.property(String::class.java)
 
     /**
      * Url of repository for downloading IDE distributions.
