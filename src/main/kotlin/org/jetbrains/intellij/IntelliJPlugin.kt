@@ -29,31 +29,24 @@ import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.IdeaPlugin
-import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
-import org.jetbrains.intellij.tasks.DownloadRobotServerPluginTask
-import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
-import org.jetbrains.intellij.tasks.JarSearchableOptionsTask
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.PublishTask
-import org.jetbrains.intellij.tasks.RunIdeBase
-import org.jetbrains.intellij.tasks.RunIdeForUiTestTask
-import org.jetbrains.intellij.tasks.RunIdeTask
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask.Companion.VERIFIER_VERSION_LATEST
-import org.jetbrains.intellij.tasks.VerifyPluginTask
 import java.io.File
 import java.util.EnumSet
 
 @Suppress("UnstableApiUsage")
 open class IntelliJPlugin : Plugin<Project> {
-
     override fun apply(project: Project) {
         checkGradleVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
         val intellijExtension = project.extensions.create(IntelliJPluginConstants.EXTENSION_NAME,
             IntelliJPluginExtension::class.java,
             project.objects) as IntelliJPluginExtension
+        val signingExtension = project.extensions.create(
+            IntelliJPluginConstants.SIGNING_EXTENSION_NAME,
+            SigningExtension::class.java,
+            project.objects
+        ) as SigningExtension
         intellijExtension.apply {
             pluginName.convention(project.provider {
                 project.name
@@ -70,7 +63,7 @@ open class IntelliJPlugin : Plugin<Project> {
             type.convention("IC")
         }
         configureConfigurations(project, intellijExtension)
-        configureTasks(project, intellijExtension)
+        configureTasks(project, intellijExtension, signingExtension)
     }
 
     private fun checkGradleVersion(project: Project) {
@@ -96,7 +89,11 @@ open class IntelliJPlugin : Plugin<Project> {
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
     }
 
-    private fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
+    private fun configureTasks(
+        project: Project,
+        extension: IntelliJPluginExtension,
+        signingExtension: SigningExtension
+    ) {
         info(project, "Configuring plugin")
         project.tasks.whenTaskAdded {
             if (it is RunIdeBase) {
@@ -116,6 +113,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configureBuildSearchableOptionsTask(project)
         configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
+        configureSignPluginTask(project, signingExtension)
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
@@ -410,7 +408,7 @@ open class IntelliJPlugin : Plugin<Project> {
             )
             task.verifierVersion.convention(VERIFIER_VERSION_LATEST)
             task.distributionFile.convention(project.layout.file(project.provider {
-                resolveDistributionFile(project)
+                resolveBuildTaskOutput(project)
             }))
             task.verificationReportsDirectory.convention(project.provider {
                 "${project.buildDir}/reports/pluginVerifier"
@@ -683,11 +681,32 @@ open class IntelliJPlugin : Plugin<Project> {
         project.components.add(IntelliJPluginLibrary())
     }
 
+    private fun configureSignPluginTask(project: Project, signingExtension: SigningExtension) {
+        info(project, "Configuring sign plugin task")
+        val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME) as Zip
+        val inputFile = buildPluginTask.archiveFile.get().asFile
+        val inputFileExtension = inputFile.path.substring(inputFile.path.lastIndexOf('.'))
+        val inputFileWithoutExtension = inputFile . path . substring (0, inputFile.path.lastIndexOf('.'))
+        val outputFilePath = "$inputFileWithoutExtension-signed$inputFileExtension"
+
+        project.tasks.create(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, SignPluginTask::class.java).apply {
+            group = IntelliJPluginConstants.GROUP_NAME
+            description = "Sign plugin with your private key and certificate chain."
+            onlyIf { signingExtension.enabled.get() }
+            certificateChain.set(signingExtension.certificateChain)
+            privateKey.set(signingExtension.privateKey)
+            inputArchiveFile.set(resolveBuildTaskOutput(project))
+            outputArchiveFile.set(File(outputFilePath))
+            dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        }
+    }
+
     private fun configurePublishPluginTask(project: Project) {
         info(project, "Configuring publish plugin task")
         val publishPluginTask = project.tasks.create(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishTask::class.java)
         val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
         val verifyPluginTask = project.tasks.findByName(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+        val signPluginTask = project.tasks.findByName(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
 
         publishPluginTask.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
@@ -701,6 +720,11 @@ open class IntelliJPlugin : Plugin<Project> {
 
             task.dependsOn(buildPluginTask)
             task.dependsOn(verifyPluginTask)
+            task.dependsOn(signPluginTask)
+        }
+
+        project.afterEvaluate {
+            publishPluginTask.conventionMapping("distributionFile") { resolveDistributionFile(project) }
         }
     }
 
@@ -718,6 +742,20 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun resolveDistributionFile(project: Project): File? {
+        val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME) as Zip
+        val signPluginTask = project.tasks.findByName(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME) as SignPluginTask
+        val signingExtension = project.extensions.findByName(IntelliJPluginConstants.SIGNING_EXTENSION_NAME) as SigningExtension
+
+        if (signingExtension.enabled.get()) {
+            return signPluginTask.outputArchiveFile.get().asFile
+        }
+
+        val distributionFile = if (VersionNumber.parse(project.gradle.gradleVersion) >= VersionNumber.parse("5.1"))
+            buildPluginTask.archiveFile.orNull?.asFile else buildPluginTask.archivePath
+        return if(distributionFile?.exists() == true) distributionFile else null
+    }
+
+    private fun resolveBuildTaskOutput(project: Project): File? {
         val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME) as Zip
         return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
     }
