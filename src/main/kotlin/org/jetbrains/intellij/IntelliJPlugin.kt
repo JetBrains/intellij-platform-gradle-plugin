@@ -350,7 +350,7 @@ open class IntelliJPlugin : Plugin<Project> {
             project.tasks.getByName(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) as DownloadRobotServerPluginTask
 
         prepareUiTestingSandboxTask.also { task ->
-            task.from(downloadPluginTask.outputDir)
+            task.from(downloadPluginTask.outputDir.get())
             task.dependsOn(downloadPluginTask)
         }
     }
@@ -364,6 +364,9 @@ open class IntelliJPlugin : Plugin<Project> {
         downloadRobotServerPluginTask.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
             task.description = "Download robot-server plugin."
+
+            task.version.convention(DownloadRobotServerPluginTask.DEFAULT_ROBOT_SERVER_PLUGIN_VERSION)
+            task.outputDir.convention(project.layout.projectDirectory.dir("${project.buildDir}/robotServerPlugin"))
         }
     }
 
