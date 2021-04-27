@@ -29,7 +29,7 @@ open class PublishTask @Inject constructor(
     val distributionFile: RegularFileProperty = objectFactory.fileProperty()
 
     @Input
-    val host: Property<String> = objectFactory.property(String::class.java).convention("https://plugins.jetbrains.com")
+    val host: Property<String> = objectFactory.property(String::class.java)
 
     @Input
     @Optional
@@ -37,7 +37,7 @@ open class PublishTask @Inject constructor(
 
     @Input
     @Optional
-    val channels: ListProperty<String> = objectFactory.listProperty(String::class.java).convention(listOf("default"))
+    val channels: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
     init {
         enabled = !project.gradle.startParameter.isOffline

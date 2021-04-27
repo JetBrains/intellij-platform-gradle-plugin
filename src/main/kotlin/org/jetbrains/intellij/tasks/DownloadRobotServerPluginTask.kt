@@ -34,7 +34,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
 
     @TaskAction
     fun downloadPlugin() {
-        val dependency = project.dependencies.create("${getDependency()}:$version")
+        val dependency = project.dependencies.create("${getDependency()}:${version.get()}")
         val repository = project.repositories.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
 
         fileSystemOperations.delete {

@@ -714,6 +714,8 @@ open class IntelliJPlugin : Plugin<Project> {
             task.group = IntelliJPluginConstants.GROUP_NAME
             task.description = "Publish plugin distribution on plugins.jetbrains.com."
 
+            task.host.convention("https://plugins.jetbrains.com")
+            task.channels.convention(listOf("default"))
             task.distributionFile.convention(
                 project.layout.file(project.provider {
                     resolveDistributionFile(project)
