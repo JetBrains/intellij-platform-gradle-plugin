@@ -7,6 +7,7 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -14,12 +15,15 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.warn
+import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class VerifyPluginTask : ConventionTask(), VerificationTask {
+open class VerifyPluginTask @Inject constructor(
+    objectFactory: ObjectFactory,
+) : ConventionTask(), VerificationTask {
 
     @Input
-    val ignoreFailures: Property<Boolean> = project.objects.property(Boolean::class.java).convention(false)
+    val ignoreFailures: Property<Boolean> = objectFactory.property(Boolean::class.java).convention(false)
 
     override fun getIgnoreFailures(): Boolean = ignoreFailures.get()
 
@@ -28,10 +32,10 @@ open class VerifyPluginTask : ConventionTask(), VerificationTask {
     }
 
     @Input
-    val ignoreWarnings: Property<Boolean> = project.objects.property(Boolean::class.java).convention(true)
+    val ignoreWarnings: Property<Boolean> = objectFactory.property(Boolean::class.java).convention(true)
 
     @InputDirectory
-    val pluginDirectory: DirectoryProperty = project.objects.directoryProperty()
+    val pluginDirectory: DirectoryProperty = objectFactory.directoryProperty()
 
     @TaskAction
     fun verifyPlugin() {

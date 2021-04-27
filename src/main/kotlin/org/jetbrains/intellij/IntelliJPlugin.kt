@@ -51,9 +51,12 @@ open class IntelliJPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         checkGradleVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
-        val intellijExtension = project.extensions.create(IntelliJPluginConstants.EXTENSION_NAME,
+
+        val intellijExtension = project.extensions.create(
+            IntelliJPluginConstants.EXTENSION_NAME,
             IntelliJPluginExtension::class.java,
-            project.objects) as IntelliJPluginExtension
+        ) as IntelliJPluginExtension
+
         intellijExtension.apply {
             pluginName.convention(project.provider {
                 project.name
@@ -364,7 +367,12 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configurePrepareSandboxTask(project: Project, extension: IntelliJPluginExtension, taskName: String, testSuffix: String): Task {
+    private fun configurePrepareSandboxTask(
+        project: Project,
+        extension: IntelliJPluginExtension,
+        taskName: String,
+        testSuffix: String,
+    ): Task {
         info(project, "Configuring $taskName task")
         val prepareSandboxTask = project.tasks.create(taskName, PrepareSandboxTask::class.java)
 

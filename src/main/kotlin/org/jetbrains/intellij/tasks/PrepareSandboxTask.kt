@@ -5,6 +5,7 @@ import groovy.lang.Closure
 import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -25,26 +26,29 @@ import org.jetbrains.intellij.model.UpdatesConfigurable
 import org.jetbrains.intellij.parseXml
 import org.jetbrains.intellij.writeXml
 import java.io.File
+import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class PrepareSandboxTask : Sync() {
+open class PrepareSandboxTask @Inject constructor(
+    objectFactory: ObjectFactory,
+) : Sync() {
 
     @Input
-    val pluginName: Property<String> = project.objects.property(String::class.java)
+    val pluginName: Property<String> = objectFactory.property(String::class.java)
 
     @Input
-    val configDirectory: Property<String> = project.objects.property(String::class.java)
+    val configDirectory: Property<String> = objectFactory.property(String::class.java)
 
     @InputFile
-    val pluginJar: RegularFileProperty = project.objects.fileProperty()
+    val pluginJar: RegularFileProperty = objectFactory.fileProperty()
 
     @InputFiles
     @Optional
-    val librariesToIgnore: ListProperty<File> = project.objects.listProperty(File::class.java)
+    val librariesToIgnore: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Input
     @Optional
-    val pluginDependencies: ListProperty<PluginDependency> = project.objects.listProperty(PluginDependency::class.java)
+    val pluginDependencies: ListProperty<PluginDependency> = objectFactory.listProperty(PluginDependency::class.java)
 
     @Internal
     fun getPluginJarFromSandbox() = File(destinationDir, "${pluginName.get()}/lib/${pluginJar.get().asFile.name}")

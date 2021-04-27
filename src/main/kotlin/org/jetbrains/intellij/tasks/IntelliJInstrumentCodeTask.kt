@@ -4,6 +4,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -24,6 +25,7 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 open class IntelliJInstrumentCodeTask @Inject constructor(
+    objectFactory: ObjectFactory,
     private val fileSystemOperations: FileSystemOperations,
 ) : ConventionTask() {
 
@@ -37,30 +39,30 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
 
     @Internal
-    val sourceSetOutputClassesDirs: ListProperty<File> = project.objects.listProperty(File::class.java)
+    val sourceSetOutputClassesDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Internal
-    val sourceSetAllDirs: ListProperty<File> = project.objects.listProperty(File::class.java)
+    val sourceSetAllDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Internal
-    val sourceSetResources: ListProperty<File> = project.objects.listProperty(File::class.java)
+    val sourceSetResources: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Internal
-    val sourceSetCompileClasspath: ListProperty<File> = project.objects.listProperty(File::class.java)
+    val sourceSetCompileClasspath: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Input
     @Optional
-    val ideaDependency: Property<IdeaDependency> = project.objects.property(IdeaDependency::class.java)
+    val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
     @InputFile
     @Optional
-    val javac2: RegularFileProperty = project.objects.fileProperty()
+    val javac2: RegularFileProperty = objectFactory.fileProperty()
 
     @Input
-    val compilerVersion: Property<String> = project.objects.property(String::class.java)
+    val compilerVersion: Property<String> = objectFactory.property(String::class.java)
 
     @OutputDirectory
-    val outputDir: DirectoryProperty = project.objects.directoryProperty()
+    val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
     @InputFiles
     fun getSourceDirs() = sourceSetAllDirs.get().filter {
