@@ -389,7 +389,6 @@ open class IntelliJPlugin : Plugin<Project> {
             task.pluginJar.convention(project.layout.file(project.provider {
                 (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archiveFile.orNull?.asFile
             }))
-            task.destinationDir = File("${extension.sandboxDirectory.get()}/plugins$testSuffix")
             task.conventionMapping("destinationDir") {
                 project.file("${extension.sandboxDirectory.get()}/plugins$testSuffix")
             }
