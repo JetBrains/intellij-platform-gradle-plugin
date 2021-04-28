@@ -1,17 +1,20 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    groovy
+    kotlin("jvm") version "1.5.0"
+    id("java-gradle-plugin")
+    id("maven-publish")
     id("com.gradle.plugin-publish") version "0.14.0"
     id("synapticloop.documentr") version "3.1.0"
-    `java-gradle-plugin`
-    `maven-publish`
-    id("com.github.breadmoirai.github-release") version "2.2.9"
-    id("org.jetbrains.changelog") version "1.1.1"
+    id("com.github.breadmoirai.github-release") version "2.2.12"
+    id("org.jetbrains.changelog") version "1.1.2"
 }
 
 plugins.withType<JavaPlugin> {
-    tasks.withType<GroovyCompile> {
-        sourceCompatibility = "1.7"
-        targetCompatibility = "1.7"
+    tasks {
+        withType<KotlinCompile> {
+            kotlinOptions.jvmTarget = "1.8"
+        }
     }
 }
 
@@ -21,8 +24,8 @@ repositories {
 }
 
 dependencies {
-    implementation(localGroovy())
     api(gradleApi())
+    implementation("org.jetbrains:marketplace-zip-signer:0.1.3")
     implementation("org.jetbrains:annotations:19.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.171")
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.171")
@@ -34,12 +37,13 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("de.undercouch:gradle-download-task:4.0.4")
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("com.fasterxml.woodstox:woodstox-core:6.2.4")
 
     testImplementation(gradleTestKit())
-    testImplementation("org.spockframework:spock-core:1.0-groovy-2.4") {
-        exclude(module = "groovy-all")
-    }
-    testImplementation("junit:junit:4.12")
+    testImplementation(kotlin("test"))
+    testImplementation(kotlin("test-junit"))
 }
 
 version = if (project.property("snapshot")?.toString()?.toBoolean() == true) {
@@ -49,7 +53,7 @@ version = if (project.property("snapshot")?.toString()?.toBoolean() == true) {
 }
 group = "org.jetbrains.intellij.plugins"
 description = """
-**This project requires Gradle 4.9 or newer**
+**This project requires Gradle 5.1 or newer**
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
@@ -92,7 +96,7 @@ fun configureTests(testTask: Test) {
         File(testGradleHomePath).mkdir()
     }
     testTask.systemProperties["test.gradle.home"] = testGradleHomePath
-    testTask.systemProperties["plugins.repo"] = project.property("pluginsRepo")
+    testTask.systemProperties["plugins.repository"] = project.property("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)
 }
 

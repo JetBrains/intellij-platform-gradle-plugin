@@ -7,7 +7,7 @@
 <h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.7.3</h4>
 
 > 
-**This project requires Gradle 4.9 or newer**
+**This project requires Gradle 5.1 or newer**
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
@@ -120,13 +120,13 @@ The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd>
 | Attributes | Values | 
 | :------------- | :--------- | 
 | <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:**    <ul>        <li>Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio.</li>        <li>Empty value means that the IDE that was used for compiling will be used for running/debugging as well.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/Android Studio.app'`<br/><br/>**Default Value:** none|
-| <kbd>sandboxDirectory</kbd> - The path of sandbox directory that is used for running IDE with developing plugin.|**Acceptable Values:** <br/><kbd>path</kbd> - `'${project.rootDir}/.sandbox'` <br/><br/>**Default Value:** <kbd>'${project.buildDir}/idea-sandbox'</kbd>|
+| <kbd>sandboxDir</kbd> - The path of sandbox directory that is used for running IDE with developing plugin.|**Acceptable Values:** <br/><kbd>path</kbd> - `'${project.rootDir}/.sandbox'` <br/><br/>**Default Value:** <kbd>'${project.buildDir}/idea-sandbox'</kbd>|
 
 #### Infrastructure Properties
 | Attributes | Values | 
 | :------------- | :--------- | 
-| <kbd>intellijRepo</kbd>, <kbd>jreRepo</kbd> - Urls of repositories for downloading IDE distributions and JetBrains Java Runtime. <br/><br/>|**Acceptable Values:** <br/><kbd>url</kbd><br/><br/>**Default Value:** <kbd>https://jetbrains.com/intellij-repository</kbd>, <kbd>https://cache-redirector.jetbrains.com/intellij-jbr</kbd>|
-| <kbd>pluginsRepo { ... }</kbd> - Configure repositories for downloading plugin dependencies. <br/><br/>|**Configuration:** <br/><kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/><kbd>maven(repoUrl)</kbd> - use custom Maven repository with plugins<br/><kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/><br/>**Default Configuration:** <kbd>pluginsRepo { marketplace() }</kbd>|
+| <kbd>intellijRepository</kbd>, <kbd>jreRepository</kbd> - Urls of repositories for downloading IDE distributions and JetBrains Java Runtime. <br/><br/>|**Acceptable Values:** <br/><kbd>url</kbd><br/><br/>**Default Value:** <kbd>https://jetbrains.com/intellij-repository</kbd>, <kbd>https://cache-redirector.jetbrains.com/intellij-jbr</kbd>|
+| <kbd>pluginsRepositories { ... }</kbd> - Configure repositories for downloading plugin dependencies. <br/><br/>|**Configuration:** <br/><kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/><kbd>maven(repositoryUrl)</kbd> - use custom Maven repository with plugins<br/><kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/><br/>**Default Configuration:** <kbd>pluginsRepositories { marketplace() }</kbd>|
 | <kbd>downloadSources</kbd> - Should plugin download IntelliJ sources while initializing Gradle build? <br/><br/>**Notes:**    <ul>        <li>Since sources are not needed while testing on CI, you can set it to `false` for a particular environment.</li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> if `CI` environment variable is not set|
 | <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDE distributions. <br/><br/>**Notes:**    <ul>        <li>Empty value means the Gradle cache directory will be used.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'<example>'`<br/><br/>**Default Value:** none|
 
@@ -141,10 +141,10 @@ In addition to that, following attributes may be used to customize IDE running:
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
 | <kbd>jbrVersion</kbd> JetBrains Java runtime version to use when running the IDE with the plugin. | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java versions are available at [JetBrains Space Packages](https://cache-redirector.jetbrains.com/intellij-jbr/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
-| <kbd>ideDirectory</kbd> Path to IDE distribution that will be used to run the IDE with the plugin. | path to IDE-dependency |
-| <kbd>configDirectory</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDirectory}/config</kbd> |
-| <kbd>pluginsDirectory</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDirectory}/plugins</kbd> |
-| <kbd>systemDirectory</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDirectory}/system</kbd> |
+| <kbd>ideDir</kbd> Path to IDE distribution that will be used to run the IDE with the plugin. | path to IDE-dependency |
+| <kbd>configDir</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDir}/config</kbd> |
+| <kbd>pluginsDir</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDir}/plugins</kbd> |
+| <kbd>systemDir</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDir}/system</kbd> |
 | <kbd>autoReloadPlugins</kbd> Enable/disable [auto-reload](https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#enabling-auto-reload) of dynamic plugins. | <kbd>true</kbd> for IDE >= 2020.2 |
 
 ### Patching DSL
@@ -177,8 +177,8 @@ Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDE
 | <kbd>localPaths</kbd> - A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in `ideVersions`.                        | <kbd>[]</kbd>                                                                                                                                  |
 | <kbd>distributionFile</kbd> - Jar or Zip file of plugin to verify.                                                                                                                              | output of `buildPlugin` task                                                                                                                   |
 | <kbd>failureLevel</kbd> - Defines the verification level at which task should fail. Can be set as `FailureLevel` enum or `EnumSet<FailureLevel>`.                                               | <kbd>FailureLevel.INVALID_PLUGIN</kbd>                                                                                                         |
-| <kbd>verificationReportsDirectory</kbd> - The path to directory where verification reports will be saved.                                                                                       | <kbd>${project.buildDir}/reports/pluginVerifier</kbd>                                                                                          |
-| <kbd>downloadDirectory</kbd> - The path to directory where IDEs used for the verification will be downloaded.                                                                                   | `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides` or system temporary directory. |
+| <kbd>verificationReportsDir</kbd> - The path to directory where verification reports will be saved.                                                                                             | <kbd>${project.buildDir}/reports/pluginVerifier</kbd>                                                                                          |
+| <kbd>downloadDir</kbd> - The path to directory where IDEs used for the verification will be downloaded.                                                                                         | `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides` or system temporary directory. |
 | <kbd>jbrVersion</kbd> - JBR version used by the Verifier.                                                                                                                                       | none                                                                                                                                           |
 | <kbd>runtimeDir</kbd> - The path to directory containing Java runtime, overrides JBR.                                                                                                           | none                                                                                                                                           |
 | <kbd>externalPrefixes</kbd> - The prefixes of classes from the external libraries.                                                                                                              | none                                                                                                                                           |
