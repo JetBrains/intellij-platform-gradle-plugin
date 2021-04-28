@@ -36,7 +36,7 @@ open class SignPluginTask @Inject constructor(
 
     @Input
     @Optional
-    var password: Property<String> = objectFactory.property(String::class.java)
+    val password: Property<String> = objectFactory.property(String::class.java)
 
     @TaskAction
     @ExperimentalUnsignedTypes
