@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import org.apache.commons.io.FileUtils
 import org.gradle.api.internal.project.ProjectInternal
+import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
 import java.io.BufferedReader
@@ -14,12 +15,12 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPluginSpecBase {
 
-    val gradleHome: String = System.getProperty("test.gradle.home")
-    val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val intellijVersion = "2020.1"
+    private val pluginsRepository = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
+    private var debugEnabled = true
 
+    val gradleHome: String = System.getProperty("test.gradle.home")
+    val intellijVersion = "2020.1"
     val dir = createTempDir()
-    var debugEnabled = true
 
     val buildFile = file("build.gradle")
     val pluginXml = file("src/main/resources/META-INF/plugin.xml")
@@ -81,13 +82,13 @@ abstract class IntelliJPluginSpecBase {
         debugEnabled = false
     }
 
-    protected fun buildAndFail(vararg tasks: String) = build(true, *tasks)
+    protected fun buildAndFail(vararg tasks: String): BuildResult = build(true, *tasks)
 
-    protected fun build(vararg tasks: String) = build(false, *tasks)
+    protected fun build(vararg tasks: String): BuildResult = build(false, *tasks)
 
-    protected fun build(fail: Boolean, vararg tasks: String) = build("6.6", fail, *tasks)
+    protected fun build(fail: Boolean, vararg tasks: String): BuildResult = build("6.6", fail, *tasks)
 
-    protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String) =
+    protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String): BuildResult =
         builder(gradleVersion, *tasks).run {
             when (fail) {
                 true -> buildAndFail()

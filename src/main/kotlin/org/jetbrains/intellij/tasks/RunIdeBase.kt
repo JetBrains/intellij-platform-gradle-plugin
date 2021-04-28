@@ -41,26 +41,17 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         "RDCPPP" to "Rider",
     )
 
-    @Internal
-    val requiredPluginIds: ListProperty<String> = project.objects.listProperty(String::class.java)
-
     @InputDirectory
     @PathSensitive(PathSensitivity.NONE)
-    val ideDirectory: DirectoryProperty = project.objects.directoryProperty()
+    val ideDir: DirectoryProperty = objectFactory.directoryProperty()
 
     @Input
     @Optional
-    val jbrVersion: Property<String> = project.objects.property(String::class.java)
-
-    @Internal
-    val configDirectory: Property<File> = project.objects.property(File::class.java)
-
-    @Internal
-    val systemDirectory: Property<File> = project.objects.property(File::class.java)
+    val jbrVersion: Property<String> = objectFactory.property(String::class.java)
 
     @InputDirectory
     @PathSensitive(PathSensitivity.NONE)
-    val pluginsDirectory: DirectoryProperty = project.objects.directoryProperty()
+    val pluginsDir: DirectoryProperty = objectFactory.directoryProperty()
 
     /**
      * Enables auto-reload of dynamic plugins. Dynamic plugins will be reloaded automatically when their JARs are
@@ -69,7 +60,22 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      */
     @Input
     @Optional
-    val autoReloadPlugins: Property<Boolean> = project.objects.property(Boolean::class.java)
+    val autoReloadPlugins: Property<Boolean> = objectFactory.property(Boolean::class.java)
+
+    @Internal
+    val requiredPluginIds: ListProperty<String> = objectFactory.listProperty(String::class.java)
+
+    @Internal
+    val configDir: Property<File> = objectFactory.property(File::class.java)
+
+    @Internal
+    val systemDir: Property<File> = objectFactory.property(File::class.java)
+
+    @Internal
+    val projectWorkingDir: Property<File> = objectFactory.property(File::class.java)
+
+    @Internal
+    val projectExecutable: Property<String> = objectFactory.property(String::class.java)
 
     init {
         main = "com.intellij.idea.Main"
@@ -81,49 +87,49 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
     @Override
     override fun exec() {
-        workingDir = project.file("${ideDirectory.get().asFile}/bin/")
+        workingDir = projectWorkingDir.get()
         configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
-        executable(executable)
+        executable(projectExecutable.get())
         super.exec()
     }
 
     private fun configureClasspath() {
-        val ideDirectoryFile = ideDirectory.get().asFile
+        val ideDirFile = ideDir.get().asFile
 
         executable.takeUnless { it.isNullOrEmpty() }?.let {
             project.file(resolveToolsJar(it)).takeIf(File::exists) ?: Jvm.current().toolsJar
         }?.let {
-            classpath += project.files(it)
+            classpath += objectFactory.fileCollection().from(it)
         }
 
-        val buildNumber = ideBuildNumber(ideDirectory.get().asFile).split('-').last()
+        val buildNumber = ideBuildNumber(ideDir.get().asFile).split('-').last()
         val version = VersionNumber.parse(buildNumber)
         if (version > VersionNumber.parse("203.0")) {
-            classpath += project.files(
-                    "$ideDirectoryFile/lib/bootstrap.jar",
-                    "$ideDirectoryFile/lib/util.jar",
-                    "$ideDirectoryFile/lib/jdom.jar",
-                    "$ideDirectoryFile/lib/log4j.jar",
-                    "$ideDirectoryFile/lib/jna.jar",
+            classpath += objectFactory.fileCollection().from(
+                    "$ideDirFile/lib/bootstrap.jar",
+                    "$ideDirFile/lib/util.jar",
+                    "$ideDirFile/lib/jdom.jar",
+                    "$ideDirFile/lib/log4j.jar",
+                    "$ideDirFile/lib/jna.jar",
             )
         } else {
-            classpath += project.files(
-                    "$ideDirectoryFile/lib/bootstrap.jar",
-                    "$ideDirectoryFile/lib/extensions.jar",
-                    "$ideDirectoryFile/lib/util.jar",
-                    "$ideDirectoryFile/lib/jdom.jar",
-                    "$ideDirectoryFile/lib/log4j.jar",
-                    "$ideDirectoryFile/lib/jna.jar",
-                    "$ideDirectoryFile/lib/trove4j.jar",
+            classpath += objectFactory.fileCollection().from(
+                    "$ideDirFile/lib/bootstrap.jar",
+                    "$ideDirFile/lib/extensions.jar",
+                    "$ideDirFile/lib/util.jar",
+                    "$ideDirFile/lib/jdom.jar",
+                    "$ideDirFile/lib/log4j.jar",
+                    "$ideDirFile/lib/jna.jar",
+                    "$ideDirFile/lib/trove4j.jar",
             )
         }
     }
 
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
-        systemProperties(getIdeaSystemProperties(configDirectory.get(), systemDirectory.get(), pluginsDirectory.get().asFile, requiredPluginIds.get()))
+        systemProperties(getIdeaSystemProperties(configDir.get(), systemDir.get(), pluginsDir.get().asFile, requiredPluginIds.get()))
         val operatingSystem = OperatingSystem.current()
         val userDefinedSystemProperties = systemProperties
         if (operatingSystem.isMacOsX) {
@@ -141,7 +147,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
-            val matcher = VERSION_PATTERN.matcher(ideBuildNumber(ideDirectory.get().asFile))
+            val matcher = VERSION_PATTERN.matcher(ideBuildNumber(ideDir.get().asFile))
             if (matcher.find()) {
                 val abbreviation = matcher.group(1)
                 val prefix = prefixes[abbreviation]
@@ -159,6 +165,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     }
 
     private fun configureJvmArgs() {
-        jvmArgs = getIdeJvmArgs(this, jvmArgs ?: emptyList(), ideDirectory.get().asFile)
+        jvmArgs = getIdeJvmArgs(this, jvmArgs ?: emptyList(), ideDir.get().asFile)
     }
 }

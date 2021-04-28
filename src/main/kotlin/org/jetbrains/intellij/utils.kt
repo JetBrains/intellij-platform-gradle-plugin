@@ -14,9 +14,7 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.base.utils.isZip
-import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
-import groovy.lang.Closure
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
@@ -137,12 +135,6 @@ fun isJarFile(file: File) = file.toPath().isJar()
 
 fun isZipFile(file: File) = file.toPath().isZip()
 
-fun stringInput(input: Any?) = when (input) {
-    null -> ""
-    is Closure<*> -> input.call().toString()
-    else -> input.toString()
-}
-
 fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = when {
     !directory.isDirectory -> emptyList()
     else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
@@ -248,18 +240,19 @@ fun log(level: LogLevel, context: Any, message: String, e: Throwable?) {
     }
 }
 
-fun createPlugin(artifact: File, validatePluginXml: Boolean, loggingContext: Any): IdePlugin? {
-    val creationResult = IdePluginManager.createManager().createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
-    if (creationResult is PluginCreationSuccess) {
-        return creationResult.plugin
-    } else if (creationResult is PluginCreationFail) {
-        val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-        warn(loggingContext, "Cannot create plugin from file ($artifact): $problems")
-    } else {
-        warn(loggingContext, "Cannot create plugin from file ($artifact). $creationResult")
+fun createPlugin(artifact: File, validatePluginXml: Boolean, loggingContext: Any) =
+    when (val result = IdePluginManager.createManager().createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)) {
+        is PluginCreationSuccess -> result.plugin
+        is PluginCreationFail -> {
+            val problems = result.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
+            warn(loggingContext, "Cannot create plugin from file ($artifact): $problems")
+            null
+        }
+        else -> {
+            warn(loggingContext, "Cannot create plugin from file ($artifact). $result")
+            null
+        }
     }
-    return null
-}
 
 fun untar(project: Project, from: File, to: File) {
     val tempDir = File(to.parent, to.name + "-temp")

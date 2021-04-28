@@ -12,22 +12,21 @@ open class JarSearchableOptionsTask : Jar() {
 
         from({
             include {
-                if (it.isDirectory) {
-                    true
-                } else {
-                    val suffix = ".searchableOptions.xml"
-                    if (it.name.endsWith(suffix)) {
-                        if (pluginJarFiles.isEmpty()) {
+                when {
+                    it.isDirectory -> true
+                    else -> {
+                        val suffix = ".searchableOptions.xml"
+                        if (it.name.endsWith(suffix) && pluginJarFiles.isEmpty()) {
                             val prepareSandboxTask =
                                 project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
                             val lib = "${prepareSandboxTask.pluginName.get()}/lib"
-                            File(prepareSandboxTask.destinationDir, lib).list()?.let {
-                                pluginJarFiles.addAll(it)
+                            File(prepareSandboxTask.destinationDir, lib).list()?.let { files ->
+                                pluginJarFiles.addAll(files)
                             }
                         }
+                        val jarName = it.name.replace(suffix, "")
+                        pluginJarFiles.contains(jarName)
                     }
-                    val jarName = it.name.replace(suffix, "")
-                    pluginJarFiles.contains(jarName)
                 }
             }
             "${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}"

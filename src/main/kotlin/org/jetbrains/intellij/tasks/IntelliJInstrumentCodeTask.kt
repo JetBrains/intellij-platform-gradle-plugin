@@ -1,12 +1,11 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileCollection
-import org.gradle.api.file.FileTree
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
-import org.gradle.api.internal.file.collections.DefaultConfigurableFileCollection
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
@@ -14,8 +13,6 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.SkipWhenEmpty
-import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.TaskAction
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants
@@ -24,9 +21,13 @@ import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.releaseType
 import java.io.File
 import java.net.URI
+import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
-open class IntelliJInstrumentCodeTask : ConventionTask() {
+@Suppress("Incubating", "UnstableApiUsage")
+open class IntelliJInstrumentCodeTask @Inject constructor(
+    objectFactory: ObjectFactory,
+    private val fileSystemOperations: FileSystemOperations,
+) : ConventionTask() {
 
     companion object {
         const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
@@ -38,35 +39,35 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
     private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
 
     @Internal
-    val sourceSet: Property<SourceSet> = project.objects.property(SourceSet::class.java)
+    val sourceSetOutputClassesDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
+
+    @Internal
+    val sourceSetAllDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
+
+    @Internal
+    val sourceSetResources: ListProperty<File> = objectFactory.listProperty(File::class.java)
+
+    @Internal
+    val sourceSetCompileClasspath: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Input
     @Optional
-    val ideaDependency: Property<IdeaDependency> = project.objects.property(IdeaDependency::class.java)
+    val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
     @InputFile
     @Optional
-    val javac2: RegularFileProperty = project.objects.fileProperty()
+    val javac2: RegularFileProperty = objectFactory.fileProperty()
 
     @Input
-    val compilerVersion: Property<String> = project.objects.property(String::class.java)
+    val compilerVersion: Property<String> = objectFactory.property(String::class.java)
 
     @OutputDirectory
-    val outputDir: DirectoryProperty = project.objects.directoryProperty()
+    val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
     @InputFiles
-    @SkipWhenEmpty
-    fun getOriginalClasses(): FileTree = sourceSet.get().output.classesDirs.let {
-        if (it is DefaultConfigurableFileCollection) {
-            project.files(it.from).asFileTree
-        } else {
-            project.fileTree(it)
-        }
+    fun getSourceDirs() = sourceSetAllDirs.get().filter {
+        it.exists() && !sourceSetResources.get().contains(it)
     }
-
-    @InputFiles
-    fun getSourceDirs(): FileCollection =
-        project.files(sourceSet.get().allSource.srcDirs.filter { !sourceSet.get().resources.contains(it) && it.exists() })
 
     @TaskAction
     fun instrumentClasses() {
@@ -76,7 +77,7 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
 
         ant.invokeMethod("taskdef", mapOf(
             "name" to "instrumentIdeaExtensions",
-            "classpath" to classpath.asPath,
+            "classpath" to classpath.joinToString(":"),
             "loaderref" to LOADER_REF,
             "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
         ))
@@ -86,34 +87,34 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
         instrumentCode(getSourceDirs(), outputDir.get().asFile, instrumentNotNull)
     }
 
-    private fun compilerClassPath(): FileCollection {
-        // local compiler
-        if (javac2.get().asFile.exists()) {
-            return project.files(
-                javac2,
-                project.fileTree("${ideaDependency.get().classes}/lib").include(
+    // local compiler
+    private fun compilerClassPath() = javac2.orNull?.let {
+        it.asFile.takeIf(File::exists)?.let { file ->
+            File("${ideaDependency.get().classes}/lib").listFiles { _, name ->
+                listOf(
                     "jdom.jar",
                     "asm-all.jar",
                     "asm-all-*.jar",
                     "jgoodies-forms.jar",
                     "forms-*.jar",
-                )
-            )
+                ).any {
+                    val parts = it.split('*')
+                    name.startsWith(parts.first()) && name.endsWith(parts.last())
+                }
+            }.orEmpty().filterNotNull() + file
         }
+    } ?: compilerClassPathFromMaven()
 
-        return compilerClassPathFromMaven()
-    }
-
-    private fun compilerClassPathFromMaven(): ConfigurableFileCollection {
+    private fun compilerClassPathFromMaven(): List<File> {
         val dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
-        val intellijRepositoryUrl = extension?.intellijRepository ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
+        val intellijRepositoryUrl = extension?.intellijRepository?.get() ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
             project.repositories.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
             project.repositories.maven { it.url = URI(ASM_REPOSITORY_URL) },
             project.repositories.maven { it.url = URI(FORMS_REPOSITORY_URL) },
         )
         try {
-            return project.files(project.configurations.detachedConfiguration(dependency).files)
+            return project.configurations.detachedConfiguration(dependency).files.toList()
         } finally {
             project.repositories.removeAll(repos)
         }
@@ -121,17 +122,18 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
 
     private fun copyOriginalClasses(outputDir: File) {
         outputDir.deleteRecursively()
-        project.copy {
-            it.from(getOriginalClasses())
+        outputDir.mkdir()
+        fileSystemOperations.copy {
+            it.from(sourceSetOutputClassesDirs.get())
             it.into(outputDir)
         }
     }
 
-    private fun prepareNotNullInstrumenting(classpath: FileCollection): Boolean {
+    private fun prepareNotNullInstrumenting(classpath: List<File>): Boolean {
         try {
             ant.invokeMethod("typedef", mapOf(
                 "name" to "skip",
-                "classpath" to classpath.asPath,
+                "classpath" to classpath.joinToString(":"),
                 "loaderref" to LOADER_REF,
                 "classname" to FILTER_ANNOTATION_REGEXP_CLASS,
             ))
@@ -148,12 +150,12 @@ open class IntelliJInstrumentCodeTask : ConventionTask() {
         return true
     }
 
-    private fun instrumentCode(srcDirs: FileCollection, outputDir: File, instrumentNotNull: Boolean) {
+    private fun instrumentCode(srcDirs: List<File>, outputDir: File, instrumentNotNull: Boolean) {
         val headlessOldValue = System.setProperty("java.awt.headless", "true")
         ant.invokeMethod("instrumentIdeaExtensions", mapOf(
-            "srcdir" to srcDirs.asPath,
+            "srcdir" to srcDirs.joinToString(":"),
             "destdir" to outputDir,
-            "classpath" to sourceSet.get().compileClasspath.asPath,
+            "classpath" to sourceSetCompileClasspath.get().joinToString(":"),
             "includeantruntime" to false,
             "instrumentNotNull" to instrumentNotNull,
         ))

@@ -3,6 +3,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -17,6 +18,7 @@ import org.jetbrains.intellij.get
 import org.jetbrains.intellij.warn
 import org.w3c.dom.Document
 import java.io.File
+import javax.inject.Inject
 import javax.xml.parsers.DocumentBuilderFactory
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerFactory
@@ -24,38 +26,40 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 @Suppress("UnstableApiUsage")
-open class PatchPluginXmlTask : ConventionTask() {
+open class PatchPluginXmlTask @Inject constructor(
+    objectFactory: ObjectFactory,
+) : ConventionTask() {
 
     @OutputDirectory
-    val destinationDir: DirectoryProperty = project.objects.directoryProperty()
+    val destinationDir: DirectoryProperty = objectFactory.directoryProperty()
 
     @SkipWhenEmpty
     @InputFiles
-    val pluginXmlFiles: ListProperty<File> = project.objects.listProperty(File::class.java)
+    val pluginXmlFiles: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Input
     @Optional
-    val pluginDescription: Property<String> = project.objects.property(String::class.java)
+    val pluginDescription: Property<String> = objectFactory.property(String::class.java)
 
     @Input
     @Optional
-    val sinceBuild: Property<String> = project.objects.property(String::class.java)
+    val sinceBuild: Property<String> = objectFactory.property(String::class.java)
 
     @Input
     @Optional
-    val untilBuild: Property<String> = project.objects.property(String::class.java)
+    val untilBuild: Property<String> = objectFactory.property(String::class.java)
 
     @Input
     @Optional
-    val version: Property<String> = project.objects.property(String::class.java)
+    val version: Property<String> = objectFactory.property(String::class.java)
 
     @Input
     @Optional
-    val changeNotes: Property<String> = project.objects.property(String::class.java)
+    val changeNotes: Property<String> = objectFactory.property(String::class.java)
 
     @Input
     @Optional
-    val pluginId: Property<String> = project.objects.property(String::class.java)
+    val pluginId: Property<String> = objectFactory.property(String::class.java)
 
     @TaskAction
     fun patchPluginXmlFiles() {
@@ -92,7 +96,7 @@ open class PatchPluginXmlTask : ConventionTask() {
                     setOutputProperty(OutputKeys.INDENT, "yes")
                     setOutputProperty(OutputKeys.METHOD, "xml")
                     setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
-                    setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+                    setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
                 }
                 .transform(DOMSource(document), StreamResult(destination))
         }

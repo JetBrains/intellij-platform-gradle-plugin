@@ -7,6 +7,7 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -17,23 +18,26 @@ import org.gradle.api.tasks.TaskExecutionException
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
+import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class PublishTask : ConventionTask() {
+open class PublishTask @Inject constructor(
+    objectFactory: ObjectFactory,
+) : ConventionTask() {
 
     @InputFile
-    val distributionFile: RegularFileProperty = project.objects.fileProperty()
+    val distributionFile: RegularFileProperty = objectFactory.fileProperty()
 
     @Input
-    val host: Property<String> = project.objects.property(String::class.java).convention("https://plugins.jetbrains.com")
-
-    @Input
-    @Optional
-    val token: Property<String> = project.objects.property(String::class.java)
+    val host: Property<String> = objectFactory.property(String::class.java)
 
     @Input
     @Optional
-    val channels: ListProperty<String> = project.objects.listProperty(String::class.java).convention(listOf("default"))
+    val token: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val channels: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
     init {
         enabled = !project.gradle.startParameter.isOffline

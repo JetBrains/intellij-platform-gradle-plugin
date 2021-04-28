@@ -120,7 +120,7 @@ The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd>
 | Attributes | Values | 
 | :------------- | :--------- | 
 | <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:**    <ul>        <li>Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio.</li>        <li>Empty value means that the IDE that was used for compiling will be used for running/debugging as well.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/Android Studio.app'`<br/><br/>**Default Value:** none|
-| <kbd>sandboxDirectory</kbd> - The path of sandbox directory that is used for running IDE with developing plugin.|**Acceptable Values:** <br/><kbd>path</kbd> - `'${project.rootDir}/.sandbox'` <br/><br/>**Default Value:** <kbd>'${project.buildDir}/idea-sandbox'</kbd>|
+| <kbd>sandboxDir</kbd> - The path of sandbox directory that is used for running IDE with developing plugin.|**Acceptable Values:** <br/><kbd>path</kbd> - `'${project.rootDir}/.sandbox'` <br/><br/>**Default Value:** <kbd>'${project.buildDir}/idea-sandbox'</kbd>|
 
 #### Infrastructure Properties
 | Attributes | Values | 
@@ -141,10 +141,10 @@ In addition to that, following attributes may be used to customize IDE running:
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
 | <kbd>jbrVersion</kbd> JetBrains Java runtime version to use when running the IDE with the plugin. | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java versions are available at [JetBrains Space Packages](https://cache-redirector.jetbrains.com/intellij-jbr/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
-| <kbd>ideDirectory</kbd> Path to IDE distribution that will be used to run the IDE with the plugin. | path to IDE-dependency |
-| <kbd>configDirectory</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDirectory}/config</kbd> |
-| <kbd>pluginsDirectory</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDirectory}/plugins</kbd> |
-| <kbd>systemDirectory</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDirectory}/system</kbd> |
+| <kbd>ideDir</kbd> Path to IDE distribution that will be used to run the IDE with the plugin. | path to IDE-dependency |
+| <kbd>configDir</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDir}/config</kbd> |
+| <kbd>pluginsDir</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDir}/plugins</kbd> |
+| <kbd>systemDir</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDir}/system</kbd> |
 | <kbd>autoReloadPlugins</kbd> Enable/disable [auto-reload](https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#enabling-auto-reload) of dynamic plugins. | <kbd>true</kbd> for IDE >= 2020.2 |
 
 ### Patching DSL
@@ -177,8 +177,8 @@ Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDE
 | <kbd>localPaths</kbd> - A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in `ideVersions`.                        | <kbd>[]</kbd>                                                                                                                                  |
 | <kbd>distributionFile</kbd> - Jar or Zip file of plugin to verify.                                                                                                                              | output of `buildPlugin` task                                                                                                                   |
 | <kbd>failureLevel</kbd> - Defines the verification level at which task should fail. Can be set as `FailureLevel` enum or `EnumSet<FailureLevel>`.                                               | <kbd>FailureLevel.INVALID_PLUGIN</kbd>                                                                                                         |
-| <kbd>verificationReportsDirectory</kbd> - The path to directory where verification reports will be saved.                                                                                       | <kbd>${project.buildDir}/reports/pluginVerifier</kbd>                                                                                          |
-| <kbd>downloadDirectory</kbd> - The path to directory where IDEs used for the verification will be downloaded.                                                                                   | `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides` or system temporary directory. |
+| <kbd>verificationReportsDir</kbd> - The path to directory where verification reports will be saved.                                                                                             | <kbd>${project.buildDir}/reports/pluginVerifier</kbd>                                                                                          |
+| <kbd>downloadDir</kbd> - The path to directory where IDEs used for the verification will be downloaded.                                                                                         | `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides` or system temporary directory. |
 | <kbd>jbrVersion</kbd> - JBR version used by the Verifier.                                                                                                                                       | none                                                                                                                                           |
 | <kbd>runtimeDir</kbd> - The path to directory containing Java runtime, overrides JBR.                                                                                                           | none                                                                                                                                           |
 | <kbd>externalPrefixes</kbd> - The prefixes of classes from the external libraries.                                                                                                              | none                                                                                                                                           |
