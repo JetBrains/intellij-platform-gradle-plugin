@@ -195,11 +195,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
             val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
 
-            assertTrue(compileClasspath.contains ("markdown.jar"))
-            assertTrue(compileClasspath.contains ("resources_en.jar"))
-            assertTrue(compileClasspath.contains ("kotlin-reflect-1.3.70.jar"))
-            assertTrue(compileClasspath.contains ("kotlin-stdlib-1.3.70.jar"))
-            assertTrue(compileClasspath.contains ("markdown-0.1.41.jar"))
+            assertTrue(compileClasspath.contains("markdown.jar"))
+            assertTrue(compileClasspath.contains("resources_en.jar"))
+            assertTrue(compileClasspath.contains("kotlin-reflect-1.3.70.jar"))
+            assertTrue(compileClasspath.contains("kotlin-stdlib-1.3.70.jar"))
+            assertTrue(compileClasspath.contains("markdown-0.1.41.jar"))
             assertFalse(runtimeClasspath.contains("markdown.jar"))
             assertFalse(runtimeClasspath.contains("resources_en.jar"))
             assertFalse(runtimeClasspath.contains("kotlin-reflect-1.3.70.jar"))
@@ -229,7 +229,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
             val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
 
-            assertTrue(compileClasspath.contains ("intellij-postfix.jar"))
+            assertTrue(compileClasspath.contains("intellij-postfix.jar"))
             assertFalse(runtimeClasspath.contains("intellij-postfix.jar"))
         }
     }
@@ -251,10 +251,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
             val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
 
-            assertTrue(compileClasspath.contains ("vcs-changeReminder.jar"))
-            assertTrue(runtimeClasspath.contains ("vcs-changeReminder.jar"))
-            assertTrue(compileClasspath.contains ("git4idea.jar"))
-            assertTrue(runtimeClasspath.contains ("git4idea.jar"))
+            assertTrue(compileClasspath.contains("vcs-changeReminder.jar"))
+            assertTrue(runtimeClasspath.contains("vcs-changeReminder.jar"))
+            assertTrue(compileClasspath.contains("git4idea.jar"))
+            assertTrue(runtimeClasspath.contains("git4idea.jar"))
         }
     }
 
@@ -302,10 +302,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
             val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
 
-            assertTrue(compileClasspath.contains ("copyright.jar"))
-            assertTrue(runtimeClasspath.contains ("copyright.jar"))
-            assertTrue(compileClasspath.contains ("org.jetbrains.postfixCompletion-0.8-beta.jar"))
-            assertTrue(runtimeClasspath.contains ("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+            assertTrue(compileClasspath.contains("copyright.jar"))
+            assertTrue(runtimeClasspath.contains("copyright.jar"))
+            assertTrue(compileClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+            assertTrue(runtimeClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
         }
     }
 
@@ -329,9 +329,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
             val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
 
-            assertTrue(compileClasspath.contains ("copyright.jar"))
+            assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
-            assertTrue(compileClasspath.contains ("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+            assertTrue(compileClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
             assertFalse(runtimeClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
         }
     }
@@ -356,7 +356,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
             val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
 
-            assertTrue(compileClasspath.contains ("copyright.jar"))
+            assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
         }
     }
@@ -422,13 +422,14 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun parseCommand(output: String) = output.lines()
         .find { it.startsWith("Starting process ") && !it.contains("vm_stat") }
         .let { assertNotNull(it) }
-        .let { it.substringAfter("Command: ") }
-        .let { ProcessProperties(it) }
+        .substringAfter("Command: ")
+        .let(::ProcessProperties)
 
     class ProcessProperties(command: String) {
 
+        private val jvmArgs = mutableSetOf<String>()
+
         val properties = mutableMapOf<String, String>()
-        val jvmArgs = mutableSetOf<String>()
         var xms = ""
         var xmx = ""
         var xclasspath = ""

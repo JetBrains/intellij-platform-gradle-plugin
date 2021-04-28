@@ -13,7 +13,7 @@ import org.jetbrains.intellij.unzip
 import java.net.URI
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
+@Suppress("Incubating", "UnstableApiUsage")
 open class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
     private val fileSystemOperations: FileSystemOperations,

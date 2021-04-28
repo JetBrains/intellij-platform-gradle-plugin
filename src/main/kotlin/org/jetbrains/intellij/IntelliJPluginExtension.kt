@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 
-import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.Project
@@ -160,8 +159,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     @Internal
     val pluginDependencies: ListProperty<PluginDependency> = objectFactory.listProperty(PluginDependency::class.java)
-
-    fun getBuildVersion(project: Project) = IdeVersion.createIdeVersion(getIdeaDependency(project).buildNumber).asStringWithoutProductCode()
 
     private var pluginDependenciesConfigured = false
 

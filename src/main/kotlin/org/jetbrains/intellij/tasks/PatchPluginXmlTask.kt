@@ -96,7 +96,7 @@ open class PatchPluginXmlTask @Inject constructor(
                     setOutputProperty(OutputKeys.INDENT, "yes")
                     setOutputProperty(OutputKeys.METHOD, "xml")
                     setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
-                    setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+                    setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
                 }
                 .transform(DOMSource(document), StreamResult(destination))
         }

@@ -12,7 +12,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
@@ -49,9 +48,6 @@ open class PrepareSandboxTask @Inject constructor(
     @Input
     @Optional
     val pluginDependencies: ListProperty<PluginDependency> = objectFactory.listProperty(PluginDependency::class.java)
-
-    @Internal
-    fun getPluginJarFromSandbox() = File(destinationDir, "${pluginName.get()}/lib/${pluginJar.get().asFile.name}")
 
     override fun configure(closure: Closure<*>): Task {
         return super.configure(closure)
