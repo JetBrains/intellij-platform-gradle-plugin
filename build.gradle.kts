@@ -25,6 +25,7 @@ repositories {
 
 dependencies {
     api(gradleApi())
+    implementation("org.jetbrains:marketplace-zip-signer:0.1.3")
     implementation("org.jetbrains:annotations:19.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.171")
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.171")
