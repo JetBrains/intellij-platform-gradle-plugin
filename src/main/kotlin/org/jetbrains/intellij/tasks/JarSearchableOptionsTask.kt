@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.intellij.IntelliJPluginConstants
 import java.io.File
@@ -21,8 +22,8 @@ open class JarSearchableOptionsTask : Jar() {
                             val prepareSandboxTask =
                                 project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
                             val lib = "${prepareSandboxTask.pluginName.get()}/lib"
-                            File(prepareSandboxTask.destinationDir, lib).list()?.let {
-                                pluginJarFiles.addAll(it)
+                            File(prepareSandboxTask.destinationDir, lib).list()?.let { files ->
+                                pluginJarFiles.addAll(files)
                             }
                         }
                     }
@@ -34,6 +35,7 @@ open class JarSearchableOptionsTask : Jar() {
         })
 
         eachFile { it.path = "search/$name" }
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
         includeEmptyDirs = false
     }
 }

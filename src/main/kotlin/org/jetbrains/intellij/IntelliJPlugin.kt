@@ -378,6 +378,9 @@ open class IntelliJPlugin : Plugin<Project> {
     ): Task {
         info(project, "Configuring $taskName task")
         val prepareSandboxTask = project.tasks.create(taskName, PrepareSandboxTask::class.java)
+        val jarTask = project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar
+
+        jarTask.duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
         return prepareSandboxTask.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
@@ -387,7 +390,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 extension.pluginName.get()
             })
             task.pluginJar.convention(project.layout.file(project.provider {
-                (project.tasks.findByName(JavaPlugin.JAR_TASK_NAME) as Jar).archiveFile.orNull?.asFile
+                jarTask.archiveFile.orNull?.asFile
             }))
             task.conventionMapping("destinationDir") {
                 project.file("${extension.sandboxDir.get()}/plugins$testSuffix")

@@ -88,24 +88,26 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     // local compiler
-    private fun compilerClassPath() = javac2.get().asFile.takeIf(File::exists)?.let { file ->
-        File("${ideaDependency.get().classes}/lib").listFiles { _, name ->
-            listOf(
-                "jdom.jar",
-                "asm-all.jar",
-                "asm-all-*.jar",
-                "jgoodies-forms.jar",
-                "forms-*.jar",
-            ).any {
-                val parts = it.split('*')
-                name.startsWith(parts.first()) && name.endsWith(parts.last())
-            }
-        }.orEmpty().filterNotNull() + file
+    private fun compilerClassPath() = javac2.orNull?.let {
+        it.asFile.takeIf(File::exists)?.let { file ->
+            File("${ideaDependency.get().classes}/lib").listFiles { _, name ->
+                listOf(
+                    "jdom.jar",
+                    "asm-all.jar",
+                    "asm-all-*.jar",
+                    "jgoodies-forms.jar",
+                    "forms-*.jar",
+                ).any {
+                    val parts = it.split('*')
+                    name.startsWith(parts.first()) && name.endsWith(parts.last())
+                }
+            }.orEmpty().filterNotNull() + file
+        }
     } ?: compilerClassPathFromMaven()
 
     private fun compilerClassPathFromMaven(): List<File> {
         val dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
-        val intellijRepositoryUrl = extension?.intellijRepository ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
+        val intellijRepositoryUrl = extension?.intellijRepository?.get() ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
             project.repositories.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
             project.repositories.maven { it.url = URI(ASM_REPOSITORY_URL) },
