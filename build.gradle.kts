@@ -36,7 +36,7 @@ dependencies {
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.15") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("de.undercouch:gradle-download-task:4.0.4")
+    implementation("de.undercouch:gradle-download-task:4.1.1")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
     implementation("com.fasterxml.woodstox:woodstox-core:6.2.4")
