@@ -557,7 +557,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }
             } ?: getBuiltinJbrVersion(task.ideDir.get().asFile)?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
-                    warn(task, "Cannot resolve builtin JBR $it. Falling local Java.")
+                    warn(task, "Cannot resolve builtin JBR ${it}. Falling local Java.")
                 }
             } ?: Jvm.current().javaExecutable.absolutePath
         })
