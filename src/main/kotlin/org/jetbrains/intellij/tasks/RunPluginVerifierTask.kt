@@ -10,7 +10,6 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
@@ -76,7 +75,7 @@ open class RunPluginVerifierTask @Inject constructor(
      * By default, it uses the plugin target IDE version.
      */
     @Input
-    val ideVersions: SetProperty<String> = objectFactory.setProperty(String::class.java)
+    val ideVersions: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
     /**
      * List of the paths to locally installed IDE distributions that should be used for verification
@@ -176,7 +175,7 @@ open class RunPluginVerifierTask @Inject constructor(
             throw IllegalStateException("Plugin file does not exist: $file")
         }
 
-        val ides = ideVersions.get().map { resolveIdePath(it) }
+        val ides = ideVersions.get().toSet().map { resolveIdePath(it) }
         if (ides.isEmpty() && localPaths.isEmpty) {
             throw GradleException("`ideVersions` and `localPaths` properties should not be empty")
         }
