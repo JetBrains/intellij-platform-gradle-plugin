@@ -13,6 +13,15 @@ jobs:
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1.0.3
 
+  codeInspection:
+    name: Code Inspection
+    needs: gradleValidation
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Qodana - Code Inspection
+        uses: JetBrains/qodana-action@v2.0-eap
+
   test:
     name: Test
     needs: gradleValidation
