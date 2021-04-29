@@ -1,4 +1,6 @@
 @file:JvmName("DependenciesUtils")
+@file:Suppress("unused")
+
 package org.jetbrains.intellij
 
 import groovy.lang.Closure

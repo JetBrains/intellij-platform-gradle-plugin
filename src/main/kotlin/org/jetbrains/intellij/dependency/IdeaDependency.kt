@@ -17,7 +17,7 @@ open class IdeaDependency(
 ) : Serializable {
 
     private val formatVersion = 1
-    val jarFiles = collectJarFiles()
+    val jarFiles = this.collectJarFiles()
 
     protected open fun collectJarFiles(): Collection<File> {
         if (classes.isDirectory) {

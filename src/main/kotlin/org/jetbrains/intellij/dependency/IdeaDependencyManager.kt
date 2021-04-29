@@ -146,7 +146,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
 
     private fun setExecutable(project: Project, parent: File, child: String) {
         File(parent, child).apply {
-            debug(project, "Resetting executable permissions for ${path}")
+            debug(project, "Resetting executable permissions for $path")
             setExecutable(true, true)
         }
     }

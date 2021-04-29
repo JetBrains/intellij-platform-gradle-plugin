@@ -10,7 +10,7 @@ open class JarSearchableOptionsTask : Jar() {
     init {
         val pluginJarFiles = mutableSetOf<String>()
 
-        from({
+        this.from({
             include {
                 when {
                     it.isDirectory -> true
@@ -32,7 +32,7 @@ open class JarSearchableOptionsTask : Jar() {
             "${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}"
         })
 
-        eachFile { it.path = "search/$name" }
+        this.eachFile { it.path = "search/$name" }
         includeEmptyDirs = false
     }
 }

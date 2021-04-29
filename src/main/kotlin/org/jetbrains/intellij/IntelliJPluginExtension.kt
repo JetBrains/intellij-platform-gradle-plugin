@@ -102,6 +102,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     /**
      * Configure multiple repositories for downloading plugins.
      */
+    @Suppress("unused")
     fun pluginsRepositories(block: Closure<Any>) {
         ConfigureUtil.configure(block, pluginsRepositories)
     }
@@ -109,6 +110,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     /**
      * Configure multiple repositories for downloading plugins.
      */
+    @Suppress("unused")
     fun pluginsRepositories(block: Action<PluginsRepositoryConfiguration>) {
         block.execute(pluginsRepositories)
     }

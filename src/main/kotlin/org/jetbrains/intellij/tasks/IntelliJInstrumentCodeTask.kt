@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
@@ -23,7 +24,8 @@ import java.io.File
 import java.net.URI
 import javax.inject.Inject
 
-@Suppress("Incubating", "UnstableApiUsage")
+@Incubating
+@Suppress("UnstableApiUsage")
 open class IntelliJInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,
     private val fileSystemOperations: FileSystemOperations,
@@ -97,8 +99,8 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                     "asm-all-*.jar",
                     "jgoodies-forms.jar",
                     "forms-*.jar",
-                ).any {
-                    val parts = it.split('*')
+                ).any { pattern ->
+                    val parts = pattern.split('*')
                     name.startsWith(parts.first()) && name.endsWith(parts.last())
                 }
             }.orEmpty().filterNotNull() + file

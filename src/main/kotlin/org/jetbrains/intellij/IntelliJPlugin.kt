@@ -46,7 +46,7 @@ import org.jetbrains.intellij.tasks.VerifyPluginTask
 import java.io.File
 import java.util.EnumSet
 
-@Suppress("UnstableApiUsage")
+@Suppress("UnstableApiUsage", "unused")
 open class IntelliJPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
@@ -56,7 +56,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val intellijExtension = project.extensions.create(
             IntelliJPluginConstants.EXTENSION_NAME,
             IntelliJPluginExtension::class.java,
-        ) as IntelliJPluginExtension
+        )
 
         intellijExtension.apply {
             pluginName.convention(project.provider {
@@ -78,7 +78,7 @@ open class IntelliJPlugin : Plugin<Project> {
             IntelliJPluginConstants.SIGNING_EXTENSION_NAME,
             SigningExtension::class.java,
             project.objects
-        ) as SigningExtension
+        )
 
         signingExtension.apply {
             enabled.convention(false)
