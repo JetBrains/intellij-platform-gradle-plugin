@@ -33,7 +33,7 @@ dependencies {
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.15") {
+    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.17") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("de.undercouch:gradle-download-task:4.1.1")
