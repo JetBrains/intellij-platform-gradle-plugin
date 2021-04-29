@@ -589,10 +589,18 @@ open class IntelliJPlugin : Plugin<Project> {
             val instrumentTask = project.tasks.create(sourceSet.getTaskName("instrument", "code"), IntelliJInstrumentCodeTask::class.java)
 
             instrumentTask.also { task ->
-                task.sourceSetOutputClassesDirs.convention(sourceSet.output.classesDirs.files)
-                task.sourceSetAllDirs.convention(sourceSet.allSource.srcDirs)
-                task.sourceSetResources.convention(sourceSet.resources.files)
-                task.sourceSetCompileClasspath.convention(sourceSet.compileClasspath)
+                task.sourceSetOutputClassesDirs.convention(project.provider {
+                    sourceSet.output.classesDirs.files
+                })
+                task.sourceSetAllDirs.convention(project.provider {
+                    sourceSet.allSource.srcDirs
+                })
+                task.sourceSetResources.convention(project.provider {
+                    sourceSet.resources.files
+                })
+                task.sourceSetCompileClasspath.convention(project.provider {
+                    sourceSet.compileClasspath
+                })
                 task.compilerVersion.convention(project.provider {
                     val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
                     if (extension.localPath.orNull.isNullOrEmpty() && version.isEmpty() && version.endsWith("-SNAPSHOT")) {
