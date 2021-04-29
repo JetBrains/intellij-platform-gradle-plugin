@@ -38,7 +38,7 @@ dependencies {
     }
     implementation("de.undercouch:gradle-download-task:4.1.1")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.1")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
     implementation("com.fasterxml.woodstox:woodstox-core:6.2.6")
 
     testImplementation(gradleTestKit())
