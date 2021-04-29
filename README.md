@@ -43,15 +43,7 @@ plugins {
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.8.0-SNAPSHOT"
-}
-
-buildscript {
-    dependencies {
-        classpath("org.jetbrains.intellij.plugins:structure-base:3.139")
-        classpath("org.jetbrains.intellij.plugins:structure-intellij:3.139")
-        classpath("org.jetbrains.intellij:plugin-repository-rest-client:2.0.15")
-    }
+  id "org.jetbrains.intellij" version "1.0.0-SNAPSHOT"
 }
 ```
 

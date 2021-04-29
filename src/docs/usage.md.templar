@@ -18,14 +18,6 @@ pre}
 plugins {{{\n}
   id "org.jetbrains.intellij" version "{snapshotVersion}-SNAPSHOT"{\n}
 }{\n}
-{\n}
-buildscript {{{\n}
-    dependencies {{{\n}
-        classpath("org.jetbrains.intellij.plugins:structure-base:3.139"){\n}
-        classpath("org.jetbrains.intellij.plugins:structure-intellij:3.139"){\n}
-        classpath("org.jetbrains.intellij:plugin-repository-rest-client:2.0.15"){\n}
-    }{\n}
-}{\n}
 ```{\n}
 {pre
 
