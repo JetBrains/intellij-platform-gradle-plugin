@@ -163,8 +163,11 @@ open class RunPluginVerifierTask @Inject constructor(
     @Input
     @Optional
     val subsystemsToCheck: Property<String> = objectFactory.property(String::class.java)
-    
+
+    private val isOffline = project.gradle.startParameter.isOffline
     private val loggingCategory = "${project.name}:$name"
+    private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
+        ?: throw GradleException("Cannot access IntelliJPluginExtension")
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
@@ -231,7 +234,7 @@ open class RunPluginVerifierTask @Inject constructor(
             warn(loggingCategory, "Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
         }
 
-        if (isOffline()) {
+        if (isOffline) {
             throw TaskExecutionException(this, GradleException(
                 "Cannot resolve Plugin Verifier in offline mode. " +
                     "Provide pre-downloaded Plugin Verifier jar file with `verifierPath` property. "
@@ -302,7 +305,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
         when {
             ideDir.exists() -> debug(loggingCategory, "IDE already available in $ideDir")
-            isOffline() -> throw TaskExecutionException(this, GradleException(
+            isOffline -> throw TaskExecutionException(this, GradleException(
                 "Cannot download IDE: $name. Gradle runs in offline mode. " +
                     "Provide pre-downloaded IDEs stored in `downloadDir` or use `localPaths` instead."
             ))
@@ -406,9 +409,6 @@ open class RunPluginVerifierTask @Inject constructor(
             return it
         }
 
-        val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
-            ?: throw GradleException("Cannot access IntelliJPluginExtension")
-
         val jbrResolver = JbrResolver(project, this, extension.jreRepository.orNull)
         jbrVersion.orNull?.let {
             jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
@@ -440,13 +440,6 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * Checks if Gradle is run with offline start parameter.
-     *
-     * @return Gradle runs in offline mode
-     */
-    private fun isOffline() = project.gradle.startParameter.isOffline
-
-    /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with available CLI options
@@ -468,7 +461,7 @@ open class RunPluginVerifierTask @Inject constructor(
             args.add("-subsystems-to-check")
             args.add(subsystemsToCheck.get())
         }
-        if (isOffline()) {
+        if (isOffline) {
             args.add("-offline")
         }
 
