@@ -25,7 +25,6 @@ object IntelliJPluginConstants {
     const val IDEA_CONFIGURATION_NAME = "idea"
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
 
-    //    const val Logger LOG = Logging.getLogger(IntelliJPlugin)
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     const val DEFAULT_INTELLIJ_REPOSITORY =
         "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository"

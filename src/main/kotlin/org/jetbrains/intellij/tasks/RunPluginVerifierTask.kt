@@ -57,7 +57,7 @@ open class RunPluginVerifierTask @Inject constructor(
         const val VERIFIER_VERSION_LATEST = "latest"
 
         fun resolveLatestVerifierVersion(): String {
-            debug(this, "Resolving Latest Verifier version")
+            debug(message = "Resolving Latest Verifier version")
             val url = URL(VERIFIER_METADATA_URL)
             return parseXml(url.openStream(), PluginVerifierRepository::class.java).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
@@ -163,6 +163,8 @@ open class RunPluginVerifierTask @Inject constructor(
     @Input
     @Optional
     val subsystemsToCheck: Property<String> = objectFactory.property(String::class.java)
+    
+    private val loggingCategory = "${project.name}:$name"
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
@@ -187,8 +189,8 @@ open class RunPluginVerifierTask @Inject constructor(
         verifierArgs += ides
         verifierArgs += localPaths.toList().map { it.canonicalPath }
 
-        debug(this, "Distribution file: $file.canonicalPath")
-        debug(this, "Verifier path: $verifierPath")
+        debug(loggingCategory, "Distribution file: $file.canonicalPath")
+        debug(loggingCategory, "Verifier path: $verifierPath")
 
         ByteArrayOutputStream().use { os ->
             project.javaexec {
@@ -201,10 +203,10 @@ open class RunPluginVerifierTask @Inject constructor(
             val output = os.toString()
             println(output) // Print output back to stdout since it's been caught for the failure level checker.
 
-            debug(this, "Current failure levels: ${FailureLevel.values().joinToString(", ")}")
+            debug(loggingCategory, "Current failure levels: ${FailureLevel.values().joinToString(", ")}")
             FailureLevel.values().forEach { level ->
                 if (failureLevel.get().contains(level) && output.contains(level.testValue)) {
-                    debug(this, "Failing task on $failureLevel failure level")
+                    debug(loggingCategory, "Failing task on $failureLevel failure level")
                     throw GradleException(level.toString())
                 }
             }
@@ -226,7 +228,7 @@ open class RunPluginVerifierTask @Inject constructor(
             if (verifier.exists()) {
                 return path
             }
-            warn(this, "Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
+            warn(loggingCategory, "Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
         }
 
         if (isOffline()) {
@@ -239,12 +241,12 @@ open class RunPluginVerifierTask @Inject constructor(
         val resolvedVerifierVersion = resolveVerifierVersion()
         val repository = project.repositories.maven { it.url = URI(getPluginVerifierRepository(resolvedVerifierVersion)) }
         try {
-            debug(this, "Using Verifier in $resolvedVerifierVersion version")
+            debug(loggingCategory, "Using Verifier in $resolvedVerifierVersion version")
             val dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
             val configuration = project.configurations.detachedConfiguration(dependency)
             return configuration.singleFile.absolutePath
         } catch (e: Exception) {
-            error(this, "Error when resolving Plugin Verifier path", e)
+            error(loggingCategory, "Error when resolving Plugin Verifier path", e)
             throw e
         } finally {
             project.repositories.remove(repository)
@@ -258,23 +260,23 @@ open class RunPluginVerifierTask @Inject constructor(
      * @return path to the resolved IDE
      */
     private fun resolveIdePath(ideVersion: String): String {
-        debug(this, "Resolving IDE path for $ideVersion")
+        debug(loggingCategory, "Resolving IDE path for $ideVersion")
         var (type, version) = ideVersion.trim().split('-', limit = 2) + null
 
         if (version == null) {
-            debug(this, "IDE type not specified, setting type to IC")
+            debug(loggingCategory, "IDE type not specified, setting type to IC")
             version = type
             type = "IC"
         }
 
         listOf("release", "rc", "eap", "beta").forEach { buildType ->
-            debug(project, "Downloading IDE '$type-$version' from $buildType channel to ${downloadDir.get()}")
+            debug(loggingCategory, "Downloading IDE '$type-$version' from $buildType channel to ${downloadDir.get()}")
             try {
                 val dir = downloadIde(type!!, version!!, buildType)
-                debug(project, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
+                debug(loggingCategory, "Resolved IDE '$type-$version' path: ${dir.absolutePath}")
                 return dir.absolutePath
             } catch (e: IOException) {
-                debug(project, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...", e)
+                debug(loggingCategory, "Cannot download IDE '$type-$version' from $buildType channel. Trying another channel...", e)
             }
         }
 
@@ -296,10 +298,10 @@ open class RunPluginVerifierTask @Inject constructor(
     private fun downloadIde(type: String, version: String, buildType: String): File {
         val name = "$type-$version"
         val ideDir = File(downloadDir.get(), name)
-        info(this, "Downloading IDE: $name")
+        info(loggingCategory, "Downloading IDE: $name")
 
         when {
-            ideDir.exists() -> debug(this, "IDE already available in $ideDir")
+            ideDir.exists() -> debug(loggingCategory, "IDE already available in $ideDir")
             isOffline() -> throw TaskExecutionException(this, GradleException(
                 "Cannot download IDE: $name. Gradle runs in offline mode. " +
                     "Provide pre-downloaded IDEs stored in `downloadDir` or use `localPaths` instead."
@@ -308,7 +310,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 val ideArchive = File(downloadDir.get(), "${name}.tar.gz")
                 val url = resolveIdeUrl(type, version, buildType)
 
-                debug(this, "Downloading IDE from $url")
+                debug(loggingCategory, "Downloading IDE from $url")
 
                 DownloadAction(project).apply {
                     src(url)
@@ -318,7 +320,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 }
 
                 try {
-                    debug(this, "IDE downloaded, extracting...")
+                    debug(loggingCategory, "IDE downloaded, extracting...")
                     untar(project, ideArchive, ideDir)
                     ideDir.listFiles()?.first()?.let { container ->
                         container.listFiles()?.forEach {
@@ -329,7 +331,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 } finally {
                     ideArchive.delete()
                 }
-                debug(this, "IDE extracted to $ideDir, archive removed")
+                debug(loggingCategory, "IDE extracted to $ideDir, archive removed")
             }
         }
 
@@ -353,7 +355,7 @@ open class RunPluginVerifierTask @Inject constructor(
             .addParameter("type", buildType)
             .addParameter(versionParameterName(version), version)
             .toString()
-        debug(this, "Resolving direct IDE download URL for: $url")
+        debug(loggingCategory, "Resolving direct IDE download URL for: $url")
 
         var connection: HttpURLConnection? = null
 
@@ -365,14 +367,14 @@ open class RunPluginVerifierTask @Inject constructor(
             if (connection.responseCode == HttpURLConnection.HTTP_MOVED_PERM || connection.responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
                 val redirectUrl = URL(connection.getHeaderField("Location"))
                 connection.disconnect()
-                debug(this, "Resolved IDE download URL: $url")
+                debug(loggingCategory, "Resolved IDE download URL: $url")
                 return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
             } else {
-                debug(this, "IDE download URL has no redirection provided, skipping.")
+                debug(loggingCategory, "IDE download URL has no redirection provided, skipping.")
             }
         } catch (e: Exception) {
-            info(this, "Cannot resolve direct download URL for: $url")
-            debug(this, "Download exception stacktrace:", e)
+            info(loggingCategory, "Cannot resolve direct download URL for: $url")
+            debug(loggingCategory, "Download exception stacktrace:", e)
         } finally {
             connection?.disconnect()
         }
@@ -400,7 +402,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     private fun resolveRuntimeDir(): String {
         runtimeDir.orNull?.let {
-            debug(this, "Runtime specified with properties: $it")
+            debug(loggingCategory, "Runtime specified with properties: $it")
             return it
         }
 
@@ -410,10 +412,10 @@ open class RunPluginVerifierTask @Inject constructor(
         val jbrResolver = JbrResolver(project, this, extension.jreRepository.orNull)
         jbrVersion.orNull?.let {
             jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
-                debug(this, "Runtime specified with JBR Version property: $it")
+                debug(loggingCategory, "Runtime specified with JBR Version property: $it")
                 return jbr.javaHome.canonicalPath
             }
-            warn(this, "Cannot resolve JBR $it. Falling back to built-in JBR.")
+            warn(loggingCategory, "Cannot resolve JBR $it. Falling back to built-in JBR.")
         }
 
         val jbrPath = when (OperatingSystem.current().isMacOsX) {
@@ -426,14 +428,14 @@ open class RunPluginVerifierTask @Inject constructor(
             jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
                 val javaHome = File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {
-                    debug(this, "Using built-in JBR: $javaHome")
+                    debug(loggingCategory, "Using built-in JBR: $javaHome")
                     return javaHome.canonicalPath
                 }
             }
-            warn(this, "Cannot resolve builtin JBR $builtinJbrVersion. Falling back to local Java.")
+            warn(loggingCategory, "Cannot resolve builtin JBR $builtinJbrVersion. Falling back to local Java.")
         }
 
-        debug(this, "Using current JVM: ${Jvm.current().javaHome}")
+        debug(loggingCategory, "Using current JVM: ${Jvm.current().javaHome}")
         return Jvm.current().javaHome.canonicalPath
     }
 

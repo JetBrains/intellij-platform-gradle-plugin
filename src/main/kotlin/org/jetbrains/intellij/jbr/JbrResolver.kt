@@ -3,7 +3,6 @@ package org.jetbrains.intellij.jbr
 import de.undercouch.gradle.tasks.download.DownloadAction
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
@@ -15,7 +14,7 @@ import java.nio.file.Paths
 
 class JbrResolver(val project: Project, val task: Task?, private val jreRepository: String?) {
 
-    private val context: ExtensionAware = task ?: project
+    private val loggingCategory = project.name + (task?.let { ":${it.name}" } ?: "")
     private val cacheDirectoryPath = Paths.get(
         project.gradle.gradleUserHomeDir.absolutePath,
         "caches/modules-2/files-2.1/com.jetbrains/jbre",
@@ -49,7 +48,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
     private fun fromDir(javaDir: File, version: String): Jbr? {
         val javaExecutable = findJavaExecutable(javaDir)
         if (javaExecutable == null) {
-            warn(context, "Cannot find java executable in $javaDir")
+            warn(loggingCategory, "Cannot find java executable in $javaDir")
             return null
         }
         return Jbr(version, javaDir, findJavaExecutable(javaDir))
@@ -64,7 +63,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
         }
 
         if (project.gradle.startParameter.isOffline) {
-            warn(context, "Cannot download JetBrains Java Runtime $artifactName. Gradle runs in offline mode.")
+            warn(loggingCategory, "Cannot download JetBrains Java Runtime $artifactName. Gradle runs in offline mode.")
             return null
         }
 
@@ -78,7 +77,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
             }
             javaArchive
         } catch (e: IOException) {
-            warn(context, "Cannot download JetBrains Java Runtime $artifactName", e)
+            warn(loggingCategory, "Cannot download JetBrains Java Runtime $artifactName", e)
             null
         }
     }

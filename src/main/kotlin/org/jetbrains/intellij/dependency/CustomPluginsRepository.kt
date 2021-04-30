@@ -31,7 +31,7 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
     }
 
     override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
-        debug(project, "Loading list of plugins from: $pluginsXmlUri")
+        debug(project.name, "Loading list of plugins from: $pluginsXmlUri")
         var downloadUrl: String?
 
         // Try to parse file as <plugin-repository>
