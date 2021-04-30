@@ -74,18 +74,8 @@ open class IntelliJPlugin : Plugin<Project> {
             type.convention("IC")
         }
 
-        val signingExtension = project.extensions.create(
-            IntelliJPluginConstants.SIGNING_EXTENSION_NAME,
-            SigningExtension::class.java,
-            project.objects
-        )
-
-        signingExtension.apply {
-            enabled.convention(false)
-        }
-
         configureConfigurations(project, intellijExtension)
-        configureTasks(project, intellijExtension, signingExtension)
+        configureTasks(project, intellijExtension)
     }
 
     private fun checkGradleVersion(project: Project) {
@@ -113,8 +103,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configureTasks(
         project: Project,
-        extension: IntelliJPluginExtension,
-        signingExtension: SigningExtension,
+        extension: IntelliJPluginExtension
     ) {
         info(project, "Configuring plugin")
         project.tasks.whenTaskAdded {
@@ -135,7 +124,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configureBuildSearchableOptionsTask(project)
         configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
-        configureSignPluginTask(project, signingExtension)
+        configureSignPluginTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
@@ -731,7 +720,7 @@ open class IntelliJPlugin : Plugin<Project> {
         project.components.add(IntelliJPluginLibrary())
     }
 
-    private fun configureSignPluginTask(project: Project, signingExtension: SigningExtension) {
+    private fun configureSignPluginTask(project: Project) {
         info(project, "Configuring sign plugin task")
         val signPluginTask = project.tasks.create(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, SignPluginTask::class.java)
         val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME) as Zip
@@ -744,13 +733,20 @@ open class IntelliJPlugin : Plugin<Project> {
             task.group = IntelliJPluginConstants.GROUP_NAME
             task.description = "Sign plugin with your private key and certificate chain."
 
-            task.certificateChain.set(signingExtension.certificateChain)
-            task.privateKey.set(signingExtension.privateKey)
             task.inputArchiveFile.set(resolveBuildTaskOutput(project))
             task.outputArchiveFile.set(File(outputFilePath))
 
-            task.onlyIf { signingExtension.enabled.get() }
+            task.onlyIf {
+                it as SignPluginTask
+                it.privateKey.isPresent && it.certificateChain.isPresent
+            }
             task.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+
+            task.doLast {
+                it as SignPluginTask
+                val publishPluginTask = project.tasks.findByName(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME) as PublishTask
+                publishPluginTask.distributionFile.convention(it.outputArchiveFile)
+            }
         }
     }
 
@@ -769,17 +765,13 @@ open class IntelliJPlugin : Plugin<Project> {
             task.channels.convention(listOf("default"))
             task.distributionFile.convention(
                 project.layout.file(project.provider {
-                    resolveDistributionFile(project)
+                    resolveBuildTaskOutput(project)
                 })
             )
 
             task.dependsOn(buildPluginTask)
             task.dependsOn(verifyPluginTask)
             task.dependsOn(signPluginTask)
-        }
-
-        project.afterEvaluate {
-            publishPluginTask.conventionMapping("distributionFile") { resolveDistributionFile(project) }
         }
     }
 
@@ -794,19 +786,6 @@ open class IntelliJPlugin : Plugin<Project> {
                 it.duplicatesStrategy = DuplicatesStrategy.INCLUDE
             }
         }
-    }
-
-    private fun resolveDistributionFile(project: Project): File? {
-        val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME) as Zip
-        val signPluginTask = project.tasks.findByName(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME) as SignPluginTask
-        val signingExtension = project.extensions.findByName(IntelliJPluginConstants.SIGNING_EXTENSION_NAME) as SigningExtension
-
-        if (signingExtension.enabled.get()) {
-            return signPluginTask.outputArchiveFile.get().asFile
-        }
-
-        val distributionFile = buildPluginTask.archiveFile.orNull?.asFile
-        return if (distributionFile?.exists() == true) distributionFile else null
     }
 
     private fun resolveBuildTaskOutput(project: Project): File? {
