@@ -154,9 +154,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     fun getVersionType(): String {
         val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
         val v = version.orNull ?: return "IC"
-        val t = type.orNull
-
-        return keys.find { v.startsWith("$it-") || it == t } ?: "IC"
+        return keys.find { v.startsWith("$it-") } ?: type.orNull.takeIf { keys.contains(it) } ?: "IC"
     }
 
     @Internal
