@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import groovy.lang.Closure
 import org.jetbrains.intellij.IntelliJPluginConstants
 
 abstract class PluginsRepositoryConfiguration {
@@ -18,6 +19,13 @@ abstract class PluginsRepositoryConfiguration {
      */
     fun maven(url: String) {
         pluginsRepositories.add(MavenPluginsRepository(url))
+    }
+
+    /**
+     * Use a Maven repository closure
+     */
+    fun maven(mavenRepo: Closure<Any>) {
+        pluginsRepositories.add(MavenPluginsRepository(null, mavenRepo))
     }
 
     /**
