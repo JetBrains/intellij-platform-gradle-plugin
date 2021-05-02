@@ -439,6 +439,10 @@ open class IntelliJPlugin : Plugin<Project> {
             })
             task.teamCityOutputFormat.convention(false)
             task.subsystemsToCheck.convention("all")
+            task.ideDir.convention(project.provider {
+                val runIdeTask = project.tasks.findByName(IntelliJPluginConstants.RUN_IDE_TASK_NAME) as RunIdeTask
+                runIdeTask.ideDir.get()
+            })
 
             task.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             task.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
@@ -470,6 +474,7 @@ open class IntelliJPlugin : Plugin<Project> {
         runIdeTask.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
             task.description = "Runs Intellij IDEA with installed plugin."
+
             task.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
         }
     }
@@ -482,6 +487,7 @@ open class IntelliJPlugin : Plugin<Project> {
         runIdeForUiTestsTaskName.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
             task.description = "Runs Intellij IDEA with installed plugin and robot-server plugin for ui tests."
+
             task.dependsOn(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
         }
     }
@@ -494,8 +500,10 @@ open class IntelliJPlugin : Plugin<Project> {
         buildSearchableOptionsTask.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
             task.description = "Builds searchable options for plugin."
+
             task.args = listOf("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}", "true")
             task.outputs.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+
             task.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             task.onlyIf {
                 val number = ideBuildNumber(task.ideDir.get().asFile)

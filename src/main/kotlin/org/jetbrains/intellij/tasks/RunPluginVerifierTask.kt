@@ -5,6 +5,7 @@ import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuild
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
@@ -13,6 +14,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
@@ -20,6 +22,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
@@ -46,7 +49,8 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 open class RunPluginVerifierTask @Inject constructor(
-    objectFactory: ObjectFactory,
+    private val objectFactory: ObjectFactory,
+    private val execOperations: ExecOperations,
 ) : ConventionTask() {
 
     companion object {
@@ -164,10 +168,19 @@ open class RunPluginVerifierTask @Inject constructor(
     @Optional
     val subsystemsToCheck: Property<String> = objectFactory.property(String::class.java)
 
+    @Internal
+    val ideDir: DirectoryProperty = objectFactory.directoryProperty()
+
     private val isOffline = project.gradle.startParameter.isOffline
     private val loggingCategory = "${project.name}:$name"
     private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
         ?: throw GradleException("Cannot access IntelliJPluginExtension")
+    @Transient
+    private val dependencyHandler = project.dependencies
+    @Transient
+    private val repositoryHandler = project.repositories
+    @Transient
+    private val configurationContainer = project.configurations
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
@@ -196,8 +209,8 @@ open class RunPluginVerifierTask @Inject constructor(
         debug(loggingCategory, "Verifier path: $verifierPath")
 
         ByteArrayOutputStream().use { os ->
-            project.javaexec {
-                it.classpath = project.files(verifierPath)
+            execOperations.javaexec {
+                it.classpath = objectFactory.fileCollection().from(verifierPath)
                 it.main = "com.jetbrains.pluginverifier.PluginVerifierMain"
                 it.args = verifierArgs
                 it.standardOutput = os
@@ -242,17 +255,17 @@ open class RunPluginVerifierTask @Inject constructor(
         }
 
         val resolvedVerifierVersion = resolveVerifierVersion()
-        val repository = project.repositories.maven { it.url = URI(getPluginVerifierRepository(resolvedVerifierVersion)) }
+        val repository = repositoryHandler.maven { it.url = URI(getPluginVerifierRepository(resolvedVerifierVersion)) }
         try {
             debug(loggingCategory, "Using Verifier in $resolvedVerifierVersion version")
-            val dependency = project.dependencies.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
-            val configuration = project.configurations.detachedConfiguration(dependency)
+            val dependency = dependencyHandler.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
+            val configuration = configurationContainer.detachedConfiguration(dependency)
             return configuration.singleFile.absolutePath
         } catch (e: Exception) {
             error(loggingCategory, "Error when resolving Plugin Verifier path", e)
             throw e
         } finally {
-            project.repositories.remove(repository)
+            repositoryHandler.remove(repository)
         }
     }
 
