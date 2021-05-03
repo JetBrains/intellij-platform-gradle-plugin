@@ -18,6 +18,8 @@ class MavenPluginsRepository(private val repositoryUrl: String?, private val mav
         val dependency = plugin.toDependency(project)
         val repository = project.repositories.maven(ConfigureUtil.configureUsing(mavenClosure))
 
+        debug(project.name, "Adding Maven repository to download $dependency - $repositoryUrl")
+        val mavenRepository = project.repositories.maven { it.url = URI.create(repositoryUrl) }
         debug(project, "Adding Maven repository to download $dependency - ${repositoryUrl ?: repository.url}")
 
         val mavenRepository = if (repositoryUrl == null) {
@@ -32,9 +34,11 @@ class MavenPluginsRepository(private val repositoryUrl: String?, private val mav
             pluginFile = configuration.singleFile
             resolvedDependency = true
         } catch (e: Exception) {
+            debug(project.name, "Couldn't find $dependency in $repositoryUrl", e)
             debug(project, "Couldn't find $dependency in ${repositoryUrl ?: repository.url}", e)
         }
 
+        debug(project.name, "Removing Maven repository $repositoryUrl")
         debug(project, "Removing Maven repository ${repositoryUrl ?: repository.url}")
         project.repositories.remove(mavenRepository)
 
@@ -43,6 +47,8 @@ class MavenPluginsRepository(private val repositoryUrl: String?, private val mav
 
     override fun postResolve(project: Project) {
         if (resolvedDependency) {
+            debug(project.name, "Adding Maven plugins repository $repositoryUrl")
+            project.repositories.maven { it.url = URI.create(repositoryUrl) }
             val repository = project.repositories.maven(ConfigureUtil.configureUsing(mavenClosure))
             debug(project, "Adding Maven plugins repository ${repositoryUrl ?: repository.url}")
             if (repositoryUrl == null) {

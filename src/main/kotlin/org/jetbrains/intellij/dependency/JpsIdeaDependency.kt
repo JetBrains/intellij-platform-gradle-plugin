@@ -8,7 +8,17 @@ class JpsIdeaDependency(
     classes: File,
     sources: File?,
     withKotlin: Boolean,
-) : IdeaDependency("ideaJPS", version, buildNumber, classes, sources, withKotlin, BuiltinPluginsRegistry(classes), emptyList()) {
+    loggingCategory: String,
+) : IdeaDependency(
+    "ideaJPS",
+    version,
+    buildNumber,
+    classes,
+    sources,
+    withKotlin,
+    BuiltinPluginsRegistry(classes, loggingCategory),
+    emptyList(),
+) {
 
     private val allowedJarNames = listOf("jps-builders.jar", "jps-model.jar", "util.jar")
 

@@ -90,6 +90,8 @@ open class PrepareSandboxTask @Inject constructor(
         }
     }
 
+    private val loggingCategory = "${project.name}:$name"
+
     @TaskAction
     override fun copy() {
         disableIdeUpdate()
@@ -114,14 +116,14 @@ open class PrepareSandboxTask @Inject constructor(
     private fun disableIdeUpdate() {
         val optionsDir = File(configDir.get(), "/options").apply {
             if (!exists() && !mkdirs()) {
-                error(this, "Cannot disable update checking in host IDE")
+                error(loggingCategory, "Cannot disable update checking in host IDE")
                 return
             }
         }
 
         val updatesConfig = File(optionsDir, "updates.xml").apply {
             if (!exists() && !createNewFile()) {
-                error(this, "Cannot disable update checking in host IDE")
+                error(loggingCategory, "Cannot disable update checking in host IDE")
                 return
             }
         }
