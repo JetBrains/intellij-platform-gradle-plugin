@@ -61,7 +61,9 @@ open class PatchPluginXmlTask @Inject constructor(
     @Optional
     val pluginId: Property<String> = objectFactory.property(String::class.java)
 
-    private val loggingCategory = "${project.name}:$name"
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
 
     @TaskAction
     fun patchPluginXmlFiles() {
@@ -114,7 +116,7 @@ open class PatchPluginXmlTask @Inject constructor(
         if (tag != null) {
             val existingValue = tag.textContent
             if (existingValue.isNotEmpty()) {
-                warn(loggingCategory, "Patching plugin.xml: value of `$name[$existingValue]` tag will be set to `$content`")
+                warn(context, "Patching plugin.xml: value of `$name[$existingValue]` tag will be set to `$content`")
             }
             tag.textContent = content
         } else {
@@ -137,7 +139,7 @@ open class PatchPluginXmlTask @Inject constructor(
         if (tag != null) {
             val existingValue = tag.attribute(attributeName)
             if (!existingValue.isNullOrEmpty()) {
-                warn(loggingCategory, "Patching plugin.xml: attribute `$attributeName=[$existingValue]` of `$tagName` tag will be set to `$attributeValue`")
+                warn(context, "Patching plugin.xml: attribute `$attributeName=[$existingValue]` of `$tagName` tag will be set to `$attributeValue`")
             }
             tag.attributes.setNamedItem(
                 document.createAttribute(attributeName).apply {

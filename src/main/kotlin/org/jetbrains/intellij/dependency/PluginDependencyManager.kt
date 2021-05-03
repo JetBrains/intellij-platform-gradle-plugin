@@ -30,7 +30,7 @@ class PluginDependencyManager(
     fun resolve(project: Project, dependency: PluginDependencyNotation): PluginDependency? {
         if (dependency.version.isNullOrEmpty() && dependency.channel.isNullOrEmpty()) {
             if (Paths.get(dependency.id).isAbsolute) {
-                return externalPluginDependency(File(dependency.id), null, false, project.name)
+                return externalPluginDependency(File(dependency.id), null, false, project)
             } else if (ideaDependency != null) {
                 info(project.name, "Looking for builtin ${dependency.id} in ${ideaDependency.classes.absolutePath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
@@ -45,7 +45,7 @@ class PluginDependencyManager(
             repository.resolve(project, dependency)?.let {
                 return when {
                     isZipFile(it) -> zippedPluginDependency(project, it, dependency)
-                    isJarFile(it) -> externalPluginDependency(it, dependency.channel, true, project.name)
+                    isJarFile(it) -> externalPluginDependency(it, dependency.channel, true, project)
                     else -> throw BuildException("Invalid type of downloaded plugin: ${it.name}", null)
                 }
             }
@@ -81,7 +81,7 @@ class PluginDependencyManager(
             null,
             "${dependency.id}-${dependency.version}"
         ))
-        return externalPluginDependency(pluginDir, dependency.channel, true, project.name)
+        return externalPluginDependency(pluginDir, dependency.channel, true, project)
     }
 
     private fun groupId(channel: String?) = when {
@@ -146,11 +146,11 @@ class PluginDependencyManager(
 
     }
 
-    private fun externalPluginDependency(artifact: File, channel: String?, maven: Boolean, loggingCategory: String): PluginDependency? {
+    private fun externalPluginDependency(artifact: File, channel: String?, maven: Boolean, context: Any): PluginDependency? {
         if (!isJarFile(artifact) && !artifact.isDirectory) {
-            warn(loggingCategory, "Cannot create plugin from file ($artifact): only directories or jars are supported")
+            warn(context, "Cannot create plugin from file ($artifact): only directories or jars are supported")
         }
-        return createPlugin(artifact, true, loggingCategory)?.let {
+        return createPlugin(artifact, true, context)?.let {
             val pluginId = it.pluginId ?: return null
             val pluginVersion = it.pluginVersion ?: return null
             return PluginDependencyImpl(pluginId, pluginVersion, artifact, false, maven).apply {

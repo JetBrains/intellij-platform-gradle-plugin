@@ -19,6 +19,7 @@ import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -58,9 +59,9 @@ fun sourcePluginXmlFiles(project: Project): List<File> {
                 }
             }
         } catch (e: SAXException) {
-            warn(project.name, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+            warn(project, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
         } catch (e: IOException) {
-            warn(project.name, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+            warn(project, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
         }
         null
     }
@@ -184,12 +185,12 @@ fun unzip(
     }
     targetDirectory.mkdir()
 
-    debug(project.name, "Unzipping ${zipFile.name}")
+    debug(project, "Unzipping ${zipFile.name}")
     project.copy {
         it.from(project.zipTree(zipFile))
         it.into(targetDirectory)
     }
-    debug(project.name, "Unzipped ${zipFile.name}")
+    debug(project, "Unzipped ${zipFile.name}")
 
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)
@@ -210,12 +211,17 @@ fun releaseType(version: String): String {
     return "releases"
 }
 
-fun error(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, category, message, e)
-fun warn(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, category, message, e)
-fun info(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, category, message, e)
-fun debug(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, category, message, e)
+fun error(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, context, message, e)
+fun warn(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, context, message, e)
+fun info(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, context, message, e)
+fun debug(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, context, message, e)
 
-private fun log(level: LogLevel, category: String?, message: String, e: Throwable?) {
+private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) {
+    val category = when (context) {
+        is Project -> "gradle-intellij-plugin :${context.name}"
+        is Task -> "gradle-intellij-plugin :${context.project.name}:${context.name}"
+        else -> "gradle-intellij-plugin"
+    }
     val logger = Logging.getLogger(IntelliJPlugin::class.java)
     if (e != null && level != LogLevel.ERROR && !logger.isDebugEnabled) {
         logger.log(level, "[$category] $message. Run with --debug option to get more log output.")
@@ -224,23 +230,23 @@ private fun log(level: LogLevel, category: String?, message: String, e: Throwabl
     }
 }
 
-fun createPlugin(artifact: File, validatePluginXml: Boolean, loggingCategory: String) =
+fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any) =
     when (val result = IdePluginManager.createManager().createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)) {
         is PluginCreationSuccess -> result.plugin
         is PluginCreationFail -> {
             val problems = result.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-            warn(loggingCategory, "Cannot create plugin from file ($artifact): $problems")
+            warn(context, "Cannot create plugin from file ($artifact): $problems")
             null
         }
         else -> {
-            warn(loggingCategory, "Cannot create plugin from file ($artifact). $result")
+            warn(context, "Cannot create plugin from file ($artifact). $result")
             null
         }
     }
 
 fun untar(project: Project, from: File, to: File) {
     val tempDir = File(to.parent, to.name + "-temp")
-    debug(project.name, "Unpacking ${from.absolutePath} to ${tempDir.absolutePath}")
+    debug(project, "Unpacking ${from.absolutePath} to ${tempDir.absolutePath}")
 
     if (tempDir.exists()) {
         tempDir.deleteRecursively()

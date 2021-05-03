@@ -14,7 +14,9 @@ import java.nio.file.Paths
 
 class JbrResolver(val project: Project, val task: Task?, private val jreRepository: String?) {
 
-    private val loggingCategory = project.name + (task?.let { ":${it.name}" } ?: "")
+    @Transient
+    private val context = task ?: project
+
     private val cacheDirectoryPath = Paths.get(
         project.gradle.gradleUserHomeDir.absolutePath,
         "caches/modules-2/files-2.1/com.jetbrains/jbre",
@@ -48,7 +50,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
     private fun fromDir(javaDir: File, version: String): Jbr? {
         val javaExecutable = findJavaExecutable(javaDir)
         if (javaExecutable == null) {
-            warn(loggingCategory, "Cannot find java executable in $javaDir")
+            warn(context, "Cannot find java executable in $javaDir")
             return null
         }
         return Jbr(version, javaDir, findJavaExecutable(javaDir))
@@ -63,7 +65,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
         }
 
         if (project.gradle.startParameter.isOffline) {
-            warn(loggingCategory, "Cannot download JetBrains Java Runtime $artifactName. Gradle runs in offline mode.")
+            warn(context, "Cannot download JetBrains Java Runtime $artifactName. Gradle runs in offline mode.")
             return null
         }
 
@@ -77,7 +79,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
             }
             javaArchive
         } catch (e: IOException) {
-            warn(loggingCategory, "Cannot download JetBrains Java Runtime $artifactName", e)
+            warn(context, "Cannot download JetBrains Java Runtime $artifactName", e)
             null
         }
     }

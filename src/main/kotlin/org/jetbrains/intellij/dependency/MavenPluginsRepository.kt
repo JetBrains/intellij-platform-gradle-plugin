@@ -14,7 +14,7 @@ class MavenPluginsRepository(private val repositoryUrl: String) : PluginsReposit
     override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
         val dependency = plugin.toDependency(project)
 
-        debug(project.name, "Adding Maven repository to download $dependency - $repositoryUrl")
+        debug(project, "Adding Maven repository to download $dependency - $repositoryUrl")
         val mavenRepository = project.repositories.maven { it.url = URI.create(repositoryUrl) }
 
         var pluginFile: File? = null
@@ -23,10 +23,10 @@ class MavenPluginsRepository(private val repositoryUrl: String) : PluginsReposit
             pluginFile = configuration.singleFile
             resolvedDependency = true
         } catch (e: Exception) {
-            debug(project.name, "Couldn't find $dependency in $repositoryUrl", e)
+            debug(project, "Couldn't find $dependency in $repositoryUrl", e)
         }
 
-        debug(project.name, "Removing Maven repository $repositoryUrl")
+        debug(project, "Removing Maven repository $repositoryUrl")
         project.repositories.remove(mavenRepository)
 
         return pluginFile
@@ -34,7 +34,7 @@ class MavenPluginsRepository(private val repositoryUrl: String) : PluginsReposit
 
     override fun postResolve(project: Project) {
         if (resolvedDependency) {
-            debug(project.name, "Adding Maven plugins repository $repositoryUrl")
+            debug(project, "Adding Maven plugins repository $repositoryUrl")
             project.repositories.maven { it.url = URI.create(repositoryUrl) }
         }
     }

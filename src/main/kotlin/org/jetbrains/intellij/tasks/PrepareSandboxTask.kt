@@ -9,7 +9,12 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.Sync
+import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
@@ -87,7 +92,9 @@ open class PrepareSandboxTask @Inject constructor(
         }
     }
 
-    private val loggingCategory = "${project.name}:$name"
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
 
     @TaskAction
     override fun copy() {
@@ -113,14 +120,14 @@ open class PrepareSandboxTask @Inject constructor(
     private fun disableIdeUpdate() {
         val optionsDir = File(configDir.get(), "/options").apply {
             if (!exists() && !mkdirs()) {
-                error(loggingCategory, "Cannot disable update checking in host IDE")
+                error(context, "Cannot disable update checking in host IDE")
                 return
             }
         }
 
         val updatesConfig = File(optionsDir, "updates.xml").apply {
             if (!exists() && !createNewFile()) {
-                error(loggingCategory, "Cannot disable update checking in host IDE")
+                error(context, "Cannot disable update checking in host IDE")
                 return
             }
         }

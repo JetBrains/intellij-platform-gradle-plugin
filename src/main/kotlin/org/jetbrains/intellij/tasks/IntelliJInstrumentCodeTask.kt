@@ -19,6 +19,7 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.releaseType
 import java.io.File
 import java.net.URI
@@ -66,6 +67,10 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
+
     @InputFiles
     fun getSourceDirs() = sourceSetAllDirs.get().filter {
         it.exists() && !sourceSetResources.get().contains(it)
@@ -84,7 +89,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
         ))
 
-        logger.info("Compiling forms and instrumenting code with nullability preconditions")
+        info(context, "Compiling forms and instrumenting code with nullability preconditions")
         val instrumentNotNull = prepareNotNullInstrumenting(classpath)
         instrumentCode(getSourceDirs(), outputDir.get().asFile, instrumentNotNull)
     }
@@ -142,8 +147,11 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         } catch (e: BuildException) {
             val cause = e.cause
             if (cause is ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.message) {
-                logger.info("Old version of Javac2 is used, " +
-                    "instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
+                info(
+                    context,
+                    "Old version of Javac2 is used, instrumenting code with nullability will be skipped. " +
+                        "Use IDEA >14 SDK (139.*) to fix this",
+                )
                 return false
             } else {
                 throw e

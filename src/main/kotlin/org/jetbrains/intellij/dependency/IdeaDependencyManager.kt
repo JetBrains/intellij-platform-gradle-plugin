@@ -57,9 +57,9 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
         extraDependencies: Collection<IdeaExtraDependency>,
     ): IdeaDependency {
         if (type == "JPS") {
-            return JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project), project.name)
+            return JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project), project)
         } else if (type == null) {
-            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project.name)
+            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project)
             return LocalIdeaDependency(name,
                 version,
                 buildNumber,
@@ -69,7 +69,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
                 pluginsRegistry,
                 extraDependencies)
         }
-        val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project.name)
+        val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project)
         return IdeaDependency(name,
             version,
             buildNumber,
@@ -81,20 +81,20 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
     }
 
     private fun resolveSources(project: Project, version: String): File? {
-        info(project.name, "Adding IDE sources repository")
+        info(project, "Adding IDE sources repository")
         try {
             val dependency = project.dependencies.create("com.jetbrains.intellij.idea:ideaIC:$version:sources@jar")
             val sourcesConfiguration = project.configurations.detachedConfiguration(dependency)
             val sourcesFiles = sourcesConfiguration.files
             if (sourcesFiles.size == 1) {
                 val sourcesDirectory = sourcesFiles.first()
-                debug(project.name, "IDE sources jar: " + sourcesDirectory.path)
+                debug(project, "IDE sources jar: " + sourcesDirectory.path)
                 return sourcesDirectory
             } else {
-                warn(project.name, "Cannot attach IDE sources. Found files: $sourcesFiles")
+                warn(project, "Cannot attach IDE sources. Found files: $sourcesFiles")
             }
         } catch (e: ResolveException) {
-            warn(project.name, "Cannot resolve IDE sources dependency", e)
+            warn(project, "Cannot resolve IDE sources dependency", e)
         }
         return null
     }
@@ -108,7 +108,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
     ) = unzip(zipFile, cacheDirectory, project, { markerFile ->
         isCacheUpToDate(zipFile, markerFile, checkVersionChange)
     }, { unzippedDirectory, markerFile ->
-        resetExecutablePermissions(unzippedDirectory, type, project.name)
+        resetExecutablePermissions(unzippedDirectory, type, project)
         storeCache(unzippedDirectory, markerFile)
     }, null)
 
@@ -134,23 +134,23 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
         }
     }
 
-    private fun resetExecutablePermissions(cacheDirectory: File, type: String, loggingCategory: String) {
+    private fun resetExecutablePermissions(cacheDirectory: File, type: String, context: Any) {
         if (type == "RD" && !OperatingSystem.current().isWindows) {
-            setExecutable(cacheDirectory, "lib/ReSharperHost/dupfinder.sh", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/inspectcode.sh", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/runtime.sh", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen", loggingCategory)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py", loggingCategory)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/dupfinder.sh", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/inspectcode.sh", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/runtime.sh", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen", context)
+            setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py", context)
         }
     }
 
-    private fun setExecutable(parent: File, child: String, loggingCategory: String) {
+    private fun setExecutable(parent: File, child: String, context: Any) {
         File(parent, child).apply {
-            debug(loggingCategory, "Resetting executable permissions for $path")
+            debug(context, "Resetting executable permissions for $path")
             setExecutable(true, true)
         }
     }
@@ -190,10 +190,10 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
 
     fun resolveRemote(project: Project, version: String, type: String, sources: Boolean, extraDependencies: List<String>): IdeaDependency {
         val releaseType = releaseType(version)
-        debug(project.name, "Adding IDE repository: $repositoryUrl/$releaseType")
+        debug(project, "Adding IDE repository: $repositoryUrl/$releaseType")
         project.repositories.maven { it.url = URI.create("$repositoryUrl/$releaseType") }
 
-        debug(project.name, "Adding IDE dependency")
+        debug(project, "Adding IDE dependency")
         var dependencyGroup = "com.jetbrains.intellij.idea"
         var dependencyName = "ideaIC"
         var hasSources = sources
@@ -212,7 +212,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
             dependencyGroup = "com.jetbrains.intellij.rider"
             dependencyName = "riderRD"
             if (sources && releaseType == "snapshots") {
-                warn(project.name, "IDE sources are not available for Rider SNAPSHOTS")
+                warn(project, "IDE sources are not available for Rider SNAPSHOTS")
                 hasSources = false
             }
         }
@@ -221,7 +221,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
         val configuration = project.configurations.detachedConfiguration(dependency)
 
         val classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
-        info(project.name, "IDE dependency cache directory: $classesDirectory")
+        info(project, "IDE dependency cache directory: $classesDirectory")
         val buildNumber = ideBuildNumber(classesDirectory)
         val sourcesDirectory = when {
             hasSources -> resolveSources(project, version)
@@ -239,7 +239,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
     }
 
     fun resolveLocal(project: Project, localPath: String, localPathSources: String?): IdeaDependency {
-        debug(project.name, "Adding local IDE dependency")
+        debug(project, "Adding local IDE dependency")
         val ideaDir = ideaDir(localPath)
         if (!ideaDir.exists() || !ideaDir.isDirectory) {
             throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
@@ -254,7 +254,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
 
     private fun extractClassesFromRemoteDependency(project: Project, configuration: Configuration, type: String, version: String): File =
         configuration.singleFile.let {
-            debug(project.name, "IDE zip: " + it.path)
+            debug(project, "IDE zip: " + it.path)
             unzipDependencyFile(getZipCacheDirectory(it, project, type), project, it, type, version.endsWith("-SNAPSHOT"))
         }
 
@@ -278,7 +278,7 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
         if (extraDependencies.isEmpty()) {
             return emptyList()
         }
-        info(project.name, "Configuring IDE extra dependencies $extraDependencies")
+        info(project, "Configuring IDE extra dependencies $extraDependencies")
         extraDependencies
             .filter { dep -> mainDependencies.any { it == dep } }
             .takeIf { it.isNotEmpty() }
@@ -288,9 +288,9 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
         extraDependencies.forEach {
             resolveExtraDependency(project, version, it)?.let { dependencyFile ->
                 val extraDependency = IdeaExtraDependency(it, dependencyFile)
-                debug(project.name, "IDE extra dependency $it in $dependencyFile files: ${extraDependency.jarFiles}")
+                debug(project, "IDE extra dependency $it in $dependencyFile files: ${extraDependency.jarFiles}")
                 resolvedExtraDependencies.add(extraDependency)
-            } ?: debug(project.name, "IDE extra dependency for $it was resolved as null")
+            } ?: debug(project, "IDE extra dependency for $it was resolved as null")
         }
         return resolvedExtraDependencies
     }
@@ -305,19 +305,19 @@ class IdeaDependencyManager(private val repositoryUrl: String, private val ideaD
                 return when {
                     depFile.name.endsWith(".zip") -> {
                         val cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
-                        debug(project.name, "IDE extra dependency $name: " + cacheDirectory.path)
+                        debug(project, "IDE extra dependency $name: " + cacheDirectory.path)
                         unzipDependencyFile(cacheDirectory, project, depFile, "IC", version.endsWith("-SNAPSHOT"))
                     }
                     else -> {
-                        debug(project.name, "IDE extra dependency $name: " + depFile.path)
+                        debug(project, "IDE extra dependency $name: " + depFile.path)
                         depFile
                     }
                 }
             } else {
-                warn(project.name, "Cannot attach IDE extra dependency $name. Found files: $files")
+                warn(project, "Cannot attach IDE extra dependency $name. Found files: $files")
             }
         } catch (e: ResolveException) {
-            warn(project.name, "Cannot resolve IDE extra dependency $name", e)
+            warn(project, "Cannot resolve IDE extra dependency $name", e)
         }
         return null
     }
