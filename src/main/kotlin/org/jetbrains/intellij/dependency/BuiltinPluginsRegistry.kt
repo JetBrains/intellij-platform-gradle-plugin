@@ -12,26 +12,26 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
 
-class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable {
+class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val loggingCategory: String) : Serializable {
 
     private val plugins = mutableMapOf<String, Plugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
 
     companion object {
-        fun fromDirectory(pluginsDirectory: File, loggingContext: Any) =
-            BuiltinPluginsRegistry(pluginsDirectory).apply {
-                if (!fillFromCache(loggingContext)) {
-                    debug(loggingContext, "Builtin registry cache is missing")
-                    fillFromDirectory(loggingContext)
-                    dumpToCache(loggingContext)
+        fun fromDirectory(pluginsDirectory: File, loggingCategory: String) =
+            BuiltinPluginsRegistry(pluginsDirectory, loggingCategory).apply {
+                if (!fillFromCache()) {
+                    debug(loggingCategory, "Builtin registry cache is missing")
+                    fillFromDirectory()
+                    dumpToCache()
                 }
             }
     }
 
-    private fun fillFromCache(loggingContext: Any): Boolean {
+    private fun fillFromCache(): Boolean {
         val cache = cacheFile().takeIf { it.exists() } ?: return false
 
-        debug(loggingContext, "Builtin registry cache is found. Loading from $cache")
+        debug(loggingCategory, "Builtin registry cache is found. Loading from $cache")
         return try {
             parseXml(cache, PluginsCache::class.java).plugin.forEach {
                 plugins[it.id] = it
@@ -39,28 +39,28 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
             }
             true
         } catch (t: Throwable) {
-            warn(loggingContext, "Cannot read builtin registry cache", t)
+            warn(loggingCategory, "Cannot read builtin registry cache", t)
             false
         }
     }
 
-    private fun fillFromDirectory(loggingContext: Any) {
+    private fun fillFromDirectory() {
         pluginsDirectory.listFiles()?.apply {
             asSequence()
                 .filter { it.isDirectory }
-                .forEach { add(it, loggingContext) }
+                .forEach { add(it) }
         }
-        debug(loggingContext, "Builtin registry populated with ${plugins.size} plugins")
+        debug(loggingCategory, "Builtin registry populated with ${plugins.size} plugins")
     }
 
-    private fun dumpToCache(loggingContext: Any) {
-        debug(loggingContext, "Dumping cache for builtin plugin")
+    private fun dumpToCache() {
+        debug(loggingCategory, "Dumping cache for builtin plugin")
         try {
             XmlMapper()
                 .registerKotlinModule()
                 .writeValue(cacheFile(), PluginsCache(plugins.values.toList()))
         } catch (t: Throwable) {
-            warn(loggingContext, "Failed to dump cache for builtin plugin", t)
+            warn(loggingCategory, "Failed to dump cache for builtin plugin", t)
         }
     }
 
@@ -91,9 +91,9 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File) : Serializable 
         return result
     }
 
-    fun add(artifact: File, loggingContext: Any) {
-        debug(loggingContext, "Adding directory to plugins index: $artifact)")
-        val intellijPlugin = createPlugin(artifact, false, loggingContext) ?: return
+    fun add(artifact: File) {
+        debug(loggingCategory, "Adding directory to plugins index: $artifact)")
+        val intellijPlugin = createPlugin(artifact, false, loggingCategory) ?: return
         val id = intellijPlugin.pluginId ?: return
         val dependencies = intellijPlugin.dependencies.filter { !it.isOptional }.map { it.id }
         val plugin = Plugin(id, artifact.name, Dependencies(dependencies))
