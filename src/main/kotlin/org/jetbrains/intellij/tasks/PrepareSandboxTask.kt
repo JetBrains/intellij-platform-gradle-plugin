@@ -9,12 +9,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.Sync
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
@@ -60,7 +55,7 @@ open class PrepareSandboxTask @Inject constructor(
 
     private fun configurePlugin() {
         val plugin = mainSpec.addChild().into(project.provider { "${pluginName.get()}/lib" })
-        val usedNames = mutableSetOf<String>()
+        val usedNames = mutableMapOf<String, String>()
         val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
         val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
         val pluginDirectories = pluginDependencies.get().map { it.artifact.absolutePath }
@@ -80,12 +75,14 @@ open class PrepareSandboxTask @Inject constructor(
                 else -> details.name
             }
             val originalExtension = when {
-                dotIndex != -1 -> details.name.substring(dotIndex + 1)
+                dotIndex != -1 -> details.name.substring(dotIndex)
                 else -> ""
             }
             var index = 1
-            while (!usedNames.add(details.name)) {
-                details.name = "${originalName}_${index++}.${originalExtension}"
+            var previousPath = usedNames.putIfAbsent(details.name, details.file.absolutePath)
+            while (previousPath != null && previousPath != details.file.absolutePath) {
+                details.name = "${originalName}_${index++}${originalExtension}"
+                previousPath = usedNames.putIfAbsent(details.name, details.file.absolutePath)
             }
         }
     }
