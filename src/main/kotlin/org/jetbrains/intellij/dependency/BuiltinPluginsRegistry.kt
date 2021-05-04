@@ -12,7 +12,7 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
 
-class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val context: Any) : Serializable {
+class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient private val context: Any) : Serializable {
 
     private val plugins = mutableMapOf<String, Plugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
