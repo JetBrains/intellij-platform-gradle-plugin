@@ -1,7 +1,8 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.apache.commons.io.FileUtils
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse

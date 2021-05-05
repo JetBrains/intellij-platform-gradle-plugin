@@ -1,10 +1,12 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class VerifyTaskSpec : IntelliJPluginSpecBase() {
+class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not fail on warning by default`() {

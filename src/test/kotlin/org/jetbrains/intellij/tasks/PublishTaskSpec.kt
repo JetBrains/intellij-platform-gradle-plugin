@@ -1,5 +1,7 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
