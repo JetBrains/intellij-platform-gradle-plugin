@@ -27,7 +27,7 @@ import java.util.zip.ZipFile
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-class IdeaDependencyManager @Inject constructor(
+open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String?,
     private val context: Any,
