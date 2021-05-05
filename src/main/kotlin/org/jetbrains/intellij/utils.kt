@@ -223,15 +223,15 @@ fun debug(context: Any? = null, message: String, e: Throwable? = null) = log(Log
 
 private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) {
     val category = when (context) {
-        is Project -> "gradle-intellij-plugin :${context.name}"
-        is Task -> "gradle-intellij-plugin :${context.project.name}:${context.name}"
+        is Project -> "gradle-intellij-plugin :${context.path}"
+        is Task -> "gradle-intellij-plugin :${context.path}"
         else -> "gradle-intellij-plugin"
     }
     val logger = Logging.getLogger(IntelliJPlugin::class.java)
     if (e != null && level != LogLevel.ERROR && !logger.isDebugEnabled) {
         logger.log(level, "[$category] $message. Run with --debug option to get more log output.")
     } else {
-        logger.log(level, "[gradle-intellij-plugin$category] $message", e)
+        logger.log(level, "[$category] $message", e)
     }
 }
 
