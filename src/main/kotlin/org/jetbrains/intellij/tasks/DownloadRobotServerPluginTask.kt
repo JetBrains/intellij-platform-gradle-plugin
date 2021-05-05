@@ -11,7 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.VersionNumber
-import org.jetbrains.intellij.unzip2
+import org.jetbrains.intellij.unzip
 import java.net.URI
 import javax.inject.Inject
 
@@ -60,7 +60,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
 
         try {
             val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
-            unzip2(zipFile, outputDir.get().asFile, archiveOperations, fileSystemOperations, context, targetDirName = "")
+            unzip(zipFile, outputDir.get().asFile, archiveOperations, fileSystemOperations, context, targetDirName = "")
         } finally {
             repositoryHandler.remove(repository)
         }

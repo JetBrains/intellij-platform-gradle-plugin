@@ -169,7 +169,7 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
 }
 
 @Suppress("UnstableApiUsage")
-fun unzip2(
+fun unzip(
     zipFile: File,
     directory: File,
     archiveOperations: ArchiveOperations,

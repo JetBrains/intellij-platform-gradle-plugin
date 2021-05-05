@@ -13,7 +13,7 @@ import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isJarFile
 import org.jetbrains.intellij.isZipFile
-import org.jetbrains.intellij.unzip2
+import org.jetbrains.intellij.unzip
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.nio.file.Paths
@@ -80,7 +80,7 @@ open class PluginDependencyManager @Inject constructor(
     }
 
     private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {
-        val pluginDir = findSingleDirectory(unzip2(
+        val pluginDir = findSingleDirectory(unzip(
             pluginFile,
             File(cacheDirectoryPath, groupId(dependency.channel)),
             archiveOperations,

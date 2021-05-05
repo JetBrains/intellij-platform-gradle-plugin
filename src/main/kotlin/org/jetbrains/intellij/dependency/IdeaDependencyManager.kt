@@ -19,7 +19,7 @@ import org.jetbrains.intellij.ideaDir
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isKotlinRuntime
 import org.jetbrains.intellij.releaseType
-import org.jetbrains.intellij.unzip2
+import org.jetbrains.intellij.unzip
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.net.URI
@@ -114,7 +114,7 @@ class IdeaDependencyManager @Inject constructor(
         zipFile: File,
         type: String,
         checkVersionChange: Boolean,
-    ) = unzip2(zipFile, cacheDirectory, archiveOperations, fileSystemOperations, context, { markerFile ->
+    ) = unzip(zipFile, cacheDirectory, archiveOperations, fileSystemOperations, context, { markerFile ->
         isCacheUpToDate(zipFile, markerFile, checkVersionChange)
     }, { unzippedDirectory, markerFile ->
         resetExecutablePermissions(unzippedDirectory, type)
