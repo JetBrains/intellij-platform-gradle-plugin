@@ -1,5 +1,7 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import java.util.zip.ZipFile
 import kotlin.test.Test

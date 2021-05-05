@@ -1,7 +1,8 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import org.junit.Assume.assumeFalse
 import java.io.File
 import kotlin.test.BeforeTest
