@@ -48,12 +48,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         file("nestedProject/src/main/java/NestedAppFile.java").groovy("""
-            class NestedAppFile{}
+            class NestedAppFile {}
         """)
 
-        file("nestedProject/src/main/resources/META-INF/plugin.xml").groovy("""
-            pluginXml.text
-        """)
+        file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
         build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
