@@ -211,8 +211,8 @@ intellij {
   version 'IC-2020.1'
   plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
   pluginName 'MyPlugin'
-
 }
+
 publishPlugin {
   token 'ssdfhasdfASDaq23jhnasdkjh'
   channels 'nightly'
@@ -230,10 +230,10 @@ plugins {
 intellij {
   version = "2020.1"
   setPlugins("coverage", "org.intellij.plugins.markdown:8.5.0.20160208")
-  isDownloadSources = true
   pluginName = "MyPlugin"
 }
-publishPlugin {
+
+tasks.publishPlugin {
   token = "ssdfhasdfASDaq23jhnasdkjh"
   channels = "nightly"
 }
