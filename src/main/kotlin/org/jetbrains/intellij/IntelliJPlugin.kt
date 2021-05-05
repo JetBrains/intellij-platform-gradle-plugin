@@ -556,7 +556,12 @@ open class IntelliJPlugin : Plugin<Project> {
             project.file("${task.ideDir.get().asFile}/bin/")
         })
         task.projectExecutable.convention(project.provider {
-            val jbrResolver = JbrResolver(project, task, extension.jreRepository.orNull)
+            val jbrResolver = project.objects.newInstance(
+                JbrResolver::class.java,
+                project,
+                task,
+                extension.jreRepository.orNull,
+            )
 
             task.jbrVersion.orNull?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {

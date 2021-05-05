@@ -27,6 +27,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.model.IdeaPlugin
 import org.w3c.dom.Node
@@ -248,9 +249,17 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any) =
         }
     }
 
-fun untar(project: Project, from: File, to: File) {
+@Suppress("UnstableApiUsage")
+fun untar(
+    from: File,
+    to: File,
+    archiveOperations: ArchiveOperations,
+    execOperations: ExecOperations,
+    fileSystemOperations: FileSystemOperations,
+    context: Any,
+) {
     val tempDir = File(to.parent, to.name + "-temp")
-    debug(project, "Unpacking ${from.absolutePath} to ${tempDir.absolutePath}")
+    debug(context, "Unpacking ${from.absolutePath} to ${tempDir.absolutePath}")
 
     if (tempDir.exists()) {
         tempDir.deleteRecursively()
@@ -258,12 +267,12 @@ fun untar(project: Project, from: File, to: File) {
     tempDir.mkdir()
 
     if (OperatingSystem.current().isWindows) {
-        project.copy {
-            it.from(project.tarTree(from))
+        fileSystemOperations.copy {
+            it.from(archiveOperations.tarTree(from))
             it.into(tempDir)
         }
     } else {
-        project.exec {
+        execOperations.exec {
             it.commandLine("tar", "-xpf", from.absolutePath, "--directory", tempDir.absolutePath)
         }
     }

@@ -3,7 +3,10 @@ package org.jetbrains.intellij.jbr
 import de.undercouch.gradle.tasks.download.DownloadAction
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.untar
@@ -11,8 +14,17 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.IOException
 import java.nio.file.Paths
+import javax.inject.Inject
 
-class JbrResolver(val project: Project, val task: Task?, private val jreRepository: String?) {
+@Suppress("UnstableApiUsage")
+open class JbrResolver @Inject constructor(
+    val project: Project,
+    val task: Task?,
+    private val jreRepository: String?,
+    private val archiveOperations: ArchiveOperations,
+    private val execOperations: ExecOperations,
+    private val fileSystemOperations: FileSystemOperations,
+) {
 
     @Transient
     private val context = task ?: project
@@ -40,7 +52,7 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
         }
 
         getJavaArchive(jbrArtifact)?.let {
-            untar(project, it, javaDir)
+            untar(it, javaDir, archiveOperations, execOperations, fileSystemOperations, context)
             it.delete()
             return fromDir(javaDir, version)
         }
@@ -128,7 +140,8 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
 
                 val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < VersionNumber.parse("1483.24")
                 if (oldFormat) {
-                    return JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}", repositoryUrl)
+                    return JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}",
+                        repositoryUrl)
                 }
 
                 if (prefix.isEmpty()) {
@@ -138,7 +151,8 @@ class JbrResolver(val project: Project, val task: Task?, private val jreReposito
                         else -> "jbr_jcef-"
                     }
                 }
-                return JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}", repositoryUrl)
+                return JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}",
+                    repositoryUrl)
             }
 
             private fun getPrefix(version: String) = when {

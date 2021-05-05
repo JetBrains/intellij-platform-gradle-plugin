@@ -4,8 +4,10 @@ import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
+import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
@@ -51,6 +53,8 @@ import javax.inject.Inject
 open class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
+    private val archiveOperations: ArchiveOperations,
+    private val fileSystemOperations: FileSystemOperations,
 ) : ConventionTask() {
 
     companion object {
@@ -344,7 +348,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
                 try {
                     debug(context, "IDE downloaded, extracting...")
-                    untar(project, ideArchive, ideDir)
+                    untar(ideArchive, ideDir, archiveOperations, execOperations, fileSystemOperations, context)
                     ideDir.listFiles()?.first()?.let { container ->
                         container.listFiles()?.forEach {
                             it.renameTo(File(ideDir, it.name))
@@ -429,7 +433,12 @@ open class RunPluginVerifierTask @Inject constructor(
             return it
         }
 
-        val jbrResolver = JbrResolver(project, this, extension.jreRepository.orNull)
+        val jbrResolver = project.objects.newInstance(
+            JbrResolver::class.java,
+            project,
+            this,
+            extension.jreRepository.orNull,
+        )
         jbrVersion.orNull?.let {
             jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
                 debug(context, "Runtime specified with JBR Version property: $it")
