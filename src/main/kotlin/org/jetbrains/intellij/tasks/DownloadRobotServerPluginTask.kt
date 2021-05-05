@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.api.Incubating
+import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
@@ -10,7 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.VersionNumber
-import org.jetbrains.intellij.unzip
+import org.jetbrains.intellij.unzip2
 import java.net.URI
 import javax.inject.Inject
 
@@ -18,6 +19,7 @@ import javax.inject.Inject
 @Suppress("UnstableApiUsage")
 open class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
+    private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
 ) : ConventionTask() {
 
