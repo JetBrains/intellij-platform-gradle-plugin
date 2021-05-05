@@ -107,7 +107,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configureTasks(
         project: Project,
-        extension: IntelliJPluginExtension
+        extension: IntelliJPluginExtension,
     ) {
         info(context, "Configuring plugin")
         project.tasks.whenTaskAdded {
@@ -153,7 +153,12 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring IDE dependency")
-            val resolver = IdeaDependencyManager(extension.intellijRepository.get(), extension.ideaDependencyCachePath.orNull)
+            val resolver = project.objects.newInstance(
+                IdeaDependencyManager::class.java,
+                extension.intellijRepository.get(),
+                extension.ideaDependencyCachePath.orNull,
+                context,
+            )
             val localPath = extension.localPath.orNull
             val ideaDependency = if (localPath != null) {
                 if (extension.version.orNull != null) {
@@ -188,10 +193,12 @@ open class IntelliJPlugin : Plugin<Project> {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring plugin dependencies")
             val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
-            val resolver = PluginDependencyManager(
+            val resolver = project.objects.newInstance(
+                PluginDependencyManager::class.java,
                 project.gradle.gradleUserHomeDir.absolutePath,
                 extension.getIdeaDependency(project),
-                extension.getPluginsRepositories()
+                extension.getPluginsRepositories(),
+                context,
             )
             extension.plugins.get().forEach {
                 info(context, "Configuring plugin $it")

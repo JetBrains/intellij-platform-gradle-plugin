@@ -20,6 +20,8 @@ import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -166,10 +168,13 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
     return null
 }
 
-fun unzip(
+@Suppress("UnstableApiUsage")
+fun unzip2(
     zipFile: File,
     directory: File,
-    project: Project,
+    archiveOperations: ArchiveOperations,
+    fileSystemOperations: FileSystemOperations,
+    context: Any,
     isUpToDate: Predicate<File>? = null,
     markUpToDate: BiConsumer<File, File>? = null,
     targetDirName: String? = null,
@@ -180,18 +185,17 @@ fun unzip(
         return targetDirectory
     }
 
-    if (targetDirectory.exists()) {
-        targetDirectory.deleteRecursively()
+    fileSystemOperations.delete {
+        it.delete(targetDirectory)
     }
-    targetDirectory.mkdir()
 
-    debug(project, "Unzipping ${zipFile.name}")
-    project.copy {
-        it.from(project.zipTree(zipFile))
+    debug(context, "Unzipping ${zipFile.name}")
+    fileSystemOperations.copy {
+        it.from(archiveOperations.zipTree(zipFile))
         it.into(targetDirectory)
     }
-    debug(project, "Unzipped ${zipFile.name}")
 
+    debug(context, "Unzipped ${zipFile.name}")
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)
     return targetDirectory
