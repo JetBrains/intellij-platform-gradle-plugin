@@ -437,7 +437,7 @@ open class RunPluginVerifierTask @Inject constructor(
             JbrResolver::class.java,
             project,
             this,
-            extension.jreRepository.orNull,
+            extension.jreRepository.orNull ?: "",
         )
         jbrVersion.orNull?.let {
             jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->

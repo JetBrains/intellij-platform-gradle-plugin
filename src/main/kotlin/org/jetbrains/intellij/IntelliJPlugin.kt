@@ -560,7 +560,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 JbrResolver::class.java,
                 project,
                 task,
-                extension.jreRepository.orNull,
+                extension.jreRepository.orNull ?: "",
             )
 
             task.jbrVersion.orNull?.let {

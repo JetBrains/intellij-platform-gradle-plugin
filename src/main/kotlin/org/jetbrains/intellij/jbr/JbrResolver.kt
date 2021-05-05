@@ -20,7 +20,7 @@ import javax.inject.Inject
 open class JbrResolver @Inject constructor(
     val project: Project,
     val task: Task?,
-    private val jreRepository: String?,
+    private val jreRepository: String,
     private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
     private val fileSystemOperations: FileSystemOperations,
@@ -81,7 +81,7 @@ open class JbrResolver @Inject constructor(
             return null
         }
 
-        val url = "${jreRepository ?: jbrArtifact.repositoryUrl}/$archiveName"
+        val url = "${jreRepository.takeIf { it.isNotEmpty() } ?: jbrArtifact.repositoryUrl}/$archiveName"
         return try {
             DownloadAction(project).apply {
                 src(url)
