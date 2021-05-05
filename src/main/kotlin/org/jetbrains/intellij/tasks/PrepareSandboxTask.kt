@@ -12,6 +12,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
@@ -49,14 +50,27 @@ open class PrepareSandboxTask @Inject constructor(
     @Optional
     val pluginDependencies: ListProperty<PluginDependency> = objectFactory.listProperty(PluginDependency::class.java)
 
-    override fun configure(closure: Closure<*>): Task {
-        return super.configure(closure)
-    }
+    @Internal
+    val defaultDestinationDir: Property<File> = objectFactory.property(File::class.java)
+
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
 
     init {
         duplicatesStrategy = DuplicatesStrategy.FAIL
         configurePlugin()
     }
+
+    @TaskAction
+    override fun copy() {
+        disableIdeUpdate()
+        super.copy()
+    }
+
+    override fun getDestinationDir(): File = super.getDestinationDir() ?: defaultDestinationDir.get()
+
+    override fun configure(closure: Closure<*>): Task = super.configure(closure)
 
     private fun configurePlugin() {
         val plugin = mainSpec.addChild().into(project.provider { "${pluginName.get()}/lib" })
@@ -90,16 +104,6 @@ open class PrepareSandboxTask @Inject constructor(
                 previousPath = usedNames.putIfAbsent(details.name, details.file.absolutePath)
             }
         }
-    }
-
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
-
-    @TaskAction
-    override fun copy() {
-        disableIdeUpdate()
-        super.copy()
     }
 
     fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
