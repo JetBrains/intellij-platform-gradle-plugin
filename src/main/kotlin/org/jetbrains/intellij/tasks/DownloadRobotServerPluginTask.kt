@@ -36,20 +36,33 @@ open class DownloadRobotServerPluginTask @Inject constructor(
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
+    @Transient
+    private val dependencyHandler = project.dependencies
+
+    @Transient
+    private val repositoryHandler = project.repositories
+
+    @Transient
+    private val configurationContainer = project.configurations
+
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
+
     @TaskAction
     fun downloadPlugin() {
-        val dependency = project.dependencies.create("${getDependency()}:${version.get()}")
-        val repository = project.repositories.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
+        val dependency = dependencyHandler.create("${getDependency()}:${version.get()}")
+        val repository = repositoryHandler.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
 
         fileSystemOperations.delete {
             it.delete(outputDir.get())
         }
 
         try {
-            val zipFile = project.configurations.detachedConfiguration(dependency).singleFile
-            unzip(zipFile, outputDir.get().asFile, project, targetDirName = "")
+            val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
+            unzip2(zipFile, outputDir.get().asFile, archiveOperations, fileSystemOperations, context, targetDirName = "")
         } finally {
-            project.repositories.remove(repository)
+            repositoryHandler.remove(repository)
         }
     }
 
