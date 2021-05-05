@@ -358,10 +358,12 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configurePrepareSandboxTasks(project: Project, extension: IntelliJPluginExtension) {
         configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
-        val prepareUiTestingSandboxTask = configurePrepareSandboxTask(project,
+        val prepareUiTestingSandboxTask = configurePrepareSandboxTask(
+            project,
             extension,
             IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
-            "-uiTest") as PrepareSandboxTask
+            "-uiTest",
+        ) as PrepareSandboxTask
         val downloadPluginTask =
             project.tasks.getByName(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) as DownloadRobotServerPluginTask
 
@@ -408,9 +410,9 @@ open class IntelliJPlugin : Plugin<Project> {
             task.pluginJar.convention(project.layout.file(project.provider {
                 jarTask.archiveFile.orNull?.asFile
             }))
-            task.conventionMapping("destinationDir") {
+            task.defaultDestinationDir.convention(project.provider {
                 project.file("${extension.sandboxDir.get()}/plugins$testSuffix")
-            }
+            })
             task.configDir.convention(project.provider {
                 "${extension.sandboxDir.get()}/config$testSuffix"
             })
