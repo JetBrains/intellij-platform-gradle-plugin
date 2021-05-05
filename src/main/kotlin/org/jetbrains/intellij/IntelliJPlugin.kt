@@ -156,7 +156,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val resolver = project.objects.newInstance(
                 IdeaDependencyManager::class.java,
                 extension.intellijRepository.get(),
-                extension.ideaDependencyCachePath.orNull,
+                extension.ideaDependencyCachePath.orNull ?: "",
                 context,
             )
             val localPath = extension.localPath.orNull
