@@ -758,20 +758,20 @@ open class IntelliJPlugin : Plugin<Project> {
             task.group = IntelliJPluginConstants.GROUP_NAME
             task.description = "Sign plugin with your private key and certificate chain."
 
-            task.inputArchiveFile.set(resolveBuildTaskOutput(project))
-            task.outputArchiveFile.set(File(outputFilePath))
+            task.inputArchiveFile.convention(project.layout.file(project.provider {
+                resolveBuildTaskOutput(project)
+            }))
+            task.outputArchiveFile.convention(project.layout.file(project.provider {
+                File(outputFilePath)
+            }))
 
             task.onlyIf {
                 it as SignPluginTask
+                println("it.privateKey.isPresent=${it.privateKey.isPresent}")
+                println("it.certificateChain.isPresent=${it.certificateChain.isPresent}")
                 it.privateKey.isPresent && it.certificateChain.isPresent
             }
             task.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
-
-            task.doLast {
-                it as SignPluginTask
-                val publishPluginTask = project.tasks.findByName(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME) as PublishTask
-                publishPluginTask.distributionFile.convention(it.outputArchiveFile)
-            }
         }
     }
 
@@ -780,7 +780,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val publishPluginTask = project.tasks.create(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishTask::class.java)
         val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
         val verifyPluginTask = project.tasks.findByName(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-        val signPluginTask = project.tasks.findByName(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+        val signPluginTask = project.tasks.findByName(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME) as SignPluginTask
 
         publishPluginTask.also { task ->
             task.group = IntelliJPluginConstants.GROUP_NAME
@@ -788,11 +788,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
             task.host.convention("https://plugins.jetbrains.com")
             task.channels.convention(listOf("default"))
-            task.distributionFile.convention(
-                project.layout.file(project.provider {
-                    resolveBuildTaskOutput(project)
-                })
-            )
+            task.distributionFile.convention(project.layout.file(project.provider {
+                signPluginTask.outputArchiveFile.orNull?.asFile.takeIf { signPluginTask.didWork } ?: resolveBuildTaskOutput(project)
+            }))
 
             task.dependsOn(buildPluginTask)
             task.dependsOn(verifyPluginTask)
