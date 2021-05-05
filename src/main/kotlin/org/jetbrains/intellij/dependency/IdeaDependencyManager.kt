@@ -29,7 +29,7 @@ import javax.inject.Inject
 @Suppress("UnstableApiUsage")
 open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
-    private val ideaDependencyCachePath: String?,
+    private val ideaDependencyCachePath: String,
     private val context: Any,
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
@@ -268,7 +268,7 @@ open class IdeaDependencyManager @Inject constructor(
         }
 
     private fun getZipCacheDirectory(zipFile: File, project: Project, type: String): File {
-        if (!ideaDependencyCachePath.isNullOrEmpty()) {
+        if (ideaDependencyCachePath.isNotEmpty()) {
             val customCacheParent = File(ideaDependencyCachePath)
             if (customCacheParent.exists()) {
                 return File(customCacheParent.absolutePath)
