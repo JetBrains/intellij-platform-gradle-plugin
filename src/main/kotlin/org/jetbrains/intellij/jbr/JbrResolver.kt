@@ -1,8 +1,6 @@
 package org.jetbrains.intellij.jbr
 
 import de.undercouch.gradle.tasks.download.DownloadAction
-import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.internal.os.OperatingSystem
@@ -18,21 +16,17 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 open class JbrResolver @Inject constructor(
-    val project: Project,
-    val task: Task?,
+    private val downloadAction: DownloadAction,
     private val jreRepository: String,
+    private val gradleUserHomeDir: String,
+    private val isOffline: Boolean,
+    private val context: Any,
     private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
     private val fileSystemOperations: FileSystemOperations,
 ) {
 
-    @Transient
-    private val context = task ?: project
-
-    private val cacheDirectoryPath = Paths.get(
-        project.gradle.gradleUserHomeDir.absolutePath,
-        "caches/modules-2/files-2.1/com.jetbrains/jbre",
-    ).toString()
+    private val cacheDirectoryPath = Paths.get(gradleUserHomeDir, "caches/modules-2/files-2.1/com.jetbrains/jbre").toString()
     private val operatingSystem = OperatingSystem.current()
 
     fun resolve(version: String?): Jbr? {
@@ -76,14 +70,14 @@ open class JbrResolver @Inject constructor(
             return javaArchive
         }
 
-        if (project.gradle.startParameter.isOffline) {
+        if (isOffline) {
             warn(context, "Cannot download JetBrains Java Runtime $artifactName. Gradle runs in offline mode.")
             return null
         }
 
         val url = "${jreRepository.takeIf { it.isNotEmpty() } ?: jbrArtifact.repositoryUrl}/$archiveName"
         return try {
-            DownloadAction(project).apply {
+            downloadAction.apply {
                 src(url)
                 dest(javaArchive.absolutePath)
                 tempAndMove(true)
