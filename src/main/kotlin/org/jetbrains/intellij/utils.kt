@@ -52,15 +52,12 @@ fun mainSourceSet(project: Project): SourceSet {
 
 fun sourcePluginXmlFiles(project: Project): List<File> {
     val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-    return mainSourceSet(project).resources.srcDirs.mapNotNull {
-        val pluginXml = File(it, "META-INF/plugin.xml")
+    return mainSourceSet(project).resources.srcDirs.mapNotNull { file ->
+        val pluginXml = File(file, "META-INF/plugin.xml")
         try {
-            return@mapNotNull pluginXml.takeIf {
-                val document = builder.parse(pluginXml)
-                document.childNodes.asSequence().any { node ->
-                    node.nodeName == "idea-plugin"
-                }
-            }
+            return@mapNotNull pluginXml
+                .takeIf { it.exists() && it.length() > 0 }
+                ?.takeIf { builder.parse(pluginXml).childNodes.asSequence().any { it.nodeName == "idea-plugin" } }
         } catch (e: SAXException) {
             warn(project, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
         } catch (e: IOException) {

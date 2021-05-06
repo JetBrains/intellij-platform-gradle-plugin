@@ -397,7 +397,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 debug(context, "Resolved IDE download URL: $url")
                 return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
             } else {
-                debug(context, "IDE download URL has no redirection provided, skipping.")
+                debug(context, "IDE download URL has no redirection provided. Skipping")
             }
         } catch (e: Exception) {
             info(context, "Cannot resolve direct download URL for: $url")

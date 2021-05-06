@@ -138,7 +138,7 @@ open class PrepareSandboxTask @Inject constructor(
 
         val updatesConfigurable = try {
             parseXml(updatesConfig, UpdatesConfigurable::class.java)
-        } catch (ignore: StreamReadException) { // TODO: SAXParseException?
+        } catch (ignore: StreamReadException) {
             UpdatesConfigurable()
         }
 
