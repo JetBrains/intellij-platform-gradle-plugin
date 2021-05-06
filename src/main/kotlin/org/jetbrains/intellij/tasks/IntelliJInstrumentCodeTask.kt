@@ -76,6 +76,15 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         it.exists() && !sourceSetResources.get().contains(it)
     }
 
+    @Transient
+    private val dependencyHandler = project.dependencies
+
+    @Transient
+    private val repositoryHandler = project.repositories
+
+    @Transient
+    private val configurationContainer = project.configurations
+
     @TaskAction
     fun instrumentClasses() {
         copyOriginalClasses(outputDir.get().asFile)
@@ -113,17 +122,17 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     } ?: compilerClassPathFromMaven()
 
     private fun compilerClassPathFromMaven(): List<File> {
-        val dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
+        val dependency = dependencyHandler.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
         val intellijRepositoryUrl = extension?.intellijRepository?.get() ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
-            project.repositories.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
-            project.repositories.maven { it.url = URI(ASM_REPOSITORY_URL) },
-            project.repositories.maven { it.url = URI(FORMS_REPOSITORY_URL) },
+            repositoryHandler.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
+            repositoryHandler.maven { it.url = URI(ASM_REPOSITORY_URL) },
+            repositoryHandler.maven { it.url = URI(FORMS_REPOSITORY_URL) },
         )
         try {
-            return project.configurations.detachedConfiguration(dependency).files.toList()
+            return configurationContainer.detachedConfiguration(dependency).files.toList()
         } finally {
-            project.repositories.removeAll(repos)
+            repositoryHandler.removeAll(repos)
         }
     }
 

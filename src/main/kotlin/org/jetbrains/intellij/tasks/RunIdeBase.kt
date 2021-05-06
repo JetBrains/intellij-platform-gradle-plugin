@@ -17,7 +17,6 @@ import org.jetbrains.intellij.VERSION_PATTERN
 import org.jetbrains.intellij.getIdeJvmArgs
 import org.jetbrains.intellij.getIdeaSystemProperties
 import org.jetbrains.intellij.ideBuildNumber
-import org.jetbrains.intellij.resolveToolsJar
 import java.io.File
 
 @Suppress("UnstableApiUsage")
@@ -99,7 +98,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         val ideDirFile = ideDir.get().asFile
 
         executable.takeUnless { it.isNullOrEmpty() }?.let {
-            project.file(resolveToolsJar(it)).takeIf(File::exists) ?: Jvm.current().toolsJar
+            resolveToolsJar(it).takeIf(File::exists) ?: Jvm.current().toolsJar
         }?.let {
             classpath += objectFactory.fileCollection().from(it)
         }
@@ -166,5 +165,14 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
     private fun configureJvmArgs() {
         jvmArgs = getIdeJvmArgs(this, jvmArgs ?: emptyList(), ideDir.get().asFile)
+    }
+
+    private fun resolveToolsJar(javaExec: String): File {
+        val binDir = File(javaExec).parent
+        val path = when {
+            OperatingSystem.current().isMacOsX -> "../../lib/tools.jar"
+            else -> "../lib/tools.jar"
+        }
+        return File(binDir, path)
     }
 }

@@ -51,9 +51,10 @@ open class IntelliJPlugin : Plugin<Project> {
 
     @Transient
     @Suppress("LeakingThis")
-    private val context = this
+    private lateinit var context: Any
 
     override fun apply(project: Project) {
+        context = project
         checkGradleVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
 
@@ -767,8 +768,6 @@ open class IntelliJPlugin : Plugin<Project> {
 
             task.onlyIf {
                 it as SignPluginTask
-                println("it.privateKey.isPresent=${it.privateKey.isPresent}")
-                println("it.certificateChain.isPresent=${it.certificateChain.isPresent}")
                 it.privateKey.isPresent && it.certificateChain.isPresent
             }
             task.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)

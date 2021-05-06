@@ -104,6 +104,26 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as BuiltinPluginsRegistry
+
+        if (pluginsDirectory != other.pluginsDirectory) return false
+        if (plugins != other.plugins) return false
+        if (directoryNameMapping != other.directoryNameMapping) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = pluginsDirectory.hashCode()
+        result = 31 * result + plugins.hashCode()
+        result = 31 * result + directoryNameMapping.hashCode()
+        return result
+    }
+
     @JacksonXmlRootElement(localName = "plugins")
     data class PluginsCache(
         @JacksonXmlElementWrapper(useWrapping = false)

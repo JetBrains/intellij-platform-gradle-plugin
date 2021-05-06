@@ -20,6 +20,7 @@ abstract class IntelliJPluginSpecBase {
 
     val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
+    val kotlinPluginVersion = "1.5.0"
     val dir = createTempDir()
 
     val buildFile = file("build.gradle")
@@ -31,22 +32,13 @@ abstract class IntelliJPluginSpecBase {
         file("settings.gradle").groovy("rootProject.name = 'projectName'")
 
         buildFile.groovy("""
-            buildscript {
-                repositories { 
-                    maven { url 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure' } 
-                    mavenCentral()
-                }
-                dependencies {
-                    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60"
-                }
-            }
             plugins {
+                id 'java'
                 id 'org.jetbrains.intellij'
+                id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             sourceCompatibility = 1.8
             targetCompatibility = 1.8
-            apply plugin: 'java'
-            apply plugin: 'kotlin'
             repositories { mavenCentral() }
             intellij {
                 version = '$intellijVersion'

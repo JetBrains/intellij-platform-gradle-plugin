@@ -145,14 +145,6 @@ fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = wh
     }, FalseFileFilter.FALSE)
 }
 
-fun resolveToolsJar(javaExec: String): String {
-    val binDir = File(javaExec).parent
-    return when {
-        OperatingSystem.current().isMacOsX -> "$binDir/../../lib/tools.jar"
-        else -> "$binDir/../lib/tools.jar"
-    }
-}
-
 fun getBuiltinJbrVersion(ideDirectory: File): String? {
     val dependenciesFile = File(ideDirectory, "dependencies.txt")
     if (dependenciesFile.exists()) {
@@ -223,8 +215,8 @@ fun debug(context: Any? = null, message: String, e: Throwable? = null) = log(Log
 
 private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) {
     val category = when (context) {
-        is Project -> "gradle-intellij-plugin :${context.path}"
-        is Task -> "gradle-intellij-plugin :${context.path}"
+        is Project -> "gradle-intellij-plugin ${context.path}${context.name}"
+        is Task -> "gradle-intellij-plugin ${context.path}"
         else -> "gradle-intellij-plugin"
     }
     val logger = Logging.getLogger(IntelliJPlugin::class.java)
