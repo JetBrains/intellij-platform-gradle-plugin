@@ -38,6 +38,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.io.InputStream
+import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.BiConsumer
 import java.util.function.Predicate
@@ -225,7 +226,7 @@ private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) 
 }
 
 fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdePlugin? {
-    val extractDirectory = createTempDir().toPath()
+    val extractDirectory = createTempDirectory("tmp")
     val result = IdePluginManager.createManager(extractDirectory)
         .createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
 
