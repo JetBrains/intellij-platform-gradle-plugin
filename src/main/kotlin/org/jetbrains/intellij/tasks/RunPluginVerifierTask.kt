@@ -177,8 +177,13 @@ open class RunPluginVerifierTask @Inject constructor(
 
     private val isOffline = project.gradle.startParameter.isOffline
 
+    private val absolutePath = project.gradle.gradleUserHomeDir.absolutePath
+
     private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
         ?: throw GradleException("Cannot access IntelliJPluginExtension")
+
+    @Transient
+    private val downloadAction = DownloadAction(project)
 
     @Transient
     private val dependencyHandler = project.dependencies
@@ -199,6 +204,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @TaskAction
     fun runPluginVerifier() {
+        println("downloadAction=$downloadAction")
         val file = distributionFile.orNull
         if (file == null || !file.asFile.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
@@ -339,7 +345,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
                 debug(context, "Downloading IDE from $url")
 
-                DownloadAction(project).apply {
+                downloadAction.apply {
                     src(url)
                     dest(ideArchive.absolutePath)
                     tempAndMove(true)
@@ -433,11 +439,13 @@ open class RunPluginVerifierTask @Inject constructor(
             return it
         }
 
-        val jbrResolver = project.objects.newInstance(
+        val jbrResolver = objectFactory.newInstance(
             JbrResolver::class.java,
-            project,
-            this,
+            downloadAction,
             extension.jreRepository.orNull ?: "",
+            absolutePath,
+            isOffline,
+            this,
         )
         jbrVersion.orNull?.let {
             jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
@@ -452,8 +460,7 @@ open class RunPluginVerifierTask @Inject constructor(
             false -> "jbr"
         }
 
-        val runIdeTask = project.tasks.findByName(IntelliJPluginConstants.RUN_IDE_TASK_NAME) as RunIdeTask
-        getBuiltinJbrVersion(runIdeTask.ideDir.get().asFile)?.let { builtinJbrVersion ->
+        getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
             jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
                 val javaHome = File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {

@@ -1,6 +1,7 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import de.undercouch.gradle.tasks.download.DownloadAction
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -438,9 +439,7 @@ open class IntelliJPlugin : Plugin<Project> {
             task.description =
                 "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
 
-            task.failureLevel.convention(
-                EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN)
-            )
+            task.failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN))
             task.verifierVersion.convention(VERIFIER_VERSION_LATEST)
             task.distributionFile.convention(project.layout.file(project.provider {
                 resolveBuildTaskOutput(project)
@@ -561,9 +560,11 @@ open class IntelliJPlugin : Plugin<Project> {
         task.projectExecutable.convention(project.provider {
             val jbrResolver = project.objects.newInstance(
                 JbrResolver::class.java,
-                project,
-                task,
+                DownloadAction(project),
                 extension.jreRepository.orNull ?: "",
+                project.gradle.gradleUserHomeDir.absolutePath,
+                project.gradle.startParameter.isOffline,
+                task,
             )
 
             task.jbrVersion.orNull?.let {
