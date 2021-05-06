@@ -248,7 +248,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 pluginXml.depends.forEach {
                     if (it.value == "com.intellij.modules.java") {
                         throw BuildException("The project depends on `com.intellij.modules.java` module but doesn't declare a compile dependency on it.\n" +
-                            "Please delete `depends` tag from $file.absolutePath or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
+                            "Please delete `depends` tag from ${file.absolutePath} or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
                             null)
                     }
                 }

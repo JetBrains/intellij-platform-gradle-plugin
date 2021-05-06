@@ -40,4 +40,12 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         assertTrue(text.contains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">"))
         assertTrue(text.contains("hit=\"Label for Test Searchable Configurable\""))
     }
+
+    @Test
+    fun `reuse configuration cache`() {
+        build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
+        val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
 }
