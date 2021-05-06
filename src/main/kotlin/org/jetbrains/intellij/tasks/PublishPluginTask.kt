@@ -21,7 +21,7 @@ import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class PublishTask @Inject constructor(
+open class PublishPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
