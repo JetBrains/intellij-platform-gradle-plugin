@@ -264,7 +264,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         assertTrue(result.output.contains("Reusing configuration cache."))
     }
 
-
     private fun warmupGradle() {
         buildFile.groovy("""
             version = "1.0.0"
