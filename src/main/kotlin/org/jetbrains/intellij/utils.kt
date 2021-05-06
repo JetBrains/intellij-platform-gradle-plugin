@@ -14,6 +14,7 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.base.utils.isZip
+import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
@@ -224,8 +225,12 @@ private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) 
     }
 }
 
-fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any) =
-    when (val result = IdePluginManager.createManager().createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)) {
+fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdePlugin? {
+    val extractDirectory = createTempDir().toPath()
+    val result = IdePluginManager.createManager(extractDirectory)
+        .createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
+
+    return when (result) {
         is PluginCreationSuccess -> result.plugin
         is PluginCreationFail -> {
             val problems = result.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
@@ -237,6 +242,7 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any) =
             null
         }
     }
+}
 
 @Suppress("UnstableApiUsage")
 fun untar(

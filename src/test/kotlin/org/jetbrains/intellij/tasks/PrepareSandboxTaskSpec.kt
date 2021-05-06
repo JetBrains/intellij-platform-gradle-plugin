@@ -669,4 +669,25 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(sandbox),
         )
     }
+
+    @Test
+    fun `reuse configuration cache`() {
+        writeJavaFile()
+
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        buildFile.groovy("""
+            intellij {
+                plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
+                pluginName = 'myPluginName'
+            }
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
+        val result = build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
 }
