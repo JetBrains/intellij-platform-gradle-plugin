@@ -16,14 +16,15 @@ import kotlin.test.assertEquals
 abstract class IntelliJPluginSpecBase {
 
     private val pluginsRepository = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
+    private val kotlinPluginVersion = "1.5.0"
     private var debugEnabled = true
 
     val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
-    val kotlinPluginVersion = "1.5.0"
     val dir = createTempDir()
 
     val buildFile = file("build.gradle")
+    val gradleProperties = file("gradle.properties")
     val pluginXml = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory = File(dir, "build")
 
@@ -53,6 +54,10 @@ abstract class IntelliJPluginSpecBase {
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
+        """)
+
+        gradleProperties.groovy("""
+            kotlin.stdlib.default.dependency = false
         """)
     }
 
