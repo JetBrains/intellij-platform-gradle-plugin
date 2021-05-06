@@ -671,7 +671,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `reuse configuration cache`() {
+    fun `reuse configuration cache – prepareSandbox`() {
         writeJavaFile()
 
         pluginXml.xml("""
@@ -687,6 +687,63 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
         val result = build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
+
+    @Test
+    fun `reuse configuration cache – prepareTestingSandbox`() {
+        writeJavaFile()
+
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        buildFile.groovy("""
+            intellij {
+                plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
+                pluginName = 'myPluginName'
+            }
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
+        val result = build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
+
+    @Test
+    fun `reuse configuration cache – prepareUiTestingSandbox`() {
+        writeJavaFile()
+
+        file("src/main/resources/META-INF/other.xml").xml("""
+            <idea-plugin />
+        """)
+
+        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+            <idea-plugin />
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <depends config-file="other.xml"/>
+            </idea-plugin>
+        """)
+
+        buildFile.groovy("""
+            version = '0.42.123'
+            intellij {
+                pluginName = 'myPluginName'
+                plugins = ['copyright']
+            }
+            downloadRobotServerPlugin.version = '0.11.1'
+            dependencies {
+                compile 'joda-time:joda-time:2.8.1'
+            }
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
+        val result = build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
 
         assertTrue(result.output.contains("Reusing configuration cache."))
     }
