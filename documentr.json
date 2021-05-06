@@ -25,6 +25,10 @@
       "value": "badge-shield-io-github-release"
     },
     {
+      "type": "markup",
+      "value": "\n\n<img src=\"./.github/readme/gradle-intellij-plugin.png\" alt=\"Gradle IntelliJ Plugin\"/>"
+    },
+    {
       "type": "inbuilt",
       "value": "project-name"
     },
