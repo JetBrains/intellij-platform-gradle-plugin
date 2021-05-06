@@ -3,6 +3,7 @@ package org.jetbrains.intellij.tasks
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
+import java.nio.file.Files.createTempDirectory
 import java.util.zip.ZipFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -384,7 +385,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun createPlugin(): File {
-        val plugin = createTempDir()
+        val plugin = createTempDirectory("tmp").toFile()
         File(plugin, "classes/").mkdir()
         File(plugin, "META-INF/").mkdir()
         File(plugin, "classes/A.class").createNewFile()

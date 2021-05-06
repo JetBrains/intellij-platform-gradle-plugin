@@ -8,6 +8,7 @@ import org.intellij.lang.annotations.Language
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files.createTempDirectory
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.test.BeforeTest
@@ -21,7 +22,7 @@ abstract class IntelliJPluginSpecBase {
 
     val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
-    val dir = createTempDir()
+    val dir = createTempDirectory("tmp").toFile()
 
     val buildFile = file("build.gradle")
     val gradleProperties = file("gradle.properties")
