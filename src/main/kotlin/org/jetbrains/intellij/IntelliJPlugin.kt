@@ -538,7 +538,7 @@ open class IntelliJPlugin : Plugin<Project> {
             project.layout.projectDirectory.dir(path)
         })
         task.requiredPluginIds.convention(project.provider {
-            getPluginIds(project)
+            project.getPluginIds()
         })
         task.configDir.convention(project.provider {
             project.file(prepareSandboxTask.configDir.get())
