@@ -3,7 +3,7 @@ package org.jetbrains.intellij.dependency
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.CompileStatic
 import org.jetbrains.intellij.collectJars
-import org.jetbrains.intellij.isJarFile
+import org.jetbrains.intellij.isJar
 import java.io.File
 
 @CompileStatic
@@ -25,13 +25,13 @@ class PluginDependencyImpl(
     var untilBuild: String? = null
 
     init {
-        if (isJarFile(artifact)) {
+        if (artifact.isJar()) {
             jarFiles = listOf(artifact)
         }
         if (artifact.isDirectory) {
             val lib = File(artifact, "lib")
             if (lib.isDirectory) {
-                jarFiles = collectJars(lib) { true }
+                jarFiles = lib.collectJars()
             }
             val classes = File(artifact, "classes")
             if (classes.isDirectory) {

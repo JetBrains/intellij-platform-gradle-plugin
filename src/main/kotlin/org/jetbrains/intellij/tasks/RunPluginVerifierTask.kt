@@ -354,7 +354,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
                 try {
                     debug(context, "IDE downloaded, extracting...")
-                    untar(ideArchive, ideDir, archiveOperations, execOperations, fileSystemOperations, context)
+                    ideArchive.untar(ideDir, archiveOperations, execOperations, fileSystemOperations, context)
                     ideDir.listFiles()?.first()?.let { container ->
                         container.listFiles()?.forEach {
                             it.renameTo(File(ideDir, it.name))
@@ -460,7 +460,7 @@ open class RunPluginVerifierTask @Inject constructor(
             false -> "jbr"
         }
 
-        getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
+        ideDir.get().asFile.getBuiltinJbrVersion()?.let { builtinJbrVersion ->
             jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
                 val javaHome = File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {

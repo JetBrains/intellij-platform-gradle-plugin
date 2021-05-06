@@ -46,7 +46,7 @@ open class JbrResolver @Inject constructor(
         }
 
         getJavaArchive(jbrArtifact)?.let {
-            untar(it, javaDir, archiveOperations, execOperations, fileSystemOperations, context)
+            it.untar(javaDir, archiveOperations, execOperations, fileSystemOperations, context)
             it.delete()
             return fromDir(javaDir, version)
         }
