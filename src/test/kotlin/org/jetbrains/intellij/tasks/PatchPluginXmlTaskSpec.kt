@@ -374,4 +374,24 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
     }
+
+
+    @Test
+    fun `reuse configuration cache`() {
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        buildFile.groovy("""
+            version = '0.42.123'
+            intellij {
+                version = '2019.1'
+            }
+        """)
+
+        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")
+        val result = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
 }
