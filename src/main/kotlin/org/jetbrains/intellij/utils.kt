@@ -107,7 +107,7 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).mapNotNull {
+fun Project.getPluginIds() = sourcePluginXmlFiles(this).mapNotNull {
     parseXml(it, IdeaPlugin::class.java).id
 }
 
@@ -132,19 +132,19 @@ fun Node.get(name: String) = childNodes.asSequence().find { it.nodeName == name 
 
 fun Node.attribute(name: String) = attributes.getNamedItem(name)?.textContent
 
-fun isJarFile(file: File) = file.toPath().isJar()
+fun File.isJar() = toPath().isJar()
 
-fun isZipFile(file: File) = file.toPath().isZip()
+fun File.isZip() = toPath().isZip()
 
-fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = when {
-    !directory.isDirectory -> emptyList()
-    else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
-        override fun accept(file: File) = isJarFile(file) && filter.test(file)
+fun File.collectJars(filter: Predicate<File> = Predicate { true }): Collection<File> = when {
+    !isDirectory -> emptyList()
+    else -> FileUtils.listFiles(this, object : AbstractFileFilter() {
+        override fun accept(file: File) = file.isJar() && filter.test(file)
     }, FalseFileFilter.FALSE)
 }
 
-fun getBuiltinJbrVersion(ideDirectory: File): String? {
-    val dependenciesFile = File(ideDirectory, "dependencies.txt")
+fun File.getBuiltinJbrVersion(): String? {
+    val dependenciesFile = File(this, "dependencies.txt")
     if (dependenciesFile.exists()) {
         val properties = Properties()
         val reader = FileReader(dependenciesFile)
@@ -160,8 +160,7 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
 }
 
 @Suppress("UnstableApiUsage")
-fun unzip(
-    zipFile: File,
+fun File.unzip(
     directory: File,
     archiveOperations: ArchiveOperations,
     fileSystemOperations: FileSystemOperations,
@@ -170,7 +169,7 @@ fun unzip(
     markUpToDate: BiConsumer<File, File>? = null,
     targetDirName: String? = null,
 ): File {
-    val targetDirectory = File(directory, targetDirName ?: zipFile.name.removeSuffix(".zip"))
+    val targetDirectory = File(directory, targetDirName ?: name.removeSuffix(".zip"))
     val markerFile = File(targetDirectory, "markerFile")
     if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
         return targetDirectory
@@ -180,13 +179,13 @@ fun unzip(
         it.delete(targetDirectory)
     }
 
-    debug(context, "Unzipping ${zipFile.name}")
+    debug(context, "Unzipping $name")
     fileSystemOperations.copy {
-        it.from(archiveOperations.zipTree(zipFile))
+        it.from(archiveOperations.zipTree(this))
         it.into(targetDirectory)
     }
 
-    debug(context, "Unzipped ${zipFile.name}")
+    debug(context, "Unzipped $name")
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)
     return targetDirectory
@@ -245,8 +244,7 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdeP
 }
 
 @Suppress("UnstableApiUsage")
-fun untar(
-    from: File,
+fun File.untar(
     to: File,
     archiveOperations: ArchiveOperations,
     execOperations: ExecOperations,
@@ -254,7 +252,7 @@ fun untar(
     context: Any,
 ) {
     val tempDir = File(to.parent, to.name + "-temp")
-    debug(context, "Unpacking ${from.absolutePath} to ${tempDir.absolutePath}")
+    debug(context, "Unpacking $absolutePath to ${tempDir.absolutePath}")
 
     if (tempDir.exists()) {
         tempDir.deleteRecursively()
@@ -263,12 +261,12 @@ fun untar(
 
     if (OperatingSystem.current().isWindows) {
         fileSystemOperations.copy {
-            it.from(archiveOperations.tarTree(from))
+            it.from(archiveOperations.tarTree(this))
             it.into(tempDir)
         }
     } else {
         execOperations.exec {
-            it.commandLine("tar", "-xpf", from.absolutePath, "--directory", tempDir.absolutePath)
+            it.commandLine("tar", "-xpf", absolutePath, "--directory", tempDir.absolutePath)
         }
     }
     tempDir.renameTo(to)

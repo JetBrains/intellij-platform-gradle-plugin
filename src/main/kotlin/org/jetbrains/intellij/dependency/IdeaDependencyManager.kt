@@ -114,7 +114,7 @@ open class IdeaDependencyManager @Inject constructor(
         zipFile: File,
         type: String,
         checkVersionChange: Boolean,
-    ) = unzip(zipFile, cacheDirectory, archiveOperations, fileSystemOperations, context, { markerFile ->
+    ) = zipFile.unzip(cacheDirectory, archiveOperations, fileSystemOperations, context, { markerFile ->
         isCacheUpToDate(zipFile, markerFile, checkVersionChange)
     }, { unzippedDirectory, markerFile ->
         resetExecutablePermissions(unzippedDirectory, type)
