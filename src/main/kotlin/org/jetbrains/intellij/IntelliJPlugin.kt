@@ -35,7 +35,7 @@ import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
 import org.jetbrains.intellij.tasks.JarSearchableOptionsTask
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.intellij.tasks.PublishPluginTask
 import org.jetbrains.intellij.tasks.RunIdeBase
 import org.jetbrains.intellij.tasks.RunIdeForUiTestTask
 import org.jetbrains.intellij.tasks.RunIdeTask
@@ -776,7 +776,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configurePublishPluginTask(project: Project) {
         info(context, "Configuring publish plugin task")
-        val publishPluginTask = project.tasks.create(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishTask::class.java)
+        val publishPluginTask = project.tasks.create(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishPluginTask::class.java)
         val buildPluginTask = project.tasks.findByName(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
         val verifyPluginTask = project.tasks.findByName(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
         val signPluginTask = project.tasks.findByName(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME) as SignPluginTask
