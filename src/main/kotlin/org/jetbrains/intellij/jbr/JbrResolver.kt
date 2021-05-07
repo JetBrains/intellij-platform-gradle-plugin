@@ -15,7 +15,6 @@ import java.io.IOException
 import java.nio.file.Paths
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 @Incubating
 open class JbrResolver @Inject constructor(
     private val downloadAction: DownloadAction,

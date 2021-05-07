@@ -19,6 +19,7 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.ArchiveOperations
@@ -160,7 +161,7 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
     return null
 }
 
-@Suppress("UnstableApiUsage")
+@Incubating
 fun unzip(
     zipFile: File,
     directory: File,
@@ -245,7 +246,7 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdeP
     }
 }
 
-@Suppress("UnstableApiUsage")
+@Incubating
 fun untar(
     from: File,
     to: File,

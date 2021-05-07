@@ -4,6 +4,7 @@ import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
+import org.gradle.api.Incubating
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -49,7 +50,7 @@ import java.nio.file.Paths
 import java.util.EnumSet
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
+@Incubating
 open class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,

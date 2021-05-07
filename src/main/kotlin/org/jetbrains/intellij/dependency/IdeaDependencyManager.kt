@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.dependency
 
 import org.gradle.api.GradleException
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.DependencySet
@@ -26,7 +27,7 @@ import java.net.URI
 import java.util.zip.ZipFile
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
+@Incubating
 open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,

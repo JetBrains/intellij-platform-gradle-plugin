@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
@@ -19,7 +20,7 @@ import java.io.File
 import java.nio.file.Paths
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
+@Incubating
 open class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
     private val ideaDependency: IdeaDependency?,
