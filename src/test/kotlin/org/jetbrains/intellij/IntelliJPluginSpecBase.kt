@@ -24,8 +24,8 @@ abstract class IntelliJPluginSpecBase {
     val intellijVersion = "2020.1"
     val dir: File = createTempDirectory("tmp").toFile()
 
+    private val gradleProperties = file("gradle.properties")
     val buildFile = file("build.gradle")
-    val gradleProperties = file("gradle.properties")
     val pluginXml = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory = File(dir, "build")
 
