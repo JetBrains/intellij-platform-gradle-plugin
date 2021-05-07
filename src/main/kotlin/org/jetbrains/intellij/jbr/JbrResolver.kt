@@ -18,7 +18,7 @@ import javax.inject.Inject
 open class JbrResolver @Inject constructor(
     private val downloadAction: DownloadAction,
     private val jreRepository: String,
-    private val gradleUserHomeDir: String,
+    gradleUserHomeDir: String,
     private val isOffline: Boolean,
     private val context: Any,
     private val archiveOperations: ArchiveOperations,

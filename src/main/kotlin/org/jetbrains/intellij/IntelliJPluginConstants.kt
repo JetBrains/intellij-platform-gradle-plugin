@@ -3,7 +3,6 @@ package org.jetbrains.intellij
 object IntelliJPluginConstants {
     const val GROUP_NAME = "intellij"
     const val EXTENSION_NAME = "intellij"
-    const val SIGNING_EXTENSION_NAME = "signing"
     const val DEFAULT_SANDBOX = "idea-sandbox"
     const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
     const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
