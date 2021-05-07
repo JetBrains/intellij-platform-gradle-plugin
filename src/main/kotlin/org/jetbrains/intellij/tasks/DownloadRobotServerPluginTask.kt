@@ -60,7 +60,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
 
         try {
             val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
-            zipFile.unzip(outputDir.get().asFile, archiveOperations, fileSystemOperations, context, targetDirName = "")
+            unzip(zipFile, outputDir.get().asFile, archiveOperations, fileSystemOperations, context, targetDirName = "")
         } finally {
             repositoryHandler.remove(repository)
         }

@@ -108,7 +108,7 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun Project.getPluginIds() = sourcePluginXmlFiles(this).mapNotNull {
+fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).mapNotNull {
     parseXml(it, IdeaPlugin::class.java).id
 }
 
@@ -137,15 +137,15 @@ fun File.isJar() = toPath().isJar()
 
 fun File.isZip() = toPath().isZip()
 
-fun File.collectJars(filter: Predicate<File> = Predicate { true }): Collection<File> = when {
-    !isDirectory -> emptyList()
-    else -> FileUtils.listFiles(this, object : AbstractFileFilter() {
+fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = when {
+    !directory.isDirectory -> emptyList()
+    else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
         override fun accept(file: File) = file.isJar() && filter.test(file)
     }, FalseFileFilter.FALSE)
 }
 
-fun File.getBuiltinJbrVersion(): String? {
-    val dependenciesFile = File(this, "dependencies.txt")
+fun getBuiltinJbrVersion(ideDirectory: File): String? {
+    val dependenciesFile = File(ideDirectory, "dependencies.txt")
     if (dependenciesFile.exists()) {
         val properties = Properties()
         val reader = FileReader(dependenciesFile)
@@ -161,7 +161,8 @@ fun File.getBuiltinJbrVersion(): String? {
 }
 
 @Suppress("UnstableApiUsage")
-fun File.unzip(
+fun unzip(
+    zipFile: File,
     directory: File,
     archiveOperations: ArchiveOperations,
     fileSystemOperations: FileSystemOperations,
@@ -170,7 +171,7 @@ fun File.unzip(
     markUpToDate: BiConsumer<File, File>? = null,
     targetDirName: String? = null,
 ): File {
-    val targetDirectory = File(directory, targetDirName ?: name.removeSuffix(".zip"))
+    val targetDirectory = File(directory, targetDirName ?: zipFile.name.removeSuffix(".zip"))
     val markerFile = File(targetDirectory, "markerFile")
     if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
         return targetDirectory
@@ -180,13 +181,13 @@ fun File.unzip(
         it.delete(targetDirectory)
     }
 
-    debug(context, "Unzipping $name")
+    debug(context, "Unzipping ${zipFile.name}")
     fileSystemOperations.copy {
-        it.from(archiveOperations.zipTree(this))
+        it.from(archiveOperations.zipTree(zipFile))
         it.into(targetDirectory)
     }
 
-    debug(context, "Unzipped $name")
+    debug(context, "Unzipped ${zipFile.name}")
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)
     return targetDirectory
@@ -245,7 +246,8 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdeP
 }
 
 @Suppress("UnstableApiUsage")
-fun File.untar(
+fun untar(
+    from: File,
     to: File,
     archiveOperations: ArchiveOperations,
     execOperations: ExecOperations,
@@ -253,7 +255,7 @@ fun File.untar(
     context: Any,
 ) {
     val tempDir = File(to.parent, to.name + "-temp")
-    debug(context, "Unpacking $absolutePath to ${tempDir.absolutePath}")
+    debug(context, "Unpacking ${from.absolutePath} to ${tempDir.absolutePath}")
 
     if (tempDir.exists()) {
         tempDir.deleteRecursively()
@@ -262,12 +264,12 @@ fun File.untar(
 
     if (OperatingSystem.current().isWindows) {
         fileSystemOperations.copy {
-            it.from(archiveOperations.tarTree(this))
+            it.from(archiveOperations.tarTree(from))
             it.into(tempDir)
         }
     } else {
         execOperations.exec {
-            it.commandLine("tar", "-xpf", absolutePath, "--directory", tempDir.absolutePath)
+            it.commandLine("tar", "-xpf", from.absolutePath, "--directory", tempDir.absolutePath)
         }
     }
     tempDir.renameTo(to)

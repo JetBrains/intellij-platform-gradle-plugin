@@ -23,10 +23,10 @@ open class IdeaDependency(
         if (classes.isDirectory) {
             val lib = File(classes, "lib")
             if (lib.isDirectory) {
-                val baseFiles = lib.collectJars { file ->
+                val baseFiles = (collectJars(lib) { file ->
                     (withKotlin || !isKotlinRuntime(file.name.removeSuffix(".jar"))) && file.name != "junit.jar" && file.name != "annotations.jar"
-                }.sorted()
-                val antFiles = File(lib, "ant/lib").collectJars().sorted()
+                }).sorted()
+                val antFiles = collectJars(File(lib, "ant/lib")) { true }.sorted()
                 return baseFiles + antFiles
             }
         }

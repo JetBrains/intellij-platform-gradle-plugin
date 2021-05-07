@@ -538,7 +538,7 @@ open class IntelliJPlugin : Plugin<Project> {
             project.layout.projectDirectory.dir(path)
         })
         task.requiredPluginIds.convention(project.provider {
-            project.getPluginIds()
+            getPluginIds(project)
         })
         task.configDir.convention(project.provider {
             project.file(prepareSandboxTask.configDir.get())
@@ -571,7 +571,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
                     warn(this, "Cannot resolve JBR $it. Falling back to builtin JBR.")
                 }
-            } ?: task.ideDir.get().asFile.getBuiltinJbrVersion()?.let {
+            } ?: getBuiltinJbrVersion(task.ideDir.get().asFile)?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
                     warn(this, "Cannot resolve builtin JBR $it. Falling local Java.")
                 }
@@ -670,7 +670,7 @@ open class IntelliJPlugin : Plugin<Project> {
             project.tasks.findByName(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME) as PrepareSandboxTask
         val runIdeTask = project.tasks.findByName(IntelliJPluginConstants.RUN_IDE_TASK_NAME) as RunIdeTask
 
-        val pluginIds = project.getPluginIds()
+        val pluginIds = getPluginIds(project)
         val configDirectory = project.file("${extension.sandboxDir.get()}/config-test")
         val systemDirectory = project.file("${extension.sandboxDir.get()}/system-test")
         val pluginsDirectory = project.file("${extension.sandboxDir.get()}/plugins-test")
