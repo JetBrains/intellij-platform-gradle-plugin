@@ -48,6 +48,7 @@ class PluginDependencyImpl(
         sinceBuild?.let { IdeVersion.createIdeVersion(it) <= ideVersion } ?: true &&
             untilBuild?.let { ideVersion <= IdeVersion.createIdeVersion(it) } ?: true
 
+    @Suppress("DuplicatedCode")
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
