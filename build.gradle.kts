@@ -2,6 +2,8 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+fun properties(key: String) = project.findProperty(key).toString()
+
 plugins {
     kotlin("jvm") version "1.5.0"
     id("java-gradle-plugin")
@@ -48,10 +50,10 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-version = if (project.property("snapshot")?.toString()?.toBoolean() == true) {
-    "${project.property("snapshotVersion")}-SNAPSHOT"
+version = if (properties("snapshot").toBoolean()) {
+    "${properties("snapshotVersion")}-SNAPSHOT"
 } else {
-    project.property("version").toString()
+    properties("version")
 }
 group = "org.jetbrains.intellij.plugins"
 description = """
@@ -98,7 +100,7 @@ fun configureTests(testTask: Test) {
         File(testGradleHomePath).mkdir()
     }
     testTask.systemProperties["test.gradle.home"] = testGradleHomePath
-    testTask.systemProperties["plugins.repository"] = project.property("pluginsRepository")
+    testTask.systemProperties["plugins.repository"] = properties("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)
 }
 
@@ -118,8 +120,8 @@ publishing {
             name = "snapshot"
             url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
             credentials {
-                username = project.property("ossrhUsername") as String
-                password = project.property("ossrhPassword") as String
+                username = properties("ossrhUsername")
+                password = properties("ossrhPassword")
             }
         }
     }
@@ -182,7 +184,7 @@ githubRelease {
         ""
     }
 
-    setToken(project.property("githubToken") as String)
+    setToken(properties("githubToken"))
     owner.set("jetbrains")
     repo.set("gradle-intellij-plugin")
     body.set(releaseNote)
