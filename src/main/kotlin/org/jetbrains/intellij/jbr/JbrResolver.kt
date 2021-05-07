@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.jbr
 
 import de.undercouch.gradle.tasks.download.DownloadAction
+import org.gradle.api.Incubating
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.internal.os.OperatingSystem
@@ -15,6 +16,7 @@ import java.nio.file.Paths
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
+@Incubating
 open class JbrResolver @Inject constructor(
     private val downloadAction: DownloadAction,
     private val jreRepository: String,
