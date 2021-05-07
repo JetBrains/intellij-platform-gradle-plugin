@@ -80,7 +80,8 @@ open class PluginDependencyManager @Inject constructor(
     }
 
     private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {
-        val pluginDir = findSingleDirectory(pluginFile.unzip(
+        val pluginDir = findSingleDirectory(unzip(
+            pluginFile,
             File(cacheDirectoryPath, groupId(dependency.channel)),
             archiveOperations,
             fileSystemOperations,
