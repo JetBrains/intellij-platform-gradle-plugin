@@ -22,7 +22,7 @@ abstract class IntelliJPluginSpecBase {
 
     val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
-    val dir = createTempDirectory("tmp").toFile()
+    val dir: File = createTempDirectory("tmp").toFile()
 
     val buildFile = file("build.gradle")
     val gradleProperties = file("gradle.properties")
