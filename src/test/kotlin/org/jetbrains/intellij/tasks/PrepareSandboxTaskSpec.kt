@@ -672,7 +672,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `reuse configuration cache – prepareSandbox`() {
+    fun `reuse configuration cache for prepareSandbox`() {
         writeJavaFile()
 
         pluginXml.xml("""
@@ -693,7 +693,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `reuse configuration cache – prepareTestingSandbox`() {
+    fun `reuse configuration cache for prepareTestingSandbox`() {
         writeJavaFile()
 
         pluginXml.xml("""
@@ -714,7 +714,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `reuse configuration cache – prepareUiTestingSandbox`() {
+    fun `reuse configuration cache for prepareUiTestingSandbox`() {
         writeJavaFile()
 
         file("src/main/resources/META-INF/other.xml").xml("""
