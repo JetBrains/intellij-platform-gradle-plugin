@@ -45,7 +45,7 @@ plugins {
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.0.0-SNAPSHOT"
+  id "org.jetbrains.intellij" version "1.0-SNAPSHOT"
 }
 ```
 
