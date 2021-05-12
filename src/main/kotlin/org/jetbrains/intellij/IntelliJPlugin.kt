@@ -595,7 +595,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     })
                     it.compilerVersion.convention(project.provider {
                         val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-                        if (extension.localPath.orNull.isNullOrEmpty() && version.isEmpty() && version.endsWith("-SNAPSHOT")) {
+                        if (extension.localPath.orNull.isNullOrEmpty() && version.endsWith("-SNAPSHOT")) {
                             when (extension.getVersionType()) {
                                 "CL" -> "CLION-$version"
                                 "RD" -> "RIDER-$version"
@@ -610,7 +610,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         extension.getIdeaDependency(project)
                     })
                     it.javac2.convention(project.layout.file(project.provider {
-                        project.file("${extension.getIdeaDependency(project).classes}/lib/javac2.jar").takeIf { javac2 -> javac2.exists() }
+                        project.file("${extension.getIdeaDependency(project).classes}/lib/javac2.jar").takeIf(File::exists)
                     }))
 
                     val classesDir = sourceSet.output.classesDirs.first()
