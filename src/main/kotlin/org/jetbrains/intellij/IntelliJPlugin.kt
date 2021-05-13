@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.JavaPlugin
@@ -398,7 +397,6 @@ open class IntelliJPlugin : Plugin<Project> {
             it.pluginJar.convention(project.layout.file(project.provider {
                 val jarTaskProvider = project.tasks.named(JavaPlugin.JAR_TASK_NAME)
                 val jarTask = jarTaskProvider.get() as Zip
-                jarTask.duplicatesStrategy = DuplicatesStrategy.INCLUDE
                 jarTask.archiveFile.orNull?.asFile
             }))
             it.defaultDestinationDir.convention(project.provider {
@@ -630,7 +628,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 it.dependsOn(instrumentTask)
                 it.onlyIf { extension.instrumentCode.get() }
                 // Set the classes dir to the one with the instrumented classes
-                it.doLast { classesDirs.from(outputDir) }
+                it.doLast { classesDirs.setFrom(outputDir) }
             }
 
             // Ensure that our task is invoked when the source set is built
@@ -783,10 +781,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) { processResourcesTask ->
             processResourcesTask as ProcessResources
-            processResourcesTask.from(patchPluginXmlTaskProvider) { copy ->
-                copy.into("META-INF")
-                copy.duplicatesStrategy = DuplicatesStrategy.INCLUDE
-            }
+            processResourcesTask.from(patchPluginXmlTaskProvider) { copy -> copy.into("META-INF") }
         }
     }
 
