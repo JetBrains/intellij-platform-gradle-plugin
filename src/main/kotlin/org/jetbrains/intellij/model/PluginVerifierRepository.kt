@@ -1,9 +1,5 @@
 package org.jetbrains.intellij.model
 
-import org.jdom2.Document
-import org.jdom2.transform.JDOMSource
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBException
 import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlElementWrapper
 import javax.xml.bind.annotation.XmlRootElement
@@ -37,15 +33,7 @@ data class PluginVerifierRepositoryVersioning(
     var versions: List<String>? = mutableListOf(),
 )
 
-object PluginVerifierRepositoryExtractor {
-
-    private val jaxbContext by lazy {
-        JAXBContext.newInstance(
-            PluginVerifierRepository::class.java,
-            PluginVerifierRepositoryVersioning::class.java,
-        )
-    }
-
-    @Throws(JAXBException::class)
-    fun unmarshal(document: Document) = jaxbContext.createUnmarshaller().unmarshal(JDOMSource(document)) as PluginVerifierRepository
-}
+class PluginVerifierRepositoryExtractor : BaseExtractor<PluginVerifierRepository>(
+    PluginVerifierRepository::class.java,
+    PluginVerifierRepositoryVersioning::class.java,
+)

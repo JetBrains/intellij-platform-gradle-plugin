@@ -15,15 +15,12 @@ import org.gradle.api.tasks.TaskAction
 import org.jetbrains.intellij.asSequence
 import org.jetbrains.intellij.attribute
 import org.jetbrains.intellij.get
+import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
 import org.w3c.dom.Document
 import java.io.File
 import javax.inject.Inject
 import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.transform.OutputKeys
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.dom.DOMSource
-import javax.xml.transform.stream.StreamResult
 
 @Suppress("UnstableApiUsage")
 open class PatchPluginXmlTask @Inject constructor(
@@ -92,17 +89,7 @@ open class PatchPluginXmlTask @Inject constructor(
             }
 
             val destination = File(destinationDir.get().asFile, file.name)
-
-            TransformerFactory.newInstance()
-                .newTransformer()
-                .apply {
-                    setOutputProperty(OutputKeys.ENCODING, "UTF-8")
-                    setOutputProperty(OutputKeys.INDENT, "yes")
-                    setOutputProperty(OutputKeys.METHOD, "xml")
-                    setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
-                    setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
-                }
-                .transform(DOMSource(document), StreamResult(destination))
+            transformXml(document, destination)
         }
     }
 

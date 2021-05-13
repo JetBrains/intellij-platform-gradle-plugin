@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import org.apache.commons.io.FileUtils
@@ -69,8 +68,7 @@ open class RunPluginVerifierTask @Inject constructor(
         fun resolveLatestVerifierVersion(): String {
             debug(message = "Resolving Latest Verifier version")
             val url = URL(VERIFIER_METADATA_URL)
-            val document = JDOMUtil.loadDocument(url.openStream())
-            return PluginVerifierRepositoryExtractor.unmarshal(document).versioning?.latest
+            return PluginVerifierRepositoryExtractor().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
     }

@@ -1,10 +1,5 @@
 package org.jetbrains.intellij.model
 
-import org.jdom2.Document
-import org.jdom2.transform.JDOMSource
-import java.io.File
-import javax.xml.bind.JAXBContext
-import javax.xml.bind.JAXBException
 import javax.xml.bind.annotation.XmlAttribute
 import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlRootElement
@@ -13,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement
 data class UpdatesConfigurable(
 
     @set:XmlElement(name = "component")
-    var components: List<UpdatesConfigurableComponent> = emptyList(),
+    var components: List<UpdatesConfigurableComponent> = mutableListOf(),
 )
 
 data class UpdatesConfigurableComponent(
@@ -22,7 +17,7 @@ data class UpdatesConfigurableComponent(
     var name: String? = null,
 
     @set:XmlElement(name = "option")
-    var options: List<UpdatesConfigurableOption> = emptyList(),
+    var options: List<UpdatesConfigurableOption> = mutableListOf(),
 )
 
 data class UpdatesConfigurableOption(
@@ -34,19 +29,8 @@ data class UpdatesConfigurableOption(
     var value: Boolean? = null,
 )
 
-object UpdatesConfigurableExtractor {
-
-    private val jaxbContext by lazy {
-        JAXBContext.newInstance(
-            UpdatesConfigurable::class.java,
-            UpdatesConfigurableComponent::class.java,
-            UpdatesConfigurableOption::class.java,
-        )
-    }
-
-    @Throws(JAXBException::class)
-    fun unmarshal(document: Document) = jaxbContext.createUnmarshaller().unmarshal(JDOMSource(document)) as UpdatesConfigurable
-
-    @Throws(JAXBException::class)
-    fun marshal(bean: UpdatesConfigurable, file: File) = jaxbContext.createMarshaller().marshal(bean, file)
-}
+class UpdatesConfigurableExtractor : BaseExtractor<UpdatesConfigurable>(
+    UpdatesConfigurable::class.java,
+    UpdatesConfigurableComponent::class.java,
+    UpdatesConfigurableOption::class.java,
+)
