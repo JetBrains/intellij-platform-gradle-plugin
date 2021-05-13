@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.dependency
 
-import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.model.PluginsCache
@@ -14,6 +13,9 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
 
     private val plugins = mutableMapOf<String, PluginsCachePlugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
+
+    @Transient
+    private val extractor = PluginsCacheExtractor()
 
     companion object {
         fun fromDirectory(pluginsDirectory: File, context: Any) =
@@ -31,8 +33,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
 
         debug(context, "Builtin registry cache is found. Loading from $cache")
         return try {
-            val document = JDOMUtil.loadDocument(cache.inputStream())
-            PluginsCacheExtractor.unmarshal(document).plugins.forEach {
+            extractor.unmarshal(cache).plugins.forEach {
                 plugins[it.id] = it
                 directoryNameMapping[it.directoryName] = it.id
             }
@@ -55,7 +56,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
     private fun dumpToCache() {
         debug(context, "Dumping cache for builtin plugin")
         try {
-            PluginsCacheExtractor.marshal(PluginsCache(plugins.values.toList()), cacheFile())
+            extractor.marshal(PluginsCache(plugins.values.toList()), cacheFile())
         } catch (t: Throwable) {
             warn(context, "Failed to dump cache for builtin plugin", t)
         }

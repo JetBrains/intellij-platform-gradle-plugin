@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
@@ -136,9 +135,9 @@ open class PrepareSandboxTask @Inject constructor(
             }
         }
 
+        val extractor = UpdatesConfigurableExtractor()
         val updatesConfigurable = try {
-            val document = JDOMUtil.loadDocument(updatesConfig.inputStream())
-            UpdatesConfigurableExtractor.unmarshal(document)
+            extractor.unmarshal(updatesConfig)
         } catch (ignore: JDOMParseException) {
             UpdatesConfigurable()
         }
@@ -155,6 +154,6 @@ open class PrepareSandboxTask @Inject constructor(
 
         option.value = false
 
-        UpdatesConfigurableExtractor.marshal(updatesConfigurable, updatesConfig)
+        extractor.marshal(updatesConfigurable, updatesConfig)
     }
 }

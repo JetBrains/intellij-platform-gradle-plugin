@@ -27,6 +27,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.process.JavaForkOptions
+import org.jdom2.Document
 import org.jdom2.JDOMException
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
@@ -38,6 +39,11 @@ import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.BiConsumer
 import java.util.function.Predicate
+import javax.xml.transform.OutputKeys
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.dom.DOMSource
+import javax.xml.transform.stream.StreamResult
+import javax.xml.transform.stream.StreamSource
 
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
@@ -64,6 +70,17 @@ fun parsePluginXml(pluginXml: File, context: Any): PluginBean? {
     }
     return null
 }
+
+fun transformXml(node: Node, file: File) = TransformerFactory.newInstance()
+    .newTransformer()
+    .apply {
+        setOutputProperty(OutputKeys.ENCODING, "UTF-8")
+        setOutputProperty(OutputKeys.INDENT, "yes")
+        setOutputProperty(OutputKeys.METHOD, "xml")
+        setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
+        setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
+    }
+    .transform(DOMSource(node), StreamResult(file))
 
 fun getIdeaSystemProperties(
     configDirectory: File,
