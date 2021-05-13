@@ -1,6 +1,6 @@
 package org.jetbrains.intellij.tasks
 
-import com.fasterxml.jackson.core.exc.StreamReadException
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
@@ -17,14 +17,14 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
+import org.jdom2.input.JDOMParseException
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.error
-import org.jetbrains.intellij.model.Component
-import org.jetbrains.intellij.model.Option
 import org.jetbrains.intellij.model.UpdatesConfigurable
-import org.jetbrains.intellij.parseXml
-import org.jetbrains.intellij.writeXml
+import org.jetbrains.intellij.model.UpdatesConfigurableComponent
+import org.jetbrains.intellij.model.UpdatesConfigurableExtractor
+import org.jetbrains.intellij.model.UpdatesConfigurableOption
 import java.io.File
 import javax.inject.Inject
 
@@ -137,19 +137,24 @@ open class PrepareSandboxTask @Inject constructor(
         }
 
         val updatesConfigurable = try {
-            parseXml(updatesConfig, UpdatesConfigurable::class.java)
-        } catch (ignore: StreamReadException) {
+            val document = JDOMUtil.loadDocument(updatesConfig.inputStream())
+            UpdatesConfigurableExtractor.unmarshal(document)
+        } catch (ignore: JDOMParseException) {
             UpdatesConfigurable()
         }
 
-        val component = updatesConfigurable.items.find { it.name == "UpdatesConfigurable" }
-            ?: Component(name = "UpdatesConfigurable").also { updatesConfigurable.items.add(it) }
+        val component = updatesConfigurable.components.find { it.name == "UpdatesConfigurable" }
+            ?: UpdatesConfigurableComponent(name = "UpdatesConfigurable").apply {
+                updatesConfigurable.components += this
+            }
 
         val option = component.options.find { it.name == "CHECK_NEEDED" }
-            ?: Option("CHECK_NEEDED", false).also { component.options.add(it) }
+            ?: UpdatesConfigurableOption("CHECK_NEEDED", false).apply {
+                component.options += this
+            }
 
         option.value = false
 
-        writeXml(updatesConfig, updatesConfigurable)
+        UpdatesConfigurableExtractor.marshal(updatesConfigurable, updatesConfig)
     }
 }

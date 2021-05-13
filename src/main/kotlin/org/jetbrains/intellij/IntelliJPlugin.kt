@@ -26,7 +26,6 @@ import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.model.IdeaPlugin
 import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.DownloadRobotServerPluginTask
 import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
@@ -242,12 +241,13 @@ open class IntelliJPlugin : Plugin<Project> {
         val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
         if (!hasJavaPluginDependency && File(extension.getIdeaDependency(project).classes, "plugins/java").exists()) {
             sourcePluginXmlFiles(project).forEach { file ->
-                val pluginXml = parseXml(file, IdeaPlugin::class.java)
-                pluginXml.depends.forEach {
-                    if (it.value == "com.intellij.modules.java") {
-                        throw BuildException("The project depends on `com.intellij.modules.java` module but doesn't declare a compile dependency on it.\n" +
-                            "Please delete `depends` tag from ${file.absolutePath} or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
-                            null)
+                parsePluginXml(file, project)?.dependencies?.forEach {
+                    if (it.dependencyId == "com.intellij.modules.java") {
+                        throw BuildException(
+                            "The project depends on `com.intellij.modules.java` module but doesn't declare a compile dependency on it.\n" +
+                                "Please delete `depends` tag from ${file.absolutePath} or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
+                            null,
+                        )
                     }
                 }
             }
@@ -516,7 +516,7 @@ open class IntelliJPlugin : Plugin<Project> {
             project.layout.projectDirectory.dir(path)
         })
         task.requiredPluginIds.convention(project.provider {
-            getPluginIds(project)
+            sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, task)?.id }
         })
         task.configDir.convention(project.provider {
             project.file(prepareSandboxTask.configDir.get())
@@ -644,7 +644,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val runIdeTaskProvider = project.tasks.named(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
         val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
 
-        val pluginIds = getPluginIds(project)
+        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, project)?.id }
         val configDirectory = project.file("${extension.sandboxDir.get()}/config-test")
         val systemDirectory = project.file("${extension.sandboxDir.get()}/system-test")
         val pluginsDirectory = project.file("${extension.sandboxDir.get()}/plugins-test")

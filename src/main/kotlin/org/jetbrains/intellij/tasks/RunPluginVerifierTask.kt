@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import org.apache.commons.io.FileUtils
@@ -34,8 +35,7 @@ import org.jetbrains.intellij.error
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.model.PluginVerifierRepository
-import org.jetbrains.intellij.parseXml
+import org.jetbrains.intellij.model.PluginVerifierRepositoryExtractor
 import org.jetbrains.intellij.untar
 import org.jetbrains.intellij.warn
 import java.io.ByteArrayOutputStream
@@ -69,7 +69,8 @@ open class RunPluginVerifierTask @Inject constructor(
         fun resolveLatestVerifierVersion(): String {
             debug(message = "Resolving Latest Verifier version")
             val url = URL(VERIFIER_METADATA_URL)
-            return parseXml(url.openStream(), PluginVerifierRepository::class.java).versioning?.latest
+            val document = JDOMUtil.loadDocument(url.openStream())
+            return PluginVerifierRepositoryExtractor.unmarshal(document).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
     }
