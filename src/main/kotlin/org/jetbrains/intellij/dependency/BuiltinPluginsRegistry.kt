@@ -1,20 +1,18 @@
 package org.jetbrains.intellij.dependency
 
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.parseXml
+import org.jetbrains.intellij.model.PluginsCache
+import org.jetbrains.intellij.model.PluginsCacheExtractor
+import org.jetbrains.intellij.model.PluginsCachePlugin
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
 
 class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient private val context: Any) : Serializable {
 
-    private val plugins = mutableMapOf<String, Plugin>()
+    private val plugins = mutableMapOf<String, PluginsCachePlugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
 
     companion object {
@@ -33,7 +31,8 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
 
         debug(context, "Builtin registry cache is found. Loading from $cache")
         return try {
-            parseXml(cache, PluginsCache::class.java).plugin.forEach {
+            val document = JDOMUtil.loadDocument(cache.inputStream())
+            PluginsCacheExtractor.unmarshal(document).plugins.forEach {
                 plugins[it.id] = it
                 directoryNameMapping[it.directoryName] = it.id
             }
@@ -56,9 +55,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
     private fun dumpToCache() {
         debug(context, "Dumping cache for builtin plugin")
         try {
-            XmlMapper()
-                .registerKotlinModule()
-                .writeValue(cacheFile(), PluginsCache(plugins.values.toList()))
+            PluginsCacheExtractor.marshal(PluginsCache(plugins.values.toList()), cacheFile())
         } catch (t: Throwable) {
             warn(context, "Failed to dump cache for builtin plugin", t)
         }
@@ -84,7 +81,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
             val id = idsToProcess.removeAt(0)
             val plugin = plugins[id] ?: plugins[directoryNameMapping[id]] ?: continue
             if (result.add(id)) {
-                idsToProcess.addAll(plugin.dependencies.dependencies - result)
+                idsToProcess.addAll(plugin.dependencies - result)
             }
         }
 
@@ -96,7 +93,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
         val intellijPlugin = createPlugin(artifact, false, context) ?: return
         val id = intellijPlugin.pluginId ?: return
         val dependencies = intellijPlugin.dependencies.filter { !it.isOptional }.map { it.id }
-        val plugin = Plugin(id, artifact.name, Dependencies(dependencies))
+        val plugin = PluginsCachePlugin(id, artifact.name, dependencies)
 
         plugins[id] = plugin
         if (plugin.directoryName != id) {
@@ -123,24 +120,4 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
         result = 31 * result + directoryNameMapping.hashCode()
         return result
     }
-
-    @JacksonXmlRootElement(localName = "plugins")
-    data class PluginsCache(
-        @JacksonXmlElementWrapper(useWrapping = false)
-        var plugin: List<Plugin> = emptyList(),
-    ) : Serializable
-
-    data class Plugin(
-        @JacksonXmlProperty(isAttribute = true)
-        val id: String,
-        @JacksonXmlProperty(isAttribute = true)
-        val directoryName: String,
-        val dependencies: Dependencies,
-    ) : Serializable
-
-    data class Dependencies(
-        @JacksonXmlElementWrapper(useWrapping = false)
-        @JacksonXmlProperty(localName = "dependency")
-        val dependencies: List<String> = emptyList(),
-    ) : Serializable
 }

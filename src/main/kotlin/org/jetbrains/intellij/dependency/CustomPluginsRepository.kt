@@ -1,14 +1,13 @@
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingParser
+import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import de.undercouch.gradle.tasks.download.org.apache.commons.codec.binary.Hex
 import org.gradle.api.Project
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.model.Category
-import org.jetbrains.intellij.model.PluginRepository
-import org.jetbrains.intellij.model.Plugins
-import org.jetbrains.intellij.parseXml
 import java.io.File
 import java.net.URI
+import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.security.MessageDigest
@@ -32,20 +31,32 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
 
     override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
         debug(project, "Loading list of plugins from: $pluginsXmlUri")
+        val url = pluginsXmlUri.toURL()
         var downloadUrl: String?
 
         // Try to parse file as <plugin-repository>
-        val pluginRepository = parseXml(pluginsXmlUri.toURL().openStream(), PluginRepository::class.java)
-        downloadUrl = pluginRepository.categories.flatMap(Category::plugins).find {
-            it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
-        }?.downloadUrl?.let { "$repositoryUrl/$it" }
+        val pluginRepository = CustomPluginRepositoryListingParser.parseListOfPlugins(
+            url.readText(),
+            url,
+            URL(repositoryUrl),
+            CustomPluginRepositoryListingType.PLUGIN_REPOSITORY,
+        )
+
+        downloadUrl = pluginRepository.find {
+            it.pluginId.equals(plugin.id, true) && it.version.equals(plugin.version, true)
+        }?.let { "$repositoryUrl/${it.downloadUrl}" }
 
         if (downloadUrl == null) {
             // Try to parse XML file as <plugins>
-            val plugins = parseXml(pluginsXmlUri.toURL().openStream(), Plugins::class.java)
-            downloadUrl = plugins.items.find {
-                it.id.equals(plugin.id, true) && it.version.equals(plugin.version, true)
-            }?.url
+            val plugins = CustomPluginRepositoryListingParser.parseListOfPlugins(
+                url.readText(),
+                url,
+                URL(repositoryUrl),
+                CustomPluginRepositoryListingType.SIMPLE,
+            )
+            downloadUrl = plugins.find {
+                it.pluginId.equals(plugin.id, true) && it.version.equals(plugin.version, true)
+            }?.let { "${it.downloadUrl}" }
         }
 
         if (downloadUrl == null) {

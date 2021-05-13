@@ -2,20 +2,16 @@
 
 package org.jetbrains.intellij
 
-import com.ctc.wstx.stax.WstxInputFactory
-import com.ctc.wstx.stax.WstxOutputFactory
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.dataformat.xml.XmlFactory
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.base.utils.isZip
+import com.jetbrains.plugin.structure.intellij.beans.PluginBean
+import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
@@ -31,43 +27,42 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.model.IdeaPlugin
+import org.jdom2.JDOMException
 import org.w3c.dom.Node
 import org.w3c.dom.NodeList
-import org.xml.sax.SAXException
+import org.xml.sax.SAXParseException
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
-import java.io.InputStream
 import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.BiConsumer
 import java.util.function.Predicate
-import javax.xml.parsers.DocumentBuilderFactory
 
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
-val MAJOR_VERSION_PATTERN = "(RIDER-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
+val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
 
 fun mainSourceSet(project: Project): SourceSet {
     val javaConvention = project.convention.getPlugin(JavaPluginConvention::class.java)
     return javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 }
 
-fun sourcePluginXmlFiles(project: Project): List<File> {
-    val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-    return mainSourceSet(project).resources.srcDirs.mapNotNull { file ->
-        val pluginXml = File(file, "META-INF/plugin.xml")
-        try {
-            return@mapNotNull pluginXml
-                .takeIf { it.exists() && it.length() > 0 }
-                ?.takeIf { builder.parse(pluginXml).childNodes.asSequence().any { it.nodeName == "idea-plugin" } }
-        } catch (e: SAXException) {
-            warn(project, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
-        } catch (e: IOException) {
-            warn(project, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
-        }
-        null
+fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
+    File(it, "META-INF/plugin.xml").takeIf { file -> file.exists() && file.length() > 0 }
+}
+
+fun parsePluginXml(pluginXml: File, context: Any): PluginBean? {
+    try {
+        val document = JDOMUtil.loadDocument(pluginXml.inputStream())
+        return PluginBeanExtractor.extractPluginBean(document)
+    } catch (e: SAXParseException) {
+        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+    } catch (e: JDOMException) {
+        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+    } catch (e: IOException) {
+        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
     }
+    return null
 }
 
 fun getIdeaSystemProperties(
@@ -107,25 +102,6 @@ fun ideBuildNumber(ideDirectory: File) = (
 
 fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
-}
-
-fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).mapNotNull {
-    parseXml(it, IdeaPlugin::class.java).id
-}
-
-fun <T> parseXml(stream: InputStream, valueType: Class<T>): T = XmlMapper()
-    .registerKotlinModule()
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    .readValue(stream, valueType)
-
-fun <T> parseXml(file: File, valueType: Class<T>) = parseXml(file.inputStream(), valueType)
-
-fun writeXml(file: File, value: Any) {
-    XmlMapper(XmlFactory(WstxInputFactory(), WstxOutputFactory()))
-        .registerKotlinModule()
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        .writerWithDefaultPrettyPrinter()
-        .writeValue(file, value)
 }
 
 fun NodeList.asSequence() = (0 until length).asSequence().map { item(it) }
@@ -229,18 +205,18 @@ private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) 
 
 fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdePlugin? {
     val extractDirectory = createTempDirectory("tmp")
-    val result = IdePluginManager.createManager(extractDirectory)
+    val creationResult = IdePluginManager.createManager(extractDirectory)
         .createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
 
-    return when (result) {
-        is PluginCreationSuccess -> result.plugin
+    return when (creationResult) {
+        is PluginCreationSuccess -> creationResult.plugin
         is PluginCreationFail -> {
-            val problems = result.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
+            val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
             warn(context, "Cannot create plugin from file ($artifact): $problems")
             null
         }
         else -> {
-            warn(context, "Cannot create plugin from file ($artifact). $result")
+            warn(context, "Cannot create plugin from file ($artifact). $creationResult")
             null
         }
     }

@@ -14,25 +14,16 @@ plugins {
     id("org.jetbrains.changelog") version "1.1.2"
 }
 
-plugins.withType<JavaPlugin> {
-    tasks {
-        withType<KotlinCompile> {
-            kotlinOptions.jvmTarget = "1.8"
-        }
-    }
-}
-
 repositories {
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
 }
 
 dependencies {
-    api(gradleApi())
     implementation("org.jetbrains:marketplace-zip-signer:0.1.3")
     implementation("org.jetbrains:annotations:20.1.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.177")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.177")
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.182")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.182")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
@@ -41,19 +32,15 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("de.undercouch:gradle-download-task:4.1.1")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.3")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
-    implementation("com.fasterxml.woodstox:woodstox-core:6.2.6")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
 }
 
-version = if (properties("snapshot").toBoolean()) {
-    "${properties("snapshotVersion")}-SNAPSHOT"
-} else {
-    properties("version")
+version = when (properties("snapshot").toBoolean()) {
+    true -> "${properties("snapshotVersion")}-SNAPSHOT"
+    false -> properties("version")
 }
 group = "org.jetbrains.intellij.plugins"
 description = """
@@ -88,10 +75,21 @@ val cacheIntolerantTest = tasks.register<Test>("cacheIntolerantTest") {
     filter.isFailOnNoMatchingTests = false
 }
 
-tasks.test {
-    configureTests(this)
-    exclude("**/DownloadIntelliJSpec.class")
-    dependsOn(cacheIntolerantTest)
+tasks {
+    withType<KotlinCompile> {
+        kotlinOptions.jvmTarget = "1.8"
+    }
+
+    wrapper {
+        gradleVersion = "7.0.1"
+        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    }
+
+    test {
+        configureTests(this)
+        exclude("**/DownloadIntelliJSpec.class")
+        dependsOn(cacheIntolerantTest)
+    }
 }
 
 fun configureTests(testTask: Test) {
@@ -165,11 +163,6 @@ publishing {
             }
         }
     }
-}
-
-tasks.wrapper {
-    gradleVersion = "7.0.1"
-    distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
 changelog {
