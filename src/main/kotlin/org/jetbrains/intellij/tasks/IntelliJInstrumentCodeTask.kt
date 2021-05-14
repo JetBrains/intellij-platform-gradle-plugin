@@ -26,6 +26,7 @@ import java.net.URI
 import javax.inject.Inject
 
 @Incubating
+@Suppress("UnstableApiUsage")
 open class IntelliJInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,
     private val fileSystemOperations: FileSystemOperations,

@@ -51,6 +51,7 @@ import java.util.EnumSet
 import javax.inject.Inject
 
 @Incubating
+@Suppress("UnstableApiUsage")
 open class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
@@ -205,7 +206,6 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @TaskAction
     fun runPluginVerifier() {
-        println("downloadAction=$downloadAction")
         val file = distributionFile.orNull
         if (file == null || !file.asFile.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
