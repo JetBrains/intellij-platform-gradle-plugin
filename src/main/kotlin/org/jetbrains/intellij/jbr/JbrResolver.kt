@@ -55,16 +55,15 @@ open class JbrResolver(
             warn(context, "Cannot find java executable in $javaDir")
             return null
         }
-        try {
+        if (!operatingSystem.isWindows) {
             Files.setPosixFilePermissions(javaExecutable, PosixFilePermissions.fromString("rwxr-xr-x"))
-        } catch (e: UnsupportedOperationException) {
         }
         return Jbr(version, javaDir, javaExecutable.toFile().absolutePath)
     }
 
     private fun getJavaArchive(jbrArtifact: JbrArtifact): File? {
         val artifactName = jbrArtifact.name
-        val archiveName = "${artifactName}.tar.gz"
+        val archiveName = "$artifactName.tar.gz"
         val javaArchive = File(cacheDirectoryPath, archiveName)
         if (javaArchive.exists()) {
             return javaArchive
