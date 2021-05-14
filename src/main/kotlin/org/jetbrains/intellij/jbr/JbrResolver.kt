@@ -57,9 +57,7 @@ open class JbrResolver(
         }
         try {
             Files.setPosixFilePermissions(javaExecutable, PosixFilePermissions.fromString("rwxr-xr-x"))
-        } catch (e: Exception) {
-            println("Files.setPosixFilePermissions=$e")
-            throw e
+        } catch (e: UnsupportedOperationException) {
         }
         return Jbr(version, javaDir, javaExecutable.toFile().absolutePath)
     }
