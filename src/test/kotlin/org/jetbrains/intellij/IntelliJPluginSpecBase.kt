@@ -166,8 +166,8 @@ abstract class IntelliJPluginSpecBase {
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
         assertEquals(expectedContent.trimIndent(), fileText(zip, path))
 
-    protected fun extractFile(zipFile: ZipFile, path: String) =
-        createTempFile("gradle-test", "").apply {
+    protected fun extractFile(zipFile: ZipFile, path: String): File =
+        File.createTempFile("gradle-test", "").apply {
             deleteOnExit()
             FileUtils.copyInputStreamToFile(zipFile.getInputStream(zipFile.getEntry(path)), this)
         }
