@@ -218,7 +218,7 @@ open class RunPluginVerifierTask @Inject constructor(
         verifierArgs += ides
         verifierArgs += localPaths.toList().map { it.canonicalPath }
 
-        debug(context, "Distribution file: $file.canonicalPath")
+        debug(context, "Distribution file: ${file.asFile.canonicalPath}")
         debug(context, "Verifier path: $verifierPath")
 
         ByteArrayOutputStream().use { os ->
@@ -351,11 +351,13 @@ open class RunPluginVerifierTask @Inject constructor(
                 try {
                     debug(context, "IDE downloaded, extracting...")
                     extractArchive(ideArchive, ideDir, context)
-                    ideDir.listFiles()?.first()?.let { container ->
-                        container.listFiles()?.forEach {
-                            it.renameTo(File(ideDir, it.name))
+                    ideDir.listFiles()?.let {
+                        it.filter(File::isDirectory).forEach { container ->
+                            container.listFiles()?.forEach { file ->
+                                file.renameTo(File(ideDir, file.name))
+                            }
+                            container.deleteRecursively()
                         }
-                        container.deleteRecursively()
                     }
                 } finally {
                     ideArchive.delete()
