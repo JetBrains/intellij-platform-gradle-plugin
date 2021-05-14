@@ -32,7 +32,7 @@ dependencies {
     implementation("org.jetbrains:marketplace-zip-signer:0.1.3")
     implementation("org.jetbrains:annotations:20.1.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.177")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.177")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.182")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
