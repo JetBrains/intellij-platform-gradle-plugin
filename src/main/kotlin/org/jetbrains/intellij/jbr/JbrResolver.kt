@@ -1,30 +1,24 @@
 package org.jetbrains.intellij.jbr
 
 import de.undercouch.gradle.tasks.download.DownloadAction
-import org.gradle.api.Incubating
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
-import org.jetbrains.intellij.untar
+import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.Paths
-import javax.inject.Inject
+import java.nio.file.attribute.PosixFilePermissions
 
-@Incubating
-open class JbrResolver @Inject constructor(
+open class JbrResolver(
     private val downloadAction: DownloadAction,
     private val jreRepository: String,
     gradleUserHomeDir: String,
     private val isOffline: Boolean,
     private val context: Any,
-    private val archiveOperations: ArchiveOperations,
-    private val execOperations: ExecOperations,
-    private val fileSystemOperations: FileSystemOperations,
 ) {
 
     private val cacheDirectoryPath = Paths.get(gradleUserHomeDir, "caches/modules-2/files-2.1/com.jetbrains/jbre").toString()
@@ -47,7 +41,8 @@ open class JbrResolver @Inject constructor(
         }
 
         getJavaArchive(jbrArtifact)?.let {
-            untar(it, javaDir, archiveOperations, execOperations, fileSystemOperations, context)
+            println("javaDir=$javaDir")
+            extractArchive(it, javaDir, context)
             it.delete()
             return fromDir(javaDir, version)
         }
@@ -60,7 +55,13 @@ open class JbrResolver @Inject constructor(
             warn(context, "Cannot find java executable in $javaDir")
             return null
         }
-        return Jbr(version, javaDir, findJavaExecutable(javaDir))
+        try {
+            Files.setPosixFilePermissions(javaExecutable, PosixFilePermissions.fromString("rwxr-xr-x"))
+        } catch (e: Exception) {
+            println("Files.setPosixFilePermissions=$e")
+            throw e
+        }
+        return Jbr(version, javaDir, javaExecutable.toFile().absolutePath)
     }
 
     private fun getJavaArchive(jbrArtifact: JbrArtifact): File? {
@@ -91,14 +92,14 @@ open class JbrResolver @Inject constructor(
         }
     }
 
-    private fun findJavaExecutable(javaHome: File): String? {
+    private fun findJavaExecutable(javaHome: File): Path? {
         val root = getJbrRoot(javaHome)
         val jre = File(root, "jre")
         val java = File(
             jre.takeIf { it.exists() } ?: root,
             "bin/java" + (".exe".takeIf { operatingSystem.isWindows } ?: "")
         )
-        return java.absolutePath.takeIf { java.exists() }
+        return java.toPath().takeIf { java.exists() }
     }
 
     private fun getJbrRoot(javaHome: File): File {

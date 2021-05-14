@@ -151,8 +151,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring IDE dependency")
-            val resolver = project.objects.newInstance(
-                IdeaDependencyManager::class.java,
+            val resolver = IdeaDependencyManager(
                 extension.intellijRepository.get(),
                 extension.ideaDependencyCachePath.orNull ?: "",
                 context,
@@ -191,8 +190,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring plugin dependencies")
             val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
-            val resolver = project.objects.newInstance(
-                PluginDependencyManager::class.java,
+            val resolver = PluginDependencyManager(
                 project.gradle.gradleUserHomeDir.absolutePath,
                 extension.getIdeaDependency(project),
                 extension.getPluginsRepositories(),
@@ -536,8 +534,7 @@ open class IntelliJPlugin : Plugin<Project> {
             project.file("${task.ideDir.get().asFile}/bin/")
         })
         task.projectExecutable.convention(project.provider {
-            val jbrResolver = project.objects.newInstance(
-                JbrResolver::class.java,
+            val jbrResolver = JbrResolver(
                 DownloadAction(project),
                 extension.jreRepository.orNull ?: "",
                 project.gradle.gradleUserHomeDir.absolutePath,

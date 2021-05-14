@@ -1,11 +1,8 @@
 package org.jetbrains.intellij.dependency
 
-import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.tooling.BuildException
@@ -14,20 +11,16 @@ import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isJar
 import org.jetbrains.intellij.isZip
-import org.jetbrains.intellij.unzip
+import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.nio.file.Paths
-import javax.inject.Inject
 
-@Incubating
-open class PluginDependencyManager @Inject constructor(
+open class PluginDependencyManager(
     gradleHomePath: String,
     private val ideaDependency: IdeaDependency?,
     private val pluginsRepositories: List<PluginsRepository>,
     private val context: Any,
-    private val archiveOperations: ArchiveOperations,
-    private val fileSystemOperations: FileSystemOperations,
 ) {
 
     private val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
@@ -81,13 +74,10 @@ open class PluginDependencyManager @Inject constructor(
     }
 
     private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {
-        val pluginDir = findSingleDirectory(unzip(
+        val pluginDir = findSingleDirectory(extractArchive(
             pluginFile,
-            File(cacheDirectoryPath, groupId(dependency.channel)),
-            archiveOperations,
-            fileSystemOperations,
+            File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}"),
             context,
-            targetDirName = "${dependency.id}-${dependency.version}",
         ))
         return externalPluginDependency(pluginDir, dependency.channel, true)
     }
