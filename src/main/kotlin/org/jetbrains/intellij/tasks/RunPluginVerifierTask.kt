@@ -5,10 +5,8 @@ import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuild
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
-import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
@@ -31,11 +29,11 @@ import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.PluginVerifierRepositoryExtractor
-import org.jetbrains.intellij.untar
 import org.jetbrains.intellij.warn
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -54,8 +52,6 @@ import javax.inject.Inject
 open class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
-    private val archiveOperations: ArchiveOperations,
-    private val fileSystemOperations: FileSystemOperations,
 ) : ConventionTask() {
 
     companion object {
@@ -354,7 +350,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
                 try {
                     debug(context, "IDE downloaded, extracting...")
-                    untar(ideArchive, ideDir, archiveOperations, execOperations, fileSystemOperations, context)
+                    extractArchive(ideArchive, ideDir, context)
                     ideDir.listFiles()?.first()?.let { container ->
                         container.listFiles()?.forEach {
                             it.renameTo(File(ideDir, it.name))
@@ -439,8 +435,7 @@ open class RunPluginVerifierTask @Inject constructor(
             return it
         }
 
-        val jbrResolver = objectFactory.newInstance(
-            JbrResolver::class.java,
+        val jbrResolver = JbrResolver(
             downloadAction,
             extension.jreRepository.orNull ?: "",
             absolutePath,

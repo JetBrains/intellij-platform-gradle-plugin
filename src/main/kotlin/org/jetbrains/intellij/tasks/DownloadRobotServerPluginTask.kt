@@ -1,9 +1,6 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.Incubating
-import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -11,16 +8,13 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.util.VersionNumber
-import org.jetbrains.intellij.unzip
+import org.jetbrains.intellij.extractArchive
 import java.net.URI
 import javax.inject.Inject
 
-@Incubating
 @Suppress("UnstableApiUsage")
 open class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
-    private val archiveOperations: ArchiveOperations,
-    private val fileSystemOperations: FileSystemOperations,
 ) : ConventionTask() {
 
     companion object {
@@ -53,14 +47,11 @@ open class DownloadRobotServerPluginTask @Inject constructor(
     fun downloadPlugin() {
         val dependency = dependencyHandler.create("${getDependency()}:${version.get()}")
         val repository = repositoryHandler.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
-
-        fileSystemOperations.delete {
-            it.delete(outputDir.get())
-        }
+        val target = outputDir.get().asFile
 
         try {
             val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
-            unzip(zipFile, outputDir.get().asFile, archiveOperations, fileSystemOperations, context, targetDirName = "")
+            extractArchive(zipFile, target, context)
         } finally {
             repositoryHandler.remove(repository)
         }
