@@ -184,12 +184,10 @@ open class IdeaDependencyManager(
         return ivyFile
     }
 
-    private fun hasKotlinDependency(project: Project): Boolean {
-        val configurations = project.configurations
-        val dependencies = configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).allDependencies +
-            configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).allDependencies
-        return dependencies.any { "org.jetbrains.kotlin" == it.group && isKotlinRuntime(it.name) }
-    }
+    private fun hasKotlinDependency(project: Project) =
+        project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).allDependencies.any {
+            "org.jetbrains.kotlin" == it.group && isKotlinRuntime(it.name)
+        }
 
     fun resolveRemote(project: Project, version: String, type: String, sources: Boolean, extraDependencies: List<String>): IdeaDependency {
         val releaseType = releaseType(version)
