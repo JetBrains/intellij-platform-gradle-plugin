@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.JavaPlugin
@@ -778,7 +779,10 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) { processResourcesTask ->
             processResourcesTask as ProcessResources
-            processResourcesTask.from(patchPluginXmlTaskProvider) { copy -> copy.into("META-INF") }
+            processResourcesTask.from(patchPluginXmlTaskProvider) { copy ->
+                copy.duplicatesStrategy = DuplicatesStrategy.INCLUDE
+                copy.into("META-INF")
+            }
         }
     }
 
