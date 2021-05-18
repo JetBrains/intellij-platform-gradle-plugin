@@ -443,6 +443,8 @@ open class IntelliJPlugin : Plugin<Project> {
 
             it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
+            it.outputs.upToDateWhen { false }
         }
     }
 
