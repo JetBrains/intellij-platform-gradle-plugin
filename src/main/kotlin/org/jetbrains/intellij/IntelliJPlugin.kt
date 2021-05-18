@@ -1,7 +1,6 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import de.undercouch.gradle.tasks.download.DownloadAction
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -535,10 +534,9 @@ open class IntelliJPlugin : Plugin<Project> {
             project.file("${task.ideDir.get().asFile}/bin/")
         })
         task.projectExecutable.convention(project.provider {
-            val jbrResolver = JbrResolver(
-                DownloadAction(project),
+            val jbrResolver = project.objects.newInstance(
+                JbrResolver::class.java,
                 extension.jreRepository.orNull ?: "",
-                project.gradle.gradleUserHomeDir.absolutePath,
                 project.gradle.startParameter.isOffline,
                 task,
             )

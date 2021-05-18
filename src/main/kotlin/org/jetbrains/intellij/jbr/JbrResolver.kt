@@ -1,27 +1,29 @@
 package org.jetbrains.intellij.jbr
 
-import de.undercouch.gradle.tasks.download.DownloadAction
+import org.gradle.api.Incubating
+import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.warn
 import java.io.File
-import java.io.IOException
-import java.nio.file.Files
+import java.net.URI
 import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.attribute.PosixFilePermissions
+import javax.inject.Inject
 
-open class JbrResolver(
-    private val downloadAction: DownloadAction,
+@Incubating
+open class JbrResolver @Inject constructor(
     private val jreRepository: String,
-    gradleUserHomeDir: String,
     private val isOffline: Boolean,
     private val context: Any,
+    private val repositoryHandler: RepositoryHandler,
+    private val dependencyHandler: DependencyHandler,
+    private val configurationContainer: ConfigurationContainer,
 ) {
 
-    private val cacheDirectoryPath = Paths.get(gradleUserHomeDir, "caches/modules-2/files-2.1/com.jetbrains/jbre").toString()
     private val operatingSystem = OperatingSystem.current()
 
     fun resolve(version: String?): Jbr? {
@@ -32,21 +34,12 @@ open class JbrResolver(
             ("8".takeIf { version.startsWith('u') } ?: "") + version,
             operatingSystem,
         )
-        val javaDir = File(cacheDirectoryPath, jbrArtifact.name)
-        if (javaDir.exists()) {
-            if (javaDir.isDirectory) {
-                return fromDir(javaDir, version)
-            }
-            javaDir.delete()
-        }
 
-        getJavaArchive(jbrArtifact)?.let {
-            println("javaDir=$javaDir")
+        return getJavaArchive(jbrArtifact)?.let {
+            val javaDir = File(it.path.replaceAfter(jbrArtifact.name, ""))
             extractArchive(it, javaDir, context)
-            it.delete()
-            return fromDir(javaDir, version)
+            fromDir(javaDir, version)
         }
-        return null
     }
 
     private fun fromDir(javaDir: File, version: String): Jbr? {
@@ -56,36 +49,32 @@ open class JbrResolver(
             return null
         }
         if (!operatingSystem.isWindows) {
-            Files.setPosixFilePermissions(javaExecutable, PosixFilePermissions.fromString("rwxr-xr-x"))
+            javaExecutable.toFile().setExecutable(true)
         }
         return Jbr(version, javaDir, javaExecutable.toFile().absolutePath)
     }
 
     private fun getJavaArchive(jbrArtifact: JbrArtifact): File? {
-        val artifactName = jbrArtifact.name
-        val archiveName = "$artifactName.tar.gz"
-        val javaArchive = File(cacheDirectoryPath, archiveName)
-        if (javaArchive.exists()) {
-            return javaArchive
-        }
-
         if (isOffline) {
-            warn(context, "Cannot download JetBrains Java Runtime $artifactName. Gradle runs in offline mode.")
+            warn(context, "Cannot download JetBrains Java Runtime ${jbrArtifact.name}. Gradle runs in offline mode.")
             return null
         }
 
-        val url = "${jreRepository.takeIf { it.isNotEmpty() } ?: jbrArtifact.repositoryUrl}/$archiveName"
+        val url = jreRepository.takeIf { it.isNotEmpty() } ?: jbrArtifact.repositoryUrl
+        val repository = repositoryHandler.ivy { ivy ->
+            ivy.url = URI(url)
+            ivy.patternLayout { it.artifact("[revision].tar.gz") }
+            ivy.metadataSources { it.artifact() }
+        }
+        val dependency = dependencyHandler.create("com.jetbrains:jbre:${jbrArtifact.name}")
+
         return try {
-            downloadAction.apply {
-                src(url)
-                dest(javaArchive.absolutePath)
-                tempAndMove(true)
-                execute()
-            }
-            javaArchive
-        } catch (e: IOException) {
-            warn(context, "Cannot download JetBrains Java Runtime $artifactName", e)
+            configurationContainer.detachedConfiguration(dependency).singleFile
+        } catch (e: Exception) {
+            warn(context, "Cannot download JetBrains Java Runtime ${jbrArtifact.name}", e)
             null
+        } finally {
+            repositoryHandler.remove(repository)
         }
     }
 

@@ -174,8 +174,6 @@ open class RunPluginVerifierTask @Inject constructor(
 
     private val isOffline = project.gradle.startParameter.isOffline
 
-    private val absolutePath = project.gradle.gradleUserHomeDir.absolutePath
-
     private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
         ?: throw GradleException("Cannot access IntelliJPluginExtension")
 
@@ -438,10 +436,9 @@ open class RunPluginVerifierTask @Inject constructor(
             return it
         }
 
-        val jbrResolver = JbrResolver(
-            downloadAction,
+        val jbrResolver = objectFactory.newInstance(
+            JbrResolver::class.java,
             extension.jreRepository.orNull ?: "",
-            absolutePath,
             isOffline,
             this,
         )
