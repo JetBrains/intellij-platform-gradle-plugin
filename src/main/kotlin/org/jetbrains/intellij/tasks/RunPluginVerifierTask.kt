@@ -334,9 +334,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
                 val repository = repositoryHandler.ivy { ivy ->
                     ivy.url = URI(url)
-                    ivy.patternLayout {
-                        it.artifact("")
-                    }
+                    ivy.patternLayout { it.artifact("") }
                     ivy.metadataSources { it.artifact() }
                 }
                 val dependency = dependencyHandler.create("com.jetbrains:ides:$type-$version-$buildType@tar.gz")
