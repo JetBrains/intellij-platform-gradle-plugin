@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
@@ -12,15 +13,12 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
-import org.jetbrains.intellij.asSequence
-import org.jetbrains.intellij.attribute
-import org.jetbrains.intellij.get
+import org.jdom2.Document
+import org.jdom2.Element
 import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
-import org.w3c.dom.Document
 import java.io.File
 import javax.inject.Inject
-import javax.xml.parsers.DocumentBuilderFactory
 
 @Suppress("UnstableApiUsage")
 open class PatchPluginXmlTask @Inject constructor(
@@ -65,9 +63,7 @@ open class PatchPluginXmlTask @Inject constructor(
     @TaskAction
     fun patchPluginXmlFiles() {
         pluginXmlFiles.get().forEach { file ->
-            val factory = DocumentBuilderFactory.newInstance()
-            val builder = factory.newDocumentBuilder()
-            val document = builder.parse(file)
+            val document = JDOMUtil.loadDocument(file.inputStream())
 
             sinceBuild.orNull?.let {
                 patchAttribute(document, "idea-version", "since-build", it)
@@ -97,22 +93,17 @@ open class PatchPluginXmlTask @Inject constructor(
         if (content.isEmpty()) {
             return
         }
-        val pluginXml = document.childNodes.asSequence().find { it.nodeName == "idea-plugin" } ?: return
+        val pluginXml = document.rootElement.takeIf { it.name == "idea-plugin" } ?: return
 
-        val tag = pluginXml.get(name)
+        val tag = pluginXml.getChild(name)
         if (tag != null) {
-            val existingValue = tag.textContent
+            val existingValue = tag.text
             if (existingValue.isNotEmpty()) {
                 warn(context, "Patching plugin.xml: value of `$name[$existingValue]` tag will be set to `$content`")
             }
-            tag.textContent = content
+            tag.text = content
         } else {
-            pluginXml.insertBefore(
-                document.createElement(name).apply {
-                    textContent = content
-                },
-                pluginXml.firstChild,
-            )
+            pluginXml.addContent(0, Element(name).apply { text = content })
         }
     }
 
@@ -120,26 +111,17 @@ open class PatchPluginXmlTask @Inject constructor(
         if (attributeValue.isEmpty()) {
             return
         }
-        val pluginXml = document.childNodes.asSequence().find { it.nodeName == "idea-plugin" } ?: return
+        val pluginXml = document.rootElement.takeIf { it.name == "idea-plugin" } ?: return
 
-        val tag = pluginXml.get(tagName)
+        val tag = pluginXml.getChild(tagName)
         if (tag != null) {
-            val existingValue = tag.attribute(attributeName)
+            val existingValue = tag.getAttribute(attributeName)?.value
             if (!existingValue.isNullOrEmpty()) {
                 warn(context, "Patching plugin.xml: attribute `$attributeName=[$existingValue]` of `$tagName` tag will be set to `$attributeValue`")
             }
-            tag.attributes.setNamedItem(
-                document.createAttribute(attributeName).apply {
-                    textContent = attributeValue
-                }
-            )
+            tag.setAttribute(attributeName, attributeValue)
         } else {
-            pluginXml.insertBefore(
-                document.createElement(tagName).apply {
-                    setAttribute(attributeName, attributeValue)
-                },
-                pluginXml.firstChild,
-            )
+            pluginXml.addContent(0, Element(tagName).apply { setAttribute(attributeName, attributeValue) })
         }
     }
 }

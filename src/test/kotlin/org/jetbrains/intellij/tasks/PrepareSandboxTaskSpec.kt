@@ -207,7 +207,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-              <depends config-file="other.xml"/>
+              <depends config-file="other.xml" />
             </idea-plugin>    
         """)
 
@@ -249,8 +249,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         assertZipContent(jar, "META-INF/plugin.xml", """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="201.6668" until-build="201.*"/>
-              <depends config-file="other.xml"/>
+              <idea-version since-build="201.6668" until-build="201.*" />
+              <depends config-file="other.xml" />
             </idea-plugin>
         """)
     }
@@ -269,7 +269,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <depends config-file="other.xml"/>
+                <depends config-file="other.xml" />
             </idea-plugin>
         """)
 
@@ -395,7 +395,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <id>${plugin.name}</id>
               <name>Test</name>
               <version>1.0</version>
-              <idea-version since-build="201.6668" until-build="201.*"/>
+              <idea-version since-build="201.6668" until-build="201.*" />
               <vendor url="https://jetbrains.com">JetBrains</vendor>
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>
@@ -418,7 +418,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <depends config-file="other.xml"/>
+                <depends config-file="other.xml" />
             </idea-plugin>
         """)
 
@@ -478,7 +478,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -495,7 +495,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="SomeOtherComponent">
-                    <option name="SomeOption" value="false"/>
+                    <option name="SomeOption" value="false" />
                 </component>
             </application>
         """)
@@ -507,10 +507,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="SomeOtherComponent">
-                    <option name="SomeOption" value="false"/>
+                    <option name="SomeOption" value="false" />
                   </component>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -527,7 +527,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="UpdatesConfigurable">
-                    <option name="SomeOption" value="false"/>
+                    <option name="SomeOption" value="false" />
                 </component>
             </application>
         """)
@@ -539,8 +539,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="SomeOption" value="false"/>
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="SomeOption" value="false" />
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -558,7 +558,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED"/>
+                    <option name="CHECK_NEEDED" />
                 </component>
             </application>
         """)
@@ -570,7 +570,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -588,7 +588,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="true"/>
+                    <option name="CHECK_NEEDED" value="true" />
                 </component>
             </application>
         """)
@@ -600,7 +600,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -727,7 +727,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <depends config-file="other.xml"/>
+                <depends config-file="other.xml" />
             </idea-plugin>
         """)
 

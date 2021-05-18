@@ -24,29 +24,26 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
+import org.jdom2.Document
 import org.jdom2.JDOMException
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
+import org.jdom2.output.Format
+import org.jdom2.output.XMLOutputter
 import org.xml.sax.SAXParseException
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
+import java.io.StringWriter
 import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.BiConsumer
 import java.util.function.Predicate
-import javax.xml.transform.OutputKeys
-import javax.xml.transform.TransformerFactory
-import javax.xml.transform.dom.DOMSource
-import javax.xml.transform.stream.StreamResult
 
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
 
-fun mainSourceSet(project: Project): SourceSet {
-    val javaConvention = project.convention.getPlugin(JavaPluginConvention::class.java)
-    return javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
-}
+fun mainSourceSet(project: Project): SourceSet = project
+    .convention.getPlugin(JavaPluginConvention::class.java)
+    .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
 fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
     File(it, "META-INF/plugin.xml").takeIf { file -> file.exists() && file.length() > 0 }
@@ -66,16 +63,17 @@ fun parsePluginXml(pluginXml: File, context: Any): PluginBean? {
     return null
 }
 
-fun transformXml(node: Node, file: File) = TransformerFactory.newInstance()
-    .newTransformer()
-    .apply {
-        setOutputProperty(OutputKeys.ENCODING, "UTF-8")
-        setOutputProperty(OutputKeys.INDENT, "yes")
-        setOutputProperty(OutputKeys.METHOD, "xml")
-        setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes")
-        setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2")
+fun transformXml(document: Document, file: File) {
+    val xmlOutput = XMLOutputter()
+    xmlOutput.format.apply {
+        indent = "  "
+        omitDeclaration = true
+        textMode = Format.TextMode.TRIM
     }
-    .transform(DOMSource(node), StreamResult(file))
+    val out = StringWriter()
+    xmlOutput.output(document, out)
+    file.writeText(out.toString())
+}
 
 fun getIdeaSystemProperties(
     configDirectory: File,
@@ -115,12 +113,6 @@ fun ideBuildNumber(ideDirectory: File) = (
 fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
-
-fun NodeList.asSequence() = (0 until length).asSequence().map { item(it) }
-
-fun Node.get(name: String) = childNodes.asSequence().find { it.nodeName == name }
-
-fun Node.attribute(name: String) = attributes.getNamedItem(name)?.textContent
 
 fun File.isJar() = toPath().isJar()
 
@@ -164,11 +156,7 @@ fun extractArchive(
     targetDirectory.deleteRecursively()
 
     debug(context, "Extracting ${archiveFile.name}")
-    try {
-        archiveFile.toPath().extractTo(targetDirectory.toPath())
-    } catch (e: Exception) {
-        println("extractArchive=$e")
-    }
+    archiveFile.toPath().extractTo(targetDirectory.toPath())
     debug(context, "Extracted ${archiveFile.name}")
 
     markerFile.createNewFile()
@@ -228,7 +216,8 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdeP
     }
 }
 
-fun isKotlinRuntime(name: String) = "kotlin-runtime" == name ||
+fun isKotlinRuntime(name: String) =
+    name == "kotlin-runtime" ||
     name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
     name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
     name == "kotlin-test" || name.startsWith("kotlin-test-")

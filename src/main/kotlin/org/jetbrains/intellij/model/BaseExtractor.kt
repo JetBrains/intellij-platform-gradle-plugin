@@ -8,9 +8,8 @@ import java.io.File
 import java.io.InputStream
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBException
-import javax.xml.transform.dom.DOMResult
 
-abstract class BaseExtractor<T>(vararg classesToBeBound: Class<*>) {
+sealed class BaseExtractor<T>(vararg classesToBeBound: Class<*>) {
 
     private val jaxbContext by lazy { JAXBContext.newInstance(*classesToBeBound) }
 
@@ -25,8 +24,9 @@ abstract class BaseExtractor<T>(vararg classesToBeBound: Class<*>) {
     fun unmarshal(document: Document) = jaxbContext.createUnmarshaller().unmarshal(JDOMSource(document)) as T
 
     @Throws(JAXBException::class)
-    fun marshal(bean: T, file: File) = DOMResult().apply {
-        jaxbContext.createMarshaller().marshal(bean, this)
-        transformXml(node, file)
+    fun marshal(bean: T, file: File) {
+        jaxbContext.createMarshaller().marshal(bean, file)
+        val document = JDOMUtil.loadDocument(file.inputStream())
+        transformXml(document, file)
     }
 }

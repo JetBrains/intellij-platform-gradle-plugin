@@ -10,7 +10,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
-class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
+class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
     private val patchedPluginXml = lazy { File(buildDirectory, IntelliJPluginConstants.PLUGIN_XML_DIR_NAME).listFiles()?.first() }
 
@@ -32,7 +32,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
             </idea-plugin>
         """)
 
@@ -61,7 +61,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
             <idea-plugin>
               <version>0.42.123</version>
               <description>Plugin pluginDescription</description>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
             </idea-plugin>
         """)
 
@@ -86,7 +86,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin someattr="\u2202">
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
             </idea-plugin>
         """)
 
@@ -115,7 +115,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
             <idea-plugin>
               <version>0.42.123</version>
               <change-notes>change notes</change-notes>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
             </idea-plugin>
         """)
 
@@ -144,7 +144,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
             <idea-plugin>
               <id>my.plugin.id</id>
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
             </idea-plugin>
         """)
 
@@ -172,7 +172,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
               <id>my.plugin.id</id>
               <vendor>JetBrains</vendor>
             </idea-plugin>
@@ -199,7 +199,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.1532.*"/>
+              <idea-version since-build="141.1532" until-build="141.1532.*" />
             </idea-plugin>
         """)
 
@@ -226,7 +226,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
               <id>org.jetbrains.erlang</id>
               <vendor>JetBrains</vendor>
             </idea-plugin>
@@ -311,7 +311,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
 
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
               <version>0.10.0</version>
             </idea-plugin>
         """)
@@ -338,7 +338,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
             </idea-plugin>
         """)
     }
@@ -370,7 +370,7 @@ class PatchPluginXmlTaskSpec: IntelliJPluginSpecBase() {
         assertFileContent(patchedPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="141.1532" until-build="141.*"/>
+              <idea-version since-build="141.1532" until-build="141.*" />
             </idea-plugin>
         """)
     }
