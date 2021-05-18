@@ -406,6 +406,7 @@ open class RunPluginVerifierTask @Inject constructor(
         } catch (e: Exception) {
             info(context, "Cannot resolve direct download URL for: $url")
             debug(context, "Download exception stacktrace:", e)
+            throw e
         } finally {
             connection?.disconnect()
         }
