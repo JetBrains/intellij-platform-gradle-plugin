@@ -22,7 +22,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
         assertFileContent(outputPluginXml.value, """
             <idea-plugin>
-              <idea-version since-build="201.6668" until-build="201.*"/>
+              <idea-version since-build="201.6668" until-build="201.*" />
             </idea-plugin>
         """)
     }
@@ -69,7 +69,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
         assertFileContent(outputPluginXml.value, """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="Oh" until-build="201.*"/>
+              <idea-version since-build="Oh" until-build="201.*" />
             </idea-plugin>
         """)
     }

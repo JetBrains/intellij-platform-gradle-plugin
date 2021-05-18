@@ -77,10 +77,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 """
                     <idea-plugin>
                       <version>0.42.123</version>
-                      <idea-version since-build="201.6668" until-build="201.*"/>
+                      <idea-version since-build="201.6668" until-build="201.*" />
                       <name>MyPluginName</name>
                       <vendor>JetBrains</vendor>
-                      <depends config-file="other.xml"/>
+                      <depends config-file="other.xml" />
                     </idea-plugin>
                 """.trimIndent(),
                 fileText(jar, "META-INF/plugin.xml"),
