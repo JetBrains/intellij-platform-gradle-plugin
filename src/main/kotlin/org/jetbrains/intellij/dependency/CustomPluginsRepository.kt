@@ -4,13 +4,10 @@ import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepository
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import org.gradle.api.Project
 import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.warn
 import java.io.File
-import java.math.BigInteger
 import java.net.URI
 import java.net.URL
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.security.MessageDigest
 
 class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
 
@@ -24,8 +21,8 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
             pluginsXmlUri = uri
         } else {
             this.repositoryUrl = repositoryUrl
-            pluginsXmlUri =
-                URI(uri.scheme, uri.userInfo, uri.host, uri.port, "${uri.path}/", uri.query, uri.fragment).resolve("updatePlugins.xml")
+            pluginsXmlUri = URI(uri.scheme, uri.userInfo, uri.host, uri.port, "${uri.path}/", uri.query, uri.fragment)
+                .resolve("updatePlugins.xml")
         }
     }
 
@@ -66,22 +63,22 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
         return downloadZipArtifact(project, downloadUrl, plugin)
     }
 
-    private fun getCacheDirectoryPath(project: Project): String {
-        // todo: a better way to define cache directory
-        val gradleHomePath = project.gradle.gradleUserHomeDir.absolutePath
-        val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
-        val digest = MessageDigest.getInstance("SHA-1").digest(repositoryUrl.toByteArray())
-        val hash = BigInteger(1, digest).toString(16)
-        return Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea", hash).toString()
-    }
-
-    private fun downloadZipArtifact(project: Project, url: String, plugin: PluginDependencyNotation): File {
-        val targetFile = Paths.get(getCacheDirectoryPath(project), "com.jetbrains.plugins", "${plugin.id}-${plugin.version}.zip").toFile()
-        if (!targetFile.isFile) {
-            targetFile.parentFile.mkdirs()
-            Files.copy(URI.create(url).toURL().openStream(), targetFile.toPath())
+    private fun downloadZipArtifact(project: Project, url: String, plugin: PluginDependencyNotation): File? {
+        val repository = project.repositories.ivy { ivy ->
+            ivy.url = URI(url)
+            ivy.patternLayout { it.artifact("") }
+            ivy.metadataSources { it.artifact() }
         }
-        return targetFile
+        val dependency = project.dependencies.create("com.jetbrains.plugins:${plugin.id}:${plugin.version}@zip")
+
+        return try {
+            project.configurations.detachedConfiguration(dependency).singleFile
+        } catch (e: Exception) {
+            warn(project, "Cannot download plugin from custom repository: ${plugin.id}:${plugin.version}", e)
+            null
+        } finally {
+            project.repositories.remove(repository)
+        }
     }
 
     override fun postResolve(project: Project) {
