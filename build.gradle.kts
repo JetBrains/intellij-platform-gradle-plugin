@@ -32,7 +32,6 @@ dependencies {
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.17") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("de.undercouch:gradle-download-task:4.1.1")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))

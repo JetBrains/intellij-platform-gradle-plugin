@@ -2,10 +2,10 @@ package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingParser
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
-import de.undercouch.gradle.tasks.download.org.apache.commons.codec.binary.Hex
 import org.gradle.api.Project
 import org.jetbrains.intellij.debug
 import java.io.File
+import java.math.BigInteger
 import java.net.URI
 import java.net.URL
 import java.nio.file.Files
@@ -71,7 +71,7 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
         val gradleHomePath = project.gradle.gradleUserHomeDir.absolutePath
         val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
         val digest = MessageDigest.getInstance("SHA-1").digest(repositoryUrl.toByteArray())
-        val hash = Hex.encodeHex(digest).toString()
+        val hash = BigInteger(1, digest).toString(16)
         return Paths.get(mavenCacheDirectoryPath, "com.jetbrains.intellij.idea", hash).toString()
     }
 
