@@ -36,7 +36,7 @@ open class JbrResolver @Inject constructor(
         )
 
         return getJavaArchive(jbrArtifact)?.let {
-            val javaDir = File(it.path.replaceAfter(jbrArtifact.name, ""))
+            val javaDir = File(it.path.replaceAfter(jbrArtifact.name, "")).resolve("extracted")
             extractArchive(it, javaDir, context)
             fromDir(javaDir, version)
         }
@@ -66,7 +66,7 @@ open class JbrResolver @Inject constructor(
             ivy.patternLayout { it.artifact("[revision].tar.gz") }
             ivy.metadataSources { it.artifact() }
         }
-        val dependency = dependencyHandler.create("com.jetbrains:jbre:${jbrArtifact.name}")
+        val dependency = dependencyHandler.create("com.jetbrains:jbre:${jbrArtifact.name}@tar.gz")
 
         return try {
             configurationContainer.detachedConfiguration(dependency).singleFile

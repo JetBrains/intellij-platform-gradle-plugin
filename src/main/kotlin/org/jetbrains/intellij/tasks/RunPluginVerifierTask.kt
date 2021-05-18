@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-import de.undercouch.gradle.tasks.download.DownloadAction
 import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
@@ -178,9 +177,6 @@ open class RunPluginVerifierTask @Inject constructor(
         ?: throw GradleException("Cannot access IntelliJPluginExtension")
 
     @Transient
-    private val downloadAction = DownloadAction(project)
-
-    @Transient
     private val dependencyHandler = project.dependencies
 
     @Transient
@@ -334,19 +330,21 @@ open class RunPluginVerifierTask @Inject constructor(
                     "Provide pre-downloaded IDEs stored in `downloadDir` or use `localPaths` instead."
             ))
             else -> {
-                val ideArchive = File(downloadDir.get(), "${name}.tar.gz")
                 val url = resolveIdeUrl(type, version, buildType)
-
                 debug(context, "Downloading IDE from $url")
 
-                downloadAction.apply {
-                    src(url)
-                    dest(ideArchive.absolutePath)
-                    tempAndMove(true)
-                    execute()
+                val repository = repositoryHandler.ivy { ivy ->
+                    ivy.url = URI(url)
+                    ivy.patternLayout {
+                        it.artifact("")
+                    }
+                    ivy.metadataSources { it.artifact() }
                 }
+                val dependency = dependencyHandler.create("com.jetbrains:ides:$type-$version-$buildType@tar.gz")
 
                 try {
+                    val ideArchive = configurationContainer.detachedConfiguration(dependency).singleFile
+
                     debug(context, "IDE downloaded, extracting...")
                     extractArchive(ideArchive, ideDir, context)
                     ideDir.listFiles()?.let {
@@ -357,10 +355,13 @@ open class RunPluginVerifierTask @Inject constructor(
                             container.deleteRecursively()
                         }
                     }
+                } catch (e: Exception) {
+                    warn(context, "Cannot download $type-$version from $buildType channel: $url", e)
                 } finally {
-                    ideArchive.delete()
+                    repositoryHandler.remove(repository)
                 }
-                debug(context, "IDE extracted to $ideDir, archive removed")
+
+                debug(context, "IDE extracted to $ideDir")
             }
         }
 
