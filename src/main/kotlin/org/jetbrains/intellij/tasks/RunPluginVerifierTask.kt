@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-import de.undercouch.gradle.tasks.download.org.apache.http.client.utils.URIBuilder
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
@@ -379,12 +378,7 @@ open class RunPluginVerifierTask @Inject constructor(
      * @return direct download URL prepended with {@link #CACHE_REDIRECTOR} host
      */
     private fun resolveIdeUrl(type: String, version: String, buildType: String): String {
-        val url = URIBuilder(IDE_DOWNLOAD_URL)
-            .addParameter("code", type)
-            .addParameter("platform", "linux")
-            .addParameter("type", buildType)
-            .addParameter(versionParameterName(version), version)
-            .toString()
+        val url = "$IDE_DOWNLOAD_URL?code=$type&platform=linux&type=$buildType&${versionParameterName(version)}=$version"
         debug(context, "Resolving direct IDE download URL for: $url")
 
         var connection: HttpURLConnection? = null
