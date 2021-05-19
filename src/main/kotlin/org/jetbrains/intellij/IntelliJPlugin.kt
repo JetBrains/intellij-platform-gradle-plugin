@@ -96,7 +96,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         val defaultDependencies = project.configurations.create("intellijDefaultDependencies").setVisible(false)
         defaultDependencies.defaultDependencies { dependencies ->
-            dependencies.add(project.dependencies.create("org.jetbrains:annotations:19.0.0"))
+            dependencies.add(project.dependencies.create("org.jetbrains:annotations:20.1.0"))
         }
 
         project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
