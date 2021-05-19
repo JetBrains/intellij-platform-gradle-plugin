@@ -151,7 +151,8 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring IDE dependency")
-            val resolver = IdeaDependencyManager(
+            val resolver = project.objects.newInstance(
+                IdeaDependencyManager::class.java,
                 extension.intellijRepository.get(),
                 extension.ideaDependencyCachePath.orNull ?: "",
                 context,
@@ -190,7 +191,8 @@ open class IntelliJPlugin : Plugin<Project> {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring plugin dependencies")
             val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
-            val resolver = PluginDependencyManager(
+            val resolver = project.objects.newInstance(
+                PluginDependencyManager::class.java,
                 project.gradle.gradleUserHomeDir.absolutePath,
                 extension.getIdeaDependency(project),
                 extension.getPluginsRepositories(),

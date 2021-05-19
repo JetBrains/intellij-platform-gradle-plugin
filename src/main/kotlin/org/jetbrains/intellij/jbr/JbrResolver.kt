@@ -5,6 +5,7 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.extractArchive
@@ -22,6 +23,7 @@ open class JbrResolver @Inject constructor(
     private val repositoryHandler: RepositoryHandler,
     private val dependencyHandler: DependencyHandler,
     private val configurationContainer: ConfigurationContainer,
+    private val execOperations: ExecOperations,
 ) {
 
     private val operatingSystem = OperatingSystem.current()
@@ -37,7 +39,7 @@ open class JbrResolver @Inject constructor(
 
         return getJavaArchive(jbrArtifact)?.let {
             val javaDir = File(it.path.replaceAfter(jbrArtifact.name, "")).resolve("extracted")
-            extractArchive(it, javaDir, context)
+            extractArchive(it, javaDir, execOperations, context)
             fromDir(javaDir, version)
         }
     }
@@ -47,9 +49,6 @@ open class JbrResolver @Inject constructor(
         if (javaExecutable == null) {
             warn(context, "Cannot find java executable in $javaDir")
             return null
-        }
-        if (!operatingSystem.isWindows) {
-            javaExecutable.toFile().setExecutable(true)
         }
         return Jbr(version, javaDir, javaExecutable.toFile().absolutePath)
     }

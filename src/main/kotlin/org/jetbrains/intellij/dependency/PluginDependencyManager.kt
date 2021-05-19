@@ -1,26 +1,31 @@
 package org.jetbrains.intellij.dependency
 
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
+import org.gradle.process.ExecOperations
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
 import org.jetbrains.intellij.createPlugin
+import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isJar
 import org.jetbrains.intellij.isZip
-import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.nio.file.Paths
+import javax.inject.Inject
 
-open class PluginDependencyManager(
+@Incubating
+open class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
     private val ideaDependency: IdeaDependency?,
     private val pluginsRepositories: List<PluginsRepository>,
     private val context: Any,
+    private val execOperations: ExecOperations,
 ) {
 
     private val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
@@ -77,6 +82,7 @@ open class PluginDependencyManager(
         val pluginDir = findSingleDirectory(extractArchive(
             pluginFile,
             File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}"),
+            execOperations,
             context,
         ))
         return externalPluginDependency(pluginDir, dependency.channel, true)
