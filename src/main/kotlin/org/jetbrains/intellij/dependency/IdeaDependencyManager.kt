@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.dependency
 
 import org.gradle.api.GradleException
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.DependencySet
@@ -9,6 +10,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
 import org.jetbrains.intellij.debug
@@ -22,11 +24,14 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
+import javax.inject.Inject
 
-open class IdeaDependencyManager(
+@Incubating
+open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
     private val context: Any,
+    private val execOperations: ExecOperations,
 ) {
 
     private val mainDependencies = listOf("ideaIC", "ideaIU", "riderRD", "riderRS")
@@ -108,7 +113,7 @@ open class IdeaDependencyManager(
         zipFile: File,
         type: String,
         checkVersionChange: Boolean,
-    ) = extractArchive(zipFile, cacheDirectory.resolve(zipFile.name.removeSuffix(".zip")), context, { markerFile ->
+    ) = extractArchive(zipFile, cacheDirectory.resolve(zipFile.name.removeSuffix(".zip")), execOperations, context, { markerFile ->
         isCacheUpToDate(zipFile, markerFile, checkVersionChange)
     }, { unzippedDirectory, markerFile ->
         resetExecutablePermissions(unzippedDirectory, type)

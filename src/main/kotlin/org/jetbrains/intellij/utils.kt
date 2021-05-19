@@ -16,6 +16,7 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.LogLevel
@@ -23,6 +24,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.JDOMException
@@ -141,9 +143,11 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
     return null
 }
 
+@Incubating
 fun extractArchive(
     archiveFile: File,
     targetDirectory: File,
+    execOperations: ExecOperations,
     context: Any,
     isUpToDate: Predicate<File>? = null,
     markUpToDate: BiConsumer<File, File>? = null,
@@ -156,7 +160,15 @@ fun extractArchive(
     targetDirectory.deleteRecursively()
 
     debug(context, "Extracting ${archiveFile.name}")
-    archiveFile.toPath().extractTo(targetDirectory.toPath())
+
+    if (!OperatingSystem.current().isWindows && archiveFile.name.endsWith(".tar.gz")) {
+        targetDirectory.mkdirs()
+        execOperations.exec {
+            it.commandLine("tar", "-xpf", archiveFile.absolutePath, "--directory", targetDirectory.absolutePath)
+        }
+    } else {
+        archiveFile.toPath().extractTo(targetDirectory.toPath())
+    }
     debug(context, "Extracted ${archiveFile.name}")
 
     markerFile.createNewFile()

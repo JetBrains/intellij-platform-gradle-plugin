@@ -343,7 +343,7 @@ open class RunPluginVerifierTask @Inject constructor(
                     val ideArchive = configurationContainer.detachedConfiguration(dependency).singleFile
 
                     debug(context, "IDE downloaded, extracting...")
-                    extractArchive(ideArchive, ideDir, context)
+                    extractArchive(ideArchive, ideDir, execOperations, context)
                     ideDir.listFiles()?.let {
                         it.filter(File::isDirectory).forEach { container ->
                             container.listFiles()?.forEach { file ->
