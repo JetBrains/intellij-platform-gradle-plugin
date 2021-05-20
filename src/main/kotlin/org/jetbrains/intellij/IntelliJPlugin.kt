@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
+import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
@@ -162,18 +163,20 @@ open class IntelliJPlugin : Plugin<Project> {
                 extension.ideaDependencyCachePath.orNull ?: "",
                 context,
             )
-            val localPath = extension.localPath.orNull
-            val ideaDependency = if (localPath != null) {
-                if (extension.version.orNull != null) {
-                    warn(context, "Both `localPath` and `version` specified, second would be ignored")
+            val ideaDependency = when (val localPath = extension.localPath.orNull) {
+                null -> {
+                    info(context, "Using IDE from remote repository")
+                    val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
+                    val extraDependencies = extension.extraDependencies.get()
+                    resolver.resolveRemote(project, version, extension.getVersionType(), extension.downloadSources.get(), extraDependencies)
                 }
-                info(context, "Using path to locally installed IDE: '$localPath'")
-                resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
-            } else {
-                info(context, "Using IDE from remote repository")
-                val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-                val extraDependencies = extension.extraDependencies.get()
-                resolver.resolveRemote(project, version, extension.getVersionType(), extension.downloadSources.get(), extraDependencies)
+                else -> {
+                    if (extension.version.orNull != null) {
+                        warn(context, "Both `localPath` and `version` specified, second would be ignored")
+                    }
+                    info(context, "Using path to locally installed IDE: '$localPath'")
+                    resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
+                }
             }
             extension.ideaDependency.set(ideaDependency)
             if (extension.configureDefaultDependencies.get()) {

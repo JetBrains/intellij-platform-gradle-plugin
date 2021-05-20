@@ -184,8 +184,9 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @Internal
     val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
+    private val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
+
     fun getVersionNumber() = version.orNull?.let { v ->
-        val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO") // TODO: move somewhere
         val key = keys.find { v.startsWith("$it-") }
         when {
             key != null -> v.substring(key.length + 1)
@@ -194,7 +195,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
     }
 
     fun getVersionType(): String {
-        val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
         val v = version.orNull ?: return "IC"
         return keys.find { v.startsWith("$it-") } ?: type.orNull.takeIf { keys.contains(it) } ?: "IC"
     }

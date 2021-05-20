@@ -65,29 +65,33 @@ open class IdeaDependencyManager @Inject constructor(
         sourcesDirectory: File?,
         project: Project,
         extraDependencies: Collection<IdeaExtraDependency>,
-    ): IdeaDependency {
-        if (type == "JPS") {
-            return JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project), project)
-        } else if (type == null) {
+    ) = when (type) {
+        "JPS" -> JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project), project)
+        else -> {
             val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project)
-            return LocalIdeaDependency(name,
-                version,
-                buildNumber,
-                classesDirectory,
-                sourcesDirectory,
-                !hasKotlinDependency(project),
-                pluginsRegistry,
-                extraDependencies)
+            when (type) {
+                null -> LocalIdeaDependency(
+                    name,
+                    version,
+                    buildNumber,
+                    classesDirectory,
+                    sourcesDirectory,
+                    !hasKotlinDependency(project),
+                    pluginsRegistry,
+                    extraDependencies,
+                )
+                else -> IdeaDependency(
+                    name,
+                    version,
+                    buildNumber,
+                    classesDirectory,
+                    sourcesDirectory,
+                    !hasKotlinDependency(project),
+                    pluginsRegistry,
+                    extraDependencies,
+                )
+            }
         }
-        val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project)
-        return IdeaDependency(name,
-            version,
-            buildNumber,
-            classesDirectory,
-            sourcesDirectory,
-            !hasKotlinDependency(project),
-            pluginsRegistry,
-            extraDependencies)
     }
 
     private fun resolveSources(project: Project, version: String): File? {
@@ -179,19 +183,23 @@ open class IdeaDependencyManager @Inject constructor(
 
         if (directory == null || !ivyFile.exists()) {
             val identity = DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version)
-            val generator = IntelliJIvyDescriptorFileGenerator(identity)
-            generator.addConfiguration(DefaultIvyConfiguration("default"))
-            generator.addConfiguration(DefaultIvyConfiguration("compile"))
-            generator.addConfiguration(DefaultIvyConfiguration("sources"))
-            dependency.jarFiles.forEach {
-                generator.addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes, null))
+            IntelliJIvyDescriptorFileGenerator(identity).apply {
+                addConfiguration(DefaultIvyConfiguration("default"))
+                addConfiguration(DefaultIvyConfiguration("compile"))
+                addConfiguration(DefaultIvyConfiguration("sources"))
+
+                dependency.jarFiles.forEach {
+                    addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes, null))
+                }
+
+                if (dependency.sources != null) {
+                    val artifact = IntellijIvyArtifact(dependency.sources, "ideaIC", "jar", "sources", "sources")
+                    artifact.conf = "sources"
+                    addArtifact(artifact)
+                }
+
+                writeTo(ivyFile)
             }
-            if (dependency.sources != null) {
-                val artifact = IntellijIvyArtifact(dependency.sources, "ideaIC", "jar", "sources", "sources")
-                artifact.conf = "sources"
-                generator.addArtifact(artifact)
-            }
-            generator.writeTo(ivyFile)
         }
         return ivyFile
     }
