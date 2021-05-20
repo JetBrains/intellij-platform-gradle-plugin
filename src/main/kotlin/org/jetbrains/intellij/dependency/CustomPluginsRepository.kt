@@ -3,6 +3,7 @@ package org.jetbrains.intellij.dependency
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingParser
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import org.gradle.api.Project
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -69,7 +70,12 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
             ivy.patternLayout { it.artifact("") }
             ivy.metadataSources { it.artifact() }
         }
-        val dependency = project.dependencies.create("com.jetbrains.plugins:${plugin.id}:${plugin.version}@zip")
+        val dependency = project.dependencies.create(
+            group = "com.jetbrains.plugins",
+            name = plugin.id,
+            version = plugin.version,
+            extension = "zip",
+        )
 
         return try {
             project.configurations.detachedConfiguration(dependency).singleFile

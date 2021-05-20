@@ -19,6 +19,8 @@ import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -230,6 +232,22 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdeP
 
 fun isKotlinRuntime(name: String) =
     name == "kotlin-runtime" ||
-    name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
-    name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
-    name == "kotlin-test" || name.startsWith("kotlin-test-")
+        name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
+        name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
+        name == "kotlin-test" || name.startsWith("kotlin-test-")
+
+fun DependencyHandler.create(
+    group: String,
+    name: String,
+    version: String?,
+    classifier: String? = null,
+    extension: String? = null,
+    configuration: String? = null,
+): Dependency = create(mapOf(
+    "group" to group,
+    "name" to name,
+    "version" to version,
+    "classifier" to classifier,
+    "ext" to extension,
+    "configuration" to configuration,
+))

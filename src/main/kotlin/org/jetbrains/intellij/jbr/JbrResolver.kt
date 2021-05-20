@@ -8,6 +8,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -65,7 +66,12 @@ open class JbrResolver @Inject constructor(
             ivy.patternLayout { it.artifact("[revision].tar.gz") }
             ivy.metadataSources { it.artifact() }
         }
-        val dependency = dependencyHandler.create("com.jetbrains:jbre:${jbrArtifact.name}@tar.gz")
+        val dependency = dependencyHandler.create(
+            group = "com.jetbrains",
+            name = "jbre",
+            version = jbrArtifact.name,
+            extension = "tar.gz",
+        )
 
         return try {
             configurationContainer.detachedConfiguration(dependency).singleFile

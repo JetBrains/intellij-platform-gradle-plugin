@@ -9,6 +9,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.extractArchive
 import java.net.URI
 import javax.inject.Inject
@@ -47,7 +48,12 @@ open class DownloadRobotServerPluginTask @Inject constructor(
 
     @TaskAction
     fun downloadPlugin() {
-        val dependency = dependencyHandler.create("${getDependency()}:${version.get()}")
+        val (group, name) = getDependency().split(':')
+        val dependency = dependencyHandler.create(
+            group = group,
+            name = name,
+            version = version.get(),
+        )
         val repository = repositoryHandler.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
         val target = outputDir.get().asFile
 

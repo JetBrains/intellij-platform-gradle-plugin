@@ -25,6 +25,7 @@ import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.extractArchive
@@ -264,7 +265,13 @@ open class RunPluginVerifierTask @Inject constructor(
         val repository = repositoryHandler.maven { it.url = URI(getPluginVerifierRepository(resolvedVerifierVersion)) }
         try {
             debug(context, "Using Verifier in $resolvedVerifierVersion version")
-            val dependency = dependencyHandler.create("org.jetbrains.intellij.plugins:verifier-cli:$resolvedVerifierVersion:all@jar")
+            val dependency = dependencyHandler.create(
+                group = "org.jetbrains.intellij.plugins",
+                name = "verifier-cli",
+                version = resolvedVerifierVersion,
+                classifier = "all",
+                extension = "jar",
+            )
             val configuration = configurationContainer.detachedConfiguration(dependency)
             return configuration.singleFile.absolutePath
         } catch (e: Exception) {
@@ -337,7 +344,12 @@ open class RunPluginVerifierTask @Inject constructor(
                     ivy.patternLayout { it.artifact("") }
                     ivy.metadataSources { it.artifact() }
                 }
-                val dependency = dependencyHandler.create("com.jetbrains:ides:$type-$version-$buildType@tar.gz")
+                val dependency = dependencyHandler.create(
+                    group = "com.jetbrains",
+                    name = "ides",
+                    version = "$type-$version-$buildType",
+                    extension = "tar.gz",
+                )
 
                 try {
                     val ideArchive = configurationContainer.detachedConfiguration(dependency).singleFile

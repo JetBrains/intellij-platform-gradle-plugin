@@ -9,6 +9,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.process.ExecOperations
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.info
@@ -70,12 +71,12 @@ open class PluginDependencyManager @Inject constructor(
         }
         registerRepositoryIfNeeded(project, plugin)
         generateIvyFile(plugin)
-        dependencies.add(project.dependencies.create(mapOf(
-            "group" to groupId(plugin.channel),
-            "name" to plugin.id,
-            "version" to plugin.version,
-            "configuration" to "compile",
-        )))
+        dependencies.add(project.dependencies.create(
+            group = groupId(plugin.channel),
+            name = plugin.id,
+            version = plugin.version,
+            configuration = "compile",
+        ))
     }
 
     private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {

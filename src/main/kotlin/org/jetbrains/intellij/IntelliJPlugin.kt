@@ -93,12 +93,17 @@ open class IntelliJPlugin : Plugin<Project> {
         val ideaPlugins = project.configurations.create(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false)
         configurePluginDependencies(project, extension, ideaPlugins)
 
-        val defaultDependencies = project.configurations.create("intellijDefaultDependencies").setVisible(false)
-        defaultDependencies.defaultDependencies { dependencies ->
-            dependencies.add(project.dependencies.create("org.jetbrains:annotations:20.1.0"))
+        val defaultDependencies = project.configurations.create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME).setVisible(false)
+        defaultDependencies.defaultDependencies {
+            it.add(project.dependencies.create(
+                group = "org.jetbrains",
+                name = "annotations",
+                version = IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION,
+            ))
         }
 
-        project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
+        project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME)
+            .extendsFrom(defaultDependencies, idea, ideaPlugins)
         project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
     }

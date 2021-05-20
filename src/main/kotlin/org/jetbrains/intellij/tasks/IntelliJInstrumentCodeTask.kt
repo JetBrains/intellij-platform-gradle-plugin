@@ -18,6 +18,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.releaseType
@@ -122,7 +123,11 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     } ?: compilerClassPathFromMaven()
 
     private fun compilerClassPathFromMaven(): List<File> {
-        val dependency = dependencyHandler.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
+        val dependency = dependencyHandler.create(
+            group = "com.jetbrains.intellij.java",
+            name = "java-compiler-ant-tasks",
+            version = compilerVersion.get(),
+        )
         val intellijRepositoryUrl = extension?.intellijRepository?.get() ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
             repositoryHandler.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },

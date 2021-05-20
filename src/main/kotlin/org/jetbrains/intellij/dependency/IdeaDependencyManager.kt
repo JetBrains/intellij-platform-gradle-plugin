@@ -13,6 +13,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.ideBuildNumber
@@ -47,12 +48,12 @@ open class IdeaDependencyManager @Inject constructor(
                 it.artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
             }
         }
-        dependencies.add(project.dependencies.create(mapOf(
-            "group" to "com.jetbrains",
-            "name" to dependency.name,
-            "version" to dependency.version,
-            "configuration" to "compile"
-        )))
+        dependencies.add(project.dependencies.create(
+            group = "com.jetbrains",
+            name = dependency.name,
+            version = dependency.version,
+            configuration = "compile",
+        ))
     }
 
     private fun createDependency(
@@ -92,7 +93,13 @@ open class IdeaDependencyManager @Inject constructor(
     private fun resolveSources(project: Project, version: String): File? {
         info(context, "Adding IDE sources repository")
         try {
-            val dependency = project.dependencies.create("com.jetbrains.intellij.idea:ideaIC:$version:sources@jar")
+            val dependency = project.dependencies.create(
+                group = "com.jetbrains.intellij.idea",
+                name = "ideaIC",
+                version = version,
+                classifier = "sources",
+                extension = "jar",
+            )
             val sourcesConfiguration = project.configurations.detachedConfiguration(dependency)
             val sourcesFiles = sourcesConfiguration.files
             if (sourcesFiles.size == 1) {
@@ -222,7 +229,11 @@ open class IdeaDependencyManager @Inject constructor(
                 hasSources = false
             }
         }
-        val dependency = project.dependencies.create("$dependencyGroup:$dependencyName:$version")
+        val dependency = project.dependencies.create(
+            group = dependencyGroup,
+            name = dependencyName,
+            version = version,
+        )
 
         val configuration = project.configurations.detachedConfiguration(dependency)
 
@@ -303,7 +314,11 @@ open class IdeaDependencyManager @Inject constructor(
 
     private fun resolveExtraDependency(project: Project, version: String, name: String): File? {
         try {
-            val dependency = project.dependencies.create("com.jetbrains.intellij.idea:$name:$version")
+            val dependency = project.dependencies.create(
+                group = "com.jetbrains.intellij.idea",
+                name = name,
+                version = version,
+            )
             val extraDepConfiguration = project.configurations.detachedConfiguration(dependency)
             val files = extraDepConfiguration.files
             if (files.size == 1) {
