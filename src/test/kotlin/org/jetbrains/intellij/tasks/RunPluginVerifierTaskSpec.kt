@@ -1,7 +1,8 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.apache.commons.io.FileUtils
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -244,6 +245,23 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
         assertTrue(result.output.contains("Gradle runs in offline mode."))
+    }
+
+    @Test
+    fun `reuse configuration cache`() {
+        writePluginXmlFile()
+        buildFile.groovy("""
+            version = "1.0.0"
+
+            runPluginVerifier {
+                ideVersions = ["2020.2.3"]
+            }
+        """)
+
+        build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
     }
 
     private fun warmupGradle() {

@@ -39,7 +39,7 @@ class PluginProjectDependency(@Transient val project: Project) : PluginDependenc
                 pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
                 pluginDependency
             } else {
-                error(project.name, "Cannot use $pluginDirectory as a plugin dependency. $creationResult")
+                error(project, "Cannot use $pluginDirectory as a plugin dependency. $creationResult")
                 null
             }
         }

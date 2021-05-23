@@ -3,7 +3,7 @@ package org.jetbrains.intellij.dependency
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.CompileStatic
 import org.jetbrains.intellij.collectJars
-import org.jetbrains.intellij.isJarFile
+import org.jetbrains.intellij.isJar
 import java.io.File
 
 @CompileStatic
@@ -25,7 +25,7 @@ class PluginDependencyImpl(
     var untilBuild: String? = null
 
     init {
-        if (isJarFile(artifact)) {
+        if (artifact.isJar()) {
             jarFiles = listOf(artifact)
         }
         if (artifact.isDirectory) {
@@ -48,6 +48,7 @@ class PluginDependencyImpl(
         sinceBuild?.let { IdeVersion.createIdeVersion(it) <= ideVersion } ?: true &&
             untilBuild?.let { ideVersion <= IdeVersion.createIdeVersion(it) } ?: true
 
+    @Suppress("DuplicatedCode")
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

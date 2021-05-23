@@ -184,8 +184,9 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @Internal
     val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
+    private val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
+
     fun getVersionNumber() = version.orNull?.let { v ->
-        val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO") // TODO: move somewhere
         val key = keys.find { v.startsWith("$it-") }
         when {
             key != null -> v.substring(key.length + 1)
@@ -194,7 +195,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
     }
 
     fun getVersionType(): String {
-        val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
         val v = version.orNull ?: return "IC"
         return keys.find { v.startsWith("$it-") } ?: type.orNull.takeIf { keys.contains(it) } ?: "IC"
     }
@@ -212,7 +212,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     fun getPluginDependenciesList(project: Project): Set<PluginDependency> {
         if (!pluginDependenciesConfigured) {
-            debug(project.name, "Plugin dependencies are resolved", Throwable())
+            debug(project, "Plugin dependencies are resolved", Throwable())
             project.configurations.getByName(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
             pluginDependenciesConfigured = true
         }
@@ -221,7 +221,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     fun getIdeaDependency(project: Project): IdeaDependency {
         if (ideaDependency.orNull == null) {
-            debug(project.name, "IDE dependency is resolved", Throwable())
+            debug(project, "IDE dependency is resolved", Throwable())
             project.configurations.getByName(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).resolve()
             if (ideaDependency.orNull == null) {
                 throw BuildException("Cannot resolve ideaDependency", null)

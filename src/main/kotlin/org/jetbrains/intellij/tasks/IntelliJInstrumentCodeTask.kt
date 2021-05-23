@@ -18,7 +18,9 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.create
 import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.releaseType
 import java.io.File
 import java.net.URI
@@ -66,10 +68,23 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
+
     @InputFiles
     fun getSourceDirs() = sourceSetAllDirs.get().filter {
         it.exists() && !sourceSetResources.get().contains(it)
     }
+
+    @Transient
+    private val dependencyHandler = project.dependencies
+
+    @Transient
+    private val repositoryHandler = project.repositories
+
+    @Transient
+    private val configurationContainer = project.configurations
 
     @TaskAction
     fun instrumentClasses() {
@@ -84,7 +99,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
         ))
 
-        logger.info("Compiling forms and instrumenting code with nullability preconditions")
+        info(context, "Compiling forms and instrumenting code with nullability preconditions")
         val instrumentNotNull = prepareNotNullInstrumenting(classpath)
         instrumentCode(getSourceDirs(), outputDir.get().asFile, instrumentNotNull)
     }
@@ -108,17 +123,21 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     } ?: compilerClassPathFromMaven()
 
     private fun compilerClassPathFromMaven(): List<File> {
-        val dependency = project.dependencies.create("com.jetbrains.intellij.java:java-compiler-ant-tasks:${compilerVersion.get()}")
+        val dependency = dependencyHandler.create(
+            group = "com.jetbrains.intellij.java",
+            name = "java-compiler-ant-tasks",
+            version = compilerVersion.get(),
+        )
         val intellijRepositoryUrl = extension?.intellijRepository?.get() ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
-            project.repositories.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
-            project.repositories.maven { it.url = URI(ASM_REPOSITORY_URL) },
-            project.repositories.maven { it.url = URI(FORMS_REPOSITORY_URL) },
+            repositoryHandler.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
+            repositoryHandler.maven { it.url = URI(ASM_REPOSITORY_URL) },
+            repositoryHandler.maven { it.url = URI(FORMS_REPOSITORY_URL) },
         )
         try {
-            return project.configurations.detachedConfiguration(dependency).files.toList()
+            return configurationContainer.detachedConfiguration(dependency).files.toList()
         } finally {
-            project.repositories.removeAll(repos)
+            repositoryHandler.removeAll(repos)
         }
     }
 
@@ -142,8 +161,11 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         } catch (e: BuildException) {
             val cause = e.cause
             if (cause is ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.message) {
-                logger.info("Old version of Javac2 is used, " +
-                    "instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
+                info(
+                    context,
+                    "Old version of Javac2 is used, instrumenting code with nullability will be skipped. " +
+                        "Use IDEA >14 SDK (139.*) to fix this",
+                )
                 return false
             } else {
                 throw e

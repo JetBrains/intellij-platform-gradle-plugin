@@ -1,5 +1,7 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import java.util.zip.ZipFile
 import kotlin.test.Test
@@ -75,10 +77,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 """
                     <idea-plugin>
                       <version>0.42.123</version>
-                      <idea-version since-build="201.6668" until-build="201.*"/>
+                      <idea-version since-build="201.6668" until-build="201.*" />
                       <name>MyPluginName</name>
                       <vendor>JetBrains</vendor>
-                      <depends config-file="other.xml"/>
+                      <depends config-file="other.xml" />
                     </idea-plugin>
                 """.trimIndent(),
                 fileText(jar, "META-INF/plugin.xml"),
@@ -385,5 +387,28 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             ),
             collectPaths(ZipFile(jar))
         )
+    }
+
+    @Test
+    fun `reuse configuration cache`() {
+        pluginXml.xml("""
+            <idea-plugin>
+                <name>MyPluginName</name>
+                <vendor>JetBrains</vendor>
+            </idea-plugin>
+        """)
+
+        buildFile.groovy("""
+            version = '0.42.321'
+            
+            intellij {
+                pluginName = 'myPluginName'
+            }
+        """)
+
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
+        val result = build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
     }
 }

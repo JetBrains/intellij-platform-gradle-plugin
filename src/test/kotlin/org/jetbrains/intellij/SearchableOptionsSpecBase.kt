@@ -55,7 +55,7 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
             }
             
             @Override
-            public void apply() throws ConfigurationException {
+            public void apply() {
             }
         }
     """.trimIndent()

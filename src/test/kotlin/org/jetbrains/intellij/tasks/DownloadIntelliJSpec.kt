@@ -1,6 +1,7 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
 import org.gradle.api.plugins.BasePlugin
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

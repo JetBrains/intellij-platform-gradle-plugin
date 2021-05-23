@@ -1,10 +1,12 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class PublishTaskSpec : IntelliJPluginSpecBase() {
+class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
     override fun setUp() {
@@ -21,24 +23,6 @@ class PublishTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `skip publishing plugin is distribution file is missing`() {
-        buildFile.groovy("""
-            publishPlugin {
-                token = 'asd'
-                distributionFile = null
-            }
-            verifyPlugin {
-                ignoreFailures = true
-            }
-        """)
-
-        val result = buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME)
-
-        // TODO: Provide more tests and remove this one. distributionFile is filled with convention if set to null
-        // assertTrue(result.output.contains("No value has been specified for property 'distributionFile'"))
-    }
-
-    @Test
     fun `skip publishing if token is missing`() {
         buildFile.groovy("""
             publishPlugin { }
@@ -50,5 +34,20 @@ class PublishTaskSpec : IntelliJPluginSpecBase() {
         val result = buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME)
 
         assertTrue(result.output.contains("token property must be specified for plugin publishing"))
+    }
+
+    @Test
+    fun `reuse configuration cache`() {
+        buildFile.groovy("""
+            publishPlugin { }
+            verifyPlugin {
+                ignoreFailures = true
+            }
+        """)
+
+        buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
+        val result = buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
     }
 }

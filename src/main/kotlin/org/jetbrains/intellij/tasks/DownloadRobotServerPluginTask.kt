@@ -1,24 +1,23 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
-import org.jetbrains.intellij.unzip
+import org.jetbrains.intellij.create
+import org.jetbrains.intellij.extractArchive
 import java.net.URI
 import javax.inject.Inject
 
-@Incubating
 @Suppress("UnstableApiUsage")
 open class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
-    private val fileSystemOperations: FileSystemOperations,
+    private val execOperations: ExecOperations,
 ) : ConventionTask() {
 
     companion object {
@@ -34,20 +33,35 @@ open class DownloadRobotServerPluginTask @Inject constructor(
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
+    @Transient
+    private val dependencyHandler = project.dependencies
+
+    @Transient
+    private val repositoryHandler = project.repositories
+
+    @Transient
+    private val configurationContainer = project.configurations
+
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
+
     @TaskAction
     fun downloadPlugin() {
-        val dependency = project.dependencies.create("${getDependency()}:${version.get()}")
-        val repository = project.repositories.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
-
-        fileSystemOperations.delete {
-            it.delete(outputDir.get())
-        }
+        val (group, name) = getDependency().split(':')
+        val dependency = dependencyHandler.create(
+            group = group,
+            name = name,
+            version = version.get(),
+        )
+        val repository = repositoryHandler.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
+        val target = outputDir.get().asFile
 
         try {
-            val zipFile = project.configurations.detachedConfiguration(dependency).singleFile
-            unzip(zipFile, outputDir.get().asFile, project, targetDirName = "")
+            val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
+            extractArchive(zipFile, target, execOperations, context)
         } finally {
-            project.repositories.remove(repository)
+            repositoryHandler.remove(repository)
         }
     }
 

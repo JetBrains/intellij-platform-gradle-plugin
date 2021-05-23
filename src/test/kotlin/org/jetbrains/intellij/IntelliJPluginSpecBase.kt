@@ -8,6 +8,7 @@ import org.intellij.lang.annotations.Language
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files.createTempDirectory
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.test.BeforeTest
@@ -16,12 +17,14 @@ import kotlin.test.assertEquals
 abstract class IntelliJPluginSpecBase {
 
     private val pluginsRepository = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
+    private val kotlinPluginVersion = "1.5.0"
     private var debugEnabled = true
 
     val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
-    val dir = createTempDir()
+    val dir: File = createTempDirectory("tmp").toFile()
 
+    private val gradleProperties = file("gradle.properties")
     val buildFile = file("build.gradle")
     val pluginXml = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory = File(dir, "build")
@@ -31,22 +34,13 @@ abstract class IntelliJPluginSpecBase {
         file("settings.gradle").groovy("rootProject.name = 'projectName'")
 
         buildFile.groovy("""
-            buildscript {
-                repositories { 
-                    maven { url 'https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-structure' } 
-                    mavenCentral()
-                }
-                dependencies {
-                    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.60"
-                }
-            }
             plugins {
+                id 'java'
                 id 'org.jetbrains.intellij'
+                id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             sourceCompatibility = 1.8
             targetCompatibility = 1.8
-            apply plugin: 'java'
-            apply plugin: 'kotlin'
             repositories { mavenCentral() }
             intellij {
                 version = '$intellijVersion'
@@ -61,6 +55,10 @@ abstract class IntelliJPluginSpecBase {
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
+        """)
+
+        gradleProperties.groovy("""
+            kotlin.stdlib.default.dependency = false
         """)
     }
 
@@ -168,8 +166,8 @@ abstract class IntelliJPluginSpecBase {
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
         assertEquals(expectedContent.trimIndent(), fileText(zip, path))
 
-    protected fun extractFile(zipFile: ZipFile, path: String) =
-        createTempFile("gradle-test", "").apply {
+    protected fun extractFile(zipFile: ZipFile, path: String): File =
+        File.createTempFile("gradle-test", "").apply {
             deleteOnExit()
             FileUtils.copyInputStreamToFile(zipFile.getInputStream(zipFile.getEntry(path)), this)
         }

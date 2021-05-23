@@ -1,27 +1,36 @@
 package org.jetbrains.intellij.model
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
+import javax.xml.bind.annotation.XmlAttribute
+import javax.xml.bind.annotation.XmlElement
+import javax.xml.bind.annotation.XmlRootElement
 
-@JacksonXmlRootElement(localName = "application")
+@XmlRootElement(name = "application")
 data class UpdatesConfigurable(
-    @JacksonXmlProperty(localName = "component")
-    @JacksonXmlElementWrapper(useWrapping = false)
-    var items: MutableList<Component> = mutableListOf(),
+
+    @set:XmlElement(name = "component")
+    var components: List<UpdatesConfigurableComponent> = mutableListOf(),
 )
 
-data class Component(
-    @JacksonXmlProperty(localName = "option")
-    @JacksonXmlElementWrapper(useWrapping = false)
-    var options: MutableList<Option> = mutableListOf(),
-    @JacksonXmlProperty(isAttribute = true)
-    var name: String,
+data class UpdatesConfigurableComponent(
+
+    @set:XmlAttribute
+    var name: String? = null,
+
+    @set:XmlElement(name = "option")
+    var options: List<UpdatesConfigurableOption> = mutableListOf(),
 )
 
-data class Option(
-    @JacksonXmlProperty(isAttribute = true)
-    var name: String,
-    @JacksonXmlProperty(isAttribute = true)
-    var value: Boolean,
+data class UpdatesConfigurableOption(
+
+    @set:XmlAttribute
+    var name: String? = null,
+
+    @set:XmlAttribute
+    var value: Boolean? = null,
+)
+
+class UpdatesConfigurableExtractor : BaseExtractor<UpdatesConfigurable>(
+    UpdatesConfigurable::class.java,
+    UpdatesConfigurableComponent::class.java,
+    UpdatesConfigurableOption::class.java,
 )

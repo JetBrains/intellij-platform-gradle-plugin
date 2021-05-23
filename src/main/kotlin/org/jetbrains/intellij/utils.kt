@@ -2,68 +2,81 @@
 
 package org.jetbrains.intellij
 
-import com.ctc.wstx.stax.WstxInputFactory
-import com.ctc.wstx.stax.WstxOutputFactory
-import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.dataformat.xml.XmlFactory
-import com.fasterxml.jackson.dataformat.xml.XmlMapper
-import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
+import com.jetbrains.plugin.structure.base.utils.extractTo
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.base.utils.isZip
+import com.jetbrains.plugin.structure.intellij.beans.PluginBean
+import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
+import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
+import org.gradle.api.Incubating
 import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.ExecOperations
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.model.IdeaPlugin
-import org.w3c.dom.Node
-import org.w3c.dom.NodeList
-import org.xml.sax.SAXException
+import org.jdom2.Document
+import org.jdom2.JDOMException
+import org.jdom2.output.Format
+import org.jdom2.output.XMLOutputter
+import org.xml.sax.SAXParseException
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
-import java.io.InputStream
+import java.io.StringWriter
+import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.BiConsumer
 import java.util.function.Predicate
-import javax.xml.parsers.DocumentBuilderFactory
 
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
-val MAJOR_VERSION_PATTERN = "(RIDER-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
+val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
 
-fun mainSourceSet(project: Project): SourceSet {
-    val javaConvention = project.convention.getPlugin(JavaPluginConvention::class.java)
-    return javaConvention.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+fun mainSourceSet(project: Project): SourceSet = project
+    .convention.getPlugin(JavaPluginConvention::class.java)
+    .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+
+fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
+    File(it, "META-INF/plugin.xml").takeIf { file -> file.exists() && file.length() > 0 }
 }
 
-fun sourcePluginXmlFiles(project: Project): List<File> {
-    val builder = DocumentBuilderFactory.newInstance().newDocumentBuilder()
-    return mainSourceSet(project).resources.srcDirs.mapNotNull {
-        val pluginXml = File(it, "META-INF/plugin.xml")
-        try {
-            return@mapNotNull pluginXml.takeIf {
-                val document = builder.parse(pluginXml)
-                document.childNodes.asSequence().any { node ->
-                    node.nodeName == "idea-plugin"
-                }
-            }
-        } catch (e: SAXException) {
-            warn(project.name, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
-        } catch (e: IOException) {
-            warn(project.name, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
-        }
-        null
+fun parsePluginXml(pluginXml: File, context: Any): PluginBean? {
+    try {
+        val document = JDOMUtil.loadDocument(pluginXml.inputStream())
+        return PluginBeanExtractor.extractPluginBean(document)
+    } catch (e: SAXParseException) {
+        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+    } catch (e: JDOMException) {
+        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+    } catch (e: IOException) {
+        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
     }
+    return null
+}
+
+fun transformXml(document: Document, file: File) {
+    val xmlOutput = XMLOutputter()
+    xmlOutput.format.apply {
+        indent = "  "
+        omitDeclaration = true
+        textMode = Format.TextMode.TRIM
+    }
+    val out = StringWriter()
+    xmlOutput.output(document, out)
+    file.writeText(out.toString())
 }
 
 fun getIdeaSystemProperties(
@@ -105,48 +118,15 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun getPluginIds(project: Project) = sourcePluginXmlFiles(project).mapNotNull {
-    parseXml(it, IdeaPlugin::class.java).id
-}
+fun File.isJar() = toPath().isJar()
 
-fun <T> parseXml(stream: InputStream, valueType: Class<T>): T = XmlMapper()
-    .registerKotlinModule()
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    .readValue(stream, valueType)
-
-fun <T> parseXml(file: File, valueType: Class<T>) = parseXml(file.inputStream(), valueType)
-
-fun writeXml(file: File, value: Any) {
-    XmlMapper(XmlFactory(WstxInputFactory(), WstxOutputFactory()))
-        .registerKotlinModule()
-        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
-        .writerWithDefaultPrettyPrinter()
-        .writeValue(file, value)
-}
-
-fun NodeList.asSequence() = (0 until length).asSequence().map { item(it) }
-
-fun Node.get(name: String) = childNodes.asSequence().find { it.nodeName == name }
-
-fun Node.attribute(name: String) = attributes.getNamedItem(name)?.textContent
-
-fun isJarFile(file: File) = file.toPath().isJar()
-
-fun isZipFile(file: File) = file.toPath().isZip()
+fun File.isZip() = toPath().isZip()
 
 fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = when {
     !directory.isDirectory -> emptyList()
     else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
-        override fun accept(file: File) = isJarFile(file) && filter.test(file)
+        override fun accept(file: File) = file.isJar() && filter.test(file)
     }, FalseFileFilter.FALSE)
-}
-
-fun resolveToolsJar(javaExec: String): String {
-    val binDir = File(javaExec).parent
-    return when {
-        OperatingSystem.current().isMacOsX -> "$binDir/../../lib/tools.jar"
-        else -> "$binDir/../lib/tools.jar"
-    }
 }
 
 fun getBuiltinJbrVersion(ideDirectory: File): String? {
@@ -165,31 +145,33 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
     return null
 }
 
-fun unzip(
-    zipFile: File,
-    directory: File,
-    project: Project,
+@Incubating
+fun extractArchive(
+    archiveFile: File,
+    targetDirectory: File,
+    execOperations: ExecOperations,
+    context: Any,
     isUpToDate: Predicate<File>? = null,
     markUpToDate: BiConsumer<File, File>? = null,
-    targetDirName: String? = null,
 ): File {
-    val targetDirectory = File(directory, targetDirName ?: zipFile.name.removeSuffix(".zip"))
     val markerFile = File(targetDirectory, "markerFile")
     if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
         return targetDirectory
     }
 
-    if (targetDirectory.exists()) {
-        targetDirectory.deleteRecursively()
-    }
-    targetDirectory.mkdir()
+    targetDirectory.deleteRecursively()
 
-    debug(project.name, "Unzipping ${zipFile.name}")
-    project.copy {
-        it.from(project.zipTree(zipFile))
-        it.into(targetDirectory)
+    debug(context, "Extracting ${archiveFile.name}")
+
+    if (!OperatingSystem.current().isWindows && archiveFile.name.endsWith(".tar.gz")) {
+        targetDirectory.mkdirs()
+        execOperations.exec {
+            it.commandLine("tar", "-xpf", archiveFile.absolutePath, "--directory", targetDirectory.absolutePath)
+        }
+    } else {
+        archiveFile.toPath().extractTo(targetDirectory.toPath())
     }
-    debug(project.name, "Unzipped ${zipFile.name}")
+    debug(context, "Extracted ${archiveFile.name}")
 
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)
@@ -210,57 +192,62 @@ fun releaseType(version: String): String {
     return "releases"
 }
 
-fun error(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, category, message, e)
-fun warn(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, category, message, e)
-fun info(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, category, message, e)
-fun debug(category: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, category, message, e)
+fun error(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, context, message, e)
+fun warn(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, context, message, e)
+fun info(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, context, message, e)
+fun debug(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, context, message, e)
 
-private fun log(level: LogLevel, category: String?, message: String, e: Throwable?) {
+private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) {
+    val category = when (context) {
+        is Project -> "gradle-intellij-plugin ${context.path}${context.name}"
+        is Task -> "gradle-intellij-plugin ${context.path}"
+        else -> "gradle-intellij-plugin"
+    }
     val logger = Logging.getLogger(IntelliJPlugin::class.java)
     if (e != null && level != LogLevel.ERROR && !logger.isDebugEnabled) {
         logger.log(level, "[$category] $message. Run with --debug option to get more log output.")
     } else {
-        logger.log(level, "[gradle-intellij-plugin$category] $message", e)
+        logger.log(level, "[$category] $message", e)
     }
 }
 
-fun createPlugin(artifact: File, validatePluginXml: Boolean, loggingCategory: String) =
-    when (val result = IdePluginManager.createManager().createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)) {
-        is PluginCreationSuccess -> result.plugin
+fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdePlugin? {
+    val extractDirectory = createTempDirectory("tmp")
+    val creationResult = IdePluginManager.createManager(extractDirectory)
+        .createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
+
+    return when (creationResult) {
+        is PluginCreationSuccess -> creationResult.plugin
         is PluginCreationFail -> {
-            val problems = result.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-            warn(loggingCategory, "Cannot create plugin from file ($artifact): $problems")
+            val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
+            warn(context, "Cannot create plugin from file ($artifact): $problems")
             null
         }
         else -> {
-            warn(loggingCategory, "Cannot create plugin from file ($artifact). $result")
+            warn(context, "Cannot create plugin from file ($artifact). $creationResult")
             null
         }
     }
-
-fun untar(project: Project, from: File, to: File) {
-    val tempDir = File(to.parent, to.name + "-temp")
-    debug(project.name, "Unpacking ${from.absolutePath} to ${tempDir.absolutePath}")
-
-    if (tempDir.exists()) {
-        tempDir.deleteRecursively()
-    }
-    tempDir.mkdir()
-
-    if (OperatingSystem.current().isWindows) {
-        project.copy {
-            it.from(project.tarTree(from))
-            it.into(tempDir)
-        }
-    } else {
-        project.exec {
-            it.commandLine("tar", "-xpf", from.absolutePath, "--directory", tempDir.absolutePath)
-        }
-    }
-    tempDir.renameTo(to)
 }
 
-fun isKotlinRuntime(name: String) = "kotlin-runtime" == name ||
-    name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
-    name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
-    name == "kotlin-test" || name.startsWith("kotlin-test-")
+fun isKotlinRuntime(name: String) =
+    name == "kotlin-runtime" ||
+        name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
+        name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
+        name == "kotlin-test" || name.startsWith("kotlin-test-")
+
+fun DependencyHandler.create(
+    group: String,
+    name: String,
+    version: String?,
+    classifier: String? = null,
+    extension: String? = null,
+    configuration: String? = null,
+): Dependency = create(mapOf(
+    "group" to group,
+    "name" to name,
+    "version" to version,
+    "classifier" to classifier,
+    "ext" to extension,
+    "configuration" to configuration,
+))

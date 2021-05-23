@@ -46,6 +46,7 @@ open class IdeaDependency(
         return fqn
     }
 
+    @Suppress("DuplicatedCode")
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

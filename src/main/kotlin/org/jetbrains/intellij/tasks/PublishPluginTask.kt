@@ -21,7 +21,7 @@ import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class PublishTask @Inject constructor(
+open class PublishPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
@@ -39,7 +39,9 @@ open class PublishTask @Inject constructor(
     @Optional
     val channels: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
-    private val loggingCategory = "${project.name}:$name"
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
 
     init {
         enabled = !project.gradle.startParameter.isOffline
@@ -54,11 +56,11 @@ open class PublishTask @Inject constructor(
             is PluginCreationSuccess -> {
                 val pluginId = creationResult.plugin.pluginId
                 channels.get().forEach { channel ->
-                    info(loggingCategory, "Uploading plugin $pluginId from ${file.absolutePath} to ${host.get()}, channel: $channel")
+                    info(context, "Uploading plugin $pluginId from ${file.absolutePath} to ${host.get()}, channel: $channel")
                     try {
                         val repositoryClient = PluginRepositoryFactory.create(host.get(), token.get())
                         repositoryClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
-                        info(loggingCategory, "Uploaded successfully")
+                        info(context, "Uploaded successfully")
                     } catch (exception: Exception) {
                         throw TaskExecutionException(this, GradleException("Failed to upload plugin. $exception.message", exception))
                     }

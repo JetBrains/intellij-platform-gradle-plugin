@@ -8,7 +8,7 @@ class JpsIdeaDependency(
     classes: File,
     sources: File?,
     withKotlin: Boolean,
-    loggingCategory: String,
+    context: Any,
 ) : IdeaDependency(
     "ideaJPS",
     version,
@@ -16,7 +16,7 @@ class JpsIdeaDependency(
     classes,
     sources,
     withKotlin,
-    BuiltinPluginsRegistry(classes, loggingCategory),
+    BuiltinPluginsRegistry(classes, context),
     emptyList(),
 ) {
 

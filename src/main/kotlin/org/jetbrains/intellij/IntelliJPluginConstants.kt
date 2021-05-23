@@ -3,7 +3,6 @@ package org.jetbrains.intellij
 object IntelliJPluginConstants {
     const val GROUP_NAME = "intellij"
     const val EXTENSION_NAME = "intellij"
-    const val SIGNING_EXTENSION_NAME = "signing"
     const val DEFAULT_SANDBOX = "idea-sandbox"
     const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
     const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
@@ -24,7 +23,9 @@ object IntelliJPluginConstants {
 
     const val IDEA_CONFIGURATION_NAME = "idea"
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
+    const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "intellijDefaultDependencies"
 
+    const val ANNOTATIONS_DEPENDENCY_VERSION = "21.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     const val DEFAULT_INTELLIJ_REPOSITORY =
         "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository"

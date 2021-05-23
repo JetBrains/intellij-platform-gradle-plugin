@@ -25,7 +25,9 @@ open class VerifyPluginTask @Inject constructor(
     @Input
     val ignoreFailures: Property<Boolean> = objectFactory.property(Boolean::class.java).convention(false)
 
-    private val loggingCategory = "${project.name}:$name"
+    @Transient
+    @Suppress("LeakingThis")
+    private val context = this
 
     override fun getIgnoreFailures(): Boolean = ignoreFailures.get()
 
@@ -44,16 +46,16 @@ open class VerifyPluginTask @Inject constructor(
         val creationResult = pluginDir.get().let { IdePluginManager.createManager().createPlugin(it.asFile.toPath()) }
         when (creationResult) {
             is PluginCreationSuccess -> creationResult.warnings.forEach {
-                warn(loggingCategory, it.message)
+                warn(context, it.message)
             }
             is PluginCreationFail -> creationResult.errorsAndWarnings.forEach {
                 if (it.level == PluginProblem.Level.ERROR) {
-                    error(loggingCategory, it.message)
+                    error(context, it.message)
                 } else {
-                    warn(loggingCategory, it.message)
+                    warn(context, it.message)
                 }
             }
-            else -> error(loggingCategory, creationResult.toString())
+            else -> error(context, creationResult.toString())
         }
         val failBuild = creationResult !is PluginCreationSuccess || !ignoreWarnings.get() && creationResult.warnings.isNotEmpty()
         if (failBuild && !ignoreFailures.get()) {

@@ -1,17 +1,39 @@
 package org.jetbrains.intellij.model
 
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
+import javax.xml.bind.annotation.XmlElement
+import javax.xml.bind.annotation.XmlElementWrapper
+import javax.xml.bind.annotation.XmlRootElement
 
-@JacksonXmlRootElement(localName = "metadata")
+@XmlRootElement(name = "metadata")
 data class PluginVerifierRepository(
+
+    @set:XmlElement
     var groupId: String? = null,
+
+    @set:XmlElement
     var artifactId: String? = null,
-    var versioning: Versioning? = null,
+
+    @set:XmlElement
+    var versioning: PluginVerifierRepositoryVersioning? = null,
 )
 
-data class Versioning(
+data class PluginVerifierRepositoryVersioning(
+
+    @set:XmlElement
     var latest: String? = null,
+
+    @set:XmlElement
     var release: String? = null,
+
+    @set:XmlElement
     var lastUpdated: String? = null,
-    var versions: List<String>? = emptyList(),
+
+    @set:XmlElement(name = "version")
+    @set:XmlElementWrapper
+    var versions: List<String>? = mutableListOf(),
+)
+
+class PluginVerifierRepositoryExtractor : BaseExtractor<PluginVerifierRepository>(
+    PluginVerifierRepository::class.java,
+    PluginVerifierRepositoryVersioning::class.java,
 )

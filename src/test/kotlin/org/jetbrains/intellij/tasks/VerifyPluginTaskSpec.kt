@@ -1,10 +1,12 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class VerifyTaskSpec : IntelliJPluginSpecBase() {
+class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not fail on warning by default`() {
@@ -91,5 +93,13 @@ class VerifyTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
         assertFalse(result.output.contains("Plugin verification"))
+    }
+
+    @Test
+    fun `reuse configuration cache`() {
+        buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, "--configuration-cache")
+        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
     }
 }

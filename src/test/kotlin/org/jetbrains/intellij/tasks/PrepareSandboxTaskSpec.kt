@@ -1,6 +1,9 @@
-package org.jetbrains.intellij
+package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
+import java.nio.file.Files.createTempDirectory
 import java.util.zip.ZipFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -48,12 +51,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         file("nestedProject/src/main/java/NestedAppFile.java").groovy("""
-            class NestedAppFile{}
+            class NestedAppFile {}
         """)
 
-        file("nestedProject/src/main/resources/META-INF/plugin.xml").groovy("""
-            pluginXml.text
-        """)
+        file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
         build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
@@ -206,7 +207,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-              <depends config-file="other.xml"/>
+              <depends config-file="other.xml" />
             </idea-plugin>    
         """)
 
@@ -248,86 +249,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         assertZipContent(jar, "META-INF/plugin.xml", """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="201.6668" until-build="201.*"/>
-              <depends config-file="other.xml"/>
+              <idea-version since-build="201.6668" until-build="201.*" />
+              <depends config-file="other.xml" />
             </idea-plugin>
         """)
-    }
-
-    @Test
-    fun `download old robot server plugin task`() {
-        writeJavaFile()
-
-        file("src/main/resources/META-INF/other.xml").xml("""
-            <idea-plugin />
-        """)
-
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
-            <idea-plugin />
-        """)
-
-        pluginXml.xml("""
-            <idea-plugin>
-                <depends config-file="other.xml"/>
-            </idea-plugin>
-        """)
-
-        buildFile.groovy("""
-            version = '0.42.123'
-            intellij {
-                pluginName = 'myPluginName'
-                plugins = ['copyright']
-            }
-            downloadRobotServerPlugin.version = '0.10.0'
-            dependencies {
-                compile 'joda-time:joda-time:2.8.1'
-            }
-        """)
-
-        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-
-        assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
-                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-0.10.0.jar"))
-        )
-    }
-
-    @Test
-    fun `download new robot server plugin task`() {
-        writeJavaFile()
-
-        file("src/main/resources/META-INF/other.xml").xml("""
-            <idea-plugin />
-        """)
-
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
-            <idea-plugin />
-        """)
-
-        pluginXml.xml("""
-            <idea-plugin>
-                <depends config-file="other.xml"/>
-            </idea-plugin>
-        """)
-
-        buildFile.groovy("""
-            version = '0.42.123'
-            intellij {
-                pluginName = 'myPluginName'
-                plugins = ['copyright']
-            }
-            downloadRobotServerPlugin.version = '0.11.1'
-            dependencies {
-                compile 'joda-time:joda-time:2.8.1'
-            }
-        """)
-
-        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-
-        assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
-                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar"))
-        )
     }
 
     @Test
@@ -344,7 +269,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <depends config-file="other.xml"/>
+                <depends config-file="other.xml" />
             </idea-plugin>
         """)
 
@@ -460,7 +385,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun createPlugin(): File {
-        val plugin = createTempDir()
+        val plugin = createTempDirectory("tmp").toFile()
         File(plugin, "classes/").mkdir()
         File(plugin, "META-INF/").mkdir()
         File(plugin, "classes/A.class").createNewFile()
@@ -470,7 +395,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <id>${plugin.name}</id>
               <name>Test</name>
               <version>1.0</version>
-              <idea-version since-build="201.6668" until-build="201.*"/>
+              <idea-version since-build="201.6668" until-build="201.*" />
               <vendor url="https://jetbrains.com">JetBrains</vendor>
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>
@@ -493,7 +418,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin>
-                <depends config-file="other.xml"/>
+                <depends config-file="other.xml" />
             </idea-plugin>
         """)
 
@@ -553,7 +478,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -570,7 +495,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="SomeOtherComponent">
-                    <option name="SomeOption" value="false"/>
+                    <option name="SomeOption" value="false" />
                 </component>
             </application>
         """)
@@ -582,10 +507,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="SomeOtherComponent">
-                    <option name="SomeOption" value="false"/>
+                    <option name="SomeOption" value="false" />
                   </component>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -602,7 +527,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="UpdatesConfigurable">
-                    <option name="SomeOption" value="false"/>
+                    <option name="SomeOption" value="false" />
                 </component>
             </application>
         """)
@@ -614,8 +539,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="SomeOption" value="false"/>
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="SomeOption" value="false" />
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -633,7 +558,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED"/>
+                    <option name="CHECK_NEEDED" />
                 </component>
             </application>
         """)
@@ -645,7 +570,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -663,7 +588,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         updatesFile.xml("""
             <application>
                 <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="true"/>
+                    <option name="CHECK_NEEDED" value="true" />
                 </component>
             </application>
         """)
@@ -675,7 +600,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
                 <application>
                   <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false"/>
+                    <option name="CHECK_NEEDED" value="false" />
                   </component>
                 </application>
             """,
@@ -744,5 +669,83 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             ),
             collectPaths(sandbox),
         )
+    }
+
+    @Test
+    fun `reuse configuration cache for prepareSandbox`() {
+        writeJavaFile()
+
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        buildFile.groovy("""
+            intellij {
+                plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
+                pluginName = 'myPluginName'
+            }
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
+        val result = build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
+
+    @Test
+    fun `reuse configuration cache for prepareTestingSandbox`() {
+        writeJavaFile()
+
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        buildFile.groovy("""
+            intellij {
+                plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
+                pluginName = 'myPluginName'
+            }
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
+        val result = build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
+
+    @Test
+    fun `reuse configuration cache for prepareUiTestingSandbox`() {
+        writeJavaFile()
+
+        file("src/main/resources/META-INF/other.xml").xml("""
+            <idea-plugin />
+        """)
+
+        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+            <idea-plugin />
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <depends config-file="other.xml" />
+            </idea-plugin>
+        """)
+
+        buildFile.groovy("""
+            version = '0.42.123'
+            intellij {
+                pluginName = 'myPluginName'
+                plugins = ['copyright']
+            }
+            downloadRobotServerPlugin.version = '0.11.1'
+            dependencies {
+                compile 'joda-time:joda-time:2.8.1'
+            }
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
+        val result = build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
     }
 }
