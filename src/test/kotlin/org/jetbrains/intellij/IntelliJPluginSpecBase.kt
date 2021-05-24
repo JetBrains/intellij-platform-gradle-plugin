@@ -145,6 +145,15 @@ abstract class IntelliJPluginSpecBase {
         }
     """)
 
+    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin("""
+        object App {
+            @JvmStatic
+            fun main(args: Array<String>) {
+                println(args.joinToString())
+            }
+        }
+    """)
+
     protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin("""
         package pack
 
