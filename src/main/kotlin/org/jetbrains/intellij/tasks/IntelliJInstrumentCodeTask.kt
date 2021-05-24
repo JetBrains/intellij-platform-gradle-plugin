@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import groovy.lang.Closure
 import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
@@ -176,24 +177,39 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
     private fun instrumentCode(srcDirs: List<File>, outputDir: File, instrumentNotNull: Boolean) {
         val headlessOldValue = System.setProperty("java.awt.headless", "true")
-        ant.invokeMethod("instrumentIdeaExtensions", mapOf(
-            "srcdir" to srcDirs.joinToString(":"),
-            "destdir" to outputDir,
-            "classpath" to sourceSetCompileClasspath.get().joinToString(":"),
-            "includeantruntime" to false,
-            "instrumentNotNull" to instrumentNotNull,
-        ))
+        try {
+            // Builds up the Ant XML:
+            // <instrumentIdeaExtensions srcdir="..." ...>
+            //    <skip pattern=".."/>
+            // </instrumentIdeaExtensions>
 
-        if (instrumentNotNull) {
-            ant.invokeMethod("skip", mapOf(
-                "pattern" to "kotlin/Metadata"
+            ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
+                mapOf(
+                    "srcdir" to srcDirs.joinToString(":"),
+                    "destdir" to outputDir,
+                    "classpath" to sourceSetCompileClasspath.get().joinToString(":"),
+                    "includeantruntime" to false,
+                    "instrumentNotNull" to instrumentNotNull
+                ),
+                object : Closure<Any>(this, this) {
+                    @Suppress("unused") // Groovy calls using reflection inside of Closure
+                    fun doCall(): Any? {
+                        if (instrumentNotNull) {
+                            ant.invokeMethod("skip", mapOf(
+                                "pattern" to "kotlin/Metadata"
+                            ))
+                        }
+
+                        return null
+                    }
+                }
             ))
-        }
-
-        if (headlessOldValue != null) {
-            System.setProperty("java.awt.headless", headlessOldValue)
-        } else {
-            System.clearProperty("java.awt.headless")
+        } finally {
+            if (headlessOldValue != null) {
+                System.setProperty("java.awt.headless", headlessOldValue)
+            } else {
+                System.clearProperty("java.awt.headless")
+            }
         }
     }
 }
