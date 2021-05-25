@@ -31,6 +31,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        gradleVersion:
+          - 6.2
+          - 6.9
+          - 7.0.2
         include:
           - os: windows-latest
           - os: ubuntu-latest
@@ -60,4 +64,4 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Run Linters and Test
-        run: ./gradlew test
+        run: ./gradlew test -PtestGradleVersion=${{ matrix.gradleVersion }}
