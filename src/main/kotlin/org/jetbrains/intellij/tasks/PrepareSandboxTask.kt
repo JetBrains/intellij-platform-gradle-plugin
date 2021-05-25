@@ -20,9 +20,9 @@ import org.jdom2.input.JDOMParseException
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.model.UpdatesConfigurable
 import org.jetbrains.intellij.model.UpdatesConfigurableComponent
-import org.jetbrains.intellij.model.UpdatesConfigurableExtractor
 import org.jetbrains.intellij.model.UpdatesConfigurableOption
 import java.io.File
 import javax.inject.Inject
@@ -135,7 +135,7 @@ open class PrepareSandboxTask @Inject constructor(
             }
         }
 
-        val extractor = UpdatesConfigurableExtractor()
+        val extractor = XmlExtractor<UpdatesConfigurable>()
         val updatesConfigurable = try {
             extractor.unmarshal(updatesConfig)
         } catch (ignore: JDOMParseException) {

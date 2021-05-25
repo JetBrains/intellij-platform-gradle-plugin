@@ -28,9 +28,3 @@ data class UpdatesConfigurableOption(
     @set:XmlAttribute
     var value: Boolean? = null,
 )
-
-class UpdatesConfigurableExtractor : BaseExtractor<UpdatesConfigurable>(
-    UpdatesConfigurable::class.java,
-    UpdatesConfigurableComponent::class.java,
-    UpdatesConfigurableOption::class.java,
-)

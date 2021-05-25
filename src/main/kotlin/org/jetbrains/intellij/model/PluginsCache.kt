@@ -25,8 +25,3 @@ data class PluginsCachePlugin(
     @set:XmlElementWrapper
     var dependencies: List<String> = mutableListOf(),
 ) : Serializable
-
-class PluginsCacheExtractor : BaseExtractor<PluginsCache>(
-    PluginsCache::class.java,
-    PluginsCachePlugin::class.java,
-)

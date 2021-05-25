@@ -2,19 +2,13 @@ package org.jetbrains.intellij.model
 
 import javax.xml.bind.annotation.XmlRegistry
 
-@SuppressWarnings("unused")
+@Suppress("unused")
 @XmlRegistry
 class ObjectFactory {
 
-    fun createUpdatesConfigurable(): UpdatesConfigurable? {
-        return UpdatesConfigurable()
-    }
+    fun createUpdatesConfigurable() = UpdatesConfigurable()
 
-    fun createPluginsCache(): PluginsCache? {
-        return PluginsCache()
-    }
+    fun createPluginsCache() = PluginsCache()
 
-    fun createPluginVerifierRepository(): PluginVerifierRepository? {
-        return PluginVerifierRepository()
-    }
+    fun createPluginVerifierRepository() = PluginVerifierRepository()
 }

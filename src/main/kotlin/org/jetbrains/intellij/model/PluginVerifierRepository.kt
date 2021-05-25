@@ -32,8 +32,3 @@ data class PluginVerifierRepositoryVersioning(
     @set:XmlElementWrapper
     var versions: List<String>? = mutableListOf(),
 )
-
-class PluginVerifierRepositoryExtractor : BaseExtractor<PluginVerifierRepository>(
-    PluginVerifierRepository::class.java,
-    PluginVerifierRepositoryVersioning::class.java,
-)

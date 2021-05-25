@@ -32,7 +32,8 @@ import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.model.PluginVerifierRepositoryExtractor
+import org.jetbrains.intellij.model.XmlExtractor
+import org.jetbrains.intellij.model.PluginVerifierRepository
 import org.jetbrains.intellij.warn
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -63,7 +64,7 @@ open class RunPluginVerifierTask @Inject constructor(
         fun resolveLatestVerifierVersion(): String {
             debug(message = "Resolving Latest Verifier version")
             val url = URL(VERIFIER_METADATA_URL)
-            return PluginVerifierRepositoryExtractor().unmarshal(url.openStream()).versioning?.latest
+            return XmlExtractor<PluginVerifierRepository>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
     }
