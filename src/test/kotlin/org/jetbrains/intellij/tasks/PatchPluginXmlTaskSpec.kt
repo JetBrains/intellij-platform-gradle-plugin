@@ -380,7 +380,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        assumeFalse(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+        assumeFalse(VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
 
         pluginXml.xml("""
             <idea-plugin />
