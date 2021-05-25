@@ -1,7 +1,9 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.SearchableOptionsSpecBase
+import org.junit.Assume.assumeTrue
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -43,6 +45,8 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
+        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+
         build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
 

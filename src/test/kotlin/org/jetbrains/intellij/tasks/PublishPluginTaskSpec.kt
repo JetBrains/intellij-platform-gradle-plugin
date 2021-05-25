@@ -1,7 +1,9 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
+import org.junit.Assume.assumeTrue
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -38,6 +40,8 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
+        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+
         buildFile.groovy("""
             publishPlugin { }
             verifyPlugin {
