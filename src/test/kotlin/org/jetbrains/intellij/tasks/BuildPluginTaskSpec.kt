@@ -3,7 +3,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assume.assumeTrue
+import org.junit.Assume.assumeFalse
 import java.io.File
 import java.util.zip.ZipFile
 import kotlin.test.Test
@@ -391,7 +391,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+        assumeFalse(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
 
         pluginXml.xml("""
             <idea-plugin>

@@ -4,7 +4,7 @@ import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import org.junit.Assume
-import org.junit.Assume.assumeTrue
+import org.junit.Assume.assumeFalse
 import java.io.File
 import java.nio.file.Files.createTempDirectory
 import java.util.zip.ZipFile
@@ -676,7 +676,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache for prepareSandbox`() {
-        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+        assumeFalse(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
 
         writeJavaFile()
 
@@ -699,7 +699,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache for prepareTestingSandbox`() {
-        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+        assumeFalse(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
 
         writeJavaFile()
 
@@ -722,7 +722,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache for prepareUiTestingSandbox`() {
-        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+        assumeFalse(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
 
         writeJavaFile()
 
