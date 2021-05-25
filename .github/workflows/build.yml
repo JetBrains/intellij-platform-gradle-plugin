@@ -65,3 +65,7 @@ jobs:
 
       - name: Run Linters and Test
         run: ./gradlew test -PtestGradleVersion="${{ matrix.gradleVersion }}"
+
+      - name: Logs
+        if: ${{ always() }}
+        run: cat /home/runner/work/gradle-intellij-plugin/gradle-intellij-plugin/build/reports/tests/test/index.html
