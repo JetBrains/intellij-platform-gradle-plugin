@@ -43,7 +43,7 @@ plugins {
  
 ### Snapshot version
 
-<summary>In order to get the latest features, use the snapshot version of the plugin</summary>
+<summary>To get the latest features, use the snapshot version of the plugin</summary>
 
 ```groovy
 plugins {
@@ -183,6 +183,17 @@ Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDE
 | <kbd>subsystemsToCheck</kbd> - Specifies which subsystems of IDE should be checked. Available options: `all` (default), `android-only`, `without-android`.                                      | none                                                                                                                                           |
 
 > **TIP** To run Plugin Verifier in [`-offline mode`](https://github.com/JetBrains/intellij-plugin-verifier/pull/58), set the Gradle [`offline` start parameter](https://docs.gradle.org/current/javadoc/org/gradle/StartParameter.html#setOffline-boolean-).
+
+### Plugin Signing
+To sign the plugin before publishing to the JetBrains Marketplace with the `signPlugin` task, it is required to provide a certificate chain and a private key with its password using `signPlugin { ... }` Plugin Signing DSL.
+
+As soon as `privateKey` and `certificateChain` properties are specified, task will be executed automatically right before the `publishPlugin` task.
+
+| **Attributes**              | **Default Value**  |
+| :-------------------------- | :----------------- |
+| <kbd>certificateChain</kbd> A string containing X509 certificates. | none |
+| <kbd>privateKey</kbd> Encoded private key in PEM format. | none |
+| <kbd>password</kbd> Password required to decrypt private key. | none |
 
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
