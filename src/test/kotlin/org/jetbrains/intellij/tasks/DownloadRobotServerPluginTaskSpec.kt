@@ -3,7 +3,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assume.assumeTrue
+import org.junit.Assume.assumeFalse
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -88,7 +88,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+        assumeFalse(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
 
         build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache")
