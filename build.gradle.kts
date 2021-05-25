@@ -44,7 +44,7 @@ version = when (properties("snapshot").toBoolean()) {
 }
 group = "org.jetbrains.intellij.plugins"
 description = """
-**This project requires Gradle 5.1 or newer**
+**This project requires Gradle 6.2 or newer**
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
