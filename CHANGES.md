@@ -1,5 +1,17 @@
 # Changelog
 
+## 1.0.0
+
+- Plugin Signing integration
+- Lazy Configuration support
+- Configuration Cache support
+- Task Configuration Avoidance support
+- better CI (GitHub Actions, Qodana, Dependabot)
+- Rewritten in Kotlin
+- properties names cleanup (`*Repo` to `*Repository`, `*Directory` to `*Dir` – for the sake of consistency with Gradle)
+- Stepping away from Bintray and JCenter
+- Breaking changes guide: https://lp.jetbrains.com/gradle-intellij-plugin
+
 ## 0.7.3
 
 - migrate from bintray [#594](../../issues/594)
