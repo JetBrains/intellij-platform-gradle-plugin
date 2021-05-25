@@ -18,7 +18,7 @@ abstract class IntelliJPluginSpecBase {
 
     private val pluginsRepository = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     private val kotlinPluginVersion = "1.5.0"
-    private val defaultGradleVersion = System.getProperty("test.gradle.version", "7.0.2")
+    private val gradleVersion = System.getProperty("test.gradle.version", "7.0.2")
     private var debugEnabled = true
 
     val gradleHome: String = System.getProperty("test.gradle.home")
@@ -85,7 +85,7 @@ abstract class IntelliJPluginSpecBase {
 
     protected fun build(vararg tasks: String): BuildResult = build(false, *tasks)
 
-    protected fun build(fail: Boolean, vararg tasks: String): BuildResult = build(defaultGradleVersion, fail, *tasks)
+    protected fun build(fail: Boolean, vararg tasks: String): BuildResult = build(gradleVersion, fail, *tasks)
 
     protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String): BuildResult =
         builder(gradleVersion, *tasks).run {
