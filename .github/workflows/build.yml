@@ -35,10 +35,10 @@ jobs:
           - 6.2
           - 6.9
           - 7.0.2
-        include:
-          - os: windows-latest
-          - os: ubuntu-latest
-          - os: macos-latest
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
 
     steps:
 
