@@ -1,7 +1,9 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.SearchableOptionsSpecBase
+import org.junit.Assume.assumeTrue
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -41,6 +43,8 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
+        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
         buildFile.groovy("""
             intellij {

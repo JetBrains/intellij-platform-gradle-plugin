@@ -1,8 +1,11 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.commons.io.FileUtils
+import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
+import org.junit.Assume
+import org.junit.Assume.assumeTrue
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -249,6 +252,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
+        assumeTrue(VersionNumber.parse(gradleVersion) >= VersionNumber.parse("6.6"))
+
         writePluginXmlFile()
         buildFile.groovy("""
             version = "1.0.0"
