@@ -46,6 +46,8 @@ group = "org.jetbrains.intellij.plugins"
 description = """
 **This project requires Gradle 6.2 or newer**
 
+For migration guide to the 1.0 version, visit: https://lp.jetbrains.com/gradle-intellij-plugin
+
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
 The plugin adds extra IntelliJ-specific dependencies, patches `processResources` tasks to fill some tags 

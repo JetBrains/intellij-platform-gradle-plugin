@@ -12,7 +12,7 @@ plugins {{{\n}
  
 ### Snapshot version
 
-<summary>In order to get the latest features, use the snapshot version of the plugin</summary>
+<summary>To get the latest features, use the snapshot version of the plugin</summary>
 pre}
 {\n}{\n}```groovy{\n}
 plugins {{{\n}

@@ -4,7 +4,7 @@ Plugin introduces the following tasks
 
 | **Task** | **Description** |
 | -------- | --------------- |
-| `buildPlugin`            | Assembles plugin and prepares zip archive for deployment. |
+| `buildPlugin`            | Assembles plugin and prepares ZIP archive for deployment. |
 | `patchPluginXml`         | Collects all plugin.xml files in sources and fill since/until build and version attributes. |
 | `downloadRobotServerPlugin` | Downloads robot-server plugin which is needed for ui tests running. | 
 | `prepareSandbox`         | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
@@ -17,3 +17,4 @@ Plugin introduces the following tasks
 | `publishPlugin`          | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
 | `runPluginVerifier`      | Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IntelliJ IDE builds. |
 | `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |
+| `signPlugin`             | Signs the ZIP archive with the provided key using [marketplace-zip-signer](https://github.com/JetBrains/marketplace-zip-signer) library. |

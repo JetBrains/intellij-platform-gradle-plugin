@@ -11,6 +11,8 @@
 > 
 **This project requires Gradle 6.2 or newer**
 
+For migration guide to the 1.0 version, visit: https://lp.jetbrains.com/gradle-intellij-plugin
+
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
 The plugin adds extra IntelliJ-specific dependencies, patches `processResources` tasks to fill some tags 
@@ -25,7 +27,7 @@ helpful while developing plugins for IntelliJ platform.
 > **TIP** Create new plugins with a preconfigured project scaffold and CI using
 > [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template).
 
-Here is [the manual](https://plugins.jetbrains.com/docs/intellij/gradle-prerequisites.html) on how to start developing plugins for IntelliJ Platform using Gradle.
+Here is [the manual](https://plugins.jetbrains.com/docs/intellij/gradle-prerequisites.html) on how to start developing plugins for the IntelliJ Platform using Gradle.
 
 Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
@@ -69,7 +71,7 @@ Plugin introduces the following tasks
 
 | **Task** | **Description** |
 | -------- | --------------- |
-| `buildPlugin`            | Assembles plugin and prepares zip archive for deployment. |
+| `buildPlugin`            | Assembles plugin and prepares ZIP archive for deployment. |
 | `patchPluginXml`         | Collects all plugin.xml files in sources and fill since/until build and version attributes. |
 | `downloadRobotServerPlugin` | Downloads robot-server plugin which is needed for ui tests running. | 
 | `prepareSandbox`         | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
@@ -82,6 +84,7 @@ Plugin introduces the following tasks
 | `publishPlugin`          | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
 | `runPluginVerifier`      | Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IntelliJ IDE builds. |
 | `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |
+| `signPlugin`             | Signs the ZIP archive with the provided key using [marketplace-zip-signer](https://github.com/JetBrains/marketplace-zip-signer) library. |
 
 ## Configuration
 
@@ -201,46 +204,6 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 | **Attributes**            | **Default Value** |
 | :------------------------ |  :---------------- |
 | <kbd>compilerVersion</kbd> is a version of instrumenting compiler. It's used for non-IDEA plugins (e.g. CLion or Rider). | <kbd>Build number of the IDE dependency</kbd> |
-
-### build.gradle
-
-```groovy
-plugins {
-  id "org.jetbrains.intellij" version "1.0"
-}
-
-intellij {
-  version 'IC-2020.1'
-  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
-  pluginName 'MyPlugin'
-}
-
-publishPlugin {
-  token 'ssdfhasdfASDaq23jhnasdkjh'
-  channels 'nightly'
-}
-```
-
-
-### build.gradle.kts
-
-```kotlin
-plugins {
-  id("org.jetbrains.intellij") version "1.0"
-}
-
-intellij {
-  version = "2020.1"
-  setPlugins("coverage", "org.intellij.plugins.markdown:8.5.0.20160208")
-  pluginName = "MyPlugin"
-}
-
-tasks.publishPlugin {
-  token = "ssdfhasdfASDaq23jhnasdkjh"
-  channels = "nightly"
-}
-```
-
 
 # Examples
 
