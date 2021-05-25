@@ -31,14 +31,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        gradleVersion:
-          - 6.2
-          - 6.9
-          - 7.0.2
-        os:
-          - windows-latest
-          - ubuntu-latest
-          - macos-latest
+        gradleVersion: ['6.2', '6.9', '7.0.2']
+        os: ['windows-latest', 'ubuntu-latest', 'macos-latest']
 
     steps:
 
