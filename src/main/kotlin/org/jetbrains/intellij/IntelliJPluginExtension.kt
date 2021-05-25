@@ -212,7 +212,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     fun getPluginDependenciesList(project: Project): Set<PluginDependency> {
         if (!pluginDependenciesConfigured) {
-            debug(project, "Plugin dependencies are resolved", Throwable())
+            debug(project, "Plugin dependencies are resolved")
             project.configurations.getByName(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
             pluginDependenciesConfigured = true
         }

@@ -11,7 +11,10 @@ import javax.xml.bind.JAXBException
 
 sealed class BaseExtractor<T>(vararg classesToBeBound: Class<*>) {
 
-    private val jaxbContext by lazy { JAXBContext.newInstance(*classesToBeBound) }
+    private val jaxbContext by lazy {
+        val cl = ObjectFactory::class.java.classLoader
+        JAXBContext.newInstance("org.jetbrains.intellij.model", cl)
+    }
 
     @Throws(JAXBException::class)
     fun unmarshal(file: File) = unmarshal(file.inputStream())

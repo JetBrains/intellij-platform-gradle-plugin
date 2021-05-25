@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement
 data class PluginsCache(
 
     @set:XmlElement(name = "plugin")
-    var plugins: List<PluginsCachePlugin> = emptyList(),
+    var plugins: List<PluginsCachePlugin> = mutableListOf(),
 ) : Serializable
 
 data class PluginsCachePlugin(
