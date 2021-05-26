@@ -18,7 +18,7 @@ abstract class IntelliJPluginSpecBase {
 
     private val pluginsRepository = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     private val kotlinPluginVersion = "1.5.0"
-    protected val gradleVersion = System.getProperty("test.gradle.version", "7.0.2")
+    protected val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: "7.0.2"
     private var debugEnabled = true
 
     val gradleHome: String = System.getProperty("test.gradle.home")
