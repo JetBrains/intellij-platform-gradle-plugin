@@ -44,7 +44,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        buildAndFail(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -164,7 +164,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             version = '0.42.123'
             
             dependencies { 
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
 
             intellij { 

@@ -180,7 +180,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['copyright']
             }
             dependencies {
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 
@@ -221,7 +221,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['copyright']
             }
             dependencies {
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 
@@ -284,7 +284,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
             downloadRobotServerPlugin.version = '0.11.1'
             dependencies {
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 
@@ -434,7 +434,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 sandboxDir = '$sandboxPath'
             }
             dependencies {
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 
@@ -748,7 +748,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
             downloadRobotServerPlugin.version = '0.11.1'
             dependencies {
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 
