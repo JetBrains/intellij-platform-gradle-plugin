@@ -2,7 +2,7 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-fun properties(key: String) = project.findProperty(key).toString()
+fun properties(key: String) = project.findProperty(key)?.toString()
 
 plugins {
     kotlin("jvm") version "1.5.10"
@@ -41,7 +41,7 @@ dependencies {
 version = when (properties("snapshot").toBoolean()) {
     true -> "${properties("snapshotVersion")}-SNAPSHOT"
     false -> properties("version")
-}
+} ?: ""
 group = "org.jetbrains.intellij.plugins"
 description = """
 **This project requires Gradle 6.2 or newer**
