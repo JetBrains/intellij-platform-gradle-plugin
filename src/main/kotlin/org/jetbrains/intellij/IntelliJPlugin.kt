@@ -519,13 +519,14 @@ open class IntelliJPlugin : Plugin<Project> {
     ) {
         val prepareSandboxTaskProvider = project.tasks.named(prepareSandBoxTaskName)
         val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
+        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, task)?.id }
 
         task.ideDir.convention(project.provider {
             val path = extension.getIdeaDependency(project).classes.path
             project.layout.projectDirectory.dir(path)
         })
         task.requiredPluginIds.convention(project.provider {
-            sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, task)?.id }
+            pluginIds
         })
         task.configDir.convention(project.provider {
             project.file(prepareSandboxTask.configDir.get())
