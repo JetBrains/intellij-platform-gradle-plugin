@@ -40,7 +40,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['copyright']
             }
             dependencies { 
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 

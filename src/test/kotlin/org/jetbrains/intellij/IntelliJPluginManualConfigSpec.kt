@@ -20,17 +20,17 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             
             afterEvaluate {
                 dependencies {
-                    compileOnly DependenciesUtils.intellij(project) { include('openapi.jar') }
-                    compile     DependenciesUtils.intellij(project) { include('asm-all.jar') }
-                    runtime     DependenciesUtils.intellij(project) { exclude('idea.jar') }
-                    testCompile DependenciesUtils.intellij(project) { include('boot.jar') }
-                    testRuntime DependenciesUtils.intellij(project)
+                    compileOnly        DependenciesUtils.intellij(project) { include('openapi.jar') }
+                    implementation     DependenciesUtils.intellij(project) { include('asm-all.jar') }
+                    runtimeOnly        DependenciesUtils.intellij(project) { exclude('idea.jar') }
+                    testImplementation DependenciesUtils.intellij(project) { include('boot.jar') }
+                    testRuntimeOnly    DependenciesUtils.intellij(project)
                 } 
             }
-            task printMainCompileClassPath { doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath } }
-            task printMainRuntimeClassPath { doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath } }
-            task printTestCompileClassPath { doLast { println 'testCompile: ' + sourceSets.test.compileClasspath.asPath } }
-            task printTestRuntimeClassPath { doLast { println 'testRuntime: ' + sourceSets.test.runtimeClasspath.asPath } }
+            task printMainCompileClassPath { doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath } }
+            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
+            task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
+            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
         """)
 
         build(
@@ -39,10 +39,10 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             "printTestRuntimeClassPath",
             "printMainRuntimeClassPath",
         ).output.lines().let { lines ->
-            val mainClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val mainRuntimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
-            val testClasspath = lines.find { it.startsWith("testCompile:") } ?: ""
-            val testRuntimeClasspath = lines.find { it.startsWith("testRuntime:") } ?: ""
+            val mainClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val testClasspath = lines.find { it.startsWith("testImplementation:") } ?: ""
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") } ?: ""
 
             assertTrue(mainClasspath.contains("openapi.jar"))           // included explicitly in compileOnly
             assertTrue(mainRuntimeClasspath.contains("openapi.jar"))    // includes all but idea.jar
@@ -79,19 +79,18 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             }
             afterEvaluate {
                 dependencies {
-                    compileOnly DependenciesUtils.intellijPlugin(project, 'junit') { include('junit-rt.jar') }
-                    compile     DependenciesUtils.intellijPlugin(project, 'junit')  { include('idea-junit.jar') }
-                    runtime     DependenciesUtils.intellijPlugin(project, 'testng') { exclude('testng-plugin.jar') }
-                    testCompile DependenciesUtils.intellijPlugin(project, 'testng') { include("testng.jar") }
-                    testRuntime DependenciesUtils.intellijPlugins(project, 'junit', 'testng')
+                    compileOnly        DependenciesUtils.intellijPlugin(project, 'junit') { include('junit-rt.jar') }
+                    implementation     DependenciesUtils.intellijPlugin(project, 'junit')  { include('idea-junit.jar') }
+                    runtimeOnly        DependenciesUtils.intellijPlugin(project, 'testng') { exclude('testng-plugin.jar') }
+                    testImplementation DependenciesUtils.intellijPlugin(project, 'testng') { include("testng.jar") }
+                    testRuntimeOnly    DependenciesUtils.intellijPlugins(project, 'junit', 'testng')
                 } 
             }
-            task printMainCompileClassPath { doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath } }
-            task printMainRuntimeClassPath { doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath } }
-            task printTestCompileClassPath { doLast { println 'testCompile: ' + sourceSets.test.compileClasspath.asPath } }
-            task printTestRuntimeClassPath { doLast { println 'testRuntime: ' + sourceSets.test.runtimeClasspath.asPath } }
+            task printMainCompileClassPath { doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath } }
+            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
+            task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
+            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
         """)
-
 
         build(
             "printMainCompileClassPath",
@@ -99,10 +98,10 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             "printTestRuntimeClassPath",
             "printMainRuntimeClassPath",
         ).output.lines().let { lines ->
-            val mainClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val mainRuntimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
-            val testClasspath = lines.find { it.startsWith("testCompile:") } ?: ""
-            val testRuntimeClasspath = lines.find { it.startsWith("testRuntime:") } ?: ""
+            val mainClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val testClasspath = lines.find { it.startsWith("testImplementation:") } ?: ""
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") } ?: ""
 
             assertTrue(mainClasspath.contains("junit-rt.jar"))              // included explicitly in compileOnly
             assertFalse(mainRuntimeClasspath.contains("junit-rt.jar"))
@@ -142,17 +141,17 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             }
             afterEvaluate {
                 dependencies {
-                    compileOnly DependenciesUtils.intellijExtra(project, 'jps-build-test') { include('jps-build-test*.jar') }
-                    runtime     DependenciesUtils.intellijExtra(project, 'intellij-core')  { exclude('intellij-core.jar') }
-                    testCompile DependenciesUtils.intellijExtra(project, 'intellij-core')  { include("annotations.jar") }
-                    testRuntime DependenciesUtils.intellijExtra(project, 'jps-build-test')
-                    testRuntime DependenciesUtils.intellijExtra(project, 'intellij-core')
+                    implementation     DependenciesUtils.intellijExtra(project, 'jps-build-test') { include('jps-build-test*.jar') }
+                    runtimeOnly        DependenciesUtils.intellijExtra(project, 'intellij-core')  { exclude('intellij-core.jar') }
+                    testImplementation DependenciesUtils.intellijExtra(project, 'intellij-core')  { include("annotations.jar") }
+                    testRuntimeOnly    DependenciesUtils.intellijExtra(project, 'jps-build-test')
+                    testRuntimeOnly    DependenciesUtils.intellijExtra(project, 'intellij-core')
                 } 
             }
-            task printMainCompileClassPath { doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath } }
-            task printMainRuntimeClassPath { doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath } }
-            task printTestCompileClassPath { doLast { println 'testCompile: ' + sourceSets.test.compileClasspath.asPath } }
-            task printTestRuntimeClassPath { doLast { println 'testRuntime: ' + sourceSets.test.runtimeClasspath.asPath } }
+            task printMainCompileClassPath { doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath } }
+            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
+            task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
+            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
         """)
 
 
@@ -162,14 +161,14 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             "printTestRuntimeClassPath",
             "printMainRuntimeClassPath",
         ).output.lines().let { lines ->
-            val mainClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val mainRuntimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
-            val testClasspath = lines.find { it.startsWith("testCompile:") } ?: ""
-            val testRuntimeClasspath = lines.find { it.startsWith("testRuntime:") } ?: ""
+            val mainClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val testClasspath = lines.find { it.startsWith("testImplementation:") } ?: ""
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") } ?: ""
 
             assertTrue(mainClasspath.contains("jps-build-test"))            // included explicitly in compileOnly (note - versioned jar, checking by name only)
-            assertFalse(mainRuntimeClasspath.contains("jps-build-test"))
-            assertFalse(testClasspath.contains("jps-build-test"))
+            assertTrue(mainRuntimeClasspath.contains("jps-build-test"))
+            assertTrue(testClasspath.contains("jps-build-test"))
             assertTrue(testRuntimeClasspath.contains("jps-build-test"))     // includes all
 
             assertFalse(mainClasspath.contains("intellij-core.jar"))
