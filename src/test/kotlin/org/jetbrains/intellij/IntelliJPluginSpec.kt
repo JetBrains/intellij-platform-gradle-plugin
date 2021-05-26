@@ -64,17 +64,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
             task printMainRuntimeClassPath { 
-                doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath }
+                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
             }
             task printMainCompileClassPath { 
-                doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath }
+                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
             }
         """)
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
@@ -91,17 +91,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['org.intellij.plugins.markdown:201.6668.74']
 
             task printMainRuntimeClassPath { 
-                doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath }
+                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
             }
             task printMainCompileClassPath { 
-                doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath }
+                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
             }
         """)
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
 
             assertTrue(compileClasspath.contains("markdown.jar"))
             assertTrue(compileClasspath.contains("resources_en.jar"))
@@ -125,17 +125,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ["copyright", "${adjustWindowsPath(plugin?.canonicalPath ?: "")}"]
            
             task printMainRuntimeClassPath {
-                doLast { println "runtime: " + sourceSets.main.runtimeClasspath.asPath }
+                doLast { println "runtimeOnly: " + sourceSets.main.runtimeClasspath.asPath }
             }
             task printMainCompileClassPath {
-                doLast { println "compile: " + sourceSets.main.compileClasspath.asPath }
+                doLast { println "implementation: " + sourceSets.main.compileClasspath.asPath }
             }
         """)
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
 
             assertTrue(compileClasspath.contains("intellij-postfix.jar"))
             assertFalse(runtimeClasspath.contains("intellij-postfix.jar"))
@@ -147,17 +147,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ["com.jetbrains.changeReminder"]
             task printTestRuntimeClassPath {
-                doLast { println "runtime: " + sourceSets.test.runtimeClasspath.asPath }
+                doLast { println "runtimeOnly: " + sourceSets.test.runtimeClasspath.asPath }
             }
             task printTestCompileClassPath {
-                doLast { println "compile: " + sourceSets.test.compileClasspath.asPath }
+                doLast { println "implementation: " + sourceSets.test.compileClasspath.asPath }
             }
         """)
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
 
             assertTrue(compileClasspath.contains("vcs-changeReminder.jar"))
             assertTrue(runtimeClasspath.contains("vcs-changeReminder.jar"))
@@ -170,21 +170,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `add ant dependencies to classpath`() {
         buildFile.groovy("""
             task printTestRuntimeClassPath {
-                doLast {
-                    println "runtime: " + sourceSets.test.runtimeClasspath.asPath
-                }
+                doLast { println "runtimeOnly: " + sourceSets.test.runtimeClasspath.asPath }
             }
             
             task printTestCompileClassPath {
-                doLast {
-                    println "compile: " + sourceSets.test.compileClasspath.asPath
-                }
+                doLast { println "implementation: " + sourceSets.test.compileClasspath.asPath }
             }
         """)
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
-        val compileClasspath = result.output.lines().find { it.startsWith("compile:") } ?: ""
-        val runtimeClasspath = result.output.lines().find { it.startsWith("runtime:") } ?: ""
+        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") } ?: ""
+        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") } ?: ""
 
         assertTrue(compileClasspath.contains("ant.jar"))
         assertTrue(runtimeClasspath.contains("ant.jar"))
@@ -198,17 +194,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
             
             task printTestRuntimeClassPath {
-                doLast { println 'runtime: ' + sourceSets.test.runtimeClasspath.asPath }
+                doLast { println 'runtimeOnly: ' + sourceSets.test.runtimeClasspath.asPath }
             }
             task printTestCompileClassPath {
-                doLast { println 'compile: ' + sourceSets.test.compileClasspath.asPath }
+                doLast { println 'implementation: ' + sourceSets.test.compileClasspath.asPath }
             }
         """)
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
         result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
-            val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertTrue(runtimeClasspath.contains("copyright.jar"))
@@ -225,17 +221,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
             
             task printMainRuntimeClassPath {
-                doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath }
+                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
             }
             task printMainCompileClassPath {
-                doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath }
+                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
             }
         """)
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
@@ -252,17 +248,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['com.intellij.copyright']
 
             task printMainRuntimeClassPath {
-                doLast { println 'runtime: ' + sourceSets.main.runtimeClasspath.asPath }
+                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
             }
             task printMainCompileClassPath {
-                doLast { println 'compile: ' + sourceSets.main.compileClasspath.asPath }
+                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
             }            
         """)
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("compile:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtime:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
