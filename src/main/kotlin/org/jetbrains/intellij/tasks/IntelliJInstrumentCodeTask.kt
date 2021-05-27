@@ -176,6 +176,10 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     private fun instrumentCode(srcDirs: List<File>, outputDir: File, instrumentNotNull: Boolean) {
+        if (srcDirs.isEmpty()) {
+            return
+        }
+
         val headlessOldValue = System.setProperty("java.awt.headless", "true")
         try {
             // Builds up the Ant XML:
