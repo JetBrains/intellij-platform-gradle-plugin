@@ -43,7 +43,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        assumeFalse(VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
+        assumeFalse("Feature supported since Gradle 6.6", VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
 
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
         buildFile.groovy("""

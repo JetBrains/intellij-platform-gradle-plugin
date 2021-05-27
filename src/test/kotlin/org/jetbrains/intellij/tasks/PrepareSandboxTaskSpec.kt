@@ -676,7 +676,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache for prepareSandbox`() {
-        assumeFalse(VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
+        assumeFalse("Feature supported since Gradle 6.6", VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
 
         writeJavaFile()
 
@@ -699,7 +699,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache for prepareTestingSandbox`() {
-        assumeFalse(VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
+        assumeFalse("Feature supported since Gradle 6.6", VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
 
         writeJavaFile()
 
@@ -722,7 +722,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache for prepareUiTestingSandbox`() {
-        assumeFalse(VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
+        assumeFalse("Feature supported since Gradle 6.6", VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
 
         writeJavaFile()
 

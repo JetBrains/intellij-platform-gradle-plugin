@@ -4,7 +4,6 @@ import org.apache.commons.io.FileUtils
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assume
 import org.junit.Assume.assumeFalse
 import java.net.URL
 import kotlin.test.Test
@@ -252,7 +251,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        assumeFalse(VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
+        assumeFalse("Feature supported since Gradle 6.6", VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
 
         writePluginXmlFile()
         buildFile.groovy("""
