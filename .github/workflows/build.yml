@@ -133,7 +133,7 @@ jobs:
           key: ${{ runner.os }}-gradle-wrapper-${{ hashFiles('**/gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: Run Linters and Test
-        run: ./gradlew test --tests "${{ matrix.testFile }}" -PtestGradleVersion="${{ matrix.gradleVersion }}"
+        run: ./gradlew test -x cacheIntolerantTest --tests "${{ matrix.testFile }}" -PtestGradleVersion="${{ matrix.gradleVersion }}"
 
       - name: Collect Test Results
         if: ${{ failure() }}
