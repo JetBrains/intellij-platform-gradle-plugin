@@ -30,6 +30,7 @@ jobs:
     needs: gradleValidation
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         testFile:
           - "*DownloadIntelliJSpec"
@@ -68,11 +69,19 @@ jobs:
       - name: Run Linters and Test
         run: ./gradlew cacheIntolerantTest --tests "${{ matrix.testFile }}" -PtestGradleVersion="${{ matrix.gradleVersion }}"
 
+      - name: Collect Test Results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-${{ matrix.testFile }}-${{ matrix.gradleVersion }}-${{ runner.os }}
+          path: ${{ github.workspace }}/build/reports/tests/test/
+
   test:
     name: Test
     needs: gradleValidation
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         testFile:
           - "*BuildPluginTaskSpec"
@@ -125,3 +134,10 @@ jobs:
 
       - name: Run Linters and Test
         run: ./gradlew test --tests "${{ matrix.testFile }}" -PtestGradleVersion="${{ matrix.gradleVersion }}"
+
+      - name: Collect Test Results
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: test-results-${{ matrix.testFile }}-${{ matrix.gradleVersion }}-${{ runner.os }}
+          path: ${{ github.workspace }}/build/reports/tests/test/
