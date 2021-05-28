@@ -38,7 +38,7 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-version = when (properties("snapshot").toBoolean()) {
+version = when (properties("snapshot")?.toBoolean() ?: false) {
     true -> "${properties("snapshotVersion")}-SNAPSHOT"
     false -> properties("version")
 } ?: ""
@@ -83,7 +83,7 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = "7.0.2"
+        gradleVersion = "6.2"
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
     }
 
