@@ -2,7 +2,7 @@
 
 ## 1.0.1, not published
 
-- Use Gradle `ArchiveOperations` in `extractArchive` utils method
+- Use Gradle `ArchiveOperations` in `extractArchive` utils method [#681](../../issues/681)
 - Set minimal supported Gradle version to 6.6
 
 ## 1.0.0

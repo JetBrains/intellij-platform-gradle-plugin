@@ -1,10 +1,8 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
-import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assume.assumeFalse
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals

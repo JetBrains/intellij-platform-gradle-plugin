@@ -1,10 +1,8 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.commons.io.FileUtils
-import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assume.assumeFalse
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
