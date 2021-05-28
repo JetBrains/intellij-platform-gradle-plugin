@@ -4,6 +4,8 @@ import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
@@ -24,7 +26,9 @@ open class JbrResolver @Inject constructor(
     private val repositoryHandler: RepositoryHandler,
     private val dependencyHandler: DependencyHandler,
     private val configurationContainer: ConfigurationContainer,
+    private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
+    private val fileSystemOperations: FileSystemOperations,
 ) {
 
     private val operatingSystem = OperatingSystem.current()
@@ -40,7 +44,7 @@ open class JbrResolver @Inject constructor(
 
         return getJavaArchive(jbrArtifact)?.let {
             val javaDir = File(it.path.replaceAfter(jbrArtifact.name, "")).resolve("extracted")
-            extractArchive(it, javaDir, execOperations, context)
+            extractArchive(it, javaDir, archiveOperations, execOperations, fileSystemOperations, context)
             fromDir(javaDir, version)
         }
     }

@@ -6,6 +6,8 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolveException
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
@@ -32,7 +34,9 @@ open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
     private val context: Any,
+    private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
+    private val fileSystemOperations: FileSystemOperations,
 ) {
 
     private val mainDependencies = listOf("ideaIC", "ideaIU", "riderRD", "riderRS")
@@ -124,12 +128,19 @@ open class IdeaDependencyManager @Inject constructor(
         zipFile: File,
         type: String,
         checkVersionChange: Boolean,
-    ) = extractArchive(zipFile, cacheDirectory.resolve(zipFile.name.removeSuffix(".zip")), execOperations, context, { markerFile ->
-        isCacheUpToDate(zipFile, markerFile, checkVersionChange)
-    }, { unzippedDirectory, markerFile ->
-        resetExecutablePermissions(unzippedDirectory, type)
-        storeCache(unzippedDirectory, markerFile)
-    })
+    ) = extractArchive(
+        zipFile,
+        cacheDirectory.resolve(zipFile.name.removeSuffix(".zip")),
+        archiveOperations,
+        execOperations,
+        fileSystemOperations,
+        context,
+        { markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange) },
+        { unzippedDirectory, markerFile ->
+            resetExecutablePermissions(unzippedDirectory, type)
+            storeCache(unzippedDirectory, markerFile)
+        },
+    )
 
     private fun isCacheUpToDate(zipFile: File, markerFile: File, checkVersion: Boolean): Boolean {
         if (!checkVersion) {

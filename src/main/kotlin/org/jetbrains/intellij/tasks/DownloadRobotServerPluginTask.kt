@@ -1,6 +1,8 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
@@ -17,7 +19,9 @@ import javax.inject.Inject
 @Suppress("UnstableApiUsage")
 open class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
+    private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
+    private val fileSystemOperations: FileSystemOperations,
 ) : ConventionTask() {
 
     companion object {
@@ -59,7 +63,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
 
         try {
             val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
-            extractArchive(zipFile, target, execOperations, context)
+            extractArchive(zipFile, target, archiveOperations, execOperations, fileSystemOperations, context)
         } finally {
             repositoryHandler.remove(repository)
         }
