@@ -81,8 +81,8 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkGradleVersion(project: Project) {
-        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("6.2")) {
-            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 6.2 and higher")
+        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("6.6")) {
+            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 6.6 and higher")
         }
     }
 

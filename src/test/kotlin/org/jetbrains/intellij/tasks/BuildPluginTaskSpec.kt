@@ -391,8 +391,6 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        assumeFalse("Feature supported since Gradle 6.6", VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
-
         pluginXml.xml("""
             <idea-plugin>
                 <name>MyPluginName</name>

@@ -44,7 +44,7 @@ version = when (properties("snapshot")?.toBoolean() ?: false) {
 } ?: ""
 group = "org.jetbrains.intellij.plugins"
 description = """
-**This project requires Gradle 6.2 or newer**
+**This project requires Gradle 6.6 or newer**
 
 For migration guide to the 1.0 version, visit: https://lp.jetbrains.com/gradle-intellij-plugin
 
@@ -83,7 +83,7 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = "6.2"
+        gradleVersion = "7.0.2"
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
     }
 

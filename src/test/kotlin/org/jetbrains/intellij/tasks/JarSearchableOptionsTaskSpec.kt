@@ -1,9 +1,7 @@
 package org.jetbrains.intellij.tasks
 
-import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.SearchableOptionsSpecBase
-import org.junit.Assume.assumeFalse
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -43,8 +41,6 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        assumeFalse("Feature supported since Gradle 6.6", VersionNumber.parse(gradleVersion) < VersionNumber.parse("6.6"))
-
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
         buildFile.groovy("""
             intellij {

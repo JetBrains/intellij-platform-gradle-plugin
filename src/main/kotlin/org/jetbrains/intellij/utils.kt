@@ -146,6 +146,7 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
     return null
 }
 
+@Suppress("UnstableApiUsage")
 @Incubating
 fun extractArchive(
     archiveFile: File,
@@ -180,7 +181,7 @@ fun extractArchive(
             else -> throw IllegalArgumentException("Unknown type archive type: $name")
         }
         fileSystemOperations.copy {
-            it.from(decompressor.call(archiveFile))
+            it.from(decompressor.invoke(archiveFile))
             it.into(targetDirectory)
         }
     }
