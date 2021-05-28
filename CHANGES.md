@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1, not published
+
+- Use Gradle `ArchiveOperations` in `extractArchive` utils method
+
 ## 1.0.0
 
 - Plugin Signing integration
