@@ -11,7 +11,8 @@ import kotlin.test.assertTrue
 
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox = File(buildDirectory, IntelliJPluginConstants.DEFAULT_SANDBOX)
+    private val sandbox
+        get() = File(buildDirectory, IntelliJPluginConstants.DEFAULT_SANDBOX)
 
     @Test
     fun `prepare sandbox for two plugins`() {
@@ -123,7 +124,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         file("settings.gradle").groovy("""
-            include 'nestedProject'            
+            include 'nestedProject'
         """)
 
         file("nestedProject/src/main/java/NestedAppFile.java").java("""
@@ -208,7 +209,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml("""
             <idea-plugin>
               <depends config-file="other.xml" />
-            </idea-plugin>    
+            </idea-plugin>
         """)
 
         buildFile.groovy("""
@@ -643,12 +644,12 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             version = '0.42.123'
-            
-            intellij { 
-                pluginName = 'myPluginName' 
+
+            intellij {
+                pluginName = 'myPluginName'
             }
-            
-            dependencies { 
+
+            dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
                 implementation fileTree('one')
                 implementation fileTree('two')

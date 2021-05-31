@@ -5,13 +5,13 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.io.TempDir
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
-import java.nio.file.Files.createTempDirectory
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
-import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
 abstract class IntelliJPluginSpecBase {
@@ -23,15 +23,20 @@ abstract class IntelliJPluginSpecBase {
 
     val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
-    val dir: File = createTempDirectory("tmp").toFile()
+    lateinit var dir: File
 
-    private val gradleProperties = file("gradle.properties")
-    val buildFile = file("build.gradle")
-    val pluginXml = file("src/main/resources/META-INF/plugin.xml")
-    val buildDirectory = File(dir, "build")
+    val gradleProperties
+        get() = file("gradle.properties")
+    val buildFile
+        get() = file("build.gradle")
+    val pluginXml
+        get() = file("src/main/resources/META-INF/plugin.xml")
+    val buildDirectory
+        get() = File(dir, "build")
 
-    @BeforeTest
-    open fun setUp() {
+    @BeforeEach
+    open fun setUp(@TempDir tempDir: File) {
+        dir = tempDir
         file("settings.gradle").groovy("rootProject.name = 'projectName'")
 
         buildFile.groovy("""
@@ -101,7 +106,7 @@ abstract class IntelliJPluginSpecBase {
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
-            .withDebug(debugEnabled)
+            .withDebug(false)
             .withTestKitDir(File(gradleHome))
             .withArguments(*tasks, "--stacktrace")//, "-Dorg.gradle.debug=true")
 

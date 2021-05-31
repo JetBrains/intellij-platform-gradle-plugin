@@ -32,10 +32,7 @@ dependencies {
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.17") {
         exclude(group = "org.jetbrains.kotlin")
     }
-
-    testImplementation(gradleTestKit())
-    testImplementation(kotlin("test"))
-    testImplementation(kotlin("test-junit"))
+    testImplementation(kotlin("test-junit5"))
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {
@@ -79,7 +76,10 @@ val cacheIntolerantTest = tasks.register<Test>("cacheIntolerantTest") {
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions {
+            jvmTarget = "1.8"
+            apiVersion = "1.3"
+        }
     }
 
     wrapper {
@@ -88,6 +88,7 @@ tasks {
     }
 
     test {
+        useJUnitPlatform()
         configureTests(this)
         exclude("**/DownloadIntelliJSpec.class")
         dependsOn(cacheIntolerantTest)

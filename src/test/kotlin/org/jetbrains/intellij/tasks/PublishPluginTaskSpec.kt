@@ -2,6 +2,8 @@ package org.jetbrains.intellij.tasks
 
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
+import org.junit.jupiter.api.io.TempDir
+import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -9,8 +11,8 @@ import kotlin.test.assertTrue
 class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
-    override fun setUp() {
-        super.setUp()
+    override fun setUp(@TempDir tempDir: File) {
+        super.setUp(tempDir)
 
         pluginXml.xml("""
             <idea-plugin>

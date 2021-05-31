@@ -3,7 +3,8 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.plugins.BasePlugin
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assume.assumeFalse
+import org.junit.jupiter.api.Assumptions.assumeFalse
+import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -18,8 +19,8 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.nightly.com.jetbrains.plugins")
 
     @BeforeTest
-    override fun setUp() {
-        super.setUp()
+    override fun setUp(@TempDir tempDir: File) {
+        super.setUp(tempDir)
 
         pluginsRepositoryCacheDir.delete()
         pluginsNightlyRepositoryCacheDir.delete()
