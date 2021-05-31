@@ -18,6 +18,7 @@ abstract class IntelliJPluginSpecBase {
 
     private val pluginsRepository = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     private val kotlinPluginVersion = "1.5.0"
+    protected val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: "7.0.2"
     private var debugEnabled = true
 
     val gradleHome: String = System.getProperty("test.gradle.home")
@@ -84,7 +85,7 @@ abstract class IntelliJPluginSpecBase {
 
     protected fun build(vararg tasks: String): BuildResult = build(false, *tasks)
 
-    protected fun build(fail: Boolean, vararg tasks: String): BuildResult = build("6.6", fail, *tasks)
+    protected fun build(fail: Boolean, vararg tasks: String): BuildResult = build(gradleVersion, fail, *tasks)
 
     protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String): BuildResult =
         builder(gradleVersion, *tasks).run {
@@ -141,6 +142,15 @@ abstract class IntelliJPluginSpecBase {
         class App {
             public static void main(@NotNull String[] strings) {
                 System.out.println(Arrays.toString(strings));
+            }
+        }
+    """)
+
+    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin("""
+        object App {
+            @JvmStatic
+            fun main(args: Array<String>) {
+                println(args.joinToString())
             }
         }
     """)

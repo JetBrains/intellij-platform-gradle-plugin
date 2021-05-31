@@ -54,8 +54,8 @@ Running Gradle tasks from IntelliJ IDEA produces a Gradle run configuration whic
 
 ```
 prepareSandbox {
-  from('yourFile') { 
-    into "${intellij.pluginName}/lib/" 
+  from('yourFile') {
+    into "${intellij.pluginName.get()}/lib/"
   }
 }
 ```

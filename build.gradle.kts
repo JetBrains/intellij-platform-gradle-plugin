@@ -2,10 +2,10 @@
 
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-fun properties(key: String) = project.findProperty(key).toString()
+fun properties(key: String) = project.findProperty(key)?.toString()
 
 plugins {
-    kotlin("jvm") version "1.5.0"
+    kotlin("jvm") version "1.5.10"
     id("java-gradle-plugin")
     id("maven-publish")
     id("com.gradle.plugin-publish") version "0.15.0"
@@ -38,13 +38,15 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-version = when (properties("snapshot").toBoolean()) {
+version = when (properties("snapshot")?.toBoolean() ?: false) {
     true -> "${properties("snapshotVersion")}-SNAPSHOT"
     false -> properties("version")
-}
+} ?: ""
 group = "org.jetbrains.intellij.plugins"
 description = """
-**This project requires Gradle 5.1 or newer**
+**This project requires Gradle 6.6 or newer**
+
+For migration guide to the 1.0 version, visit: https://lp.jetbrains.com/gradle-intellij-plugin
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
@@ -77,7 +79,10 @@ val cacheIntolerantTest = tasks.register<Test>("cacheIntolerantTest") {
 
 tasks {
     withType<KotlinCompile> {
-        kotlinOptions.jvmTarget = "1.8"
+        kotlinOptions {
+            jvmTarget = "1.8"
+            apiVersion = "1.3"
+        }
     }
 
     wrapper {
@@ -98,6 +103,7 @@ fun configureTests(testTask: Test) {
         File(testGradleHomePath).mkdir()
     }
     testTask.systemProperties["test.gradle.home"] = testGradleHomePath
+    testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
     testTask.systemProperties["plugins.repository"] = properties("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)
 }

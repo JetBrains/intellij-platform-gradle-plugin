@@ -9,9 +9,11 @@ import java.io.InputStream
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBException
 
-sealed class BaseExtractor<T>(vararg classesToBeBound: Class<*>) {
+class XmlExtractor<T> {
 
-    private val jaxbContext by lazy { JAXBContext.newInstance(*classesToBeBound) }
+    private val jaxbContext by lazy {
+        JAXBContext.newInstance("org.jetbrains.intellij.model", ObjectFactory::class.java.classLoader)
+    }
 
     @Throws(JAXBException::class)
     fun unmarshal(file: File) = unmarshal(file.inputStream())

@@ -2,8 +2,8 @@ package org.jetbrains.intellij.dependency
 
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.model.PluginsCache
-import org.jetbrains.intellij.model.PluginsCacheExtractor
 import org.jetbrains.intellij.model.PluginsCachePlugin
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -15,7 +15,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
     private val directoryNameMapping = mutableMapOf<String, String>()
 
     @Transient
-    private val extractor = PluginsCacheExtractor()
+    private val extractor = XmlExtractor<PluginsCache>()
 
     companion object {
         fun fromDirectory(pluginsDirectory: File, context: Any) =

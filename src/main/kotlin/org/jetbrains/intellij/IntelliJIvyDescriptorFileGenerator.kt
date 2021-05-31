@@ -41,45 +41,46 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
 
     @Throws(IOException::class)
     private fun writeDescriptor(writer: Writer) {
-        val xmlWriter = OptionalAttributeXmlWriter(writer, "  ", ivyFileEncoding)
-        xmlWriter.startElement("ivy-module").attribute("version", "2.0")
-        if (usesClassifier()) {
-            xmlWriter.attribute("xmlns:m", "https://ant.apache.org/ivy/maven")
-        }
-        xmlWriter.startElement("info")
-            .attribute("organisation", projectIdentity.organisation)
-            .attribute("module", projectIdentity.module)
-            .attribute("revision", projectIdentity.revision)
-            .attribute("publication", ivyDateFormat.format(Date()))
-        xmlWriter.endElement()
+        OptionalAttributeXmlWriter(writer, "  ", ivyFileEncoding).run {
+            startElement("ivy-module").attribute("version", "2.0")
+            if (usesClassifier()) {
+                attribute("xmlns:m", "https://ant.apache.org/ivy/maven")
+            }
+            startElement("info")
+                .attribute("organisation", projectIdentity.organisation)
+                .attribute("module", projectIdentity.module)
+                .attribute("revision", projectIdentity.revision)
+                .attribute("publication", ivyDateFormat.format(Date()))
+            endElement()
 
-        writeConfigurations(xmlWriter)
-        writePublications(xmlWriter)
-        xmlWriter.endElement()
+            writeConfigurations()
+            writePublications()
+            endElement()
+        }
     }
 
     private fun usesClassifier() = artifacts.any { it.classifier != null }
 
     @Throws(IOException::class)
-    private fun writeConfigurations(xmlWriter: OptionalAttributeXmlWriter) {
-        xmlWriter.startElement("configurations")
+    private fun OptionalAttributeXmlWriter.writeConfigurations() {
+        startElement("configurations")
         configurations.forEach {
-            xmlWriter.startElement("conf")
+            startElement("conf")
                 .attribute("name", it.name)
                 .attribute("visibility", "public")
             if (it.extends.size > 0) {
-                xmlWriter.attribute("extends", it.extends.joinToString(","))
+                attribute("extends", it.extends.joinToString(","))
             }
-            xmlWriter.endElement()
+            endElement()
         }
-        xmlWriter.endElement()
+        endElement()
     }
 
     @Throws(IOException::class)
-    private fun writePublications(xmlWriter: OptionalAttributeXmlWriter) {
-        xmlWriter.startElement("publications")
+    private fun OptionalAttributeXmlWriter.writePublications() {
+        startElement("publications")
         artifacts.forEach {
-            xmlWriter.startElement("artifact")
+            startElement("artifact")
                 .attribute("name", it.name)
                 .attribute("type", it.type)
                 .attribute("ext", it.extension)
@@ -87,7 +88,7 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
                 .attribute("m:classifier", it.classifier)
                 .endElement()
         }
-        xmlWriter.endElement()
+        endElement()
     }
 
     class OptionalAttributeXmlWriter(writer: Writer, indent: String, encoding: String) : SimpleXmlWriter(writer, indent, encoding) {

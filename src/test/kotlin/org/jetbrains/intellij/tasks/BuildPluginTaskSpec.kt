@@ -11,7 +11,7 @@ import kotlin.test.assertTrue
 class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
-    fun `build plugin distribution Gradle #gradleVersion`() {
+    fun `build plugin distribution`() {
         writeJavaFile()
 
         file("src/main/resources/META-INF/other.xml").xml("""
@@ -38,58 +38,56 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['copyright']
             }
             dependencies { 
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 
-        listOf("6.6").forEach { gradleVersion ->
-            build(gradleVersion, false, IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-            val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
-            assertTrue(distribution.exists())
+        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        assertTrue(distribution.exists())
 
-            val zipFile = ZipFile(distribution)
-            assertEquals(
-                setOf(
-                    "myPluginName/",
-                    "myPluginName/lib/",
-                    "myPluginName/lib/joda-time-2.8.1.jar",
-                    "myPluginName/lib/projectName-0.42.123.jar",
-                    "myPluginName/lib/searchableOptions-0.42.123.jar",
-                ),
-                collectPaths(zipFile)
-            )
+        val zipFile = ZipFile(distribution)
+        assertEquals(
+            setOf(
+                "myPluginName/",
+                "myPluginName/lib/",
+                "myPluginName/lib/joda-time-2.8.1.jar",
+                "myPluginName/lib/projectName-0.42.123.jar",
+                "myPluginName/lib/searchableOptions-0.42.123.jar",
+            ),
+            collectPaths(zipFile)
+        )
 
-            val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
-            assertEquals(
-                setOf(
-                    "App.class",
-                    "META-INF/",
-                    "META-INF/MANIFEST.MF",
-                    "META-INF/nonIncluded.xml",
-                    "META-INF/other.xml",
-                    "META-INF/plugin.xml",
-                ),
-                collectPaths(jar)
-            )
+        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
+        assertEquals(
+            setOf(
+                "App.class",
+                "META-INF/",
+                "META-INF/MANIFEST.MF",
+                "META-INF/nonIncluded.xml",
+                "META-INF/other.xml",
+                "META-INF/plugin.xml",
+            ),
+            collectPaths(jar)
+        )
 
-            assertEquals(
-                """
-                    <idea-plugin>
-                      <version>0.42.123</version>
-                      <idea-version since-build="201.6668" until-build="201.*" />
-                      <name>MyPluginName</name>
-                      <vendor>JetBrains</vendor>
-                      <depends config-file="other.xml" />
-                    </idea-plugin>
-                """.trimIndent(),
-                fileText(jar, "META-INF/plugin.xml"),
-            )
-        }
+        assertEquals(
+            """
+                <idea-plugin>
+                  <version>0.42.123</version>
+                  <idea-version since-build="201.6668" until-build="201.*" />
+                  <name>MyPluginName</name>
+                  <vendor>JetBrains</vendor>
+                  <depends config-file="other.xml" />
+                </idea-plugin>
+            """.trimIndent(),
+            fileText(jar, "META-INF/plugin.xml"),
+        )
     }
 
     @Test
-    fun `build plugin distribution with Gradle 4 and Kotlin 1_1_4`() {
+    fun `build plugin distribution with Kotlin 1_1_4`() {
         writeJavaFile()
         writeKotlinUIFile()
 
@@ -164,7 +162,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             version = '0.42.123'
             
             dependencies { 
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
 
             intellij { 

@@ -3,8 +3,10 @@ package org.jetbrains.intellij.tasks
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
+import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
@@ -32,7 +34,8 @@ import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.model.PluginVerifierRepositoryExtractor
+import org.jetbrains.intellij.model.PluginVerifierRepository
+import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.warn
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -50,7 +53,9 @@ import javax.inject.Inject
 @Suppress("UnstableApiUsage")
 open class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
+    private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
+    private val fileSystemOperations: FileSystemOperations,
 ) : ConventionTask() {
 
     companion object {
@@ -63,7 +68,7 @@ open class RunPluginVerifierTask @Inject constructor(
         fun resolveLatestVerifierVersion(): String {
             debug(message = "Resolving Latest Verifier version")
             val url = URL(VERIFIER_METADATA_URL)
-            return PluginVerifierRepositoryExtractor().unmarshal(url.openStream()).versioning?.latest
+            return XmlExtractor<PluginVerifierRepository>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
     }
@@ -355,7 +360,7 @@ open class RunPluginVerifierTask @Inject constructor(
                     val ideArchive = configurationContainer.detachedConfiguration(dependency).singleFile
 
                     debug(context, "IDE downloaded, extracting...")
-                    extractArchive(ideArchive, ideDir, execOperations, context)
+                    extractArchive(ideArchive, ideDir, archiveOperations, execOperations, fileSystemOperations, context)
                     ideDir.listFiles()?.let {
                         it.filter(File::isDirectory).forEach { container ->
                             container.listFiles()?.forEach { file ->

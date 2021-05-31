@@ -34,7 +34,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             }
             downloadRobotServerPlugin.version = '0.10.0'
             dependencies {
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 
@@ -72,7 +72,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             }
             downloadRobotServerPlugin.version = '0.11.1'
             dependencies {
-                compile 'joda-time:joda-time:2.8.1'
+                implementation 'joda-time:joda-time:2.8.1'
             }
         """)
 

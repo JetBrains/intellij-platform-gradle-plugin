@@ -5,7 +5,6 @@ package org.jetbrains.intellij
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
-import com.jetbrains.plugin.structure.base.utils.extractTo
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.base.utils.isZip
 import com.jetbrains.plugin.structure.intellij.beans.PluginBean
@@ -21,6 +20,8 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -74,9 +75,11 @@ fun transformXml(document: Document, file: File) {
         omitDeclaration = true
         textMode = Format.TextMode.TRIM
     }
-    val out = StringWriter()
-    xmlOutput.output(document, out)
-    file.writeText(out.toString())
+
+    StringWriter().use {
+        xmlOutput.output(document, it)
+        file.writeText(it.toString())
+    }
 }
 
 fun getIdeaSystemProperties(
@@ -145,33 +148,47 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
     return null
 }
 
+@Suppress("UnstableApiUsage")
 @Incubating
 fun extractArchive(
     archiveFile: File,
     targetDirectory: File,
+    archiveOperations: ArchiveOperations,
     execOperations: ExecOperations,
+    fileSystemOperations: FileSystemOperations,
     context: Any,
     isUpToDate: Predicate<File>? = null,
     markUpToDate: BiConsumer<File, File>? = null,
 ): File {
+    val name = archiveFile.name
     val markerFile = File(targetDirectory, "markerFile")
     if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
         return targetDirectory
     }
 
     targetDirectory.deleteRecursively()
+    targetDirectory.mkdirs()
 
-    debug(context, "Extracting ${archiveFile.name}")
+    debug(context, "Extracting $name")
 
-    if (!OperatingSystem.current().isWindows && archiveFile.name.endsWith(".tar.gz")) {
-        targetDirectory.mkdirs()
+
+    if (name.endsWith(".tar.gz") && OperatingSystem.current().isWindows) {
         execOperations.exec {
             it.commandLine("tar", "-xpf", archiveFile.absolutePath, "--directory", targetDirectory.absolutePath)
         }
     } else {
-        archiveFile.toPath().extractTo(targetDirectory.toPath())
+        val decompressor = when {
+            name.endsWith(".zip") || name.endsWith(".sit") -> archiveOperations::zipTree
+            name.endsWith(".tar.gz") -> archiveOperations::tarTree
+            else -> throw IllegalArgumentException("Unknown type archive type: $name")
+        }
+        fileSystemOperations.copy {
+            it.from(decompressor.invoke(archiveFile))
+            it.into(targetDirectory)
+        }
     }
-    debug(context, "Extracted ${archiveFile.name}")
+
+    debug(context, "Extracted $name")
 
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)

@@ -61,10 +61,6 @@
       "value": "src/docs/configuration.md.templar"
     },
     {
-      "type": "template",
-      "value": "src/docs/build.gradle.md.templar"
-    },
-    {
       "type": "file",
       "value": "src/docs/examples.md"
     },

@@ -1,15 +1,17 @@
 <a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)
  [![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat)](https://twitter.com/JBPlatform/)
- [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-0.7.3-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
+ [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-1.0-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
 
 <img src="./.github/readme/gradle-intellij-plugin.png" alt="Gradle IntelliJ Plugin"/>
 
 # gradle-intellij-plugin
 
-<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 0.7.3</h4>
+<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 1.0</h4>
 
 > 
-**This project requires Gradle 5.1 or newer**
+**This project requires Gradle 6.6 or newer**
+
+For migration guide to the 1.0 version, visit: https://lp.jetbrains.com/gradle-intellij-plugin
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
@@ -25,7 +27,7 @@ helpful while developing plugins for IntelliJ platform.
 > **TIP** Create new plugins with a preconfigured project scaffold and CI using
 > [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template).
 
-Here is [the manual](https://plugins.jetbrains.com/docs/intellij/gradle-prerequisites.html) on how to start developing plugins for IntelliJ Platform using Gradle.
+Here is [the manual](https://plugins.jetbrains.com/docs/intellij/gradle-prerequisites.html) on how to start developing plugins for the IntelliJ Platform using Gradle.
 
 Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
@@ -35,17 +37,17 @@ Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "0.7.3"
+  id "org.jetbrains.intellij" version "1.0"
 }
 ```
  
 ### Snapshot version
 
-<summary>In order to get the latest features, use the snapshot version of the plugin</summary>
+<summary>To get the latest features, use the snapshot version of the plugin</summary>
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.0-SNAPSHOT"
+  id "org.jetbrains.intellij" version "1.1-SNAPSHOT"
 }
 ```
 
@@ -69,7 +71,7 @@ Plugin introduces the following tasks
 
 | **Task** | **Description** |
 | -------- | --------------- |
-| `buildPlugin`            | Assembles plugin and prepares zip archive for deployment. |
+| `buildPlugin`            | Assembles plugin and prepares ZIP archive for deployment. |
 | `patchPluginXml`         | Collects all plugin.xml files in sources and fill since/until build and version attributes. |
 | `downloadRobotServerPlugin` | Downloads robot-server plugin which is needed for ui tests running. | 
 | `prepareSandbox`         | Creates proper structure of plugin, copies patched plugin xml files and fills sandbox directory with all of it. |
@@ -82,6 +84,7 @@ Plugin introduces the following tasks
 | `publishPlugin`          | Uploads plugin distribution archive to https://plugins.jetbrains.com. |
 | `runPluginVerifier`      | Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IntelliJ IDE builds. |
 | `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |
+| `signPlugin`             | Signs the ZIP archive with the provided key using [marketplace-zip-signer](https://github.com/JetBrains/marketplace-zip-signer) library. |
 
 ## Configuration
 
@@ -181,6 +184,17 @@ Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDE
 
 > **TIP** To run Plugin Verifier in [`-offline mode`](https://github.com/JetBrains/intellij-plugin-verifier/pull/58), set the Gradle [`offline` start parameter](https://docs.gradle.org/current/javadoc/org/gradle/StartParameter.html#setOffline-boolean-).
 
+### Plugin Signing
+To sign the plugin before publishing to the JetBrains Marketplace with the `signPlugin` task, it is required to provide a certificate chain and a private key with its password using `signPlugin { ... }` Plugin Signing DSL.
+
+As soon as `privateKey` and `certificateChain` properties are specified, task will be executed automatically right before the `publishPlugin` task.
+
+| **Attributes**              | **Default Value**  |
+| :-------------------------- | :----------------- |
+| <kbd>certificateChain</kbd> A string containing X509 certificates. | none |
+| <kbd>privateKey</kbd> Encoded private key in PEM format. | none |
+| <kbd>password</kbd> Password required to decrypt private key. | none |
+
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
 
@@ -201,46 +215,6 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 | **Attributes**            | **Default Value** |
 | :------------------------ |  :---------------- |
 | <kbd>compilerVersion</kbd> is a version of instrumenting compiler. It's used for non-IDEA plugins (e.g. CLion or Rider). | <kbd>Build number of the IDE dependency</kbd> |
-
-### build.gradle
-
-```groovy
-plugins {
-  id "org.jetbrains.intellij" version "0.7.3"
-}
-
-intellij {
-  version 'IC-2020.1'
-  plugins = ['coverage', 'org.intellij.plugins.markdown:8.5.0.20160208']
-  pluginName 'MyPlugin'
-}
-
-publishPlugin {
-  token 'ssdfhasdfASDaq23jhnasdkjh'
-  channels 'nightly'
-}
-```
-
-
-### build.gradle.kts
-
-```kotlin
-plugins {
-  id("org.jetbrains.intellij") version "0.7.3"
-}
-
-intellij {
-  version = "2020.1"
-  setPlugins("coverage", "org.intellij.plugins.markdown:8.5.0.20160208")
-  pluginName = "MyPlugin"
-}
-
-tasks.publishPlugin {
-  token = "ssdfhasdfASDaq23jhnasdkjh"
-  channels = "nightly"
-}
-```
-
 
 # Examples
 

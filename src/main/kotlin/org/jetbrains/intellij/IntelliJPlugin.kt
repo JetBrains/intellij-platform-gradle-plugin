@@ -6,7 +6,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
-import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
@@ -82,8 +81,8 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkGradleVersion(project: Project) {
-        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("5.1")) {
-            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 5.1 and higher")
+        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("6.6")) {
+            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 6.6 and higher")
         }
     }
 
@@ -520,13 +519,14 @@ open class IntelliJPlugin : Plugin<Project> {
     ) {
         val prepareSandboxTaskProvider = project.tasks.named(prepareSandBoxTaskName)
         val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
+        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, task)?.id }
 
         task.ideDir.convention(project.provider {
             val path = extension.getIdeaDependency(project).classes.path
             project.layout.projectDirectory.dir(path)
         })
         task.requiredPluginIds.convention(project.provider {
-            sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, task)?.id }
+            pluginIds
         })
         task.configDir.convention(project.provider {
             project.file(prepareSandboxTask.configDir.get())
