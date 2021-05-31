@@ -1,6 +1,8 @@
 package org.jetbrains.intellij.dependency
 
 import groovy.lang.Closure
+import org.gradle.api.Action
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.jetbrains.intellij.IntelliJPluginConstants
 
 abstract class PluginsRepositoryConfiguration {
@@ -11,21 +13,28 @@ abstract class PluginsRepositoryConfiguration {
      * Use default marketplace repository
      */
     fun marketplace() {
-        pluginsRepositories.add(MavenPluginsRepository(IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY))
+        pluginsRepositories.add(MavenRepositoryPlugin(IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY))
     }
 
     /**
      * Use a Maven repository with plugin artifacts
      */
     fun maven(url: String) {
-        pluginsRepositories.add(MavenPluginsRepository(url))
+        pluginsRepositories.add(MavenRepositoryPlugin(url))
     }
 
     /**
-     * Use a Maven repository closure
+     * Use a Maven repository by closure
      */
     fun maven(mavenRepo: Closure<Any>) {
-        pluginsRepositories.add(MavenPluginsRepository(null, mavenRepo))
+        pluginsRepositories.add(MavenRepositoryPluginByClosure(mavenRepo))
+    }
+
+    /**
+     * Use a Maven repository by action
+     */
+    fun maven(action : Action<in MavenArtifactRepository>) {
+        pluginsRepositories.add(MavenRepositoryPluginByAction(action))
     }
 
     /**
