@@ -75,9 +75,11 @@ fun transformXml(document: Document, file: File) {
         omitDeclaration = true
         textMode = Format.TextMode.TRIM
     }
-    val out = StringWriter()
-    xmlOutput.output(document, out)
-    file.writeText(out.toString())
+
+    StringWriter().use {
+        xmlOutput.output(document, it)
+        file.writeText(it.toString())
+    }
 }
 
 fun getIdeaSystemProperties(
