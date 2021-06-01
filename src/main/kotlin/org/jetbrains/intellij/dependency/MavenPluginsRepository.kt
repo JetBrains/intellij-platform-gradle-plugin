@@ -1,12 +1,10 @@
 package org.jetbrains.intellij.dependency
 
-import groovy.lang.Closure
 import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
-import org.gradle.util.ConfigureUtil
 import org.jetbrains.intellij.debug
 import java.io.File
 import java.net.URI
@@ -40,26 +38,6 @@ interface MavenRepository : PluginsRepository {
 }
 
 @CompileStatic
-class MavenRepositoryPluginByClosure(private val maven: Closure<Any>) : MavenRepository {
-
-    override var resolvedDependency = false
-
-    override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
-        val dependency = plugin.toDependency(project)
-        val repository = project.repositories.maven(ConfigureUtil.configureUsing(maven))
-        return getPluginFile(project, dependency, repository, repository.url.toString())
-    }
-
-    override fun postResolve(project: Project) =
-        postResolve(project) {
-            val repository = project.repositories.maven(ConfigureUtil.configureUsing(maven))
-            debug(project.name, "Adding Maven plugins repository ${repository.url}")
-            project.repositories.add(repository)
-        }
-
-}
-
-@CompileStatic
 class MavenRepositoryPluginByAction(private val maven: Action<in MavenArtifactRepository>) : MavenRepository {
 
     override var resolvedDependency = false
@@ -78,7 +56,6 @@ class MavenRepositoryPluginByAction(private val maven: Action<in MavenArtifactRe
         }
 }
 
-
 @CompileStatic
 class MavenRepositoryPlugin(private val repositoryUrl: String) : MavenRepository {
 
@@ -95,5 +72,4 @@ class MavenRepositoryPlugin(private val repositoryUrl: String) : MavenRepository
             debug(project, "Adding Maven plugins repository $repositoryUrl")
             project.repositories.maven { it.url = URI.create(repositoryUrl) }
         }
-
 }
