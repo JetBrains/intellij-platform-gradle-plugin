@@ -34,7 +34,7 @@ open class JarSearchableOptionsTask : Jar() {
             "$buildDir/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}"
         })
 
-        this.eachFile { it.path = "search/$name" }
+        this.eachFile { it.path = "search/${it.name}" }
         includeEmptyDirs = false
     }
 }
