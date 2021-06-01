@@ -63,29 +63,31 @@ open class PatchPluginXmlTask @Inject constructor(
     @TaskAction
     fun patchPluginXmlFiles() {
         pluginXmlFiles.get().forEach { file ->
-            val document = JDOMUtil.loadDocument(file.inputStream())
+            file.inputStream().use { inputStream ->
+                val document = JDOMUtil.loadDocument(inputStream)
 
-            sinceBuild.orNull?.let {
-                patchAttribute(document, "idea-version", "since-build", it)
-            }
-            untilBuild.orNull?.let {
-                patchAttribute(document, "idea-version", "until-build", it)
-            }
-            pluginDescription.orNull?.let {
-                patchTag(document, "description", it)
-            }
-            changeNotes.orNull?.let {
-                patchTag(document, "change-notes", it)
-            }
-            version.orNull.takeIf { it != Project.DEFAULT_VERSION }?.let {
-                patchTag(document, "version", it)
-            }
-            pluginId.orNull?.let {
-                patchTag(document, "id", it)
-            }
+                sinceBuild.orNull?.let {
+                    patchAttribute(document, "idea-version", "since-build", it)
+                }
+                untilBuild.orNull?.let {
+                    patchAttribute(document, "idea-version", "until-build", it)
+                }
+                pluginDescription.orNull?.let {
+                    patchTag(document, "description", it)
+                }
+                changeNotes.orNull?.let {
+                    patchTag(document, "change-notes", it)
+                }
+                version.orNull.takeIf { it != Project.DEFAULT_VERSION }?.let {
+                    patchTag(document, "version", it)
+                }
+                pluginId.orNull?.let {
+                    patchTag(document, "id", it)
+                }
 
-            val destination = File(destinationDir.get().asFile, file.name)
-            transformXml(document, destination)
+                val destination = File(destinationDir.get().asFile, file.name)
+                transformXml(document, destination)
+            }
         }
     }
 
@@ -117,7 +119,8 @@ open class PatchPluginXmlTask @Inject constructor(
         if (tag != null) {
             val existingValue = tag.getAttribute(attributeName)?.value
             if (!existingValue.isNullOrEmpty()) {
-                warn(context, "Patching plugin.xml: attribute `$attributeName=[$existingValue]` of `$tagName` tag will be set to `$attributeValue`")
+                warn(context,
+                    "Patching plugin.xml: attribute `$attributeName=[$existingValue]` of `$tagName` tag will be set to `$attributeValue`")
             }
             tag.setAttribute(attributeName, attributeValue)
         } else {
