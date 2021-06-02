@@ -674,19 +674,20 @@ open class IntelliJPlugin : Plugin<Project> {
             task.outputs.dir(systemDirectory)
             task.outputs.dir(configDirectory)
             task.inputs.files(prepareTestingSandboxTask)
+            val ideaDependency = extension.getIdeaDependency(project)
 
             task.doFirst {
                 val ideDirectory = runIdeTask.ideDir.get().asFile
                 task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs ?: emptyList(), ideDirectory)
                 task.classpath += project.files(
-                    "${extension.getIdeaDependency(project).classes}/lib/resources.jar",
-                    "${extension.getIdeaDependency(project).classes}/lib/idea.jar"
+                    "${ideaDependency.classes}/lib/resources.jar",
+                    "${ideaDependency.classes}/lib/idea.jar",
                 )
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as task's the very first source of plugins
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
-                val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
+                val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
                 if (ideVersion.baselineVersion >= 193) {
                     task.systemProperty(
                         IntelliJPluginConstants.PLUGIN_PATH,
