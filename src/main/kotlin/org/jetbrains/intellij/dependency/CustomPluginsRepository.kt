@@ -22,51 +22,29 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
             pluginsXmlUri = uri
         } else {
             this.repositoryUrl = repositoryUrl
-            pluginsXmlUri = URI(uri.scheme, uri.userInfo, uri.host, uri.port, "${uri.path}/", uri.query, uri.fragment)
-                .resolve("updatePlugins.xml")
+            pluginsXmlUri = uri.run { URI(scheme, userInfo, host, port, "$path/", query, fragment).resolve("updatePlugins.xml") }
         }
     }
 
     override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
         debug(project, "Loading list of plugins from: $pluginsXmlUri")
         val url = pluginsXmlUri.toURL()
-        var downloadUrl: String?
-
-        // Try to parse file as <plugin-repository>
-        val pluginRepository = CustomPluginRepositoryListingParser.parseListOfPlugins(
-            url.readText(),
-            url,
-            URL(repositoryUrl),
-            CustomPluginRepositoryListingType.PLUGIN_REPOSITORY,
-        )
-
-        downloadUrl = pluginRepository.find {
-            it.pluginId.equals(plugin.id, true) && it.version.equals(plugin.version, true)
-        }?.let { "$repositoryUrl/${it.downloadUrl}" }
-
-        if (downloadUrl == null) {
-            // Try to parse XML file as <plugins>
-            val plugins = CustomPluginRepositoryListingParser.parseListOfPlugins(
-                url.readText(),
-                url,
-                URL(repositoryUrl),
-                CustomPluginRepositoryListingType.SIMPLE,
-            )
-            downloadUrl = plugins.find {
-                it.pluginId.equals(plugin.id, true) && it.version.equals(plugin.version, true)
-            }?.let { "${it.downloadUrl}" }
-        }
-
-        if (downloadUrl == null) {
-            return null
-        }
+        val downloadUrl = resolveDownloadUrl(url, plugin, CustomPluginRepositoryListingType.PLUGIN_REPOSITORY)
+            ?: resolveDownloadUrl(url, plugin, CustomPluginRepositoryListingType.SIMPLE)
+            ?: return null
 
         return downloadZipArtifact(project, downloadUrl, plugin)
     }
 
-    private fun downloadZipArtifact(project: Project, url: String, plugin: PluginDependencyNotation): File? {
+    private fun resolveDownloadUrl(url: URL, plugin: PluginDependencyNotation, type: CustomPluginRepositoryListingType) =
+        CustomPluginRepositoryListingParser
+            .parseListOfPlugins(url.readText(), url, URL(repositoryUrl), type)
+            .find { it.pluginId.equals(plugin.id, true) && it.version.equals(plugin.version, true) }
+            ?.downloadUrl
+
+    private fun downloadZipArtifact(project: Project, url: URL, plugin: PluginDependencyNotation): File? {
         val repository = project.repositories.ivy { ivy ->
-            ivy.url = URI(url)
+            ivy.url = url.toURI()
             ivy.patternLayout { it.artifact("") }
             ivy.metadataSources { it.artifact() }
         }
