@@ -23,7 +23,7 @@ dependencies {
     implementation("org.jetbrains:marketplace-zip-signer:0.1.3")
     implementation("org.jetbrains:annotations:21.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.185")
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.182")
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.185")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
