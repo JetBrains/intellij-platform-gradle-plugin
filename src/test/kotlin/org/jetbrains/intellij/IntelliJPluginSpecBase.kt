@@ -16,11 +16,11 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPluginSpecBase {
 
-    private val pluginsRepository = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     private val kotlinPluginVersion = "1.5.0"
-    protected val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: "7.0.2"
+    private val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: "7.0.2"
     private var debugEnabled = true
 
+    val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
     val dir: File = createTempDirectory("tmp").toFile()
@@ -42,7 +42,9 @@ abstract class IntelliJPluginSpecBase {
             }
             sourceCompatibility = 1.8
             targetCompatibility = 1.8
-            repositories { mavenCentral() }
+            repositories {
+                mavenCentral()
+            }
             intellij {
                 version = '$intellijVersion'
                 downloadSources = false
