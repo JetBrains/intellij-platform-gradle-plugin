@@ -13,19 +13,17 @@ interface MavenRepository : PluginsRepository {
 
     var resolvedDependency: Boolean
 
-    fun getPluginFile(
-        project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String
-    ): File? {
-        debug(project.name, "Adding Maven repository to download $dependency - $url")
+    fun getPluginFile(project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String): File? {
+        debug(project, "Adding Maven repository to download $dependency - $url")
         var pluginFile: File? = null
         try {
             val configuration = project.configurations.detachedConfiguration(dependency)
             pluginFile = configuration.singleFile
             resolvedDependency = true
         } catch (e: Exception) {
-            debug(project.name, "Couldn't find $dependency in $url", e)
+            debug(project, "Couldn't find $dependency in $url", e)
         }
-        debug(project.name, "Removing Maven repository $url")
+        debug(project, "Removing Maven repository $url")
         project.repositories.remove(repository)
         return pluginFile
     }
@@ -51,7 +49,7 @@ class MavenRepositoryPluginByAction(private val maven: Action<in MavenArtifactRe
     override fun postResolve(project: Project) =
         postResolve(project) {
             val repository = project.repositories.maven(maven)
-            debug(project.name, "Adding Maven plugins repository ${repository.url}")
+            debug(project, "Adding Maven plugins repository ${repository.url}")
             project.repositories.maven(maven)
         }
 }
