@@ -6,8 +6,6 @@ import javax.xml.bind.annotation.XmlRegistry
 @XmlRegistry
 class ObjectFactory {
 
-    fun createUpdatesConfigurable() = UpdatesConfigurable()
-
     fun createPluginsCache() = PluginsCache()
 
     fun createPluginVerifierRepository() = PluginVerifierRepository()

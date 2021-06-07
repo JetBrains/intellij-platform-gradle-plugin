@@ -1,6 +1,8 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
+import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
@@ -16,14 +18,11 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
-import org.jdom2.input.JDOMParseException
+import org.jdom2.Element
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.error
-import org.jetbrains.intellij.model.XmlExtractor
-import org.jetbrains.intellij.model.UpdatesConfigurable
-import org.jetbrains.intellij.model.UpdatesConfigurableComponent
-import org.jetbrains.intellij.model.UpdatesConfigurableOption
+import org.jetbrains.intellij.transformXml
 import java.io.File
 import javax.inject.Inject
 
@@ -110,12 +109,14 @@ open class PrepareSandboxTask @Inject constructor(
     }
 
     fun configureExternalPlugin(pluginDependency: PluginDependency) {
-        if (!pluginDependency.builtin) {
-            val artifact = pluginDependency.artifact
-            if (artifact.isDirectory) {
-                from(artifact) { it.into(artifact.name) }
+        if (pluginDependency.builtin) {
+            return
+        }
+        pluginDependency.artifact.run {
+            if (isDirectory) {
+                from(this) { copy -> copy.into(name) }
             } else {
-                from(artifact)
+                from(this)
             }
         }
     }
@@ -135,25 +136,32 @@ open class PrepareSandboxTask @Inject constructor(
             }
         }
 
-        val extractor = XmlExtractor<UpdatesConfigurable>()
-        val updatesConfigurable = try {
-            extractor.unmarshal(updatesConfig)
-        } catch (ignore: JDOMParseException) {
-            UpdatesConfigurable()
+        if (updatesConfig.readText().trim().isEmpty()) {
+            updatesConfig.writeText("<application/>")
         }
 
-        val component = updatesConfigurable.components.find { it.name == "UpdatesConfigurable" }
-            ?: UpdatesConfigurableComponent(name = "UpdatesConfigurable").apply {
-                updatesConfigurable.components += this
+        updatesConfig.inputStream().use { inputStream ->
+            val document = JDOMUtil.loadDocument(inputStream)
+            val application = document.rootElement.takeIf { it.name == "application" }
+                ?: throw GradleException("Invalid content of $updatesConfig – <application> root element was expected.")
+
+            val updatesConfigurable = application.getChildren("component").find {
+                it.getAttributeValue("name") == "UpdatesConfigurable"
+            } ?: Element("component").apply {
+                setAttribute("name", "UpdatesConfigurable")
+                application.addContent(this)
             }
 
-        val option = component.options.find { it.name == "CHECK_NEEDED" }
-            ?: UpdatesConfigurableOption("CHECK_NEEDED", false).apply {
-                component.options += this
+            val option = updatesConfigurable.getChildren("option").find {
+                it.getAttributeValue("name") == "CHECK_NEEDED"
+            } ?: Element("option").apply {
+                setAttribute("name", "CHECK_NEEDED")
+                updatesConfigurable.addContent(this)
             }
 
-        option.value = false
+            option.setAttribute("value", "false")
 
-        extractor.marshal(updatesConfigurable, updatesConfig)
+            transformXml(document, updatesConfig)
+        }
     }
 }

@@ -608,6 +608,86 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `disable ide update with updates_xml empty`() {
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
+
+        updatesFile.xml("")
+
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+
+        assertFileContent(
+            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            """
+                <application>
+                  <component name="UpdatesConfigurable">
+                    <option name="CHECK_NEEDED" value="false" />
+                  </component>
+                </application>
+            """,
+        )
+    }
+
+    @Test
+    fun `disable ide update with complex updates_xml`() {
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
+
+        updatesFile.xml("""
+            <application>
+                <component name="UpdatesConfigurable">
+                    <enabledExternalComponentSources>
+                        <item value="Android SDK" />
+                    </enabledExternalComponentSources>
+                    <option name="externalUpdateChannels">
+                        <map>
+                            <entry key="Android SDK" value="Stable Channel" />
+                        </map>
+                    </option>
+                    <knownExternalComponentSources>
+                        <item value="Android SDK" />
+                    </knownExternalComponentSources>
+                    <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
+                    <option name="LAST_TIME_CHECKED" value="1622537478550" />
+                    <option name="CHECK_NEEDED" value="false" />
+                </component>
+            </application>
+        """)
+
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+
+        assertFileContent(
+            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            """
+                <application>
+                  <component name="UpdatesConfigurable">
+                    <enabledExternalComponentSources>
+                      <item value="Android SDK" />
+                    </enabledExternalComponentSources>
+                    <option name="externalUpdateChannels">
+                      <map>
+                        <entry key="Android SDK" value="Stable Channel" />
+                      </map>
+                    </option>
+                    <knownExternalComponentSources>
+                      <item value="Android SDK" />
+                    </knownExternalComponentSources>
+                    <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
+                    <option name="LAST_TIME_CHECKED" value="1622537478550" />
+                    <option name="CHECK_NEEDED" value="false" />
+                  </component>
+                </application>
+            """,
+        )
+    }
+
+    @Test
     fun `replace jar on version changing`() {
         pluginXml.xml("""
             <idea-plugin />

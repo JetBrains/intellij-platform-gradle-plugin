@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.dependency
 
-
 import org.jetbrains.intellij.collectJars
 import java.io.File
 

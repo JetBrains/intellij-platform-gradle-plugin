@@ -4,6 +4,9 @@
 
 - Use Gradle `ArchiveOperations` in `extractArchive` utils method [#681](../../issues/681)
 - Set minimal supported Gradle version to 6.6
+- Use JDOM for altering `updates.xml` in `PrepareSandboxTask` to keep existing content
+- Fixed incorrect output path of JarSearchableOptionsTask causing also duplicate entry exception [#678](../../issues/678)
+- Fixed incorrect plugin download URL for custom repositories [#688](../../issues/688)
 
 ## 1.0.0
 
