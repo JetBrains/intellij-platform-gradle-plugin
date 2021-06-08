@@ -18,6 +18,8 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
+import org.jetbrains.intellij.IntelliJPluginConstants.MAVEN_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.dependency.IdeaDependency
@@ -37,8 +39,6 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     companion object {
         const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
         const val LOADER_REF = "java2.loader"
-        const val ASM_REPOSITORY_URL = "https://cache-redirector.jetbrains.com/intellij-dependencies"
-        const val FORMS_REPOSITORY_URL = "https://cache-redirector.jetbrains.com/repo1.maven.org/maven2"
     }
 
     private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
@@ -132,8 +132,8 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         val intellijRepositoryUrl = extension?.intellijRepository?.get() ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
             repositoryHandler.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
-            repositoryHandler.maven { it.url = URI(ASM_REPOSITORY_URL) },
-            repositoryHandler.maven { it.url = URI(FORMS_REPOSITORY_URL) },
+            repositoryHandler.maven { it.url = URI(INTELLIJ_DEPENDENCIES) },
+            repositoryHandler.maven { it.url = URI(MAVEN_REPOSITORY) },
         )
         try {
             return configurationContainer.detachedConfiguration(dependency).files.toList()

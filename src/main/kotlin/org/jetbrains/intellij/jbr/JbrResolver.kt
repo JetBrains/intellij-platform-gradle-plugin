@@ -127,7 +127,7 @@ open class JbrResolver @Inject constructor(
                 }
                 val buildNumber = VersionNumber.parse(buildNumberString)
                 val isJava8 = majorVersion.startsWith('8')
-                val repositoryUrl = IntelliJPluginConstants.DEFAULT_JBR_REPO
+                val repositoryUrl = IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY
 
                 val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < VersionNumber.parse("1483.24")
                 if (oldFormat) {

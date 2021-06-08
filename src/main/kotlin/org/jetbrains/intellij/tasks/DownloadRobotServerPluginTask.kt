@@ -12,6 +12,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
+import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
@@ -31,15 +32,13 @@ open class DownloadRobotServerPluginTask @Inject constructor(
 ) : ConventionTask() {
 
     companion object {
-        const val ROBOT_SERVER_REPOSITORY = "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/ij/intellij-dependencies"
-        private const val ROBOT_SERVER_PLUGIN_METADATA_URL =
-            "$ROBOT_SERVER_REPOSITORY/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"
+        private const val METADATA_URL = "$INTELLIJ_DEPENDENCIES/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"
         const val OLD_ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
         const val NEW_ROBOT_SERVER_DEPENDENCY = "com.intellij.remoterobot:robot-server-plugin"
 
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Robot Server Plugin version")
-            val url = URL(ROBOT_SERVER_PLUGIN_METADATA_URL)
+            val url = URL(METADATA_URL)
             return XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Robot Server Plugin version")
         }
@@ -82,7 +81,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
             name = name,
             version = resolvedVersion,
         )
-        val repository = repositoryHandler.maven { it.url = URI.create(ROBOT_SERVER_REPOSITORY) }
+        val repository = repositoryHandler.maven { it.url = URI.create(INTELLIJ_DEPENDENCIES) }
         val target = outputDir.get().asFile
 
         try {

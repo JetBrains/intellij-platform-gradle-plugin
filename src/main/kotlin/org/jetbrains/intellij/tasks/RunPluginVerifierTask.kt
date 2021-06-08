@@ -26,6 +26,9 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
+import org.jetbrains.intellij.IntelliJPluginConstants.DATA_SERVICES
+import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.create
@@ -60,14 +63,13 @@ open class RunPluginVerifierTask @Inject constructor(
 ) : ConventionTask() {
 
     companion object {
-        private const val VERIFIER_METADATA_URL =
-            "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
-        private const val IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
-        private const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
+        private const val METADATA_URL =
+            "$INTELLIJ_PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
+        private const val IDE_DOWNLOAD_URL = "$DATA_SERVICES/products/download"
 
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Plugin Verifier version")
-            val url = URL(VERIFIER_METADATA_URL)
+            val url = URL(METADATA_URL)
             return XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
@@ -551,7 +553,7 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     private fun getPluginVerifierRepository(version: String) = when {
-        VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
+        VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
         else -> IntelliJPluginConstants.OLD_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
     }
 
