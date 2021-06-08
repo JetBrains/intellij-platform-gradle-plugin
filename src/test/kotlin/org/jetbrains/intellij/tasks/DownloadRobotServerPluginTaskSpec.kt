@@ -85,6 +85,44 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `download latest robot server plugin task`() {
+        writeJavaFile()
+
+        file("src/main/resources/META-INF/other.xml").xml("""
+            <idea-plugin />
+        """)
+
+        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+            <idea-plugin />
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <depends config-file="other.xml"/>
+            </idea-plugin>
+        """)
+
+        buildFile.groovy("""
+            version = '0.42.123'
+            intellij {
+                pluginName = 'myPluginName'
+                plugins = ['copyright']
+            }
+            dependencies {
+                implementation 'joda-time:joda-time:2.8.1'
+            }
+        """)
+
+        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+
+        val resolvedVersion = DownloadRobotServerPluginTask.resolveLatestVersion()
+        assertTrue(
+            collectPaths(File(buildDirectory, "robotServerPlugin"))
+                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-$resolvedVersion.jar"))
+        )
+    }
+
+    @Test
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache")

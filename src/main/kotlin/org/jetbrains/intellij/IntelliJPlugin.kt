@@ -20,6 +20,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.gradle.util.VersionNumber
+import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
@@ -37,7 +38,6 @@ import org.jetbrains.intellij.tasks.RunIdeBase
 import org.jetbrains.intellij.tasks.RunIdeForUiTestTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask.Companion.VERIFIER_VERSION_LATEST
 import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
 import java.io.File
@@ -380,7 +380,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Download robot-server plugin."
 
-            it.version.convention(DownloadRobotServerPluginTask.DEFAULT_ROBOT_SERVER_PLUGIN_VERSION)
+            it.version.convention(VERSION_LATEST)
             it.outputDir.convention(project.layout.projectDirectory.dir("${project.buildDir}/robotServerPlugin"))
         }
     }
@@ -432,7 +432,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
 
             it.failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN))
-            it.verifierVersion.convention(VERIFIER_VERSION_LATEST)
+            it.verifierVersion.convention(VERSION_LATEST)
             it.distributionFile.convention(project.layout.file(project.provider {
                 resolveBuildTaskOutput(project)
             }))

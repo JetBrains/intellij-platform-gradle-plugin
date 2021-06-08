@@ -26,6 +26,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
@@ -34,7 +35,7 @@ import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.model.PluginVerifierRepository
+import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.warn
 import java.io.ByteArrayOutputStream
@@ -63,12 +64,11 @@ open class RunPluginVerifierTask @Inject constructor(
             "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
         private const val IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
         private const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
-        const val VERIFIER_VERSION_LATEST = "latest"
 
-        fun resolveLatestVerifierVersion(): String {
-            debug(message = "Resolving Latest Verifier version")
+        fun resolveLatestVersion(): String {
+            debug(message = "Resolving latest Plugin Verifier version")
             val url = URL(VERIFIER_METADATA_URL)
-            return XmlExtractor<PluginVerifierRepository>().unmarshal(url.openStream()).versioning?.latest
+            return XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
     }
@@ -424,13 +424,12 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Resolves Plugin Verifier version.
-     * If set to {@link #VERIFIER_VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
+     * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
      * performed for the latest available verifier version.
      *
      * @return Plugin Verifier version
      */
-    private fun resolveVerifierVersion() =
-        verifierVersion.orNull?.takeIf { it != VERIFIER_VERSION_LATEST } ?: resolveLatestVerifierVersion()
+    private fun resolveVerifierVersion() = verifierVersion.orNull?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
 
     /**
      * Resolves the Java Runtime directory. `runtimeDir` property is used if provided with the task configuration.

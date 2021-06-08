@@ -56,7 +56,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-        val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
+        val version = RunPluginVerifierTask.resolveLatestVersion()
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier $version"))
     }
 
@@ -237,7 +237,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val version = RunPluginVerifierTask.resolveLatestVerifierVersion()
+        val version = RunPluginVerifierTask.resolveLatestVersion()
         FileUtils.copyInputStreamToFile(
             URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")

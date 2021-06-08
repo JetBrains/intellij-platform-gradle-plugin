@@ -36,5 +36,6 @@ object IntelliJPluginConstants {
         "https://cache-redirector.jetbrains.com/jetbrains.bintray.com/intellij-plugin-service"
     const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven"
     const val PLUGIN_PATH = "plugin.path"
+    const val VERSION_LATEST = "latest"
 }
 

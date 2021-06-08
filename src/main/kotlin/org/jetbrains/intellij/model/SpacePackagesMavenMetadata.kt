@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlElementWrapper
 import javax.xml.bind.annotation.XmlRootElement
 
 @XmlRootElement(name = "metadata")
-data class PluginVerifierRepository(
+data class SpacePackagesMavenMetadata(
 
     @set:XmlElement
     var groupId: String? = null,
@@ -14,10 +14,10 @@ data class PluginVerifierRepository(
     var artifactId: String? = null,
 
     @set:XmlElement
-    var versioning: PluginVerifierRepositoryVersioning? = null,
+    var versioning: SpacePackagesMavenMetadataVersioning? = null,
 )
 
-data class PluginVerifierRepositoryVersioning(
+data class SpacePackagesMavenMetadataVersioning(
 
     @set:XmlElement
     var latest: String? = null,
