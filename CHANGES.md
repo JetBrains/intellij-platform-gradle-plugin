@@ -8,6 +8,7 @@
 - Fixed incorrect output path of JarSearchableOptionsTask causing also duplicate entry exception [#678](../../issues/678)
 - Fixed incorrect plugin download URL for custom repositories [#688](../../issues/688)
 - Make `DownloadRobotServerPluginTask` pointing to the latest Robot Server Plugin available
+- Support Maven closure in PluginsRepositories block
 
 ## 1.0.0
 
