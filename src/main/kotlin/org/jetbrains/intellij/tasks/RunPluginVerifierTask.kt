@@ -27,8 +27,7 @@ import org.gradle.process.ExecOperations
 import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
-import org.jetbrains.intellij.IntelliJPluginConstants.DATA_SERVICES
-import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.create
@@ -63,9 +62,8 @@ open class RunPluginVerifierTask @Inject constructor(
 ) : ConventionTask() {
 
     companion object {
-        private const val METADATA_URL =
-            "$INTELLIJ_PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
-        private const val IDE_DOWNLOAD_URL = "$DATA_SERVICES/products/download"
+        private const val METADATA_URL = "$PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
+        private const val IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
 
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Plugin Verifier version")
@@ -553,8 +551,8 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     private fun getPluginVerifierRepository(version: String) = when {
-        VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
-        else -> IntelliJPluginConstants.OLD_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY
+        VersionNumber.parse(version) >= VersionNumber.parse("1.255") -> PLUGIN_VERIFIER_REPOSITORY
+        else -> IntelliJPluginConstants.OLD_PLUGIN_VERIFIER_REPOSITORY
     }
 
     enum class FailureLevel(val testValue: String) {
