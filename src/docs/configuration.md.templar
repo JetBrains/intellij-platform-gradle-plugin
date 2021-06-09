@@ -240,6 +240,7 @@ Please see [Plugin Dependencies](https://plugins.jetbrains.com/docs/intellij/plu
 **Configuration:** <br/>
 <kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/>
 <kbd>maven(repositoryUrl)</kbd> - use custom Maven repository with plugins<br/>
+<kbd>maven {"{"} repositoryUrl }</kbd> - use custom Maven repository with plugins where you can configure additional parameters (credentials, authentication and etc.)<br/>
 <kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/>
 <br/>
 **Default Configuration:** <kbd>pluginsRepositories {"{"} marketplace() }</kbd>

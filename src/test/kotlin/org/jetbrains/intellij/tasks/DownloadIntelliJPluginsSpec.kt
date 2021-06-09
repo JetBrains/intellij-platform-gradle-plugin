@@ -27,6 +27,35 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         pluginsNightlyCacheDir.delete()
     }
 
+
+    @Test
+    fun `download plugin through maven block`() {
+        buildFile.groovy("""
+            intellij {
+                plugins = ["com.intellij.lang.jsgraphql:2.9.1"]
+                pluginsRepositories {
+                      maven {
+                        url = uri("$pluginsRepository")
+                      }
+                } 
+            }
+        """)
+
+        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        val pluginDir = File(pluginsRepositoryCacheDir, "com.intellij.lang.jsgraphql/2.9.1")
+        pluginDir.list()?.let {
+            assertTrue(it.contains("7145468b33e1c1e246ec5c9127c219d1c7e54cc2"))
+        }
+
+        File(pluginDir, "7c426d70e7d2b270ba3eb896fc7c5e7cbf8330b1").list()?.let {
+            assertTrue(it.contains("com.intellij.lang.jsgraphql-2.9.1.zip"))
+        }
+
+        File(pluginDir, "7145468b33e1c1e246ec5c9127c219d1c7e54cc2").list()?.let {
+            assertTrue(it.contains("com.intellij.lang.jsgraphql-2.9.1.pom"))
+        }
+    }
+
     @Test
     fun `download zip plugin from non-default channel`() {
         buildFile.groovy("""
