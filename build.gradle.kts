@@ -29,7 +29,7 @@ dependencies {
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.17") {
+    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.20") {
         exclude(group = "org.jetbrains.kotlin")
     }
 
