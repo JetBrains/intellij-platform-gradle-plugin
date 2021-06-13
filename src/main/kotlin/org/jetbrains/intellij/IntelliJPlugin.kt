@@ -420,6 +420,7 @@ open class IntelliJPlugin : Plugin<Project> {
             })
 
             it.dependsOn(JavaPlugin.JAR_TASK_NAME)
+            it.dependsOn(project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME))
 
             configure?.invoke(it)
         }
