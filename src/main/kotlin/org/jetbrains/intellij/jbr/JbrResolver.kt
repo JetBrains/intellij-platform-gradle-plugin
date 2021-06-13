@@ -98,7 +98,7 @@ open class JbrResolver @Inject constructor(
     }
 
     private fun getJbrRoot(javaHome: File): File {
-        val jbr = javaHome.listFiles()?.first { it.name == "jbr" || it.name == "jbrsdk" }
+        val jbr = javaHome.listFiles()?.firstOrNull { it.name == "jbr" || it.name == "jbrsdk" }
         if (jbr != null && jbr.exists()) {
             return when (operatingSystem.isMacOsX) {
                 true -> File(jbr, "Contents/Home")
