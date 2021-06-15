@@ -33,6 +33,7 @@ import org.jdom2.Document
 import org.jdom2.JDOMException
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
+import org.jetbrains.intellij.dependency.IdeaDependency
 import org.xml.sax.SAXParseException
 import java.io.File
 import java.io.FileReader
@@ -264,3 +265,11 @@ fun DependencyHandler.create(
     "ext" to extension,
     "configuration" to configuration,
 ))
+
+fun isDependencyOnPyCharm(dependency: IdeaDependency): Boolean {
+    return dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
+}
+
+fun isPyCharmType(type: String): Boolean {
+    return type == "PY" || type == "PC"
+}

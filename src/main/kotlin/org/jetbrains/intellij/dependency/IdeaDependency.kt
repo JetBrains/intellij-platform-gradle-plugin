@@ -16,7 +16,7 @@ open class IdeaDependency(
     val extraDependencies: Collection<IdeaExtraDependency>,
 ) : Serializable {
 
-    private val formatVersion = 1
+    private val formatVersion = 2
     val jarFiles = this.collectJarFiles()
 
     protected open fun collectJarFiles(): Collection<File> {
