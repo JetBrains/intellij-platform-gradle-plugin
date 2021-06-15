@@ -14,16 +14,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.tooling.BuildException
-import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.create
-import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.extractArchive
-import org.jetbrains.intellij.ideBuildNumber
-import org.jetbrains.intellij.ideaDir
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.isKotlinRuntime
-import org.jetbrains.intellij.releaseType
-import org.jetbrains.intellij.warn
+import org.jetbrains.intellij.*
 import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
@@ -98,12 +89,13 @@ open class IdeaDependencyManager @Inject constructor(
         }
     }
 
-    private fun resolveSources(project: Project, version: String): File? {
+    private fun resolveSources(project: Project, version: String, type: String): File? {
         info(context, "Adding IDE sources repository")
         try {
+            val forPyCharm = isPyCharmType(type)
             val dependency = project.dependencies.create(
-                group = "com.jetbrains.intellij.idea",
-                name = "ideaIC",
+                group = if (forPyCharm) "com.jetbrains.intellij.pycharm" else "com.jetbrains.intellij.idea",
+                name = if (forPyCharm) "pycharmPC" else "ideaIC",
                 version = version,
                 classifier = "sources",
                 extension = "jar",
@@ -204,7 +196,8 @@ open class IdeaDependencyManager @Inject constructor(
                 }
 
                 if (dependency.sources != null) {
-                    val artifact = IntellijIvyArtifact(dependency.sources, "ideaIC", "jar", "sources", "sources")
+                    val name = if (isDependencyOnPyCharm(dependency)) "pycharmPC" else "ideaIC"
+                    val artifact = IntellijIvyArtifact(dependency.sources, name, "jar", "sources", "sources")
                     artifact.conf = "sources"
                     addArtifact(artifact)
                 }
@@ -234,7 +227,7 @@ open class IdeaDependencyManager @Inject constructor(
         } else if (type == "CL") {
             dependencyGroup = "com.jetbrains.intellij.clion"
             dependencyName = "clion"
-        } else if (type == "PY" || type == "PC") {
+        } else if (isPyCharmType(type)) {
             dependencyGroup = "com.jetbrains.intellij.pycharm"
             dependencyName = "pycharm$type"
         } else if (type == "GO") {
@@ -260,7 +253,7 @@ open class IdeaDependencyManager @Inject constructor(
         info(context, "IDE dependency cache directory: $classesDirectory")
         val buildNumber = ideBuildNumber(classesDirectory)
         val sourcesDirectory = when {
-            hasSources -> resolveSources(project, version)
+            hasSources -> resolveSources(project, version, type)
             else -> null
         }
         val resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)

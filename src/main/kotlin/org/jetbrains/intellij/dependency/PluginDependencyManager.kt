@@ -10,14 +10,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.process.ExecOperations
 import org.gradle.tooling.BuildException
-import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.create
-import org.jetbrains.intellij.createPlugin
-import org.jetbrains.intellij.extractArchive
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.isJar
-import org.jetbrains.intellij.isZip
-import org.jetbrains.intellij.warn
+import org.jetbrains.intellij.*
 import java.io.File
 import java.nio.file.Paths
 import javax.inject.Inject
@@ -148,7 +141,8 @@ open class PluginDependencyManager @Inject constructor(
                 addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, configuration.name, baseDir, groupId))
             }
             ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
-                val artifact = IntellijIvyArtifact(it, "ideaIC", "jar", "sources", "sources")
+                val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
+                val artifact = IntellijIvyArtifact(it, name, "jar", "sources", "sources")
                 artifact.conf = "sources"
                 addArtifact(artifact)
             }
