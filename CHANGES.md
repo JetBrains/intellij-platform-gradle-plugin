@@ -9,6 +9,8 @@
 - Fixed incorrect plugin download URL for custom repositories [#688](../../issues/688)
 - Make `DownloadRobotServerPluginTask` pointing to the latest Robot Server Plugin available
 - Support Maven closure in PluginsRepositories block
+- `BuildSearchableOptionsTask` fails on MacOS when resolving `javaHome` #[#696](../../issues/696)
+- `PrepareSandboxTask` doesn't depend on `JavaPlugin` dependencies #[#451](../../issues/451)
 
 ## 1.0.0
 
