@@ -11,7 +11,7 @@
 > 
 **This project requires Gradle 6.6 or newer**
 
-For migration guide to the 1.0 version, visit: https://lp.jetbrains.com/gradle-intellij-plugin
+When upgrading to 1.x version, please make sure to follow migration guide to adjust your existing build script: https://lp.jetbrains.com/gradle-intellij-plugin
 
 This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
 
@@ -123,7 +123,7 @@ The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd>
 | Attributes | Values | 
 | :------------- | :--------- | 
 | <kbd>intellijRepository</kbd>, <kbd>jreRepository</kbd> - Urls of repositories for downloading IDE distributions and JetBrains Java Runtime. <br/><br/>|**Acceptable Values:** <br/><kbd>url</kbd><br/><br/>**Default Value:** <kbd>https://jetbrains.com/intellij-repository</kbd>, <kbd>https://cache-redirector.jetbrains.com/intellij-jbr</kbd>|
-| <kbd>pluginsRepositories { ... }</kbd> - Configure repositories for downloading plugin dependencies. <br/><br/>|**Configuration:** <br/><kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/><kbd>maven(repositoryUrl)</kbd> - use custom Maven repository with plugins<br/><kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/><br/>**Default Configuration:** <kbd>pluginsRepositories { marketplace() }</kbd>|
+| <kbd>pluginsRepositories { ... }</kbd> - Configure repositories for downloading plugin dependencies. <br/><br/>|**Configuration:** <br/><kbd>marketplace()</kbd> - use Maven repository with plugins listed in the JetBrains marketplace<br/><kbd>maven(repositoryUrl)</kbd> - use custom Maven repository with plugins<br/><kbd>maven { repositoryUrl }</kbd> - use custom Maven repository with plugins where you can configure additional parameters (credentials, authentication and etc.)<br/><kbd>custom(pluginsXmlUrl)</kbd> - use [custom plugin repository](https://www.jetbrains.com/help/idea/managing-plugins.html) <br/><br/>**Default Configuration:** <kbd>pluginsRepositories { marketplace() }</kbd>|
 | <kbd>downloadSources</kbd> - Should plugin download IntelliJ sources while initializing Gradle build? <br/><br/>**Notes:**    <ul>        <li>Since sources are not needed while testing on CI, you can set it to `false` for a particular environment.</li>    </ul>|**Acceptable Values:** <kbd>true</kbd> <kbd>false</kbd><br/><br/>**Default Value:** <kbd>true</kbd> if `CI` environment variable is not set|
 | <kbd>ideaDependencyCachePath</kbd> - The absolute path to the local directory that should be used for storing IDE distributions. <br/><br/>**Notes:**    <ul>        <li>Empty value means the Gradle cache directory will be used.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'<example>'`<br/><br/>**Default Value:** none|
 
