@@ -195,18 +195,14 @@ fun extractArchive(
     return targetDirectory
 }
 
-fun releaseType(version: String): String {
-    if (version.endsWith("-EAP-SNAPSHOT") ||
+fun releaseType(version: String) = when {
+    version.endsWith("-EAP-SNAPSHOT") ||
         version.endsWith("-EAP-CANDIDATE-SNAPSHOT") ||
         version.endsWith("-CUSTOM-SNAPSHOT") ||
         MAJOR_VERSION_PATTERN.matcher(version).matches()
-    ) {
-        return "snapshots"
-    }
-    if (version.endsWith("-SNAPSHOT")) {
-        return "nightly"
-    }
-    return "releases"
+    -> "snapshots"
+    version.endsWith("-SNAPSHOT") -> "nightly"
+    else -> "releases"
 }
 
 fun error(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, context, message, e)

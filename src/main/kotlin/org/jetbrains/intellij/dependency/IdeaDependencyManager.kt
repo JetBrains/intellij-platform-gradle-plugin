@@ -264,14 +264,16 @@ open class IdeaDependencyManager @Inject constructor(
             else -> null
         }
         val resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
-        return createDependency(dependencyName,
+        return createDependency(
+            dependencyName,
             type,
             version,
             buildNumber,
             classesDirectory,
             sourcesDirectory,
             project,
-            resolvedExtraDependencies)
+            resolvedExtraDependencies,
+        )
     }
 
     fun resolveLocal(project: Project, localPath: String, localPathSources: String?): IdeaDependency {
