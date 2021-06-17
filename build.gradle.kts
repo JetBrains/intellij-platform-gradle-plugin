@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains:marketplace-zip-signer:0.1.3")
+    implementation("org.jetbrains:marketplace-zip-signer:0.1.5")
     implementation("org.jetbrains:annotations:21.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.185")
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.185")
