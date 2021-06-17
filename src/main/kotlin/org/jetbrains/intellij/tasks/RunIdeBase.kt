@@ -87,10 +87,10 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     @Override
     override fun exec() {
         workingDir = projectWorkingDir.get()
-        configureClasspath()
         configureSystemProperties()
         configureJvmArgs()
         executable(projectExecutable.get())
+        configureClasspath()
         super.exec()
     }
 
