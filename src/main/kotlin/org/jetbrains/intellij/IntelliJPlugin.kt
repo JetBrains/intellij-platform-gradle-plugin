@@ -1,8 +1,10 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
@@ -12,6 +14,7 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskCollection
 import org.gradle.api.tasks.bundling.Zip
@@ -649,7 +652,6 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring tests tasks")
         val testTasks = project.tasks.withType(Test::class.java) as TaskCollection
         val prepareTestingSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
-        val prepareTestingSandboxTask = prepareTestingSandboxTaskProvider.get() as PrepareSandboxTask
         val runIdeTaskProvider = project.tasks.named(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
         val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
 
@@ -660,7 +662,6 @@ open class IntelliJPlugin : Plugin<Project> {
 
         testTasks.forEach { task ->
             task.enableAssertions = true
-            task.systemProperties(getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
 
             // appClassLoader should be used for user's plugins. Otherwise, classes it won't be possible to use
             // its classes of application components or services in tests: class loaders will be different for
@@ -673,29 +674,40 @@ open class IntelliJPlugin : Plugin<Project> {
             task.systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
             task.outputs.dir(systemDirectory)
-            task.outputs.dir(configDirectory)
-            task.inputs.files(prepareTestingSandboxTask)
+                    .withPropertyName("System directory")
+            task.inputs.dir(configDirectory)
+                    .withPropertyName("Config Directory")
+                    .withPathSensitivity(PathSensitivity.RELATIVE)
+            task.inputs.files(prepareTestingSandboxTaskProvider)
+                    .withPropertyName("Plugins directory")
+                    .withPathSensitivity(PathSensitivity.RELATIVE)
+
             val ideaDependency = extension.getIdeaDependency(project)
 
-            task.doFirst {
-                val ideDirectory = runIdeTask.ideDir.get().asFile
-                task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs ?: emptyList(), ideDirectory)
-                task.classpath += project.files(
-                    "${ideaDependency.classes}/lib/resources.jar",
-                    "${ideaDependency.classes}/lib/idea.jar",
-                )
-
-                // since 193 plugins from classpath are loaded before plugins from plugins directory
-                // to handle this, use plugin.path property as task's the very first source of plugins
-                // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
-                val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
-                if (ideVersion.baselineVersion >= 193) {
-                    task.systemProperty(
-                        IntelliJPluginConstants.PLUGIN_PATH,
-                        pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
+            @Suppress("ObjectLiteralToLambda")
+            task.doFirst(object : Action<Task> {
+                override fun execute(t: Task) {
+                    val ideDirectory = runIdeTask.ideDir.get().asFile
+                    task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs ?: emptyList(), ideDirectory)
+                    task.classpath += project.files(
+                            "${ideaDependency.classes}/lib/resources.jar",
+                            "${ideaDependency.classes}/lib/idea.jar"
                     )
+
+                    task.systemProperties(getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
+
+                    // since 193 plugins from classpath are loaded before plugins from plugins directory
+                    // to handle this, use plugin.path property as task's the very first source of plugins
+                    // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
+                    val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
+                    if (ideVersion.baselineVersion >= 193) {
+                        task.systemProperty(
+                                IntelliJPluginConstants.PLUGIN_PATH,
+                                pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
+                        )
+                    }
                 }
-            }
+            })
         }
     }
 
