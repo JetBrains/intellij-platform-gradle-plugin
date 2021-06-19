@@ -17,7 +17,7 @@ import kotlin.test.assertEquals
 abstract class IntelliJPluginSpecBase {
 
     private val kotlinPluginVersion = "1.5.0"
-    private val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: "7.0.2"
+    private val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: "7.1"
     private var debugEnabled = true
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)

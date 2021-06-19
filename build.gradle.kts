@@ -86,8 +86,8 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = "7.0.2"
-        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+        gradleVersion = "7.1"
+        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-7.1-all.zip"
     }
 
     test {
