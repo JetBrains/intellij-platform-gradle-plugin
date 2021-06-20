@@ -14,6 +14,7 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
+import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskCollection
@@ -681,9 +682,11 @@ open class IntelliJPlugin : Plugin<Project> {
             task.inputs.files(prepareTestingSandboxTaskProvider)
                     .withPropertyName("Plugins directory")
                     .withPathSensitivity(PathSensitivity.RELATIVE)
+                    .withNormalizer(ClasspathNormalizer::class.java)
 
             val ideaDependency = extension.getIdeaDependency(project)
 
+            // Use an anonymous class, since lambdas disable caching for the task.
             @Suppress("ObjectLiteralToLambda")
             task.doFirst(object : Action<Task> {
                 override fun execute(t: Task) {
