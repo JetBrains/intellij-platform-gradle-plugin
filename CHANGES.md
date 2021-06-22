@@ -5,15 +5,16 @@
 - Use Gradle `ArchiveOperations` in `extractArchive` utils method [#681](../../issues/681)
 - Set minimal supported Gradle version to 6.6
 - Use JDOM for altering `updates.xml` in `PrepareSandboxTask` to keep existing content
-- Fixed incorrect output path of JarSearchableOptionsTask causing also duplicate entry exception [#678](../../issues/678)
+- Fixed incorrect output path of `JarSearchableOptionsTask` causing also duplicate entry exception [#678](../../issues/678)
 - Fixed incorrect plugin download URL for custom repositories [#688](../../issues/688)
 - Make `DownloadRobotServerPluginTask` pointing to the latest Robot Server Plugin available
-- Support Maven closure in PluginsRepositories block
-- `BuildSearchableOptionsTask` fails on MacOS when resolving `javaHome` #[#696](../../issues/696)
+- Support Maven closure in `PluginsRepositories` block
+- `BuildSearchableOptionsTask` fails on macOS when resolving `javaHome` #[#696](../../issues/696)
 - `PrepareSandboxTask` doesn't depend on `JavaPlugin` dependencies #[#451](../../issues/451)
 
 ## 1.0.0
 
+- Breaking changes guide: https://lp.jetbrains.com/gradle-intellij-plugin
 - Plugin Signing integration
 - Lazy Configuration support
 - Configuration Cache support
@@ -22,7 +23,6 @@
 - Rewritten in Kotlin
 - properties names cleanup (`*Repo` to `*Repository`, `*Directory` to `*Dir` – for the sake of consistency with Gradle)
 - Stepping away from Bintray and JCenter
-- Breaking changes guide: https://lp.jetbrains.com/gradle-intellij-plugin
 
 ## 0.7.3
 
