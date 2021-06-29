@@ -1,6 +1,5 @@
 package org.jetbrains.intellij
 
-import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
@@ -11,7 +10,6 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.tooling.BuildException
-import org.gradle.util.ConfigureUtil
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginsRepositoryConfiguration
@@ -125,14 +123,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
             marketplace()
             getRepositories()
         }
-    }
-
-    /**
-     * Configure multiple repositories for downloading plugins.
-     */
-    @Suppress("unused")
-    fun pluginsRepositories(block: Closure<Any>) {
-        ConfigureUtil.configure(block, pluginsRepositories)
     }
 
     /**

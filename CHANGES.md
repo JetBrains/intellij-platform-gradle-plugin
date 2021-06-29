@@ -11,6 +11,7 @@
 - Support Maven closure in `PluginsRepositories` block
 - `BuildSearchableOptionsTask` fails on macOS when resolving `javaHome` #[#696](../../issues/696)
 - `PrepareSandboxTask` doesn't depend on `JavaPlugin` dependencies #[#451](../../issues/451)
+- Remove `IntelliJPluginExtension.pluginsRepositories(block: Closure<Any>)` due to `ConfigureUtil` deprecation and a lack of typed parameters
 
 ## 1.0.0
 
