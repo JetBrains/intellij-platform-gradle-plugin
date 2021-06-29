@@ -99,7 +99,8 @@ open class PluginDependencyManager @Inject constructor(
     private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy {
-                it.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision].[ext]") // ivy xml
+                val ivyFileSuffix = plugin.getFqn().substring("${plugin.id}-${plugin.version}".length)
+                it.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
                 it.artifactPattern("${ideaDependency?.classes}/plugins/[module]/[artifact](.[ext])") // builtin plugins
                 it.artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency?.sources != null) {
@@ -121,7 +122,7 @@ open class PluginDependencyManager @Inject constructor(
             plugin.builtin -> plugin.artifact
             else -> plugin.artifact.parentFile
         }
-        val pluginFqn = "${plugin.id}-${plugin.version}"
+        val pluginFqn = plugin.getFqn()
         val groupId = groupId(plugin.channel)
         val ivyFile = File(File(cacheDirectoryPath, groupId), "$pluginFqn.xml").takeUnless { it.exists() } ?: return
         val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
