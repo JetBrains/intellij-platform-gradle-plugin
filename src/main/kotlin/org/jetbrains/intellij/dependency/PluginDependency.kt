@@ -7,6 +7,9 @@ import java.io.Serializable
 
 @CompileStatic
 interface PluginDependency : Serializable {
+    companion object {
+        private val formatVersion = 1
+    }
 
     val id: String
 
@@ -31,4 +34,6 @@ interface PluginDependency : Serializable {
     val notation: PluginDependencyNotation
 
     fun isCompatible(ideVersion: IdeVersion): Boolean
+
+    fun getFqn(): String = "$id-$version-$formatVersion"
 }
