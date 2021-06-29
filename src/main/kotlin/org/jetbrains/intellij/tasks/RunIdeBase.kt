@@ -12,7 +12,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.util.VersionNumber
+import org.gradle.util.GradleVersion.version
 import org.jetbrains.intellij.VERSION_PATTERN
 import org.jetbrains.intellij.getIdeJvmArgs
 import org.jetbrains.intellij.getIdeaSystemProperties
@@ -77,7 +77,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     val projectExecutable: Property<String> = objectFactory.property(String::class.java)
 
     init {
-        main = "com.intellij.idea.Main"
+        mainClass.set("com.intellij.idea.Main")
         enableAssertions = true
         if (runAlways) {
             outputs.upToDateWhen { false }
@@ -104,8 +104,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         val buildNumber = ideBuildNumber(ideDir.get().asFile).split('-').last()
-        val version = VersionNumber.parse(buildNumber)
-        if (version > VersionNumber.parse("203.0")) {
+        if (version(buildNumber) > version("203.0")) {
             classpath += objectFactory.fileCollection().from(
                     "$ideDirFile/lib/bootstrap.jar",
                     "$ideDirFile/lib/util.jar",
