@@ -62,7 +62,7 @@ open class PublishPluginTask @Inject constructor(
                         repositoryClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
                         info(context, "Uploaded successfully")
                     } catch (exception: Exception) {
-                        throw TaskExecutionException(this, GradleException("Failed to upload plugin. $exception.message", exception))
+                        throw TaskExecutionException(this, GradleException("Failed to upload plugin. ${exception.message}", exception))
                     }
                 }
             }
