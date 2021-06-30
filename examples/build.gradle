@@ -25,7 +25,7 @@ subprojects {
     apply plugin: 'org.jetbrains.intellij'
 
     intellij {
-        version '2020.1'
+        version = '2020.1'
     }
 }
 
