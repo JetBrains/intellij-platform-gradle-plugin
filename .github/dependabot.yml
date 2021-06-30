@@ -1,0 +1,48 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "gradle"
+    directory: "/simple-plugin/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gradle"
+    directory: "/clion-plugin/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gradle"
+    directory: "/pycharm-plugin/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gradle"
+    directory: "/plugin-with-dependencies/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gradle"
+    directory: "/custom-runide-task/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gradle"
+    directory: "/kotlin-plugin/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gradle"
+    directory: "/composite-plugin/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "gradle"
+    directory: "/rider-plugin/"
+    target-branch: "examples"
+    schedule:
+      interval: "daily"
