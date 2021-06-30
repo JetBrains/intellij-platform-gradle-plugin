@@ -1,4 +1,0 @@
-intellij {
-    // PC is also available here
-    type = 'PY'
-}

@@ -1,4 +1,0 @@
-intellij {
-    version = '2020.1'
-    plugins = ['java', 'coverage', 'org.jetbrains.kotlin:1.3.72-release-IJ2020.1-1']
-}

@@ -1,9 +1,0 @@
-<idea-plugin>
-    <actions>
-        <action class="org.intellij.examples.dependencies.plugin.CoverageHelloAction" id="SayHelloToCoverage"
-                text="Say Hello To Coverage">
-            <add-to-group group-id="ToolsMenu"/>
-            <add-to-group group-id="WelcomeScreen.QuickStart"/>
-        </action>
-    </actions>
-</idea-plugin>

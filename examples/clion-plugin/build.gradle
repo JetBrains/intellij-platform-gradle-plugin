@@ -1,4 +1,0 @@
-intellij {
-    version = 'CL-2018.3.4'
-    downloadSources = false
-}
