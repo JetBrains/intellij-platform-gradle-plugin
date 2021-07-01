@@ -24,7 +24,7 @@ import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
@@ -47,8 +47,10 @@ import java.util.function.Predicate
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
 
+@Suppress("DEPRECATION")
 fun mainSourceSet(project: Project): SourceSet = project
-    .extensions.getByType(JavaPluginExtension::class.java)
+    .convention.getPlugin(JavaPluginConvention::class.java)
+//    .extensions.getByType(JavaPluginExtension::class.java) // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
 fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
