@@ -12,8 +12,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.util.GradleVersion.version
 import org.jetbrains.intellij.VERSION_PATTERN
+import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.getIdeJvmArgs
 import org.jetbrains.intellij.getIdeaSystemProperties
 import org.jetbrains.intellij.ideBuildNumber
@@ -104,7 +104,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         val buildNumber = ideBuildNumber(ideDir.get().asFile).split('-').last()
-        if (version(buildNumber) > version("203.0")) {
+        if (Version.parse(buildNumber) > Version.parse("203.0")) {
             classpath += objectFactory.fileCollection().from(
                     "$ideDirFile/lib/bootstrap.jar",
                     "$ideDirFile/lib/util.jar",

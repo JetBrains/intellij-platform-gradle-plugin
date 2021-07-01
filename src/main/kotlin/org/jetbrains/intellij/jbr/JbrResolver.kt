@@ -8,8 +8,8 @@ import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
-import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.warn
@@ -125,11 +125,11 @@ open class JbrResolver @Inject constructor(
                     true -> version.substring(lastIndexOfB + 1)
                     else -> ""
                 }
-                val buildNumber = VersionNumber.parse(buildNumberString)
+                val buildNumber = Version.parse(buildNumberString)
                 val isJava8 = majorVersion.startsWith('8')
                 val repositoryUrl = IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY
 
-                val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < VersionNumber.parse("1483.24")
+                val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < Version.parse("1483.24")
                 if (oldFormat) {
                     return JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}",
                         repositoryUrl)
@@ -138,7 +138,7 @@ open class JbrResolver @Inject constructor(
                 if (prefix.isEmpty()) {
                     prefix = when {
                         isJava8 -> "jbrx-"
-                        buildNumber < VersionNumber.parse("1319.6") -> "jbr-"
+                        buildNumber < Version.parse("1319.6") -> "jbr-"
                         else -> "jbr_jcef-"
                     }
                 }

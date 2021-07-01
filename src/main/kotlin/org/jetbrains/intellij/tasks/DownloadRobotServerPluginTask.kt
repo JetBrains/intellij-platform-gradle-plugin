@@ -11,9 +11,9 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.process.ExecOperations
-import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
+import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.extractArchive
@@ -93,7 +93,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
     }
 
     private fun getDependency(version: String) = when {
-        VersionNumber.parse(version) < VersionNumber.parse("0.11.0") -> OLD_ROBOT_SERVER_DEPENDENCY
+        Version.parse(version) < Version.parse("0.11.0") -> OLD_ROBOT_SERVER_DEPENDENCY
         else -> NEW_ROBOT_SERVER_DEPENDENCY
     }
 }

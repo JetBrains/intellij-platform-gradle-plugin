@@ -24,12 +24,12 @@ import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
-import org.gradle.util.GradleVersion.version
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
@@ -551,7 +551,7 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     private fun getPluginVerifierRepository(version: String) = when {
-        version(version) >= version("1.255") -> PLUGIN_VERIFIER_REPOSITORY
+        Version.parse(version) >= Version.parse("1.255") -> PLUGIN_VERIFIER_REPOSITORY
         else -> IntelliJPluginConstants.OLD_PLUGIN_VERIFIER_REPOSITORY
     }
 

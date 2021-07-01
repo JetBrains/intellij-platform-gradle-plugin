@@ -23,7 +23,6 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
-import org.gradle.util.VersionNumber
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -85,7 +84,7 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkGradleVersion(project: Project) {
-        if (VersionNumber.parse(project.gradle.gradleVersion) < VersionNumber.parse("6.6")) {
+        if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.6")) {
             throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 6.6 and higher")
         }
     }
@@ -511,7 +510,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             it.onlyIf { _ ->
                 val number = ideBuildNumber(it.ideDir.get().asFile)
-                VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("191.2752")
+                Version.parse(number.split('-').last()) >= Version.parse("191.2752")
             }
         }
     }
@@ -545,7 +544,7 @@ open class IntelliJPlugin : Plugin<Project> {
         })
         task.autoReloadPlugins.convention(project.provider {
             val number = ideBuildNumber(task.ideDir.get().asFile)
-            VersionNumber.parse(number.split('-').last()) >= VersionNumber.parse("202.0")
+            Version.parse(number.split('-').last()) >= Version.parse("202.0")
         })
         task.projectWorkingDir.convention(project.provider {
             project.file("${task.ideDir.get().asFile}/bin/")
