@@ -23,7 +23,7 @@
 - Task Configuration Avoidance support
 - better CI (GitHub Actions, Qodana, Dependabot)
 - Rewritten in Kotlin
-- properties names cleanup (`*Repo` to `*Repository`, `*Directory` to `*Dir` – for the sake of consistency with Gradle)
+- property names cleanup (`*Repo` to `*Repository`, `*Directory` to `*Dir` – for the sake of consistency with Gradle)
 - Stepping away from Bintray and JCenter
 
 ## 0.7.3

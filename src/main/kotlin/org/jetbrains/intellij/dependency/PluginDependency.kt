@@ -8,7 +8,7 @@ import java.io.Serializable
 @CompileStatic
 interface PluginDependency : Serializable {
     companion object {
-        private val formatVersion = 1
+        private const val formatVersion = 1
     }
 
     val id: String
