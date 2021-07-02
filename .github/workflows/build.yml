@@ -38,7 +38,7 @@ jobs:
         testFile:
           - "DownloadIntelliJSpec"
         gradleVersion:
-          - 6.6
+          - 6.6.1
           - 6.9
           - 7.1.1
         os:
@@ -104,7 +104,7 @@ jobs:
           - "IntelliJPluginSpec"
           - "IntelliJPluginManualConfigSpec"
         gradleVersion:
-          - 6.6
+          - 6.6.1
           - 6.9
           - 7.1.1
         os:
