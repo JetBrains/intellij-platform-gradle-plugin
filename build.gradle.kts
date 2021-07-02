@@ -92,8 +92,8 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = "7.1"
-        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-7.1-all.zip"
+        gradleVersion = properties("gradleVersion")
+        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
     }
 
     test {
@@ -109,6 +109,8 @@ fun configureTests(testTask: Test) {
         File(testGradleHomePath).mkdir()
     }
     testTask.systemProperties["test.gradle.home"] = testGradleHomePath
+    testTask.systemProperties["test.kotlin.version"] = properties("kotlinVersion")
+    testTask.systemProperties["test.gradle.default"] = properties("gradleVersion")
     testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
     testTask.systemProperties["plugins.repository"] = properties("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)

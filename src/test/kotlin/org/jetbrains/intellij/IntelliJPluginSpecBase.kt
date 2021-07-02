@@ -16,12 +16,13 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPluginSpecBase {
 
-    private val kotlinPluginVersion = "1.5.0"
-    private val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: "7.1"
     private var debugEnabled = true
+    private val kotlinPluginVersion = System.getProperty("test.kotlin.version")
+    private val gradleDefault = System.getProperty("test.gradle.default")
+    private val gradleVersion = System.getProperty("test.gradle.version").takeIf(String::isNotEmpty) ?: gradleDefault
+    val gradleHome: String = System.getProperty("test.gradle.home")
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val gradleHome: String = System.getProperty("test.gradle.home")
     val intellijVersion = "2020.1"
     val dir: File = createTempDirectory("tmp").toFile()
 
