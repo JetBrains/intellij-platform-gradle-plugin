@@ -185,8 +185,8 @@ publishing {
 }
 
 changelog {
-    version = "${project.version}"
-    path = "${project.projectDir}/CHANGES.md"
+    version.set("${project.version}")
+    path.set("${project.projectDir}/CHANGES.md")
 }
 
 githubRelease {
