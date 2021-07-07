@@ -35,6 +35,8 @@ import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.getBuiltinJbrVersion
+import org.jetbrains.intellij.ifFalse
+import org.jetbrains.intellij.ifNull
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
@@ -440,44 +442,69 @@ open class RunPluginVerifierTask @Inject constructor(
      * @return path to the Java Runtime directory
      */
     private fun resolveRuntimeDir(): String {
-        runtimeDir.orNull?.let {
-            debug(context, "Runtime specified with properties: $it")
-            return it
-        }
-
         val jbrResolver = objectFactory.newInstance(
             JbrResolver::class.java,
             extension.jreRepository.orNull ?: "",
             isOffline,
             this,
         )
-        jbrVersion.orNull?.let {
-            jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
-                debug(context, "Runtime specified with JetBrains Runtime Version property: $it")
-                return jbr.javaHome.canonicalPath
-            }
-            warn(context, "Cannot resolve JetBrains Runtime '$it'. Falling back to built-in JetBrains Runtime.")
-        }
 
         val jbrPath = when (OperatingSystem.current().isMacOsX) {
             true -> "jbr/Contents/Home"
             false -> "jbr"
         }
 
-        getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
-            jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
-                val javaHome = File(builtinJbr.javaHome, jbrPath)
-                if (javaHome.exists()) {
-                    debug(context, "Using built-in JetBrains Runtime: $javaHome")
-                    return javaHome.canonicalPath
+        return listOf(
+            {
+                runtimeDir.orNull
+                    ?.also { debug(context, "Runtime specified with properties: $it") }
+            },
+            {
+                jbrResolver.resolve(jbrVersion.orNull)?.javaHome?.canonicalPath
+                    ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: ${jbrVersion.get()}") }
+                    .ifNull { warn(context, "Cannot resolve JetBrains Runtime '$jbrVersion'. Falling back to built-in JetBrains Runtime.") }
+            },
+            {
+                getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
+                    jbrResolver.resolve(builtinJbrVersion)
+                        ?.let { builtinJbr -> File(builtinJbr.javaHome, jbrPath).takeIf(File::exists)?.canonicalPath }
+                        ?.also { debug(context, "Using built-in JetBrains Runtime: $it") }
+                        .ifNull { warn(context, "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Rutime.") }
                 }
-            }
-            warn(context, "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Runtime.")
-        }
-
-        debug(context, "Using current JVM: ${Jvm.current().javaHome}")
-        return Jvm.current().javaHome.canonicalPath
+            },
+            {
+                Jvm.current().javaHome.canonicalPath
+                    .also { debug(context, "Using current JVM: $it") }
+            },
+        )
+            .asSequence()
+            .mapNotNull { it()?.takeIf(::validateRuntimeDir) }
+            .firstOrNull()
+            ?: throw GradleException(when {
+                requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
+                else -> "Java Runtime directory couldn't be resolved"
+            })
     }
+
+    /**
+     * Verifies if provided Java Runtime directory points to Java 11 in case of Plugin Verifier 1.260+.
+     *
+     * @return Java Runtime directory points to Java 8 for Plugin Verifier version < 1.260, or Java 11 for 1.260+.
+     */
+    private fun validateRuntimeDir(runtimeDir: String) = ByteArrayOutputStream().use { os ->
+        execOperations.exec {
+            it.workingDir = File(runtimeDir).resolve("bin")
+            it.executable = "java"
+            it.args = listOf("--version")
+            it.standardOutput = os
+        }
+        !requiresJava11() && Version.parse(os.toString()) >= Version(11)
+    }.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, following runtimeDir was provided: $runtimeDir") }
+
+    /**
+     * Checks Plugin Verifier version, if 1.260+ – require Java 11 to run.
+     */
+    private fun requiresJava11() = Version.parse(resolveVerifierVersion()) >= Version(1, 260)
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
