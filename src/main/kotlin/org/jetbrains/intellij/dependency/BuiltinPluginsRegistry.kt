@@ -31,7 +31,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
     private fun fillFromCache(): Boolean {
         val cache = cacheFile().takeIf { it.exists() } ?: return false
 
-        debug(context, "Builtin registry cache is found. Loading from $cache")
+        debug(context, "Builtin registry cache is found. Loading from: $cache")
         return try {
             extractor.unmarshal(cache).plugins.forEach {
                 plugins[it.id] = it

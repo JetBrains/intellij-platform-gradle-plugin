@@ -143,7 +143,7 @@ open class PrepareSandboxTask @Inject constructor(
         updatesConfig.inputStream().use { inputStream ->
             val document = JDOMUtil.loadDocument(inputStream)
             val application = document.rootElement.takeIf { it.name == "application" }
-                ?: throw GradleException("Invalid content of $updatesConfig – <application> root element was expected.")
+                ?: throw GradleException("Invalid content of '$updatesConfig' – '<application>' root element was expected.")
 
             val updatesConfigurable = application.getChildren("component").find {
                 it.getAttributeValue("name") == "UpdatesConfigurable"

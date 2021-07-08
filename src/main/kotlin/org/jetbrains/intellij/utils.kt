@@ -62,11 +62,11 @@ fun parsePluginXml(pluginXml: File, context: Any): PluginBean? {
         val document = JDOMUtil.loadDocument(pluginXml.inputStream())
         return PluginBeanExtractor.extractPluginBean(document)
     } catch (e: SAXParseException) {
-        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+        warn(context, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
     } catch (e: JDOMException) {
-        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+        warn(context, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
     } catch (e: IOException) {
-        warn(context, "Cannot read ${pluginXml.canonicalPath}. Skipping", e)
+        warn(context, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
     }
     return null
 }
@@ -172,8 +172,7 @@ fun extractArchive(
     targetDirectory.deleteRecursively()
     targetDirectory.mkdirs()
 
-    debug(context, "Extracting $name")
-
+    debug(context, "Extracting: $name")
 
     if (name.endsWith(".tar.gz") && OperatingSystem.current().isWindows) {
         execOperations.exec {
@@ -191,7 +190,7 @@ fun extractArchive(
         }
     }
 
-    debug(context, "Extracted $name")
+    debug(context, "Extracted: $name")
 
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)
@@ -236,11 +235,11 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdeP
         is PluginCreationSuccess -> creationResult.plugin
         is PluginCreationFail -> {
             val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-            warn(context, "Cannot create plugin from file ($artifact): $problems")
+            warn(context, "Cannot create plugin from file '$artifact': $problems")
             null
         }
         else -> {
-            warn(context, "Cannot create plugin from file ($artifact). $creationResult")
+            warn(context, "Cannot create plugin from file '$artifact'. $creationResult")
             null
         }
     }

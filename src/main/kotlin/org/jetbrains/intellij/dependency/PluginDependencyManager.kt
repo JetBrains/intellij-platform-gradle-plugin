@@ -36,14 +36,14 @@ open class PluginDependencyManager @Inject constructor(
             if (Paths.get(dependency.id).isAbsolute) {
                 return externalPluginDependency(File(dependency.id))
             } else if (ideaDependency != null) {
-                info(context, "Looking for builtin ${dependency.id} in ${ideaDependency.classes.absolutePath}")
+                info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.absolutePath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
                         ("-withSources".takeIf { ideaDependency.sources != null } ?: "")
                     return PluginDependencyImpl(it.name, builtinPluginVersion, it, true)
                 }
             }
-            throw BuildException("Cannot find builtin plugin ${dependency.id} for IDE: ${ideaDependency?.classes?.absolutePath}", null)
+            throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency?.classes?.absolutePath}", null)
         }
         pluginsRepositories.forEach { repository ->
             repository.resolve(project, dependency)?.let {
@@ -55,8 +55,8 @@ open class PluginDependencyManager @Inject constructor(
             }
         }
         throw BuildException(
-            "Cannot resolve plugin ${dependency.id} version ${dependency.version}" +
-                (" from channel ${dependency.channel}".takeIf { dependency.channel != null } ?: ""),
+            "Cannot resolve plugin '${dependency.id}' in version '${dependency.version}'" +
+                (" from channel '${dependency.channel}'".takeIf { dependency.channel != null } ?: ""),
             null
         )
     }
@@ -94,7 +94,7 @@ open class PluginDependencyManager @Inject constructor(
     }
 
     private fun findSingleDirectory(dir: File) =
-        dir.listFiles()?.singleOrNull { it.isDirectory } ?: throw BuildException("Single directory expected in $dir", null)
+        dir.listFiles()?.singleOrNull { it.isDirectory } ?: throw BuildException("Single directory expected in: $dir", null)
 
     private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
         if (ivyArtifactRepository == null) {
@@ -154,7 +154,7 @@ open class PluginDependencyManager @Inject constructor(
 
     private fun externalPluginDependency(artifact: File, channel: String? = null, maven: Boolean = false): PluginDependency? {
         if (!artifact.isJar() && !artifact.isDirectory) {
-            warn(context, "Cannot create plugin from file ($artifact): only directories or jars are supported")
+            warn(context, "Cannot create plugin from file '$artifact' - only directories or jars are supported")
         }
         return createPlugin(artifact, true, context)?.let {
             val pluginId = it.pluginId ?: return null

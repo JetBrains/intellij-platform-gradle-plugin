@@ -52,7 +52,7 @@ open class JbrResolver @Inject constructor(
     private fun fromDir(javaDir: File, version: String): Jbr? {
         val javaExecutable = findJavaExecutable(javaDir)
         if (javaExecutable == null) {
-            warn(context, "Cannot find java executable in $javaDir")
+            warn(context, "Cannot find java executable in: $javaDir")
             return null
         }
         return Jbr(version, javaDir, javaExecutable.toFile().absolutePath)
@@ -60,7 +60,7 @@ open class JbrResolver @Inject constructor(
 
     private fun getJavaArchive(jbrArtifact: JbrArtifact): File? {
         if (isOffline) {
-            warn(context, "Cannot download JetBrains Java Runtime ${jbrArtifact.name}. Gradle runs in offline mode.")
+            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'. Gradle runs in offline mode.")
             return null
         }
 
@@ -80,7 +80,7 @@ open class JbrResolver @Inject constructor(
         return try {
             configurationContainer.detachedConfiguration(dependency).singleFile
         } catch (e: Exception) {
-            warn(context, "Cannot download JetBrains Java Runtime ${jbrArtifact.name}", e)
+            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'", e)
             null
         } finally {
             repositoryHandler.remove(repository)

@@ -101,7 +101,7 @@ open class PatchPluginXmlTask @Inject constructor(
         if (tag != null) {
             val existingValue = tag.text
             if (existingValue.isNotEmpty()) {
-                warn(context, "Patching plugin.xml: value of `$name[$existingValue]` tag will be set to `$content`")
+                warn(context, "Patching plugin.xml: value of '$name[$existingValue]' tag will be set to '$content'")
             }
             tag.text = content
         } else {
@@ -120,7 +120,7 @@ open class PatchPluginXmlTask @Inject constructor(
             val existingValue = tag.getAttribute(attributeName)?.value
             if (!existingValue.isNullOrEmpty()) {
                 warn(context,
-                    "Patching plugin.xml: attribute `$attributeName=[$existingValue]` of `$tagName` tag will be set to `$attributeValue`")
+                    "Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$attributeValue'")
             }
             tag.setAttribute(attributeName, attributeValue)
         } else {

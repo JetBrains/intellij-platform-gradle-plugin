@@ -172,7 +172,7 @@ open class IdeaDependencyManager @Inject constructor(
 
     private fun setExecutable(parent: File, child: String, context: Any) {
         File(parent, child).apply {
-            debug(context, "Resetting executable permissions for $path")
+            debug(context, "Resetting executable permissions for: $path")
             setExecutable(true, true)
         }
     }
@@ -309,19 +309,19 @@ open class IdeaDependencyManager @Inject constructor(
         if (extraDependencies.isEmpty()) {
             return emptyList()
         }
-        info(context, "Configuring IDE extra dependencies $extraDependencies")
+        info(context, "Configuring IDE extra dependencies: $extraDependencies")
         extraDependencies
             .filter { dep -> mainDependencies.any { it == dep } }
             .takeIf { it.isNotEmpty() }
-            ?.let { throw GradleException("The items $it cannot be used as extra dependencies") }
+            ?.let { throw GradleException("The items '$it' cannot be used as extra dependencies") }
 
         val resolvedExtraDependencies = mutableListOf<IdeaExtraDependency>()
         extraDependencies.forEach {
             resolveExtraDependency(project, version, it)?.let { dependencyFile ->
                 val extraDependency = IdeaExtraDependency(it, dependencyFile)
-                debug(context, "IDE extra dependency $it in $dependencyFile files: ${extraDependency.jarFiles}")
+                debug(context, "IDE extra dependency '$it' in '$dependencyFile' files: ${extraDependency.jarFiles}")
                 resolvedExtraDependencies.add(extraDependency)
-            } ?: debug(context, "IDE extra dependency for $it was resolved as null")
+            } ?: debug(context, "IDE extra dependency for '$it' was resolved as null")
         }
         return resolvedExtraDependencies
     }
@@ -340,19 +340,19 @@ open class IdeaDependencyManager @Inject constructor(
                 return when {
                     depFile.name.endsWith(".zip") -> {
                         val cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
-                        debug(context, "IDE extra dependency $name: " + cacheDirectory.path)
+                        debug(context, "IDE extra dependency '$name': " + cacheDirectory.path)
                         unzipDependencyFile(cacheDirectory, depFile, "IC", version.endsWith("-SNAPSHOT"))
                     }
                     else -> {
-                        debug(context, "IDE extra dependency $name: " + depFile.path)
+                        debug(context, "IDE extra dependency '$name': " + depFile.path)
                         depFile
                     }
                 }
             } else {
-                warn(context, "Cannot attach IDE extra dependency $name. Found files: $files")
+                warn(context, "Cannot attach IDE extra dependency '$name'. Found files: $files")
             }
         } catch (e: ResolveException) {
-            warn(context, "Cannot resolve IDE extra dependency $name", e)
+            warn(context, "Cannot resolve IDE extra dependency '$name'", e)
         }
         return null
     }

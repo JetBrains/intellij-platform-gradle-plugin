@@ -174,9 +174,9 @@ open class IntelliJPlugin : Plugin<Project> {
                 }
                 else -> {
                     if (extension.version.orNull != null) {
-                        warn(context, "Both `localPath` and `version` specified, second would be ignored")
+                        warn(context, "Both 'localPath' and 'version' specified, second would be ignored")
                     }
-                    info(context, "Using path to locally installed IDE: '$localPath'")
+                    info(context, "Using path to locally installed IDE: $localPath")
                     resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
                 }
             }
@@ -209,17 +209,17 @@ open class IntelliJPlugin : Plugin<Project> {
                 context,
             )
             extension.plugins.get().forEach {
-                info(context, "Configuring plugin $it")
+                info(context, "Configuring plugin: $it")
                 if (it is Project) {
                     configureProjectPluginDependency(project, it, dependencies, extension)
                 } else {
                     val pluginDependency = PluginDependencyNotation.parsePluginDependencyString(it.toString())
                     if (pluginDependency.id.isEmpty()) {
-                        throw BuildException("Failed to resolve plugin $it", null)
+                        throw BuildException("Failed to resolve plugin: $it", null)
                     }
                     val plugin = resolver.resolve(project, pluginDependency) ?: throw BuildException("Failed to resolve plugin $it", null)
                     if (!plugin.isCompatible(ideVersion)) {
-                        throw BuildException("Plugin $it is not compatible to ${ideVersion.asString()}", null)
+                        throw BuildException("Plugin '$it' is not compatible to: ${ideVersion.asString()}", null)
                     }
                     configurePluginDependency(project, plugin, extension, dependencies, resolver)
                 }
@@ -254,8 +254,8 @@ open class IntelliJPlugin : Plugin<Project> {
                 parsePluginXml(file, project)?.dependencies?.forEach {
                     if (it.dependencyId == "com.intellij.modules.java") {
                         throw BuildException(
-                            "The project depends on `com.intellij.modules.java` module but doesn't declare a compile dependency on it.\n" +
-                                "Please delete `depends` tag from ${file.absolutePath} or add `java` plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
+                            "The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\n" +
+                                "Please delete 'depends' tag from '${file.absolutePath}' or add 'java' plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
                             null,
                         )
                     }
@@ -298,7 +298,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectPluginTasksDependency(project: Project, dependency: Project) {
         // invoke before tasks graph is ready
         if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
         }
         dependency.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) { dependencySandboxTask ->
             project.tasks.withType(PrepareSandboxTask::class.java).forEach {
@@ -315,7 +315,7 @@ open class IntelliJPlugin : Plugin<Project> {
     ) {
         // invoke on demand, when plugins artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use $dependency as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
         }
         dependencies.add(project.dependencies.create(dependency))
         val pluginDependency = PluginProjectDependency(dependency)
@@ -559,11 +559,11 @@ open class IntelliJPlugin : Plugin<Project> {
 
             task.jbrVersion.orNull?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
-                    warn(this, "Cannot resolve JBR $it. Falling back to builtin JBR.")
+                    warn(this, "Cannot resolve JBR '$it'. Falling back to builtin JBR.")
                 }
             } ?: getBuiltinJbrVersion(task.ideDir.get().asFile)?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
-                    warn(this, "Cannot resolve builtin JBR $it. Falling local Java.")
+                    warn(this, "Cannot resolve builtin JBR '$it'. Falling local Java.")
                 }
             } ?: Jvm.current().javaExecutable.absolutePath
         })

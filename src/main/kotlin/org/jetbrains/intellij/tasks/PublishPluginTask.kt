@@ -56,22 +56,22 @@ open class PublishPluginTask @Inject constructor(
             is PluginCreationSuccess -> {
                 val pluginId = creationResult.plugin.pluginId
                 channels.get().forEach { channel ->
-                    info(context, "Uploading plugin $pluginId from ${file.absolutePath} to ${host.get()}, channel: $channel")
+                    info(context, "Uploading plugin '$pluginId' from '${file.absolutePath}' to '${host.get()}', channel: '$channel'")
                     try {
                         val repositoryClient = PluginRepositoryFactory.create(host.get(), token.get())
                         repositoryClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
                         info(context, "Uploaded successfully")
                     } catch (exception: Exception) {
-                        throw TaskExecutionException(this, GradleException("Failed to upload plugin. ${exception.message}", exception))
+                        throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
                     }
                 }
             }
             is PluginCreationFail -> {
                 val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-                throw TaskExecutionException(this, GradleException("Cannot upload plugin. $problems"))
+                throw TaskExecutionException(this, GradleException("Cannot upload plugin: $problems"))
             }
             else -> {
-                throw TaskExecutionException(this, GradleException("Cannot upload plugin. $creationResult"))
+                throw TaskExecutionException(this, GradleException("Cannot upload plugin: $creationResult"))
             }
         }
     }
