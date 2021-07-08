@@ -3,6 +3,7 @@ package org.jetbrains.intellij.tasks
 import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -480,7 +481,7 @@ open class RunPluginVerifierTask @Inject constructor(
             .asSequence()
             .mapNotNull { it()?.takeIf(::validateRuntimeDir) }
             .firstOrNull()
-            ?: throw GradleException(when {
+            ?: throw InvalidUserDataException(when {
                 requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
                 else -> "Java Runtime directory couldn't be resolved"
             })
@@ -498,8 +499,11 @@ open class RunPluginVerifierTask @Inject constructor(
             it.args = listOf("--version")
             it.standardOutput = os
         }
-        !requiresJava11() && Version.parse(os.toString()) >= Version(11)
-    }.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, following runtimeDir was provided: $runtimeDir") }
+        val version = Version.parse(os.toString())
+        val result = !requiresJava11() && version >= Version(11)
+
+        result.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDir") }
+    }
 
     /**
      * Checks Plugin Verifier version, if 1.260+ – require Java 11 to run.
