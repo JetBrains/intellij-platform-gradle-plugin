@@ -559,11 +559,11 @@ open class IntelliJPlugin : Plugin<Project> {
 
             task.jbrVersion.orNull?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
-                    warn(this, "Cannot resolve JBR '$it'. Falling back to builtin JBR.")
+                    warn(this, "Cannot resolve JetBrains Runtime '$it'. Falling back to builtin JetBrains Runtime.")
                 }
             } ?: getBuiltinJbrVersion(task.ideDir.get().asFile)?.let {
                 jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
-                    warn(this, "Cannot resolve builtin JBR '$it'. Falling local Java.")
+                    warn(this, "Cannot resolve builtin JetBrains Runtime '$it'. Falling local Java Runtime.")
                 }
             } ?: Jvm.current().javaExecutable.absolutePath
         })

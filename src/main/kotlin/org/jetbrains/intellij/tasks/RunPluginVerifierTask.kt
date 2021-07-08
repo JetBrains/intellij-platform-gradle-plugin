@@ -453,10 +453,10 @@ open class RunPluginVerifierTask @Inject constructor(
         )
         jbrVersion.orNull?.let {
             jbrResolver.resolve(jbrVersion.orNull)?.let { jbr ->
-                debug(context, "Runtime specified with JBR Version property: $it")
+                debug(context, "Runtime specified with JetBrains Runtime Version property: $it")
                 return jbr.javaHome.canonicalPath
             }
-            warn(context, "Cannot resolve JBR '$it'. Falling back to built-in JBR.")
+            warn(context, "Cannot resolve JetBrains Runtime '$it'. Falling back to built-in JetBrains Runtime.")
         }
 
         val jbrPath = when (OperatingSystem.current().isMacOsX) {
@@ -468,11 +468,11 @@ open class RunPluginVerifierTask @Inject constructor(
             jbrResolver.resolve(builtinJbrVersion)?.let { builtinJbr ->
                 val javaHome = File(builtinJbr.javaHome, jbrPath)
                 if (javaHome.exists()) {
-                    debug(context, "Using built-in JBR: $javaHome")
+                    debug(context, "Using built-in JetBrains Runtime: $javaHome")
                     return javaHome.canonicalPath
                 }
             }
-            warn(context, "Cannot resolve builtin JBR '$builtinJbrVersion'. Falling back to local Java.")
+            warn(context, "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Runtime.")
         }
 
         debug(context, "Using current JVM: ${Jvm.current().javaHome}")
