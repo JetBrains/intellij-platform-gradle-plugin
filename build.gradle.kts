@@ -27,7 +27,7 @@ dependencies {
     implementation("org.jetbrains.intellij.plugins:structure-base:3.192") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.192") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.193") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("javax.xml.bind:jaxb-api:2.3.1")
