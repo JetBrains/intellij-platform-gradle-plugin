@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.3, not published
+
+- Fixed `releaseType` resolving for Rider versions in `-EAP#-SNAPSHOT` format.
+
 ## 1.1.2
 
 - Use Gradle `ArchiveOperations` in `extractArchive` utils method [#681](../../issues/681)

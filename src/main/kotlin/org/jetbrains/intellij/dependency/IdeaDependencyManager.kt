@@ -248,7 +248,6 @@ open class IdeaDependencyManager @Inject constructor(
         )
 
         val configuration = project.configurations.detachedConfiguration(dependency)
-
         val classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
         info(context, "IDE dependency cache directory: $classesDirectory")
         val buildNumber = ideBuildNumber(classesDirectory)
@@ -333,8 +332,8 @@ open class IdeaDependencyManager @Inject constructor(
                 name = name,
                 version = version,
             )
-            val extraDepConfiguration = project.configurations.detachedConfiguration(dependency)
-            val files = extraDepConfiguration.files
+            val extraDependencyConfiguration = project.configurations.detachedConfiguration(dependency)
+            val files = extraDependencyConfiguration.files
             if (files.size == 1) {
                 val depFile = files.first()
                 return when {
