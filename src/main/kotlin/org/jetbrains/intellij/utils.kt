@@ -45,7 +45,7 @@ import java.util.function.BiConsumer
 import java.util.function.Predicate
 
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
-val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-SNAPSHOT".toPattern()
+val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
 @Suppress("DEPRECATION")
 fun mainSourceSet(project: Project): SourceSet = project
@@ -201,7 +201,7 @@ fun releaseType(version: String) = when {
     version.endsWith("-EAP-SNAPSHOT") ||
         version.endsWith("-EAP-CANDIDATE-SNAPSHOT") ||
         version.endsWith("-CUSTOM-SNAPSHOT") ||
-        MAJOR_VERSION_PATTERN.matcher(version).matches()
+        version.matches(MAJOR_VERSION_PATTERN.toRegex())
     -> "snapshots"
     version.endsWith("-SNAPSHOT") -> "nightly"
     else -> "releases"
