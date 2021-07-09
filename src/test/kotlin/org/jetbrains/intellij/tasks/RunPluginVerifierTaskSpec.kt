@@ -28,7 +28,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `run plugin verifier in old version hosted on Bintray`() {
+    fun `run plugin verifier fails on old version lower than 1_255`() {
         writePluginXmlFile()
         buildFile.groovy("""
             version = "1.0.0"
@@ -39,9 +39,9 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.254"))
+        assertTrue(result.output.contains("Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254"))
     }
 
     @Test
@@ -107,7 +107,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("`ideVersions` and `localPaths` properties should not be empty"))
+        assertTrue(result.output.contains("'ideVersions' and 'localPaths' properties should not be empty"))
     }
 
     @Test

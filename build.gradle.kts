@@ -24,10 +24,10 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("org.jetbrains:annotations:21.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.191") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.192") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.191") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.192") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("javax.xml.bind:jaxb-api:2.3.1")
@@ -111,7 +111,7 @@ fun configureTests(testTask: Test) {
     testTask.systemProperties["test.gradle.home"] = testGradleHomePath
     testTask.systemProperties["test.kotlin.version"] = properties("kotlinVersion")
     testTask.systemProperties["test.gradle.default"] = properties("gradleVersion")
-    testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
+    testTask.systemProperties["test.gradle.version"] = properties("gradleVersion")
     testTask.systemProperties["plugins.repository"] = properties("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)
 }

@@ -65,7 +65,7 @@ fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     }
 
     if (nonValidPlugins.isNotEmpty()) {
-        throw GradleException("intellij plugins '$nonValidPlugins' are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+        throw GradleException("The following plugins: $nonValidPlugins are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
     }
 
     return files(selectedPlugins.map { it.jarFiles })

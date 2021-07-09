@@ -42,6 +42,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             repositories { mavenCentral() }
             apply plugin: 'org.jetbrains.intellij'
             version = '0.42.123'
+            compileJava {
+                sourceCompatibility = '1.8'
+                targetCompatibility = '1.8'
+            }
             intellij {
                 version = '$intellijVersion'
                 downloadSources = false
@@ -110,15 +114,26 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 repositories { mavenCentral() }
                 version = '0.42.123'
                 apply plugin: 'org.jetbrains.intellij'
-                intellij { downloadSources = false }
+                intellij { 
+                    downloadSources = false
+                    version = "2020.2.3"
+                }
             }
             project(':') {
-                intellij.pluginName = 'myPluginName'
-                intellij.plugins = [project(':nestedProject')]
+                intellij {
+                    pluginName = 'myPluginName'
+                    plugins = [project(':nestedProject')]
+                }
             }
             project(':nestedProject') {
-                intellij.pluginName = 'myNestedPluginName'
-                intellij.instrumentCode = false
+                compileJava {
+                    sourceCompatibility = '1.8'
+                    targetCompatibility = '1.8'
+                }
+                intellij {
+                    pluginName = 'myNestedPluginName'
+                    instrumentCode = false
+                }
             }
         """)
 
