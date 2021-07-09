@@ -587,6 +587,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring compile tasks")
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
+        val instrumentCode = project.provider { extension.instrumentCode.get() }
 
         sourceSets.forEach { sourceSet ->
             val instrumentTask =
@@ -631,7 +632,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     it.outputDir.convention(project.layout.projectDirectory.dir(outputDir.path))
 
                     it.dependsOn(sourceSet.classesTaskName)
-                    it.onlyIf { extension.instrumentCode.get() }
+                    it.onlyIf { instrumentCode.get() }
                 }
 
             // A dedicated task ensures that sources substitution is always run,
@@ -641,7 +642,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 val outputDir = instrumentTask.get().outputDir
 
                 it.dependsOn(instrumentTask)
-                it.onlyIf { extension.instrumentCode.get() }
+                it.onlyIf { instrumentCode.get() }
                 // Set the classes dir to the one with the instrumented classes
                 it.doLast { classesDirs.setFrom(outputDir) }
             }
@@ -659,9 +660,10 @@ open class IntelliJPlugin : Plugin<Project> {
         val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
 
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, project)?.id }
-        val configDirectory = project.file("${extension.sandboxDir.get()}/config-test")
-        val systemDirectory = project.file("${extension.sandboxDir.get()}/system-test")
-        val pluginsDirectory = project.file("${extension.sandboxDir.get()}/plugins-test")
+        val sandboxDir = extension.sandboxDir.get()
+        val configDirectory = project.file("$sandboxDir/config-test").also { it.mkdirs() }
+        val systemDirectory = project.file("$sandboxDir/system-test").also { it.mkdirs() }
+        val pluginsDirectory = project.file("$sandboxDir/plugins-test").also { it.mkdirs() }
 
         testTasks.forEach { task ->
             task.enableAssertions = true
@@ -681,23 +683,24 @@ open class IntelliJPlugin : Plugin<Project> {
             task.inputs.dir(configDirectory)
                     .withPropertyName("Config Directory")
                     .withPathSensitivity(PathSensitivity.RELATIVE)
-            task.inputs.files(prepareTestingSandboxTaskProvider)
+            task.inputs.files(prepareTestingSandboxTaskProvider.get().inputs.files)
                     .withPropertyName("Plugins directory")
                     .withPathSensitivity(PathSensitivity.RELATIVE)
                     .withNormalizer(ClasspathNormalizer::class.java)
 
             val ideaDependency = extension.getIdeaDependency(project)
+            val ideaDependencyLibraries = project.files(
+                "${ideaDependency.classes}/lib/resources.jar",
+                "${ideaDependency.classes}/lib/idea.jar"
+            )
+            val ideDirectory = project.provider { runIdeTask.ideDir.get().asFile }
 
             // Use an anonymous class, since lambdas disable caching for the task.
             @Suppress("ObjectLiteralToLambda")
             task.doFirst(object : Action<Task> {
                 override fun execute(t: Task) {
-                    val ideDirectory = runIdeTask.ideDir.get().asFile
-                    task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs ?: emptyList(), ideDirectory)
-                    task.classpath += project.files(
-                            "${ideaDependency.classes}/lib/resources.jar",
-                            "${ideaDependency.classes}/lib/idea.jar"
-                    )
+                    task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs ?: emptyList(), ideDirectory.get())
+                    task.classpath += ideaDependencyLibraries
 
                     task.systemProperties(getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
 
