@@ -1,15 +1,15 @@
 package org.jetbrains.intellij
 
 class Version(
-    private val major: Int,
-    private val minor: Int,
-    private val patch: Int,
+    private val major: Int = 0,
+    private val minor: Int = 0,
+    private val patch: Int = 0,
     private val version: String = "",
 ) : Comparable<Version> {
 
     companion object {
         fun parse(versionString: String) =
-            versionString.split('.', '-')
+            versionString.split(' ', '.', '-')
                 .mapNotNull(String::toIntOrNull)
                 .let { it + List(3) { 0 } }
                 .let { (major, minor, patch) -> Version(major, minor, patch, versionString) }

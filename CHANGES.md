@@ -3,6 +3,7 @@
 ## 1.1.3, not published
 
 - Fixed `releaseType` resolving for Rider versions in `-EAP#-SNAPSHOT` format.
+- `runPluginVerifier`: verify required Java 11 environment for Plugin Verifier `1.260+`
 - `pluginVerifier` – remove support for old versions `< 1.255` hosted on Bintray
 
 ## 1.1.2

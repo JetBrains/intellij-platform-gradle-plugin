@@ -274,3 +274,17 @@ fun isDependencyOnPyCharm(dependency: IdeaDependency): Boolean {
 fun isPyCharmType(type: String): Boolean {
     return type == "PY" || type == "PC"
 }
+
+fun <T> T?.ifNull(block: () -> Unit): T? {
+    if (this == null) {
+        block()
+    }
+    return this
+}
+
+fun Boolean.ifFalse(block: () -> Unit): Boolean {
+    if (!this) {
+        block()
+    }
+    return this
+}
