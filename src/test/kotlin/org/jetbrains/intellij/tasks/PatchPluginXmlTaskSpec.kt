@@ -260,9 +260,9 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        assertTrue(output.contains("attribute `since-build=[1]` of `idea-version` tag will be set to `141.1532`"))
-        assertTrue(output.contains("attribute `until-build=[2]` of `idea-version` tag will be set to `141.*`"))
-        assertTrue(output.contains("value of `version[my_version]` tag will be set to `0.42.123`"))
+        assertTrue(output.contains("attribute 'since-build=[1]' of 'idea-version' tag will be set to '141.1532'"))
+        assertTrue(output.contains("attribute 'until-build=[2]' of 'idea-version' tag will be set to '141.*'"))
+        assertTrue(output.contains("value of 'version[my_version]' tag will be set to '0.42.123'"))
     }
 
     @Test

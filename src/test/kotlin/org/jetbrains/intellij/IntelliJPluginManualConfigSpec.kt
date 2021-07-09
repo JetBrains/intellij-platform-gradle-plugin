@@ -267,7 +267,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail("tasks")
         assertTrue(
-            result.output.contains("intellij plugins [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+            result.output.contains("The following plugins: [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
         )
     }
 
