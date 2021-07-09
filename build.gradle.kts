@@ -111,7 +111,7 @@ fun configureTests(testTask: Test) {
     testTask.systemProperties["test.gradle.home"] = testGradleHomePath
     testTask.systemProperties["test.kotlin.version"] = properties("kotlinVersion")
     testTask.systemProperties["test.gradle.default"] = properties("gradleVersion")
-    testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
+    testTask.systemProperties["test.gradle.version"] = properties("gradleVersion")
     testTask.systemProperties["plugins.repository"] = properties("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)
 }
