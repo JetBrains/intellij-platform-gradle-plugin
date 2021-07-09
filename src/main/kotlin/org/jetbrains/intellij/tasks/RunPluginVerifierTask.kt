@@ -267,7 +267,7 @@ open class RunPluginVerifierTask @Inject constructor(
         }
 
         val resolvedVerifierVersion = resolveVerifierVersion()
-        val repository = repositoryHandler.maven { it.url = URI(getPluginVerifierRepository(resolvedVerifierVersion)) }
+        val repository = repositoryHandler.maven { it.url = URI(PLUGIN_VERIFIER_REPOSITORY) }
         try {
             debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
             val dependency = dependencyHandler.create(
@@ -548,11 +548,6 @@ open class RunPluginVerifierTask @Inject constructor(
     private fun versionParameterName(version: String) = when {
         version.matches("\\d{3}(\\.\\d+)+".toRegex()) -> "build"
         else -> "version"
-    }
-
-    private fun getPluginVerifierRepository(version: String) = when {
-        Version.parse(version) >= Version.parse("1.255") -> PLUGIN_VERIFIER_REPOSITORY
-        else -> IntelliJPluginConstants.OLD_PLUGIN_VERIFIER_REPOSITORY
     }
 
     enum class FailureLevel(val testValue: String) {
