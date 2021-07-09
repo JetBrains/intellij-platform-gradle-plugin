@@ -597,6 +597,9 @@ open class IntelliJPlugin : Plugin<Project> {
                     it.sourceSetAllDirs.convention(project.provider {
                         sourceSet.allSource.srcDirs
                     })
+                    it.intellijRepository.convention(project.provider {
+                        extension.intellijRepository.get()
+                    })
                     it.sourceSetResources.convention(project.provider {
                         sourceSet.resources.files
                     })

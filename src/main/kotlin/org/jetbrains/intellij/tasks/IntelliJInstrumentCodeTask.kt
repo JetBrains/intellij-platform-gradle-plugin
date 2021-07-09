@@ -41,13 +41,14 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         const val LOADER_REF = "java2.loader"
     }
 
-    private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
-
     @Internal
     val sourceSetOutputClassesDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @Internal
     val sourceSetAllDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
+
+    @Internal
+    val intellijRepository: Property<String> = objectFactory.property(String::class.java)
 
     @Internal
     val sourceSetResources: ListProperty<File> = objectFactory.listProperty(File::class.java)
@@ -129,7 +130,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             name = "java-compiler-ant-tasks",
             version = compilerVersion.get(),
         )
-        val intellijRepositoryUrl = extension?.intellijRepository?.get() ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
+        val intellijRepositoryUrl = intellijRepository.orNull ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
         val repos = listOf(
             repositoryHandler.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
             repositoryHandler.maven { it.url = URI(INTELLIJ_DEPENDENCIES) },
