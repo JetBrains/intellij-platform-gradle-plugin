@@ -5,7 +5,7 @@ import java.io.File
 
 interface PluginsRepository {
 
-    fun resolve(project: Project, plugin: PluginDependencyNotation): File?
+    fun resolve(project: Project, plugin: PluginDependencyNotation, context: String?): File?
 
-    fun postResolve(project: Project)
+    fun postResolve(project: Project, context: String?)
 }

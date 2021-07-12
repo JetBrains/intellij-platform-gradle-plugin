@@ -15,6 +15,7 @@ import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.jdom2.Document
 import org.jdom2.Element
+import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -56,9 +57,7 @@ open class PatchPluginXmlTask @Inject constructor(
     @Optional
     val pluginId: Property<String> = objectFactory.property(String::class.java)
 
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
+    private val context = logCategory()
 
     @TaskAction
     fun patchPluginXmlFiles() {

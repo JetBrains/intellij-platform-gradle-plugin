@@ -24,6 +24,7 @@ import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.info
+import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.releaseType
 import java.io.File
 import java.net.URI
@@ -70,9 +71,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
+    private val context = logCategory()
 
     @InputFiles
     fun getSourceDirs() = sourceSetAllDirs.get().filter {

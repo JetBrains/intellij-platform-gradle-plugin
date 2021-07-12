@@ -8,7 +8,7 @@ class JpsIdeaDependency(
     classes: File,
     sources: File?,
     withKotlin: Boolean,
-    context: Any,
+    context: String?,
 ) : IdeaDependency(
     "ideaJPS",
     version,

@@ -57,16 +57,16 @@ fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.sr
     File(it, "META-INF/plugin.xml").takeIf { file -> file.exists() && file.length() > 0 }
 }
 
-fun parsePluginXml(pluginXml: File, context: Any): PluginBean? {
+fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
     try {
         val document = JDOMUtil.loadDocument(pluginXml.inputStream())
         return PluginBeanExtractor.extractPluginBean(document)
     } catch (e: SAXParseException) {
-        warn(context, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
+        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
     } catch (e: JDOMException) {
-        warn(context, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
+        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
     } catch (e: IOException) {
-        warn(context, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
+        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
     }
     return null
 }
@@ -159,7 +159,7 @@ fun extractArchive(
     archiveOperations: ArchiveOperations,
     execOperations: ExecOperations,
     fileSystemOperations: FileSystemOperations,
-    context: Any,
+    logCategory: String?,
     isUpToDate: Predicate<File>? = null,
     markUpToDate: BiConsumer<File, File>? = null,
 ): File {
@@ -172,7 +172,7 @@ fun extractArchive(
     targetDirectory.deleteRecursively()
     targetDirectory.mkdirs()
 
-    debug(context, "Extracting: $name")
+    debug(logCategory, "Extracting: $name")
 
     if (name.endsWith(".tar.gz") && OperatingSystem.current().isWindows) {
         execOperations.exec {
@@ -190,7 +190,7 @@ fun extractArchive(
         }
     }
 
-    debug(context, "Extracted: $name")
+    debug(logCategory, "Extracted: $name")
 
     markerFile.createNewFile()
     markUpToDate?.accept(targetDirectory, markerFile)
@@ -207,17 +207,13 @@ fun releaseType(version: String) = when {
     else -> "releases"
 }
 
-fun error(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, context, message, e)
-fun warn(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, context, message, e)
-fun info(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, context, message, e)
-fun debug(context: Any? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, context, message, e)
+fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
+fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, logCategory, message, e)
+fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
+fun debug(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, logCategory, message, e)
 
-private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) {
-    val category = when (context) {
-        is Project -> "gradle-intellij-plugin ${context.path}${context.name}"
-        is Task -> "gradle-intellij-plugin ${context.path}"
-        else -> "gradle-intellij-plugin"
-    }
+private fun log(level: LogLevel, logCategory: String?, message: String, e: Throwable?) {
+    val category = "gradle-intellij-plugin ${logCategory ?: ""}".trim()
     val logger = Logging.getLogger(IntelliJPlugin::class.java)
     if (e != null && level != LogLevel.ERROR && !logger.isDebugEnabled) {
         logger.log(level, "[$category] $message. Run with --debug option to get more log output.")
@@ -226,7 +222,10 @@ private fun log(level: LogLevel, context: Any?, message: String, e: Throwable?) 
     }
 }
 
-fun createPlugin(artifact: File, validatePluginXml: Boolean, context: Any): IdePlugin? {
+fun Project.logCategory(): String = path + name
+fun Task.logCategory(): String = path
+
+fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): IdePlugin? {
     val extractDirectory = createTempDirectory("tmp")
     val creationResult = IdePluginManager.createManager(extractDirectory)
         .createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)

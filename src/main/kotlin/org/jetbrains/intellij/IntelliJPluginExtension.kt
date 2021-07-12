@@ -202,7 +202,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     fun getPluginDependenciesList(project: Project): Set<PluginDependency> {
         if (!pluginDependenciesConfigured) {
-            debug(project, "Plugin dependencies are resolved")
+            debug(project.logCategory(), "Plugin dependencies are resolved")
             project.configurations.getByName(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
             pluginDependenciesConfigured = true
         }
@@ -211,7 +211,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     fun getIdeaDependency(project: Project): IdeaDependency {
         if (ideaDependency.orNull == null) {
-            debug(project, "IDE dependency is resolved", Throwable())
+            debug(project.logCategory(), "IDE dependency is resolved", Throwable())
             project.configurations.getByName(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).resolve()
             if (ideaDependency.orNull == null) {
                 throw BuildException("Cannot resolve ideaDependency", null)

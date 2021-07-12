@@ -14,6 +14,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 import javax.inject.Inject
 
@@ -25,9 +26,7 @@ open class VerifyPluginTask @Inject constructor(
     @Input
     val ignoreFailures: Property<Boolean> = objectFactory.property(Boolean::class.java).convention(false)
 
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
+    private val context = logCategory()
 
     override fun getIgnoreFailures(): Boolean = ignoreFailures.get()
 

@@ -9,7 +9,7 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
 
-class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient private val context: Any) : Serializable {
+class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val context: String?) : Serializable {
 
     private val plugins = mutableMapOf<String, PluginsCachePlugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
@@ -18,7 +18,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, @Transient priv
     private val extractor = XmlExtractor<PluginsCache>()
 
     companion object {
-        fun fromDirectory(pluginsDirectory: File, context: Any) =
+        fun fromDirectory(pluginsDirectory: File, context: String?) =
             BuiltinPluginsRegistry(pluginsDirectory, context).apply {
                 if (!fillFromCache()) {
                     debug(context, "Builtin registry cache is missing")

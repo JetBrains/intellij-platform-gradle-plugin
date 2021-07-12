@@ -17,6 +17,7 @@ import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.extractArchive
+import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import java.net.URI
@@ -59,9 +60,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
     @Transient
     private val configurationContainer = project.configurations
 
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
+    private val context = logCategory()
 
     /**
      * Resolves Plugin Verifier version.

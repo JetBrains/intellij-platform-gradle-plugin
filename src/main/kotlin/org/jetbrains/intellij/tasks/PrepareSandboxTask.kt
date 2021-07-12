@@ -22,6 +22,7 @@ import org.jdom2.Element
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.transformXml
 import java.io.File
 import javax.inject.Inject
@@ -51,9 +52,7 @@ open class PrepareSandboxTask @Inject constructor(
     @Internal
     val defaultDestinationDir: Property<File> = objectFactory.property(File::class.java)
 
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
+    private val context = logCategory()
 
     init {
         duplicatesStrategy = DuplicatesStrategy.FAIL

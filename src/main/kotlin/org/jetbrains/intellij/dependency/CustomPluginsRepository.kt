@@ -26,14 +26,14 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
         }
     }
 
-    override fun resolve(project: Project, plugin: PluginDependencyNotation): File? {
-        debug(project, "Loading list of plugins from: $pluginsXmlUri")
+    override fun resolve(project: Project, plugin: PluginDependencyNotation, context: String?): File? {
+        debug(context, "Loading list of plugins from: $pluginsXmlUri")
         val url = pluginsXmlUri.toURL()
         val downloadUrl = resolveDownloadUrl(url, plugin, CustomPluginRepositoryListingType.PLUGIN_REPOSITORY)
             ?: resolveDownloadUrl(url, plugin, CustomPluginRepositoryListingType.SIMPLE)
             ?: return null
 
-        return downloadZipArtifact(project, downloadUrl, plugin)
+        return downloadZipArtifact(project, downloadUrl, plugin, context)
     }
 
     private fun resolveDownloadUrl(url: URL, plugin: PluginDependencyNotation, type: CustomPluginRepositoryListingType) =
@@ -42,7 +42,7 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
             .find { it.pluginId.equals(plugin.id, true) && it.version.equals(plugin.version, true) }
             ?.downloadUrl
 
-    private fun downloadZipArtifact(project: Project, url: URL, plugin: PluginDependencyNotation): File? {
+    private fun downloadZipArtifact(project: Project, url: URL, plugin: PluginDependencyNotation, context: String?): File? {
         val repository = project.repositories.ivy { ivy ->
             ivy.url = url.toURI()
             ivy.patternLayout { it.artifact("") }
@@ -58,13 +58,13 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
         return try {
             project.configurations.detachedConfiguration(dependency).singleFile
         } catch (e: Exception) {
-            warn(project, "Cannot download plugin from custom repository: ${plugin.id}:${plugin.version}", e)
+            warn(context, "Cannot download plugin from custom repository: ${plugin.id}:${plugin.version}", e)
             null
         } finally {
             project.repositories.remove(repository)
         }
     }
 
-    override fun postResolve(project: Project) {
+    override fun postResolve(project: Project, context: String?) {
     }
 }

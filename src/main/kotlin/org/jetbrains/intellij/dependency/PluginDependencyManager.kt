@@ -20,7 +20,7 @@ open class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
     private val ideaDependency: IdeaDependency?,
     private val pluginsRepositories: List<PluginsRepository>,
-    private val context: Any,
+    private val context: String?,
     private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
     private val fileSystemOperations: FileSystemOperations,
@@ -46,7 +46,7 @@ open class PluginDependencyManager @Inject constructor(
             throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency?.classes?.absolutePath}", null)
         }
         pluginsRepositories.forEach { repository ->
-            repository.resolve(project, dependency)?.let {
+            repository.resolve(project, dependency, context)?.let {
                 return when {
                     it.isZip() -> zippedPluginDependency(it, dependency)
                     it.isJar() -> externalPluginDependency(it, dependency.channel, true)

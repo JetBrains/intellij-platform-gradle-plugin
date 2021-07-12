@@ -40,6 +40,7 @@ import org.jetbrains.intellij.ifFalse
 import org.jetbrains.intellij.ifNull
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.warn
@@ -193,9 +194,7 @@ open class RunPluginVerifierTask @Inject constructor(
     @Transient
     private val configurationContainer = project.configurations
 
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
+    private val context = logCategory()
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
@@ -447,7 +446,7 @@ open class RunPluginVerifierTask @Inject constructor(
             JbrResolver::class.java,
             extension.jreRepository.orNull ?: "",
             isOffline,
-            this,
+            context,
         )
 
         val jbrPath = when (OperatingSystem.current().isMacOsX) {

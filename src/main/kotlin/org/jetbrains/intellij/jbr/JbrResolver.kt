@@ -22,7 +22,7 @@ import javax.inject.Inject
 open class JbrResolver @Inject constructor(
     private val jreRepository: String,
     private val isOffline: Boolean,
-    private val context: Any,
+    private val context: String?,
     private val repositoryHandler: RepositoryHandler,
     private val dependencyHandler: DependencyHandler,
     private val configurationContainer: ConfigurationContainer,

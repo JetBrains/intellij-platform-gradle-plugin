@@ -24,7 +24,7 @@ import javax.inject.Inject
 open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
-    private val context: Any,
+    private val context: String?,
     private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
     private val fileSystemOperations: FileSystemOperations,
@@ -61,9 +61,9 @@ open class IdeaDependencyManager @Inject constructor(
         project: Project,
         extraDependencies: Collection<IdeaExtraDependency>,
     ) = when (type) {
-        "JPS" -> JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project), project)
+        "JPS" -> JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project), context)
         else -> {
-            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), project)
+            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), context)
             when (type) {
                 null -> LocalIdeaDependency(
                     name,
@@ -170,7 +170,7 @@ open class IdeaDependencyManager @Inject constructor(
         }
     }
 
-    private fun setExecutable(parent: File, child: String, context: Any) {
+    private fun setExecutable(parent: File, child: String, context: String?) {
         File(parent, child).apply {
             debug(context, "Resetting executable permissions for: $path")
             setExecutable(true, true)

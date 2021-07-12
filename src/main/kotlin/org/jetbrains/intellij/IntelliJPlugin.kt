@@ -49,12 +49,10 @@ import java.util.EnumSet
 @Suppress("UnstableApiUsage", "unused")
 open class IntelliJPlugin : Plugin<Project> {
 
-    @Transient
-    @Suppress("LeakingThis")
-    private lateinit var context: Any
+    private lateinit var context: String
 
     override fun apply(project: Project) {
-        context = project
+        context = project.logCategory()
         checkGradleVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
 
@@ -229,7 +227,7 @@ open class IntelliJPlugin : Plugin<Project> {
             }
             verifyJavaPluginDependency(extension, project)
             extension.getPluginsRepositories().forEach {
-                it.postResolve(project)
+                it.postResolve(project, context)
             }
         }
 
@@ -251,7 +249,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
         if (!hasJavaPluginDependency && File(extension.getIdeaDependency(project).classes, "plugins/java").exists()) {
             sourcePluginXmlFiles(project).forEach { file ->
-                parsePluginXml(file, project)?.dependencies?.forEach {
+                parsePluginXml(file, context)?.dependencies?.forEach {
                     if (it.dependencyId == "com.intellij.modules.java") {
                         throw BuildException(
                             "The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\n" +
@@ -318,7 +316,7 @@ open class IntelliJPlugin : Plugin<Project> {
             throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
         }
         dependencies.add(project.dependencies.create(dependency))
-        val pluginDependency = PluginProjectDependency(dependency)
+        val pluginDependency = PluginProjectDependency(dependency, context)
         extension.addPluginDependency(pluginDependency)
         project.tasks.withType(PrepareSandboxTask::class.java).forEach {
             it.configureCompositePlugin(pluginDependency)
@@ -523,7 +521,8 @@ open class IntelliJPlugin : Plugin<Project> {
     ) {
         val prepareSandboxTaskProvider = project.tasks.named(prepareSandBoxTaskName)
         val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
-        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, task)?.id }
+        val taskContext = task.logCategory()
+        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
         task.ideDir.convention(project.provider {
             val path = extension.getIdeaDependency(project).classes.path
@@ -554,7 +553,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 JbrResolver::class.java,
                 extension.jreRepository.orNull ?: "",
                 project.gradle.startParameter.isOffline,
-                task,
+                taskContext,
             )
 
             task.jbrVersion.orNull?.let {
@@ -659,7 +658,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val runIdeTaskProvider = project.tasks.named(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
         val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
 
-        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, project)?.id }
+        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
         val sandboxDir = extension.sandboxDir.get()
         val configDirectory = project.file("$sandboxDir/config-test").also { it.mkdirs() }
         val systemDirectory = project.file("$sandboxDir/system-test").also { it.mkdirs() }

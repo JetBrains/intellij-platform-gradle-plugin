@@ -16,6 +16,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import org.jetbrains.intellij.info
+import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
 import javax.inject.Inject
@@ -39,9 +40,7 @@ open class PublishPluginTask @Inject constructor(
     @Optional
     val channels: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
-    @Transient
-    @Suppress("LeakingThis")
-    private val context = this
+    private val context = logCategory()
 
     init {
         enabled = !project.gradle.startParameter.isOffline

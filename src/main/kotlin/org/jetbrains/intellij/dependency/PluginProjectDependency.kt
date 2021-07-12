@@ -15,7 +15,7 @@ import java.io.File
 @CompileStatic
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 @Suppress("UnstableApiUsage")
-class PluginProjectDependency(@Transient val project: Project) : PluginDependency {
+class PluginProjectDependency(@Transient val project: Project, val context: String?) : PluginDependency {
 
     private val pluginDirectory: File by lazy {
         val prepareSandboxTask = project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
@@ -39,7 +39,7 @@ class PluginProjectDependency(@Transient val project: Project) : PluginDependenc
                 pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
                 pluginDependency
             } else {
-                error(project, "Cannot use '$pluginDirectory' as a plugin dependency: $creationResult")
+                error(context, "Cannot use '$pluginDirectory' as a plugin dependency: $creationResult")
                 null
             }
         }
