@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.Action
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -45,6 +46,7 @@ import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
 import java.io.File
+import java.net.URI
 import java.util.EnumSet
 
 @Suppress("UnstableApiUsage", "unused")
@@ -95,7 +97,8 @@ open class IntelliJPlugin : Plugin<Project> {
         val ideaPlugins = project.configurations.create(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false)
         configurePluginDependencies(project, extension, ideaPlugins)
 
-        val defaultDependencies = project.configurations.create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME).setVisible(false)
+        val defaultDependencies =
+            project.configurations.create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME).setVisible(false)
         defaultDependencies.defaultDependencies {
             it.add(project.dependencies.create(
                 group = "org.jetbrains",
@@ -297,7 +300,8 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectPluginTasksDependency(project: Project, dependency: Project) {
         // invoke before tasks graph is ready
         if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins,
+                null)
         }
         dependency.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) { dependencySandboxTask ->
             project.tasks.withType(PrepareSandboxTask::class.java).forEach {
@@ -314,7 +318,8 @@ open class IntelliJPlugin : Plugin<Project> {
     ) {
         // invoke on demand, when plugins artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins, null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins,
+                null)
         }
         dependencies.add(project.dependencies.create(dependency))
         val pluginDependency = PluginProjectDependency(dependency, context)
@@ -455,6 +460,38 @@ open class IntelliJPlugin : Plugin<Project> {
 
             it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
+            it.verifierPath.convention(project.provider {
+                if (project.gradle.startParameter.isOffline) {
+                    throw GradleException(
+                        "Cannot resolve Plugin Verifier in offline mode. " +
+                            "Provide pre-downloaded Plugin Verifier jar file with 'verifierPath' property."
+                    )
+                }
+
+                val resolvedVerifierVersion = RunPluginVerifierTask.resolveVerifierVersion(it.verifierVersion.orNull)
+                val repository = project.repositories.maven { it.url = URI(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY) }
+                try {
+                    debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
+                    val dependency = project.dependencies.create(
+                        group = "org.jetbrains.intellij.plugins",
+                        name = "verifier-cli",
+                        version = resolvedVerifierVersion,
+                        classifier = "all",
+                        extension = "jar",
+                    )
+
+                    project.configurations
+                        .detachedConfiguration(dependency)
+                        .singleFile
+                        .absolutePath
+                } catch (e: Exception) {
+                    error(context, "Error when resolving Plugin Verifier path", e)
+                    throw e
+                } finally {
+                    project.repositories.remove(repository)
+                }
+            })
 
             it.outputs.upToDateWhen { false }
         }
@@ -717,8 +754,8 @@ open class IntelliJPlugin : Plugin<Project> {
                     val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
                     if (ideVersion.baselineVersion >= 193) {
                         task.systemProperty(
-                                IntelliJPluginConstants.PLUGIN_PATH,
-                                pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
+                            IntelliJPluginConstants.PLUGIN_PATH,
+                            pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
                         )
                     }
                 }
