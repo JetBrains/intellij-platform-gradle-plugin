@@ -460,9 +460,11 @@ open class RunPluginVerifierTask @Inject constructor(
                     ?.also { debug(context, "Runtime specified with properties: $it") }
             },
             {
-                jbrResolver.resolve(jbrVersion.orNull)?.javaHome?.canonicalPath
-                    ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: ${jbrVersion.get()}") }
-                    .ifNull { warn(context, "Cannot resolve JetBrains Runtime '$jbrVersion'. Falling back to built-in JetBrains Runtime.") }
+                jbrVersion.orNull.let { version ->
+                    jbrResolver.resolve(version)?.javaHome?.canonicalPath
+                        ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: $version") }
+                        .ifNull { warn(context, "Cannot resolve JetBrains Runtime '$version'. Falling back to built-in JetBrains Runtime.") }
+                }
             },
             {
                 getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
