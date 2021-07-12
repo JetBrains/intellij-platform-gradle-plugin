@@ -32,7 +32,6 @@ import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.error
 import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.ifFalse
@@ -74,6 +73,15 @@ open class RunPluginVerifierTask @Inject constructor(
             return XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
+
+        /**
+         * Resolves Plugin Verifier version.
+         * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
+         * performed for the latest available verifier version.
+         *
+         * @return Plugin Verifier version
+         */
+        fun resolveVerifierVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
     }
 
     /**
@@ -257,35 +265,9 @@ open class RunPluginVerifierTask @Inject constructor(
             if (verifier.exists()) {
                 return path
             }
-            warn(context, "Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
         }
 
-        if (isOffline) {
-            throw TaskExecutionException(this, GradleException(
-                "Cannot resolve Plugin Verifier in offline mode. " +
-                    "Provide pre-downloaded Plugin Verifier jar file with 'verifierPath' property."
-            ))
-        }
-
-        val resolvedVerifierVersion = resolveVerifierVersion()
-        val repository = repositoryHandler.maven { it.url = URI(PLUGIN_VERIFIER_REPOSITORY) }
-        try {
-            debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
-            val dependency = dependencyHandler.create(
-                group = "org.jetbrains.intellij.plugins",
-                name = "verifier-cli",
-                version = resolvedVerifierVersion,
-                classifier = "all",
-                extension = "jar",
-            )
-            val configuration = configurationContainer.detachedConfiguration(dependency)
-            return configuration.singleFile.absolutePath
-        } catch (e: Exception) {
-            error(context, "Error when resolving Plugin Verifier path", e)
-            throw e
-        } finally {
-            repositoryHandler.remove(repository)
-        }
+        throw InvalidUserDataException("Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
     }
 
     /**
@@ -424,15 +406,6 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * Resolves Plugin Verifier version.
-     * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
-     * performed for the latest available verifier version.
-     *
-     * @return Plugin Verifier version
-     */
-    private fun resolveVerifierVersion() = verifierVersion.orNull?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
-
-    /**
      * Resolves the Java Runtime directory. `runtimeDir` property is used if provided with the task configuration.
      * Otherwise, `jbrVersion` is used for resolving the JBR. If it's not set, or it's impossible to resolve valid
      * version, built-in JBR will be used.
@@ -470,7 +443,10 @@ open class RunPluginVerifierTask @Inject constructor(
                 getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
                     jbrResolver.resolve(builtinJbrVersion)?.javaExecutable
                         ?.also { debug(context, "Using built-in JetBrains Runtime: $it") }
-                        .ifNull { warn(context, "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Runtime.") }
+                        .ifNull {
+                            warn(context,
+                                "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Runtime.")
+                        }
                 }
             },
             {
@@ -507,13 +483,16 @@ open class RunPluginVerifierTask @Inject constructor(
         val version = Version.parse(os.toString())
         val result = version >= Version(11)
 
-        result.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executable") }
+        result.ifFalse {
+            debug(context,
+                "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executable")
+        }
     }
 
     /**
      * Checks Plugin Verifier version, if 1.260+ – require Java 11 to run.
      */
-    private fun requiresJava11() = Version.parse(resolveVerifierVersion()) >= Version(1, 260)
+    private fun requiresJava11() = Version.parse(resolveVerifierVersion(verifierVersion.orNull)) >= Version(1, 260)
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
