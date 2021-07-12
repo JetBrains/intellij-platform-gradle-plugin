@@ -4,13 +4,18 @@ import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
-import org.gradle.process.ExecOperations
 import org.gradle.tooling.BuildException
-import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
+import org.jetbrains.intellij.create
+import org.jetbrains.intellij.createPlugin
+import org.jetbrains.intellij.info
+import org.jetbrains.intellij.isDependencyOnPyCharm
+import org.jetbrains.intellij.isJar
+import org.jetbrains.intellij.isZip
+import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.warn
 import java.io.File
 import java.nio.file.Paths
 import javax.inject.Inject
@@ -20,10 +25,8 @@ open class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
     private val ideaDependency: IdeaDependency?,
     private val pluginsRepositories: List<PluginsRepository>,
+    private val archiveUtils: ArchiveUtils,
     private val context: String?,
-    private val archiveOperations: ArchiveOperations,
-    private val execOperations: ExecOperations,
-    private val fileSystemOperations: FileSystemOperations,
 ) {
 
     private val mavenCacheDirectoryPath = Paths.get(gradleHomePath, "caches/modules-2/files-2.1").toString()
@@ -77,12 +80,9 @@ open class PluginDependencyManager @Inject constructor(
     }
 
     private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {
-        val pluginDir = findSingleDirectory(extractArchive(
+        val pluginDir = findSingleDirectory(archiveUtils.extract(
             pluginFile,
             File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}"),
-            archiveOperations,
-            execOperations,
-            fileSystemOperations,
             context,
         ))
         return externalPluginDependency(pluginDir, dependency.channel, true)

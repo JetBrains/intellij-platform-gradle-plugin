@@ -1,36 +1,28 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.api.GradleException
-import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.process.ExecOperations
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.extractArchive
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
+import org.jetbrains.intellij.utils.ArchiveUtils
 import java.net.URI
 import java.net.URL
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
-open class DownloadRobotServerPluginTask @Inject constructor(
-    objectFactory: ObjectFactory,
-    private val archiveOperations: ArchiveOperations,
-    private val execOperations: ExecOperations,
-    private val fileSystemOperations: FileSystemOperations,
-) : ConventionTask() {
+open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: ObjectFactory) : ConventionTask() {
 
     companion object {
         private const val METADATA_URL = "$INTELLIJ_DEPENDENCIES/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"
@@ -85,7 +77,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
 
         try {
             val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
-            extractArchive(zipFile, target, archiveOperations, execOperations, fileSystemOperations, context)
+//            archiveUtils.extract(zipFile, target, context)
         } finally {
             repositoryHandler.remove(repository)
         }

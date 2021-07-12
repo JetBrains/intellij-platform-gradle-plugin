@@ -4,14 +4,11 @@ import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.process.ExecOperations
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
-import org.jetbrains.intellij.extractArchive
+import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.net.URI
@@ -22,13 +19,11 @@ import javax.inject.Inject
 open class JbrResolver @Inject constructor(
     private val jreRepository: String,
     private val isOffline: Boolean,
+    private val archiveUtils: ArchiveUtils,
     private val context: String?,
     private val repositoryHandler: RepositoryHandler,
     private val dependencyHandler: DependencyHandler,
     private val configurationContainer: ConfigurationContainer,
-    private val archiveOperations: ArchiveOperations,
-    private val execOperations: ExecOperations,
-    private val fileSystemOperations: FileSystemOperations,
 ) {
 
     private val operatingSystem = OperatingSystem.current()
@@ -44,7 +39,7 @@ open class JbrResolver @Inject constructor(
 
         return getJavaArchive(jbrArtifact)?.let {
             val javaDir = File(it.path.replaceAfter(jbrArtifact.name, "")).resolve("extracted")
-            extractArchive(it, javaDir, archiveOperations, execOperations, fileSystemOperations, context)
+            archiveUtils.extract(it, javaDir, context)
             fromDir(javaDir, version)
         }
     }

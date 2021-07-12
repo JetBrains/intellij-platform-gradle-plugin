@@ -15,19 +15,15 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
-import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.process.ExecOperations
 import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.JDOMException
@@ -41,7 +37,6 @@ import java.io.IOException
 import java.io.StringWriter
 import java.nio.file.Files.createTempDirectory
 import java.util.Properties
-import java.util.function.BiConsumer
 import java.util.function.Predicate
 
 val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
@@ -151,52 +146,6 @@ fun getBuiltinJbrVersion(ideDirectory: File): String? {
     return null
 }
 
-@Suppress("UnstableApiUsage")
-@Incubating
-fun extractArchive(
-    archiveFile: File,
-    targetDirectory: File,
-    archiveOperations: ArchiveOperations,
-    execOperations: ExecOperations,
-    fileSystemOperations: FileSystemOperations,
-    logCategory: String?,
-    isUpToDate: Predicate<File>? = null,
-    markUpToDate: BiConsumer<File, File>? = null,
-): File {
-    val name = archiveFile.name
-    val markerFile = File(targetDirectory, "markerFile")
-    if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
-        return targetDirectory
-    }
-
-    targetDirectory.deleteRecursively()
-    targetDirectory.mkdirs()
-
-    debug(logCategory, "Extracting: $name")
-
-    if (name.endsWith(".tar.gz") && OperatingSystem.current().isWindows) {
-        execOperations.exec {
-            it.commandLine("tar", "-xpf", archiveFile.absolutePath, "--directory", targetDirectory.absolutePath)
-        }
-    } else {
-        val decompressor = when {
-            name.endsWith(".zip") || name.endsWith(".sit") -> archiveOperations::zipTree
-            name.endsWith(".tar.gz") -> archiveOperations::tarTree
-            else -> throw IllegalArgumentException("Unknown type archive type: $name")
-        }
-        fileSystemOperations.copy {
-            it.from(decompressor.invoke(archiveFile))
-            it.into(targetDirectory)
-        }
-    }
-
-    debug(logCategory, "Extracted: $name")
-
-    markerFile.createNewFile()
-    markUpToDate?.accept(targetDirectory, markerFile)
-    return targetDirectory
-}
-
 fun releaseType(version: String) = when {
     version.endsWith("-EAP-SNAPSHOT") ||
         version.endsWith("-EAP-CANDIDATE-SNAPSHOT") ||
@@ -286,4 +235,10 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
         block()
     }
     return this
+}
+
+fun Project.ifOffline(block: () -> Unit) {
+    if (gradle.startParameter.isOffline) {
+        block()
+    }
 }

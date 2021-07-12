@@ -45,6 +45,7 @@ import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
+import org.jetbrains.intellij.utils.ArchiveUtils
 import java.io.File
 import java.net.URI
 import java.util.EnumSet
@@ -52,10 +53,13 @@ import java.util.EnumSet
 @Suppress("UnstableApiUsage", "unused")
 open class IntelliJPlugin : Plugin<Project> {
 
+    private lateinit var archiveUtils: ArchiveUtils
     private lateinit var context: String
 
     override fun apply(project: Project) {
+        archiveUtils = project.objects.newInstance(ArchiveUtils::class.java)
         context = project.logCategory()
+
         checkGradleVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
 
@@ -165,6 +169,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 IdeaDependencyManager::class.java,
                 extension.intellijRepository.get(),
                 extension.ideaDependencyCachePath.orNull ?: "",
+                archiveUtils,
                 context,
             )
             val ideaDependency = when (val localPath = extension.localPath.orNull) {
@@ -208,6 +213,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 project.gradle.gradleUserHomeDir.absolutePath,
                 extension.getIdeaDependency(project),
                 extension.getPluginsRepositories(),
+                archiveUtils,
                 context,
             )
             extension.plugins.get().forEach {
@@ -436,6 +442,8 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureRunPluginVerifierTask(project: Project) {
         info(context, "Configuring run plugin verifier task")
         project.tasks.register(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask::class.java) {
+            val taskContext = it.logCategory()
+
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
 
@@ -457,12 +465,52 @@ open class IntelliJPlugin : Plugin<Project> {
                 val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
                 runIdeTask.ideDir.get()
             })
+            it.ides.convention(project.provider {
+                it.ideVersions.get().map { ideVersion ->
+                    val downloadDir = File(it.downloadDir.get())
 
-            it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
-            it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+                    RunPluginVerifierTask.resolveIdePath(ideVersion, downloadDir, taskContext) { type, version, buildType ->
+                        val name = "$type-$version"
+                        info(context, "Downloading IDE: $name")
 
+                        val url = RunPluginVerifierTask.resolveIdeUrl(type, version, buildType, taskContext)
+                        debug(context, "Downloading IDE from $url")
+
+                        try {
+                            val ideArchive = download(
+                                project,
+                                url,
+                                project.dependencies.create(
+                                    group = "com.jetbrains",
+                                    name = "ides",
+                                    version = "$type-$version-$buildType",
+                                    extension = "tar.gz",
+                                ),
+                                taskContext,
+                            )
+
+                            debug(context, "IDE downloaded, extracting...")
+                            archiveUtils.extract(ideArchive, downloadDir, taskContext)
+                            downloadDir.listFiles()?.let { files ->
+                                files.filter(File::isDirectory).forEach { container ->
+                                    container.listFiles()?.forEach { file ->
+                                        file.renameTo(downloadDir.resolve(file.name))
+                                    }
+                                    container.deleteRecursively()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            warn(context, "Cannot download '$type-$version' from '$buildType' channel: $url", e)
+                        }
+
+                        debug(context, "IDE extracted to: $downloadDir")
+                        downloadDir
+                    }
+
+                }.let { files -> project.files(files) }
+            })
             it.verifierPath.convention(project.provider {
-                if (project.gradle.startParameter.isOffline) {
+                project.ifOffline {
                     throw GradleException(
                         "Cannot resolve Plugin Verifier in offline mode. " +
                             "Provide pre-downloaded Plugin Verifier jar file with 'verifierPath' property."
@@ -470,30 +518,45 @@ open class IntelliJPlugin : Plugin<Project> {
                 }
 
                 val resolvedVerifierVersion = RunPluginVerifierTask.resolveVerifierVersion(it.verifierVersion.orNull)
-                val repository = project.repositories.maven { it.url = URI(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY) }
-                try {
-                    debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
-                    val dependency = project.dependencies.create(
+                debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
+
+                download(
+                    project,
+                    IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY,
+                    project.dependencies.create(
                         group = "org.jetbrains.intellij.plugins",
                         name = "verifier-cli",
                         version = resolvedVerifierVersion,
                         classifier = "all",
                         extension = "jar",
-                    )
-
-                    project.configurations
-                        .detachedConfiguration(dependency)
-                        .singleFile
-                        .absolutePath
-                } catch (e: Exception) {
-                    error(context, "Error when resolving Plugin Verifier path", e)
-                    throw e
-                } finally {
-                    project.repositories.remove(repository)
-                }
+                    ),
+                    taskContext,
+                ).canonicalPath
             })
 
+            it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+            it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
             it.outputs.upToDateWhen { false }
+        }
+    }
+
+    private fun download(
+        project: Project,
+        repositoryUrl: String,
+        dependency: Dependency,
+        context: String?,
+    ): File {
+        val repository = project.repositories.maven {
+            it.url = URI(repositoryUrl)
+        }
+        try {
+            return project.configurations.detachedConfiguration(dependency).singleFile
+        } catch (e: Exception) {
+            error(context, "Error when resolving Plugin Verifier path", e)
+            throw e
+        } finally {
+            project.repositories.remove(repository)
         }
     }
 
@@ -591,6 +654,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 JbrResolver::class.java,
                 extension.jreRepository.orNull ?: "",
                 project.gradle.startParameter.isOffline,
+                archiveUtils,
                 taskContext,
             )
 
