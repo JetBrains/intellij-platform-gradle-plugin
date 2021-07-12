@@ -499,7 +499,7 @@ open class RunPluginVerifierTask @Inject constructor(
             it.standardOutput = os
         }
         val version = Version.parse(os.toString())
-        val result = !requiresJava11() && version >= Version(11)
+        val result = !requiresJava11() || version >= Version(11)
 
         result.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDir") }
     }
