@@ -25,7 +25,6 @@ import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
-import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
@@ -494,6 +493,8 @@ open class RunPluginVerifierTask @Inject constructor(
      * @return Java Runtime directory points to Java 8 for Plugin Verifier version < 1.260, or Java 11 for 1.260+.
      */
     private fun validateRuntimeDir(runtimeDir: String) = ByteArrayOutputStream().use { os ->
+        debug(context, "Plugin Verifier JRE verification: $runtimeDir")
+
         execOperations.exec {
             it.workingDir = File(runtimeDir).resolve("bin")
             it.executable = "java"
