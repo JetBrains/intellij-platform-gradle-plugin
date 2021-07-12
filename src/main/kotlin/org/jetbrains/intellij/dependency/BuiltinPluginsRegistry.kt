@@ -10,7 +10,6 @@ import java.io.File
 import java.io.Serializable
 
 class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val context: String?) : Serializable {
-
     private val plugins = mutableMapOf<String, PluginsCachePlugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
 
@@ -18,6 +17,8 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     private val extractor = XmlExtractor<PluginsCache>()
 
     companion object {
+        const val version = 1
+
         fun fromDirectory(pluginsDirectory: File, context: String?) =
             BuiltinPluginsRegistry(pluginsDirectory, context).apply {
                 if (!fillFromCache()) {
@@ -62,7 +63,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
         }
     }
 
-    private fun cacheFile() = File(pluginsDirectory, "builtinRegistry.xml")
+    private fun cacheFile() = File(pluginsDirectory, "builtinRegistry-$version.xml")
 
     fun findPlugin(name: String): File? {
         val plugin = plugins[name] ?: plugins[directoryNameMapping[name]] ?: return null
