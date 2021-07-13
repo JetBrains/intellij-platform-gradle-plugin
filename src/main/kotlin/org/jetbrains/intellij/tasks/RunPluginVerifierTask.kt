@@ -495,14 +495,18 @@ open class RunPluginVerifierTask @Inject constructor(
     private fun validateRuntimeDir(runtimeDir: String) = ByteArrayOutputStream().use { os ->
         debug(context, "Plugin Verifier JRE verification: $runtimeDir")
 
+        if (!requiresJava11()) {
+            return true
+        }
+
         execOperations.exec {
             it.workingDir = File(runtimeDir).resolve("bin")
             it.executable = "java"
-            it.args = listOf("--version")
-            it.standardOutput = os
+            it.args = listOf("-version")
+            it.errorOutput = os
         }
         val version = Version.parse(os.toString())
-        val result = !requiresJava11() || version >= Version(11)
+        val result = version >= Version(11)
 
         result.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDir") }
     }
