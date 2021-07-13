@@ -455,10 +455,12 @@ open class RunPluginVerifierTask @Inject constructor(
 
         return listOf(
             {
+                println("->1")
                 runtimeDir.orNull
                     ?.also { debug(context, "Runtime specified with properties: $it") }
             },
             {
+                println("->2")
                 jbrVersion.orNull?.let { version ->
                     jbrResolver.resolve(version)?.javaHome?.canonicalPath
                         ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: $version") }
@@ -466,6 +468,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 }
             },
             {
+                println("->3")
                 getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
                     jbrResolver.resolve(builtinJbrVersion)
                         ?.let { builtinJbr -> File(builtinJbr.javaHome, jbrPath).takeIf(File::exists)?.canonicalPath }
@@ -474,6 +477,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 }
             },
             {
+                println("->4")
                 Jvm.current().javaHome.canonicalPath
                     .also { debug(context, "Using current JVM: $it") }
             },
