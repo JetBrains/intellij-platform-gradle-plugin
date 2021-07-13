@@ -470,7 +470,7 @@ open class RunPluginVerifierTask @Inject constructor(
                     jbrResolver.resolve(builtinJbrVersion)
                         ?.let { builtinJbr -> File(builtinJbr.javaHome, jbrPath).takeIf(File::exists)?.canonicalPath }
                         ?.also { debug(context, "Using built-in JetBrains Runtime: $it") }
-                        .ifNull { warn(context, "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Rutime.") }
+                        .ifNull { warn(context, "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Runtime.") }
                 }
             },
             {
