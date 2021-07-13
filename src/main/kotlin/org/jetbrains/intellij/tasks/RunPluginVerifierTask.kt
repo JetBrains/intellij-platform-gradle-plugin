@@ -459,7 +459,7 @@ open class RunPluginVerifierTask @Inject constructor(
                     ?.also { debug(context, "Runtime specified with properties: $it") }
             },
             {
-                jbrVersion.orNull.let { version ->
+                jbrVersion.orNull?.let { version ->
                     jbrResolver.resolve(version)?.javaHome?.canonicalPath
                         ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: $version") }
                         .ifNull { warn(context, "Cannot resolve JetBrains Runtime '$version'. Falling back to built-in JetBrains Runtime.") }
@@ -495,6 +495,7 @@ open class RunPluginVerifierTask @Inject constructor(
     private fun validateRuntimeDir(runtimeDir: String) = ByteArrayOutputStream().use { os ->
         debug(context, "Plugin Verifier JRE verification: $runtimeDir")
 
+        println("requiresJava11()=${requiresJava11()}")
         if (!requiresJava11()) {
             return true
         }
@@ -505,8 +506,11 @@ open class RunPluginVerifierTask @Inject constructor(
             it.args = listOf("-version")
             it.errorOutput = os
         }
+        println("os.toString()=${os.toString()}")
         val version = Version.parse(os.toString())
         val result = version >= Version(11)
+        println("version=${version}")
+        println("result=${result}")
 
         result.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDir") }
     }
