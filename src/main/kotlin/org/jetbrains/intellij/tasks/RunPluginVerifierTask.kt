@@ -469,7 +469,10 @@ open class RunPluginVerifierTask @Inject constructor(
             },
             {
                 println("->3")
+                println("ideDir.get().asFile=${ideDir.get().asFile}")
+                println("getBuiltinJbrVersion(ideDir.get().asFile)=${getBuiltinJbrVersion(ideDir.get().asFile)}")
                 getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
+                    println("jbrResolver.resolve(builtinJbrVersion)=${jbrResolver.resolve(builtinJbrVersion)}")
                     jbrResolver.resolve(builtinJbrVersion)
                         ?.let { builtinJbr -> File(builtinJbr.javaHome, jbrPath).takeIf(File::exists)?.canonicalPath }
                         ?.also { debug(context, "Using built-in JetBrains Runtime: $it") }
