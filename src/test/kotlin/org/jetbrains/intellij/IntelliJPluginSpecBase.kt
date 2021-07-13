@@ -21,6 +21,8 @@ abstract class IntelliJPluginSpecBase {
     private val gradleDefault = System.getProperty("test.gradle.default")
     private val gradleVersion = System.getProperty("test.gradle.version", gradleDefault)
     private val gradleArguments = System.getProperty("test.gradle.arguments", "")
+        .split(' ').filterNot(String::isNullOrBlank).toTypedArray()
+
     val gradleHome: String = System.getProperty("test.gradle.home")
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
@@ -107,7 +109,7 @@ abstract class IntelliJPluginSpecBase {
             .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
-            .withArguments(*tasks, "--stacktrace", "--configuration-cache", gradleArguments)//, "-Dorg.gradle.debug=true")
+            .withArguments(*tasks, "--stacktrace", "--configuration-cache", *gradleArguments)//, "-Dorg.gradle.debug=true")
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
