@@ -21,7 +21,7 @@ abstract class IntelliJPluginSpecBase {
     private val gradleDefault = System.getProperty("test.gradle.default")
     private val gradleVersion = System.getProperty("test.gradle.version", gradleDefault)
     private val gradleArguments = System.getProperty("test.gradle.arguments", "")
-        .split(' ').filterNot(String::isNullOrBlank).toTypedArray()
+        .split(' ').filter(String::isNotEmpty).toTypedArray()
 
     val gradleHome: String = System.getProperty("test.gradle.home")
 
