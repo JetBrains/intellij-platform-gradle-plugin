@@ -20,7 +20,7 @@ abstract class IntelliJPluginSpecBase {
     private val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     private val gradleDefault = System.getProperty("test.gradle.default")
     private val gradleVersion = System.getProperty("test.gradle.version", gradleDefault)
-    private val gradleArguments = System.getProperty("test.gradle.arguments")
+    private val gradleArguments = System.getProperty("test.gradle.arguments", "")
     val gradleHome: String = System.getProperty("test.gradle.home")
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)

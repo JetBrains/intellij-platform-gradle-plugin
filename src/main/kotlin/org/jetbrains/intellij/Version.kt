@@ -9,7 +9,7 @@ class Version(
 
     companion object {
         fun parse(versionString: String) =
-            versionString.split(' ', '.', '-', '"')
+            versionString.split(' ', '.', '-', '"', '_')
                 .mapNotNull(String::toIntOrNull)
                 .let { it + List(3) { 0 } }
                 .let { (major, minor, patch) -> Version(major, minor, patch, versionString) }
