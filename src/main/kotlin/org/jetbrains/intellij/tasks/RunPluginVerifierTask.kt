@@ -455,33 +455,26 @@ open class RunPluginVerifierTask @Inject constructor(
 
         return listOf(
             {
-                println("->1")
                 runtimeDir.orNull
+                    ?.let { File(it).resolve(jbrPath).resolve("bin/java").canonicalPath }
                     ?.also { debug(context, "Runtime specified with properties: $it") }
             },
             {
-                println("->2")
                 jbrVersion.orNull?.let { version ->
-                    jbrResolver.resolve(version)?.javaHome?.canonicalPath
+                    jbrResolver.resolve(version)?.javaExecutable
                         ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: $version") }
                         .ifNull { warn(context, "Cannot resolve JetBrains Runtime '$version'. Falling back to built-in JetBrains Runtime.") }
                 }
             },
             {
-                println("->3")
-                println("ideDir.get().asFile=${ideDir.get().asFile}")
-                println("getBuiltinJbrVersion(ideDir.get().asFile)=${getBuiltinJbrVersion(ideDir.get().asFile)}")
                 getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
-                    println("jbrResolver.resolve(builtinJbrVersion)=${jbrResolver.resolve(builtinJbrVersion)}")
-                    jbrResolver.resolve(builtinJbrVersion)
-                        ?.let { builtinJbr -> File(builtinJbr.javaHome, jbrPath).takeIf(File::exists)?.canonicalPath }
+                    jbrResolver.resolve(builtinJbrVersion)?.javaExecutable
                         ?.also { debug(context, "Using built-in JetBrains Runtime: $it") }
                         .ifNull { warn(context, "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Runtime.") }
                 }
             },
             {
-                println("->4")
-                Jvm.current().javaHome.canonicalPath
+                Jvm.current().javaExecutable.canonicalPath
                     .also { debug(context, "Using current JVM: $it") }
             },
         )
@@ -499,27 +492,22 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return Java Runtime directory points to Java 8 for Plugin Verifier version < 1.260, or Java 11 for 1.260+.
      */
-    private fun validateRuntimeDir(runtimeDir: String) = ByteArrayOutputStream().use { os ->
-        debug(context, "Plugin Verifier JRE verification: $runtimeDir")
+    private fun validateRuntimeDir(executable: String) = ByteArrayOutputStream().use { os ->
+        debug(context, "Plugin Verifier JRE verification: $executable")
 
-        println("requiresJava11()=${requiresJava11()}")
         if (!requiresJava11()) {
             return true
         }
 
         execOperations.exec {
-            it.workingDir = File(runtimeDir).resolve("bin")
-            it.executable = "java"
+            it.executable = executable
             it.args = listOf("-version")
             it.errorOutput = os
         }
-        println("os.toString()=${os.toString()}")
         val version = Version.parse(os.toString())
         val result = version >= Version(11)
-        println("version=${version}")
-        println("result=${result}")
 
-        result.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDir") }
+        result.ifFalse { debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executable") }
     }
 
     /**
