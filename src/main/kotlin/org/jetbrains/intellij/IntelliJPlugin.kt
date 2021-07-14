@@ -760,14 +760,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configureSignPluginTask(project: Project) {
         info(context, "Configuring sign plugin task")
-        val buildPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
-        val buildPluginTask = buildPluginTaskProvider.get() as Zip
-        val inputFile = buildPluginTask.archiveFile.get().asFile
-        val inputFileExtension = inputFile.path.substring(inputFile.path.lastIndexOf('.'))
-        val inputFileWithoutExtension = inputFile.path.substring(0, inputFile.path.lastIndexOf('.'))
-        val outputFilePath = "$inputFileWithoutExtension-signed$inputFileExtension"
 
         project.tasks.register(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, SignPluginTask::class.java) {
+
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Sign plugin with your private key and certificate chain."
 
@@ -775,6 +770,12 @@ open class IntelliJPlugin : Plugin<Project> {
                 resolveBuildTaskOutput(project)
             }))
             it.outputArchiveFile.convention(project.layout.file(project.provider {
+                val buildPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+                val buildPluginTask = buildPluginTaskProvider.get() as Zip
+                val inputFile = buildPluginTask.archiveFile.get().asFile
+                val inputFileExtension = inputFile.path.substring(inputFile.path.lastIndexOf('.'))
+                val inputFileWithoutExtension = inputFile.path.substring(0, inputFile.path.lastIndexOf('.'))
+                val outputFilePath = "$inputFileWithoutExtension-signed$inputFileExtension"
                 File(outputFilePath)
             }))
 
