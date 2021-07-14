@@ -26,8 +26,9 @@ open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: Obje
 
     companion object {
         private const val METADATA_URL = "$INTELLIJ_DEPENDENCIES/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"
-        const val OLD_ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
-        const val NEW_ROBOT_SERVER_DEPENDENCY = "com.intellij.remoterobot:robot-server-plugin"
+        private const val OLD_ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
+        private const val NEW_ROBOT_SERVER_DEPENDENCY = "com.intellij.remoterobot:robot-server-plugin"
+        private const val NEW_ROBOT_SERVER_VERSION = "0.11.0"
 
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Robot Server Plugin version")
@@ -46,8 +47,8 @@ open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: Obje
         fun resolveVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
 
         fun getDependency(version: String) = when {
-            Version.parse(version) < Version.parse("0.11.0") -> OLD_ROBOT_SERVER_DEPENDENCY
-            else -> NEW_ROBOT_SERVER_DEPENDENCY
+            Version.parse(version) >= Version.parse(NEW_ROBOT_SERVER_VERSION) -> NEW_ROBOT_SERVER_DEPENDENCY
+            else -> OLD_ROBOT_SERVER_DEPENDENCY
         }
     }
 
