@@ -17,17 +17,10 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.tooling.BuildException
-import org.jetbrains.intellij.IntelliJPluginConstants
-import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
-import org.jetbrains.intellij.IntelliJPluginConstants.MAVEN_REPOSITORY
-import org.jetbrains.intellij.IntelliJPluginExtension
-import org.jetbrains.intellij.create
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.releaseType
 import java.io.File
-import java.net.URI
 import javax.inject.Inject
 
 @Incubating
@@ -47,9 +40,6 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
     @Internal
     val sourceSetAllDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
-
-    @Internal
-    val intellijRepository: Property<String> = objectFactory.property(String::class.java)
 
     @Internal
     val sourceSetResources: ListProperty<File> = objectFactory.listProperty(File::class.java)
@@ -78,14 +68,8 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         it.exists() && !sourceSetResources.get().contains(it)
     }
 
-    @Transient
-    private val dependencyHandler = project.dependencies
-
-    @Transient
-    private val repositoryHandler = project.repositories
-
-    @Transient
-    private val configurationContainer = project.configurations
+    @InputFiles
+    val compilerClassPathFromMaven: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @TaskAction
     fun instrumentClasses() {
@@ -121,26 +105,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                 }
             }.orEmpty().filterNotNull() + file
         }
-    } ?: compilerClassPathFromMaven()
-
-    private fun compilerClassPathFromMaven(): List<File> {
-        val dependency = dependencyHandler.create(
-            group = "com.jetbrains.intellij.java",
-            name = "java-compiler-ant-tasks",
-            version = compilerVersion.get(),
-        )
-        val intellijRepositoryUrl = intellijRepository.orNull ?: IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
-        val repos = listOf(
-            repositoryHandler.maven { it.url = URI("$intellijRepositoryUrl/${releaseType(compilerVersion.get())}") },
-            repositoryHandler.maven { it.url = URI(INTELLIJ_DEPENDENCIES) },
-            repositoryHandler.maven { it.url = URI(MAVEN_REPOSITORY) },
-        )
-        try {
-            return configurationContainer.detachedConfiguration(dependency).files.toList()
-        } finally {
-            repositoryHandler.removeAll(repos)
-        }
-    }
+    } ?: compilerClassPathFromMaven.get()
 
     private fun copyOriginalClasses(outputDir: File) {
         outputDir.deleteRecursively()
