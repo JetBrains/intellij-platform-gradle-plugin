@@ -6,18 +6,18 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.ArchiveUtils
-import java.net.URI
+import java.io.File
 import java.net.URL
 import javax.inject.Inject
 
@@ -35,56 +35,38 @@ open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: Obje
             return XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Robot Server Plugin version")
         }
+
+        /**
+         * Resolves Plugin Verifier version.
+         * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
+         * performed for the latest available verifier version.
+         *
+         * @return Plugin Verifier version
+         */
+        fun resolveVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+
+        fun getDependency(version: String) = when {
+            Version.parse(version) < Version.parse("0.11.0") -> OLD_ROBOT_SERVER_DEPENDENCY
+            else -> NEW_ROBOT_SERVER_DEPENDENCY
+        }
     }
 
     @Input
     val version: Property<String> = objectFactory.property(String::class.java)
 
+    @InputFile
+    val pluginArchive: Property<File> = objectFactory.property(File::class.java)
+
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
-    @Transient
-    private val dependencyHandler = project.dependencies
-
-    @Transient
-    private val repositoryHandler = project.repositories
-
-    @Transient
-    private val configurationContainer = project.configurations
+    private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
 
     private val context = logCategory()
 
-    /**
-     * Resolves Plugin Verifier version.
-     * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
-     * performed for the latest available verifier version.
-     *
-     * @return Plugin Verifier version
-     */
-    private fun resolveVersion() = version.orNull?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
-
     @TaskAction
     fun downloadPlugin() {
-        val resolvedVersion = resolveVersion()
-        val (group, name) = getDependency(resolvedVersion).split(':')
-        val dependency = dependencyHandler.create(
-            group = group,
-            name = name,
-            version = resolvedVersion,
-        )
-        val repository = repositoryHandler.maven { it.url = URI.create(INTELLIJ_DEPENDENCIES) }
         val target = outputDir.get().asFile
-
-        try {
-            val zipFile = configurationContainer.detachedConfiguration(dependency).singleFile
-//            archiveUtils.extract(zipFile, target, context)
-        } finally {
-            repositoryHandler.remove(repository)
-        }
-    }
-
-    private fun getDependency(version: String) = when {
-        Version.parse(version) < Version.parse("0.11.0") -> OLD_ROBOT_SERVER_DEPENDENCY
-        else -> NEW_ROBOT_SERVER_DEPENDENCY
+        archiveUtils.extract(pluginArchive.get(), target, context)
     }
 }
