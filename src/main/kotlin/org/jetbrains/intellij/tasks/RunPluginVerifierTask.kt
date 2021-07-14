@@ -29,7 +29,6 @@ import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.ifFalse
 import org.jetbrains.intellij.ifNull
-import org.jetbrains.intellij.ifOffline
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.logCategory
@@ -478,7 +477,7 @@ open class RunPluginVerifierTask @Inject constructor(
             args.add("-subsystems-to-check")
             args.add(subsystemsToCheck.get())
         }
-        project.ifOffline {
+        if (isOffline) {
             args.add("-offline")
         }
 
