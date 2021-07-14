@@ -660,9 +660,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
         val sandboxDir = extension.sandboxDir.get()
-        val configDirectory = project.file("$sandboxDir/config-test").also { it.mkdirs() }
-        val systemDirectory = project.file("$sandboxDir/system-test").also { it.mkdirs() }
-        val pluginsDirectory = project.file("$sandboxDir/plugins-test").also { it.mkdirs() }
+        val configDirectory = project.file("$sandboxDir/config-test").apply { mkdirs() }
+        val systemDirectory = project.file("$sandboxDir/system-test").apply { mkdirs() }
+        val pluginsDirectory = project.file("$sandboxDir/plugins-test").apply { mkdirs() }
 
         testTasks.forEach { task ->
             task.enableAssertions = true
@@ -677,15 +677,22 @@ open class IntelliJPlugin : Plugin<Project> {
             // the same as previous – setting appClassLoader but outdated. Works for part of 203 builds.
             task.systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            task.outputs.dir(systemDirectory)
-                    .withPropertyName("System directory")
-            task.inputs.dir(configDirectory)
-                    .withPropertyName("Config Directory")
-                    .withPathSensitivity(PathSensitivity.RELATIVE)
-            task.inputs.files(prepareTestingSandboxTaskProvider.get().inputs.files)
-                    .withPropertyName("Plugins directory")
-                    .withPathSensitivity(PathSensitivity.RELATIVE)
-                    .withNormalizer(ClasspathNormalizer::class.java)
+            task.outputs
+                .dir(project.provider {
+                    systemDirectory.apply { mkdirs() }
+                })
+                .withPropertyName("System directory")
+            task.inputs
+                .dir(project.provider {
+                    configDirectory.apply { mkdirs() }
+                })
+                .withPropertyName("Config Directory")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+            task.inputs
+                .files(prepareTestingSandboxTaskProvider.get().inputs.files)
+                .withPropertyName("Plugins directory")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+                .withNormalizer(ClasspathNormalizer::class.java)
 
             val ideaDependency = extension.getIdeaDependency(project)
             val ideaDependencyLibraries = project.files(
