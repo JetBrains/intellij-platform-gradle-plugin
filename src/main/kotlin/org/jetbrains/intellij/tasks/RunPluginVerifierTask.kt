@@ -24,7 +24,6 @@ import org.gradle.process.ExecOperations
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
-import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.getBuiltinJbrVersion
@@ -254,6 +253,13 @@ open class RunPluginVerifierTask @Inject constructor(
     val jbrVersion: Property<String> = objectFactory.property(String::class.java)
 
     /**
+     * Url of repository for downloading JetBrains Java Runtime.
+     */
+    @Input
+    @Optional
+    val jreRepository: Property<String> = objectFactory.property(String::class.java)
+
+    /**
      * The path to directory containing JVM runtime, overrides {@link #jbrVersion}.
      * TODO: fileProperty?
      */
@@ -291,18 +297,6 @@ open class RunPluginVerifierTask @Inject constructor(
     private val isOffline = project.gradle.startParameter.isOffline
 
     private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
-
-    private val extension = project.extensions.findByType(IntelliJPluginExtension::class.java)
-        ?: throw GradleException("Cannot access IntelliJPluginExtension")
-
-    @Transient
-    private val dependencyHandler = project.dependencies
-
-    @Transient
-    private val repositoryHandler = project.repositories
-
-    @Transient
-    private val configurationContainer = project.configurations
 
     private val context = logCategory()
 
@@ -383,7 +377,7 @@ open class RunPluginVerifierTask @Inject constructor(
     private fun resolveRuntimeDir(): String {
         val jbrResolver = objectFactory.newInstance(
             JbrResolver::class.java,
-            extension.jreRepository.orNull ?: "",
+            jreRepository.orNull ?: "",
             isOffline,
             archiveUtils,
             context,
