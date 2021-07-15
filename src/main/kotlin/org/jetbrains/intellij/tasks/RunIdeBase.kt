@@ -38,6 +38,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         "GO" to "GoLand",
         "RD" to "Rider",
         "RDCPPP" to "Rider",
+        "GW" to "Gateway"
     )
 
     @InputDirectory

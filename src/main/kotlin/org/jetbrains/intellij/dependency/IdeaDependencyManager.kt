@@ -240,6 +240,10 @@ open class IdeaDependencyManager @Inject constructor(
                 warn(context, "IDE sources are not available for Rider SNAPSHOTS")
                 hasSources = false
             }
+        } else if (type == "GW") {
+            dependencyGroup = "com.jetbrains.gateway"
+            dependencyName = "JetBrainsGateway"
+            hasSources = false
         }
         val dependency = project.dependencies.create(
             group = dependencyGroup,

@@ -174,7 +174,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @Internal
     val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
-    private val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
+    private val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO", "GW")
 
     fun getVersionNumber() = version.orNull?.let { v ->
         val key = keys.find { v.startsWith("$it-") }
