@@ -1,6 +1,6 @@
 package org.jetbrains.intellij.tasks
 
-
+import org.bouncycastle.jce.provider.BouncyCastleProvider
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
@@ -15,6 +15,7 @@ import org.jetbrains.zip.signer.signer.PrivateKeyUtils
 import org.jetbrains.zip.signer.signer.PublicKeyUtils
 import org.jetbrains.zip.signer.signing.DefaultSignatureProvider
 import org.jetbrains.zip.signer.signing.ZipSigner
+import java.security.Security
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -41,6 +42,8 @@ open class SignPluginTask @Inject constructor(
     @TaskAction
     @ExperimentalUnsignedTypes
     fun signPlugin() {
+        Security.addProvider(BouncyCastleProvider())
+
         val certificateChain = CertificateUtils.loadCertificates(this.certificateChain.get())
         val privateKey = PrivateKeyUtils.loadPrivateKey(this.privateKey.get(), password.orNull?.toCharArray())
 
