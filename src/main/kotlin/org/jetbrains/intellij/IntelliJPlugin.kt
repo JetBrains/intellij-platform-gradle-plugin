@@ -570,7 +570,7 @@ open class IntelliJPlugin : Plugin<Project> {
         try {
             return project.configurations.detachedConfiguration(dependency).files.toList()
         } catch (e: Exception) {
-            error(context, "Error when resolving Plugin Verifier path", e)
+            error(context, "Error when resolving dependency: $dependency", e)
             throw e
         } finally {
             project.repositories.removeAll(repositories)
@@ -743,17 +743,26 @@ open class IntelliJPlugin : Plugin<Project> {
                     }))
                     it.compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = it.compilerVersion.get()
-                        download(
-                            project,
-                            it.logCategory(),
-                            project.dependencies.create(
-                                group = "com.jetbrains.intellij.java",
-                                name = "java-compiler-ant-tasks",
-                                version = compilerVersion,
-                            ),
-                            "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
-                            IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
-                        )
+                        if (Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
+                            download(
+                                project,
+                                it.logCategory(),
+                                project.dependencies.create(
+                                    group = "com.jetbrains.intellij.java",
+                                    name = "java-compiler-ant-tasks",
+                                    version = compilerVersion,
+                                ),
+                                "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
+                                IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
+                            )
+                        } else {
+                            warn(
+                                it.logCategory(),
+                                "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. " +
+                                    "Use higher 'intellij.version' or specify the 'javac2' property manually.",
+                            )
+                            null
+                        }
                     })
 
                     val classesDir = sourceSet.output.classesDirs.first()
