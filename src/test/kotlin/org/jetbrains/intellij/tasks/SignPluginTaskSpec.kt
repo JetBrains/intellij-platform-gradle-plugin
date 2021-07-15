@@ -26,6 +26,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
 
         val distributionFolder = File(buildDirectory, "distributions")
-        assertTrue(distributionFolder.listFiles().asList().any() { it.name.contains("1.0.0-signed.zip") })
+        assertTrue(distributionFolder.listFiles().asList().any { it.name.contains("1.0.0-signed.zip") })
     }
 }
