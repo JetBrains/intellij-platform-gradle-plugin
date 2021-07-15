@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.tasks
 
 import groovy.lang.Closure
+import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
@@ -75,7 +76,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     fun instrumentClasses() {
         copyOriginalClasses(outputDir.get().asFile)
 
-        val classpath = compilerClassPath()
+        val classpath = compilerClassPath() ?: throw GradleException("Compiler classpath was not resolved.")
 
         ant.invokeMethod("taskdef", mapOf(
             "name" to "instrumentIdeaExtensions",
