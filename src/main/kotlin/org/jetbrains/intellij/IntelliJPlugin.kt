@@ -9,6 +9,9 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
@@ -401,12 +404,16 @@ open class IntelliJPlugin : Plugin<Project> {
                 download(
                     project,
                     it.logCategory(),
-                    project.dependencies.create(
-                        group = group,
-                        name = name,
-                        version = resolvedVersion,
-                    ),
-                    IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
+                    {
+                        create(
+                            group = group,
+                            name = name,
+                            version = resolvedVersion,
+                        )
+                    },
+                    {
+                        maven { maven -> maven.url = URI(IntelliJPluginConstants.INTELLIJ_DEPENDENCIES) }
+                    },
                 ).first()
             })
         }
@@ -485,7 +492,8 @@ open class IntelliJPlugin : Plugin<Project> {
 
                     RunPluginVerifierTask.resolveIdePath(ideVersion, downloadDir, taskContext) { type, version, buildType ->
                         val name = "$type-$version"
-                        info(context, "Downloading IDE: $name")
+                        val ideDir = downloadDir.resolve(name)
+                        info(context, "Downloading IDE '$name' to: $ideDir")
 
                         val url = RunPluginVerifierTask.resolveIdeUrl(type, version, buildType, taskContext)
                         debug(context, "Downloading IDE from $url")
@@ -494,21 +502,29 @@ open class IntelliJPlugin : Plugin<Project> {
                             val ideArchive = download(
                                 project,
                                 taskContext,
-                                project.dependencies.create(
-                                    group = "com.jetbrains",
-                                    name = "ides",
-                                    version = "$type-$version-$buildType",
-                                    extension = "tar.gz",
-                                ),
-                                url,
+                                {
+                                    create(
+                                        group = "com.jetbrains",
+                                        name = "ides",
+                                        version = "$type-$version-$buildType",
+                                        extension = "tar.gz",
+                                    )
+                                },
+                                {
+                                    ivy { ivy ->
+                                        ivy.url = URI(url)
+                                        ivy.patternLayout { layout -> layout.artifact("") }
+                                        ivy.metadataSources { metadata -> metadata.artifact() }
+                                    }
+                                },
                             ).first()
 
                             debug(context, "IDE downloaded, extracting...")
-                            archiveUtils.extract(ideArchive, downloadDir, taskContext)
-                            downloadDir.listFiles()?.let { files ->
+                            archiveUtils.extract(ideArchive, ideDir, taskContext)
+                            ideDir.listFiles()?.let { files ->
                                 files.filter(File::isDirectory).forEach { container ->
                                     container.listFiles()?.forEach { file ->
-                                        file.renameTo(downloadDir.resolve(file.name))
+                                        file.renameTo(ideDir.resolve(file.name))
                                     }
                                     container.deleteRecursively()
                                 }
@@ -537,14 +553,18 @@ open class IntelliJPlugin : Plugin<Project> {
                 download(
                     project,
                     taskContext,
-                    project.dependencies.create(
-                        group = "org.jetbrains.intellij.plugins",
-                        name = "verifier-cli",
-                        version = resolvedVerifierVersion,
-                        classifier = "all",
-                        extension = "jar",
-                    ),
-                    IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY,
+                    {
+                        create(
+                            group = "org.jetbrains.intellij.plugins",
+                            name = "verifier-cli",
+                            version = resolvedVerifierVersion,
+                            classifier = "all",
+                            extension = "jar",
+                        )
+                    },
+                    {
+                        maven { maven -> maven.url = URI(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY) }
+                    },
                 ).first().canonicalPath
             })
             it.jreRepository.convention(extension.jreRepository)
@@ -559,14 +579,21 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun download(
         project: Project,
         context: String?,
-        dependency: Dependency,
-        vararg repositoryUrls: String,
+        dependenciesBlock: DependencyHandler.() -> Dependency,
+        repositoriesBlock: RepositoryHandler.() -> ArtifactRepository,
+    ) = downloadFromMultipleRepositories(project, context, dependenciesBlock) {
+        listOf(repositoriesBlock.invoke(this))
+    }
+
+    private fun downloadFromMultipleRepositories(
+        project: Project,
+        context: String?,
+        dependenciesBlock: DependencyHandler.() -> Dependency,
+        repositoriesBlock: RepositoryHandler.() -> List<ArtifactRepository>,
     ): List<File> {
-        val repositories = project.repositories.run {
-            repositoryUrls.map { url ->
-                maven { it.url = URI(url) }
-            }
-        }
+        val dependency = dependenciesBlock.invoke(project.dependencies)
+        val repositories = repositoriesBlock.invoke(project.repositories)
+
         try {
             return project.configurations.detachedConfiguration(dependency).files.toList()
         } catch (e: Exception) {
@@ -744,16 +771,22 @@ open class IntelliJPlugin : Plugin<Project> {
                     it.compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = it.compilerVersion.get()
                         if (Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
-                            download(
+                            downloadFromMultipleRepositories(
                                 project,
                                 it.logCategory(),
-                                project.dependencies.create(
-                                    group = "com.jetbrains.intellij.java",
-                                    name = "java-compiler-ant-tasks",
-                                    version = compilerVersion,
-                                ),
-                                "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
-                                IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
+                                {
+                                    create(
+                                        group = "com.jetbrains.intellij.java",
+                                        name = "java-compiler-ant-tasks",
+                                        version = compilerVersion,
+                                    )
+                                },
+                                {
+                                    listOf(
+                                        "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
+                                        IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
+                                    ).map { url -> maven { maven -> maven.url = URI(url) } }
+                                }
                             )
                         } else {
                             warn(
