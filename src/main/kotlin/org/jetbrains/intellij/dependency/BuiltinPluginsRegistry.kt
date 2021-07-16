@@ -2,9 +2,9 @@ package org.jetbrains.intellij.dependency
 
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.model.PluginsCache
 import org.jetbrains.intellij.model.PluginsCachePlugin
+import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
@@ -13,23 +13,21 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     private val plugins = mutableMapOf<String, PluginsCachePlugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
 
-    @Transient
-    private val extractor = XmlExtractor<PluginsCache>()
-
     companion object {
         const val version = 1
 
         fun fromDirectory(pluginsDirectory: File, context: String?) =
             BuiltinPluginsRegistry(pluginsDirectory, context).apply {
-                if (!fillFromCache()) {
+                val extractor = XmlExtractor<PluginsCache>()
+                if (!fillFromCache(extractor)) {
                     debug(context, "Builtin registry cache is missing")
                     fillFromDirectory()
-                    dumpToCache()
+                    dumpToCache(extractor)
                 }
             }
     }
 
-    private fun fillFromCache(): Boolean {
+    private fun fillFromCache(extractor: XmlExtractor<PluginsCache>): Boolean {
         val cache = cacheFile().takeIf { it.exists() } ?: return false
 
         debug(context, "Builtin registry cache is found. Loading from: $cache")
@@ -54,7 +52,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
         debug(context, "Builtin registry populated with ${plugins.size} plugins")
     }
 
-    private fun dumpToCache() {
+    private fun dumpToCache(extractor: XmlExtractor<PluginsCache>) {
         debug(context, "Dumping cache for builtin plugin")
         try {
             extractor.marshal(PluginsCache(plugins.values.toList()), cacheFile())
