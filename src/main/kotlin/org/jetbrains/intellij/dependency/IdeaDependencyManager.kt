@@ -1,7 +1,6 @@
 package org.jetbrains.intellij.dependency
 
 import org.gradle.api.GradleException
-import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.DependencySet
@@ -26,10 +25,8 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
-import javax.inject.Inject
 
-@Incubating
-open class IdeaDependencyManager @Inject constructor(
+open class IdeaDependencyManager(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
     private val archiveUtils: ArchiveUtils,
@@ -67,7 +64,13 @@ open class IdeaDependencyManager @Inject constructor(
         project: Project,
         extraDependencies: Collection<IdeaExtraDependency>,
     ) = when (type) {
-        "JPS" -> JpsIdeaDependency(version, buildNumber, classesDirectory, sourcesDirectory, !hasKotlinDependency(project), context)
+        "JPS" -> JpsIdeaDependency(version,
+            buildNumber,
+            classesDirectory,
+            sourcesDirectory,
+            !hasKotlinDependency(project),
+            context,
+        )
         else -> {
             val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), context)
             when (type) {
