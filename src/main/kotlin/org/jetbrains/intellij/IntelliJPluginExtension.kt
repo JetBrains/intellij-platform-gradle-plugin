@@ -23,6 +23,9 @@ import javax.inject.Inject
 abstract class IntelliJPluginExtension @Inject constructor(
     objectFactory: ObjectFactory,
 ) {
+    companion object {
+        private val versionTypeRegex = Regex("([A-Z]{2,3})-(.*)")
+    }
 
     /**
      * The list of bundled IDE plugins and plugins from the <a href="https://plugins.jetbrains.com/">JetBrains Plugin Repository</a>.
@@ -174,19 +177,13 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @Internal
     val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
-    private val keys = listOf("JPS", "IU", "IC", "RD", "CL", "PY", "PC", "GO")
-
-    fun getVersionNumber() = version.orNull?.let { v ->
-        val key = keys.find { v.startsWith("$it-") }
-        when {
-            key != null -> v.substring(key.length + 1)
-            else -> v
-        }
+    fun getVersionNumber() = version.orNull?.let { version ->
+        versionTypeRegex.matchEntire(version)?.groupValues?.getOrNull(2) ?: version
     }
 
     fun getVersionType(): String {
-        val v = version.orNull ?: return "IC"
-        return keys.find { v.startsWith("$it-") } ?: type.orNull.takeIf { keys.contains(it) } ?: "IC"
+        val version = version.orNull ?: return "IC"
+        return versionTypeRegex.matchEntire(version)?.groupValues?.getOrNull(1) ?: type.getOrElse("IC")
     }
 
     fun addPluginDependency(pluginDependency: PluginDependency) {
