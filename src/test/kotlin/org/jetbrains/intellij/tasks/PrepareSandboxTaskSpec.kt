@@ -767,6 +767,37 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `prepareTestingSandbox runs before test`() {
+        writeJavaFile()
+        file("additional/some-file")
+
+        pluginXml.xml("""
+            <idea-plugin />
+        """)
+
+        buildFile.groovy("""
+            intellij {
+                pluginName = 'myPluginName'
+            }
+            
+            ${IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME} {
+                from("additional")
+            }
+        """)
+
+        build("test")
+
+        assertEquals(
+            setOf(
+                "/plugins-test/myPluginName/lib/projectName.jar",
+                "/plugins-test/some-file",
+                "/config-test/options/updates.xml",
+            ),
+            collectPaths(sandbox),
+        )
+    }
+
+    @Test
     fun `reuse configuration cache for prepareSandbox`() {
         writeJavaFile()
 

@@ -18,6 +18,7 @@ import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskCollection
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
@@ -654,7 +655,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring tests tasks")
         val testTasks = project.tasks.withType(Test::class.java) as TaskCollection
-        val prepareTestingSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
+        val prepareTestingSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME) as TaskProvider<PrepareSandboxTask>
         val runIdeTaskProvider = project.tasks.named(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
         val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
 
@@ -689,7 +690,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 .withPropertyName("Config Directory")
                 .withPathSensitivity(PathSensitivity.RELATIVE)
             task.inputs
-                .files(prepareTestingSandboxTaskProvider.get().inputs.files)
+                .files(prepareTestingSandboxTaskProvider.map { it.destinationDir })
                 .withPropertyName("Plugins directory")
                 .withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class.java)
