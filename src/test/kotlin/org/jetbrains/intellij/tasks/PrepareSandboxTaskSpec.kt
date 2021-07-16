@@ -775,8 +775,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        buildFile.groovy(
-            """
+        buildFile.groovy("""
             intellij {
                 pluginName = 'myPluginName'
             }
@@ -784,8 +783,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             ${IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME} {
                 from("additional")
             }
-        """
-        )
+        """)
 
         build("test")
 
