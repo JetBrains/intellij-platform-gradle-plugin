@@ -5,26 +5,13 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import groovy.transform.CompileStatic
 import groovy.transform.ToString
-import org.gradle.api.GradleException
-import org.gradle.api.Project
-import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.error
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import java.io.File
 
 @CompileStatic
 @ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 @Suppress("UnstableApiUsage")
-class PluginProjectDependency(@Transient val project: Project, val context: String?) : PluginDependency {
-
-    private val pluginDirectory: File by lazy {
-        val prepareSandboxTask = project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-        if (prepareSandboxTask is PrepareSandboxTask) {
-            File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get())
-        } else {
-            throw GradleException("Error accessing PrepareSandboxTask")
-        }
-    }
+class PluginProjectDependency(private val pluginDirectory: File, val context: String?) : PluginDependency {
 
     private val pluginDependency: PluginDependencyImpl? by lazy {
         pluginDirectory.takeIf { it.exists() }?.let {

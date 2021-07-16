@@ -329,7 +329,12 @@ open class IntelliJPlugin : Plugin<Project> {
                 null)
         }
         dependencies.add(project.dependencies.create(dependency))
-        val pluginDependency = PluginProjectDependency(dependency, context)
+
+        val prepareSandboxTaskProvider = dependency.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
+        val dependencyDirectory = File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get())
+
+        val pluginDependency = PluginProjectDependency(dependencyDirectory, context)
         extension.addPluginDependency(pluginDependency)
         project.tasks.withType(PrepareSandboxTask::class.java).forEach {
             it.configureCompositePlugin(pluginDependency)
