@@ -1,5 +1,10 @@
 # Changelog
 
+## next
+
+- Fix `prepareTestingSandbox` not running when test task is executed [#745](../../issues/745) by @abrooksv
+- Move signPlugin file name creation to lazy [#742](../../issues/742) by @brian-mcnamara
+
 ## 1.1.3
 
 - Fixed dependency on `JavaScript` plugin [#674](../../issues/674)
