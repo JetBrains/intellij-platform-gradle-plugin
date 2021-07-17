@@ -3,42 +3,22 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.VERSION_PATTERN
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.getIdeJvmArgs
 import org.jetbrains.intellij.getIdeaSystemProperties
 import org.jetbrains.intellij.ideBuildNumber
 import java.io.File
+import java.nio.file.Files
+import kotlin.streams.asSequence
 
 @Suppress("UnstableApiUsage")
 abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
-
-    private val prefixes = mapOf(
-        "IU" to null,
-        "IC" to "Idea",
-        "RM" to "Ruby",
-        "PY" to "Python",
-        "PC" to "PyCharmCore",
-        "PE" to "PyCharmEdu",
-        "PS" to "PhpStorm",
-        "WS" to "WebStorm",
-        "OC" to "AppCode",
-        "CL" to "CLion",
-        "DB" to "DataGrip",
-        "AI" to "AndroidStudio",
-        "GO" to "GoLand",
-        "RD" to "Rider",
-        "RDCPPP" to "Rider",
-    )
+    companion object {
+        private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
+    }
 
     @InputDirectory
     @PathSensitive(PathSensitivity.NONE)
@@ -145,18 +125,20 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
-            val matcher = VERSION_PATTERN.matcher(ideBuildNumber(ideDir.get().asFile))
-            if (matcher.find()) {
-                val abbreviation = matcher.group(1)
-                val prefix = prefixes[abbreviation]
-                if (!prefix.isNullOrEmpty()) {
-                    systemProperty("idea.platform.prefix", prefix)
-                }
+            val prefix = Files.list(ideDir.get().asFile.toPath().resolve("bin"))
+                    .asSequence()
+                    .filter { file -> file.fileName.toString().endsWith(".sh") }
+                    .flatMap { file -> Files.lines(file).asSequence() }
+                    .mapNotNull { line -> platformPrefixSystemPropertyRegex.find(line)?.groupValues?.getOrNull(1) }
+                    .firstOrNull()
+
+            if (prefix != null) {
+                systemProperty("idea.platform.prefix", prefix)
             }
         }
     }
 
-    private fun systemPropertyIfNotDefined( name: String,  value: Any, userDefinedSystemProperties: Map<String, Any>) {
+    private fun systemPropertyIfNotDefined(name: String, value: Any, userDefinedSystemProperties: Map<String, Any>) {
         if (!userDefinedSystemProperties.containsKey(name)) {
             systemProperty(name, value)
         }
