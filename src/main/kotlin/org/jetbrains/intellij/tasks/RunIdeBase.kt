@@ -6,10 +6,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.getIdeJvmArgs
-import org.jetbrains.intellij.getIdeaSystemProperties
-import org.jetbrains.intellij.ideBuildNumber
+import org.jetbrains.intellij.*
 import java.io.File
 import java.nio.file.Files
 import kotlin.streams.asSequence
@@ -19,6 +16,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     companion object {
         private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
     }
+    
+    private val context = logCategory()
 
     @InputDirectory
     @PathSensitive(PathSensitivity.NONE)
@@ -125,6 +124,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
+            info(context, "Looking for platform prefix")
             val prefix = Files.list(ideDir.get().asFile.toPath().resolve("bin"))
                     .asSequence()
                     .filter { file -> file.fileName.toString().endsWith(".sh") }
@@ -135,6 +135,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             if (prefix != null) {
                 systemProperty("idea.platform.prefix", prefix)
             }
+            info(context, "Using idea.platform.prefix=$prefix")
         }
     }
 
