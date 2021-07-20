@@ -39,7 +39,6 @@ import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.Predicate
 
-val VERSION_PATTERN = "^([A-Z]+)-([0-9.A-z]+)\\s*$".toPattern()
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
 @Suppress("DEPRECATION")
