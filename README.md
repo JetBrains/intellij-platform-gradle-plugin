@@ -137,7 +137,7 @@ In addition to that, following attributes may be used to customize IDE running:
 
 | **Attributes**              | **Default Value**  |
 | :-------------------------- | :----------------- |
-| <kbd>jbrVersion</kbd> JetBrains Java runtime version to use when running the IDE with the plugin. | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java versions are available at [JetBrains Space Packages](https://cache-redirector.jetbrains.com/intellij-jbr/).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
+| <kbd>jbrVersion</kbd> JetBrains Java runtime version to use when running the IDE with the plugin. | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
 | <kbd>ideDir</kbd> Path to IDE distribution that will be used to run the IDE with the plugin. | path to IDE-dependency |
 | <kbd>configDir</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDir}/config</kbd> |
 | <kbd>pluginsDir</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDir}/plugins</kbd> |
