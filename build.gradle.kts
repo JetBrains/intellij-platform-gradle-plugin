@@ -11,7 +11,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.15.0"
     id("synapticloop.documentr") version "3.1.0"
     id("com.github.breadmoirai.github-release") version "2.2.12"
-    id("org.jetbrains.changelog") version "1.2.0"
+    id("org.jetbrains.changelog") version "1.2.1"
 }
 
 repositories {
