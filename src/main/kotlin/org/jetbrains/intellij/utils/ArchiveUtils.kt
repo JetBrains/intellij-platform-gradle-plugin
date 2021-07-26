@@ -3,7 +3,6 @@ package org.jetbrains.intellij.utils
 import org.gradle.api.Incubating
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
-import org.gradle.process.ExecOperations
 import org.jetbrains.intellij.debug
 import java.io.File
 import java.util.function.BiConsumer
