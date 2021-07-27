@@ -21,11 +21,13 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
+import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.error
 import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.ifFalse
 import org.jetbrains.intellij.ifNull
@@ -67,7 +69,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
         /**
          * Resolves Plugin Verifier version.
-         * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
+         * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #METADATA_URL}
          * performed for the latest available verifier version.
          *
          * @return Plugin Verifier version
@@ -316,20 +318,22 @@ open class RunPluginVerifierTask @Inject constructor(
         }
 
         val verifierPath = resolveVerifierPath()
-        val verifierArgs = mutableListOf("check-plugin")
-        verifierArgs += getOptions()
-        verifierArgs += file.asFile.canonicalPath
-        verifierArgs += paths
+        val verifierArgs = listOf("check-plugin") + getOptions() + file.asFile.canonicalPath + paths
 
         debug(context, "Distribution file: ${file.asFile.canonicalPath}")
         debug(context, "Verifier path: $verifierPath")
 
         ByteArrayOutputStream().use { os ->
-            execOperations.javaexec {
-                it.classpath = objectFactory.fileCollection().from(verifierPath)
-                it.mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
-                it.args = verifierArgs
-                it.standardOutput = os
+            try {
+                execOperations.javaexec {
+                    it.classpath = objectFactory.fileCollection().from(verifierPath)
+                    it.mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
+                    it.args = verifierArgs
+                    it.standardOutput = os
+                }
+            } catch (e: ExecException) {
+                error(context, "Error during Plugin Verifier CLI execution:\n$os")
+                throw e
             }
 
             val output = os.toString()
@@ -397,7 +401,10 @@ open class RunPluginVerifierTask @Inject constructor(
                 jbrVersion.orNull?.let { version ->
                     jbrResolver.resolve(version)?.javaExecutable
                         ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: $version") }
-                        .ifNull { warn(context, "Cannot resolve JetBrains Runtime '$version'. Falling back to built-in JetBrains Runtime.") }
+                        .ifNull {
+                            warn(context,
+                                "Cannot resolve JetBrains Runtime '$version'. Falling back to built-in JetBrains Runtime.")
+                        }
                 }
             },
             {

@@ -2,7 +2,6 @@ package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.Action
-import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -414,9 +413,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             version = resolvedVersion,
                         )
                     },
-                    {
-                        maven { maven -> maven.url = URI(IntelliJPluginConstants.INTELLIJ_DEPENDENCIES) }
-                    },
+                    { mavenRepository(IntelliJPluginConstants.INTELLIJ_DEPENDENCIES) },
                 ).first()
             })
         }
@@ -513,13 +510,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                         extension = "tar.gz",
                                     )
                                 },
-                                {
-                                    ivy { ivy ->
-                                        ivy.url = URI(url)
-                                        ivy.patternLayout { layout -> layout.artifact("") }
-                                        ivy.metadataSources { metadata -> metadata.artifact() }
-                                    }
-                                },
+                                { ivyRepository(url) },
                             ).first()
 
                             debug(context, "IDE downloaded, extracting...")
@@ -543,13 +534,6 @@ open class IntelliJPlugin : Plugin<Project> {
                 }.let { files -> project.files(files) }
             })
             it.verifierPath.convention(project.provider {
-                project.ifOffline {
-                    throw GradleException(
-                        "Cannot resolve Plugin Verifier in offline mode. " +
-                            "Provide pre-downloaded Plugin Verifier jar file with 'verifierPath' property."
-                    )
-                }
-
                 val resolvedVerifierVersion = RunPluginVerifierTask.resolveVerifierVersion(it.verifierVersion.orNull)
                 debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
 
@@ -565,9 +549,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             extension = "jar",
                         )
                     },
-                    {
-                        maven { maven -> maven.url = URI(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY) }
-                    },
+                    { mavenRepository(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY) },
                 ).first().canonicalPath
             })
             it.jreRepository.convention(extension.jreRepository)
@@ -788,7 +770,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                     listOf(
                                         "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
                                         IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
-                                    ).map { url -> maven { maven -> maven.url = URI(url) } }
+                                    ).map { url -> mavenRepository(url) }
                                 }
                             )
                         } else {
@@ -956,6 +938,26 @@ open class IntelliJPlugin : Plugin<Project> {
                 val outputFilePath = "$inputFileWithoutExtension-signed$inputFileExtension"
                 File(outputFilePath)
             }))
+            it.cliVersion.convention(VERSION_LATEST)
+            it.cliPath.convention(project.provider {
+                val resolvedCliVersion = SignPluginTask.resolveCliVersion(it.cliVersion.orNull)
+                val url = SignPluginTask.resolveCliUrl(resolvedCliVersion)
+                debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
+
+                download(
+                    project,
+                    it.logCategory(),
+                    {
+                        create(
+                            group = "org.jetbrains",
+                            name = "marketplace-zip-signer-cli",
+                            version = resolvedCliVersion,
+                            extension = "jar",
+                        )
+                    },
+                    { ivyRepository(url) },
+                ).first().canonicalPath
+            })
 
             it.onlyIf { _ ->
                 it as SignPluginTask
@@ -1008,4 +1010,16 @@ open class IntelliJPlugin : Plugin<Project> {
         val buildPluginTask = buildPluginTaskProvider.get() as Zip
         return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
     }
+
+    private fun RepositoryHandler.ivyRepository(url: String) =
+        ivy { ivy ->
+            ivy.url = URI(url)
+            ivy.patternLayout { layout -> layout.artifact("") }
+            ivy.metadataSources { metadata -> metadata.artifact() }
+        }
+
+    private fun RepositoryHandler.mavenRepository(url: String) =
+        maven { maven ->
+            maven.url = URI(url)
+        }
 }
