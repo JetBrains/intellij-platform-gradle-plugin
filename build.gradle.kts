@@ -23,7 +23,7 @@ dependencies {
     implementation("org.jetbrains:marketplace-zip-signer:0.1.5") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains:annotations:21.0.0")
+    implementation("org.jetbrains:annotations:22.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.194") {
         exclude(group = "org.jetbrains.kotlin")
     }
