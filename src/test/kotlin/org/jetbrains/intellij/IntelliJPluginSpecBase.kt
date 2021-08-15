@@ -19,7 +19,7 @@ abstract class IntelliJPluginSpecBase {
     private var debugEnabled = true
     private val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     private val gradleDefault = System.getProperty("test.gradle.default")
-    private val gradleVersion = System.getProperty("test.gradle.version", gradleDefault)
+    private val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
     private val gradleArguments = System.getProperty("test.gradle.arguments", "")
         .split(' ').filter(String::isNotEmpty).toTypedArray()
 

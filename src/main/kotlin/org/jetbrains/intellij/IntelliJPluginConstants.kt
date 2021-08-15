@@ -35,7 +35,6 @@ object IntelliJPluginConstants {
     const val DEFAULT_JBR_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
     const val PLUGIN_VERIFIER_REPOSITORY =
         "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
-    const val MAVEN_REPOSITORY = "$CACHE_REDIRECTOR/repo1.maven.org/maven2"
 
     const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"

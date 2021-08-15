@@ -50,7 +50,9 @@ version = when (properties("snapshot")?.toBoolean() ?: false) {
 } ?: ""
 group = "org.jetbrains.intellij.plugins"
 description = """
-**This project requires Gradle 6.6 or newer**
+> **Important:**
+> - This project requires **Gradle 6.6** or newer
+> - Gradle JVM should be set to **Java 11** (see _Preferences | Build, Execution, Deployment | Build Tools | Gradle_)
 
 When upgrading to 1.x version, please make sure to follow migration guide to adjust your existing build script: https://lp.jetbrains.com/gradle-intellij-plugin
 
@@ -112,6 +114,7 @@ fun configureTests(testTask: Test) {
     testTask.systemProperties["test.kotlin.version"] = properties("kotlinVersion")
     testTask.systemProperties["test.gradle.default"] = properties("gradleVersion")
     testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
+    testTask.systemProperties["test.gradle.arguments"] = properties("testGradleArguments")
     testTask.systemProperties["plugins.repository"] = properties("pluginsRepository")
     testTask.outputs.dir(testGradleHomePath)
 }
