@@ -1,5 +1,9 @@
 # Changelog
 
+## next
+
+- Use target Kotlin API Version 1.3 [#750](../../issues/750)
+
 ## 1.1.4
 
 - Configuration cache enhancements
