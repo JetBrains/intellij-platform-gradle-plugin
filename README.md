@@ -11,7 +11,7 @@
 > 
 > **Important:**
 > - This project requires **Gradle 6.6** or newer
-> - Gradle JVM should be set to **Java 11** (see _Preferences | Build, Execution, Deployment | Build Tools | Gradle_)
+> - Gradle JVM should be set to **Java 11** (see _Settings/Preferences | Build, Execution, Deployment | Build Tools | Gradle_)
 
 When upgrading to 1.x version, please make sure to follow migration guide to adjust your existing build script: https://lp.jetbrains.com/gradle-intellij-plugin
 
