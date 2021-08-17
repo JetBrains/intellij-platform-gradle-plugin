@@ -154,7 +154,6 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
         """)
 
-
         build(
             "printMainCompileClassPath",
             "printTestCompileClassPath",

@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import org.gradle.api.plugins.JavaPlugin
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
+import org.junit.Assume.assumeFalse
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,6 +14,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `intellij-specific tasks`() {
+        assumeFalse(Version.parse(gradleVersion) < Version.parse("6.9"))
         assertEquals(
             listOf(
                 IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME,
