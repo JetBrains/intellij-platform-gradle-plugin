@@ -10,24 +10,52 @@ import kotlin.test.assertTrue
 class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
-    fun `run Marketplace ZIP Signer in specified version`() {
+    fun `run Marketplace ZIP Signer in the latest version`() {
         buildFile.groovy("""
             version = "1.0.0"
             
             signPlugin {
-                cliVersion = "0.1.5"
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
         """)
 
-        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+        val version = SignPluginTask.resolveLatestVersion()
+        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
 
-        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.255"))
+        assertTrue(result.output.contains("marketplace-zip-signer-cli-$version.jar"))
     }
 
     @Test
-    fun `run Marketplace ZIP Signer fails on invalid version`() {
+    fun `run Marketplace ZIP Signer in specified version`() {
+        buildFile.groovy("""
+            version = "1.0.0"
+            
+            signPlugin {
+                cliVersion = "0.1.7"
+                certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
+                privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
+
+        assertTrue(result.output.contains("marketplace-zip-signer-cli-0.1.7.jar"))
+    }
+
+    @Test
+    fun `skip Marketplace ZIP Signer task if no key and certificateChain were provided`() {
+        buildFile.groovy("""
+            version = "1.0.0"
+        """)
+
+        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+
+        assertTrue(result.output.contains("Task :${IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME} SKIPPED"))
+    }
+
+    @Test
+    fun `run Marketplace ZIP Signer and fail on invalid version`() {
         buildFile.groovy("""
             version = "1.0.0"
             
@@ -38,13 +66,14 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
 
-        assertTrue(result.output.contains("Could not find marketplace-zip-signer-0.0.1-cli.jar"))
+        assertTrue(result.output.contains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1."))
     }
 
     @Test
     fun `output file contains version when specified in build file`() {
         buildFile.groovy("""
-            version '1.0.0'
+            version = "1.0.0"
+            
             signPlugin {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
@@ -87,5 +116,5 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun loadCertFile(name: String) = javaClass.classLoader.getResource(name)?.file
+    private fun loadCertFile(name: String) = javaClass.classLoader.getResource(name)?.path
 }

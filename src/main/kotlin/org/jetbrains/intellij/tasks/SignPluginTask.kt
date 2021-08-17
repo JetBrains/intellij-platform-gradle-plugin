@@ -40,7 +40,7 @@ open class SignPluginTask @Inject constructor(
          *
          * @return latest CLI version
          */
-        private fun resolveLatestVersion(): String {
+        fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Marketplace ZIP Signer CLI version")
             val url = URL(METADATA_URL)
             try {
@@ -66,7 +66,7 @@ open class SignPluginTask @Inject constructor(
          * @return Marketplace ZIP Signer CLI download URL
          */
         fun resolveCliUrl(version: String?) = resolveCliVersion(version).let {
-            "https://github.com/JetBrains/marketplace-zip-signer/releases/download/$it/zip-signer-cli.jar"
+            "https://github.com/JetBrains/marketplace-zip-signer/releases/download/$it/marketplace-zip-signer-cli.jar"
         }
     }
 
@@ -153,7 +153,7 @@ open class SignPluginTask @Inject constructor(
      * Private key file.
      * Refers to `key-file` option.
      */
-    @Input
+    @InputFile
     @Optional
     val privateKeyFile: RegularFileProperty = objectFactory.fileProperty()
 
@@ -171,6 +171,7 @@ open class SignPluginTask @Inject constructor(
      * Refers to `cert` option.
      */
     @Input
+    @Optional
     val certificateChain: Property<String> = objectFactory.property(String::class.java)
 
     /**
@@ -178,7 +179,8 @@ open class SignPluginTask @Inject constructor(
      * First certificate from the chain will be used as a certificate authority (CA).
      * Refers to `cert-file` option.
      */
-    @Input
+    @InputFile
+    @Optional
     val certificateChainFile: RegularFileProperty = objectFactory.fileProperty()
 
     private val context = logCategory()
