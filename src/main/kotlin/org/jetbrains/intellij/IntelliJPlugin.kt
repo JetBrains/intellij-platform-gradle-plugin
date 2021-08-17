@@ -961,7 +961,8 @@ open class IntelliJPlugin : Plugin<Project> {
 
             it.onlyIf { _ ->
                 it as SignPluginTask
-                it.privateKey.isPresent && it.certificateChain.isPresent
+                (it.privateKey.isPresent || it.privateKeyFile.isPresent)
+                    && (it.certificateChain.isPresent || it.certificateChainFile.isPresent)
             }
             it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
         }
