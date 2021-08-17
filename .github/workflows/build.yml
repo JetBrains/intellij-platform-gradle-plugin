@@ -75,4 +75,4 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: test-results-${{ matrix.gradleVersion }}-${{ runner.os }}
-          path: ${{ github.workspace }}/build/reports/tests/test/
+          path: ${{ github.workspace }}/build/reports/tests
