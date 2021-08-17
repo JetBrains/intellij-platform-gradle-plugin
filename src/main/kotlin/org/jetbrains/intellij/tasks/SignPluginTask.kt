@@ -34,6 +34,7 @@ open class SignPluginTask @Inject constructor(
 
     companion object {
         private const val METADATA_URL = "https://api.github.com/repos/JetBrains/marketplace-zip-signer/releases/latest"
+        private const val USER_AGENT = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"
 
         /**
          * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
@@ -42,9 +43,11 @@ open class SignPluginTask @Inject constructor(
          */
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Marketplace ZIP Signer CLI version")
-            val url = URL(METADATA_URL)
             try {
-                return Json.decodeFromString(GitHubReleaseMetadata.serializer(), url.readText()).tagName
+                val content = URL(METADATA_URL).openConnection().apply {
+                    addRequestProperty("User-Agent", USER_AGENT)
+                }.getInputStream().use { it.readBytes() }.toString(Charsets.UTF_8)
+                return Json.decodeFromString(GitHubReleaseMetadata.serializer(), content).tagName
             } catch (e: SerializationException) {
                 throw GradleException("Cannot resolve the latest Marketplace ZIP Signer CLI version")
             }
