@@ -27,9 +27,11 @@ open class PublishPluginTask @Inject constructor(
 ) : ConventionTask() {
 
     @InputFile
+    @Optional
     val distributionFile: RegularFileProperty = objectFactory.fileProperty()
 
     @Input
+    @Optional
     val host: Property<String> = objectFactory.property(String::class.java)
 
     @Input
