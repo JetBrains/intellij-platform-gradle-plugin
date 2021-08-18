@@ -300,9 +300,8 @@ open class IdeaDependencyManager(
 
     private fun getZipCacheDirectory(zipFile: File, project: Project, type: String): File {
         if (ideaDependencyCachePath.isNotEmpty()) {
-            val customCacheParent = File(ideaDependencyCachePath)
-            if (customCacheParent.exists()) {
-                return File(customCacheParent.absolutePath)
+            return File(ideaDependencyCachePath).apply {
+                mkdirs()
             }
         } else if (type == "RD" && OperatingSystem.current().isWindows) {
             return project.buildDir
