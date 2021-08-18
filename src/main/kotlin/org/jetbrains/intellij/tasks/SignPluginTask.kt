@@ -1,7 +1,5 @@
 package org.jetbrains.intellij.tasks
 
-import kotlinx.serialization.SerializationException
-import kotlinx.serialization.json.Json
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
@@ -20,9 +18,10 @@ import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.model.GitHubReleaseMetadata
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
 
@@ -33,8 +32,7 @@ open class SignPluginTask @Inject constructor(
 ) : ConventionTask() {
 
     companion object {
-        private const val METADATA_URL = "https://api.github.com/repos/JetBrains/marketplace-zip-signer/releases/latest"
-        private const val USER_AGENT = "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"
+        private const val LATEST_RELEASE_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases/latest"
 
         /**
          * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
@@ -44,11 +42,11 @@ open class SignPluginTask @Inject constructor(
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Marketplace ZIP Signer CLI version")
             try {
-                val content = URL(METADATA_URL).openConnection().apply {
-                    addRequestProperty("User-Agent", USER_AGENT)
-                }.getInputStream().use { it.readBytes() }.toString(Charsets.UTF_8)
-                return Json.decodeFromString(GitHubReleaseMetadata.serializer(), content).tagName
-            } catch (e: SerializationException) {
+                return URL(LATEST_RELEASE_URL).openConnection().run {
+                    (this as HttpURLConnection).instanceFollowRedirects = false
+                    getHeaderField("Location").split('/').last()
+                }
+            } catch (e: IOException) {
                 throw GradleException("Cannot resolve the latest Marketplace ZIP Signer CLI version")
             }
         }
