@@ -29,7 +29,7 @@ open class DependenciesDownloader @Inject constructor(
         repositoriesBlock: RepositoryHandler.() -> List<ArtifactRepository>,
     ): List<File> {
         val dependency = dependenciesBlock.invoke(dependencyHandler)
-        val repositories = repositoriesBlock.invoke(repositoryHandler)
+        val repositories = repositoriesBlock.invoke(repositoryHandler) + repositoryHandler.mavenCentral()
 
         try {
             return configurationContainer.detachedConfiguration(dependency).files.toList()
