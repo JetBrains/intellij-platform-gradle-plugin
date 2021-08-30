@@ -732,9 +732,9 @@ open class IntelliJPlugin : Plugin<Project> {
                     it.ideaDependency.convention(project.provider {
                         extension.getIdeaDependency(project)
                     })
-                    it.javac2.convention(project.layout.file(project.provider {
+                    it.javac2.convention(project.provider {
                         project.file("${extension.getIdeaDependency(project).classes}/lib/javac2.jar").takeIf(File::exists)
-                    }))
+                    })
                     it.compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = it.compilerVersion.get()
                         if (Version.parse(compilerVersion) >= Version(183, 3795, 13)) {

@@ -12,7 +12,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
@@ -196,14 +195,14 @@ open class RunPluginVerifierTask @Inject constructor(
      * List of the paths to the specified IDE versions in {@link #ideVersions} used for the verification.
      * By default, it resolves paths to the downloaded {@link #ideVersions} IDEs.
      */
-    @InputFiles
+    @Input
     val ides: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     /**
      * List of the paths to locally installed IDE distributions that should be used for verification
      * in addition to those specified in {@link #ideVersions}.
      */
-    @InputFiles
+    @Input
     val localPaths: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     /**

@@ -5,7 +5,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
@@ -54,7 +53,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
     @InputFile
     @Optional
-    val javac2: RegularFileProperty = objectFactory.fileProperty()
+    val javac2: Property<File> = objectFactory.property(File::class.java)
 
     @Input
     val compilerVersion: Property<String> = objectFactory.property(String::class.java)
@@ -69,7 +68,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         it.exists() && !sourceSetResources.get().contains(it)
     }
 
-    @InputFiles
+    @Input
     val compilerClassPathFromMaven: ListProperty<File> = objectFactory.listProperty(File::class.java)
 
     @TaskAction
@@ -92,7 +91,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
     // local compiler
     private fun compilerClassPath() = javac2.orNull?.let {
-        it.asFile.takeIf(File::exists)?.let { file ->
+        it.takeIf(File::exists)?.let { file ->
             File("${ideaDependency.get().classes}/lib").listFiles { _, name ->
                 listOf(
                     "jdom.jar",

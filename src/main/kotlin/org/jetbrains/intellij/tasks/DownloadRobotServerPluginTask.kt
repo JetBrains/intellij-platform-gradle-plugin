@@ -6,7 +6,6 @@ import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
@@ -55,7 +54,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: Obje
     @Input
     val version: Property<String> = objectFactory.property(String::class.java)
 
-    @InputFile
+    @Input
     val pluginArchive: Property<File> = objectFactory.property(File::class.java)
 
     @OutputDirectory
