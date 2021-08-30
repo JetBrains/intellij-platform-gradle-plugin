@@ -4,13 +4,12 @@ import org.gradle.api.Incubating
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.create
-import org.jetbrains.intellij.ivyRepository
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.create
+import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.warn
 import java.io.File
-import java.net.URI
 import java.nio.file.Path
 import javax.inject.Inject
 

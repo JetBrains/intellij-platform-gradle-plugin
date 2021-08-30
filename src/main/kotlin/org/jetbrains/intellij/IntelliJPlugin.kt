@@ -45,6 +45,9 @@ import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.create
+import org.jetbrains.intellij.utils.ivyRepository
+import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
 import java.util.EnumSet
 
@@ -115,8 +118,6 @@ open class IntelliJPlugin : Plugin<Project> {
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
         project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
-
-//        project.repositories.mavenCentral()
     }
 
     private fun configureTasks(
@@ -551,7 +552,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }).first().canonicalPath
             })
             it.jreRepository.convention(extension.jreRepository)
-            it.isOffline.set(project.gradle.startParameter.isOffline)
+            it.offline.set(project.gradle.startParameter.isOffline)
 
             it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)

@@ -8,13 +8,13 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.create
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isDependencyOnPyCharm
 import org.jetbrains.intellij.isJar
 import org.jetbrains.intellij.isZip
 import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.nio.file.Paths

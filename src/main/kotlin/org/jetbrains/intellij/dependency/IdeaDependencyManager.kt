@@ -10,7 +10,6 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.ideBuildNumber
 import org.jetbrains.intellij.ideaDir
@@ -18,13 +17,13 @@ import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isDependencyOnPyCharm
 import org.jetbrains.intellij.isKotlinRuntime
 import org.jetbrains.intellij.isPyCharmType
-import org.jetbrains.intellij.mavenRepository
 import org.jetbrains.intellij.releaseType
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.create
+import org.jetbrains.intellij.utils.mavenRepository
 import org.jetbrains.intellij.warn
 import java.io.File
-import java.net.URI
 import java.util.zip.ZipFile
 import javax.inject.Inject
 

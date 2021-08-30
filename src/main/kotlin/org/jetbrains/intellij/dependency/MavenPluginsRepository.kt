@@ -6,10 +6,9 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.mavenRepository
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
-import java.net.URI
 
 interface MavenRepository : PluginsRepository {
 

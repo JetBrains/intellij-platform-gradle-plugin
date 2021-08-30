@@ -3,10 +3,10 @@ package org.jetbrains.intellij.dependency
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingParser
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import org.gradle.api.Project
-import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.ivyRepository
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.create
+import org.jetbrains.intellij.utils.ivyRepository
 import java.io.File
 import java.net.URI
 import java.net.URL

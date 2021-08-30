@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import java.io.File
+import java.net.URI
 import javax.inject.Inject
 
 open class DependenciesDownloader @Inject constructor(
@@ -40,3 +41,31 @@ open class DependenciesDownloader @Inject constructor(
         }
     }
 }
+
+internal fun DependencyHandler.create(
+    group: String,
+    name: String,
+    version: String?,
+    classifier: String? = null,
+    extension: String? = null,
+    configuration: String? = null,
+): Dependency = create(mapOf(
+    "group" to group,
+    "name" to name,
+    "version" to version,
+    "classifier" to classifier,
+    "ext" to extension,
+    "configuration" to configuration,
+))
+
+internal fun RepositoryHandler.ivyRepository(url: String, pattern: String = "") =
+    ivy { ivy ->
+        ivy.url = URI(url)
+        ivy.patternLayout { layout -> layout.artifact(pattern) }
+        ivy.metadataSources { metadata -> metadata.artifact() }
+    }
+
+internal fun RepositoryHandler.mavenRepository(url: String) =
+    maven { maven ->
+        maven.url = URI(url)
+    }

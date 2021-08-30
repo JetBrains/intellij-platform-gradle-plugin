@@ -297,7 +297,7 @@ open class RunPluginVerifierTask @Inject constructor(
     val ideDir: DirectoryProperty = objectFactory.directoryProperty()
 
     @Internal
-    val isOffline: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val offline: Property<Boolean> = objectFactory.property(Boolean::class.java)
 
     private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
 
@@ -384,7 +384,7 @@ open class RunPluginVerifierTask @Inject constructor(
         val jbrResolver = objectFactory.newInstance(
             JbrResolver::class.java,
             jreRepository.orNull ?: "",
-            isOffline.get(),
+            offline.get(),
             archiveUtils,
             dependenciesDownloader,
             context,
@@ -488,7 +488,7 @@ open class RunPluginVerifierTask @Inject constructor(
             args.add("-subsystems-to-check")
             args.add(subsystemsToCheck.get())
         }
-        if (isOffline.get()) {
+        if (offline.get()) {
             args.add("-offline")
         }
 

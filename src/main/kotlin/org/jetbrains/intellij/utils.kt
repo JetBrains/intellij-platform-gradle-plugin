@@ -17,9 +17,6 @@ import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -36,7 +33,6 @@ import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.io.StringWriter
-import java.net.URI
 import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.Predicate
@@ -199,34 +195,6 @@ fun isKotlinRuntime(name: String) =
         name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
         name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
         name == "kotlin-test" || name.startsWith("kotlin-test-")
-
-fun DependencyHandler.create(
-    group: String,
-    name: String,
-    version: String?,
-    classifier: String? = null,
-    extension: String? = null,
-    configuration: String? = null,
-): Dependency = create(mapOf(
-    "group" to group,
-    "name" to name,
-    "version" to version,
-    "classifier" to classifier,
-    "ext" to extension,
-    "configuration" to configuration,
-))
-
-internal fun RepositoryHandler.ivyRepository(url: String, pattern: String = "") =
-    ivy { ivy ->
-        ivy.url = URI(url)
-        ivy.patternLayout { layout -> layout.artifact(pattern) }
-        ivy.metadataSources { metadata -> metadata.artifact() }
-    }
-
-internal fun RepositoryHandler.mavenRepository(url: String) =
-    maven { maven ->
-        maven.url = URI(url)
-    }
 
 fun isDependencyOnPyCharm(dependency: IdeaDependency): Boolean {
     return dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
