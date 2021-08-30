@@ -18,6 +18,7 @@ import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isDependencyOnPyCharm
 import org.jetbrains.intellij.isKotlinRuntime
 import org.jetbrains.intellij.isPyCharmType
+import org.jetbrains.intellij.mavenRepository
 import org.jetbrains.intellij.releaseType
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
@@ -114,9 +115,7 @@ open class IdeaDependencyManager @Inject constructor(
                     extension = "jar",
                 )
             }, {
-                maven { maven ->
-                    maven.url = URI.create("$repositoryUrl/$releaseType")
-                }
+                mavenRepository("$repositoryUrl/$releaseType")
             })
             if (sourcesFiles.size == 1) {
                 val sourcesDirectory = sourcesFiles.first()
@@ -265,9 +264,7 @@ open class IdeaDependencyManager @Inject constructor(
                 version = version,
             )
         }, {
-            maven { maven ->
-                maven.url = URI.create("$repositoryUrl/$releaseType")
-            }
+            mavenRepository("$repositoryUrl/$releaseType")
         }).first().let {
             debug(context, "IDE zip: " + it.path)
             unzipDependencyFile(getZipCacheDirectory(it, project, type), it, type, version.endsWith("-SNAPSHOT"))
@@ -352,9 +349,7 @@ open class IdeaDependencyManager @Inject constructor(
                     version = version,
                 )
             }, {
-                maven { maven ->
-                    maven.url = URI.create("$repositoryUrl/$releaseType")
-                }
+                mavenRepository("$repositoryUrl/$releaseType")
             })
             if (files.size == 1) {
                 val depFile = files.first()

@@ -44,10 +44,6 @@ open class PublishPluginTask @Inject constructor(
 
     private val context = logCategory()
 
-    init {
-        enabled = !project.gradle.startParameter.isOffline
-    }
-
     @TaskAction
     fun publishPlugin() {
         validateInput()

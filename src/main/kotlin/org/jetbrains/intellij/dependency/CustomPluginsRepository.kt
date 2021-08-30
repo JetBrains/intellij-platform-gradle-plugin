@@ -5,6 +5,7 @@ import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepository
 import org.gradle.api.Project
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.ivyRepository
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import java.io.File
 import java.net.URI
@@ -52,11 +53,7 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
                     extension = "zip",
                 )
             }, {
-                ivy { ivy ->
-                    ivy.url = url.toURI()
-                    ivy.patternLayout { it.artifact("") }
-                    ivy.metadataSources { it.artifact() }
-                }
+                ivyRepository(url.toString())
             }).first()
 
     override fun postResolve(project: Project, context: String?) {

@@ -79,10 +79,10 @@ open class PrepareSandboxTask @Inject constructor(
         plugin.from(project.provider {
             listOf(pluginJar.get().asFile) + runtimeConfiguration.allDependencies.map {
                 runtimeConfiguration.fileCollection(it).filter { file ->
-                    !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-                        file.absolutePath == p || file.absolutePath.startsWith("$p${File.separator}")
-                    })
-                }
+            !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
+                file.absolutePath == p || file.absolutePath.startsWith("$p${File.separator}")
+            })
+        }
             }.flatten()
         }).eachFile { details ->
             val dotIndex = details.name.lastIndexOf('.')

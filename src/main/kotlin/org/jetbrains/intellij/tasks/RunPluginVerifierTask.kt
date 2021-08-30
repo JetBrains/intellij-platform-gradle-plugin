@@ -296,7 +296,8 @@ open class RunPluginVerifierTask @Inject constructor(
     @Internal
     val ideDir: DirectoryProperty = objectFactory.directoryProperty()
 
-    private val isOffline = project.gradle.startParameter.isOffline
+    @Internal
+    val isOffline: Property<Boolean> = objectFactory.property(Boolean::class.java)
 
     private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
 
@@ -383,7 +384,7 @@ open class RunPluginVerifierTask @Inject constructor(
         val jbrResolver = objectFactory.newInstance(
             JbrResolver::class.java,
             jreRepository.orNull ?: "",
-            isOffline,
+            isOffline.get(),
             archiveUtils,
             dependenciesDownloader,
             context,
@@ -487,7 +488,7 @@ open class RunPluginVerifierTask @Inject constructor(
             args.add("-subsystems-to-check")
             args.add(subsystemsToCheck.get())
         }
-        if (isOffline) {
+        if (isOffline.get()) {
             args.add("-offline")
         }
 

@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.mavenRepository
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import java.io.File
 import java.net.URI
@@ -56,13 +57,13 @@ class MavenRepositoryPlugin(private val repositoryUrl: String) : MavenRepository
 
     override fun resolve(project: Project, plugin: PluginDependencyNotation, context: String?): File? {
         val dependency = plugin.toDependency(project)
-        val mavenRepository = project.repositories.maven { it.url = URI.create(repositoryUrl) }
+        val mavenRepository = project.repositories.mavenRepository(repositoryUrl)
         return getPluginFile(project, dependency, mavenRepository, repositoryUrl, context)
     }
 
     override fun postResolve(project: Project, context: String?) =
         postResolve(project) {
             debug(context, "Adding Maven plugins repository: $repositoryUrl")
-            project.repositories.maven { it.url = URI.create(repositoryUrl) }
+            project.repositories.mavenRepository(repositoryUrl)
         }
 }

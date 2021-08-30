@@ -19,6 +19,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -35,6 +36,7 @@ import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.io.StringWriter
+import java.net.URI
 import java.nio.file.Files.createTempDirectory
 import java.util.Properties
 import java.util.function.Predicate
@@ -213,6 +215,18 @@ fun DependencyHandler.create(
     "ext" to extension,
     "configuration" to configuration,
 ))
+
+internal fun RepositoryHandler.ivyRepository(url: String, pattern: String = "") =
+    ivy { ivy ->
+        ivy.url = URI(url)
+        ivy.patternLayout { layout -> layout.artifact(pattern) }
+        ivy.metadataSources { metadata -> metadata.artifact() }
+    }
+
+internal fun RepositoryHandler.mavenRepository(url: String) =
+    maven { maven ->
+        maven.url = URI(url)
+    }
 
 fun isDependencyOnPyCharm(dependency: IdeaDependency): Boolean {
     return dependency.name == "pycharmPY" || dependency.name == "pycharmPC"

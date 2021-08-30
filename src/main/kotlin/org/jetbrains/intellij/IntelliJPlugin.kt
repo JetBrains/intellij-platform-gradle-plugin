@@ -8,7 +8,6 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
@@ -47,7 +46,6 @@ import org.jetbrains.intellij.tasks.VerifyPluginTask
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import java.io.File
-import java.net.URI
 import java.util.EnumSet
 
 @Suppress("UnstableApiUsage", "unused")
@@ -553,6 +551,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }).first().canonicalPath
             })
             it.jreRepository.convention(extension.jreRepository)
+            it.isOffline.set(project.gradle.startParameter.isOffline)
 
             it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
@@ -673,16 +672,25 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun configureJarSearchableOptionsTask(project: Project) {
+        val prepareSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
+
         info(context, "Configuring jar searchable options task")
         val buildDir = project.buildDir
         project.tasks.register(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask::class.java) {
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Jars searchable options."
 
+            it.outputDir.convention(project.layout.projectDirectory.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}"))
+            it.pluginName.convention(prepareSandboxTask.pluginName)
+            it.sandboxDir.convention(project.provider {
+                prepareSandboxTask.destinationDir.canonicalPath
+            })
             it.archiveBaseName.convention("lib/searchableOptions")
             it.destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
 
             it.dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+            it.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             it.onlyIf { File(buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory }
         }
     }
@@ -880,6 +888,7 @@ open class IntelliJPlugin : Plugin<Project> {
             })
             it.from(jarSearchableOptionsTask.archiveFile) { copy -> copy.into("lib") }
             it.dependsOn(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+            it.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
             val archivesConfiguration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
             ArchivePublishArtifact(it).let { zipArtifact ->
@@ -959,6 +968,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.dependsOn(buildPluginTaskProvider)
             it.dependsOn(verifyPluginTaskProvider)
             it.dependsOn(signPluginTaskProvider)
+            it.onlyIf { project.gradle.startParameter.isOffline }
         }
     }
 
@@ -980,16 +990,4 @@ open class IntelliJPlugin : Plugin<Project> {
         val buildPluginTask = buildPluginTaskProvider.get() as Zip
         return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
     }
-
-    private fun RepositoryHandler.ivyRepository(url: String) =
-        ivy { ivy ->
-            ivy.url = URI(url)
-            ivy.patternLayout { layout -> layout.artifact("") }
-            ivy.metadataSources { metadata -> metadata.artifact() }
-        }
-
-    private fun RepositoryHandler.mavenRepository(url: String) =
-        maven { maven ->
-            maven.url = URI(url)
-        }
 }

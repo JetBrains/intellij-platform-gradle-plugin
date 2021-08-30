@@ -5,6 +5,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
+import org.jetbrains.intellij.ivyRepository
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.warn
@@ -66,11 +67,7 @@ open class JbrResolver @Inject constructor(
                     extension = "tar.gz",
                 )
             }, {
-                ivy { ivy ->
-                    ivy.url = URI(url)
-                    ivy.patternLayout { it.artifact("[revision].tar.gz") }
-                    ivy.metadataSources { it.artifact() }
-                }
+                ivyRepository(url, "[revision].tar.gz")
             }).first()
         } catch (e: Exception) {
             warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'", e)

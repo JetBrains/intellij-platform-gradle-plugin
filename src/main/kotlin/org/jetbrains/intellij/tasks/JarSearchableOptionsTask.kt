@@ -1,13 +1,27 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.intellij.IntelliJPluginConstants
 import java.io.File
 
 @Suppress("UnstableApiUsage")
 open class JarSearchableOptionsTask : Jar() {
 
-    private val buildDir = project.buildDir.canonicalPath
+    @OutputDirectory
+    @Optional
+    val outputDir: DirectoryProperty = objectFactory.directoryProperty()
+
+    @Input
+    @Optional
+    val pluginName: Property<String> = objectFactory.property(String::class.java)
+
+    @Input
+    @Optional
+    val sandboxDir: Property<String> = objectFactory.property(String::class.java)
 
     init {
         val pluginJarFiles = mutableSetOf<String>()
@@ -19,10 +33,7 @@ open class JarSearchableOptionsTask : Jar() {
                     else -> {
                         val suffix = ".searchableOptions.xml"
                         if (it.name.endsWith(suffix) && pluginJarFiles.isEmpty()) {
-                            val prepareSandboxTask =
-                                project.tasks.findByName(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) as PrepareSandboxTask
-                            val lib = "${prepareSandboxTask.pluginName.get()}/lib"
-                            File(prepareSandboxTask.destinationDir, lib).list()?.let { files ->
+                            File(sandboxDir.get(), "${pluginName.get()}/lib").list()?.let { files ->
                                 pluginJarFiles.addAll(files)
                             }
                         }
@@ -31,7 +42,7 @@ open class JarSearchableOptionsTask : Jar() {
                     }
                 }
             }
-            "$buildDir/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}"
+            outputDir.get().asFile.canonicalPath
         })
 
         this.eachFile { it.path = "search/${it.name}" }
