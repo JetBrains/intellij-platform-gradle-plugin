@@ -1,14 +1,12 @@
 package org.jetbrains.intellij.jbr
 
 import org.gradle.api.Incubating
-import org.gradle.api.artifacts.ConfigurationContainer
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.net.URI
@@ -20,10 +18,8 @@ open class JbrResolver @Inject constructor(
     private val jreRepository: String,
     private val isOffline: Boolean,
     private val archiveUtils: ArchiveUtils,
+    private val dependenciesDownloader: DependenciesDownloader,
     private val context: String?,
-    private val repositoryHandler: RepositoryHandler,
-    private val dependencyHandler: DependencyHandler,
-    private val configurationContainer: ConfigurationContainer,
 ) {
 
     private val operatingSystem = OperatingSystem.current()
@@ -60,25 +56,25 @@ open class JbrResolver @Inject constructor(
         }
 
         val url = jreRepository.takeIf { it.isNotEmpty() } ?: jbrArtifact.repositoryUrl
-        val repository = repositoryHandler.ivy { ivy ->
-            ivy.url = URI(url)
-            ivy.patternLayout { it.artifact("[revision].tar.gz") }
-            ivy.metadataSources { it.artifact() }
-        }
-        val dependency = dependencyHandler.create(
-            group = "com.jetbrains",
-            name = "jbre",
-            version = jbrArtifact.name,
-            extension = "tar.gz",
-        )
 
         return try {
-            configurationContainer.detachedConfiguration(dependency).singleFile
+            dependenciesDownloader.downloadFromRepository(context, {
+                create(
+                    group = "com.jetbrains",
+                    name = "jbre",
+                    version = jbrArtifact.name,
+                    extension = "tar.gz",
+                )
+            }, {
+                ivy { ivy ->
+                    ivy.url = URI(url)
+                    ivy.patternLayout { it.artifact("[revision].tar.gz") }
+                    ivy.metadataSources { it.artifact() }
+                }
+            }).first()
         } catch (e: Exception) {
             warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'", e)
             null
-        } finally {
-            repositoryHandler.remove(repository)
         }
     }
 

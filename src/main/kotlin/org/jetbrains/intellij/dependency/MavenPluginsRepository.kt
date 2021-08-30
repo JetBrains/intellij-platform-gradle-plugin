@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import java.io.File
 import java.net.URI
 
@@ -13,20 +14,14 @@ interface MavenRepository : PluginsRepository {
 
     var resolvedDependency: Boolean
 
-    fun getPluginFile(project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String, context: String?): File? {
-        debug(context, "Adding Maven repository to download '$dependency' from '$url'")
-        var pluginFile: File? = null
-        try {
-            val configuration = project.configurations.detachedConfiguration(dependency)
-            pluginFile = configuration.singleFile
-            resolvedDependency = true
-        } catch (e: Exception) {
-            debug(context, "Couldn't find '$dependency' in '$url'", e)
-        }
-        debug(context, "Removing Maven repository: $url")
-        project.repositories.remove(repository)
-        return pluginFile
-    }
+    fun getPluginFile(project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String, context: String?): File? =
+        runCatching {
+            project.objects.newInstance(DependenciesDownloader::class.java)
+                .downloadFromRepository(context, { dependency }, { repository })
+                .first().also {
+                    resolvedDependency = true
+                }
+        }.getOrNull()
 
     fun postResolve(project: Project, func: () -> Unit) {
         if (resolvedDependency) {

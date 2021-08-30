@@ -2,7 +2,6 @@ package org.jetbrains.intellij.dependency
 
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.plugins.JavaPlugin
@@ -21,15 +20,18 @@ import org.jetbrains.intellij.isKotlinRuntime
 import org.jetbrains.intellij.isPyCharmType
 import org.jetbrains.intellij.releaseType
 import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.net.URI
 import java.util.zip.ZipFile
+import javax.inject.Inject
 
-open class IdeaDependencyManager(
+open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
     private val archiveUtils: ArchiveUtils,
+    private val dependenciesDownloader: DependenciesDownloader,
     private val context: String?,
 ) {
 
@@ -98,19 +100,24 @@ open class IdeaDependencyManager(
         }
     }
 
-    private fun resolveSources(project: Project, version: String, type: String): File? {
+    private fun resolveSources(version: String, type: String): File? {
         info(context, "Adding IDE sources repository")
         try {
+            val releaseType = releaseType(version)
             val forPyCharm = isPyCharmType(type)
-            val dependency = project.dependencies.create(
-                group = if (forPyCharm) "com.jetbrains.intellij.pycharm" else "com.jetbrains.intellij.idea",
-                name = if (forPyCharm) "pycharmPC" else "ideaIC",
-                version = version,
-                classifier = "sources",
-                extension = "jar",
-            )
-            val sourcesConfiguration = project.configurations.detachedConfiguration(dependency)
-            val sourcesFiles = sourcesConfiguration.files
+            val sourcesFiles = dependenciesDownloader.downloadFromRepository(context, {
+                create(
+                    group = if (forPyCharm) "com.jetbrains.intellij.pycharm" else "com.jetbrains.intellij.idea",
+                    name = if (forPyCharm) "pycharmPC" else "ideaIC",
+                    version = version,
+                    classifier = "sources",
+                    extension = "jar",
+                )
+            }, {
+                maven { maven ->
+                    maven.url = URI.create("$repositoryUrl/$releaseType")
+                }
+            })
             if (sourcesFiles.size == 1) {
                 val sourcesDirectory = sourcesFiles.first()
                 debug(context, "IDE sources jar: " + sourcesDirectory.path)
@@ -222,7 +229,6 @@ open class IdeaDependencyManager(
     fun resolveRemote(project: Project, version: String, type: String, sources: Boolean, extraDependencies: List<String>): IdeaDependency {
         val releaseType = releaseType(version)
         debug(context, "Adding IDE repository: $repositoryUrl/$releaseType")
-        project.repositories.maven { it.url = URI.create("$repositoryUrl/$releaseType") }
 
         debug(context, "Adding IDE dependency")
         var dependencyGroup = "com.jetbrains.intellij.idea"
@@ -251,18 +257,26 @@ open class IdeaDependencyManager(
             dependencyName = "JetBrainsGateway"
             hasSources = false
         }
-        val dependency = project.dependencies.create(
-            group = dependencyGroup,
-            name = dependencyName,
-            version = version,
-        )
 
-        val configuration = project.configurations.detachedConfiguration(dependency)
-        val classesDirectory = extractClassesFromRemoteDependency(project, configuration, type, version)
+        val classesDirectory = dependenciesDownloader.downloadFromRepository(context, {
+            create(
+                group = dependencyGroup,
+                name = dependencyName,
+                version = version,
+            )
+        }, {
+            maven { maven ->
+                maven.url = URI.create("$repositoryUrl/$releaseType")
+            }
+        }).first().let {
+            debug(context, "IDE zip: " + it.path)
+            unzipDependencyFile(getZipCacheDirectory(it, project, type), it, type, version.endsWith("-SNAPSHOT"))
+        }
+
         info(context, "IDE dependency cache directory: $classesDirectory")
         val buildNumber = ideBuildNumber(classesDirectory)
         val sourcesDirectory = when {
-            hasSources -> resolveSources(project, version, type)
+            hasSources -> resolveSources(version, type)
             else -> null
         }
         val resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
@@ -291,12 +305,6 @@ open class IdeaDependencyManager(
         }
         return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, emptyList())
     }
-
-    private fun extractClassesFromRemoteDependency(project: Project, configuration: Configuration, type: String, version: String): File =
-        configuration.singleFile.let {
-            debug(context, "IDE zip: " + it.path)
-            unzipDependencyFile(getZipCacheDirectory(it, project, type), it, type, version.endsWith("-SNAPSHOT"))
-        }
 
     private fun getZipCacheDirectory(zipFile: File, project: Project, type: String): File {
         if (ideaDependencyCachePath.isNotEmpty()) {
@@ -336,13 +344,18 @@ open class IdeaDependencyManager(
 
     private fun resolveExtraDependency(project: Project, version: String, name: String): File? {
         try {
-            val dependency = project.dependencies.create(
-                group = "com.jetbrains.intellij.idea",
-                name = name,
-                version = version,
-            )
-            val extraDependencyConfiguration = project.configurations.detachedConfiguration(dependency)
-            val files = extraDependencyConfiguration.files
+            val releaseType = releaseType(version)
+            val files = dependenciesDownloader.downloadFromRepository(context, {
+                create(
+                    group = "com.jetbrains.intellij.idea",
+                    name = name,
+                    version = version,
+                )
+            }, {
+                maven { maven ->
+                    maven.url = URI.create("$repositoryUrl/$releaseType")
+                }
+            })
             if (files.size == 1) {
                 val depFile = files.first()
                 return when {

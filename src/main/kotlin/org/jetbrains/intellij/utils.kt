@@ -235,9 +235,3 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
     }
     return this
 }
-
-fun Project.ifOffline(block: () -> Unit) {
-    if (gradle.startParameter.isOffline) {
-        block()
-    }
-}

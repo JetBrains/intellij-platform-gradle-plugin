@@ -5,7 +5,7 @@ import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepository
 import org.gradle.api.Project
 import org.jetbrains.intellij.create
 import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.warn
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import java.io.File
 import java.net.URI
 import java.net.URL
@@ -42,28 +42,22 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
             .find { it.pluginId.equals(plugin.id, true) && it.version.equals(plugin.version, true) }
             ?.downloadUrl
 
-    private fun downloadZipArtifact(project: Project, url: URL, plugin: PluginDependencyNotation, context: String?): File? {
-        val repository = project.repositories.ivy { ivy ->
-            ivy.url = url.toURI()
-            ivy.patternLayout { it.artifact("") }
-            ivy.metadataSources { it.artifact() }
-        }
-        val dependency = project.dependencies.create(
-            group = "com.jetbrains.plugins",
-            name = plugin.id,
-            version = plugin.version,
-            extension = "zip",
-        )
-
-        return try {
-            project.configurations.detachedConfiguration(dependency).singleFile
-        } catch (e: Exception) {
-            warn(context, "Cannot download plugin from custom repository: ${plugin.id}:${plugin.version}", e)
-            null
-        } finally {
-            project.repositories.remove(repository)
-        }
-    }
+    private fun downloadZipArtifact(project: Project, url: URL, plugin: PluginDependencyNotation, context: String?) =
+        project.objects.newInstance(DependenciesDownloader::class.java)
+            .downloadFromRepository(context, {
+                create(
+                    group = "com.jetbrains.plugins",
+                    name = plugin.id,
+                    version = plugin.version,
+                    extension = "zip",
+                )
+            }, {
+                ivy { ivy ->
+                    ivy.url = url.toURI()
+                    ivy.patternLayout { it.artifact("") }
+                    ivy.metadataSources { it.artifact() }
+                }
+            }).first()
 
     override fun postResolve(project: Project, context: String?) {
     }

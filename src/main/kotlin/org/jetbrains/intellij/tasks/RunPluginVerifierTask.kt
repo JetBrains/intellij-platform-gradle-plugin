@@ -37,6 +37,7 @@ import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.warn
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -378,11 +379,13 @@ open class RunPluginVerifierTask @Inject constructor(
      * @return path to the Java Runtime directory
      */
     private fun resolveRuntimeDir(): String {
+        val dependenciesDownloader = objectFactory.newInstance(DependenciesDownloader::class.java)
         val jbrResolver = objectFactory.newInstance(
             JbrResolver::class.java,
             jreRepository.orNull ?: "",
             isOffline,
             archiveUtils,
+            dependenciesDownloader,
             context,
         )
 

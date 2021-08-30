@@ -8,9 +8,7 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
@@ -47,6 +45,7 @@ import org.jetbrains.intellij.tasks.RunPluginVerifierTask
 import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
 import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import java.io.File
 import java.net.URI
 import java.util.EnumSet
@@ -55,10 +54,12 @@ import java.util.EnumSet
 open class IntelliJPlugin : Plugin<Project> {
 
     private lateinit var archiveUtils: ArchiveUtils
+    private lateinit var dependenciesDownloader: DependenciesDownloader
     private lateinit var context: String
 
     override fun apply(project: Project) {
         archiveUtils = project.objects.newInstance(ArchiveUtils::class.java)
+        dependenciesDownloader = project.objects.newInstance(DependenciesDownloader::class.java)
         context = project.logCategory()
 
         checkGradleVersion(project)
@@ -116,6 +117,8 @@ open class IntelliJPlugin : Plugin<Project> {
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
         project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
+
+//        project.repositories.mavenCentral()
     }
 
     private fun configureTasks(
@@ -166,10 +169,12 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring IDE dependency")
-            val resolver = IdeaDependencyManager(
+            val dependencyManager = project.objects.newInstance(
+                IdeaDependencyManager::class.java,
                 extension.intellijRepository.get(),
                 extension.ideaDependencyCachePath.orNull ?: "",
                 archiveUtils,
+                dependenciesDownloader,
                 context,
             )
             val ideaDependency = when (val localPath = extension.localPath.orNull) {
@@ -177,20 +182,24 @@ open class IntelliJPlugin : Plugin<Project> {
                     info(context, "Using IDE from remote repository")
                     val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
                     val extraDependencies = extension.extraDependencies.get()
-                    resolver.resolveRemote(project, version, extension.getVersionType(), extension.downloadSources.get(), extraDependencies)
+                    dependencyManager.resolveRemote(project,
+                        version,
+                        extension.getVersionType(),
+                        extension.downloadSources.get(),
+                        extraDependencies)
                 }
                 else -> {
                     if (extension.version.orNull != null) {
                         warn(context, "Both 'localPath' and 'version' specified, second would be ignored")
                     }
                     info(context, "Using path to locally installed IDE: $localPath")
-                    resolver.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
+                    dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
                 }
             }
             extension.ideaDependency.set(ideaDependency)
             if (extension.configureDefaultDependencies.get()) {
                 info(context, "${ideaDependency.buildNumber} is used for building")
-                resolver.register(project, ideaDependency, dependencies)
+                dependencyManager.register(project, ideaDependency, dependencies)
                 if (!ideaDependency.extraDependencies.isEmpty()) {
                     info(context,
                         "Note: ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
@@ -403,18 +412,15 @@ open class IntelliJPlugin : Plugin<Project> {
             it.pluginArchive.convention(project.provider {
                 val resolvedVersion = DownloadRobotServerPluginTask.resolveVersion(it.version.orNull)
                 val (group, name) = DownloadRobotServerPluginTask.getDependency(resolvedVersion).split(':')
-                download(
-                    project,
-                    it.logCategory(),
-                    {
-                        create(
-                            group = group,
-                            name = name,
-                            version = resolvedVersion,
-                        )
-                    },
-                    { mavenRepository(IntelliJPluginConstants.INTELLIJ_DEPENDENCIES) },
-                ).first()
+                dependenciesDownloader.downloadFromRepository(it.logCategory(), {
+                    create(
+                        group = group,
+                        name = name,
+                        version = resolvedVersion,
+                    )
+                }, {
+                    mavenRepository(IntelliJPluginConstants.INTELLIJ_DEPENDENCIES)
+                }).first()
             })
         }
     }
@@ -499,19 +505,16 @@ open class IntelliJPlugin : Plugin<Project> {
                         debug(context, "Downloading IDE from $url")
 
                         try {
-                            val ideArchive = download(
-                                project,
-                                taskContext,
-                                {
-                                    create(
-                                        group = "com.jetbrains",
-                                        name = "ides",
-                                        version = "$type-$version-$buildType",
-                                        extension = "tar.gz",
-                                    )
-                                },
-                                { ivyRepository(url) },
-                            ).first()
+                            val ideArchive = dependenciesDownloader.downloadFromRepository(it.logCategory(), {
+                                create(
+                                    group = "com.jetbrains",
+                                    name = "ides",
+                                    version = "$type-$version-$buildType",
+                                    extension = "tar.gz",
+                                )
+                            }, {
+                                ivyRepository(url)
+                            }).first()
 
                             debug(context, "IDE downloaded, extracting...")
                             archiveUtils.extract(ideArchive, ideDir, taskContext)
@@ -537,20 +540,17 @@ open class IntelliJPlugin : Plugin<Project> {
                 val resolvedVerifierVersion = RunPluginVerifierTask.resolveVerifierVersion(it.verifierVersion.orNull)
                 debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
 
-                download(
-                    project,
-                    taskContext,
-                    {
-                        create(
-                            group = "org.jetbrains.intellij.plugins",
-                            name = "verifier-cli",
-                            version = resolvedVerifierVersion,
-                            classifier = "all",
-                            extension = "jar",
-                        )
-                    },
-                    { mavenRepository(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY) },
-                ).first().canonicalPath
+                dependenciesDownloader.downloadFromRepository(taskContext, {
+                    create(
+                        group = "org.jetbrains.intellij.plugins",
+                        name = "verifier-cli",
+                        version = resolvedVerifierVersion,
+                        classifier = "all",
+                        extension = "jar",
+                    )
+                }, {
+                    mavenRepository(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY)
+                }).first().canonicalPath
             })
             it.jreRepository.convention(extension.jreRepository)
 
@@ -558,34 +558,6 @@ open class IntelliJPlugin : Plugin<Project> {
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
             it.outputs.upToDateWhen { false }
-        }
-    }
-
-    private fun download(
-        project: Project,
-        context: String?,
-        dependenciesBlock: DependencyHandler.() -> Dependency,
-        repositoriesBlock: RepositoryHandler.() -> ArtifactRepository,
-    ) = downloadFromMultipleRepositories(project, context, dependenciesBlock) {
-        listOf(repositoriesBlock.invoke(this))
-    }
-
-    private fun downloadFromMultipleRepositories(
-        project: Project,
-        context: String?,
-        dependenciesBlock: DependencyHandler.() -> Dependency,
-        repositoriesBlock: RepositoryHandler.() -> List<ArtifactRepository>,
-    ): List<File> {
-        val dependency = dependenciesBlock.invoke(project.dependencies)
-        val repositories = repositoriesBlock.invoke(project.repositories)
-
-        try {
-            return project.configurations.detachedConfiguration(dependency).files.toList()
-        } catch (e: Exception) {
-            error(context, "Error when resolving dependency: $dependency", e)
-            throw e
-        } finally {
-            project.repositories.removeAll(repositories)
         }
     }
 
@@ -684,6 +656,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 extension.jreRepository.orNull ?: "",
                 project.gradle.startParameter.isOffline,
                 archiveUtils,
+                dependenciesDownloader,
                 taskContext,
             )
 
@@ -756,8 +729,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     it.compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = it.compilerVersion.get()
                         if (Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
-                            downloadFromMultipleRepositories(
-                                project,
+                            dependenciesDownloader.downloadFromMultipleRepositories(
                                 it.logCategory(),
                                 {
                                     create(
@@ -944,19 +916,16 @@ open class IntelliJPlugin : Plugin<Project> {
                 val url = SignPluginTask.resolveCliUrl(resolvedCliVersion)
                 debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
 
-                download(
-                    project,
-                    it.logCategory(),
-                    {
-                        create(
-                            group = "org.jetbrains",
-                            name = "marketplace-zip-signer-cli",
-                            version = resolvedCliVersion,
-                            extension = "jar",
-                        )
-                    },
-                    { ivyRepository(url) },
-                ).first().canonicalPath
+                dependenciesDownloader.downloadFromRepository(it.logCategory(), {
+                    create(
+                        group = "org.jetbrains",
+                        name = "marketplace-zip-signer-cli",
+                        version = resolvedCliVersion,
+                        extension = "jar",
+                    )
+                }, {
+                    ivyRepository(url)
+                }).first().canonicalPath
             })
 
             it.onlyIf { _ ->

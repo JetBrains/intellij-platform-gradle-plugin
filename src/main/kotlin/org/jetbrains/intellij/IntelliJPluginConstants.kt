@@ -25,7 +25,7 @@ object IntelliJPluginConstants {
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
     const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "intellijDefaultDependencies"
 
-    const val ANNOTATIONS_DEPENDENCY_VERSION = "21.0.0"
+    const val ANNOTATIONS_DEPENDENCY_VERSION = "22.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
     const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
