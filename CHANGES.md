@@ -4,6 +4,7 @@
 
 - Use target Kotlin API Version 1.3 [#750](../../issues/750)
 - Migrate `SignPluginTask` to use the Marketplace ZIP Signer CLI
+- Fixed resolving of built-in JetBrains Runtime (JBR) [#756](../../issues/756)
 
 ## 1.1.4
 

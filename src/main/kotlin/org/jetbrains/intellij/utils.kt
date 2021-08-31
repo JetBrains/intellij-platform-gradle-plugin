@@ -30,11 +30,9 @@ import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.xml.sax.SAXParseException
 import java.io.File
-import java.io.FileReader
 import java.io.IOException
 import java.io.StringWriter
 import java.nio.file.Files.createTempDirectory
-import java.util.Properties
 import java.util.function.Predicate
 
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
@@ -125,22 +123,6 @@ fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = wh
     else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
         override fun accept(file: File) = file.isJar() && filter.test(file)
     }, FalseFileFilter.FALSE)
-}
-
-fun getBuiltinJbrVersion(ideDirectory: File): String? {
-    val dependenciesFile = File(ideDirectory, "dependencies.txt")
-    if (dependenciesFile.exists()) {
-        val properties = Properties()
-        val reader = FileReader(dependenciesFile)
-        try {
-            properties.load(reader)
-            return properties.getProperty("jdkBuild")
-        } catch (ignore: IOException) {
-        } finally {
-            reader.close()
-        }
-    }
-    return null
 }
 
 fun releaseType(version: String) = when {

@@ -1,16 +1,22 @@
 package org.jetbrains.intellij.jbr
 
 import org.gradle.api.Incubating
+import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.ifNull
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.warn
 import java.io.File
+import java.io.FileReader
+import java.io.IOException
 import java.nio.file.Path
+import java.util.Properties
 import javax.inject.Inject
 
 @Incubating
@@ -23,6 +29,68 @@ open class JbrResolver @Inject constructor(
 ) {
 
     private val operatingSystem = OperatingSystem.current()
+
+    fun resolveRuntimeDir(
+        runtimeDir: String? = null,
+        jbrVersion: String? = null,
+        ideDir: File? = null,
+        validate: (executable: String) -> Boolean = { true }
+    ): String? {
+        debug(context, "Resolving runtime directory.")
+
+        val jbrPath = when (OperatingSystem.current().isMacOsX) {
+            true -> "jbr/Contents/Home"
+            false -> "jbr"
+        }
+
+        return listOf(
+            {
+                runtimeDir?.let { path ->
+                    path
+                        .let { File(it).resolve(jbrPath).resolve("bin/java").takeIf(File::exists)?.canonicalPath }
+                        .also { debug(context, "Runtime specified with runtimeDir='$path' resolved as: $it") }
+                        .ifNull { warn(context, "Cannot resolve runtime with runtimeDir='$path'") }
+                }
+            },
+            {
+                jbrVersion?.let { version ->
+                    resolve(version)
+                        ?.javaExecutable
+                        .also { debug(context, "Runtime specified with jbrVersion='$version' resolved as: $it") }
+                        .ifNull { warn(context, "Cannot resolve runtime with jbrVersion='$version'") }
+                }
+            },
+            {
+                ideDir?.let { file ->
+                    file
+                        .let { file.resolve(jbrPath).resolve("bin/java").takeIf(File::exists)?.canonicalPath }
+                        .also { debug(context, "Runtime specified with ideDir='$file' resolved as: $it") }
+                }
+            },
+            {
+                ideDir?.let { file ->
+                    getBuiltinJbrVersion(file)
+                        ?.let { version ->
+                            resolve(version)
+                                ?.javaExecutable
+                                .also { debug(context, "Runtime specified with ideDir='$file', version='version' resolved as: $it") }
+                                .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file', version='version'") }
+                        }
+                        .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file'") }
+                }
+            },
+            {
+                Jvm.current()
+                    .javaExecutable
+                    .canonicalPath
+                    .also { debug(context, "Using current JVM: $it") }
+            },
+        )
+            .asSequence()
+            .mapNotNull { it()?.takeIf(validate) }
+            .firstOrNull()
+            ?.also { debug(context, "Resolved JVM Runtime directory: $it") }
+    }
 
     fun resolve(version: String?): Jbr? {
         if (version.isNullOrEmpty()) {
@@ -166,5 +234,21 @@ open class JbrResolver @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun getBuiltinJbrVersion(ideDirectory: File): String? {
+        val dependenciesFile = File(ideDirectory, "dependencies.txt")
+        if (dependenciesFile.exists()) {
+            val properties = Properties()
+            val reader = FileReader(dependenciesFile)
+            try {
+                properties.load(reader)
+                return properties.getProperty("jdkBuild")
+            } catch (ignore: IOException) {
+            } finally {
+                reader.close()
+            }
+        }
+        return null
     }
 }

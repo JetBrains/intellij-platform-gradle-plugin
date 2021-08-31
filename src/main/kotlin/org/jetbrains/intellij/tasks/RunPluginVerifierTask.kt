@@ -17,8 +17,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
-import org.gradle.internal.jvm.Jvm
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
@@ -27,9 +25,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
-import org.jetbrains.intellij.getBuiltinJbrVersion
 import org.jetbrains.intellij.ifFalse
-import org.jetbrains.intellij.ifNull
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.logCategory
@@ -37,7 +33,6 @@ import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.warn
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -389,49 +384,15 @@ open class RunPluginVerifierTask @Inject constructor(
             context,
         )
 
-        val jbrPath = when (OperatingSystem.current().isMacOsX) {
-            true -> "jbr/Contents/Home"
-            false -> "jbr"
-        }
-
-        return listOf(
-            {
-                runtimeDir.orNull
-                    ?.let { File(it).resolve(jbrPath).resolve("bin/java").canonicalPath }
-                    ?.also { debug(context, "Runtime specified with properties: $it") }
-            },
-            {
-                jbrVersion.orNull?.let { version ->
-                    jbrResolver.resolve(version)?.javaExecutable
-                        ?.also { debug(context, "Runtime specified with JetBrains Runtime Version property: $version") }
-                        .ifNull {
-                            warn(context,
-                                "Cannot resolve JetBrains Runtime '$version'. Falling back to built-in JetBrains Runtime.")
-                        }
-                }
-            },
-            {
-                getBuiltinJbrVersion(ideDir.get().asFile)?.let { builtinJbrVersion ->
-                    jbrResolver.resolve(builtinJbrVersion)?.javaExecutable
-                        ?.also { debug(context, "Using built-in JetBrains Runtime: $it") }
-                        .ifNull {
-                            warn(context,
-                                "Cannot resolve builtin JetBrains Runtime '$builtinJbrVersion'. Falling back to local Java Runtime.")
-                        }
-                }
-            },
-            {
-                Jvm.current().javaExecutable.canonicalPath
-                    .also { debug(context, "Using current JVM: $it") }
-            },
-        )
-            .asSequence()
-            .mapNotNull { it()?.takeIf(::validateRuntimeDir) }
-            .firstOrNull()
-            ?: throw InvalidUserDataException(when {
-                requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
-                else -> "Java Runtime directory couldn't be resolved"
-            })
+        return jbrResolver.resolveRuntimeDir(
+            runtimeDir = runtimeDir.orNull,
+            jbrVersion = jbrVersion.orNull,
+            ideDir = ideDir.asFile.orNull,
+            validate = ::validateRuntimeDir,
+        ) ?: throw InvalidUserDataException(when {
+            requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
+            else -> "Java Runtime directory couldn't be resolved"
+        })
     }
 
     /**
@@ -455,8 +416,7 @@ open class RunPluginVerifierTask @Inject constructor(
         val result = version >= Version(11)
 
         result.ifFalse {
-            debug(context,
-                "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executable")
+            debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executable")
         }
     }
 

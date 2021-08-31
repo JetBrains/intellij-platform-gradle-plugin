@@ -4,10 +4,23 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.*
+import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.getIdeJvmArgs
+import org.jetbrains.intellij.getIdeaSystemProperties
+import org.jetbrains.intellij.ideBuildNumber
+import org.jetbrains.intellij.info
+import org.jetbrains.intellij.logCategory
 import java.io.File
 import java.nio.file.Files
 import kotlin.streams.asSequence
@@ -64,7 +77,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
     }
 
-    @Override
+    @TaskAction
     override fun exec() {
         workingDir = projectWorkingDir.get()
         configureSystemProperties()

@@ -660,15 +660,10 @@ open class IntelliJPlugin : Plugin<Project> {
                 taskContext,
             )
 
-            task.jbrVersion.orNull?.let {
-                jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
-                    warn(this, "Cannot resolve JetBrains Runtime '$it'. Falling back to builtin JetBrains Runtime.")
-                }
-            } ?: getBuiltinJbrVersion(task.ideDir.get().asFile)?.let {
-                jbrResolver.resolve(it)?.javaExecutable ?: null.apply {
-                    warn(this, "Cannot resolve builtin JetBrains Runtime '$it'. Falling local Java Runtime.")
-                }
-            } ?: Jvm.current().javaExecutable.absolutePath
+            jbrResolver.resolveRuntimeDir(
+                jbrVersion = task.jbrVersion.orNull,
+                ideDir = task.ideDir.asFile.orNull,
+            )
         })
     }
 
