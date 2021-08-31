@@ -952,6 +952,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val buildPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
         val verifyPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
         val signPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+        val isOffline = project.gradle.startParameter.isOffline
 
         project.tasks.register(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishPluginTask::class.java) {
             it.group = IntelliJPluginConstants.GROUP_NAME
@@ -969,7 +970,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.dependsOn(buildPluginTaskProvider)
             it.dependsOn(verifyPluginTaskProvider)
             it.dependsOn(signPluginTaskProvider)
-            it.onlyIf { project.gradle.startParameter.isOffline }
+            it.onlyIf { !isOffline }
         }
     }
 
