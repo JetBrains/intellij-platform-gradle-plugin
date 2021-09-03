@@ -1,6 +1,6 @@
 # Changelog
 
-## next
+## 1.1.5
 
 - Use target Kotlin API Version 1.3 [#750](../../issues/750)
 - Migrate `SignPluginTask` to use the Marketplace ZIP Signer CLI
