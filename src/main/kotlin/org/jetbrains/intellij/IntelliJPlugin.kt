@@ -529,8 +529,8 @@ open class IntelliJPlugin : Plugin<Project> {
                             warn(context, "Cannot download '$type-$version' from '$buildType' channel: $url", e)
                         }
 
-                        debug(context, "IDE extracted to: $downloadDir")
-                        downloadDir
+                        debug(context, "IDE extracted to: $ideDir")
+                        ideDir
                     }
 
                 }.let { files -> project.files(files) }

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.6
+
+- Fixed returned list of paths to IDEs downloaded for Plugin Verifier [#779](../../issues/779)
+
 ## 1.1.5
 
 - Use target Kotlin API Version 1.3 [#750](../../issues/750)
