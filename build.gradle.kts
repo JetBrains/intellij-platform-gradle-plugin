@@ -51,7 +51,10 @@ version = when (properties("snapshot")?.toBoolean() ?: false) {
 group = "org.jetbrains.intellij.plugins"
 description = """
 > **Important:**
-> - This project requires **Gradle 6.6** or newer
+> - This project requires **Gradle 6.6** or newer, however it is recommended to **use the [latest Gradle available](https://gradle.org/releases/)**. Update it with:
+>   ```bash
+>   ./gradlew wrapper --gradle-version=VERSION
+>   ```
 > - Gradle JVM should be set to **Java 11** (see _Settings/Preferences | Build, Execution, Deployment | Build Tools | Gradle_)
 
 When upgrading to 1.x version, please make sure to follow migration guide to adjust your existing build script: https://lp.jetbrains.com/gradle-intellij-plugin
