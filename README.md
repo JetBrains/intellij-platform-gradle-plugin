@@ -214,7 +214,9 @@ As soon as `privateKey` (or `privateKeyFile`) and `certificateChain` (or `certif
 Plugin Verifier requires a list of the IDEs that will be used for verifying your plugin build against.
 The availability of the releases may change in time, i.e. due to security issues in one version – which will be later removed and replaced with an updated IDE release.
 
-With the `listProductsReleases` task, it is possible to list the currently available IDEs matching given conditions, like platform types, since/until release versions, and pass them directly to the `runPluginVerifier` task.
+With the `listProductsReleases` task, it is possible to list the currently available IDEs matching given conditions, like platform types, since/until release versions.
+
+If `runPluginVerifier` task has no `ideVersions` property specified, the output of the `listProductsReleases` is used.
 
 | **Attributes**                                                                                               | **Default Value**  |
 | :----------------------------------------------------------------------------------------------------------- | :----------------- |
@@ -224,13 +226,6 @@ With the `listProductsReleases` task, it is possible to list the currently avail
 | <kbd>untilVersion</kbd> Upper boundary of the listed results.                                                | none               |
 | <kbd>includeEAP</kbd> Defines if EAP releases should be included in results list.                            | `true`             |
 
-Example:
-
-```groovy
-runPluginVerifier {
-
-}
-```
 
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
