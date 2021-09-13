@@ -34,6 +34,7 @@ import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.DownloadRobotServerPluginTask
 import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
 import org.jetbrains.intellij.tasks.JarSearchableOptionsTask
+import org.jetbrains.intellij.tasks.ListProductsReleasesTask
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.tasks.PublishPluginTask
@@ -136,6 +137,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configurePatchPluginXmlTask(project, extension)
         configureRobotServerDownloadTask(project)
         configurePrepareSandboxTasks(project, extension)
+        configureListProductsReleasesTask(project, extension)
         configureRunPluginVerifierTask(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
@@ -469,6 +471,8 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring run plugin verifier task")
         project.tasks.register(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask::class.java) {
             val taskContext = it.logCategory()
+            val listProductsReleasesTaskProvider = project.tasks.named(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+            val listProductsReleasesTask = listProductsReleasesTaskProvider.get() as ListProductsReleasesTask
 
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
@@ -490,6 +494,9 @@ open class IntelliJPlugin : Plugin<Project> {
                 val runIdeTaskProvider = project.tasks.named(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
                 val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
                 runIdeTask.ideDir.get()
+            })
+            it.ideVersions.convention(project.provider {
+                listProductsReleasesTask.outputFile.get().asFile.takeIf(File::exists)?.readLines()
             })
             it.ides.convention(project.provider {
                 it.ideVersions.get().map { ideVersion ->
@@ -556,6 +563,10 @@ open class IntelliJPlugin : Plugin<Project> {
 
             it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
+            it.dependsOn(listProductsReleasesTask)
+            val ideVersionsPresent = it.ideVersions.isPresent
+            listProductsReleasesTask.onlyIf { !ideVersionsPresent }
 
             it.outputs.upToDateWhen { false }
         }
@@ -953,7 +964,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Publish plugin distribution on plugins.jetbrains.com."
 
-            it.host.convention("https://plugins.jetbrains.com")
+            it.host.convention(IntelliJPluginConstants.MARKETPLACE_HOST)
             it.channels.convention(listOf("default"))
             it.distributionFile.convention(project.layout.file(project.provider {
                 signPluginTaskProvider.get().let { signPluginTask ->
@@ -966,6 +977,36 @@ open class IntelliJPlugin : Plugin<Project> {
             it.dependsOn(verifyPluginTaskProvider)
             it.dependsOn(signPluginTaskProvider)
             it.onlyIf { !isOffline }
+        }
+    }
+
+    private fun configureListProductsReleasesTask(project: Project, extension: IntelliJPluginExtension) {
+        info(context, "Configuring list products task")
+
+        project.tasks.register(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, ListProductsReleasesTask::class.java) {
+            it.group = IntelliJPluginConstants.GROUP_NAME
+            it.description = "List all available IntelliJ-based IDEs with their updates."
+
+            it.updatesPath.convention(project.provider {
+                dependenciesDownloader.downloadFromRepository(it.logCategory(), {
+                    create(
+                        group = "org.jetbrains",
+                        name = "products-releases",
+                        version = "1.0",
+                        extension = "xml",
+                    )
+                }, {
+                    ivyRepository(IntelliJPluginConstants.PRODUCTS_RELEASES_URL)
+                }).first().canonicalPath
+            })
+            it.outputFile.convention {
+                File(project.buildDir, "${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}.txt")
+            }
+            it.types.convention(project.provider {
+                listOf(extension.type.get())
+            })
+            it.sinceVersion.convention(extension.version)
+            it.includeEAP.convention(true)
         }
     }
 

@@ -27,7 +27,6 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         pluginsNightlyCacheDir.delete()
     }
 
-
     @Test
     fun `download plugin through maven block`() {
         buildFile.groovy("""

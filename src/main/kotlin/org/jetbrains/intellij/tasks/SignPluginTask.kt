@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
@@ -218,8 +219,8 @@ open class SignPluginTask @Inject constructor(
                     it.classpath = objectFactory.fileCollection().from(cliPath)
                     it.mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
                     it.args = cliArgs
-                    it.standardOutput = os
-                    it.errorOutput = os
+                    it.standardOutput = TeeOutputStream(System.out, os)
+                    it.errorOutput = TeeOutputStream(System.err, os)
                 }
             } catch (e: ExecException) {
                 error(context, "Error during Marketplace ZIP Signer CLI execution:\n$os")

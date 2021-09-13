@@ -18,3 +18,4 @@ Plugin introduces the following tasks
 | `runPluginVerifier`      | Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IntelliJ IDE builds. |
 | `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |
 | `signPlugin`             | Signs the ZIP archive with the provided key using [marketplace-zip-signer](https://github.com/JetBrains/marketplace-zip-signer) library. |
+| `listProductsReleases`   | Lists the available IDE binary releases that could be used with the Plugin Verifier. |

@@ -90,6 +90,7 @@ Plugin introduces the following tasks
 | `runPluginVerifier`      | Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IntelliJ IDE builds. |
 | `verifyPlugin`           | Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure. |
 | `signPlugin`             | Signs the ZIP archive with the provided key using [marketplace-zip-signer](https://github.com/JetBrains/marketplace-zip-signer) library. |
+| `listProductsReleases`   | Lists the available IDE binary releases that could be used with the Plugin Verifier. |
 
 ## Configuration
 
@@ -208,6 +209,28 @@ As soon as `privateKey` (or `privateKeyFile`) and `certificateChain` (or `certif
 | <kbd>keyStoreKeyAlias</kbd> KeyStore key alias.                                                        | none               |
 | <kbd>keyStoreType</kbd> KeyStore type.                                                                 | none               |
 | <kbd>keyStoreProviderName</kbd> JCA KeyStore Provider name.                                            | none               |
+
+### List Products Releases
+Plugin Verifier requires a list of the IDEs that will be used for verifying your plugin build against.
+The availability of the releases may change in time, i.e. due to security issues in one version – which will be later removed and replaced with an updated IDE release.
+
+With the `listProductsReleases` task, it is possible to list the currently available IDEs matching given conditions, like platform types, since/until release versions, and pass them directly to the `runPluginVerifier` task.
+
+| **Attributes**                                                                                               | **Default Value**  |
+| :----------------------------------------------------------------------------------------------------------- | :----------------- |
+| <kbd>updatesFile</kbd> Path to the products releases update file. By default, falls back to the Maven cache. | Maven cache        |
+| <kbd>types</kbd> List of types of IDEs that will be listed in results. Uses `intellij.type` by default.      | `[intellij.type]`  |
+| <kbd>sinceVersion</kbd> Lower boundary of the listed results. Uses `intellij.version` by default.            | `intellij.version` |
+| <kbd>untilVersion</kbd> Upper boundary of the listed results.                                                | none               |
+| <kbd>includeEAP</kbd> Defines if EAP releases should be included in results list.                            | `true`             |
+
+Example:
+
+```groovy
+runPluginVerifier {
+
+}
+```
 
 ### Publishing DSL
 The following attributes are a part of the Publishing DSL <kbd>publishPlugin { ... }</kbd> in which allows Gradle to upload a working plugin to the JetBrains Plugin Repository. Note that you need to upload the plugin to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
