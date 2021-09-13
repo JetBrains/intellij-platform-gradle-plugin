@@ -21,6 +21,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
                 IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
                 IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME,
+                IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME,
                 IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME,
                 IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME,
                 IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME,
@@ -120,7 +121,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add local plugin to compile only classpath`() {
-        val repositoryInstance = PluginRepositoryFactory.create("https://plugins.jetbrains.com", null)
+        val repositoryInstance = PluginRepositoryFactory.create(IntelliJPluginConstants.MARKETPLACE_HOST, null)
         val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
 
         buildFile.groovy("""

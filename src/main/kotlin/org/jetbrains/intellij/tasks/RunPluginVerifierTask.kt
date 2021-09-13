@@ -1,6 +1,7 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.commons.io.FileUtils
+import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.InvalidUserDataException
@@ -325,19 +326,16 @@ open class RunPluginVerifierTask @Inject constructor(
                     it.classpath = objectFactory.fileCollection().from(verifierPath)
                     it.mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
                     it.args = verifierArgs
-                    it.standardOutput = os
+                    it.standardOutput = TeeOutputStream(System.out, os)
                 }
             } catch (e: ExecException) {
                 error(context, "Error during Plugin Verifier CLI execution:\n$os")
                 throw e
             }
 
-            val output = os.toString()
-            println(output) // Print output back to stdout since it's been caught for the failure level checker.
-
             debug(context, "Current failure levels: ${FailureLevel.values().joinToString(", ")}")
             FailureLevel.values().forEach { level ->
-                if (failureLevel.get().contains(level) && output.contains(level.testValue)) {
+                if (failureLevel.get().contains(level) && os.toString().contains(level.testValue)) {
                     debug(context, "Failing task on '$failureLevel' failure level")
                     throw GradleException(level.toString())
                 }

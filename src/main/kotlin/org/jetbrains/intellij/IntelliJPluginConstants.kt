@@ -20,6 +20,7 @@ object IntelliJPluginConstants {
     const val BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
+    const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
 
     const val IDEA_CONFIGURATION_NAME = "idea"
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
@@ -28,6 +29,8 @@ object IntelliJPluginConstants {
     const val ANNOTATIONS_DEPENDENCY_VERSION = "22.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
+    const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
+    const val PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
     const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
     const val INTELLIJ_DEPENDENCIES = "$CACHE_REDIRECTOR/intellij-dependencies"
     const val DEFAULT_INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository"
