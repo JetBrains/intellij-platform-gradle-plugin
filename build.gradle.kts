@@ -91,7 +91,7 @@ val cacheIntolerantTest = tasks.register<Test>("cacheIntolerantTest") {
 tasks {
     withType<KotlinCompile> {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "11"
             apiVersion = "1.3"
         }
     }
