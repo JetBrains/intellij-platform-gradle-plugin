@@ -181,10 +181,19 @@ open class RunPluginVerifierTask @Inject constructor(
     val failureLevel: ListProperty<FailureLevel> = objectFactory.listProperty(FailureLevel::class.java)
 
     /**
+     * A fallback file with a list of the releases generated with {@link ListProductsReleasesTask}.
+     * Used if {@link #ideVersions} is not provided.
+     */
+    @Input
+    @Optional
+    val productsReleasesFile: Property<File> = objectFactory.property(File::class.java)
+
+    /**
      * List of the specified IDE versions used for the verification.
      * By default, it uses the plugin target IDE version.
      */
     @Input
+    @Optional
     val ideVersions: ListProperty<String> = objectFactory.listProperty(String::class.java)
 
     /**
