@@ -3,6 +3,7 @@
 ## next
 
 - Increase the default `runPluginVerifier.failureLevel` to `COMPATIBILITY_PROBLEMS`
+- Introduce `listProductsReleases` task for listing the IDE releases matching given criterias
 
 ## 1.1.6
 
