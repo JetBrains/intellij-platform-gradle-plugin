@@ -98,16 +98,23 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `fail on missing ideVersions property`() {
+    fun `use ListProductsReleasesTask output on missing ideVersions property`() {
         writeJavaFile()
         writePluginXmlFile()
+
+        val resource = javaClass.classLoader.getResource("products-releases/products-releases.xml")?.path
         buildFile.groovy("""
             version = "1.0.0"
+
+            listProductsReleases {
+                updatesPath = '${resource}'
+            }
         """)
 
-        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("'ideVersions' and 'localPaths' properties should not be empty"))
+        assertTrue(result.output.contains("> Task :listProductsReleases"))
+        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier"))
     }
 
     @Test

@@ -495,11 +495,15 @@ open class IntelliJPlugin : Plugin<Project> {
                 val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
                 runIdeTask.ideDir.get()
             })
-            it.ideVersions.convention(project.provider {
-                listProductsReleasesTask.outputFile.get().asFile.takeIf(File::exists)?.readLines()
+            it.productsReleasesFile.convention(project.provider {
+                listProductsReleasesTask.outputFile.get().asFile
             })
             it.ides.convention(project.provider {
-                it.ideVersions.get().map { ideVersion ->
+                val ideVersions = it.ideVersions.get().takeIf(List<String>::isNotEmpty)
+                    ?: it.productsReleasesFile.get().takeIf(File::exists)?.readLines()
+                    ?: emptyList()
+
+                ideVersions.map { ideVersion ->
                     val downloadDir = File(it.downloadDir.get())
 
                     RunPluginVerifierTask.resolveIdePath(ideVersion, downloadDir, taskContext) { type, version, buildType ->
@@ -563,10 +567,10 @@ open class IntelliJPlugin : Plugin<Project> {
 
             it.dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+            it.dependsOn(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
-            it.dependsOn(listProductsReleasesTask)
-            val ideVersionsPresent = it.ideVersions.isPresent
-            listProductsReleasesTask.onlyIf { !ideVersionsPresent }
+            val ideVersionsEmpty = project.provider { it.ideVersions.get().isEmpty() }
+            listProductsReleasesTask.onlyIf { ideVersionsEmpty.get() }
 
             it.outputs.upToDateWhen { false }
         }

@@ -1,4 +1,5 @@
 @file:JvmName("Utils")
+@file:Suppress("DEPRECATION")
 
 package org.jetbrains.intellij
 
