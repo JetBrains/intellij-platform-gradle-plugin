@@ -473,7 +473,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
 
-            it.failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.INVALID_PLUGIN))
+            it.failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
             it.verifierVersion.convention(VERSION_LATEST)
             it.distributionFile.convention(project.layout.file(project.provider {
                 resolveBuildTaskOutput(project)

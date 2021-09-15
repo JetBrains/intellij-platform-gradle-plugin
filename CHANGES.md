@@ -1,5 +1,9 @@
 # Changelog
 
+## next
+
+- Increase the default `runPluginVerifier.failureLevel` to `COMPATIBILITY_PROBLEMS`
+
 ## 1.1.6
 
 - Fixed returned list of paths to IDEs downloaded for Plugin Verifier [#779](../../issues/779)
