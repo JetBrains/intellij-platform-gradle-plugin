@@ -110,7 +110,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     private fun BuildResult.taskOutput() = output.lines().run {
         val from = indexOf("> Task :${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}") + 1
-        val to = drop(from).indexOf("") + 1
+        val to = indexOfFirst { it.startsWith("BUILD SUCCESSFUL") }
         subList(from, to)
     }
 }
