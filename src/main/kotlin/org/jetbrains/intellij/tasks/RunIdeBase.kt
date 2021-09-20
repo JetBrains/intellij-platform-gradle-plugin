@@ -4,24 +4,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.getIdeJvmArgs
-import org.jetbrains.intellij.getIdeaSystemProperties
-import org.jetbrains.intellij.ideBuildNumber
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.*
 import java.io.File
+import java.io.FileNotFoundException
 import java.nio.file.Files
 import kotlin.streams.asSequence
 
@@ -138,14 +126,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
-            info(context, "Looking for platform prefix")
-            val prefix = Files.list(ideDir.get().asFile.toPath().resolve("bin"))
-                    .asSequence()
-                    .filter { file -> file.fileName.toString().endsWith(".sh") }
-                    .flatMap { file -> Files.lines(file).asSequence() }
-                    .mapNotNull { line -> platformPrefixSystemPropertyRegex.find(line)?.groupValues?.getOrNull(1) }
-                    .firstOrNull()
-            
+            val prefix = findIdePrefix()
             if (prefix == null && !ideBuildNumber(ideDir.get().asFile).startsWith("IU-")) {
                 throw TaskExecutionException(this, GradleException("Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
                         "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."))
@@ -155,6 +136,39 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 systemProperty("idea.platform.prefix", prefix)
             }
             info(context, "Using idea.platform.prefix=$prefix")
+        }
+    }
+
+    private fun findIdePrefix(): String? {
+        info(context, "Looking for platform prefix")
+        val prefix = Files.list(ideDir.get().asFile.toPath().resolve("bin"))
+            .asSequence()
+            .filter { file -> file.fileName.toString().endsWith(".sh") || file.fileName.toString().endsWith(".bat")}
+            .flatMap { file -> Files.lines(file).asSequence() }
+            .mapNotNull { line -> platformPrefixSystemPropertyRegex.find(line)?.groupValues?.getOrNull(1) }
+            .firstOrNull()
+
+        return when {
+            prefix != null -> {
+                prefix
+            }
+            OperatingSystem.current().isMacOsX -> {
+                val infoPlist = ideDir.get().asFile.toPath().resolve("Info.plist")
+                try {
+                    Files.lines(infoPlist).asSequence().windowed(2)
+                        .filter { it.first().trim() == "<key>idea.platform.prefix</key>" }
+                        .map { it.last().trim().removeSurrounding("<string>", "</string>") }
+                        .firstOrNull()
+                } catch (e: FileNotFoundException) {
+                    null
+                } catch (t: Throwable) {
+                    error(context, "Cannot find prefix in $infoPlist", t)
+                    null
+                }
+            }
+            else -> {
+                null
+            }
         }
     }
 
