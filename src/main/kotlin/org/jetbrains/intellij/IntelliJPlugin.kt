@@ -747,7 +747,9 @@ open class IntelliJPlugin : Plugin<Project> {
                     })
                     it.compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = it.compilerVersion.get()
-                        if (Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
+                        if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION ||
+                            Version.parse(compilerVersion) >= Version(183, 3795, 13)
+                        ) {
                             dependenciesDownloader.downloadFromMultipleRepositories(
                                 it.logCategory(),
                                 {
@@ -768,7 +770,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             warn(
                                 it.logCategory(),
                                 "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. " +
-                                    "Use higher 'intellij.version' or specify the 'javac2' property manually.",
+                                    "Use higher 'intellij.version' or specify the 'compilerVersion' property manually.",
                             )
                             null
                         }
