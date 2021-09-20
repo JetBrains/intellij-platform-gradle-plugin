@@ -53,7 +53,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     fun `get IDEs list for the custom platformType and platformVersion defined in intellij`() {
         buildFile.groovy("""
             intellij {
-                type = "PS"
+                type = "PY"
                 version = "2021.1"
             }
         """)
@@ -61,7 +61,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("PS-2021.2.2", "PS-2021.1.4"),
+            listOf("PY-2021.2.2", "PY-2021.1.3"),
             result.taskOutput()
         )
     }
