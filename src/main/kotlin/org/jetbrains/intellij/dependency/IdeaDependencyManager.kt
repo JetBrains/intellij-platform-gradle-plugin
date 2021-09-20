@@ -229,31 +229,37 @@ open class IdeaDependencyManager @Inject constructor(
         debug(context, "Adding IDE repository: $repositoryUrl/$releaseType")
 
         debug(context, "Adding IDE dependency")
-        var dependencyGroup = "com.jetbrains.intellij.idea"
-        var dependencyName = "ideaIC"
         var hasSources = sources
-        if (type == "IU") {
-            dependencyName = "ideaIU"
-        } else if (type == "CL") {
-            dependencyGroup = "com.jetbrains.intellij.clion"
-            dependencyName = "clion"
-        } else if (isPyCharmType(type)) {
-            dependencyGroup = "com.jetbrains.intellij.pycharm"
-            dependencyName = "pycharm$type"
-        } else if (type == "GO") {
-            dependencyGroup = "com.jetbrains.intellij.goland"
-            dependencyName = "goland"
-        } else if (type == "RD") {
-            dependencyGroup = "com.jetbrains.intellij.rider"
-            dependencyName = "riderRD"
-            if (sources && releaseType == "snapshots") {
-                warn(context, "IDE sources are not available for Rider SNAPSHOTS")
-                hasSources = false
+        val (dependencyGroup, dependencyName) = when {
+            type == "IU" -> {
+                "com.jetbrains.intellij.idea" to "ideaIU"
             }
-        } else if (type == "GW") {
-            dependencyGroup = "com.jetbrains.gateway"
-            dependencyName = "JetBrainsGateway"
-            hasSources = false
+            type == "IC" -> {
+                "com.jetbrains.intellij.idea" to "ideaIC"
+            }
+            type == "CL" -> {
+                "com.jetbrains.intellij.clion" to "clion"
+            }
+            isPyCharmType(type) -> {
+                "com.jetbrains.intellij.pycharm" to "pycharm$type"
+            }
+            type == "GO" -> {
+                "com.jetbrains.intellij.goland" to "goland"
+            }
+            type == "RD" -> {
+                if (sources && releaseType == "snapshots") {
+                    warn(context, "IDE sources are not available for Rider SNAPSHOTS")
+                    hasSources = false
+                }
+                "com.jetbrains.intellij.rider" to "riderRD"
+            }
+            type == "GW" -> {
+                hasSources = false
+                "com.jetbrains.gateway" to "JetBrainsGateway"
+            }
+            else -> {
+                throw BuildException("Specified type '$type' is unknown. Supported values: IC, IU, CL, PY, PC, GO, RD, GW", null)
+            }
         }
 
         val classesDirectory = dependenciesDownloader.downloadFromRepository(context, {
