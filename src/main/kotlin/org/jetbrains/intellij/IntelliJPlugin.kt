@@ -178,36 +178,39 @@ open class IntelliJPlugin : Plugin<Project> {
                 dependenciesDownloader,
                 context,
             )
-            val ideaDependency = when (val localPath = extension.localPath.orNull) {
-                null -> {
-                    info(context, "Using IDE from remote repository")
-                    val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-                    val extraDependencies = extension.extraDependencies.get()
-                    dependencyManager.resolveRemote(project,
-                        version,
-                        extension.getVersionType(),
-                        extension.downloadSources.get(),
-                        extraDependencies)
-                }
-                else -> {
-                    if (extension.version.orNull != null) {
-                        warn(context, "Both 'localPath' and 'version' specified, second would be ignored")
+            extension.ideaDependency.convention(project.provider {
+                val ideaDependency = when (val localPath = extension.localPath.orNull) {
+                    null -> {
+                        info(context, "Using IDE from remote repository")
+                        val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
+                        val extraDependencies = extension.extraDependencies.get()
+                        dependencyManager.resolveRemote(project,
+                            version,
+                            extension.getVersionType(),
+                            extension.downloadSources.get(),
+                            extraDependencies)
                     }
-                    info(context, "Using path to locally installed IDE: $localPath")
-                    dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
+                    else -> {
+                        if (extension.version.orNull != null) {
+                            warn(context, "Both 'localPath' and 'version' specified, second would be ignored")
+                        }
+                        info(context, "Using path to locally installed IDE: $localPath")
+                        dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
+                    }
                 }
-            }
-            extension.ideaDependency.set(ideaDependency)
-            if (extension.configureDefaultDependencies.get()) {
-                info(context, "${ideaDependency.buildNumber} is used for building")
-                dependencyManager.register(project, ideaDependency, dependencies)
-                if (!ideaDependency.extraDependencies.isEmpty()) {
-                    info(context,
-                        "Note: ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+                if (extension.configureDefaultDependencies.get()) {
+                    info(context, "${ideaDependency.buildNumber} is used for building")
+                    dependencyManager.register(project, ideaDependency, dependencies)
+                    if (!ideaDependency.extraDependencies.isEmpty()) {
+                        info(context,
+                            "Note: ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+                    }
+                } else {
+                    info(context, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
                 }
-            } else {
-                info(context, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
-            }
+
+                ideaDependency
+            })
         }
         Jvm.current().toolsJar?.let { toolsJar ->
             project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
@@ -217,11 +220,12 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configurePluginDependencies(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring plugin dependencies")
-            val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
+            val ideaDependency = extension.getIdeaDependency(project)
+            val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
             val resolver = project.objects.newInstance(
                 PluginDependencyManager::class.java,
                 project.gradle.gradleUserHomeDir.absolutePath,
-                extension.getIdeaDependency(project),
+                ideaDependency,
                 extension.getPluginsRepositories(),
                 archiveUtils,
                 context,
@@ -848,11 +852,17 @@ open class IntelliJPlugin : Plugin<Project> {
                 .withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class.java)
 
-            val ideaDependency = extension.getIdeaDependency(project)
-            val ideaDependencyLibraries = project.files(
-                "${ideaDependency.classes}/lib/resources.jar",
-                "${ideaDependency.classes}/lib/idea.jar"
-            )
+            val ideaDependency = project.provider {
+                extension.getIdeaDependency(project)
+            }
+            val ideaDependencyLibraries =
+                project.provider {
+                    val classes = ideaDependency.get().classes
+                    project.files(
+                        "$classes/lib/resources.jar",
+                        "$classes/lib/idea.jar"
+                    )
+                }
             val ideDirectory = project.provider { runIdeTask.ideDir.get().asFile }
 
             // Use an anonymous class, since lambdas disable caching for the task.
@@ -860,14 +870,14 @@ open class IntelliJPlugin : Plugin<Project> {
             task.doFirst(object : Action<Task> {
                 override fun execute(t: Task) {
                     task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs ?: emptyList(), ideDirectory.get())
-                    task.classpath += ideaDependencyLibraries
+                    task.classpath += ideaDependencyLibraries.get()
 
                     task.systemProperties(getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
 
                     // since 193 plugins from classpath are loaded before plugins from plugins directory
                     // to handle this, use plugin.path property as task's the very first source of plugins
                     // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
-                    val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
+                    val ideVersion = IdeVersion.createIdeVersion(ideaDependency.get().buildNumber)
                     if (ideVersion.baselineVersion >= 193) {
                         task.systemProperty(
                             IntelliJPluginConstants.PLUGIN_PATH,

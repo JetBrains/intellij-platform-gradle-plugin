@@ -149,7 +149,6 @@ open class PluginDependencyManager @Inject constructor(
             }
             writeTo(ivyFile)
         }
-
     }
 
     private fun externalPluginDependency(artifact: File, channel: String? = null, maven: Boolean = false): PluginDependency? {
