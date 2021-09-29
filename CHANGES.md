@@ -5,6 +5,8 @@
 - Increase the default `runPluginVerifier.failureLevel` to `COMPATIBILITY_PROBLEMS`
 - Introduce `listProductsReleases` task for listing the IDE releases matching given criteria
 - Fixed resolving compiler classpath for the `instrumentCode` task when using `LATEST-EAP-SNAPSHOT` [#752](../../issues/752)
+- Avoid downloading IDEA dependency in configuration phase
+- Fixed resolving `idea.platform.prefix` [#772](../../issues/772)
 
 ## 1.1.6
 
