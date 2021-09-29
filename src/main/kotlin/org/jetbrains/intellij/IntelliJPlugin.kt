@@ -631,7 +631,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
             it.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             it.onlyIf { _ ->
-                val number = ideBuildNumber(it.ideDir.get().asFile)
+                val number = ideBuildNumber(it.ideDir.get())
                 Version.parse(number.split('-').last()) >= Version.parse("191.2752")
             }
         }
@@ -650,7 +650,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         task.ideDir.convention(project.provider {
             val path = extension.getIdeaDependency(project).classes.path
-            project.layout.projectDirectory.dir(path)
+            project.file(path)
         })
         task.requiredPluginIds.convention(project.provider {
             pluginIds
@@ -666,11 +666,11 @@ open class IntelliJPlugin : Plugin<Project> {
             project.file("${extension.sandboxDir.get()}/system")
         })
         task.autoReloadPlugins.convention(project.provider {
-            val number = ideBuildNumber(task.ideDir.get().asFile)
+            val number = ideBuildNumber(task.ideDir.get())
             Version.parse(number.split('-').last()) >= Version.parse("202.0")
         })
         task.projectWorkingDir.convention(project.provider {
-            project.file("${task.ideDir.get().asFile}/bin/")
+            project.file("${task.ideDir.get()}/bin/")
         })
         task.projectExecutable.convention(project.provider {
             val jbrResolver = project.objects.newInstance(
@@ -684,7 +684,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
             jbrResolver.resolveRuntimeDir(
                 jbrVersion = task.jbrVersion.orNull,
-                ideDir = task.ideDir.asFile.orNull,
+                ideDir = task.ideDir.orNull,
             )
         })
     }
@@ -870,7 +870,9 @@ open class IntelliJPlugin : Plugin<Project> {
                         "$classes/lib/idea.jar"
                     )
                 }
-            val ideDirectory = project.provider { runIdeTask.ideDir.get().asFile }
+            val ideDirectory = project.provider {
+                runIdeTask.ideDir.get()
+            }
 
             // Use an anonymous class, since lambdas disable caching for the task.
             @Suppress("ObjectLiteralToLambda")

@@ -4,10 +4,24 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.*
+import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.error
+import org.jetbrains.intellij.getIdeJvmArgs
+import org.jetbrains.intellij.getIdeaSystemProperties
+import org.jetbrains.intellij.ideBuildNumber
+import org.jetbrains.intellij.info
+import org.jetbrains.intellij.logCategory
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
@@ -21,9 +35,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     
     private val context = logCategory()
 
-    @InputDirectory
-    @PathSensitive(PathSensitivity.NONE)
-    val ideDir: DirectoryProperty = objectFactory.directoryProperty()
+    @Input
+    val ideDir: Property<File> = objectFactory.property(File::class.java)
 
     @Input
     @Optional
@@ -76,7 +89,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     }
 
     private fun configureClasspath() {
-        val ideDirFile = ideDir.get().asFile
+        val ideDirFile = ideDir.get()
 
         executable.takeUnless { it.isNullOrEmpty() }?.let {
             resolveToolsJar(it).takeIf(File::exists) ?: Jvm.current().toolsJar
@@ -84,7 +97,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             classpath += objectFactory.fileCollection().from(it)
         }
 
-        val buildNumber = ideBuildNumber(ideDir.get().asFile).split('-').last()
+        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last()
         if (Version.parse(buildNumber) > Version.parse("203.0")) {
             classpath += objectFactory.fileCollection().from(
                     "$ideDirFile/lib/bootstrap.jar",
@@ -127,7 +140,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = findIdePrefix()
-            if (prefix == null && !ideBuildNumber(ideDir.get().asFile).startsWith("IU-")) {
+            if (prefix == null && !ideBuildNumber(ideDir.get()).startsWith("IU-")) {
                 throw TaskExecutionException(this, GradleException("Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
                         "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."))
             }
@@ -141,7 +154,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
     private fun findIdePrefix(): String? {
         info(context, "Looking for platform prefix")
-        val prefix = Files.list(ideDir.get().asFile.toPath().resolve("bin"))
+        val prefix = Files.list(ideDir.get().toPath().resolve("bin"))
             .asSequence()
             .filter { file -> file.fileName.toString().endsWith(".sh") || file.fileName.toString().endsWith(".bat")}
             .flatMap { file -> Files.lines(file).asSequence() }
@@ -153,7 +166,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 prefix
             }
             OperatingSystem.current().isMacOsX -> {
-                val infoPlist = ideDir.get().asFile.toPath().resolve("Info.plist")
+                val infoPlist = ideDir.get().toPath().resolve("Info.plist")
                 try {
                     Files.lines(infoPlist).asSequence().windowed(2)
                         .filter { it.first().trim() == "<key>idea.platform.prefix</key>" }
@@ -179,7 +192,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     }
 
     private fun configureJvmArgs() {
-        jvmArgs = getIdeJvmArgs(this, jvmArgs ?: emptyList(), ideDir.get().asFile)
+        jvmArgs = getIdeJvmArgs(this, jvmArgs ?: emptyList(), ideDir.get())
     }
 
     private fun resolveToolsJar(javaExec: String): File {

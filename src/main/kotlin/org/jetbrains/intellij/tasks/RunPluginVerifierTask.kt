@@ -5,7 +5,6 @@ import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.InvalidUserDataException
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
@@ -298,7 +297,7 @@ open class RunPluginVerifierTask @Inject constructor(
     val subsystemsToCheck: Property<String> = objectFactory.property(String::class.java)
 
     @Internal
-    val ideDir: DirectoryProperty = objectFactory.directoryProperty()
+    val ideDir: Property<File> = objectFactory.property(File::class.java)
 
     @Internal
     val offline: Property<Boolean> = objectFactory.property(Boolean::class.java)
@@ -394,7 +393,7 @@ open class RunPluginVerifierTask @Inject constructor(
         return jbrResolver.resolveRuntimeDir(
             runtimeDir = runtimeDir.orNull,
             jbrVersion = jbrVersion.orNull,
-            ideDir = ideDir.asFile.orNull,
+            ideDir = ideDir.orNull,
             validate = ::validateRuntimeDir,
         ) ?: throw InvalidUserDataException(when {
             requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
