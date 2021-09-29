@@ -413,7 +413,9 @@ open class IntelliJPlugin : Plugin<Project> {
             it.description = "Download robot-server plugin."
 
             it.version.convention(VERSION_LATEST)
-            it.outputDir.convention(project.layout.projectDirectory.dir("${project.buildDir}/robotServerPlugin"))
+            it.outputDir.convention(project.provider {
+                project.layout.projectDirectory.dir("${project.buildDir}/robotServerPlugin")
+            })
             it.pluginArchive.convention(project.provider {
                 val resolvedVersion = DownloadRobotServerPluginTask.resolveVersion(it.version.orNull)
                 val (group, name) = DownloadRobotServerPluginTask.getDependency(resolvedVersion).split(':')
@@ -623,8 +625,9 @@ open class IntelliJPlugin : Plugin<Project> {
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Builds searchable options for plugin."
 
-            it.args = listOf("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}", "true")
-            it.outputs.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+            it.outputDir.convention(project.provider {
+                project.layout.projectDirectory.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+            })
 
             it.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             it.onlyIf { _ ->
@@ -696,7 +699,9 @@ open class IntelliJPlugin : Plugin<Project> {
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Jars searchable options."
 
-            it.outputDir.convention(project.layout.projectDirectory.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}"))
+            it.outputDir.convention(project.provider {
+                project.layout.projectDirectory.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+            })
             it.pluginName.convention(prepareSandboxTask.pluginName)
             it.sandboxDir.convention(project.provider {
                 prepareSandboxTask.destinationDir.canonicalPath
@@ -780,9 +785,11 @@ open class IntelliJPlugin : Plugin<Project> {
                         }
                     })
 
-                    val classesDir = sourceSet.output.classesDirs.first()
-                    val outputDir = File(classesDir.parentFile, "${sourceSet.name}-instrumented")
-                    it.outputDir.convention(project.layout.projectDirectory.dir(outputDir.path))
+                    it.outputDir.convention(project.provider {
+                        val classesDir = sourceSet.output.classesDirs.first()
+                        val outputDir = File(classesDir.parentFile, "${sourceSet.name}-instrumented")
+                        project.layout.projectDirectory.dir(outputDir.path)
+                    })
 
                     it.dependsOn(sourceSet.classesTaskName)
                     it.onlyIf { instrumentCode.get() }

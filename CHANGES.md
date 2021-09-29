@@ -7,6 +7,7 @@
 - Fixed resolving compiler classpath for the `instrumentCode` task when using `LATEST-EAP-SNAPSHOT` [#752](../../issues/752)
 - Avoid downloading IDEA dependency in configuration phase
 - Fixed resolving `idea.platform.prefix` [#772](../../issues/772)
+- Fix for custom `buildDir` not used in some `instrumentCode` and `buildSearchableOptions` tasks [#793](../../issues/793)
 
 ## 1.1.6
 
