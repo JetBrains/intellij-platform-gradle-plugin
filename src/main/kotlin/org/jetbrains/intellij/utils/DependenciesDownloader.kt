@@ -5,6 +5,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
+import org.jetbrains.intellij.error
 import java.io.File
 import java.net.URI
 import javax.inject.Inject
@@ -34,7 +35,7 @@ open class DependenciesDownloader @Inject constructor(
         try {
             return configurationContainer.detachedConfiguration(dependency).files.toList()
         } catch (e: Exception) {
-            org.jetbrains.intellij.error(context, "Error when resolving dependency: $dependency", e)
+            error(context, "Error when resolving dependency: $dependency", e)
             throw e
         } finally {
             repositoryHandler.removeAll(repositories)
