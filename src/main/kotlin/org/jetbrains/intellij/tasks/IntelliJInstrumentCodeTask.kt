@@ -51,7 +51,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     @Optional
     val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
-    @InputFile
+    @Input
     @Optional
     val javac2: Property<File> = objectFactory.property(File::class.java)
 

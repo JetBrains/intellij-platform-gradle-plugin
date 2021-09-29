@@ -40,20 +40,27 @@ open class IdeaDependencyManager @Inject constructor(
     fun register(project: Project, dependency: IdeaDependency, dependencies: DependencySet) {
         val ivyFile = getOrCreateIvyXml(dependency)
         val ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
-        project.repositories.ivy {
-            it.url = dependency.classes.toURI()
-            it.ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
-            it.artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
-            if (dependency.sources != null) {
-                it.artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
+
+        if (!project.repositories.any { it.name == ivyFileSuffix }) {
+            project.repositories.ivy {
+                it.name = ivyFileSuffix
+                it.url = dependency.classes.toURI()
+                it.ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
+                it.artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
+                if (dependency.sources != null) {
+                    it.artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
+                }
             }
         }
-        dependencies.add(project.dependencies.create(
-            group = "com.jetbrains",
-            name = dependency.name,
-            version = dependency.version,
-            configuration = "compile",
-        ))
+
+        if (!dependencies.any { it.name == dependency.name && it.version == dependency.version }) {
+            dependencies.add(project.dependencies.create(
+                group = "com.jetbrains",
+                name = dependency.name,
+                version = dependency.version,
+                configuration = "compile",
+            ))
+        }
     }
 
     private fun createDependency(

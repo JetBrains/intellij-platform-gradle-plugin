@@ -21,10 +21,10 @@ class PluginProjectDependency(private val pluginDirectory: File, val context: St
                 val pluginId = intellijPlugin.pluginId ?: return@let null
                 val pluginVersion = intellijPlugin.pluginVersion ?: return@let null
 
-                val pluginDependency = PluginDependencyImpl(pluginId, pluginVersion, it, builtin = false, maven = false)
-                pluginDependency.sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
-                pluginDependency.untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
-                pluginDependency
+                PluginDependencyImpl(pluginId, pluginVersion, it, builtin = false, maven = false).apply {
+                    sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
+                    untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
+                }
             } else {
                 error(context, "Cannot use '$pluginDirectory' as a plugin dependency: $creationResult")
                 null
