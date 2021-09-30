@@ -222,7 +222,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configurePluginDependencies(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         configuration.withDependencies { dependencies ->
             info(context, "Configuring plugin dependencies")
-            val ideaDependency = extension.getIdeaDependency(project)
+            val ideaDependency = extension.ideaDependency.get()
             val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
             val resolver = project.objects.newInstance(
                 PluginDependencyManager::class.java,
@@ -273,7 +273,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun verifyJavaPluginDependency(extension: IntelliJPluginExtension, project: Project) {
         val plugins = extension.plugins.get()
         val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
-        if (!hasJavaPluginDependency && File(extension.getIdeaDependency(project).classes, "plugins/java").exists()) {
+        if (!hasJavaPluginDependency && File(extension.ideaDependency.get().classes, "plugins/java").exists()) {
             sourcePluginXmlFiles(project).forEach { file ->
                 parsePluginXml(file, context)?.dependencies?.forEach {
                     if (it.dependencyId == "com.intellij.modules.java") {
@@ -373,7 +373,7 @@ open class IntelliJPlugin : Plugin<Project> {
             }))
             it.sinceBuild.convention(project.provider {
                 if (extension.updateSinceUntilBuild.get()) {
-                    val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
+                    val ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.get().buildNumber)
                     "${ideVersion.baselineVersion}.${ideVersion.build}"
                 } else {
                     null
@@ -384,7 +384,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     if (extension.sameSinceUntilBuild.get()) {
                         "${it.sinceBuild.get()}.*"
                     } else {
-                        val ideVersion = IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber)
+                        val ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.get().buildNumber)
                         "${ideVersion.baselineVersion}.*"
                     }
                 } else {
@@ -462,7 +462,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 "${extension.sandboxDir.get()}/config$testSuffix"
             })
             it.librariesToIgnore.convention(project.provider {
-                project.files(extension.getIdeaDependency(project).jarFiles)
+                project.files(extension.ideaDependency.get().jarFiles)
             })
             it.pluginDependencies.convention(project.provider {
                 extension.getPluginDependenciesList(project)
@@ -651,7 +651,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
         task.ideDir.convention(project.provider {
-            val path = extension.getIdeaDependency(project).classes.path
+            val path = extension.ideaDependency.get().classes.path
             project.file(path)
         })
         task.requiredPluginIds.convention(project.provider {
@@ -747,14 +747,12 @@ open class IntelliJPlugin : Plugin<Project> {
                                 else -> version
                             }
                         } else {
-                            IdeVersion.createIdeVersion(extension.getIdeaDependency(project).buildNumber).asStringWithoutProductCode()
+                            IdeVersion.createIdeVersion(extension.ideaDependency.get().buildNumber).asStringWithoutProductCode()
                         }
                     })
-                    it.ideaDependency.convention(project.provider {
-                        extension.getIdeaDependency(project)
-                    })
+                    it.ideaDependency.convention(extension.ideaDependency)
                     it.javac2.convention(project.provider {
-                        project.file("${extension.getIdeaDependency(project).classes}/lib/javac2.jar").takeIf(File::exists)
+                        project.file("${extension.ideaDependency.get().classes}/lib/javac2.jar").takeIf(File::exists)
                     })
                     it.compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = it.compilerVersion.get()
@@ -861,12 +859,9 @@ open class IntelliJPlugin : Plugin<Project> {
                 .withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class.java)
 
-            val ideaDependency = project.provider {
-                extension.getIdeaDependency(project)
-            }
             val ideaDependencyLibraries =
                 project.provider {
-                    val classes = ideaDependency.get().classes
+                    val classes = extension.ideaDependency.get().classes
                     project.files(
                         "$classes/lib/resources.jar",
                         "$classes/lib/idea.jar"
@@ -888,7 +883,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     // since 193 plugins from classpath are loaded before plugins from plugins directory
                     // to handle this, use plugin.path property as task's the very first source of plugins
                     // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
-                    val ideVersion = IdeVersion.createIdeVersion(ideaDependency.get().buildNumber)
+                    val ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.get().buildNumber)
                     if (ideVersion.baselineVersion >= 193) {
                         task.systemProperty(
                             IntelliJPluginConstants.PLUGIN_PATH,

@@ -25,7 +25,7 @@ private fun Project.intellijBase(): FileTree {
         throw GradleException("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
     }
 
-    return files(extension.getIdeaDependency(this).jarFiles).asFileTree
+    return files(extension.ideaDependency.get().jarFiles).asFileTree
 }
 
 fun Project.intellijPlugin(plugin: String): FileCollection = intellijPluginBase(plugin)
@@ -84,11 +84,11 @@ private fun Project.intellijExtraBase(extra: String): FileTree {
         throw GradleException("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
     }
 
-    val dependency = extension.getIdeaDependency(this)
-    val extraDep = dependency.extraDependencies.find { it.name == extra }
-    if (extraDep?.jarFiles == null || extraDep.jarFiles.isEmpty()) {
+    val dependency = extension.ideaDependency.get()
+    val extraDependency = dependency.extraDependencies.find { it.name == extra }
+    if (extraDependency?.jarFiles == null || extraDependency.jarFiles.isEmpty()) {
         throw GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
     }
 
-    return files(extraDep.jarFiles).asFileTree
+    return files(extraDependency.jarFiles).asFileTree
 }

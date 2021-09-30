@@ -9,7 +9,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
-import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginsRepositoryConfiguration
@@ -206,15 +205,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
         return pluginDependencies.orNull?.toSet() ?: emptySet()
     }
 
-    fun getIdeaDependency(project: Project): IdeaDependency {
-        if (ideaDependency.orNull == null) {
-            debug(project.logCategory(), "IDE dependency is resolved", Throwable())
-            project.configurations.getByName(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).resolve()
-            if (ideaDependency.orNull == null) {
-                throw BuildException("Cannot resolve ideaDependency", null)
-            }
-        }
-        return ideaDependency.get()
-    }
+    @Deprecated("Use ideaDependency property directly", ReplaceWith("ideaDependency.get()"))
+    fun getIdeaDependency(@Suppress("UNUSED_PARAMETER") project: Project): IdeaDependency = ideaDependency.get()
 }
 
