@@ -1,5 +1,5 @@
 container:
-  image: gradle:jdk8
+  image: gradle:jdk11
 
 test_task:
   test_script: ./gradlew test --stacktrace
