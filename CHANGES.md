@@ -4,12 +4,13 @@
 
 ## 1.2.0
 
+- Fixed running tests on 2021.3 platform version
 - Delay dependencies resolving to tasks configuration phase
 - Deprecate `IntelliJPluginExtension.getIdeaDependency(project: Project)`
+- Avoid downloading IDE dependency in configuration phase
 - Increase the default `runPluginVerifier.failureLevel` to `COMPATIBILITY_PROBLEMS`
 - Introduce `listProductsReleases` task for listing the IDE releases matching given criteria
 - Fixed resolving compiler classpath for the `instrumentCode` task when using `LATEST-EAP-SNAPSHOT` [#752](../../issues/752)
-- Avoid downloading IDEA dependency in configuration phase
 - Fixed resolving `idea.platform.prefix` [#772](../../issues/772)
 - Fix for custom `buildDir` not used in some `instrumentCode` and `buildSearchableOptions` tasks [#793](../../issues/793)
 
