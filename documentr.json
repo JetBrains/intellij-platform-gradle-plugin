@@ -10,19 +10,19 @@
     },
     {
       "type": "markup",
-      "value": "[![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)\n "
+      "value": "[![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.intellij?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)](https://plugins.gradle.org/plugin/org.jetbrains.intellij)\n "
     },
     {
       "type": "markup",
-      "value": "[![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat)](https://twitter.com/JBPlatform/)\n "
+      "value": "[![Build Status](https://github.com/JetBrains/gradle-intellij-plugin/workflows/Build/badge.svg)](https://github.com/JetBrains/gradle-intellij-plugin/actions/workflows/build.yml)\n "
     },
     {
-      "type": "inbuilt",
-      "value": "badge-shield-io-gradle-plugin"
+      "type": "markup",
+      "value": "[![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat&logo=twitter)](https://twitter.com/JBPlatform/)\n "
     },
     {
-      "type": "inbuilt",
-      "value": "badge-shield-io-github-release"
+      "type": "markup",
+      "value": "[![Slack](https://img.shields.io/badge/Slack-%23gradle--intellij--plugin-blue?style=flat-square&logo=Slack)](https://plugins.jetbrains.com/slack)\n "
     },
     {
       "type": "markup",
