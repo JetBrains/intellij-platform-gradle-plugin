@@ -168,50 +168,52 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
-        configuration.withDependencies { dependencies ->
-            info(context, "Configuring IDE dependency")
-            val dependencyManager = project.objects.newInstance(
-                IdeaDependencyManager::class.java,
-                extension.intellijRepository.get(),
-                extension.ideaDependencyCachePath.orNull ?: "",
-                archiveUtils,
-                dependenciesDownloader,
-                context,
-            )
-            extension.ideaDependency.convention(project.provider {
-                val ideaDependency = when (val localPath = extension.localPath.orNull) {
-                    null -> {
-                        info(context, "Using IDE from remote repository")
-                        val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-                        val extraDependencies = extension.extraDependencies.get()
-                        dependencyManager.resolveRemote(project,
-                            version,
-                            extension.getVersionType(),
-                            extension.downloadSources.get(),
-                            extraDependencies)
-                    }
-                    else -> {
-                        if (extension.version.orNull != null) {
-                            warn(context, "Both 'localPath' and 'version' specified, second would be ignored")
-                        }
-                        info(context, "Using path to locally installed IDE: $localPath")
-                        dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
-                    }
+        info(context, "Configuring IDE dependency")
+        var defaultDependenciesResolved = false
+        val dependencyManager = project.objects.newInstance(
+            IdeaDependencyManager::class.java,
+            extension.intellijRepository.get(),
+            extension.ideaDependencyCachePath.orNull ?: "",
+            archiveUtils,
+            dependenciesDownloader,
+            context,
+        )
+        extension.ideaDependency.convention(project.provider {
+            val ideaDependency = when (val localPath = extension.localPath.orNull) {
+                null -> {
+                    info(context, "Using IDE from remote repository")
+                    val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
+                    val extraDependencies = extension.extraDependencies.get()
+                    dependencyManager.resolveRemote(project,
+                        version,
+                        extension.getVersionType(),
+                        extension.downloadSources.get(),
+                        extraDependencies)
                 }
-                if (extension.configureDefaultDependencies.get()) {
-                    info(context, "${ideaDependency.buildNumber} is used for building")
-                    dependencyManager.register(project, ideaDependency, dependencies)
-                    if (!ideaDependency.extraDependencies.isEmpty()) {
-                        info(context,
-                            "Note: ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+                else -> {
+                    if (extension.version.orNull != null) {
+                        warn(context, "Both 'localPath' and 'version' specified, second would be ignored")
                     }
-                } else {
-                    info(context, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
+                    info(context, "Using path to locally installed IDE: $localPath")
+                    dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
                 }
+            }
+            if (extension.configureDefaultDependencies.get() && !defaultDependenciesResolved) {
+                defaultDependenciesResolved = true
+                info(context, "${ideaDependency.buildNumber} is used for building")
+                dependencyManager.register(project, ideaDependency, configuration.dependencies)
+                configuration.resolve()
 
-                ideaDependency
-            })
-        }
+                if (!ideaDependency.extraDependencies.isEmpty()) {
+                    info(context,
+                        "Note: ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+                }
+            } else {
+                info(context, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
+            }
+
+            ideaDependency
+        })
         Jvm.current().toolsJar?.let { toolsJar ->
             project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
         }

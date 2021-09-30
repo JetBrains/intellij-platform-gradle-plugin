@@ -2,6 +2,7 @@
 
 ## next
 
+- Delay dependencies resolving to tasks configuration phase
 - Increase the default `runPluginVerifier.failureLevel` to `COMPATIBILITY_PROBLEMS`
 - Introduce `listProductsReleases` task for listing the IDE releases matching given criteria
 - Fixed resolving compiler classpath for the `instrumentCode` task when using `LATEST-EAP-SNAPSHOT` [#752](../../issues/752)
