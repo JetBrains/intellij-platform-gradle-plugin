@@ -1,12 +1,14 @@
-<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Build Status](https://api.cirrus-ci.com/github/JetBrains/gradle-intellij-plugin.svg)](https://cirrus-ci.com/github/JetBrains/gradle-intellij-plugin)
- [![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat)](https://twitter.com/JBPlatform/)
- [![Gradle Plugin Release](https://img.shields.io/badge/gradle%20plugin-1.1.6-blue.svg)](https://plugins.gradle.org/plugin/org.jetbrains.intellij) [![GitHub Release](https://img.shields.io/github/release/jetbrains/gradle-intellij-plugin.svg)](https://github.com/jetbrains/gradle-intellij-plugin/releases) 
+<a name="documentr_top"></a>[![official JetBrains project](https://jb.gg/badges/official.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub) [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.intellij?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)](https://plugins.gradle.org/plugin/org.jetbrains.intellij)
+ [![Build Status](https://github.com/JetBrains/gradle-intellij-plugin/workflows/Build/badge.svg)](https://github.com/JetBrains/gradle-intellij-plugin/actions/workflows/build.yml)
+ [![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat&logo=twitter)](https://twitter.com/JBPlatform/)
+ [![Slack](https://img.shields.io/badge/Slack-%23gradle--intellij--plugin-blue?style=flat-square&logo=Slack)](https://plugins.jetbrains.com/slack)
+ 
 
 <img src="./.github/readme/gradle-intellij-plugin.png" alt="Gradle IntelliJ Plugin"/>
 
 # gradle-intellij-plugin
 
-<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 1.1.6</h4>
+<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 1.2.0</h4>
 
 > 
 > **Important:**
@@ -42,7 +44,7 @@ Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.1.6"
+  id "org.jetbrains.intellij" version "1.2.0"
 }
 ```
  
@@ -52,7 +54,7 @@ plugins {
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.2-SNAPSHOT"
+  id "org.jetbrains.intellij" version "1.3-SNAPSHOT"
 }
 ```
 
@@ -212,19 +214,21 @@ As soon as `privateKey` (or `privateKeyFile`) and `certificateChain` (or `certif
 
 ### List Products Releases
 Plugin Verifier requires a list of the IDEs that will be used for verifying your plugin build against.
-The availability of the releases may change in time, i.e. due to security issues in one version – which will be later removed and replaced with an updated IDE release.
+The availability of the releases may change in time, i.e., due to security issues in one version – which will be later removed and replaced with an updated IDE release.
 
 With the `listProductsReleases` task, it is possible to list the currently available IDEs matching given conditions, like platform types, since/until release versions.
+Such a list is fetched from the remote updates file: `https://www.jetbrains.com/updates/updates.xml`, parsed and filtered considering the specified `types`, `sinceVersion`, `untilVersion` properties.
 
-If `runPluginVerifier` task has no `ideVersions` property specified, the output of the `listProductsReleases` is used.
+The result list is stored within the `outputFile`, which is used as a source for the Plugin Verifier if the `runPluginVerifier` task has no `ideVersions` property specified, the output of the `listProductsReleases` is used.
 
-| **Attributes**                                                                                               | **Default Value**  |
-| :----------------------------------------------------------------------------------------------------------- | :----------------- |
-| <kbd>updatesFile</kbd> Path to the products releases update file. By default, falls back to the Maven cache. | Maven cache        |
-| <kbd>types</kbd> List of types of IDEs that will be listed in results. Uses `intellij.type` by default.      | `[intellij.type]`  |
-| <kbd>sinceVersion</kbd> Lower boundary of the listed results. Uses `intellij.version` by default.            | `intellij.version` |
-| <kbd>untilVersion</kbd> Upper boundary of the listed results.                                                | none               |
-| <kbd>includeEAP</kbd> Defines if EAP releases should be included in results list.                            | `true`             |
+| **Attributes**                                                                                               | **Default Value**                                      |
+| :----------------------------------------------------------------------------------------------------------- | :----------------------------------------------------- |
+| <kbd>updatesFile</kbd> Path to the products releases update file. By default, falls back to the Maven cache. | Maven cache                                            |
+| <kbd>types</kbd> List of types of IDEs that will be listed in results. Uses `intellij.type` by default.      | `[intellij.type]`                                      |
+| <kbd>sinceVersion</kbd> Lower boundary of the listed results. Uses `intellij.version` by default.            | `intellij.version`                                     |
+| <kbd>untilVersion</kbd> Upper boundary of the listed results.                                                | none                                                   |
+| <kbd>includeEAP</kbd> Defines if EAP releases should be included in results list.                            | `true`                                                 |
+| <kbd>outputFile</kbd> Path to the file, where the output list will be stored.                                | `File("${project.buildDir}/listProductsReleases.txt`") |
 
 
 ### Publishing DSL

@@ -2,6 +2,8 @@
 
 ## next
 
+## 1.2.0
+
 - Delay dependencies resolving to tasks configuration phase
 - Deprecate `IntelliJPluginExtension.getIdeaDependency(project: Project)`
 - Increase the default `runPluginVerifier.failureLevel` to `COMPATIBILITY_PROBLEMS`
