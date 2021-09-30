@@ -447,9 +447,7 @@ open class IntelliJPlugin : Plugin<Project> {
             it.group = IntelliJPluginConstants.GROUP_NAME
             it.description = "Prepare sandbox directory with installed plugin and its dependencies."
 
-            it.pluginName.convention(project.provider {
-                extension.pluginName.get()
-            })
+            it.pluginName.convention(extension.pluginName)
             it.pluginJar.convention(project.layout.file(project.provider {
                 val jarTaskProvider = project.tasks.named(JavaPlugin.JAR_TASK_NAME)
                 val jarTask = jarTaskProvider.get() as Zip
@@ -906,16 +904,12 @@ open class IntelliJPlugin : Plugin<Project> {
             it.description = "Bundles the project as a distribution."
             it.group = IntelliJPluginConstants.GROUP_NAME
 
-            it.archiveBaseName.convention(project.provider {
-                prepareSandboxTask.pluginName.get()
-            })
+            it.archiveBaseName.convention(prepareSandboxTask.pluginName)
 
             it.from(project.provider {
                 "${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName.get()}"
             })
-            it.into(project.provider {
-                prepareSandboxTask.pluginName.get()
-            })
+            it.into(prepareSandboxTask.pluginName)
             it.from(jarSearchableOptionsTask.archiveFile) { copy -> copy.into("lib") }
             it.dependsOn(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
