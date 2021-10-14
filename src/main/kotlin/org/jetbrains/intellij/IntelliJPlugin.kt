@@ -99,32 +99,39 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun configureConfigurations(project: Project, extension: IntelliJPluginExtension) {
-        val idea = project.configurations.create(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).setVisible(false)
-        configureIntellijDependency(project, extension, idea)
+        val idea = project.configurations.create(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME)
+            .setVisible(false)
+            .apply {
+                configureIntellijDependency(project, extension, this)
+            }
 
-        val ideaPlugins = project.configurations.create(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false)
-        configurePluginDependencies(project, extension, ideaPlugins)
+        val ideaPlugins = project.configurations.create(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME)
+            .setVisible(false)
+            .apply {
+                configurePluginDependencies(project, extension, this)
+            }
 
-        val defaultDependencies =
-            project.configurations.create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME).setVisible(false)
-        defaultDependencies.defaultDependencies {
-            it.add(project.dependencies.create(
-                group = "org.jetbrains",
-                name = "annotations",
-                version = IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION,
-            ))
-        }
+        val defaultDependencies = project.configurations.create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME)
+            .setVisible(false)
+            .apply {
+                defaultDependencies {
+                    it.add(project.dependencies.create(
+                        group = "org.jetbrains",
+                        name = "annotations",
+                        version = IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION,
+                    ))
+                }
+            }
 
-        project.configurations.getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME)
+        project.configurations
+            .getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME)
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
-        project.configurations.getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
+        project.configurations
+            .getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME)
             .extendsFrom(defaultDependencies, idea, ideaPlugins)
     }
 
-    private fun configureTasks(
-        project: Project,
-        extension: IntelliJPluginExtension,
-    ) {
+    private fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring plugin")
         project.tasks.whenTaskAdded {
             if (it is RunIdeBase) {
@@ -185,11 +192,13 @@ open class IntelliJPlugin : Plugin<Project> {
                     info(context, "Using IDE from remote repository")
                     val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
                     val extraDependencies = extension.extraDependencies.get()
-                    dependencyManager.resolveRemote(project,
+                    dependencyManager.resolveRemote(
+                        project,
                         version,
                         extension.getVersionType(),
                         extension.downloadSources.get(),
-                        extraDependencies)
+                        extraDependencies,
+                    )
                 }
                 else -> {
                     if (extension.version.orNull != null) {
@@ -217,6 +226,10 @@ open class IntelliJPlugin : Plugin<Project> {
         })
         Jvm.current().toolsJar?.let { toolsJar ->
             project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
+        }
+
+        project.afterEvaluate {
+            extension.ideaDependency.get()
         }
     }
 
@@ -323,8 +336,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectPluginTasksDependency(project: Project, dependency: Project) {
         // invoke before tasks graph is ready
         if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins,
-                null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found." + dependency.plugins, null)
         }
         dependency.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) { dependencySandboxTask ->
             project.tasks.withType(PrepareSandboxTask::class.java).forEach {
@@ -341,8 +353,7 @@ open class IntelliJPlugin : Plugin<Project> {
     ) {
         // invoke on demand, when plugins artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin is not found." + dependency.plugins,
-                null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found." + dependency.plugins, null)
         }
         dependencies.add(project.dependencies.create(dependency))
 
