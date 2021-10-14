@@ -170,15 +170,16 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureIntellijDependency(project: Project, extension: IntelliJPluginExtension, configuration: Configuration) {
         info(context, "Configuring IDE dependency")
         var defaultDependenciesResolved = false
-        val dependencyManager = project.objects.newInstance(
-            IdeaDependencyManager::class.java,
-            extension.intellijRepository.get(),
-            extension.ideaDependencyCachePath.orNull ?: "",
-            archiveUtils,
-            dependenciesDownloader,
-            context,
-        )
+
         extension.ideaDependency.convention(project.provider {
+            val dependencyManager = project.objects.newInstance(
+                IdeaDependencyManager::class.java,
+                extension.intellijRepository.get(),
+                extension.ideaDependencyCachePath.orNull ?: "",
+                archiveUtils,
+                dependenciesDownloader,
+                context,
+            )
             val ideaDependency = when (val localPath = extension.localPath.orNull) {
                 null -> {
                     info(context, "Using IDE from remote repository")

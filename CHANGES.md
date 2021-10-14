@@ -2,6 +2,8 @@
 
 ## next
 
+- Respect `ideaDependencyCachePath` property [#794](../../issues/794)
+
 ## 1.2.0
 
 - Fixed running tests on 2021.3 platform version
