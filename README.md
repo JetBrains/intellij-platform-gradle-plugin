@@ -124,7 +124,6 @@ The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd>
 #### Run/Debug IDE Properties
 | Attributes | Values | 
 | :------------- | :--------- | 
-| <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>**Notes:**    <ul>        <li>Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio.</li>        <li>Empty value means that the IDE that was used for compiling will be used for running/debugging as well.</li>    </ul>|**Acceptable Values:** <br/><kbd>path</kbd> - `'/Applications/Android Studio.app'`<br/><br/>**Default Value:** none|
 | <kbd>sandboxDir</kbd> - The path of sandbox directory that is used for running IDE with developing plugin.|**Acceptable Values:** <br/><kbd>path</kbd> - `'${project.rootDir}/.sandbox'` <br/><br/>**Default Value:** <kbd>'${project.buildDir}/idea-sandbox'</kbd>|
 
 #### Infrastructure Properties

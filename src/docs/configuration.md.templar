@@ -189,23 +189,6 @@ Please see [Plugin Dependencies](https://plugins.jetbrains.com/docs/intellij/plu
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>alternativeIdePath</kbd> - The absolute path to the locally installed JetBrains IDE. <br/><br/>
-
-**Notes:**
-    <ul>
-        <li>Use this property if you want to test your plugin in any non-IDEA JetBrains IDE such as WebStorm or Android Studio.</li>
-        <li>Empty value means that the IDE that was used for compiling will be used for running/debugging as well.</li>
-    </ul>
-|
-**Acceptable Values:** <br/>
-<kbd>path</kbd> - `'/Applications/Android Studio.app'`<br/><br/>
-
-**Default Value:** none
-|{\n}
-
-{-- --------------------------------------------------------------------------------------------------------------- --}
-{-- --------------------------------------------------------------------------------------------------------------- --}
-
 | <kbd>sandboxDir</kbd> - The path of sandbox directory that is used for running IDE with developing plugin.
 |
 **Acceptable Values:** <br/>
