@@ -6,6 +6,7 @@ fun properties(key: String) = project.findProperty(key)?.toString()
 
 plugins {
     kotlin("jvm") version "1.5.31"
+    kotlin("plugin.serialization") version "1.5.31"
     id("java-gradle-plugin")
     id("maven-publish")
     id("com.gradle.plugin-publish") version "0.16.0"
@@ -30,7 +31,6 @@ dependencies {
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.197") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("javax.xml.bind:jaxb-api:2.3.1")
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
@@ -38,6 +38,9 @@ dependencies {
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.20") {
         exclude(group = "org.jetbrains.kotlin")
     }
+
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
