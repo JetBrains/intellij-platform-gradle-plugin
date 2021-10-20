@@ -150,8 +150,12 @@ publishing {
             version = version.toString()
 
             from(components["java"])
-            artifact(sourcesJar.get())
-            artifact(javadocJar.get())
+            artifact(sourcesJar.get().apply {
+                archiveClassifier.set("sources")
+            })
+            artifact(javadocJar.get().apply {
+                archiveClassifier.set("javadoc")
+            })
 
             pom {
                 name.set("Gradle IntelliJ Plugin")
