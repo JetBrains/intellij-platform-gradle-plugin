@@ -4,6 +4,7 @@
 
 - Respect `ideaDependencyCachePath` property [#794](../../issues/794)
 - Fix for providing dependencies after project evaluation [#801](../../issues/801)
+- Resolve EAP version of the Java compiler for local EAP IDE instances [#811](../../issues/811)
 
 ## 1.2.0
 
