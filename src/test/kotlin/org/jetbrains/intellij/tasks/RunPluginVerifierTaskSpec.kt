@@ -129,13 +129,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
             runPluginVerifier {
                 ideVersions = []
+                localPaths = [new File('/tmp')]
             }
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         assertTrue(result.output.contains("> Task :listProductsReleases SKIPPED"))
-        assertTrue(result.output.contains("'ideVersions' and 'localPaths' properties should not be empty"))
     }
 
     @Test
