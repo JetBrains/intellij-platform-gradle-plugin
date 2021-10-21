@@ -12,7 +12,7 @@ plugins {
     id("com.gradle.plugin-publish") version "0.16.0"
     id("synapticloop.documentr") version "3.1.0"
     id("com.github.breadmoirai.github-release") version "2.2.12"
-    id("org.jetbrains.changelog") version "1.3.0"
+    id("org.jetbrains.changelog") version "1.3.1"
 }
 
 repositories {
@@ -153,8 +153,12 @@ publishing {
             version = version.toString()
 
             from(components["java"])
-            artifact(sourcesJar.get())
-            artifact(javadocJar.get())
+            artifact(sourcesJar.get().apply {
+                archiveClassifier.set("sources")
+            })
+            artifact(javadocJar.get().apply {
+                archiveClassifier.set("javadoc")
+            })
 
             pom {
                 name.set("Gradle IntelliJ Plugin")
