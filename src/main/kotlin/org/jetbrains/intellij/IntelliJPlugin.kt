@@ -522,7 +522,12 @@ open class IntelliJPlugin : Plugin<Project> {
             })
             it.ides.convention(project.provider {
                 val ideVersions = it.ideVersions.get().takeIf(List<String>::isNotEmpty)
-                    ?: it.productsReleasesFile.get().takeIf(File::exists)?.readLines()
+                    ?: run {
+                        when {
+                            it.localPaths.get().isEmpty() -> it.productsReleasesFile.get().takeIf(File::exists)?.readLines()
+                            else -> null
+                        }
+                    }
                     ?: emptyList()
 
                 ideVersions.map { ideVersion ->
@@ -591,8 +596,8 @@ open class IntelliJPlugin : Plugin<Project> {
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
-            val isIdeVersionsPresent = project.provider { it.ideVersions.isPresent }
-            listProductsReleasesTask.onlyIf { !isIdeVersionsPresent.get() }
+            val isIdeVersionsEmpty = project.provider { it.ideVersions.get().isEmpty() }
+            listProductsReleasesTask.onlyIf { isIdeVersionsEmpty.get() }
 
             it.outputs.upToDateWhen { false }
         }

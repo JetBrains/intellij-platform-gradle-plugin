@@ -111,11 +111,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 }
             }
 
-            throw GradleException(
-                "IDE '$ideVersion' cannot be downloaded. " +
-                    "Please verify the specified IDE version against the products available for testing: " +
-                    "https://jb.gg/intellij-platform-builds-list"
-            )
+            throw GradleException("IDE '$ideVersion' cannot be downloaded. " + "Please verify the specified IDE version against the products available for testing: " + "https://jb.gg/intellij-platform-builds-list")
         }
 
         /**
@@ -489,17 +485,12 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     enum class FailureLevel(val testValue: String) {
-        COMPATIBILITY_WARNINGS("Compatibility warnings"),
-        COMPATIBILITY_PROBLEMS("Compatibility problems"),
-        DEPRECATED_API_USAGES("Deprecated API usages"),
-        EXPERIMENTAL_API_USAGES("Experimental API usages"),
-        INTERNAL_API_USAGES("Internal API usages"),
-        OVERRIDE_ONLY_API_USAGES("Override-only API usages"),
-        NON_EXTENDABLE_API_USAGES("Non-extendable API usages"),
-        PLUGIN_STRUCTURE_WARNINGS("Plugin structure warnings"),
-        MISSING_DEPENDENCIES("Missing dependencies"),
-        INVALID_PLUGIN("The following files specified for the verification are not valid plugins"),
-        NOT_DYNAMIC("Plugin cannot be loaded/unloaded without IDE restart");
+        COMPATIBILITY_WARNINGS("Compatibility warnings"), COMPATIBILITY_PROBLEMS("Compatibility problems"), DEPRECATED_API_USAGES("Deprecated API usages"), EXPERIMENTAL_API_USAGES(
+            "Experimental API usages"),
+        INTERNAL_API_USAGES("Internal API usages"), OVERRIDE_ONLY_API_USAGES("Override-only API usages"), NON_EXTENDABLE_API_USAGES("Non-extendable API usages"), PLUGIN_STRUCTURE_WARNINGS(
+            "Plugin structure warnings"),
+        MISSING_DEPENDENCIES("Missing dependencies"), INVALID_PLUGIN("The following files specified for the verification are not valid plugins"), NOT_DYNAMIC(
+            "Plugin cannot be loaded/unloaded without IDE restart");
 
         companion object {
             val ALL: EnumSet<FailureLevel> = EnumSet.allOf(FailureLevel::class.java)
