@@ -1,9 +1,8 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -732,7 +731,6 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    @ExperimentalSerializationApi
     private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring compile tasks")
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
@@ -769,7 +767,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             val isEap = localPath?.runCatching {
                                 ideaDependency is LocalIdeaDependency
                                 val productInfoFile = ideaDependency.classes.resolve("Resources/product-info.json")
-                                val productInfo = Json.decodeFromStream<ProductInfo>(productInfoFile.inputStream())
+                                val productInfo = Json.decodeFromString<ProductInfo>(productInfoFile.readText())
                                 productInfo.versionSuffix == "EAP"
                             }?.getOrNull() ?: false
                             val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
