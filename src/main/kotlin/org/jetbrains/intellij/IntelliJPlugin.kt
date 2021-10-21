@@ -1,6 +1,9 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -25,11 +28,13 @@ import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
+import org.jetbrains.intellij.dependency.LocalIdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.model.ProductInfo
 import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.DownloadRobotServerPluginTask
 import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
@@ -727,6 +732,7 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
+    @ExperimentalSerializationApi
     private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring compile tasks")
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
@@ -749,7 +755,9 @@ open class IntelliJPlugin : Plugin<Project> {
                     })
                     it.compilerVersion.convention(project.provider {
                         val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-                        if (extension.localPath.orNull.isNullOrEmpty() && version.endsWith("-SNAPSHOT")) {
+                        val localPath = extension.localPath.orNull
+
+                        if (localPath.isNullOrBlank() && version.endsWith("-SNAPSHOT")) {
                             when (extension.getVersionType()) {
                                 "CL" -> "CLION-$version"
                                 "RD" -> "RIDER-$version"
@@ -757,7 +765,16 @@ open class IntelliJPlugin : Plugin<Project> {
                                 else -> version
                             }
                         } else {
-                            IdeVersion.createIdeVersion(extension.ideaDependency.get().buildNumber).asStringWithoutProductCode()
+                            val ideaDependency = extension.ideaDependency.get()
+                            val isEap = localPath?.runCatching {
+                                ideaDependency is LocalIdeaDependency
+                                val productInfoFile = ideaDependency.classes.resolve("Resources/product-info.json")
+                                val productInfo = Json.decodeFromStream<ProductInfo>(productInfoFile.inputStream())
+                                productInfo.versionSuffix == "EAP"
+                            }?.getOrNull() ?: false
+                            val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
+
+                            IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode() + eapSuffix
                         }
                     })
                     it.ideaDependency.convention(extension.ideaDependency)
