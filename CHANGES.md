@@ -6,6 +6,7 @@
 - Fix for providing dependencies after project evaluation [#801](../../issues/801)
 - Resolve EAP version of the Java compiler for local EAP IDE instances [#811](../../issues/811)
 - Publish plugin sources and JavaDocs [#810](../../issues/810)
+- Allow for passing an empty array for `runPluginVerifier.ideVersions` property [#809](../../issues/809)
 
 ## 1.2.0
 

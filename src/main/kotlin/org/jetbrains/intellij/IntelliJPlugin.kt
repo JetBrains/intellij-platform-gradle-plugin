@@ -591,8 +591,8 @@ open class IntelliJPlugin : Plugin<Project> {
             it.dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
-            val ideVersionsEmpty = project.provider { it.ideVersions.get().isEmpty() }
-            listProductsReleasesTask.onlyIf { ideVersionsEmpty.get() }
+            val isIdeVersionsPresent = project.provider { it.ideVersions.isPresent }
+            listProductsReleasesTask.onlyIf { !isIdeVersionsPresent.get() }
 
             it.outputs.upToDateWhen { false }
         }

@@ -120,6 +120,25 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `do not use ListProductsReleasesTask output on empty array passed to ideVersions property`() {
+        writeJavaFile()
+        writePluginXmlFile()
+
+        buildFile.groovy("""
+            version = "1.0.0"
+
+            runPluginVerifier {
+                ideVersions = []
+            }
+        """)
+
+        val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
+
+        assertTrue(result.output.contains("> Task :listProductsReleases SKIPPED"))
+        assertTrue(result.output.contains("'ideVersions' and 'localPaths' properties should not be empty"))
+    }
+
+    @Test
     fun `fail on verifyPlugin task`() {
         writeJavaFile()
         pluginXml.delete()
