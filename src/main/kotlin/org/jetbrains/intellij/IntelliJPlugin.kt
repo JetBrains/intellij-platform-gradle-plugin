@@ -766,12 +766,12 @@ open class IntelliJPlugin : Plugin<Project> {
                             }
                         } else {
                             val ideaDependency = extension.ideaDependency.get()
-                            val isEap = localPath?.let {
+                            val isEap = localPath?.runCatching {
                                 ideaDependency is LocalIdeaDependency
                                 val productInfoFile = ideaDependency.classes.resolve("Resources/product-info.json")
                                 val productInfo = Json.decodeFromStream<ProductInfo>(productInfoFile.inputStream())
                                 productInfo.versionSuffix == "EAP"
-                            } ?: false
+                            }?.getOrNull() ?: false
                             val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
 
                             IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode() + eapSuffix
