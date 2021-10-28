@@ -1,5 +1,9 @@
 # Changelog
 
+## next
+
+- Resolve EAP version of the Java compiler for `LATEST-EAP-SNAPSHOT`
+
 ## 1.2.1
 
 - Respect `ideaDependencyCachePath` property [#794](../../issues/794)

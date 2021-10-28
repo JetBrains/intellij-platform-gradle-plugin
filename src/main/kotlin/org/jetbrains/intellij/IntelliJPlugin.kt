@@ -763,7 +763,8 @@ open class IntelliJPlugin : Plugin<Project> {
                         val json by lazy { Json { ignoreUnknownKeys = true } }
 
                         if (localPath.isNullOrBlank() && version.endsWith("-SNAPSHOT")) {
-                            if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION) {
+                            val type = extension.getVersionType()
+                            if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && listOf("CL", "RD", "PY").contains(type)) {
                                 val ideaDependency = extension.ideaDependency.get()
                                 val productInfoFile = ideaDependency.classes.resolve("product-info.json")
                                 val productInfo = json.decodeFromString<ProductInfo>(productInfoFile.readText())
@@ -772,7 +773,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                     Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}-EAP-CANDIDATE-SNAPSHOT" }
                                 } ?: version
                             } else {
-                                when (extension.getVersionType()) {
+                                when (type) {
                                     "CL" -> "CLION-$version"
                                     "RD" -> "RIDER-$version"
                                     "PY" -> "PYCHARM-$version"
