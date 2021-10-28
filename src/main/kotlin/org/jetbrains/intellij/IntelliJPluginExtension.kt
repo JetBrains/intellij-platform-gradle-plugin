@@ -28,7 +28,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The list of bundled IDE plugins and plugins from the <a href="https://plugins.jetbrains.com/">JetBrains Plugin Repository</a>.
-     * Accepts values of `String` or `Project`.
+     * It accepts values of `String` or `Project`.
      */
     @Input
     @Optional
@@ -68,7 +68,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The name of the target zip-archive and defines the name of plugin artifact.
-     * By default: <code>${project.name}</code>
+     * By default, <code>${project.name}</code>
      */
     @Input
     @Optional
@@ -97,7 +97,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The path of sandbox directory that is used for running IDE with developing plugin.
-     * By default: <code>${project.buildDir}/idea-sandbox</code>.
+     * By default, <code>${project.buildDir}/idea-sandbox</code>.
      */
     @Input
     @Optional

@@ -6,6 +6,7 @@ import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
+@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test

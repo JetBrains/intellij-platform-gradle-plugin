@@ -4,6 +4,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+@Suppress("GroovyAssignabilityCheck")
 class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
     @Test

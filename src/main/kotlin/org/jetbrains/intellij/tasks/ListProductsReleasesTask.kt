@@ -72,7 +72,7 @@ open class ListProductsReleasesTask @Inject constructor(
             .flatMap { product -> product.codes.map { it to product }.asSequence() }
             .filter { (type) -> types.get().contains(type) }
             .flatMap { (type, product) -> product.channels.map { type to it }.asSequence() }
-            .filter { (_, channel) -> channel.status == CHANNEL_RELEASE || (includeEAP && channel.status == CHANNEL_EAP) }
+            .filter { (_, channel) -> (channel.status == CHANNEL_RELEASE) || ((channel.status == CHANNEL_EAP) && includeEAP) }
             .flatMap { (type, channel) -> channel.builds.map { type to it.version.run(::parse) }.asSequence() }
             .filter { (_, version) -> version >= since && (until == null || version <= until) }
             .groupBy { (type, version) -> "$type-${version.major}.${version.minor}" }

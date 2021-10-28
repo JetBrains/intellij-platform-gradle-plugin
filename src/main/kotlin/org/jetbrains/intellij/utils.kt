@@ -1,5 +1,5 @@
 @file:JvmName("Utils")
-@file:Suppress("DEPRECATION")
+@file:Suppress("DEPRECATION", "BooleanMethodIsAlwaysInverted")
 
 package org.jetbrains.intellij
 

@@ -123,7 +123,7 @@
 
 - runPluginVerifier: allow specifying `ideVersions` as comma-separated String
 - runPluginVerifier: specifying EAP build number leads to IllegalArgumentException
-- runPluginVerifier: fix for ArrayIndexOutOfBoundsException when destructuring ideVersion.split
+- runPluginVerifier: fix for `ArrayIndexOutOfBoundsException` when destructuring `ideVersion.split`
 
 ## 0.6.0
 
@@ -168,7 +168,7 @@
 
 - fixed caching builtin plugins data
 - add annotations-19.0.0 to compile classpath by default 
-- fix setting plugin name for Gradle 5.1..5.3 [#481](../../issues/481)
+- fix setting plugin name for Gradle 5.1-5.3 [#481](../../issues/481)
 
 ## 0.4.19
 
@@ -334,7 +334,7 @@
 - check build number to decide whether the unzipped distribution can be reused (fixes [#234](../../issues/234))
 - download JetBrains Java runtime and use it while running IDE (fixes [#192](../../issues/192))
 - do not include plugin's jars recursively (fixes [#231](../../issues/231))
-- allow to add custom Javac2.jar to `instrumentCode` task
+- allow adding custom Javac2.jar to `instrumentCode` task
 
 ## 0.2.20
 
@@ -470,7 +470,7 @@
 
 ## 0.0.39
 
-- Allow to make single-build plugin distributions (fixes [#64](../../issues/64))
+- Allow making single-build plugin distributions (fixes [#64](../../issues/64))
 
 ## 0.0.37
 

@@ -38,7 +38,7 @@ open class DependenciesDownloader @Inject constructor(
             error(context, "Error when resolving dependency: $dependency", e)
             throw e
         } finally {
-            repositoryHandler.removeAll(repositories)
+            repositoryHandler.removeAll(repositories.toSet())
         }
     }
 }

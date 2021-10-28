@@ -8,6 +8,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test

@@ -51,7 +51,7 @@ As examples of using this plugin, you can also check out following projects:
 	- Uses other IntelliJ IDEA plugins as test dependencies
 	- Circle CI configuration file & Travis CI configuration file
 	- Gradle task to verify plugin compatibility cross IntelliJ Platform versions
-	- Auto subbmit anonymous feedback as github issues
+	- Auto submit anonymous feedback as GitHub issues
 - [Requirements](https://github.com/meanmail-dev/requirements)
 	- Uses the Gradle Kotlin DSL
 	- Fully written in Kotlin

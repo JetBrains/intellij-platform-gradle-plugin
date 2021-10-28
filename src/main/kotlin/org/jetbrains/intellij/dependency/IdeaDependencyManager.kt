@@ -27,6 +27,7 @@ import java.io.File
 import java.util.zip.ZipFile
 import javax.inject.Inject
 
+@Suppress("BooleanMethodIsAlwaysInverted")
 open class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
@@ -222,6 +223,7 @@ open class IdeaDependencyManager @Inject constructor(
         return ivyFile
     }
 
+    @Suppress("BooleanMethodIsAlwaysInverted")
     private fun hasKotlinDependency(project: Project) =
         project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME).allDependencies.any {
             "org.jetbrains.kotlin" == it.group && isKotlinRuntime(it.name)

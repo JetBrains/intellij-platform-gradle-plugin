@@ -835,7 +835,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
                 it.dependsOn(instrumentTask)
                 it.onlyIf { instrumentCode.get() }
-                // Set the classes dir to the one with the instrumented classes
+                // Set the classes' dir to the one with the instrumented classes
                 it.doLast { classesDirs.setFrom(outputDir) }
             }
 

@@ -111,7 +111,7 @@ open class RunPluginVerifierTask @Inject constructor(
                 }
             }
 
-            throw GradleException("IDE '$ideVersion' cannot be downloaded. " + "Please verify the specified IDE version against the products available for testing: " + "https://jb.gg/intellij-platform-builds-list")
+            throw GradleException("IDE '$ideVersion' cannot be downloaded. Please verify the specified IDE version against the products available for testing: https://jb.gg/intellij-platform-builds-list")
         }
 
         /**

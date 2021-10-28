@@ -1,3 +1,5 @@
+@file:Suppress("SameReturnValue")
+
 package org.jetbrains.intellij.tasks
 
 import groovy.lang.Closure
@@ -10,7 +12,6 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
@@ -164,7 +165,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                     @Suppress("unused") // Groovy calls using reflection inside of Closure
                     fun doCall(): Any? {
                         if (instrumentNotNull) {
-                            ant.invokeMethod("skip", mapOf(
+                            return ant.invokeMethod("skip", mapOf(
                                 "pattern" to "kotlin/Metadata"
                             ))
                         }

@@ -14,6 +14,7 @@ import java.util.zip.ZipOutputStream
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
+@Suppress("GroovyUnusedAssignment")
 abstract class IntelliJPluginSpecBase {
 
     private var debugEnabled = true
@@ -82,6 +83,7 @@ abstract class IntelliJPluginSpecBase {
         }
     """)
 
+    @Suppress("SameParameterValue")
     protected fun disableDebug(reason: String) {
         println("Debugging is disable for test with the following reason: $reason")
         debugEnabled = false
@@ -179,9 +181,11 @@ abstract class IntelliJPluginSpecBase {
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
         assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.replace("\r", "")?.trim())
 
+    @Suppress("SameParameterValue")
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
         assertEquals(expectedContent.trimIndent(), fileText(zip, path))
 
+    @Suppress("SameParameterValue")
     protected fun extractFile(zipFile: ZipFile, path: String): File =
         File.createTempFile("gradle-test", "").apply {
             deleteOnExit()

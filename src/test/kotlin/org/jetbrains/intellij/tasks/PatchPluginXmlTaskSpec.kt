@@ -10,6 +10,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 
+@Suppress("PluginXmlValidity")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
     private val patchedPluginXml = lazy { File(buildDirectory, IntelliJPluginConstants.PLUGIN_XML_DIR_NAME).listFiles()?.first() }

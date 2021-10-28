@@ -9,6 +9,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
+@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     private val sandbox = File(buildDirectory, IntelliJPluginConstants.DEFAULT_SANDBOX)

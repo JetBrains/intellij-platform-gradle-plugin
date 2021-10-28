@@ -6,6 +6,7 @@ import java.io.File
 import java.io.Serializable
 
 @CompileStatic
+@Suppress("BooleanMethodIsAlwaysInverted")
 interface PluginDependency : Serializable {
     companion object {
         private const val formatVersion = 1
