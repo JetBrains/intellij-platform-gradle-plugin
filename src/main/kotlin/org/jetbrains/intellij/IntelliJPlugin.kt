@@ -27,7 +27,6 @@ import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
-import org.jetbrains.intellij.dependency.LocalIdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
@@ -761,20 +760,30 @@ open class IntelliJPlugin : Plugin<Project> {
                     it.compilerVersion.convention(project.provider {
                         val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
                         val localPath = extension.localPath.orNull
+                        val json by lazy { Json { ignoreUnknownKeys = true } }
 
                         if (localPath.isNullOrBlank() && version.endsWith("-SNAPSHOT")) {
-                            when (extension.getVersionType()) {
-                                "CL" -> "CLION-$version"
-                                "RD" -> "RIDER-$version"
-                                "PY" -> "PYCHARM-$version"
-                                else -> version
+                            if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION) {
+                                val ideaDependency = extension.ideaDependency.get()
+                                val productInfoFile = ideaDependency.classes.resolve("product-info.json")
+                                val productInfo = json.decodeFromString<ProductInfo>(productInfoFile.readText())
+
+                                productInfo.buildNumber?.let { buildNumber ->
+                                    Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}-EAP-CANDIDATE-SNAPSHOT" }
+                                } ?: version
+                            } else {
+                                when (extension.getVersionType()) {
+                                    "CL" -> "CLION-$version"
+                                    "RD" -> "RIDER-$version"
+                                    "PY" -> "PYCHARM-$version"
+                                    else -> version
+                                }
                             }
                         } else {
                             val ideaDependency = extension.ideaDependency.get()
                             val isEap = localPath?.runCatching {
-                                ideaDependency is LocalIdeaDependency
                                 val productInfoFile = ideaDependency.classes.resolve("Resources/product-info.json")
-                                val productInfo = Json.decodeFromString<ProductInfo>(productInfoFile.readText())
+                                val productInfo = json.decodeFromString<ProductInfo>(productInfoFile.readText())
                                 productInfo.versionSuffix == "EAP"
                             }?.getOrNull() ?: false
                             val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
