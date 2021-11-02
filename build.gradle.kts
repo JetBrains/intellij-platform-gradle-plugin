@@ -107,7 +107,7 @@ tasks {
     test {
         configureTests(this)
         exclude("**/DownloadIntelliJSpec.class")
-        dependsOn(cacheIntolerantTest)
+//        dependsOn(cacheIntolerantTest)
     }
 }
 
@@ -153,8 +153,8 @@ publishing {
             version = version.toString()
 
             from(components["java"])
-            artifact(sourcesJar.get())
-            artifact(javadocJar.get())
+            artifact(sourcesJar)
+            artifact(javadocJar)
 
             pom {
                 name.set("Gradle IntelliJ Plugin")
