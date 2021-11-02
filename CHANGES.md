@@ -3,6 +3,7 @@
 ## next
 
 - Resolve EAP version of the Java compiler for `LATEST-EAP-SNAPSHOT`
+- Allow for using `dcevm`, `fd`, and `nomod` variants of JBR [#818](../../issues/818)
 
 ## 1.2.1
 

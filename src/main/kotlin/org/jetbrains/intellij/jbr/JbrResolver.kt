@@ -166,7 +166,7 @@ open class JbrResolver @Inject constructor(
         })
     }
 
-    private class JbrArtifact(val name: String, val repositoryUrl: String) {
+    internal class JbrArtifact(val name: String, val repositoryUrl: String) {
 
         companion object {
             fun from(version: String, operatingSystem: OperatingSystem): JbrArtifact {
@@ -197,26 +197,33 @@ open class JbrResolver @Inject constructor(
                         else -> "jbr_jcef-"
                     }
                 }
-                return JbrArtifact("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}",
-                    repositoryUrl)
+                println("xxxx")
+                println("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}")
+                return JbrArtifact(
+                    "$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}",
+                    repositoryUrl,
+                )
             }
 
             private fun getPrefix(version: String) = when {
                 version.startsWith("jbrsdk-") -> "jbrsdk-"
                 version.startsWith("jbr_jcef-") -> "jbr_jcef-"
+                version.startsWith("jbr_dcevm-") -> "jbr_dcevm-"
+                version.startsWith("jbr_fd-") -> "jbr_fd-"
+                version.startsWith("jbr_nomod-") -> "jbr_nomod-"
                 version.startsWith("jbr-") -> "jbr-"
                 version.startsWith("jbrx-") -> "jbrx-"
                 version.startsWith("jbrex8") -> "jbrex"
                 else -> ""
             }
 
-            private fun platform(operatingSystem: OperatingSystem) = when {
+            internal fun platform(operatingSystem: OperatingSystem) = when {
                 operatingSystem.isWindows -> "windows"
                 operatingSystem.isMacOsX -> "osx"
                 else -> "linux"
             }
 
-            private fun arch(newFormat: Boolean): String {
+            internal fun arch(newFormat: Boolean): String {
                 val arch = System.getProperty("os.arch")
                 if ("aarch64" == arch || "arm64" == arch) {
                     return "aarch64"
