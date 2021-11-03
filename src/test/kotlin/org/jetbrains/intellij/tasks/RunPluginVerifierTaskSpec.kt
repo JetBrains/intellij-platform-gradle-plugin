@@ -109,8 +109,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
             listProductsReleases {
                 updatesPath = '${resource}'
-                sinceVersion = "2021.2"
-                untilVersion = "2021.2.1"
+                sinceVersion = "2020.2"
+                untilVersion = "2020.2.3"
                 includeEAP = false
             }
         """)
