@@ -1,11 +1,15 @@
 package org.jetbrains.intellij.tasks
 
+import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
+import java.util.jar.Manifest
 import java.util.zip.ZipFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
@@ -386,6 +390,38 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             ),
             collectPaths(ZipFile(jar))
         )
+    }
+
+    @Test
+    fun `provide MANIFEST_MF with build details`() {
+        buildFile.groovy("""
+            version = '0.42.123'
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <name>MyPluginName</name>
+                <vendor>JetBrains</vendor>
+            </idea-plugin>
+        """)
+
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+
+        val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
+        val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
+
+        val content = fileText(ZipFile(artifact), "META-INF/MANIFEST.MF")
+        val attributes = Manifest(content.byteInputStream()).mainAttributes
+
+        assertNotNull(attributes)
+
+        assertEquals("1.0", attributes.getValue("Manifest-Version"))
+        assertEquals("Gradle $gradleVersion", attributes.getValue("Created-By"))
+        assertEquals(Jvm.current().toString(), attributes.getValue("Build-JVM"))
+        assertEquals("0.42.123", attributes.getValue("Version"))
+        assertEquals(IntelliJPluginConstants.NAME, attributes.getValue("Build-Plugin"))
+        assertEquals("", attributes.getValue("Build-Plugin-Version"))
+        assertEquals(OperatingSystem.current().toString(), attributes.getValue("Build-OS"))
     }
 
     @Test

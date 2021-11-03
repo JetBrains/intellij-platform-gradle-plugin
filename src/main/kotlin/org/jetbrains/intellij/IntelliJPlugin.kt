@@ -1,8 +1,6 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.json.Json
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,9 +18,11 @@ import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskCollection
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
@@ -32,7 +32,6 @@ import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.model.ProductInfo
 import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.tasks.DownloadRobotServerPluginTask
 import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
@@ -53,7 +52,9 @@ import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
+import java.net.URL
 import java.util.EnumSet
+import java.util.jar.Manifest
 
 @Suppress("UnstableApiUsage", "unused")
 open class IntelliJPlugin : Plugin<Project> {
@@ -465,7 +466,19 @@ open class IntelliJPlugin : Plugin<Project> {
             it.pluginName.convention(extension.pluginName)
             it.pluginJar.convention(project.layout.file(project.provider {
                 val jarTaskProvider = project.tasks.named(JavaPlugin.JAR_TASK_NAME)
-                val jarTask = jarTaskProvider.get() as Zip
+                val jarTask = jarTaskProvider.get() as Jar
+                jarTask.manifest.attributes(mapOf(
+                    "Created-By" to "Gradle ${project.gradle.gradleVersion}",
+                    "Build-JVM" to Jvm.current(),
+                    "Version" to project.version,
+                    "Build-Plugin" to IntelliJPluginConstants.NAME,
+                    "Build-Plugin-Version" to getVersion(),
+                    "Build-OS" to OperatingSystem.current(),
+                    "Build-SDK" to when (extension.localPath.orNull) {
+                        null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
+                        else -> ideProductInfo(extension.ideaDependency.get().classes)?.run { "$productCode-$version" }
+                    },
+                ))
                 jarTask.archiveFile.orNull?.asFile
             }))
             it.defaultDestinationDir.convention(project.provider {
@@ -760,16 +773,12 @@ open class IntelliJPlugin : Plugin<Project> {
                     it.compilerVersion.convention(project.provider {
                         val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
                         val localPath = extension.localPath.orNull
-                        val json by lazy { Json { ignoreUnknownKeys = true } }
+                        val ideaDependency = extension.ideaDependency.get()
 
                         if (localPath.isNullOrBlank() && version.endsWith("-SNAPSHOT")) {
                             val type = extension.getVersionType()
                             if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && listOf("CL", "RD", "PY").contains(type)) {
-                                val ideaDependency = extension.ideaDependency.get()
-                                val productInfoFile = ideaDependency.classes.resolve("product-info.json")
-                                val productInfo = json.decodeFromString<ProductInfo>(productInfoFile.readText())
-
-                                productInfo.buildNumber?.let { buildNumber ->
+                                ideProductInfo(ideaDependency.classes)?.buildNumber?.let { buildNumber ->
                                     Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}-EAP-CANDIDATE-SNAPSHOT" }
                                 } ?: version
                             } else {
@@ -781,12 +790,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                 }
                             }
                         } else {
-                            val ideaDependency = extension.ideaDependency.get()
-                            val isEap = localPath?.runCatching {
-                                val productInfoFile = ideaDependency.classes.resolve("Resources/product-info.json")
-                                val productInfo = json.decodeFromString<ProductInfo>(productInfoFile.readText())
-                                productInfo.versionSuffix == "EAP"
-                            }?.getOrNull() ?: false
+                            val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
                             val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
 
                             IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode() + eapSuffix
@@ -953,8 +957,8 @@ open class IntelliJPlugin : Plugin<Project> {
             it.from(project.provider {
                 "${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName.get()}"
             })
-            it.into(prepareSandboxTask.pluginName)
             it.from(jarSearchableOptionsTask.archiveFile) { copy -> copy.into("lib") }
+            it.into(prepareSandboxTask.pluginName)
             it.dependsOn(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             it.dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
@@ -1089,4 +1093,13 @@ open class IntelliJPlugin : Plugin<Project> {
         val buildPluginTask = buildPluginTaskProvider.get() as Zip
         return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
     }
+
+    private fun getVersion() = IntelliJPlugin::class.java
+        .run { getResource("$simpleName.class")?.toString() }
+        ?.takeIf { it.startsWith("jar") }
+        ?.runCatching {
+            val manifestPath = substring(0, lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF"
+            Manifest(URL(manifestPath).openStream()).mainAttributes.getValue("Version")
+        }
+        ?.getOrNull() ?: ""
 }

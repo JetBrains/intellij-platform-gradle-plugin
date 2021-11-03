@@ -13,6 +13,8 @@ import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
@@ -29,6 +31,7 @@ import org.jdom2.JDOMException
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.model.ProductInfo
 import org.xml.sax.SAXParseException
 import java.io.File
 import java.io.IOException
@@ -110,6 +113,13 @@ fun ideBuildNumber(ideDirectory: File) = (
     File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
         ?: File(ideDirectory, "build.txt")
     ).readText().trim()
+
+fun ideProductInfo(ideDirectory: File) = (
+    File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+        ?: File(ideDirectory, "product-info.json")
+    )
+    .runCatching { Json { ignoreUnknownKeys = true }.decodeFromString<ProductInfo>(readText()) }
+    .getOrNull()
 
 fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")

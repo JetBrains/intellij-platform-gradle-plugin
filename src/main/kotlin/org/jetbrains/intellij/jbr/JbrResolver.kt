@@ -197,8 +197,6 @@ open class JbrResolver @Inject constructor(
                         else -> "jbr_jcef-"
                     }
                 }
-                println("xxxx")
-                println("$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}")
                 return JbrArtifact(
                     "$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}",
                     repositoryUrl,

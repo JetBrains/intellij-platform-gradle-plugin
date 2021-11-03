@@ -107,7 +107,13 @@ tasks {
     test {
         configureTests(this)
         exclude("**/DownloadIntelliJSpec.class")
-//        dependsOn(cacheIntolerantTest)
+        dependsOn(cacheIntolerantTest)
+    }
+
+    jar {
+        manifest {
+            attributes("Version" to project.version)
+        }
     }
 }
 
