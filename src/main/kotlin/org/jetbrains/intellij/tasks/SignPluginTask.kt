@@ -216,11 +216,11 @@ open class SignPluginTask @Inject constructor(
         ByteArrayOutputStream().use { os ->
             try {
                 execOperations.javaexec {
-                    it.classpath = objectFactory.fileCollection().from(cliPath)
-                    it.mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
-                    it.args = cliArgs
-                    it.standardOutput = TeeOutputStream(System.out, os)
-                    it.errorOutput = TeeOutputStream(System.err, os)
+                    classpath = objectFactory.fileCollection().from(cliPath)
+                    mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
+                    args = cliArgs
+                    standardOutput = TeeOutputStream(System.out, os)
+                    errorOutput = TeeOutputStream(System.err, os)
                 }
             } catch (e: ExecException) {
                 error(context, "Error during Marketplace ZIP Signer CLI execution:\n$os")

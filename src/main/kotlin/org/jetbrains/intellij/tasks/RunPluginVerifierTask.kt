@@ -16,6 +16,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.property
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
@@ -326,10 +327,10 @@ open class RunPluginVerifierTask @Inject constructor(
         ByteArrayOutputStream().use { os ->
             try {
                 execOperations.javaexec {
-                    it.classpath = objectFactory.fileCollection().from(verifierPath)
-                    it.mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
-                    it.args = verifierArgs
-                    it.standardOutput = TeeOutputStream(System.out, os)
+                    classpath = objectFactory.fileCollection().from(verifierPath)
+                    mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
+                    args = verifierArgs
+                    standardOutput = TeeOutputStream(System.out, os)
                 }
             } catch (e: ExecException) {
                 error(context, "Error during Plugin Verifier CLI execution:\n$os")
@@ -401,23 +402,23 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return Java Runtime directory points to Java 8 for Plugin Verifier version < 1.260, or Java 11 for 1.260+.
      */
-    private fun validateRuntimeDir(executable: String) = ByteArrayOutputStream().use { os ->
-        debug(context, "Plugin Verifier JRE verification: $executable")
+    private fun validateRuntimeDir(executablePath: String) = ByteArrayOutputStream().use { os ->
+        debug(context, "Plugin Verifier JRE verification: $executablePath")
 
         if (!requiresJava11()) {
             return true
         }
 
         execOperations.exec {
-            it.executable = executable
-            it.args = listOf("-version")
-            it.errorOutput = os
+            executable = executablePath
+            args = listOf("-version")
+            errorOutput = os
         }
         val version = Version.parse(os.toString())
         val result = version >= Version(11)
 
         result.ifFalse {
-            debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executable")
+            debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executablePath")
         }
     }
 

@@ -8,6 +8,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.Version.Companion.parse
@@ -75,7 +76,7 @@ open class ListProductsReleasesTask @Inject constructor(
             .flatMap { (type, channel) -> channel.builds.map { type to it.version.run(::parse) }.asSequence() }
             .filter { (_, version) -> version >= since && (until == null || version <= until) }
             .groupBy { (type, version) -> "$type-${version.major}.${version.minor}" }
-            .mapNotNull { it.value.maxBy { (_, version) -> version.patch }?.let { (type, version) -> "$type-${version.asRelease()}" } }
+            .mapNotNull { it.value.maxByOrNull { (_, version) -> version.patch }?.let { (type, version) -> "$type-${version.asRelease()}" } }
             .distinct()
             .toList()
 

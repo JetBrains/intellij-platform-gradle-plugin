@@ -3,14 +3,11 @@
 package org.jetbrains.intellij.tasks
 
 import groovy.lang.Closure
-import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -18,6 +15,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.property
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.info
@@ -77,7 +75,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     fun instrumentClasses() {
         copyOriginalClasses(outputDir.get().asFile)
 
-        val classpath = compilerClassPath() ?: throw GradleException("Compiler classpath was not resolved.")
+        val classpath = compilerClassPath()
 
         ant.invokeMethod("taskdef", mapOf(
             "name" to "instrumentIdeaExtensions",
@@ -113,8 +111,8 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         outputDir.deleteRecursively()
         outputDir.mkdir()
         fileSystemOperations.copy {
-            it.from(sourceSetOutputClassesDirs.get())
-            it.into(outputDir)
+            from(sourceSetOutputClassesDirs.get())
+            into(outputDir)
         }
     }
 

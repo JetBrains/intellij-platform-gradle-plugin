@@ -13,6 +13,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.error
@@ -191,7 +192,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     }
 
     private fun configureJvmArgs() {
-        jvmArgs = getIdeJvmArgs(this, jvmArgs ?: emptyList(), ideDir.get())
+        jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get())
     }
 
     private fun resolveToolsJar(javaExec: String): File {

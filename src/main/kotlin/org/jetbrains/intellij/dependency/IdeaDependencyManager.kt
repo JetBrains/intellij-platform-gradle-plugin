@@ -43,11 +43,11 @@ open class IdeaDependencyManager @Inject constructor(
         val ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
 
         project.repositories.ivy {
-            it.url = dependency.classes.toURI()
-            it.ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
-            it.artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
+            url = dependency.classes.toURI()
+            ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
+            artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
             if (dependency.sources != null) {
-                it.artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
+                artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
             }
         }
 
