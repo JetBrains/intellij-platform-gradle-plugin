@@ -1,8 +1,10 @@
 @file:Suppress("UnstableApiUsage")
 
+import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun properties(key: String) = project.findProperty(key)?.toString()
+fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
 plugins {
     kotlin("jvm") version "1.5.31"
@@ -10,9 +12,10 @@ plugins {
     id("java-gradle-plugin")
     id("maven-publish")
     id("com.gradle.plugin-publish") version "0.16.0"
+    id("org.jetbrains.changelog") version "1.3.1"
+    id("org.jetbrains.dokka") version "1.4.32"
     id("synapticloop.documentr") version "3.1.0"
     id("com.github.breadmoirai.github-release") version "2.2.12"
-    id("org.jetbrains.changelog") version "1.3.1"
 }
 
 repositories {
@@ -111,9 +114,7 @@ tasks {
     }
 
     jar {
-        manifest {
-            attributes("Version" to project.version)
-        }
+        patchManifest()
     }
 }
 
@@ -131,14 +132,23 @@ fun configureTests(testTask: Test) {
     testTask.outputs.dir(testGradleHomePath)
 }
 
-val javadocJar = tasks.register<Jar>("javadocJar") {
+val dokkaHtml by tasks.getting(DokkaTask::class)
+val javadocJar by tasks.registering(Jar::class) {
+    dependsOn(dokkaHtml)
     archiveClassifier.set("javadoc")
-    from(tasks.named("javadoc"))
+    from(dokkaHtml.outputDirectory)
+    patchManifest()
 }
 
 val sourcesJar = tasks.register<Jar>("sourcesJar") {
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
+    patchManifest()
+}
+
+artifacts {
+    archives(javadocJar)
+    archives(sourcesJar)
 }
 
 publishing {
@@ -153,12 +163,12 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("snapshot") {
+        withType(MavenPublication::class.java).configureEach {
             groupId = project.group.toString()
             artifactId = project.name
             version = version.toString()
 
-            from(components["java"])
+            println("components='${components}'")
             artifact(sourcesJar)
             artifact(javadocJar)
 
