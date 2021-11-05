@@ -3,9 +3,9 @@ package org.jetbrains.intellij.dependency
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingParser
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.utils.ivyRepository
 import java.io.File
 import java.net.URI
@@ -50,7 +50,7 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
                     group = "com.jetbrains.plugins",
                     name = plugin.id,
                     version = plugin.version,
-                    extension = "zip",
+                    ext = "zip",
                 )
             }, {
                 ivyRepository(url.toString())

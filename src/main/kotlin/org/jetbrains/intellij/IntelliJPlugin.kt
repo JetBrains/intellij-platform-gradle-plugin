@@ -22,6 +22,9 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.attributes
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.named
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
@@ -47,7 +50,6 @@ import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
@@ -172,7 +174,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectAfterEvaluate(project: Project, extension: IntelliJPluginExtension) {
         project.subprojects.forEach { subproject ->
             if (subproject.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
-                subproject.extensions.findByType(IntelliJPluginExtension::class.java)?.let {
+                subproject.extensions.getByType(IntelliJPluginExtension::class.java).let {
                     configureProjectAfterEvaluate(subproject, it)
                 }
             }
@@ -345,7 +347,7 @@ open class IntelliJPlugin : Plugin<Project> {
         if (dependency.plugins.findPlugin(IntelliJPlugin::class.java) == null) {
             throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found." + dependency.plugins, null)
         }
-        dependency.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) {
+        dependency.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME) {
             project.tasks.withType(PrepareSandboxTask::class.java).forEach {
                 it.dependsOn(this)
             }
@@ -364,9 +366,8 @@ open class IntelliJPlugin : Plugin<Project> {
         }
         dependencies.add(project.dependencies.create(dependency))
 
-        val prepareSandboxTaskProvider = dependency.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-        val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
-        val dependencyDirectory = File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get())
+        val prepareSandboxTaskProvider = dependency.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        val dependencyDirectory = prepareSandboxTaskProvider.get().run { File(destinationDir, pluginName.get()) }
 
         val pluginDependency = PluginProjectDependency(dependencyDirectory, context)
         extension.addPluginDependency(pluginDependency)
@@ -414,12 +415,13 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun configurePrepareSandboxTasks(project: Project, extension: IntelliJPluginExtension) {
-        val downloadPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+        val downloadPluginTaskProvider =
+            project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
         configurePrepareSandboxTask(project, extension, IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest") {
-            val downloadPluginTask = downloadPluginTaskProvider.get() as DownloadRobotServerPluginTask
+            val downloadPluginTask = downloadPluginTaskProvider.get()
 
             it.from(downloadPluginTask.outputDir.get())
             it.dependsOn(downloadPluginTask)
@@ -468,9 +470,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
             pluginName.convention(extension.pluginName)
             pluginJar.convention(project.layout.file(project.provider {
-                val jarTaskProvider = project.tasks.named(JavaPlugin.JAR_TASK_NAME)
-                val jarTask = jarTaskProvider.get() as Jar
-                jarTask.manifest.attributes(mapOf(
+                val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+                val jarTask = jarTaskProvider.get()
+                jarTask.manifest.attributes(
                     "Created-By" to "Gradle ${project.gradle.gradleVersion}",
                     "Build-JVM" to Jvm.current(),
                     "Version" to project.version,
@@ -481,7 +483,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
                         else -> ideProductInfo(extension.ideaDependency.get().classes)?.run { "$productCode-$version" }
                     },
-                ))
+                )
                 jarTask.archiveFile.orNull?.asFile
             }))
             defaultDestinationDir.convention(project.provider {
@@ -508,8 +510,9 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring run plugin verifier task")
         project.tasks.register(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask::class.java) {
             val taskContext = logCategory()
-            val listProductsReleasesTaskProvider = project.tasks.named(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-            val listProductsReleasesTask = listProductsReleasesTaskProvider.get() as ListProductsReleasesTask
+            val listProductsReleasesTaskProvider =
+                project.tasks.named<ListProductsReleasesTask>(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+            val listProductsReleasesTask = listProductsReleasesTaskProvider.get()
 
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
@@ -528,8 +531,8 @@ open class IntelliJPlugin : Plugin<Project> {
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
             ideDir.convention(project.provider {
-                val runIdeTaskProvider = project.tasks.named(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
-                val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
+                val runIdeTaskProvider = project.tasks.named<RunIdeTask>(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
+                val runIdeTask = runIdeTaskProvider.get()
                 runIdeTask.ideDir.get()
             })
             productsReleasesFile.convention(project.provider {
@@ -562,7 +565,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                     group = "com.jetbrains",
                                     name = "ides",
                                     version = "$type-$version-$buildType",
-                                    extension = "tar.gz",
+                                    ext = "tar.gz",
                                 )
                             }, {
                                 ivyRepository(url)
@@ -598,7 +601,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         name = "verifier-cli",
                         version = resolvedVerifierVersion,
                         classifier = "all",
-                        extension = "jar",
+                        ext = "jar",
                     )
                 }, {
                     mavenRepository(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY)
@@ -627,8 +630,8 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Validates completeness and contents of plugin.xml descriptors as well as plugin’s archive structure."
 
             pluginDir.convention(project.provider {
-                val prepareSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-                val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
+                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+                val prepareSandboxTask = prepareSandboxTaskProvider.get()
                 val path = File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get()).path
                 project.layout.projectDirectory.dir(path)
             })
@@ -681,8 +684,8 @@ open class IntelliJPlugin : Plugin<Project> {
         task: RunIdeBase,
         prepareSandBoxTaskName: String,
     ) {
-        val prepareSandboxTaskProvider = project.tasks.named(prepareSandBoxTaskName)
-        val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
+        val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
+        val prepareSandboxTask = prepareSandboxTaskProvider.get()
         val taskContext = task.logCategory()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
@@ -728,8 +731,8 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun configureJarSearchableOptionsTask(project: Project) {
-        val prepareSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-        val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
+        val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        val prepareSandboxTask = prepareSandboxTaskProvider.get()
 
         info(context, "Configuring jar searchable options task")
         val buildDir = project.buildDir
@@ -864,9 +867,9 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring tests tasks")
         val testTasks = project.tasks.withType(Test::class.java)
-        val prepareTestingSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
-        val runIdeTaskProvider = project.tasks.named(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
-        val runIdeTask = runIdeTaskProvider.get() as RunIdeTask
+        val prepareTestingSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
+        val runIdeTaskProvider = project.tasks.named<RunIdeTask>(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
+        val runIdeTask = runIdeTaskProvider.get()
 
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
         val sandboxDir = extension.sandboxDir.get()
@@ -901,7 +904,6 @@ open class IntelliJPlugin : Plugin<Project> {
                 .withPathSensitivity(PathSensitivity.RELATIVE)
             task.inputs
                 .files(prepareTestingSandboxTaskProvider.map {
-                    it as PrepareSandboxTask
                     it.destinationDir
                 })
                 .withPropertyName("Plugins directory")
@@ -946,10 +948,10 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configureBuildPluginTask(project: Project) {
         info(context, "Configuring building plugin task")
-        val prepareSandboxTaskProvider = project.tasks.named(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-        val prepareSandboxTask = prepareSandboxTaskProvider.get() as PrepareSandboxTask
-        val jarSearchableOptionsTaskProvider = project.tasks.named(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
-        val jarSearchableOptionsTask = jarSearchableOptionsTaskProvider.get() as JarSearchableOptionsTask
+        val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        val prepareSandboxTask = prepareSandboxTaskProvider.get()
+        val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+        val jarSearchableOptionsTask = jarSearchableOptionsTaskProvider.get()
 
         project.tasks.register(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, Zip::class.java) {
             description = "Bundles the project as a distribution."
@@ -986,8 +988,8 @@ open class IntelliJPlugin : Plugin<Project> {
                 resolveBuildTaskOutput(project)
             }))
             outputArchiveFile.convention(project.layout.file(project.provider {
-                val buildPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
-                val buildPluginTask = buildPluginTaskProvider.get() as Zip
+                val buildPluginTaskProvider = project.tasks.named<Zip>(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+                val buildPluginTask = buildPluginTaskProvider.get()
                 val inputFile = buildPluginTask.archiveFile.get().asFile
                 val inputFileExtension = inputFile.path.substring(inputFile.path.lastIndexOf('.'))
                 val inputFileWithoutExtension = inputFile.path.substring(0, inputFile.path.lastIndexOf('.'))
@@ -1005,7 +1007,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         group = "org.jetbrains",
                         name = "marketplace-zip-signer-cli",
                         version = resolvedCliVersion,
-                        extension = "jar",
+                        ext = "jar",
                     )
                 }, {
                     ivyRepository(url)
@@ -1019,9 +1021,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configurePublishPluginTask(project: Project) {
         info(context, "Configuring publish plugin task")
-        val buildPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
-        val verifyPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-        val signPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+        val buildPluginTaskProvider = project.tasks.named<Zip>(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        val verifyPluginTaskProvider = project.tasks.named<VerifyPluginTask>(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+        val signPluginTaskProvider = project.tasks.named<SignPluginTask>(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
         val isOffline = project.gradle.startParameter.isOffline
 
         project.tasks.register(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishPluginTask::class.java) {
@@ -1032,7 +1034,6 @@ open class IntelliJPlugin : Plugin<Project> {
             channels.convention(listOf("default"))
             distributionFile.convention(project.layout.file(project.provider {
                 signPluginTaskProvider.get().let { signPluginTask ->
-                    signPluginTask as SignPluginTask
                     signPluginTask.outputArchiveFile.orNull?.asFile.takeIf { signPluginTask.didWork } ?: resolveBuildTaskOutput(project)
                 }
             }))
@@ -1057,7 +1058,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         group = "org.jetbrains",
                         name = "products-releases",
                         version = "1.0",
-                        extension = "xml",
+                        ext = "xml",
                     )
                 }, {
                     ivyRepository(IntelliJPluginConstants.PRODUCTS_RELEASES_URL)
@@ -1076,10 +1077,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configureProcessResources(project: Project) {
         info(context, "Configuring resources task")
-        val patchPluginXmlTaskProvider = project.tasks.named(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
+        val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
 
-        project.tasks.named(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
-            this as ProcessResources
+        project.tasks.named<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
             from(patchPluginXmlTaskProvider) {
                 duplicatesStrategy = DuplicatesStrategy.INCLUDE
                 into("META-INF")
@@ -1088,8 +1088,8 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun resolveBuildTaskOutput(project: Project): File? {
-        val buildPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
-        val buildPluginTask = buildPluginTaskProvider.get() as Zip
+        val buildPluginTaskProvider = project.tasks.named<Zip>(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        val buildPluginTask = buildPluginTaskProvider.get()
         return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
     }
 

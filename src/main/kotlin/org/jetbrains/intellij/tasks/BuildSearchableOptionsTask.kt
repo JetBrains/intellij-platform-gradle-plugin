@@ -18,7 +18,7 @@ open class BuildSearchableOptionsTask : RunIdeBase(false) {
     }
 
     override fun exec() {
-        args = (args ?: emptyList()) + listOf(outputDir.get().asFile.canonicalPath, "true")
+        args = args + listOf(outputDir.get().asFile.canonicalPath, "true")
         super.exec()
     }
 

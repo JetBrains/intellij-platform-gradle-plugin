@@ -43,22 +43,6 @@ open class DependenciesDownloader @Inject constructor(
     }
 }
 
-internal fun DependencyHandler.create(
-    group: String,
-    name: String,
-    version: String?,
-    classifier: String? = null,
-    extension: String? = null,
-    configuration: String? = null,
-): Dependency = create(mapOf(
-    "group" to group,
-    "name" to name,
-    "version" to version,
-    "classifier" to classifier,
-    "ext" to extension,
-    "configuration" to configuration,
-))
-
 internal fun RepositoryHandler.ivyRepository(repositoryUrl: String, pattern: String = "") =
     ivy {
         url = URI(repositoryUrl)

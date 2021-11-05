@@ -3,13 +3,13 @@ package org.jetbrains.intellij.jbr
 import org.gradle.api.Incubating
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.ifNull
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -131,7 +131,7 @@ open class JbrResolver @Inject constructor(
                     group = "com.jetbrains",
                     name = "jbre",
                     version = jbrArtifact.name,
-                    extension = "tar.gz",
+                    ext = "tar.gz",
                 )
             }, {
                 ivyRepository(url, "[revision].tar.gz")
