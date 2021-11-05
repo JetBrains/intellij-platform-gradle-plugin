@@ -13,7 +13,7 @@ plugins {
     id("maven-publish")
     id("com.gradle.plugin-publish") version "0.16.0"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.dokka") version "1.4.32"
+    id("org.jetbrains.dokka") version "1.5.31"
     id("synapticloop.documentr") version "3.1.0"
     id("com.github.breadmoirai.github-release") version "2.2.12"
 }
