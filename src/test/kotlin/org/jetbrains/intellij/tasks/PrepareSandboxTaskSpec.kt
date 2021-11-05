@@ -117,7 +117,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 apply plugin: 'org.jetbrains.intellij'
                 intellij { 
                     downloadSources = false
-                    version = "2020.2.3"
+                    version = "$intellijVersion"
                 }
             }
             project(':') {

@@ -353,7 +353,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             version = '0.42.123'
             intellij {
-                version = '2019.1'
+                version = '$intellijVersion'
             }
         """)
 
@@ -386,7 +386,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             version = '0.42.123'
             intellij {
-                version = '2019.1'
+                version = '$intellijVersion'
             }
         """)
 
