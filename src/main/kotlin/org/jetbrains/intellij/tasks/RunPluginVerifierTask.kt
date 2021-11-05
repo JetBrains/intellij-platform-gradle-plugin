@@ -17,6 +17,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
@@ -173,7 +174,7 @@ open class RunPluginVerifierTask @Inject constructor(
      * List of the {@link FailureLevel} values used for failing the task if any reported issue will match.
      */
     @Input
-    val failureLevel: ListProperty<FailureLevel> = objectFactory.listProperty(FailureLevel::class.java)
+    val failureLevel = objectFactory.listProperty<FailureLevel>()
 
     /**
      * A fallback file with a list of the releases generated with {@link ListProductsReleasesTask}.
@@ -181,7 +182,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val productsReleasesFile: Property<File> = objectFactory.property(File::class.java)
+    val productsReleasesFile = objectFactory.property<File>()
 
     /**
      * List of the specified IDE versions used for the verification.
@@ -189,21 +190,21 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val ideVersions: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val ideVersions = objectFactory.listProperty<String>()
 
     /**
      * List of the paths to the specified IDE versions in {@link #ideVersions} used for the verification.
      * By default, it resolves paths to the downloaded {@link #ideVersions} IDEs.
      */
     @Input
-    val ides: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val ides = objectFactory.listProperty<File>()
 
     /**
      * List of the paths to locally installed IDE distributions that should be used for verification
      * in addition to those specified in {@link #ideVersions}.
      */
     @Input
-    val localPaths: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val localPaths = objectFactory.listProperty<File>()
 
     /**
      * Returns the version of the IntelliJ Plugin Verifier that will be used.
@@ -211,7 +212,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val verifierVersion: Property<String> = objectFactory.property(String::class.java)
+    val verifierVersion = objectFactory.property<String>()
 
     /**
      * Local path to the IntelliJ Plugin Verifier that will be used.
@@ -219,7 +220,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val verifierPath: Property<String> = objectFactory.property(String::class.java)
+    val verifierPath = objectFactory.property<String>()
 
     /**
      * An instance of the distribution file generated with the build task.
@@ -235,7 +236,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @OutputDirectory
     @Optional
-    val verificationReportsDir: Property<String> = objectFactory.property(String::class.java)
+    val verificationReportsDir = objectFactory.property<String>()
 
     /**
      * The path to directory where IDEs used for the verification will be downloaded.
@@ -243,7 +244,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val downloadDir: Property<String> = objectFactory.property(String::class.java)
+    val downloadDir = objectFactory.property<String>()
 
     /**
      * JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
@@ -251,14 +252,14 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val jbrVersion: Property<String> = objectFactory.property(String::class.java)
+    val jbrVersion = objectFactory.property<String>()
 
     /**
      * Url of repository for downloading JetBrains Java Runtime.
      */
     @Input
     @Optional
-    val jreRepository: Property<String> = objectFactory.property(String::class.java)
+    val jreRepository = objectFactory.property<String>()
 
     /**
      * The path to directory containing JVM runtime, overrides {@link #jbrVersion}.
@@ -266,7 +267,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val runtimeDir: Property<String> = objectFactory.property(String::class.java)
+    val runtimeDir = objectFactory.property<String>()
 
     /**
      * The list of classes prefixes from the external libraries.
@@ -274,7 +275,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val externalPrefixes: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val externalPrefixes = objectFactory.listProperty<String>()
 
     /**
      * A flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
@@ -282,7 +283,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val teamCityOutputFormat: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val teamCityOutputFormat = objectFactory.property<Boolean>()
 
     /**
      * Specifies which subsystems of IDE should be checked.
@@ -290,13 +291,13 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     @Input
     @Optional
-    val subsystemsToCheck: Property<String> = objectFactory.property(String::class.java)
+    val subsystemsToCheck = objectFactory.property<String>()
 
     @Internal
-    val ideDir: Property<File> = objectFactory.property(File::class.java)
+    val ideDir = objectFactory.property<File>()
 
     @Internal
-    val offline: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val offline = objectFactory.property<Boolean>()
 
     private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
 

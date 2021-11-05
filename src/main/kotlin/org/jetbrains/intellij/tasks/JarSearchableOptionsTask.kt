@@ -7,6 +7,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.property
 import java.io.File
 import javax.inject.Inject
 
@@ -21,11 +22,11 @@ open class JarSearchableOptionsTask @Inject constructor(
 
     @Input
     @Optional
-    val pluginName: Property<String> = objectFactory.property(String::class.java)
+    val pluginName = objectFactory.property<String>()
 
     @Input
     @Optional
-    val sandboxDir: Property<String> = objectFactory.property(String::class.java)
+    val sandboxDir = objectFactory.property<String>()
 
     init {
         val pluginJarFiles = mutableSetOf<String>()

@@ -15,6 +15,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.getIdeJvmArgs
@@ -36,11 +37,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     private val context = logCategory()
 
     @Input
-    val ideDir: Property<File> = objectFactory.property(File::class.java)
+    val ideDir = objectFactory.property<File>()
 
     @Input
     @Optional
-    val jbrVersion: Property<String> = objectFactory.property(String::class.java)
+    val jbrVersion = objectFactory.property<String>()
 
     @InputDirectory
     @PathSensitive(PathSensitivity.NONE)
@@ -53,22 +54,22 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      */
     @Input
     @Optional
-    val autoReloadPlugins: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val autoReloadPlugins = objectFactory.property<Boolean>()
 
     @Internal
-    val requiredPluginIds: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val requiredPluginIds = objectFactory.listProperty<String>()
 
     @Internal
-    val configDir: Property<File> = objectFactory.property(File::class.java)
+    val configDir = objectFactory.property<File>()
 
     @Internal
-    val systemDir: Property<File> = objectFactory.property(File::class.java)
+    val systemDir = objectFactory.property<File>()
 
     @Internal
-    val projectWorkingDir: Property<File> = objectFactory.property(File::class.java)
+    val projectWorkingDir = objectFactory.property<File>()
 
     @Internal
-    val projectExecutable: Property<String> = objectFactory.property(String::class.java)
+    val projectExecutable = objectFactory.property<String>()
 
     init {
         mainClass.set("com.intellij.idea.Main")

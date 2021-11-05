@@ -8,11 +8,11 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.VerificationTask
+import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
@@ -24,7 +24,7 @@ open class VerifyPluginTask @Inject constructor(
 ) : ConventionTask(), VerificationTask {
 
     @Input
-    val ignoreFailures: Property<Boolean> = objectFactory.property(Boolean::class.java).convention(false)
+    val ignoreFailures = objectFactory.property<Boolean>().convention(false)
 
     private val context = logCategory()
 
@@ -35,7 +35,7 @@ open class VerifyPluginTask @Inject constructor(
     }
 
     @Input
-    val ignoreWarnings: Property<Boolean> = objectFactory.property(Boolean::class.java).convention(true)
+    val ignoreWarnings = objectFactory.property<Boolean>().convention(true)
 
     @InputDirectory
     val pluginDir: DirectoryProperty = objectFactory.directoryProperty()

@@ -4,10 +4,10 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
@@ -52,10 +52,10 @@ open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: Obje
     }
 
     @Input
-    val version: Property<String> = objectFactory.property(String::class.java)
+    val version = objectFactory.property<String>()
 
     @Input
-    val pluginArchive: Property<File> = objectFactory.property(File::class.java)
+    val pluginArchive = objectFactory.property<File>()
 
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()

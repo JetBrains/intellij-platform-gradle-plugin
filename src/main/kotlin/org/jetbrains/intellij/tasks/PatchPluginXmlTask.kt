@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.logCategory
@@ -31,31 +32,31 @@ open class PatchPluginXmlTask @Inject constructor(
 
     @SkipWhenEmpty
     @InputFiles
-    val pluginXmlFiles: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val pluginXmlFiles = objectFactory.listProperty<File>()
 
     @Input
     @Optional
-    val pluginDescription: Property<String> = objectFactory.property(String::class.java)
+    val pluginDescription = objectFactory.property<String>()
 
     @Input
     @Optional
-    val sinceBuild: Property<String> = objectFactory.property(String::class.java)
+    val sinceBuild = objectFactory.property<String>()
 
     @Input
     @Optional
-    val untilBuild: Property<String> = objectFactory.property(String::class.java)
+    val untilBuild = objectFactory.property<String>()
 
     @Input
     @Optional
-    val version: Property<String> = objectFactory.property(String::class.java)
+    val version = objectFactory.property<String>()
 
     @Input
     @Optional
-    val changeNotes: Property<String> = objectFactory.property(String::class.java)
+    val changeNotes = objectFactory.property<String>()
 
     @Input
     @Optional
-    val pluginId: Property<String> = objectFactory.property(String::class.java)
+    val pluginId = objectFactory.property<String>()
 
     private val context = logCategory()
 

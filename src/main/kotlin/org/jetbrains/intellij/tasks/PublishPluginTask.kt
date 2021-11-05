@@ -15,6 +15,7 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
@@ -32,15 +33,15 @@ open class PublishPluginTask @Inject constructor(
 
     @Input
     @Optional
-    val host: Property<String> = objectFactory.property(String::class.java)
+    val host = objectFactory.property<String>()
 
     @Input
     @Optional
-    val token: Property<String> = objectFactory.property(String::class.java)
+    val token = objectFactory.property<String>()
 
     @Input
     @Optional
-    val channels: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val channels = objectFactory.listProperty<String>()
 
     private val context = logCategory()
 

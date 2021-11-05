@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.property
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants
@@ -93,7 +94,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val cliVersion: Property<String> = objectFactory.property(String::class.java)
+    val cliVersion = objectFactory.property<String>()
 
     /**
      * Local path to the Marketplace ZIP Signer CLI that will be used.
@@ -101,7 +102,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val cliPath: Property<String> = objectFactory.property(String::class.java)
+    val cliPath = objectFactory.property<String>()
 
     /**
      * KeyStore file path.
@@ -109,7 +110,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val keyStore: Property<String> = objectFactory.property(String::class.java)
+    val keyStore = objectFactory.property<String>()
 
     /**
      * KeyStore password.
@@ -117,7 +118,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val keyStorePassword: Property<String> = objectFactory.property(String::class.java)
+    val keyStorePassword = objectFactory.property<String>()
 
     /**
      * KeyStore key alias.
@@ -125,7 +126,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val keyStoreKeyAlias: Property<String> = objectFactory.property(String::class.java)
+    val keyStoreKeyAlias = objectFactory.property<String>()
 
     /**
      * KeyStore type.
@@ -133,7 +134,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val keyStoreType: Property<String> = objectFactory.property(String::class.java)
+    val keyStoreType = objectFactory.property<String>()
 
     /**
      * JCA KeyStore Provider name.
@@ -141,7 +142,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val keyStoreProviderName: Property<String> = objectFactory.property(String::class.java)
+    val keyStoreProviderName = objectFactory.property<String>()
 
     /**
      * Private key content.
@@ -149,7 +150,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val privateKey: Property<String> = objectFactory.property(String::class.java)
+    val privateKey = objectFactory.property<String>()
 
     /**
      * Private key file.
@@ -165,7 +166,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val password: Property<String> = objectFactory.property(String::class.java)
+    val password = objectFactory.property<String>()
 
     /**
      * Certificate chain content.
@@ -174,7 +175,7 @@ open class SignPluginTask @Inject constructor(
      */
     @Input
     @Optional
-    val certificateChain: Property<String> = objectFactory.property(String::class.java)
+    val certificateChain = objectFactory.property<String>()
 
     /**
      * Certificate chain file.
