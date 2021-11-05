@@ -9,14 +9,14 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.property
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.info
@@ -37,27 +37,27 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     @Internal
-    val sourceSetOutputClassesDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val sourceSetOutputClassesDirs = objectFactory.listProperty<File>()
 
     @Internal
-    val sourceSetAllDirs: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val sourceSetAllDirs = objectFactory.listProperty<File>()
 
     @Internal
-    val sourceSetResources: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val sourceSetResources = objectFactory.listProperty<File>()
 
     @Internal
-    val sourceSetCompileClasspath: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val sourceSetCompileClasspath = objectFactory.listProperty<File>()
 
     @Input
     @Optional
-    val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
+    val ideaDependency = objectFactory.property<IdeaDependency>()
 
     @Input
     @Optional
-    val javac2: Property<File> = objectFactory.property(File::class.java)
+    val javac2 = objectFactory.property<File>()
 
     @Input
-    val compilerVersion: Property<String> = objectFactory.property(String::class.java)
+    val compilerVersion = objectFactory.property<String>()
 
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
@@ -70,7 +70,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     @Input
-    val compilerClassPathFromMaven: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val compilerClassPathFromMaven = objectFactory.listProperty<File>()
 
     @TaskAction
     fun instrumentClasses() {
