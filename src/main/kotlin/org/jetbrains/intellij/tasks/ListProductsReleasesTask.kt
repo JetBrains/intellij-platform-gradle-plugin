@@ -4,12 +4,12 @@ import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.Version.Companion.parse
 import org.jetbrains.intellij.logCategory
@@ -26,26 +26,26 @@ open class ListProductsReleasesTask @Inject constructor(
 
     @Input
     @Optional
-    val updatesPath: Property<String> = objectFactory.property(String::class.java)
+    val updatesPath = objectFactory.property<String>()
 
     @OutputFile
     val outputFile: RegularFileProperty = objectFactory.fileProperty()
 
     @Input
     @Optional
-    val types: ListProperty<String> = objectFactory.listProperty(String::class.java)
+    val types = objectFactory.listProperty<String>()
 
     @Input
     @Optional
-    val sinceVersion: Property<String> = objectFactory.property(String::class.java)
+    val sinceVersion = objectFactory.property<String>()
 
     @Input
     @Optional
-    val untilVersion: Property<String> = objectFactory.property(String::class.java)
+    val untilVersion = objectFactory.property<String>()
 
     @Input
     @Optional
-    val includeEAP: Property<Boolean> = objectFactory.property(Boolean::class.java)
+    val includeEAP = objectFactory.property<Boolean>()
 
     companion object {
         private const val CHANNEL_EAP = "eap"

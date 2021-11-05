@@ -8,8 +8,6 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
@@ -17,6 +15,8 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Sync
 import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
+import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.property
 import org.jdom2.Element
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
@@ -32,24 +32,24 @@ open class PrepareSandboxTask @Inject constructor(
 ) : Sync() {
 
     @Input
-    val pluginName: Property<String> = objectFactory.property(String::class.java)
+    val pluginName = objectFactory.property<String>()
 
     @Input
-    val configDir: Property<String> = objectFactory.property(String::class.java)
+    val configDir = objectFactory.property<String>()
 
     @InputFile
     val pluginJar: RegularFileProperty = objectFactory.fileProperty()
 
     @Input
     @Optional
-    val librariesToIgnore: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val librariesToIgnore = objectFactory.listProperty<File>()
 
     @Input
     @Optional
-    val pluginDependencies: ListProperty<PluginDependency> = objectFactory.listProperty(PluginDependency::class.java)
+    val pluginDependencies = objectFactory.listProperty<PluginDependency>()
 
     @Internal
-    val defaultDestinationDir: Property<File> = objectFactory.property(File::class.java)
+    val defaultDestinationDir = objectFactory.property<File>()
 
     private val context = logCategory()
 

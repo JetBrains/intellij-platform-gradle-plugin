@@ -5,14 +5,14 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.property
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.logCategory
@@ -31,31 +31,31 @@ open class PatchPluginXmlTask @Inject constructor(
 
     @SkipWhenEmpty
     @InputFiles
-    val pluginXmlFiles: ListProperty<File> = objectFactory.listProperty(File::class.java)
+    val pluginXmlFiles = objectFactory.listProperty<File>()
 
     @Input
     @Optional
-    val pluginDescription: Property<String> = objectFactory.property(String::class.java)
+    val pluginDescription = objectFactory.property<String>()
 
     @Input
     @Optional
-    val sinceBuild: Property<String> = objectFactory.property(String::class.java)
+    val sinceBuild = objectFactory.property<String>()
 
     @Input
     @Optional
-    val untilBuild: Property<String> = objectFactory.property(String::class.java)
+    val untilBuild = objectFactory.property<String>()
 
     @Input
     @Optional
-    val version: Property<String> = objectFactory.property(String::class.java)
+    val version = objectFactory.property<String>()
 
     @Input
     @Optional
-    val changeNotes: Property<String> = objectFactory.property(String::class.java)
+    val changeNotes = objectFactory.property<String>()
 
     @Input
     @Optional
-    val pluginId: Property<String> = objectFactory.property(String::class.java)
+    val pluginId = objectFactory.property<String>()
 
     private val context = logCategory()
 
