@@ -11,7 +11,7 @@ plugins {
     kotlin("plugin.serialization") version "1.5.31"
     id("java-gradle-plugin")
     id("maven-publish")
-    id("com.gradle.plugin-publish") version "0.16.0"
+    id("com.gradle.plugin-publish") version "0.17.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.5.31"
     id("synapticloop.documentr") version "3.1.0"
