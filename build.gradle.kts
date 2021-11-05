@@ -9,7 +9,7 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     kotlin("jvm") version "1.5.31"
     kotlin("plugin.serialization") version "1.5.31"
-    id("java-gradle-plugin")
+    `kotlin-dsl`
     id("maven-publish")
     id("com.gradle.plugin-publish") version "0.17.0"
     id("org.jetbrains.changelog") version "1.3.1"
