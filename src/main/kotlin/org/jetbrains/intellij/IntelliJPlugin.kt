@@ -1,10 +1,8 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
@@ -736,12 +734,13 @@ open class IntelliJPlugin : Plugin<Project> {
 
         info(context, "Configuring jar searchable options task")
         val buildDir = project.buildDir
+
         project.tasks.register(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, JarSearchableOptionsTask::class.java) {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Jars searchable options."
 
             outputDir.convention(project.provider {
-                project.layout.projectDirectory.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+                project.layout.projectDirectory.dir("build/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
             })
             pluginName.convention(prepareSandboxTask.pluginName)
             sandboxDir.convention(project.provider {
@@ -752,7 +751,11 @@ open class IntelliJPlugin : Plugin<Project> {
 
             dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-            onlyIf { File(buildDir, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory }
+
+            val isDirectoryProvider = project.provider {
+                project.buildDir.resolve(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).isDirectory
+            }
+            onlyIf { isDirectoryProvider.get() }
         }
     }
 
@@ -844,7 +847,9 @@ open class IntelliJPlugin : Plugin<Project> {
                     })
 
                     dependsOn(sourceSet.classesTaskName)
-                    onlyIf { instrumentCode.get() }
+
+                    val instrumentCodeProvider = project.provider { instrumentCode.get() }
+                    onlyIf { instrumentCodeProvider.get() }
                 }
 
             // A dedicated task ensures that sources substitution is always run,
@@ -854,7 +859,10 @@ open class IntelliJPlugin : Plugin<Project> {
                 val outputDir = instrumentTask.get().outputDir
 
                 dependsOn(instrumentTask)
-                onlyIf { instrumentCode.get() }
+
+                val instrumentCodeProvider = project.provider { instrumentCode.get() }
+                onlyIf { instrumentCodeProvider.get() }
+
                 // Set the classes' dir to the one with the instrumented classes
                 doLast { classesDirs.setFrom(outputDir) }
             }
@@ -867,7 +875,8 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring tests tasks")
         val testTasks = project.tasks.withType(Test::class.java)
-        val prepareTestingSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
+        val prepareTestingSandboxTaskProvider =
+            project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
         val runIdeTask = runIdeTaskProvider.get()
 
@@ -924,25 +933,23 @@ open class IntelliJPlugin : Plugin<Project> {
 
             // Use an anonymous class, since lambdas disable caching for the task.
             @Suppress("ObjectLiteralToLambda")
-            task.doFirst(object : Action<Task> {
-                override fun execute(t: Task) {
-                    task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirectory.get())
-                    task.classpath += ideaDependencyLibraries.get()
+            task.doFirst {
+                task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirectory.get())
+                task.classpath += ideaDependencyLibraries.get()
 
-                    task.systemProperties(getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
+                task.systemProperties(getIdeaSystemProperties(configDirectory, systemDirectory, pluginsDirectory, pluginIds))
 
-                    // since 193 plugins from classpath are loaded before plugins from plugins directory
-                    // to handle this, use plugin.path property as task's the very first source of plugins
-                    // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
-                    val ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.get().buildNumber)
-                    if (ideVersion.baselineVersion >= 193) {
-                        task.systemProperty(
-                            IntelliJPluginConstants.PLUGIN_PATH,
-                            pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
-                        )
-                    }
+                // since 193 plugins from classpath are loaded before plugins from plugins directory
+                // to handle this, use plugin.path property as task's the very first source of plugins
+                // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
+                val ideVersion = IdeVersion.createIdeVersion(extension.ideaDependency.get().buildNumber)
+                if (ideVersion.baselineVersion >= 193) {
+                    task.systemProperty(
+                        IntelliJPluginConstants.PLUGIN_PATH,
+                        pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
+                    )
                 }
-            })
+            }
         }
     }
 
@@ -950,7 +957,8 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring building plugin task")
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
         val prepareSandboxTask = prepareSandboxTaskProvider.get()
-        val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+        val jarSearchableOptionsTaskProvider =
+            project.tasks.named<JarSearchableOptionsTask>(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
         val jarSearchableOptionsTask = jarSearchableOptionsTaskProvider.get()
 
         project.tasks.register(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, Zip::class.java) {
@@ -1090,7 +1098,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun resolveBuildTaskOutput(project: Project): File? {
         val buildPluginTaskProvider = project.tasks.named<Zip>(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
         val buildPluginTask = buildPluginTaskProvider.get()
-        return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
+        return buildPluginTask.archiveFile.orNull?.asFile?.takeIf(File::exists)
     }
 
     private fun getVersion() = IntelliJPlugin::class.java

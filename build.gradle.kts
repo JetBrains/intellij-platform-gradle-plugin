@@ -168,7 +168,6 @@ publishing {
             artifactId = project.name
             version = version.toString()
 
-            println("components='${components}'")
             artifact(sourcesJar)
             artifact(javadocJar)
 
