@@ -3,6 +3,7 @@
 ## next
 
 - Make `intellij.version` property mandatory
+- Postpone the initial dependencies downloading to the `setupDependencies` task which is run in the `afterSync` phase or by individual tasks
 - Provide build information within the `META-INF/MANIFEST.MF` file
 - Resolve EAP version of the Java compiler for `LATEST-EAP-SNAPSHOT`
 - Allow for using `dcevm`, `fd`, and `nomod` variants of JBR [#818](../../issues/818)
