@@ -54,7 +54,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * Please see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
      */
     @Input
-    @Optional
     val version: Property<String> = objectFactory.property(String::class.java)
 
     /**
@@ -176,13 +175,12 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @Internal
     val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
-    fun getVersionNumber() = version.orNull?.let { version ->
+    fun getVersionNumber(): String = version.get().let { version ->
         versionTypeRegex.matchEntire(version)?.groupValues?.getOrNull(2) ?: version
     }
 
-    fun getVersionType(): String {
-        val version = version.orNull ?: return "IC"
-        return versionTypeRegex.matchEntire(version)?.groupValues?.getOrNull(1) ?: type.getOrElse("IC")
+    fun getVersionType(): String = version.get().let { version ->
+        versionTypeRegex.matchEntire(version)?.groupValues?.getOrNull(1) ?: type.getOrElse("IC")
     }
 
     fun addPluginDependency(pluginDependency: PluginDependency) {

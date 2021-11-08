@@ -21,7 +21,7 @@ plugins {{{\n}
 ```{\n}
 {pre
 
-And define the snapshots repository in your `settings.gradle` file
+And define the snapshot repository in your `settings.gradle` file
 
 pre}
 {\n}{\n}```groovy{\n}

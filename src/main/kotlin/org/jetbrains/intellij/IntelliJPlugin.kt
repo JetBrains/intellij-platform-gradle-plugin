@@ -194,7 +194,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val ideaDependency = when (val localPath = extension.localPath.orNull) {
                 null -> {
                     info(context, "Using IDE from remote repository")
-                    val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
+                    val version = extension.getVersionNumber()
                     val extraDependencies = extension.extraDependencies.get()
                     dependencyManager.resolveRemote(
                         project,
@@ -771,7 +771,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         sourceSet.compileClasspath
                     })
                     it.compilerVersion.convention(project.provider {
-                        val version = extension.getVersionNumber() ?: IntelliJPluginConstants.DEFAULT_IDEA_VERSION
+                        val version = extension.getVersionNumber()
                         val localPath = extension.localPath.orNull
                         val ideaDependency = extension.ideaDependency.get()
 

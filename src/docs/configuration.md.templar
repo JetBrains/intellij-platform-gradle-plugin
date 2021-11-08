@@ -6,7 +6,7 @@ Plugin provides the following options to configure target IntelliJ SDK and build
 
 ### Setup DSL
 
-The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to setup the environment and dependencies.
+The following attributes are a part of the Setup DSL <kbd>intellij { ... }</kbd> in which allows you to set up the environment and dependencies.
 
 pre}
 {\n}
@@ -43,7 +43,7 @@ pre}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 {-- --------------------------------------------------------------------------------------------------------------- --}
 
-| <kbd>version</kbd> - The version of the IntelliJ Platform IDE that will be used to build the plugin. <br/><br/>
+| <kbd>version</kbd> **REQUIRED** - The version of the IntelliJ Platform IDE that will be used to build the plugin.<br/><br/>
 
 Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html) in SDK docs for more details.<br/><br/>
 
@@ -60,9 +60,7 @@ Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/pl
         <li><kbd>'LATEST-EAP-SNAPSHOT'</kbd></li>
     </ul>
 
-<br/><br/>All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://plugins.jetbrains.com/docs/intellij/intellij-artifacts.html) page.<br/><br/>
-
-**Default Value:** <kbd>'LATEST-EAP-SNAPSHOT'</kbd>
+<br/><br/>All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://plugins.jetbrains.com/docs/intellij/intellij-artifacts.html) page.
 |{\n}
 
 {-- --------------------------------------------------------------------------------------------------------------- --}
@@ -325,7 +323,7 @@ Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDE
 ### Plugin Signing
 To sign the plugin before publishing to the JetBrains Marketplace with the `signPlugin` task, it is required to provide a certificate chain and a private key with its password using `signPlugin { ... }` Plugin Signing DSL.
 
-As soon as `privateKey` (or `privateKeyFile`) and `certificateChain` (or `certificateChainFile)` properties are specified, task will be executed automatically right before the `publishPlugin` task.
+As soon as `privateKey` (or `privateKeyFile`) and `certificateChain` (or `certificateChainFile`) properties are specified, task will be executed automatically right before the `publishPlugin` task.
 
 | **Attributes**                                                                                         | **Default Value**  |
 | :----------------------------------------------------------------------------------------------------- | :----------------- |
