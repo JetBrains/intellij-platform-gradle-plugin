@@ -12,6 +12,7 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.ClasspathNormalizer
@@ -24,7 +25,12 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.gradle.tooling.BuildException
+import org.jetbrains.gradle.ext.IdeaExtPlugin
+import org.jetbrains.gradle.ext.ProjectSettings
+import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -44,6 +50,7 @@ import org.jetbrains.intellij.tasks.RunIdeBase
 import org.jetbrains.intellij.tasks.RunIdeForUiTestTask
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.intellij.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.tasks.SetupDependenciesTask
 import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
 import org.jetbrains.intellij.utils.ArchiveUtils
@@ -70,6 +77,17 @@ open class IntelliJPlugin : Plugin<Project> {
 
         checkGradleVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
+        project.plugins.apply(IdeaExtPlugin::class.java)
+
+        project.pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
+            project.idea {
+                this.project.settings {
+                    taskTriggers {
+                        afterSync("setupDependencies")
+                    }
+                }
+            }
+        }
 
         val intellijExtension = project.extensions.create(
             IntelliJPluginConstants.EXTENSION_NAME,
@@ -160,6 +178,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
+        configureSetupDependenciesTask(project, extension)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
         project.afterEvaluate {
             configureProjectAfterEvaluate(it, extension)
@@ -230,10 +249,6 @@ open class IntelliJPlugin : Plugin<Project> {
         })
         Jvm.current().toolsJar?.let { toolsJar ->
             project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
-        }
-
-        project.afterEvaluate {
-            extension.ideaDependency.get()
         }
     }
 
@@ -1088,6 +1103,19 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
+    private fun configureSetupDependenciesTask(project: Project, extension: IntelliJPluginExtension) {
+        info(context, "Configuring setup dependencies task")
+
+        project.tasks.register(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME, SetupDependenciesTask::class.java) {
+            it.group = IntelliJPluginConstants.GROUP_NAME
+            it.description = "Setup required dependencies for building and running project."
+
+            it.doFirst {
+                extension.ideaDependency.get()
+            }
+        }
+    }
+
     private fun resolveBuildTaskOutput(project: Project): File? {
         val buildPluginTaskProvider = project.tasks.named(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
         val buildPluginTask = buildPluginTaskProvider.get() as Zip
@@ -1102,4 +1130,16 @@ open class IntelliJPlugin : Plugin<Project> {
             Manifest(URL(manifestPath).openStream()).mainAttributes.getValue("Version")
         }
         ?.getOrNull() ?: ""
+
+    private fun Project.idea(
+        action: IdeaModel.() -> Unit,
+    ) = extensions.configure("idea", action)
+
+    private fun IdeaProject.settings(
+        action: ProjectSettings.() -> Unit,
+    ) = (this as ExtensionAware).extensions.configure("settings", action)
+
+    private fun ProjectSettings.taskTriggers(
+        action: TaskTriggersConfig.() -> Unit,
+    ) = (this as ExtensionAware).extensions.configure("taskTriggers", action)
 }

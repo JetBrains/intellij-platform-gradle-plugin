@@ -21,6 +21,7 @@ plugins {
 repositories {
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
+    maven("https://plugins.gradle.org/m2")
 }
 
 dependencies {
@@ -44,6 +45,8 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
+
+    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
@@ -168,7 +171,6 @@ publishing {
             artifactId = project.name
             version = version.toString()
 
-            println("components='${components}'")
             artifact(sourcesJar)
             artifact(javadocJar)
 

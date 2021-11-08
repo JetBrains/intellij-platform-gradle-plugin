@@ -22,6 +22,7 @@ object IntelliJPluginConstants {
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
+    const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
 
     const val IDEA_CONFIGURATION_NAME = "idea"
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
