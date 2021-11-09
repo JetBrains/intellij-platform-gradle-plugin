@@ -8,6 +8,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
 import org.jetbrains.intellij.debug
@@ -20,7 +21,6 @@ import org.jetbrains.intellij.isPyCharmType
 import org.jetbrains.intellij.releaseType
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.utils.mavenRepository
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -115,7 +115,7 @@ open class IdeaDependencyManager @Inject constructor(
                     name = if (forPyCharm) "pycharmPC" else "ideaIC",
                     version = version,
                     classifier = "sources",
-                    extension = "jar",
+                    ext = "jar",
                 )
             }, {
                 mavenRepository("$repositoryUrl/$releaseType")

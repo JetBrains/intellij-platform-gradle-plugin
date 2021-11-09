@@ -22,6 +22,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.named
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.plugins.ide.idea.model.IdeaModel
@@ -55,7 +56,6 @@ import org.jetbrains.intellij.tasks.SignPluginTask
 import org.jetbrains.intellij.tasks.VerifyPluginTask
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.utils.create
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
@@ -251,7 +251,8 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring patch plugin.xml task")
 
         project.tasks.register(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, PatchPluginXmlTask::class.java) {
-            val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+            val setupDependenciesTaskProvider =
+                project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
             val setupDependenciesTask = setupDependenciesTaskProvider.get()
 
             group = IntelliJPluginConstants.GROUP_NAME
@@ -342,7 +343,8 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring $taskName task")
 
         project.tasks.register(taskName, PrepareSandboxTask::class.java) {
-            val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+            val setupDependenciesTaskProvider =
+                project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
             val setupDependenciesTask = setupDependenciesTaskProvider.get()
 
             group = IntelliJPluginConstants.GROUP_NAME
@@ -403,7 +405,8 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring run plugin verifier task")
 
         project.tasks.register(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, RunPluginVerifierTask::class.java) {
-            val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+            val listProductsReleasesTaskProvider =
+                project.tasks.named<ListProductsReleasesTask>(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
             val listProductsReleasesTask = listProductsReleasesTaskProvider.get()
 
             group = IntelliJPluginConstants.GROUP_NAME
@@ -455,7 +458,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                     group = "com.jetbrains",
                                     name = "ides",
                                     version = "$type-$version-$buildType",
-                                    extension = "tar.gz",
+                                    ext = "tar.gz",
                                 )
                             }, {
                                 ivyRepository(url)
@@ -491,7 +494,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         name = "verifier-cli",
                         version = resolvedVerifierVersion,
                         classifier = "all",
-                        extension = "jar",
+                        ext = "jar",
                     )
                 }, {
                     mavenRepository(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY)
@@ -640,9 +643,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Jars searchable options."
 
             outputDir.convention(project.provider {
-                project.layout.projectDirectory.dir(
-                    project.buildDir.resolve(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).canonicalPath
-                )
+                project.layout.projectDirectory.dir(project.buildDir.resolve(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).canonicalPath)
             })
             pluginName.convention(prepareSandboxTask.pluginName)
             sandboxDir.convention(project.provider {
@@ -664,7 +665,8 @@ open class IntelliJPlugin : Plugin<Project> {
         sourceSets.forEach { sourceSet ->
             val instrumentTask =
                 project.tasks.register(sourceSet.getTaskName("instrument", "code"), IntelliJInstrumentCodeTask::class.java) {
-                    val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+                    val setupDependenciesTaskProvider =
+                        project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
                     val setupDependenciesTask = setupDependenciesTaskProvider.get()
                     val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
@@ -712,30 +714,26 @@ open class IntelliJPlugin : Plugin<Project> {
                     })
                     compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = compilerVersion.get()
-                        if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION ||
-                            Version.parse(compilerVersion) >= Version(183, 3795, 13)
+                        if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION || Version.parse(compilerVersion) >= Version(183,
+                                3795,
+                                13)
                         ) {
-                            dependenciesDownloader.downloadFromMultipleRepositories(
-                                logCategory(),
-                                {
-                                    create(
-                                        group = "com.jetbrains.intellij.java",
-                                        name = "java-compiler-ant-tasks",
-                                        version = compilerVersion,
-                                    )
-                                },
-                                {
-                                    listOf(
-                                        "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
-                                        IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
-                                    ).map { url -> mavenRepository(url) }
-                                }
-                            )
+                            dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
+                                create(
+                                    group = "com.jetbrains.intellij.java",
+                                    name = "java-compiler-ant-tasks",
+                                    version = compilerVersion,
+                                )
+                            }, {
+                                listOf(
+                                    "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
+                                    IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
+                                ).map { url -> mavenRepository(url) }
+                            })
                         } else {
                             warn(
                                 logCategory(),
-                                "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. " +
-                                    "Use higher 'intellij.version' or specify the 'compilerVersion' property manually.",
+                                "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. " + "Use higher 'intellij.version' or specify the 'compilerVersion' property manually.",
                             )
                             null
                         }
@@ -772,8 +770,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring tests tasks")
-        val setupDependenciesTaskProvider =
-            project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
         val setupDependenciesTask = setupDependenciesTaskProvider.get()
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(IntelliJPluginConstants.RUN_IDE_TASK_NAME)
         val runIdeTask = runIdeTaskProvider.get()
@@ -818,17 +815,9 @@ open class IntelliJPlugin : Plugin<Project> {
             // the same as previous – setting appClassLoader but outdated. Works for part of 203 builds.
             task.systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            task.outputs
-                .dir(systemDirectoryProvider)
-                .withPropertyName("System directory")
-            task.inputs
-                .dir(configDirectoryProvider)
-                .withPropertyName("Config Directory")
-                .withPathSensitivity(PathSensitivity.RELATIVE)
-            task.inputs
-                .files(pluginsDirectoryProvider)
-                .withPropertyName("Plugins directory")
-                .withPathSensitivity(PathSensitivity.RELATIVE)
+            task.outputs.dir(systemDirectoryProvider).withPropertyName("System directory")
+            task.inputs.dir(configDirectoryProvider).withPropertyName("Config Directory").withPathSensitivity(PathSensitivity.RELATIVE)
+            task.inputs.files(pluginsDirectoryProvider).withPropertyName("Plugins directory").withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class.java)
 
             task.dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
@@ -865,7 +854,8 @@ open class IntelliJPlugin : Plugin<Project> {
         project.tasks.register(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, Zip::class.java) {
             val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             val prepareSandboxTask = prepareSandboxTaskProvider.get()
-            val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+            val jarSearchableOptionsTaskProvider =
+                project.tasks.named<JarSearchableOptionsTask>(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             val jarSearchableOptionsTask = jarSearchableOptionsTaskProvider.get()
 
             description = "Bundles the project as a distribution."
@@ -920,7 +910,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         group = "org.jetbrains",
                         name = "marketplace-zip-signer-cli",
                         version = resolvedCliVersion,
-                        extension = "jar",
+                        ext = "jar",
                     )
                 }, {
                     ivyRepository(url)
@@ -928,7 +918,6 @@ open class IntelliJPlugin : Plugin<Project> {
             })
 
             onlyIf { _ ->
-                this as SignPluginTask
                 (privateKey.isPresent || privateKeyFile.isPresent) && (certificateChain.isPresent || certificateChainFile.isPresent)
             }
             dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
@@ -973,7 +962,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         group = "org.jetbrains",
                         name = "products-releases",
                         version = "1.0",
-                        extension = "xml",
+                        ext = "xml",
                     )
                 }, {
                     ivyRepository(IntelliJPluginConstants.PRODUCTS_RELEASES_URL)
@@ -1016,9 +1005,8 @@ open class IntelliJPlugin : Plugin<Project> {
                 val ideaPlugins = create(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).setVisible(false).apply {
                     configurePluginDependencies(project, this@register, extension, this)
                 }
-                val defaultDependencies = create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME)
-                    .setVisible(false)
-                    .apply {
+                val defaultDependencies =
+                    create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME).setVisible(false).apply {
                         defaultDependencies {
                             add(project.dependencies.create(
                                 group = "org.jetbrains",
@@ -1142,14 +1130,11 @@ open class IntelliJPlugin : Plugin<Project> {
         return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
     }
 
-    private fun getVersion() = IntelliJPlugin::class.java
-        .run { getResource("$simpleName.class")?.toString() }
-        ?.takeIf { it.startsWith("jar") }
-        ?.runCatching {
+    private fun getVersion() =
+        IntelliJPlugin::class.java.run { getResource("$simpleName.class")?.toString() }?.takeIf { it.startsWith("jar") }?.runCatching {
             val manifestPath = substring(0, lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF"
             Manifest(URL(manifestPath).openStream()).mainAttributes.getValue("Version")
-        }
-        ?.getOrNull() ?: ""
+        }?.getOrNull() ?: ""
 
     private fun Project.idea(
         action: IdeaModel.() -> Unit,
