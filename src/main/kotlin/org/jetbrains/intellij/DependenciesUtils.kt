@@ -35,8 +35,7 @@ fun Project.intellijPlugin(plugin: String, filter: Action<PatternFilterable>): F
 fun Project.intellijPlugin(plugin: String, filter: PatternFilterable): FileCollection = intellijPluginBase(plugin).matching(filter)
 
 private fun Project.intellijPluginBase(plugin: String): FileTree {
-    val extension = extensions.findByType(IntelliJPluginExtension::class.java)
-        ?: throw GradleException("IntelliJPluginExtension cannot be resolved")
+    val extension = extensions.getByType(IntelliJPluginExtension::class.java)
 
     if (!state.executed) {
         throw GradleException("intellij plugin '$plugin' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
@@ -51,9 +50,7 @@ private fun Project.intellijPluginBase(plugin: String): FileTree {
 }
 
 fun Project.intellijPlugins(vararg plugins: String): FileCollection {
-    val extension = extensions.findByType(IntelliJPluginExtension::class.java)
-        ?: throw GradleException("IntelliJPluginExtension cannot be resolved")
-
+    val extension = extensions.getByType(IntelliJPluginExtension::class.java)
     val selectedPlugins = mutableSetOf<PluginDependency>()
     val nonValidPlugins = mutableListOf<String>()
     plugins.forEach { pluginName ->
