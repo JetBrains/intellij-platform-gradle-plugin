@@ -22,6 +22,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.attributes
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.named
 import org.gradle.language.jvm.tasks.ProcessResources
@@ -354,7 +355,7 @@ open class IntelliJPlugin : Plugin<Project> {
             pluginJar.convention(project.layout.file(project.provider {
                 val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
                 val jarTask = jarTaskProvider.get()
-                jarTask.manifest.attributes(mapOf(
+                jarTask.manifest.attributes(
                     "Created-By" to "Gradle ${project.gradle.gradleVersion}",
                     "Build-JVM" to Jvm.current(),
                     "Version" to project.version,
@@ -365,7 +366,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
                         else -> ideProductInfo(setupDependenciesTask.idea.get().classes)?.run { "$productCode-$version" }
                     },
-                ))
+                )
                 jarTask.archiveFile.orNull?.asFile
             }))
             defaultDestinationDir.convention(project.provider {
