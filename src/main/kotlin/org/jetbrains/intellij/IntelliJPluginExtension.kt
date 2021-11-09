@@ -173,14 +173,15 @@ abstract class IntelliJPluginExtension @Inject constructor(
     val pluginDependencies: ListProperty<PluginDependency> = objectFactory.listProperty(PluginDependency::class.java)
 
     @Internal
+    @Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     val ideaDependency: Property<IdeaDependency> = objectFactory.property(IdeaDependency::class.java)
 
-    fun getVersionNumber(): String = version.get().let { version ->
-        versionTypeRegex.matchEntire(version)?.groupValues?.getOrNull(2) ?: version
+    fun getVersionNumber(): String = version.get().run {
+        versionTypeRegex.matchEntire(this)?.groupValues?.getOrNull(2) ?: this
     }
 
-    fun getVersionType(): String = version.get().let { version ->
-        versionTypeRegex.matchEntire(version)?.groupValues?.getOrNull(1) ?: type.getOrElse("IC")
+    fun getVersionType(): String = version.get().run {
+        versionTypeRegex.matchEntire(this)?.groupValues?.getOrNull(1) ?: type.getOrElse("IC")
     }
 
     fun addPluginDependency(pluginDependency: PluginDependency) {
@@ -203,7 +204,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
         return pluginDependencies.orNull?.toSet() ?: emptySet()
     }
 
-    @Deprecated("Use ideaDependency property directly", ReplaceWith("ideaDependency.get()"))
+    @Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     fun getIdeaDependency(@Suppress("UNUSED_PARAMETER") project: Project): IdeaDependency = ideaDependency.get()
 }
 

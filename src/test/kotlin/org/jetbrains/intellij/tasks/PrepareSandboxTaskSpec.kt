@@ -31,8 +31,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             version = '0.42.123'
-            intellij.pluginName = 'myPluginName'
-            intellij.plugins = [project('nestedProject')]
+            
+            intellij {
+                pluginName = 'myPluginName'
+                plugins = [project('nestedProject')]
+            }
         """)
 
         file("settings.gradle").groovy("""
@@ -43,10 +46,12 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             repositories { mavenCentral() }
             apply plugin: 'org.jetbrains.intellij'
             version = '0.42.123'
+            
             compileJava {
                 sourceCompatibility = '1.8'
                 targetCompatibility = '1.8'
             }
+            
             intellij {
                 version = '$intellijVersion'
                 downloadSources = false
