@@ -34,14 +34,20 @@ open class ArchiveUtils @Inject constructor(
 
         debug(context, "Extracting: $name")
 
-        val decompressor = when {
-            name.endsWith(".zip") || name.endsWith(".sit") -> archiveOperations::zipTree
-            name.endsWith(".tar.gz") -> archiveOperations::tarTree
+        when {
+            name.endsWith(".zip") || name.endsWith(".sit") -> {
+                fileSystemOperations.copy {
+                    from(archiveOperations.zipTree(archiveFile))
+                    into(targetDirectory)
+                }
+            }
+            name.endsWith(".tar.gz") -> {
+                fileSystemOperations.copy {
+                    from(archiveOperations.tarTree(archiveFile))
+                    into(targetDirectory)
+                }
+            }
             else -> throw IllegalArgumentException("Unknown type archive type: $name")
-        }
-        fileSystemOperations.copy {
-            from(decompressor.invoke(archiveFile))
-            into(targetDirectory)
         }
 
         debug(context, "Extracted: $name")
