@@ -40,8 +40,8 @@ open class ArchiveUtils @Inject constructor(
             else -> throw IllegalArgumentException("Unknown type archive type: $name")
         }
         fileSystemOperations.copy {
-            it.from(decompressor.invoke(archiveFile))
-            it.into(targetDirectory)
+            from(decompressor.invoke(archiveFile))
+            into(targetDirectory)
         }
 
         debug(context, "Extracted: $name")

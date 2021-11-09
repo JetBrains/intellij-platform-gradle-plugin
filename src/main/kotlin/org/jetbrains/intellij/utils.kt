@@ -162,6 +162,7 @@ private fun log(level: LogLevel, logCategory: String?, message: String, e: Throw
 }
 
 fun Project.logCategory(): String = path + name
+
 fun Task.logCategory(): String = project.path + project.name + path
 
 fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): IdePlugin? {

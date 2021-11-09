@@ -7,10 +7,10 @@ fun properties(key: String) = project.findProperty(key)?.toString()
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
 plugins {
+    `kotlin-dsl`
+    `maven-publish`
     kotlin("jvm") version "1.5.31"
     kotlin("plugin.serialization") version "1.5.31"
-    id("java-gradle-plugin")
-    id("maven-publish")
     id("com.gradle.plugin-publish") version "0.17.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.5.31"
