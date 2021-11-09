@@ -3,6 +3,7 @@
 ## next
 
 - Make `intellij.version` property mandatory
+- Move `intellij.ideaDependency` to the `SetupDependenciesTask.idea`
 - Postpone the initial dependencies downloading to the `setupDependencies` task which is run in the `afterSync` phase or by individual tasks
 - Provide build information within the `META-INF/MANIFEST.MF` file
 - Resolve EAP version of the Java compiler for `LATEST-EAP-SNAPSHOT`

@@ -11,6 +11,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.util.PatternFilterable
 import org.jetbrains.intellij.dependency.PluginDependency
+import org.jetbrains.intellij.tasks.SetupDependenciesTask
 
 fun Project.intellij(): FileCollection = intellijBase()
 fun Project.intellij(filter: Closure<*>): FileCollection = intellijBase().matching(filter)
@@ -18,14 +19,14 @@ fun Project.intellij(filter: Action<PatternFilterable>): FileCollection = intell
 fun Project.intellij(filter: PatternFilterable): FileCollection = intellijBase().matching(filter)
 
 private fun Project.intellijBase(): FileTree {
-    val extension = extensions.findByType(IntelliJPluginExtension::class.java)
-        ?: throw GradleException("IntelliJPluginExtension cannot be resolved")
+    val setupDependenciesTaskProvider = project.tasks.named(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+    val setupDependenciesTask = setupDependenciesTaskProvider.get() as SetupDependenciesTask
 
     if (!state.executed) {
         throw GradleException("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
     }
 
-    return files(extension.ideaDependency.get().jarFiles).asFileTree
+    return files(setupDependenciesTask.idea.get().jarFiles).asFileTree
 }
 
 fun Project.intellijPlugin(plugin: String): FileCollection = intellijPluginBase(plugin)
@@ -77,14 +78,14 @@ fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>): Fil
 fun Project.intellijExtra(extra: String, filter: PatternFilterable): FileCollection = intellijExtraBase(extra).matching(filter)
 
 private fun Project.intellijExtraBase(extra: String): FileTree {
-    val extension = extensions.findByType(IntelliJPluginExtension::class.java)
-        ?: throw GradleException("IntelliJPluginExtension cannot be resolved")
+    val setupDependenciesTaskProvider = project.tasks.named(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+    val setupDependenciesTask = setupDependenciesTaskProvider.get() as SetupDependenciesTask
 
     if (!state.executed) {
         throw GradleException("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
     }
 
-    val dependency = extension.ideaDependency.get()
+    val dependency = setupDependenciesTask.idea.get()
     val extraDependency = dependency.extraDependencies.find { it.name == extra }
     if (extraDependency?.jarFiles == null || extraDependency.jarFiles.isEmpty()) {
         throw GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
