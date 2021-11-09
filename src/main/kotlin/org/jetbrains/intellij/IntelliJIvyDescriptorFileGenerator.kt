@@ -30,9 +30,9 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
     }
 
     fun writeTo(file: File) {
-        xmlTransformer.transform(file, ivyFileEncoding) { writer ->
+        xmlTransformer.transform(file, ivyFileEncoding) {
             try {
-                writeDescriptor(writer)
+                writeDescriptor(this)
             } catch (e: IOException) {
                 throw UncheckedIOException(e)
             }

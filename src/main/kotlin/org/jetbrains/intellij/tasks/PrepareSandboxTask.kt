@@ -83,27 +83,27 @@ open class PrepareSandboxTask @Inject constructor(
             })
         }
             }.flatten()
-        }).eachFile { details ->
-            val dotIndex = details.name.lastIndexOf('.')
+        }).eachFile {
+            val dotIndex = name.lastIndexOf('.')
             val originalName = when {
-                dotIndex != -1 -> details.name.substring(0, dotIndex)
-                else -> details.name
+                dotIndex != -1 -> name.substring(0, dotIndex)
+                else -> name
             }
             val originalExtension = when {
-                dotIndex != -1 -> details.name.substring(dotIndex)
+                dotIndex != -1 -> name.substring(dotIndex)
                 else -> ""
             }
             var index = 1
-            var previousPath = usedNames.putIfAbsent(details.name, details.file.absolutePath)
-            while (previousPath != null && previousPath != details.file.absolutePath) {
-                details.name = "${originalName}_${index++}${originalExtension}"
-                previousPath = usedNames.putIfAbsent(details.name, details.file.absolutePath)
+            var previousPath = usedNames.putIfAbsent(name, file.absolutePath)
+            while (previousPath != null && previousPath != file.absolutePath) {
+                name = "${originalName}_${index++}${originalExtension}"
+                previousPath = usedNames.putIfAbsent(name, file.absolutePath)
             }
         }
     }
 
     fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
-        from(pluginDependency.artifact) { it.into(pluginDependency.artifact.name) }
+        from(pluginDependency.artifact) { into(pluginDependency.artifact.name) }
     }
 
     fun configureExternalPlugin(pluginDependency: PluginDependency) {
@@ -112,7 +112,7 @@ open class PrepareSandboxTask @Inject constructor(
         }
         pluginDependency.artifact.run {
             if (isDirectory) {
-                from(this) { copy -> copy.into(name) }
+                from(this) { into(name) }
             } else {
                 from(this)
             }

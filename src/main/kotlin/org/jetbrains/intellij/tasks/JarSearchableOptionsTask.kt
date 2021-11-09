@@ -49,7 +49,7 @@ open class JarSearchableOptionsTask @Inject constructor(
             outputDir.get().asFile.canonicalPath
         })
 
-        this.eachFile { it.path = "search/${it.name}" }
+        this.eachFile { path = "search/$name" }
         includeEmptyDirs = false
     }
 }

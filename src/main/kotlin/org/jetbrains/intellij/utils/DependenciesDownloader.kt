@@ -59,14 +59,14 @@ internal fun DependencyHandler.create(
     "configuration" to configuration,
 ))
 
-internal fun RepositoryHandler.ivyRepository(url: String, pattern: String = "") =
-    ivy { ivy ->
-        ivy.url = URI(url)
-        ivy.patternLayout { layout -> layout.artifact(pattern) }
-        ivy.metadataSources { metadata -> metadata.artifact() }
+internal fun RepositoryHandler.ivyRepository(repositoryUrl: String, pattern: String = "") =
+    ivy {
+        url = URI(repositoryUrl)
+        patternLayout { artifact(pattern) }
+        metadataSources { artifact() }
     }
 
-internal fun RepositoryHandler.mavenRepository(url: String) =
-    maven { maven ->
-        maven.url = URI(url)
+internal fun RepositoryHandler.mavenRepository(repositoryUrl: String) =
+    maven {
+        url = URI(repositoryUrl)
     }

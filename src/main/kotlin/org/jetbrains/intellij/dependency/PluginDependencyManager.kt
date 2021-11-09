@@ -100,11 +100,11 @@ open class PluginDependencyManager @Inject constructor(
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy {
                 val ivyFileSuffix = plugin.getFqn().substring("${plugin.id}-${plugin.version}".length)
-                it.ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
-                it.artifactPattern("${ideaDependency?.classes}/plugins/[module]/[artifact](.[ext])") // builtin plugins
-                it.artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
+                ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
+                artifactPattern("${ideaDependency?.classes}/plugins/[module]/[artifact](.[ext])") // builtin plugins
+                artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency?.sources != null) {
-                    it.artifactPattern("${ideaDependency.sources.parent}/[artifact]-${ideaDependency.version}(-[classifier]).[ext]")
+                    artifactPattern("${ideaDependency.sources.parent}/[artifact]-${ideaDependency.version}(-[classifier]).[ext]")
                 }
             }
         }

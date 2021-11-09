@@ -112,8 +112,8 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         outputDir.deleteRecursively()
         outputDir.mkdir()
         fileSystemOperations.copy {
-            it.from(sourceSetOutputClassesDirs.get())
-            it.into(outputDir)
+            from(sourceSetOutputClassesDirs.get())
+            into(outputDir)
         }
     }
 
