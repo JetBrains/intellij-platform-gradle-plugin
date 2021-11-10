@@ -38,7 +38,7 @@ jobs:
         gradleVersion:
           - 6.6.1
           - 6.9.1
-          - 7.2
+          - 7.3
         os:
           - windows-latest
           - ubuntu-latest
