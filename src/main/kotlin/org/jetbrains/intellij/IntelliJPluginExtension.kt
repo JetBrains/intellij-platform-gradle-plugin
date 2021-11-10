@@ -16,7 +16,6 @@ import javax.inject.Inject
 
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
- * TODO: Annotate props properly with @Input, @Optional, etc
  */
 @Suppress("UnstableApiUsage")
 abstract class IntelliJPluginExtension @Inject constructor(

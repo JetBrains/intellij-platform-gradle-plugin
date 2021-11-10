@@ -262,7 +262,6 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * The path to directory containing JVM runtime, overrides {@link #jbrVersion}.
-     * TODO: fileProperty?
      */
     @Input
     @Optional
@@ -390,8 +389,9 @@ open class RunPluginVerifierTask @Inject constructor(
             runtimeDir = runtimeDir.orNull,
             jbrVersion = jbrVersion.orNull,
             ideDir = ideDir.orNull,
-            validate = ::validateRuntimeDir,
-        ) ?: throw InvalidUserDataException(when {
+        ) {
+            validateRuntimeDir(it)
+        } ?: throw InvalidUserDataException(when {
             requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
             else -> "Java Runtime directory couldn't be resolved"
         })
