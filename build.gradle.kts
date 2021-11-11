@@ -36,7 +36,7 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
     // should be changed together with plugin-repository-rest-client
-    implementation("org.jetbrains.intellij:blockmap:1.0.5") {
+    implementation("org.jetbrains.intellij:blockmap:2.0.16") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.20") {
