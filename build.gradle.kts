@@ -43,7 +43,7 @@ dependencies {
         exclude(group = "org.jetbrains.kotlin")
     }
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.1")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1")
