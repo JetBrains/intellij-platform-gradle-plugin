@@ -226,7 +226,7 @@ The result list is stored within the `outputFile`, which is used as a source for
 | <kbd>types</kbd> List of types of IDEs that will be listed in results. Uses `intellij.type` by default.      | `[intellij.type]`                                      |
 | <kbd>sinceVersion</kbd> Lower boundary of the listed results. Uses `intellij.version` by default.            | `intellij.version`                                     |
 | <kbd>untilVersion</kbd> Upper boundary of the listed results.                                                | none                                                   |
-| <kbd>includeEAP</kbd> Defines if EAP releases should be included in results list.                            | `true`                                                 |
+| <kbd>releaseChannels</kbd> Defines channels that product updates will be filtered with.                      | `EnumSet.allOf(ListProductsReleasesTask.Channel)`      |
 | <kbd>outputFile</kbd> Path to the file, where the output list will be stored.                                | `File("${project.buildDir}/listProductsReleases.txt`") |
 
 
