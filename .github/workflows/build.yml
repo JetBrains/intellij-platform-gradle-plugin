@@ -25,8 +25,8 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v2.4.0
 
-      - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v3.2.1
+#      - name: Qodana - Code Inspection
+#        uses: JetBrains/qodana-action@v3.2.1
 
   test:
     name: Test
@@ -37,11 +37,11 @@ jobs:
       matrix:
         gradleVersion:
           - 6.6.1
-          - 6.9.1
-          - 7.3
+#          - 6.9.1
+#          - 7.3
         os:
-          - windows-latest
-          - ubuntu-latest
+#          - windows-latest
+#          - ubuntu-latest
           - macos-latest
 
     steps:
