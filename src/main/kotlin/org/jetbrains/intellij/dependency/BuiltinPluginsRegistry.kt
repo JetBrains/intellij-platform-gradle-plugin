@@ -18,7 +18,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
 
         fun fromDirectory(pluginsDirectory: File, context: String?) =
             BuiltinPluginsRegistry(pluginsDirectory, context).apply {
-                val extractor = XmlExtractor<PluginsCache>()
+                val extractor = XmlExtractor<PluginsCache>(context)
                 if (!fillFromCache(extractor)) {
                     debug(context, "Builtin registry cache is missing")
                     fillFromDirectory()

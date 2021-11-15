@@ -2,12 +2,15 @@
 
 ## next
 
+- IntelliJ Plugin Verifier allows for running against Android Studio (i.e. `AI-2021.2.1.4`)
 - Make `intellij.version` property mandatory
 - Move `intellij.ideaDependency` to the `SetupDependenciesTask.idea`
 - Postpone the initial dependencies downloading to the `setupDependencies` task which is run in the `afterSync` phase or by individual tasks
 - Provide build information within the `META-INF/MANIFEST.MF` file
 - Resolve EAP version of the Java compiler for `LATEST-EAP-SNAPSHOT`
 - Allow for using `dcevm`, `fd`, and `nomod` variants of JBR [#818](../../issues/818)
+- `ListProductsReleasesTask.updatesPath` changed to `ListProductsReleasesTask.updatePaths`
+- `ListProductsReleasesTask.includeEAP` changed to `ListProductsReleasesTask.releaseChannels`
 
 ## 1.2.1
 

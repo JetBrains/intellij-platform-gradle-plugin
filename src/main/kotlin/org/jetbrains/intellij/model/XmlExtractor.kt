@@ -4,12 +4,13 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.jdom2.Document
 import org.jdom2.transform.JDOMSource
 import org.jetbrains.intellij.transformXml
+import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.InputStream
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBException
 
-class XmlExtractor<T> {
+class XmlExtractor<T>(private val context: String? = null) {
 
     private val jaxbContext by lazy {
         JAXBContext.newInstance("org.jetbrains.intellij.model", ObjectFactory::class.java.classLoader)
@@ -31,4 +32,10 @@ class XmlExtractor<T> {
         val document = JDOMUtil.loadDocument(file.inputStream())
         transformXml(document, file)
     }
+
+    fun fetch(path: String) = runCatching {
+        unmarshal(File(path))
+    }.onFailure {
+        warn(context, "Failed to get products releases list: ${it.message}", it)
+    }.getOrNull()
 }

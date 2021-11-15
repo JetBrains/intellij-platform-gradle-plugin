@@ -10,13 +10,12 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.Version.Companion.parse
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
-import org.jetbrains.intellij.warn
-import java.io.File
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -26,7 +25,7 @@ open class ListProductsReleasesTask @Inject constructor(
 
     @Input
     @Optional
-    val updatesPath = objectFactory.property<String>()
+    val updatePaths = objectFactory.listProperty<String>()
 
     @OutputFile
     val outputFile: RegularFileProperty = objectFactory.fileProperty()
@@ -45,38 +44,33 @@ open class ListProductsReleasesTask @Inject constructor(
 
     @Input
     @Optional
-    val includeEAP = objectFactory.property<Boolean>()
-
-    companion object {
-        private const val CHANNEL_EAP = "eap"
-        private const val CHANNEL_RELEASE = "release"
-    }
+    val releaseChannels = objectFactory.setProperty<Channel>()
 
     private val context = logCategory()
 
     @TaskAction
     fun list() {
-        val extractor = XmlExtractor<ProductsReleases>()
-        val releases = extractor.runCatching {
-            unmarshal(File(updatesPath.get()))
-        }.onFailure {
-            warn(context, "Failed to get products releases list: ${it.message}", it)
-        }.getOrNull() ?: return
+        val extractor = XmlExtractor<ProductsReleases>(context)
+        val releases = updatePaths.get().mapNotNull(extractor::fetch)
 
         val since = sinceVersion.get().run(::parse)
         val until = untilVersion.orNull?.run(::parse)
-        val includeEAP = includeEAP.get()
+        val channels = releaseChannels.get()
 
-        val result = releases.products
+        val result = releases
+            .map(ProductsReleases::products)
+            .flatten()
             .asSequence()
             .flatMap { product -> product.codes.map { it to product }.asSequence() }
             .filter { (type) -> types.get().contains(type) }
             .flatMap { (type, product) -> product.channels.map { type to it }.asSequence() }
-            .filter { (_, channel) -> (channel.status == CHANNEL_RELEASE) || ((channel.status == CHANNEL_EAP) && includeEAP) }
+            .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.toUpperCase())) }
             .flatMap { (type, channel) -> channel.builds.map { type to it.version.run(::parse) }.asSequence() }
             .filter { (_, version) -> version >= since && (until == null || version <= until) }
             .groupBy { (type, version) -> "$type-${version.major}.${version.minor}" }
-            .mapNotNull { it.value.maxBy { (_, version) -> version.patch }?.let { (type, version) -> "$type-${version.asRelease()}" } }
+            .mapNotNull {
+                it.value.maxByOrNull { (_, version) -> version.patch }?.let { (type, version) -> "$type-${version.asRelease()}" }
+            }
             .distinct()
             .toList()
 
@@ -88,4 +82,8 @@ open class ListProductsReleasesTask @Inject constructor(
     }
 
     private fun Version.asRelease() = "$major.$minor" + (".$patch".takeIf { patch > 0 } ?: "")
+
+    enum class Channel {
+        EAP, MILESTONE, BETA, RELEASE,
+    }
 }

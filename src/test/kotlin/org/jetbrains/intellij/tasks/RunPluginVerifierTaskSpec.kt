@@ -80,6 +80,23 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `test plugin against Android Studio`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile.groovy("""
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["AI-2021.1.1.15"]
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
+
+        assertTrue(result.output.contains("Plugin MyName:1.0.0 against AI-211.7628.21.2111.7824002: Compatible"))
+    }
+
+    @Test
     fun `set verification reports directory`() {
         writeJavaFile()
         writePluginXmlFile()
@@ -103,15 +120,17 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
         writePluginXmlFile()
 
-        val resource = javaClass.classLoader.getResource("products-releases/products-releases.xml")?.path
+        val resource = javaClass.classLoader.getResource("products-releases/idea-releases.xml")?.path
         buildFile.groovy("""
+            import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
+
             version = "1.0.0"
 
             listProductsReleases {
-                updatesPath = '${resource}'
+                updatePaths = ['${resource}']
                 sinceVersion = "2020.2"
                 untilVersion = "2020.2.3"
-                includeEAP = false
+                releaseChannels = EnumSet.of(Channel.RELEASE)
             }
         """)
 

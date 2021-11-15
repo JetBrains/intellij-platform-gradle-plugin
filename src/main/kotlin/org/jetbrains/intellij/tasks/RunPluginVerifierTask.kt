@@ -19,6 +19,7 @@ import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
+import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
@@ -53,7 +54,8 @@ open class RunPluginVerifierTask @Inject constructor(
 
     companion object {
         private const val METADATA_URL = "$PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
-        private const val IDE_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+        private const val IDEA_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+        private const val ANDROID_STUDIO_DOWNLOAD_URL = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
 
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Plugin Verifier version")
@@ -100,7 +102,12 @@ open class RunPluginVerifierTask @Inject constructor(
                 return ideDir.canonicalPath
             }
 
-            listOf("release", "rc", "eap", "beta").forEach { buildType ->
+            val buildTypes = when (type) {
+                IntelliJPluginConstants.ANDROID_STUDIO_TYPE -> listOf("")
+                else -> listOf("release", "rc", "eap", "beta")
+            }
+
+            buildTypes.forEach { buildType ->
                 debug(context, "Downloading IDE '$type-$version' from '$buildType' channel to: $downloadDir")
                 try {
                     return block(type!!, version!!, buildType).absolutePath.also {
@@ -125,23 +132,30 @@ open class RunPluginVerifierTask @Inject constructor(
          * @return direct download URL prepended with {@link #CACHE_REDIRECTOR} host
          */
         fun resolveIdeUrl(type: String, version: String, buildType: String, context: String?): String {
-            val url = "$IDE_DOWNLOAD_URL?code=$type&platform=linux&type=$buildType&${versionParameterName(version)}=$version"
+            val isAndroidStudio = type == IntelliJPluginConstants.ANDROID_STUDIO_TYPE
+            val url = when {
+                isAndroidStudio -> "$ANDROID_STUDIO_DOWNLOAD_URL/$version/android-studio-$version-linux.tar.gz"
+                else -> "$IDEA_DOWNLOAD_URL?code=$type&platform=linux&type=$buildType&${versionParameterName(version)}=$version"
+            }
+
             debug(context, "Resolving direct IDE download URL for: $url")
 
             var connection: HttpURLConnection? = null
 
             try {
-                connection = URL(url).openConnection() as HttpURLConnection
-                connection.instanceFollowRedirects = false
-                connection.inputStream
+                with(URL(url).openConnection() as HttpURLConnection) {
+                    connection = this
+                    instanceFollowRedirects = false
+                    inputStream
 
-                if (connection.responseCode == HttpURLConnection.HTTP_MOVED_PERM || connection.responseCode == HttpURLConnection.HTTP_MOVED_TEMP) {
-                    val redirectUrl = URL(connection.getHeaderField("Location"))
-                    connection.disconnect()
-                    debug(context, "Resolved IDE download URL: $url")
-                    return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
-                } else {
-                    debug(context, "IDE download URL has no redirection provided. Skipping")
+                    if ((responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) && !isAndroidStudio) {
+                        val redirectUrl = URL(getHeaderField("Location"))
+                        disconnect()
+                        debug(context, "Resolved IDE download URL: $url")
+                        return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
+                    } else {
+                        debug(context, "IDE download URL has no redirection provided. Skipping")
+                    }
                 }
             } catch (e: Exception) {
                 info(context, "Cannot resolve direct download URL for: $url")
@@ -402,15 +416,15 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return Java Runtime directory points to Java 8 for Plugin Verifier version < 1.260, or Java 11 for 1.260+.
      */
-    private fun validateRuntimeDir(executablePath: String) = ByteArrayOutputStream().use { os ->
-        debug(context, "Plugin Verifier JRE verification: $executablePath")
+    private fun validateRuntimeDir(runtimeDirPath: String) = ByteArrayOutputStream().use { os ->
+        debug(context, "Plugin Verifier JRE verification: $runtimeDirPath")
 
         if (!requiresJava11()) {
             return true
         }
 
         execOperations.exec {
-            executable = executablePath
+            executable = File(runtimeDirPath).resolve("bin/java").canonicalPath
             args = listOf("-version")
             errorOutput = os
         }
@@ -418,7 +432,7 @@ open class RunPluginVerifierTask @Inject constructor(
         val result = version >= Version(11)
 
         result.ifFalse {
-            debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $executablePath")
+            debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDirPath")
         }
     }
 

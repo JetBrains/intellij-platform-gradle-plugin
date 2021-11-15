@@ -14,10 +14,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     override fun setUp() {
         super.setUp()
 
-        val resource = javaClass.classLoader.getResource("products-releases/products-releases.xml")?.path
+        val resources = listOf(
+            "products-releases/idea-releases.xml",
+            "products-releases/android-studio-releases.xml",
+        ).joinToString { "'${javaClass.classLoader.getResource(it)?.path}'" }
+
         buildFile.groovy("""
             listProductsReleases {
-                updatesPath = '${resource}'
+                updatePaths = [${resources}]
             }
         """)
     }
@@ -69,9 +73,11 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `get IDEs list without EAP releases`() {
         buildFile.groovy("""
+            import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
+
             listProductsReleases {
                 sinceVersion = "2021.1"
-                includeEAP = false
+                releaseChannels = EnumSet.of(Channel.RELEASE)
             }
         """)
 
@@ -96,6 +102,23 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             listOf("IU-2021.2.2", "IU-2021.1.3", "PS-2021.2.2", "PS-2021.1.4", "PY-2021.2.2", "PY-2021.1.3"),
+            result.taskOutput()
+        )
+    }
+
+    @Test
+    fun `get Android Studio releases`() {
+        buildFile.groovy("""
+            listProductsReleases {
+                sinceVersion = "2021.1"
+                types = ["AI"]
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+
+        assertEquals(
+            listOf("AI-2021.2.1", "AI-2021.1.1"),
             result.taskOutput()
         )
     }

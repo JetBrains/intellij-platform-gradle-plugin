@@ -35,27 +35,44 @@ open class JbrResolver @Inject constructor(
         jbrVersion: String? = null,
         ideDir: File? = null,
         validate: (executable: String) -> Boolean = { true },
+    ) = resolveRuntime(runtimeDir, jbrVersion, ideDir, false, validate)
+
+    fun resolveRuntime(
+        runtimeDir: String? = null,
+        jbrVersion: String? = null,
+        ideDir: File? = null,
+        resolveExecutable: Boolean = true,
+        validate: (executable: String) -> Boolean = { true },
     ): String? {
         debug(context, "Resolving runtime directory.")
-
-        val jbrPath = when (OperatingSystem.current().isMacOsX) {
-            true -> "jbr/Contents/Home"
-            false -> "jbr"
-        }
 
         return listOf(
             {
                 runtimeDir?.let { path ->
                     path
-                        .let { File(it).resolve(jbrPath).resolve("bin/java").takeIf(File::exists)?.canonicalPath }
+                        .let(::File)
+                        .let(::getJbrRoot)
+                        .run {
+                            when (resolveExecutable) {
+                                true -> resolve("bin/java")
+                                else -> this
+                            }
+                        }
+                        .takeIf(File::exists)
+                        ?.canonicalPath
                         .also { debug(context, "Runtime specified with runtimeDir='$path' resolved as: $it") }
                         .ifNull { warn(context, "Cannot resolve runtime with runtimeDir='$path'") }
                 }
             },
             {
                 jbrVersion?.let { version ->
-                    resolve(version)
-                        ?.javaExecutable
+                    version.let(::resolve)
+                        ?.run {
+                            when (resolveExecutable) {
+                                true -> javaExecutable
+                                else -> javaHome.let(::getJbrRoot).canonicalPath
+                            }
+                        }
                         .also { debug(context, "Runtime specified with jbrVersion='$version' resolved as: $it") }
                         .ifNull { warn(context, "Cannot resolve runtime with jbrVersion='$version'") }
                 }
@@ -63,7 +80,10 @@ open class JbrResolver @Inject constructor(
             {
                 ideDir?.let { file ->
                     file
-                        .let { file.resolve(jbrPath).resolve("bin/java").takeIf(File::exists)?.canonicalPath }
+                        .let(::getJbrRoot)
+                        .run { resolve("bin/java").takeIf { resolveExecutable } ?: this }
+                        .takeIf(File::exists)
+                        ?.canonicalPath
                         .also { debug(context, "Runtime specified with ideDir='$file' resolved as: $it") }
                 }
             },
@@ -72,7 +92,12 @@ open class JbrResolver @Inject constructor(
                     getBuiltinJbrVersion(file)
                         ?.let { version ->
                             resolve(version)
-                                ?.javaExecutable
+                                ?.run {
+                                    when (resolveExecutable) {
+                                        true -> javaExecutable
+                                        else -> javaHome.let(::getJbrRoot).canonicalPath
+                                    }
+                                }
                                 .also { debug(context, "Runtime specified with ideDir='$file', version='version' resolved as: $it") }
                                 .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file', version='version'") }
                         }
@@ -81,9 +106,15 @@ open class JbrResolver @Inject constructor(
             },
             {
                 Jvm.current()
-                    .javaExecutable
+                    .run {
+                        when (resolveExecutable) {
+                            true -> javaExecutable
+                            else -> javaHome.let(::getJbrRoot)
+                        }
+                    }
                     .canonicalPath
                     .also { debug(context, "Using current JVM: $it") }
+                    .ifNull { warn(context, "Cannot resolve current JVM") }
             },
         )
             .asSequence()

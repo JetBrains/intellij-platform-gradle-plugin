@@ -32,7 +32,6 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
-import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -314,7 +313,7 @@ open class IntelliJPlugin : Plugin<Project> {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Download robot-server plugin."
 
-            version.convention(VERSION_LATEST)
+            version.convention(IntelliJPluginConstants.VERSION_LATEST)
             outputDir.convention(project.provider {
                 project.layout.projectDirectory.dir("${project.buildDir}/robotServerPlugin")
             })
@@ -414,7 +413,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds."
 
             failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
-            verifierVersion.convention(VERSION_LATEST)
+            verifierVersion.convention(IntelliJPluginConstants.VERSION_LATEST)
             distributionFile.convention(project.layout.file(project.provider {
                 resolveBuildTaskOutput(project)
             }))
@@ -451,14 +450,19 @@ open class IntelliJPlugin : Plugin<Project> {
                         info(context, "Downloading IDE '$name' to: $ideDir")
 
                         val url = RunPluginVerifierTask.resolveIdeUrl(type, version, buildType, logCategory())
+                        val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
+                        val group = when (type) {
+                            IntelliJPluginConstants.ANDROID_STUDIO_TYPE -> "com.android"
+                            else -> "com.jetbrains"
+                        }
                         debug(context, "Downloading IDE from $url")
 
                         try {
                             val ideArchive = dependenciesDownloader.downloadFromRepository(logCategory(), {
                                 create(
-                                    group = "com.jetbrains",
+                                    group = group,
                                     name = "ides",
-                                    version = "$type-$version-$buildType",
+                                    version = dependencyVersion,
                                     ext = "tar.gz",
                                 )
                             }, {
@@ -624,7 +628,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 taskContext,
             )
 
-            jbrResolver.resolveRuntimeDir(
+            jbrResolver.resolveRuntime(
                 jbrVersion = task.jbrVersion.orNull,
                 ideDir = task.ideDir.orNull,
             )
@@ -734,7 +738,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         } else {
                             warn(
                                 logCategory(),
-                                "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. " + "Use higher 'intellij.version' or specify the 'compilerVersion' property manually.",
+                                "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. Use higher 'intellij.version' or specify the 'compilerVersion' property manually.",
                             )
                             null
                         }
@@ -900,7 +904,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 val outputFilePath = "$inputFileWithoutExtension-signed$inputFileExtension"
                 File(outputFilePath)
             }))
-            cliVersion.convention(VERSION_LATEST)
+            cliVersion.convention(IntelliJPluginConstants.VERSION_LATEST)
             cliPath.convention(project.provider {
                 val resolvedCliVersion = SignPluginTask.resolveCliVersion(cliVersion.orNull)
                 val url = SignPluginTask.resolveCliUrl(resolvedCliVersion)
@@ -918,7 +922,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }).first().canonicalPath
             })
 
-            onlyIf { _ ->
+            onlyIf {
                 (privateKey.isPresent || privateKeyFile.isPresent) && (certificateChain.isPresent || certificateChainFile.isPresent)
             }
             dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
@@ -957,17 +961,21 @@ open class IntelliJPlugin : Plugin<Project> {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "List all available IntelliJ-based IDEs with their updates."
 
-            updatesPath.convention(project.provider {
-                dependenciesDownloader.downloadFromRepository(logCategory(), {
-                    create(
-                        group = "org.jetbrains",
-                        name = "products-releases",
-                        version = "1.0",
-                        ext = "xml",
-                    )
-                }, {
-                    ivyRepository(IntelliJPluginConstants.PRODUCTS_RELEASES_URL)
-                }).first().canonicalPath
+            updatePaths.convention(project.provider {
+
+                mapOf(
+                    "idea-releases" to IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL,
+//                    "android-studio-releases" to IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL,
+                ).entries.map { (name, repository) ->
+                    dependenciesDownloader.downloadFromRepository(logCategory(), {
+                        create(
+                            group = "org.jetbrains",
+                            name = name,
+                            version = "1.0",
+                            ext = "xml",
+                        )
+                    }, { ivyRepository(repository) }).first().canonicalPath
+                }
             })
             outputFile.convention {
                 File(project.buildDir, "${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}.txt")
@@ -976,7 +984,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 listOf(extension.type.get())
             })
             sinceVersion.convention(extension.version)
-            includeEAP.convention(true)
+            releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
         }
     }
 

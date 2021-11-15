@@ -32,7 +32,8 @@ object IntelliJPluginConstants {
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
-    const val PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
+    const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
+//    const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://dl.google.com/android/studio/patches/updates.xml"
     const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
     const val INTELLIJ_DEPENDENCIES = "$CACHE_REDIRECTOR/intellij-dependencies"
     const val DEFAULT_INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository"
@@ -43,5 +44,6 @@ object IntelliJPluginConstants {
 
     const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"
+    const val ANDROID_STUDIO_TYPE = "AI"
 }
 

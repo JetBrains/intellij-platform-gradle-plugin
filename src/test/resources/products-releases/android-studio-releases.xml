@@ -1,0 +1,157 @@
+<?xml version="1.0" ?><products>
+    <product name="Android Studio">
+        <code>AI</code>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-2-eap" majorVersion="2" name="Android Studio updates" status="eap" url="https://developer.android.com/r/studio-ui/release-updates.html">
+        <build apiVersion="AI-212.5284.40" number="AI-212.5284.40.2112.7863073" version="Chipmunk | 2021.2.1 Canary 4">
+            <message><![CDATA[<html> A new Android Studio Chipmunk | 2021.2.1 Canary 4 is available in the Canary channel and includes new features and bug fixes. <p> <b>Canary builds</b> are released approximately once a week and include all of our<br/> new features and bug fixes. Although these builds receive only minimal testing and<br/> may include bugs, they are made available to allow users to try out new features as <br/> early as possible. <p/> </html>]]></message>
+            <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-canary.html"/>
+            <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+            <patch from="212.4037.9.2112.7818732" size="176"/> <!-- 2021.2.1.1 -->
+            <patch from="212.5284.40.2112.7824075" size="47"/> <!-- 2021.2.1.2 -->
+            <patch from="212.5284.40.2112.7855545" size="39"/> <!-- 2021.2.1.3 -->
+        </build>
+        </channel>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-2-milestone" majorVersion="2" name="Android Studio updates" status="milestone" url="https://developer.android.com/r/studio-ui/release-updates.html">
+            <build apiVersion="AI-212.5284.40" number="AI-212.5284.40.2112.7863073" version="Chipmunk | 2021.2.1 Canary 4">
+                <message><![CDATA[<html>A new Android Studio Chipmunk | 2021.2.1 Canary 4 is available in the dev channel. <p> <b>Dev builds</b> include all of our new features and bug fixes with additional testing. <br>We try to release updates weekly to address bugs and introduce new features. <br/> They are still subject to bugs, but we want people to see what's new as soon as possible while limiting the risk of a regression.<br/><br/> <p/> For more predictable builds, use <b>Settings | Updates</b> and select the <b>Canary Channel</b>. </html>]]></message>
+                <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-dev.html"/>
+                <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+                <patch from="212.4037.9.2112.7818732" size="176"/> <!-- 2021.2.1.1 -->
+                <patch from="212.5284.40.2112.7824075" size="47"/> <!-- 2021.2.1.2 -->
+                <patch from="212.5284.40.2112.7855545" size="39"/> <!-- 2021.2.1.3 -->
+            </build>
+        </channel>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-2-beta" majorVersion="2" name="Android Studio updates" status="beta" url="https://developer.android.com/r/studio-ui/release-updates.html">
+            <build apiVersion="AI-211.7628.21" number="AI-211.7628.21.2111.7863044" version="Bumblebee | 2021.1.1 Beta 3">
+                <message><![CDATA[<html>A new Android Studio Bumblebee | 2021.1.1 Beta 3 is available in the Beta channel. <p> Android Studio Bumblebee | 2021.1.1 Beta 3 offers new functionality, bug fixes, and performance improvements.<br/> <br/>Beta builds include all of our new features with additional testing. We try to release updates weekly to address bugs and introduce new features. They are still subject to bugs, but we want people to see what's new as soon as possible while limiting the risk of a regression. </p> </html>]]></message>
+                <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-beta.html"/>
+                <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+                <patch from="203.7717.56.2111.7361063" size="514"/> <!-- 2021.1.1.1 -->
+                <patch from="211.6222.4.2111.7407564" size="315"/> <!-- 2021.1.1.2 -->
+                <patch from="211.7442.40.2111.7518594" size="238"/> <!-- 2021.1.1.3 -->
+                <patch from="211.7628.21.2111.7545178" size="216"/> <!-- 2021.1.1.4 -->
+                <patch from="211.7628.21.2111.7579519" size="206"/> <!-- 2021.1.1.5 -->
+                <patch from="211.7628.21.2111.7584175" size="205"/> <!-- 2021.1.1.6 -->
+                <patch from="211.7628.21.2111.7615328" size="203"/> <!-- 2021.1.1.7 -->
+                <patch from="211.7628.21.2111.7619903" size="201"/> <!-- 2021.1.1.8 -->
+                <patch from="211.7628.21.2111.7653804" size="180"/> <!-- 2021.1.1.9 -->
+                <patch from="211.7628.21.2111.7667256" size="129"/> <!-- 2021.1.1.10 -->
+                <patch from="211.7628.21.2111.7676841" size="120"/> <!-- 2021.1.1.11 -->
+                <patch from="211.7628.21.2111.7699744" size="69"/> <!-- 2021.1.1.12 -->
+                <patch from="211.7628.21.2111.7762732" size="66"/> <!-- 2021.1.1.13 -->
+                <patch from="211.7628.21.2111.7785763" size="65"/> <!-- 2021.1.1.14 -->
+                <patch from="211.7628.21.2111.7824002" size="50"/> <!-- 2021.1.1.15 -->
+            </build>
+        </channel>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-2-release" majorVersion="2" name="Android Studio updates" status="release" url="https://developer.android.com/r/studio-ui/release-updates.html">
+            <build apiVersion="AI-203.7717.56" number="AI-203.7717.56.2031.7784292" version="Arctic Fox | 2020.3.1 Patch 3">
+                <message><![CDATA[<html> The latest stable release of Android Studio is now available for download. <p> Android Studio Arctic Fox | 2020.3.1 Patch 3 is a major new release and includes performance improvements, bug fixes <br/>and new features. <ul> <li>Intellij 2020.3.1 Platform Update</li> <li>Jetpack Compose Preview</li> <li>Jetpack Compose Layout Inspector</li> <li>Live Edit of literals</li> <li>Background Task Inspector</li> <li>Accessibility Scanner in Layout Editor</li> <li>Wear OS Pairing and Heart Rate Sensor</li> <li>Google TV Remote Control and Automotive OS Sensor Replay</li> <li>Android 12 lint checks</li> <li>Non-transitive R classes Refactoring Support</li> <li>Apple Silicon Support Preview</li> <li>Android Emulator Extended Controls</li> </ul> </p> <p> <b>Important </b>After updating, you need to restart Android Studio to apply any<br/> memory settings you migrate from an earlier version of the IDE. </p> <a href="https://d.android.com/r/studio-ui/stable-release-notes">Release Notes</a> <br/> </html>]]></message>
+                <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-stable.html"/>
+                <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+                <patch exclusions="mac" from="202.7319.50.2031.6983675" size="724"/> <!-- 2020.3.1.1 -->
+                <patch from="202.7319.50.2031.7006259" size="724"/> <!-- 2020.3.1.2 -->
+                <patch from="202.7319.50.2031.7019041" size="723"/> <!-- 2020.3.1.3 -->
+                <patch from="202.7319.50.2031.7049475" size="691"/> <!-- 2020.3.1.4 -->
+                <patch from="203.6682.168.2031.7101492" size="603"/> <!-- 2020.3.1.5 -->
+                <patch from="203.6682.168.2031.7132434" size="595"/> <!-- 2020.3.1.6 -->
+                <patch from="203.7148.57.2031.7136282" size="597"/> <!-- 2020.3.1.7 -->
+                <patch from="203.7148.57.2031.7165533" size="511"/> <!-- 2020.3.1.8 -->
+                <patch from="203.7148.57.2031.7185775" size="510"/> <!-- 2020.3.1.9 -->
+                <patch from="203.7148.57.2031.7194378" size="509"/> <!-- 2020.3.1.10 -->
+                <patch from="203.7148.57.2031.7209405" size="441"/> <!-- 2020.3.1.11 -->
+                <patch from="203.7148.57.2031.7226969" size="371"/> <!-- 2020.3.1.12 -->
+                <patch from="203.7148.57.2031.7242491" size="378"/> <!-- 2020.3.1.13 -->
+                <patch from="203.7717.56.2031.7260174" size="351"/> <!-- 2020.3.1.14 -->
+                <patch from="203.7717.56.2031.7321754" size="267"/> <!-- 2020.3.1.15 -->
+                <patch from="202.7660.26.42.7322048" size="700"/> <!-- 4.2.0.24 -->
+                <patch from="202.7660.26.42.7351085" size="658"/> <!-- 4.2.1.0 -->
+                <patch from="203.7717.56.2031.7360992" size="151"/> <!-- 2020.3.1.16 -->
+                <patch from="203.7717.56.2031.7375522" size="151"/> <!-- 2020.3.1.17 -->
+                <patch from="203.7717.56.2031.7395685" size="151"/> <!-- 2020.3.1.18 -->
+                <patch from="203.7717.56.2031.7435690" size="143"/> <!-- 2020.3.1.19 -->
+                <patch from="203.7717.56.2031.7479365" size="142"/> <!-- 2020.3.1.20 -->
+                <patch from="202.7660.26.42.7486908" size="657"/> <!-- 4.2.2.0 -->
+                <patch from="203.7717.56.2031.7557721" size="85"/> <!-- 2020.3.1.21 -->
+                <patch from="203.7717.56.2031.7583922" size="84"/> <!-- 2020.3.1.22 -->
+                <patch from="203.7717.56.2031.7621141" size="43"/> <!-- 2020.3.1.23 -->
+                <patch from="203.7717.56.2031.7678000" size="43"/> <!-- 2020.3.1.24 -->
+            </build>
+        </channel>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-1-eap" majorVersion="1" name="Android Studio updates" status="eap" url="https://developer.android.com/r/studio-ui/release-updates.html">
+            <build apiVersion="AI-212.5284.40" number="AI-212.5284.40.2112.7863073" version="Chipmunk | 2021.2.1 Canary 4">
+                <message><![CDATA[<html> A new Android Studio Chipmunk | 2021.2.1 Canary 4 is available in the Canary channel and includes new features and bug fixes. <p> <b>Canary builds</b> are released approximately once a week and include all of our<br/> new features and bug fixes. Although these builds receive only minimal testing and<br/> may include bugs, they are made available to allow users to try out new features as <br/> early as possible. <p/> </html>]]></message>
+                <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-canary.html"/>
+                <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+                <patch from="212.4037.9.2112.7818732" size="176"/> <!-- 2021.2.1.1 -->
+                <patch from="212.5284.40.2112.7824075" size="47"/> <!-- 2021.2.1.2 -->
+                <patch from="212.5284.40.2112.7855545" size="39"/> <!-- 2021.2.1.3 -->
+            </build>
+        </channel>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-1-milestone" majorVersion="1" name="Android Studio updates" status="milestone" url="https://developer.android.com/r/studio-ui/release-updates.html">
+            <build apiVersion="AI-212.5284.40" number="AI-212.5284.40.2112.7863073" version="Chipmunk | 2021.2.1 Canary 4">
+                <message><![CDATA[<html>A new Android Studio Chipmunk | 2021.2.1 Canary 4 is available in the dev channel. <p> Chipmunk | 2021.2.1 Canary 4 offers new functionality, bug fixes, and performance improvements.<br/><br/> Android Studio Chipmunk | 2021.2.1 Canary 4 includes multiple <b>security fixes</b>.<br/><br/><b>We recommend updating to this version, to stay current with the latest updates.</b> <br/><br/>Given the older version of Android Studio you are currently running, you will need to <b>download the entire program</b> when updating Android Studio. <br/> Dev builds include all of our new features with additional testing. We try to release updates weekly to address bugs and introduce new features. <br/> They are still subject to bugs, but we want people to see what's new as soon as possible while limiting the risk of a regression.<br/> </html>]]></message>
+                <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-dev.html"/>
+                <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+                <patch from="212.4037.9.2112.7818732" size="176"/> <!-- 2021.2.1.1 -->
+                <patch from="212.5284.40.2112.7824075" size="47"/> <!-- 2021.2.1.2 -->
+                <patch from="212.5284.40.2112.7855545" size="39"/> <!-- 2021.2.1.3 -->
+            </build>
+        </channel>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-1-beta" majorVersion="1" name="Android Studio updates" status="beta" url="https://developer.android.com/r/studio-ui/release-updates.html">
+            <build apiVersion="AI-211.7628.21" number="AI-211.7628.21.2111.7863044" version="Bumblebee | 2021.1.1 Beta 3">
+                <message><![CDATA[<html>A new Android Studio Bumblebee | 2021.1.1 Beta 3 is available in the Beta channel. <p> Android Studio Bumblebee | 2021.1.1 Beta 3 offers new functionality, bug fixes, and performance improvements.<br/> <br/>Beta builds include all of our new features with additional testing. We try to release updates weekly to address bugs and introduce new features. They are still subject to bugs, but we want people to see what's new as soon as possible while limiting the risk of a regression. </p> </html>]]></message>
+                <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-beta.html"/>
+                <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+                <patch from="203.7717.56.2111.7361063" size="514"/> <!-- 2021.1.1.1 -->
+                <patch from="211.6222.4.2111.7407564" size="315"/> <!-- 2021.1.1.2 -->
+                <patch from="211.7442.40.2111.7518594" size="238"/> <!-- 2021.1.1.3 -->
+                <patch from="211.7628.21.2111.7545178" size="216"/> <!-- 2021.1.1.4 -->
+                <patch from="211.7628.21.2111.7579519" size="206"/> <!-- 2021.1.1.5 -->
+                <patch from="211.7628.21.2111.7584175" size="205"/> <!-- 2021.1.1.6 -->
+                <patch from="211.7628.21.2111.7615328" size="203"/> <!-- 2021.1.1.7 -->
+                <patch from="211.7628.21.2111.7619903" size="201"/> <!-- 2021.1.1.8 -->
+                <patch from="211.7628.21.2111.7653804" size="180"/> <!-- 2021.1.1.9 -->
+                <patch from="211.7628.21.2111.7667256" size="129"/> <!-- 2021.1.1.10 -->
+                <patch from="211.7628.21.2111.7676841" size="120"/> <!-- 2021.1.1.11 -->
+                <patch from="211.7628.21.2111.7699744" size="69"/> <!-- 2021.1.1.12 -->
+                <patch from="211.7628.21.2111.7762732" size="66"/> <!-- 2021.1.1.13 -->
+                <patch from="211.7628.21.2111.7785763" size="65"/> <!-- 2021.1.1.14 -->
+                <patch from="211.7628.21.2111.7824002" size="50"/> <!-- 2021.1.1.15 -->
+            </build>
+        </channel>
+        <channel feedback="https://code.google.com/p/android/issues/entry?template=Android+Studio+bug" id="AI-1-release" majorVersion="1" name="Android Studio updates" status="release" url="https://developer.android.com/r/studio-ui/release-updates.html">
+            <build apiVersion="AI-203.7717.56" number="AI-203.7717.56.2031.7784292" version="Arctic Fox | 2020.3.1 Patch 3">
+                <message><![CDATA[<html> The latest stable release of Android Studio is now available for download.<p/> <p> Android Studio Arctic Fox | 2020.3.1 Patch 3 is a major new release and includes performance improvements, bug fixes <br/>and new features. <ul> <li>Intellij 2020.3.1 Platform Update</li> <li>Jetpack Compose Preview</li> <li>Jetpack Compose Layout Inspector</li> <li>Live Edit of literals</li> <li>Background Task Inspector</li> <li>Accessibility Scanner in Layout Editor</li> <li>Wear OS Pairing and Heart Rate Sensor</li> <li>Google TV Remote Control and Automotive OS Sensor Replay</li> <li>Android 12 lint checks</li> <li>Non-transitive R classes Refactoring Support</li> <li>Apple Silicon Support Preview</li> <li>Android Emulator Extended Controls</li> </ul> </p> <p> <b>Important </b>After updating, you need to restart Android Studio to apply any<br/> memory settings you migrate from an earlier version of the IDE. </p> <a href="https://d.android.com/r/studio-ui/stable-release-notes">Release Notes</a> <br/> </html>]]></message>
+                <button download="true" name="Download" url="https://developer.android.com/r/studio-ui/download-stable.html"/>
+                <button name="Release Notes" url="https://developer.android.com/r/studio-ui/release-updates.html"/>
+                <patch exclusions="mac" from="202.7319.50.2031.6983675" size="724"/> <!-- 2020.3.1.1 -->
+                <patch from="202.7319.50.2031.7006259" size="724"/> <!-- 2020.3.1.2 -->
+                <patch from="202.7319.50.2031.7019041" size="723"/> <!-- 2020.3.1.3 -->
+                <patch from="202.7319.50.2031.7049475" size="691"/> <!-- 2020.3.1.4 -->
+                <patch from="203.6682.168.2031.7101492" size="603"/> <!-- 2020.3.1.5 -->
+                <patch from="203.6682.168.2031.7132434" size="595"/> <!-- 2020.3.1.6 -->
+                <patch from="203.7148.57.2031.7136282" size="597"/> <!-- 2020.3.1.7 -->
+                <patch from="203.7148.57.2031.7165533" size="511"/> <!-- 2020.3.1.8 -->
+                <patch from="203.7148.57.2031.7185775" size="510"/> <!-- 2020.3.1.9 -->
+                <patch from="203.7148.57.2031.7194378" size="509"/> <!-- 2020.3.1.10 -->
+                <patch from="203.7148.57.2031.7209405" size="441"/> <!-- 2020.3.1.11 -->
+                <patch from="203.7148.57.2031.7226969" size="371"/> <!-- 2020.3.1.12 -->
+                <patch from="203.7148.57.2031.7242491" size="378"/> <!-- 2020.3.1.13 -->
+                <patch from="203.7717.56.2031.7260174" size="351"/> <!-- 2020.3.1.14 -->
+                <patch from="203.7717.56.2031.7321754" size="267"/> <!-- 2020.3.1.15 -->
+                <patch from="202.7660.26.42.7322048" size="700"/> <!-- 4.2.0.24 -->
+                <patch from="202.7660.26.42.7351085" size="658"/> <!-- 4.2.1.0 -->
+                <patch from="203.7717.56.2031.7360992" size="151"/> <!-- 2020.3.1.16 -->
+                <patch from="203.7717.56.2031.7375522" size="151"/> <!-- 2020.3.1.17 -->
+                <patch from="203.7717.56.2031.7395685" size="151"/> <!-- 2020.3.1.18 -->
+                <patch from="203.7717.56.2031.7435690" size="143"/> <!-- 2020.3.1.19 -->
+                <patch from="203.7717.56.2031.7479365" size="142"/> <!-- 2020.3.1.20 -->
+                <patch from="202.7660.26.42.7486908" size="657"/> <!-- 4.2.2.0 -->
+                <patch from="203.7717.56.2031.7557721" size="85"/> <!-- 2020.3.1.21 -->
+                <patch from="203.7717.56.2031.7583922" size="84"/> <!-- 2020.3.1.22 -->
+                <patch from="203.7717.56.2031.7621141" size="43"/> <!-- 2020.3.1.23 -->
+                <patch from="203.7717.56.2031.7678000" size="43"/> <!-- 2020.3.1.24 -->
+            </build>
+        </channel>
+    </product>
+</products>
