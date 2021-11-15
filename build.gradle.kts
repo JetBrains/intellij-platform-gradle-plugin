@@ -218,11 +218,9 @@ changelog {
 }
 
 githubRelease {
-    val releaseNote = if (changelog.has("${project.version}")) {
-        changelog.get("${project.version}").toText()
-    } else {
-        ""
-    }
+    val releaseNote = changelog.run {
+        getOrNull("${project.version}") ?: getLatest()
+    }.toText()
 
     setToken(properties("githubToken"))
     owner.set("jetbrains")
