@@ -6,18 +6,19 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.ifNull
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
-import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.nio.file.Path
 import java.util.Properties
 import javax.inject.Inject
+
+fun debug(context: String?, message: String) = println(message)
+fun warn(context: String?, message: String) = println(message)
 
 @Incubating
 open class JbrResolver @Inject constructor(
@@ -46,6 +47,7 @@ open class JbrResolver @Inject constructor(
     ): String? {
         debug(context, "Resolving runtime directory.")
 
+        println("resolveExecutable='${resolveExecutable}'")
         return listOf(
             {
                 runtimeDir?.let { path ->
@@ -168,7 +170,7 @@ open class JbrResolver @Inject constructor(
                 ivyRepository(url, "[revision].tar.gz")
             }).first()
         } catch (e: Exception) {
-            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'", e)
+            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'")
             null
         }
     }

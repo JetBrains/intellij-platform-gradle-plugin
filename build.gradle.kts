@@ -112,8 +112,9 @@ tasks {
 
     test {
         configureTests(this)
-        exclude("**/DownloadIntelliJSpec.class")
-        dependsOn(cacheIntolerantTest)
+//        exclude("**/*.class")
+        include("**/RunPluginVerifierTaskSpec.class")
+//        dependsOn(cacheIntolerantTest)
     }
 
     jar {
