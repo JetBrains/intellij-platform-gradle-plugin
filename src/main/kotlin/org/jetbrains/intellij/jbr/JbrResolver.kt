@@ -84,14 +84,15 @@ open class JbrResolver @Inject constructor(
                     file
                         .let(::getJbrRoot)
                         .run {
-                            when (resolveExecutable) {
-                                true -> resolve("bin/java")
-                                else -> this
+                            resolve("bin/java").takeIf(File::exists)?.let { executable ->
+                                when (resolveExecutable) {
+                                    true -> executable.canonicalPath
+                                    else -> canonicalPath.takeIf { executable.exists() }
+                                }
                             }
                         }
-                        .takeIf(File::exists)
-                        ?.canonicalPath
                         .also { debug(context, "Runtime specified with ideDir='$file' resolved as: $it") }
+                        .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file'") }
                 }
             },
             {
@@ -100,9 +101,6 @@ open class JbrResolver @Inject constructor(
                         ?.let { version ->
                             resolve(version)
                                 ?.run {
-                                    println("Jbr 103='${this}'")
-                                    println("javaExecutable='${javaExecutable}'")
-                                    println("javaHome='${javaHome}'")
                                     when (resolveExecutable) {
                                         true -> javaExecutable
                                         else -> javaHome.let(::getJbrRoot).canonicalPath
