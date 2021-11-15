@@ -81,10 +81,16 @@ open class JbrResolver @Inject constructor(
                 ideDir?.let { file ->
                     file
                         .let(::getJbrRoot)
-                        .run { resolve("bin/java").takeIf { resolveExecutable } ?: this }
-                        .takeIf(File::exists)
-                        ?.canonicalPath
+                        .run {
+                            resolve("bin/java").takeIf(File::exists)?.let { executable ->
+                                when (resolveExecutable) {
+                                    true -> executable.canonicalPath
+                                    else -> canonicalPath.takeIf { executable.exists() }
+                                }
+                            }
+                        }
                         .also { debug(context, "Runtime specified with ideDir='$file' resolved as: $it") }
+                        .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file'") }
                 }
             },
             {
@@ -98,8 +104,8 @@ open class JbrResolver @Inject constructor(
                                         else -> javaHome.let(::getJbrRoot).canonicalPath
                                     }
                                 }
-                                .also { debug(context, "Runtime specified with ideDir='$file', version='version' resolved as: $it") }
-                                .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file', version='version'") }
+                                .also { debug(context, "Runtime specified with ideDir='$file', version='$version' resolved as: $it") }
+                                .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file', version='$version'") }
                         }
                         .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file'") }
                 }
@@ -108,11 +114,10 @@ open class JbrResolver @Inject constructor(
                 Jvm.current()
                     .run {
                         when (resolveExecutable) {
-                            true -> javaExecutable
-                            else -> javaHome.let(::getJbrRoot)
+                            true -> javaExecutable.canonicalPath
+                            else -> javaHome.let(::getJbrRoot).canonicalPath
                         }
                     }
-                    .canonicalPath
                     .also { debug(context, "Using current JVM: $it") }
                     .ifNull { warn(context, "Cannot resolve current JVM") }
             },
@@ -168,7 +173,7 @@ open class JbrResolver @Inject constructor(
                 ivyRepository(url, "[revision].tar.gz")
             }).first()
         } catch (e: Exception) {
-            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'", e)
+            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'")
             null
         }
     }
@@ -187,14 +192,14 @@ open class JbrResolver @Inject constructor(
         val jbr = javaHome.listFiles()?.firstOrNull { it.name == "jbr" || it.name == "jbrsdk" }
         if (jbr != null && jbr.exists()) {
             return when (operatingSystem.isMacOsX) {
-                true -> File(jbr, "Contents/Home")
+                true -> jbr.resolve("Contents/Home")
                 false -> jbr
             }
         }
-        return File(javaHome, when (operatingSystem.isMacOsX) {
-            true -> "jdk/Contents/Home"
-            false -> ""
-        })
+        return when (operatingSystem.isMacOsX) {
+            true -> javaHome.resolve("jdk/Contents/Home")
+            false -> javaHome
+        }
     }
 
     internal class JbrArtifact(val name: String, val repositoryUrl: String) {
@@ -213,12 +218,12 @@ open class JbrResolver @Inject constructor(
                 }
                 val buildNumber = Version.parse(buildNumberString)
                 val isJava8 = majorVersion.startsWith('8')
-                val repositoryUrl = IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY
-
                 val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < Version.parse("1483.24")
                 if (oldFormat) {
-                    return JbrArtifact("jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}",
-                        repositoryUrl)
+                    return JbrArtifact(
+                        "jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}",
+                        IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY,
+                    )
                 }
 
                 if (prefix.isEmpty()) {
@@ -230,7 +235,7 @@ open class JbrResolver @Inject constructor(
                 }
                 return JbrArtifact(
                     "$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}",
-                    repositoryUrl,
+                    IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY,
                 )
             }
 
