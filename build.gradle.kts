@@ -25,9 +25,6 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains:marketplace-zip-signer:0.1.8") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
     implementation("org.jetbrains:annotations:23.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.198") {
         exclude(group = "org.jetbrains.kotlin")
