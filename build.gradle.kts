@@ -213,14 +213,3 @@ changelog {
     version.set("${project.version}")
     path.set("${project.projectDir}/CHANGES.md")
 }
-
-githubRelease {
-    val releaseNote = changelog.run {
-        getOrNull("${project.version}") ?: getLatest()
-    }.toText()
-
-    setToken(properties("githubToken"))
-    owner.set("jetbrains")
-    repo.set("gradle-intellij-plugin")
-    body.set(releaseNote)
-}
