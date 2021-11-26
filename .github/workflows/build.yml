@@ -19,7 +19,7 @@ jobs:
 
       # Run reusable test workflow
       - name: Test
-        uses: ./.github/workflows/reusable-test.yml@main
+        uses: ./.github/workflows/reusable-test.yml@latest
 
   build:
     name: Build
