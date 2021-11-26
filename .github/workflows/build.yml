@@ -12,8 +12,14 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
+
+      # Check out current repository
+      - name: Fetch Sources
+        uses: actions/checkout@v2.4.0
+
+      # Run reusable test workflow
       - name: Test
-        uses: ./.github/workflows/test-reusable.yml
+        uses: ./.github/workflows/reusable-test.yml
 
   build:
     name: Build
