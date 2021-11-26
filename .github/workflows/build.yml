@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Test
-        uses: ./.github/workflows/test-reusable
+        uses: ./.github/workflows/test-reusable.yml
 
   build:
     name: Build
