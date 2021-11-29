@@ -8,18 +8,10 @@ on:
 
 jobs:
 
+  # Run reusable test workflow
   test:
     name: Test
-    runs-on: ubuntu-latest
-    steps:
-
-      # Check out current repository
-      - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
-
-      # Run reusable test workflow
-      - name: Test
-        uses: JetBrains/gradle-intellij-plugin/.github/workflows/reusable-test.yml@test-reusable-workflow
+    uses: JetBrains/gradle-intellij-plugin/.github/workflows/reusable-test.yml@test-reusable-workflow
 
   build:
     name: Build
