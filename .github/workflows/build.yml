@@ -7,66 +7,11 @@ on:
   pull_request:
 
 jobs:
-  gradleValidation:
-    name: Gradle Wrapper
-    runs-on: ubuntu-latest
-    steps:
 
-      - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
-
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.4
-
-  codeInspection:
-    name: Code Inspection
-    needs: gradleValidation
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
-
-      - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v3.2.1
-
+  # Run reusable test workflow
   test:
     name: Test
-    needs: gradleValidation
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        gradleVersion:
-          - 6.6.1
-          - 6.9.1
-          - 7.3
-        os:
-          - windows-latest
-          - ubuntu-latest
-          - macos-latest
-
-    steps:
-
-      - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
-
-      - name: Setup Java
-        uses: actions/setup-java@v2
-        with:
-          distribution: zulu
-          java-version: 11
-          cache: gradle
-
-      - name: Run Linters and Test
-        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}"
-
-      - name: Collect Test Results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: test-results-${{ matrix.gradleVersion }}-${{ runner.os }}
-          path: ${{ github.workspace }}/build/reports/tests
+    uses: JetBrains/gradle-intellij-plugin/.github/workflows/reusable-test.yml@test-reusable-workflow
 
   build:
     name: Build
