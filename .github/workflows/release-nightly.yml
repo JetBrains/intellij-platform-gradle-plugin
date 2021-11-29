@@ -42,5 +42,4 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v2.2.4
         with:
-          name: ${{ steps.artifact.outputs.filename }}
           path: ./build/libs/*-SNAPSHOT.jar
