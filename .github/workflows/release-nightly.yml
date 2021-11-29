@@ -1,7 +1,7 @@
 name: Nightly Release
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "0 0 * * *"
 
 jobs:
 
@@ -13,6 +13,7 @@ jobs:
   # Prepare and publish the Gradle Plugins repository
   release:
     name: Release to Gradle Plugins
+    needs: test
     runs-on: ubuntu-latest
     steps:
 
