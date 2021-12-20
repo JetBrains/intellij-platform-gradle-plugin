@@ -76,9 +76,9 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         assertFalse(cacheDir.exists() || ideaCommunityCacheDir.exists(), "it was already cached. test is senseless until gradle clean")
 
         buildFile.groovy("""
-            intellij { 
+            intellij {
                 version = 'IU-14.1.4'
-                downloadSources = true 
+                downloadSources = true
             }
         """)
         build(BasePlugin.ASSEMBLE_TASK_NAME)

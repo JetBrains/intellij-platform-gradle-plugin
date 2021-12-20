@@ -1,0 +1,10 @@
+2022-01-26 10:23:20,568 [  15879]   INFO - System.impl.PopupMenuPreloader - Popup menu 'Help' preloaded at 'MainMenu' in 422 ms
+2022-01-26 10:23:20,663 [  15974]   INFO - System.impl.PopupMenuPreloader - Popup menu 'Editor Popup Menu' preloaded at 'EditorPopup' in 467 ms
+2022-01-26 10:23:21,714 [  17025]   INFO -                         STDOUT - File opened successfully: alias.php
+2022-01-26 10:23:21,714 [  17025]   INFO -                         STDOUT -
+2022-01-26 10:23:21,715 [  17026]   INFO -                         STDOUT - %stopProfile traces=999,flamegraph
+2022-01-26 10:23:21,716 [  17027]   INFO -                         STDOUT - ##teamcity[buildStatisticValue key='test_alloc' value='1573']
+2022-01-26 10:23:21,717 [  17028]   INFO -                         STDOUT - ##teamcity[buildStatisticValue key='test_alloc | Responsiveness' value='3']
+2022-01-26 10:23:21,717 [  17028]   INFO -                         STDOUT - ##teamcity[buildStatisticValue key='test_alloc | Average Responsiveness' value='777']
+2022-01-26 10:23:21,821 [  17132]   INFO -                         STDOUT - %exitApp
+2022-01-26 10:23:22,106 [  17417]   INFO - rationStore.ComponentStoreImpl - Saving appFileTypeManager took 12 ms

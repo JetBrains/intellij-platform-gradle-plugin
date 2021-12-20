@@ -14,6 +14,7 @@ object IntelliJPluginConstants {
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     const val RUN_IDE_TASK_NAME = "runIde"
+    const val RUN_IDE_PERFORMACNE_TEST_TASK_NAME = "runIdePerformanceTest"
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
     const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"

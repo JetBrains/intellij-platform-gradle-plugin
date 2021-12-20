@@ -39,21 +39,7 @@ import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.tasks.BuildSearchableOptionsTask
-import org.jetbrains.intellij.tasks.DownloadRobotServerPluginTask
-import org.jetbrains.intellij.tasks.IntelliJInstrumentCodeTask
-import org.jetbrains.intellij.tasks.JarSearchableOptionsTask
-import org.jetbrains.intellij.tasks.ListProductsReleasesTask
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.tasks.PublishPluginTask
-import org.jetbrains.intellij.tasks.RunIdeBase
-import org.jetbrains.intellij.tasks.RunIdeForUiTestTask
-import org.jetbrains.intellij.tasks.RunIdeTask
-import org.jetbrains.intellij.tasks.RunPluginVerifierTask
-import org.jetbrains.intellij.tasks.SetupDependenciesTask
-import org.jetbrains.intellij.tasks.SignPluginTask
-import org.jetbrains.intellij.tasks.VerifyPluginTask
+import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
@@ -141,6 +127,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configureRunPluginVerifierTask(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
+        configureRunIdePerformanceTestTask(project)
         configureRunIdeaForUiTestsTask(project)
         configureBuildSearchableOptionsTask(project)
         configureJarSearchableOptionsTask(project)
@@ -545,6 +532,17 @@ open class IntelliJPlugin : Plugin<Project> {
         project.tasks.register(IntelliJPluginConstants.RUN_IDE_TASK_NAME, RunIdeTask::class.java) {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Runs Intellij IDEA with installed plugin."
+
+            dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        }
+    }
+
+    private fun configureRunIdePerformanceTestTask(project: Project) {
+        info(context, "Configuring run IDE performance test task")
+
+        project.tasks.register(IntelliJPluginConstants.RUN_IDE_PERFORMACNE_TEST_TASK_NAME, RunIdePerformanceTestTask::class.java) {
+            group = IntelliJPluginConstants.GROUP_NAME
+            description = "Runs performance tests."
 
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
         }
