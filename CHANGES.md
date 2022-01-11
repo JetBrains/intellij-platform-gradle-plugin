@@ -2,6 +2,10 @@
 
 ## next
 
+- Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)  
+
+## 1.3.0
+
 - IntelliJ Plugin Verifier allows for running against Android Studio (i.e. `AI-2021.2.1.4`)
 - Make `intellij.version` property mandatory
 - Move `intellij.ideaDependency` to the `SetupDependenciesTask.idea`
