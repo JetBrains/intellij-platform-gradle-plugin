@@ -60,7 +60,7 @@ jobs:
 
       - name: Collect Test Results
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: test-results-${{ matrix.gradleVersion }}-${{ runner.os }}
           path: ${{ github.workspace }}/build/reports/tests
