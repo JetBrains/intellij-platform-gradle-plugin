@@ -9,8 +9,8 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.6.0"
-    kotlin("plugin.serialization") version "1.6.0"
+    kotlin("jvm") version "1.6.10"
+    kotlin("plugin.serialization") version "1.6.10"
     id("com.gradle.plugin-publish") version "0.19.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.6.0"
@@ -26,10 +26,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.198") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.201") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.198") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.201") {
         exclude(group = "org.jetbrains.kotlin")
     }
     // should be changed together with plugin-repository-rest-client
