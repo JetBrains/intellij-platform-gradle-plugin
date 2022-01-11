@@ -173,15 +173,22 @@ open class IdeaDependencyManager @Inject constructor(
 
     private fun resetExecutablePermissions(cacheDirectory: File, type: String) {
         if (type == "RD" && !OperatingSystem.current().isWindows) {
-            setExecutable(cacheDirectory, "lib/ReSharperHost/dupfinder.sh", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/inspectcode.sh", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/JetBrains.ReSharper.Host.sh", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/runtime.sh", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/env-wrapper", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/macos-x64/mono/bin/mono-sgen-gdb.py", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen", context)
-            setExecutable(cacheDirectory, "lib/ReSharperHost/linux-x64/mono/bin/mono-sgen-gdb.py", context)
+            for (f in cacheDirectory.walkTopDown()) {
+                if (f.isFile
+                    && (f.extension == "dylib"
+                            || f.extension == "py"
+                            || f.extension == "sh"
+                            || f.extension.startsWith("so")
+                            || f.name == "dotnet"
+                            || f.name == "env-wrapper"
+                            || f.name == "mono-sgen"
+                            || f.name == "BridgeService"
+                            || f.name == "JetBrains.Profiler.PdbServer"
+                            || f.name == "JBDeviceService")
+                ) {
+                    setExecutable(cacheDirectory, f.relativeTo(cacheDirectory).toString(), context)
+                }
+            }
         }
     }
 
