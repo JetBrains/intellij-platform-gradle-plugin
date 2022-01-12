@@ -688,7 +688,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         sourceSet.compileClasspath
                     })
                     compilerVersion.convention(project.provider {
-                        val version = extension.getVersionNumber()
+                        val version by lazy { extension.getVersionNumber() }
                         val localPath = extension.localPath.orNull
                         val ideaDependency = setupDependenciesTask.idea.get()
 
