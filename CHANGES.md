@@ -3,6 +3,7 @@
 ## next
 
 - Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)  
+- Revert `org.jetbrains.intellij:blockmap` dependency to the latest `1.0.5` version
 
 ## 1.3.0
 
