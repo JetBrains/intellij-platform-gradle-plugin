@@ -26,7 +26,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.201") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.202") {
         exclude(group = "org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.201") {
