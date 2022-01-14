@@ -15,13 +15,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.error
-import org.jetbrains.intellij.getIdeJvmArgs
-import org.jetbrains.intellij.getIdeaSystemProperties
-import org.jetbrains.intellij.ideBuildNumber
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.*
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
@@ -149,6 +143,10 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 systemProperty("idea.platform.prefix", prefix)
             }
             info(context, "Using idea.platform.prefix=$prefix")
+        }
+
+        if (Version.parse(ideBuildNumber(ideDir.get()).split('-').last()) > Version.parse("221.0")) {
+            systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
     }
 
