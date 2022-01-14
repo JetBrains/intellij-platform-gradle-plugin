@@ -64,7 +64,7 @@ open class PrepareSandboxTask @Inject constructor(
         super.copy()
     }
 
-    override fun getDestinationDir(): File = super.getDestinationDir() ?: defaultDestinationDir.get()
+    override fun getDestinationDir(): File = super.getDestinationDir()
 
     override fun configure(closure: Closure<*>): Task = super.configure(closure)
 

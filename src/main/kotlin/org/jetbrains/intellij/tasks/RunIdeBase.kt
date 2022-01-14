@@ -192,7 +192,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     }
 
     private fun configureJvmArgs() {
-        jvmArgs = getIdeJvmArgs(this, jvmArgs ?: emptyList(), ideDir.get())
+        jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get())
     }
 
     private fun resolveToolsJar(javaExec: String): File {
