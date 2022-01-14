@@ -64,7 +64,7 @@ open class PrepareSandboxTask @Inject constructor(
         super.copy()
     }
 
-    override fun getDestinationDir(): File = super.getDestinationDir()
+    override fun getDestinationDir(): File = defaultDestinationDir.get()
 
     override fun configure(closure: Closure<*>): Task = super.configure(closure)
 
@@ -78,10 +78,10 @@ open class PrepareSandboxTask @Inject constructor(
         plugin.from(project.provider {
             listOf(pluginJar.get().asFile) + runtimeConfiguration.allDependencies.map {
                 runtimeConfiguration.fileCollection(it).filter { file ->
-            !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-                file.absolutePath == p || file.absolutePath.startsWith("$p${File.separator}")
-            })
-        }
+                    !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
+                        file.absolutePath == p || file.absolutePath.startsWith("$p${File.separator}")
+                    })
+                }
             }.flatten()
         }).eachFile {
             val dotIndex = name.lastIndexOf('.')
