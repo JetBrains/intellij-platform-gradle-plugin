@@ -15,7 +15,13 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
-import org.jetbrains.intellij.*
+import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.error
+import org.jetbrains.intellij.getIdeJvmArgs
+import org.jetbrains.intellij.getIdeaSystemProperties
+import org.jetbrains.intellij.ideBuildNumber
+import org.jetbrains.intellij.info
+import org.jetbrains.intellij.logCategory
 import java.io.File
 import java.io.FileNotFoundException
 import java.nio.file.Files
@@ -26,7 +32,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     companion object {
         private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
     }
-    
+
     private val context = logCategory()
 
     @Input
@@ -94,21 +100,21 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         val buildNumber = ideBuildNumber(ideDir.get()).split('-').last()
         if (Version.parse(buildNumber) > Version.parse("203.0")) {
             classpath += objectFactory.fileCollection().from(
-                    "$ideDirFile/lib/bootstrap.jar",
-                    "$ideDirFile/lib/util.jar",
-                    "$ideDirFile/lib/jdom.jar",
-                    "$ideDirFile/lib/log4j.jar",
-                    "$ideDirFile/lib/jna.jar",
+                "$ideDirFile/lib/bootstrap.jar",
+                "$ideDirFile/lib/util.jar",
+                "$ideDirFile/lib/jdom.jar",
+                "$ideDirFile/lib/log4j.jar",
+                "$ideDirFile/lib/jna.jar",
             )
         } else {
             classpath += objectFactory.fileCollection().from(
-                    "$ideDirFile/lib/bootstrap.jar",
-                    "$ideDirFile/lib/extensions.jar",
-                    "$ideDirFile/lib/util.jar",
-                    "$ideDirFile/lib/jdom.jar",
-                    "$ideDirFile/lib/log4j.jar",
-                    "$ideDirFile/lib/jna.jar",
-                    "$ideDirFile/lib/trove4j.jar",
+                "$ideDirFile/lib/bootstrap.jar",
+                "$ideDirFile/lib/extensions.jar",
+                "$ideDirFile/lib/util.jar",
+                "$ideDirFile/lib/jdom.jar",
+                "$ideDirFile/lib/log4j.jar",
+                "$ideDirFile/lib/jna.jar",
+                "$ideDirFile/lib/trove4j.jar",
             )
         }
     }
@@ -135,7 +141,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         if (!systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = findIdePrefix()
             if (prefix == null && !ideBuildNumber(ideDir.get()).startsWith("IU-")) {
-                throw TaskExecutionException(this, GradleException("Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
+                throw TaskExecutionException(this,
+                    GradleException("Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
                         "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."))
             }
 
@@ -145,7 +152,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             info(context, "Using idea.platform.prefix=$prefix")
         }
 
-        if (Version.parse(ideBuildNumber(ideDir.get()).split('-').last()) > Version.parse("221.0")) {
+        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last()
+        if (Version.parse(buildNumber) > Version.parse("221.0")) {
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
     }
@@ -154,7 +162,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         info(context, "Looking for platform prefix")
         val prefix = Files.list(ideDir.get().toPath().resolve("bin"))
             .asSequence()
-            .filter { file -> file.fileName.toString().endsWith(".sh") || file.fileName.toString().endsWith(".bat")}
+            .filter { file -> file.fileName.toString().endsWith(".sh") || file.fileName.toString().endsWith(".bat") }
             .flatMap { file -> Files.lines(file).asSequence() }
             .mapNotNull { line -> platformPrefixSystemPropertyRegex.find(line)?.groupValues?.getOrNull(1) }
             .firstOrNull()
