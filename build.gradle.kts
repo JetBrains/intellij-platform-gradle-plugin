@@ -163,11 +163,12 @@ publishing {
         }
     }
     publications {
-        withType(MavenPublication::class.java).configureEach {
-            groupId = project.group.toString()
-            artifactId = project.name
+        create<MavenPublication>("snapshot") {
+            groupId = "org.jetbrains.intellij"
+            artifactId = "org.jetbrains.intellij.gradle.plugin"
             version = version.toString()
 
+            from(components["java"])
             artifact(sourcesJar)
             artifact(javadocJar)
 

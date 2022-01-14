@@ -36,7 +36,7 @@ jobs:
         env:
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
-        run: ./gradlew publish -Psnapshot=true -PossrhUsername=$OSSRH_USERNAME -PossrhPassword=$OSSRH_PASSWORD
+        run: ./gradlew publishSnapshotPublicationToSnapshotRepository -Psnapshot=true -PossrhUsername=$OSSRH_USERNAME -PossrhPassword=$OSSRH_PASSWORD
 
       # Store already-built plugin as an artifact for downloading
       - name: Upload artifact
