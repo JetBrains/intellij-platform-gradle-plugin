@@ -2,9 +2,10 @@
 
 ## next
 
-- Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)  
+- Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)
 - Revert `org.jetbrains.intellij:blockmap` dependency to the latest `1.0.5` version
 - Avoid querying `intellij.version` when `intellij.localPath` is set
+- Fixed `BuildSearchableOptionsTask` for `2022.1+` version of IDE [RIDER-73264](https://youtrack.jetbrains.com/issue/RIDER-73264)
 
 ## 1.3.0
 
