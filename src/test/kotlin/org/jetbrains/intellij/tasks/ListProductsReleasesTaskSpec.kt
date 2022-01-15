@@ -27,7 +27,23 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `get IDEs list for the current platformType and platformVersion`() {
+    fun `get IDEs list for the current platformType, sinceBuild and untilBuild`() {
+        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+
+        assertEquals(
+            listOf("IC-2020.1.4"),
+            result.taskOutput()
+        )
+    }
+
+    @Test
+    fun `get IDEs list for the current platformType`() {
+        buildFile.groovy("""
+            listProductsReleases {
+                sinceVersion = "201"
+            }
+        """)
+
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
@@ -54,6 +70,43 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `get IDEs list using sinceBuild and untilBuild`() {
+        buildFile.groovy("""
+            patchPluginXml {
+                sinceBuild = "203"
+                untilBuild = "212.*"
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+
+        assertEquals(
+            listOf("IC-2021.2.2", "IC-2021.1.3", "IC-2020.3.4"),
+            result.taskOutput()
+        )
+    }
+
+    @Test
+    fun `get IDEs list using sinceBuild despite it is lower than intellij_version`() {
+        buildFile.groovy("""
+            intellij {
+                version = "2021.1"
+            }
+            patchPluginXml {
+                sinceBuild = "203"
+                untilBuild = "212.*"
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+
+        assertEquals(
+            listOf("IC-2021.2.2", "IC-2021.1.3", "IC-2020.3.4"),
+            result.taskOutput()
+        )
+    }
+
+    @Test
     fun `get IDEs list for the custom platformType and platformVersion defined in intellij`() {
         buildFile.groovy("""
             intellij {
@@ -65,7 +118,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("PY-2021.2.2", "PY-2021.1.3"),
+            listOf("PY-2021.1.3"),
             result.taskOutput()
         )
     }

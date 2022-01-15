@@ -6,6 +6,8 @@
 - Revert `org.jetbrains.intellij:blockmap` dependency to the latest `1.0.5` version
 - Avoid querying `intellij.version` when `intellij.localPath` is set
 - Fixed `BuildSearchableOptionsTask` for `2022.1+` version of IDE [RIDER-73264](https://youtrack.jetbrains.com/issue/RIDER-73264)
+- `ListProductsReleasesTask`: rely on the `patchPluginXml.sinceBuild`/`patchPluginXml.untilBuild` properties instead of `intellij.version`
+- `ListProductsReleasesTask`: allow using IDE version along with build numbers
 
 ## 1.3.0
 

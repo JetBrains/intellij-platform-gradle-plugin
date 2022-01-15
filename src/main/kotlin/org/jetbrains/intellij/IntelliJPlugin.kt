@@ -958,6 +958,9 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring list products task")
 
         project.tasks.register(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, ListProductsReleasesTask::class.java) {
+            val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
+            val patchPluginXmlTask = patchPluginXmlTaskProvider.get()
+
             group = IntelliJPluginConstants.GROUP_NAME
             description = "List all available IntelliJ-based IDEs with their updates."
 
@@ -983,7 +986,8 @@ open class IntelliJPlugin : Plugin<Project> {
             types.convention(project.provider {
                 listOf(extension.type.get())
             })
-            sinceVersion.convention(extension.version)
+            sinceBuild.convention(patchPluginXmlTask.sinceBuild)
+            untilBuild.convention(patchPluginXmlTask.untilBuild)
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
         }
     }

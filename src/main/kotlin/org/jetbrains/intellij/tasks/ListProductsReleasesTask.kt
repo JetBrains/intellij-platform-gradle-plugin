@@ -5,6 +5,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -42,6 +43,12 @@ open class ListProductsReleasesTask @Inject constructor(
     @Optional
     val untilVersion = objectFactory.property<String>()
 
+    @Internal
+    val sinceBuild = objectFactory.property<String>()
+
+    @Internal
+    val untilBuild = objectFactory.property<String>()
+
     @Input
     @Optional
     val releaseChannels = objectFactory.setProperty<Channel>()
@@ -53,26 +60,35 @@ open class ListProductsReleasesTask @Inject constructor(
         val extractor = XmlExtractor<ProductsReleases>(context)
         val releases = updatePaths.get().mapNotNull(extractor::fetch)
 
-        val since = sinceVersion.get().run(::parse)
-        val until = untilVersion.orNull?.run(::parse)
+        val since = (sinceVersion.orNull ?: sinceBuild.get()).run(::parse)
+        val until = (untilVersion.orNull ?: untilBuild.get().takeUnless { sinceVersion.isPresent })?.run {
+            replace("*", "9999").run(::parse)
+        }
         val channels = releaseChannels.get()
 
-        val result = releases
-            .map(ProductsReleases::products)
-            .flatten()
-            .asSequence()
-            .flatMap { product -> product.codes.map { it to product }.asSequence() }
-            .filter { (type) -> types.get().contains(type) }
+        fun testVersion(version: Version, build: Version): Boolean {
+            val a = when (since.major) {
+                in 100..999 -> build
+                else -> version
+            }
+            val b = when (until?.major) {
+                in 100..999 -> build
+                else -> version
+            }
+
+            return a >= since && (until == null || b <= until)
+        }
+
+        val result = releases.map(ProductsReleases::products).flatten().asSequence()
+            .flatMap { product -> product.codes.map { it to product }.asSequence() }.filter { (type) -> types.get().contains(type) }
             .flatMap { (type, product) -> product.channels.map { type to it }.asSequence() }
             .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.toUpperCase())) }
-            .flatMap { (type, channel) -> channel.builds.map { type to it.version.run(::parse) }.asSequence() }
-            .filter { (_, version) -> version >= since && (until == null || version <= until) }
-            .groupBy { (type, version) -> "$type-${version.major}.${version.minor}" }
-            .mapNotNull {
-                it.value.maxByOrNull { (_, version) -> version.patch }?.let { (type, version) -> "$type-${version.asRelease()}" }
-            }
-            .distinct()
-            .toList()
+            .flatMap { (type, channel) -> channel.builds.map { type to (it.version.run(::parse) to it.number.run(::parse)) }.asSequence() }
+            .filter { (_, version) -> testVersion(version.first, version.second) }
+            .groupBy { (type, version) -> "$type-${version.first.major}.${version.first.minor}" }.mapNotNull {
+                it.value.maxByOrNull { (_, version) -> version.first.patch }
+                    ?.let { (type, version) -> "$type-${version.first.asRelease()}" }
+            }.distinct().toList()
 
         outputFile.get().asFile.outputStream().use { os ->
             result.joinToString("\n").apply {
