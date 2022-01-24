@@ -710,7 +710,9 @@ open class IntelliJPlugin : Plugin<Project> {
                             val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
                             val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
 
-                            IdeVersion.createIdeVersion(ideaDependency.buildNumber).asStringWithoutProductCode() + eapSuffix
+                            IdeVersion.createIdeVersion(ideaDependency.buildNumber)
+                                .stripExcessComponents()
+                                .asStringWithoutProductCode() + eapSuffix
                         }
                     })
                     ideaDependency.convention(setupDependenciesTask.idea)
@@ -1160,4 +1162,18 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun ProjectSettings.taskTriggers(
         action: TaskTriggersConfig.() -> Unit,
     ) = (this as ExtensionAware).extensions.configure("taskTriggers", action)
+
+
+    /**
+     * Strips an [IdeVersion] of components other than SNAPSHOT and * that exceeds patch, i.e. "excess" in the following
+     * version will be stripped: major.minor.patch.excess.SNAPSHOT.
+     * This is needed due to recent versions of Android Studio having additional components in its build number; e.g.
+     * 2020.3.1-patch-4 has build number AI-203.7717.56.2031.7935034, with these additional components instrumentCode
+     * fails because it tries to resolve a non-existent compiler version (203.7717.56.2031.7935034). This function
+     * strips it down so that only major minor and patch are used.
+     */
+    private fun IdeVersion.stripExcessComponents(): IdeVersion = asStringWithoutProductCode().split(".")
+        .filterIndexed { index, component -> index < 3 || component == "SNAPSHOT" || component == "*"  }
+        .joinToString(prefix = "${productCode}-", separator = ".")
+        .let(IdeVersion::createIdeVersion)
 }
