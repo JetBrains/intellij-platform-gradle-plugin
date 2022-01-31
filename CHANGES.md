@@ -2,6 +2,7 @@
 
 ## next
 - Fixed JBR resolving for MacOSX M1
+- Fix compiler resolution for long build numbers [#883](../../issues/883)
 
 ## 1.3.1
 - Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)
