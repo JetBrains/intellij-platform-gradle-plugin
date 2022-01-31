@@ -11,7 +11,7 @@ plugins {
     `maven-publish`
     kotlin("jvm") version "1.6.10"
     kotlin("plugin.serialization") version "1.6.10"
-    id("com.gradle.plugin-publish") version "0.19.0"
+    id("com.gradle.plugin-publish") version "0.20.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.6.10"
     id("synapticloop.documentr") version "3.1.0"
@@ -43,7 +43,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
-    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.1")
+    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.2")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))

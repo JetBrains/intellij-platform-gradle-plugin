@@ -226,15 +226,17 @@ open class JbrResolver @Inject constructor(
                     )
                 }
 
+                val arch = arch(isJava8)
                 if (prefix.isEmpty()) {
                     prefix = when {
                         isJava8 -> "jbrx-"
+                        operatingSystem.isMacOsX && arch == "aarch64" -> "jbr_jcef-"
                         buildNumber < Version.parse("1319.6") -> "jbr-"
                         else -> "jbr_jcef-"
                     }
                 }
                 return JbrArtifact(
-                    "$prefix${majorVersion}-${platform(operatingSystem)}-${arch(isJava8)}-b${buildNumberString}",
+                    "$prefix$majorVersion-${platform(operatingSystem)}-$arch-b$buildNumberString",
                     IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY,
                 )
             }
