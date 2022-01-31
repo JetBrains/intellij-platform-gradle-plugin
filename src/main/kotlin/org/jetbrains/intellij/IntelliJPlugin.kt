@@ -721,9 +721,8 @@ open class IntelliJPlugin : Plugin<Project> {
                     })
                     compilerClassPathFromMaven.convention(project.provider {
                         val compilerVersion = compilerVersion.get()
-                        if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION || Version.parse(compilerVersion) >= Version(183,
-                                3795,
-                                13)
+                        if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION ||
+                            Version.parse(compilerVersion) >= Version(183, 3795, 13)
                         ) {
                             dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
                                 create(
@@ -1163,7 +1162,6 @@ open class IntelliJPlugin : Plugin<Project> {
         action: TaskTriggersConfig.() -> Unit,
     ) = (this as ExtensionAware).extensions.configure("taskTriggers", action)
 
-
     /**
      * Strips an [IdeVersion] of components other than SNAPSHOT and * that exceeds patch, i.e. "excess" in the following
      * version will be stripped: major.minor.patch.excess.SNAPSHOT.
@@ -1173,7 +1171,7 @@ open class IntelliJPlugin : Plugin<Project> {
      * strips it down so that only major minor and patch are used.
      */
     private fun IdeVersion.stripExcessComponents(): IdeVersion = asStringWithoutProductCode().split(".")
-        .filterIndexed { index, component -> index < 3 || component == "SNAPSHOT" || component == "*"  }
-        .joinToString(prefix = "${productCode}-", separator = ".")
+        .filterIndexed { index, component -> index < 3 || component == "SNAPSHOT" || component == "*" }
+        .joinToString(prefix = "$productCode-", separator = ".")
         .let(IdeVersion::createIdeVersion)
 }
