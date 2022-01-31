@@ -363,7 +363,13 @@ open class IntelliJPlugin : Plugin<Project> {
                     "Build-OS" to OperatingSystem.current(),
                     "Build-SDK" to when (extension.localPath.orNull) {
                         null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
-                        else -> ideProductInfo(setupDependenciesTask.idea.get().classes)?.run { "$productCode-$version" }
+                        else -> setupDependenciesTask.idea.get().classes.let { ideaClasses ->
+                            ideProductInfo(ideaClasses)
+                                ?.run { "$productCode-$version" }
+                                // Fall back on build number if product-info.json is not present, this is the case
+                                // for recent versions of Android Studio.
+                                ?: ideBuildNumber(ideaClasses)
+                        }
                     },
                 )
                 jarTask.archiveFile.orNull?.asFile
