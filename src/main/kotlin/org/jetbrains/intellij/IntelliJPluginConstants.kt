@@ -41,6 +41,10 @@ object IntelliJPluginConstants {
     const val DEFAULT_JBR_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
     const val PLUGIN_VERIFIER_REPOSITORY =
         "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
+    const val ANDROID_STUDIO_DOWNLOAD_URL = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
+    const val IDEA_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+    const val ZIP_SIGNER_LATEST_RELEASE_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases/latest"
+    const val ZIP_SIGNER_DOWNLOAD_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases/download/%VERSION%/marketplace-zip-signer-cli.jar"
 
     const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"

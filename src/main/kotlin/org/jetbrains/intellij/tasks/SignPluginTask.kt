@@ -6,9 +6,9 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.SkipWhenEmpty
@@ -33,44 +33,40 @@ open class SignPluginTask @Inject constructor(
     private val execOperations: ExecOperations,
 ) : ConventionTask() {
 
-    companion object {
-        private const val LATEST_RELEASE_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases/latest"
-
-        /**
-         * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
-         *
-         * @return latest CLI version
-         */
-        fun resolveLatestVersion(): String {
-            debug(message = "Resolving latest Marketplace ZIP Signer CLI version")
-            try {
-                return URL(LATEST_RELEASE_URL).openConnection().run {
-                    (this as HttpURLConnection).instanceFollowRedirects = false
-                    getHeaderField("Location").split('/').last()
-                }
-            } catch (e: IOException) {
-                throw GradleException("Cannot resolve the latest Marketplace ZIP Signer CLI version")
+    /**
+     * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
+     *
+     * @return latest CLI version
+     */
+    fun resolveLatestVersion(): String {
+        debug(message = "Resolving latest Marketplace ZIP Signer CLI version")
+        try {
+            return URL(zipSignerLatestReleaseUrl.get()).openConnection().run {
+                (this as HttpURLConnection).instanceFollowRedirects = false
+                getHeaderField("Location").split('/').last()
             }
+        } catch (e: IOException) {
+            throw GradleException("Cannot resolve the latest Marketplace ZIP Signer CLI version")
         }
+    }
 
-        /**
-         * Resolves Marketplace ZIP Signer CLI version.
-         * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #METADATA_URL}
-         * performed for the latest available verifier version.
-         *
-         * @return Marketplace ZIP Signer CLI version
-         */
-        fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST }
-            ?: resolveLatestVersion()
+    /**
+     * Resolves Marketplace ZIP Signer CLI version.
+     * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #METADATA_URL}
+     * performed for the latest available verifier version.
+     *
+     * @return Marketplace ZIP Signer CLI version
+     */
+    fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST }
+        ?: resolveLatestVersion()
 
-        /**
-         * Resolves Marketplace ZIP Signer CLI download URL.
-         *
-         * @return Marketplace ZIP Signer CLI download URL
-         */
-        fun resolveCliUrl(version: String?) = resolveCliVersion(version).let {
-            "https://github.com/JetBrains/marketplace-zip-signer/releases/download/$it/marketplace-zip-signer-cli.jar"
-        }
+    /**
+     * Resolves Marketplace ZIP Signer CLI download URL.
+     *
+     * @return Marketplace ZIP Signer CLI download URL
+     */
+    fun resolveCliUrl(version: String?) = resolveCliVersion(version).let {
+        zipSignerDownloadUrl.get().replace("%VERSION%", it)
     }
 
     /**
@@ -185,6 +181,12 @@ open class SignPluginTask @Inject constructor(
     @InputFile
     @Optional
     val certificateChainFile: RegularFileProperty = objectFactory.fileProperty()
+
+    @Internal
+    val zipSignerLatestReleaseUrl = objectFactory.property<String>()
+
+    @Internal
+    val zipSignerDownloadUrl = objectFactory.property<String>()
 
     private val context = logCategory()
 

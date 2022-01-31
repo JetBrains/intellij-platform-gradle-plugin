@@ -450,12 +450,12 @@ open class IntelliJPlugin : Plugin<Project> {
                 ideVersions.map { ideVersion ->
                     val downloadDir = File(downloadDir.get())
 
-                    RunPluginVerifierTask.resolveIdePath(ideVersion, downloadDir, logCategory()) { type, version, buildType ->
+                    resolveIdePath(ideVersion, downloadDir) { type, version, buildType ->
                         val name = "$type-$version"
                         val ideDir = downloadDir.resolve(name)
                         info(context, "Downloading IDE '$name' to: $ideDir")
 
-                        val url = RunPluginVerifierTask.resolveIdeUrl(type, version, buildType, logCategory())
+                        val url = resolveIdeUrl(type, version, buildType)
                         val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
                         val group = when (type) {
                             IntelliJPluginConstants.ANDROID_STUDIO_TYPE -> "com.android"
@@ -495,8 +495,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
                 }.let { files -> project.files(files) }
             })
+            verifierRepository.convention(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY)
             verifierPath.convention(project.provider {
-                val resolvedVerifierVersion = RunPluginVerifierTask.resolveVerifierVersion(verifierVersion.orNull)
+                val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
                 debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
 
                 dependenciesDownloader.downloadFromRepository(logCategory(), {
@@ -508,11 +509,16 @@ open class IntelliJPlugin : Plugin<Project> {
                         ext = "jar",
                     )
                 }, {
-                    mavenRepository(IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY)
+                    mavenRepository(verifierRepository.get())
                 }).first().canonicalPath
             })
             jreRepository.convention(extension.jreRepository)
             offline.set(project.gradle.startParameter.isOffline)
+            latestVersionMetadata.convention(verifierRepository.map {
+                "$it/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
+            })
+            androidStudioDownloadUrl.convention(IntelliJPluginConstants.ANDROID_STUDIO_DOWNLOAD_URL)
+            ideaDownloadUrl.convention(IntelliJPluginConstants.IDEA_DOWNLOAD_URL)
 
             dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
@@ -913,8 +919,8 @@ open class IntelliJPlugin : Plugin<Project> {
             }))
             cliVersion.convention(IntelliJPluginConstants.VERSION_LATEST)
             cliPath.convention(project.provider {
-                val resolvedCliVersion = SignPluginTask.resolveCliVersion(cliVersion.orNull)
-                val url = SignPluginTask.resolveCliUrl(resolvedCliVersion)
+                val resolvedCliVersion = resolveCliVersion(cliVersion.orNull)
+                val url = resolveCliUrl(resolvedCliVersion)
                 debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
 
                 dependenciesDownloader.downloadFromRepository(logCategory(), {
@@ -928,6 +934,8 @@ open class IntelliJPlugin : Plugin<Project> {
                     ivyRepository(url)
                 }).first().canonicalPath
             })
+            zipSignerLatestReleaseUrl.convention(IntelliJPluginConstants.ZIP_SIGNER_LATEST_RELEASE_URL)
+            zipSignerDownloadUrl.convention(IntelliJPluginConstants.ZIP_SIGNER_DOWNLOAD_URL)
 
             onlyIf {
                 (privateKey.isPresent || privateKeyFile.isPresent) && (certificateChain.isPresent || certificateChainFile.isPresent)
