@@ -3,12 +3,19 @@ package org.jetbrains.intellij.tasks
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment")
 class SignPluginTaskSpec : IntelliJPluginSpecBase() {
+
+    private fun resolveLatestVersion() = URL(IntelliJPluginConstants.ZIP_SIGNER_LATEST_RELEASE_URL).openConnection().run {
+        (this as HttpURLConnection).instanceFollowRedirects = false
+        getHeaderField("Location").split('/').last()
+    }
 
     @Test
     fun `run Marketplace ZIP Signer in the latest version`() {
@@ -21,7 +28,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val version = SignPluginTask.resolveLatestVersion()
+        val version = resolveLatestVersion()
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
 
         assertTrue(result.output.contains("marketplace-zip-signer-cli-$version.jar"))

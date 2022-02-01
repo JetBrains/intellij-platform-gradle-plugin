@@ -3,6 +3,8 @@ package org.jetbrains.intellij.tasks
 import org.apache.commons.io.FileUtils
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
+import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
+import org.jetbrains.intellij.model.XmlExtractor
 import java.net.URL
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -10,6 +12,11 @@ import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
+
+    private fun resolveLatestVersion() =
+        "${IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml".let {
+            XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(URL(it).openStream()).versioning?.latest
+        }
 
     @Test
     fun `run plugin verifier in specified version`() {
@@ -57,7 +64,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-        val version = RunPluginVerifierTask.resolveLatestVersion()
+        val version = resolveLatestVersion()
         assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier $version"))
     }
 
@@ -286,7 +293,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val version = RunPluginVerifierTask.resolveLatestVersion()
+        val version = resolveLatestVersion()
         FileUtils.copyInputStreamToFile(
             URL("${IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
             file("build/pluginVerifier.jar")

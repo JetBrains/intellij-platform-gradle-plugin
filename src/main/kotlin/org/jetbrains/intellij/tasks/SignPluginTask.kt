@@ -38,7 +38,7 @@ open class SignPluginTask @Inject constructor(
      *
      * @return latest CLI version
      */
-    fun resolveLatestVersion(): String {
+    private fun resolveLatestVersion(): String {
         debug(message = "Resolving latest Marketplace ZIP Signer CLI version")
         try {
             return URL(zipSignerLatestReleaseUrl.get()).openConnection().run {
@@ -57,8 +57,7 @@ open class SignPluginTask @Inject constructor(
      *
      * @return Marketplace ZIP Signer CLI version
      */
-    fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST }
-        ?: resolveLatestVersion()
+    fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST } ?: resolveLatestVersion()
 
     /**
      * Resolves Marketplace ZIP Signer CLI download URL.
@@ -198,16 +197,10 @@ open class SignPluginTask @Inject constructor(
         }
 
         if (privateKey.orNull == null && privateKeyFile.orNull == null) {
-            throw InvalidUserDataException(
-                "Private key not found. " +
-                    "One of the 'signPlugin.privateKey' or 'signPlugin.privateKeyFile' properties has to be provided."
-            )
+            throw InvalidUserDataException("Private key not found. " + "One of the 'signPlugin.privateKey' or 'signPlugin.privateKeyFile' properties has to be provided.")
         }
         if (certificateChain.orNull == null && certificateChainFile.orNull == null) {
-            throw InvalidUserDataException(
-                "Certificate chain not found. " +
-                    "One of the 'signPlugin.certificateChain' or 'signPlugin.certificateChainFile' properties has to be provided."
-            )
+            throw InvalidUserDataException("Certificate chain not found. " + "One of the 'signPlugin.certificateChain' or 'signPlugin.certificateChainFile' properties has to be provided.")
         }
 
         val cliPath = resolveCliPath()
