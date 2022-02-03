@@ -5,15 +5,12 @@ import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 
 class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download idea dependencies`() {
         val cacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1")
-
-        assertFalse(cacheDir.exists(), "it was already cached. test is senseless until gradle clean")
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
@@ -35,8 +32,6 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
     fun `download sources if option is enabled`() {
         val cacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1")
         val sourcesJar = File(cacheDir, "a2c781ea46fb47d00ee87bfe0d9e43283928657f/ideaIC-2020.1-sources.jar")
-
-        assertFalse(sourcesJar.exists(), "it was already cached. test is senseless until gradle clean")
 
         buildFile.groovy("""
             intellij {
@@ -72,8 +67,6 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
     fun `download ultimate idea dependencies`() {
         val cacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU/14.1.4")
         val ideaCommunityCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.4")
-
-        assertFalse(cacheDir.exists() || ideaCommunityCacheDir.exists(), "it was already cached. test is senseless until gradle clean")
 
         buildFile.groovy("""
             intellij { 
