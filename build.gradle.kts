@@ -88,12 +88,6 @@ pluginBundle {
     tags = listOf("intellij", "jetbrains", "idea")
 }
 
-val cacheIntolerantTest = tasks.register<Test>("cacheIntolerantTest") {
-    configureTests(this)
-    include("**/DownloadIntelliJSpec.class")
-    filter.isFailOnNoMatchingTests = false
-}
-
 tasks {
     withType<KotlinCompile> {
         kotlinOptions {
@@ -108,28 +102,22 @@ tasks {
     }
 
     test {
-        configureTests(this)
-        exclude("**/DownloadIntelliJSpec.class")
-        dependsOn(cacheIntolerantTest)
+        val testGradleHomePath = "$buildDir/testGradleHome"
+        doFirst {
+            File(testGradleHomePath).mkdir()
+        }
+        systemProperties["test.gradle.home"] = testGradleHomePath
+        systemProperties["test.kotlin.version"] = properties("kotlinVersion")
+        systemProperties["test.gradle.default"] = properties("gradleVersion")
+        systemProperties["test.gradle.version"] = properties("testGradleVersion")
+        systemProperties["test.gradle.arguments"] = properties("testGradleArguments")
+        systemProperties["plugins.repository"] = properties("pluginsRepository")
+        outputs.dir(testGradleHomePath)
     }
 
     jar {
         patchManifest()
     }
-}
-
-fun configureTests(testTask: Test) {
-    val testGradleHomePath = "$buildDir/testGradleHome"
-    testTask.doFirst {
-        File(testGradleHomePath).mkdir()
-    }
-    testTask.systemProperties["test.gradle.home"] = testGradleHomePath
-    testTask.systemProperties["test.kotlin.version"] = properties("kotlinVersion")
-    testTask.systemProperties["test.gradle.default"] = properties("gradleVersion")
-    testTask.systemProperties["test.gradle.version"] = properties("testGradleVersion")
-    testTask.systemProperties["test.gradle.arguments"] = properties("testGradleArguments")
-    testTask.systemProperties["plugins.repository"] = properties("pluginsRepository")
-    testTask.outputs.dir(testGradleHomePath)
 }
 
 val dokkaHtml by tasks.getting(DokkaTask::class)
