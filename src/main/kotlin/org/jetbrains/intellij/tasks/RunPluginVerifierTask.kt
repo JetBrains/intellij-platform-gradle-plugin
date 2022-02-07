@@ -268,6 +268,15 @@ open class RunPluginVerifierTask @Inject constructor(
     val jbrVersion = objectFactory.property<String>()
 
     /**
+     * JetBrains Java runtime variant to use when running the IDE with the plugin.
+     * Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`.
+     * See JetBrains Runtime Releases: https://github.com/JetBrains/JetBrainsRuntime/releases
+     */
+    @Input
+    @Optional
+    val jbrVariant = objectFactory.property<String>()
+
+    /**
      * Url of repository for downloading JetBrains Java Runtime.
      */
     @Input
@@ -402,6 +411,7 @@ open class RunPluginVerifierTask @Inject constructor(
         return jbrResolver.resolveRuntimeDir(
             runtimeDir = runtimeDir.orNull,
             jbrVersion = jbrVersion.orNull,
+            jbrVariant = jbrVariant.orNull,
             ideDir = ideDir.orNull,
         ) {
             validateRuntimeDir(it)

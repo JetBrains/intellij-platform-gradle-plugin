@@ -33,13 +33,15 @@ open class JbrResolver @Inject constructor(
     fun resolveRuntimeDir(
         runtimeDir: String? = null,
         jbrVersion: String? = null,
+        jbrVariant: String? = null,
         ideDir: File? = null,
         validate: (executable: String) -> Boolean = { true },
-    ) = resolveRuntime(runtimeDir, jbrVersion, ideDir, false, validate)
+    ) = resolveRuntime(runtimeDir, jbrVersion, jbrVariant, ideDir, false, validate)
 
     fun resolveRuntime(
         runtimeDir: String? = null,
         jbrVersion: String? = null,
+        jbrVariant: String? = null,
         ideDir: File? = null,
         resolveExecutable: Boolean = true,
         validate: (executable: String) -> Boolean = { true },
@@ -66,15 +68,14 @@ open class JbrResolver @Inject constructor(
             },
             {
                 jbrVersion?.let { version ->
-                    version.let(::resolve)
-                        ?.run {
-                            when (resolveExecutable) {
-                                true -> javaExecutable
-                                else -> javaHome.let(::getJbrRoot).canonicalPath
-                            }
+                    resolve(version, jbrVariant)?.run {
+                        when (resolveExecutable) {
+                            true -> javaExecutable
+                            else -> javaHome.let(::getJbrRoot).canonicalPath
                         }
-                        .also { debug(context, "Runtime specified with jbrVersion='$version' resolved as: $it") }
-                        .ifNull { warn(context, "Cannot resolve runtime with jbrVersion='$version'") }
+                    }
+                        .also { debug(context, "Runtime specified with jbrVersion='$version', jbrVariant='$jbrVariant' resolved as: $it") }
+                        .ifNull { warn(context, "Cannot resolve runtime with jbrVersion='$version', jbrVariant='$jbrVariant'") }
                 }
             },
             {
@@ -97,13 +98,12 @@ open class JbrResolver @Inject constructor(
                 ideDir?.let { file ->
                     getBuiltinJbrVersion(file)
                         ?.let { version ->
-                            resolve(version)
-                                ?.run {
-                                    when (resolveExecutable) {
-                                        true -> javaExecutable
-                                        else -> javaHome.let(::getJbrRoot).canonicalPath
-                                    }
+                            resolve(version, jbrVariant)?.run {
+                                when (resolveExecutable) {
+                                    true -> javaExecutable
+                                    else -> javaHome.let(::getJbrRoot).canonicalPath
                                 }
+                            }
                                 .also { debug(context, "Runtime specified with ideDir='$file', version='$version' resolved as: $it") }
                                 .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file', version='$version'") }
                         }
@@ -128,14 +128,11 @@ open class JbrResolver @Inject constructor(
             ?.also { debug(context, "Resolved JVM Runtime directory: $it") }
     }
 
-    fun resolve(version: String?): Jbr? {
+    fun resolve(version: String?, variant: String?): Jbr? {
         if (version.isNullOrEmpty()) {
             return null
         }
-        val jbrArtifact = JbrArtifact.from(
-            ("8".takeIf { version.startsWith('u') } ?: "") + version,
-            operatingSystem,
-        )
+        val jbrArtifact = JbrArtifact.from(version, variant, operatingSystem)
 
         return getJavaArchive(jbrArtifact)?.let {
             val javaDir = File(it.path.replaceAfter(jbrArtifact.name, "")).resolve("extracted")
@@ -205,12 +202,14 @@ open class JbrResolver @Inject constructor(
     internal class JbrArtifact(val name: String, val repositoryUrl: String) {
 
         companion object {
-            fun from(version: String, operatingSystem: OperatingSystem): JbrArtifact {
-                var prefix = getPrefix(version)
+            fun from(jbrVersion: String, jbrVariant: String?, operatingSystem: OperatingSystem): JbrArtifact {
+                val version = ("8".takeIf { jbrVersion.startsWith('u') } ?: "") + jbrVersion
+                var prefix = getPrefix(version, jbrVariant)
                 val lastIndexOfB = version.lastIndexOf('b')
+                val lastIndexOfDash = version.lastIndexOf('-') + 1
                 val majorVersion = when (lastIndexOfB > -1) {
-                    true -> version.substring(prefix.length, lastIndexOfB)
-                    false -> version.substring(prefix.length)
+                    true -> version.substring(lastIndexOfDash, lastIndexOfB)
+                    false -> version.substring(lastIndexOfDash)
                 }
                 val buildNumberString = when (lastIndexOfB > -1) {
                     true -> version.substring(lastIndexOfB + 1)
@@ -241,7 +240,8 @@ open class JbrResolver @Inject constructor(
                 )
             }
 
-            private fun getPrefix(version: String) = when {
+            private fun getPrefix(version: String, variant: String?) = when {
+                !variant.isNullOrEmpty() -> "jbr_$variant-"
                 version.startsWith("jbrsdk-") -> "jbrsdk-"
                 version.startsWith("jbr_jcef-") -> "jbr_jcef-"
                 version.startsWith("jbr_dcevm-") -> "jbr_dcevm-"
