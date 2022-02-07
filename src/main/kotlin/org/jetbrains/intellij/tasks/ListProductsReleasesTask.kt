@@ -5,7 +5,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -43,10 +42,12 @@ open class ListProductsReleasesTask @Inject constructor(
     @Optional
     val untilVersion = objectFactory.property<String>()
 
-    @Internal
+    @Input
+    @Optional
     val sinceBuild = objectFactory.property<String>()
 
-    @Internal
+    @Input
+    @Optional
     val untilBuild = objectFactory.property<String>()
 
     @Input
