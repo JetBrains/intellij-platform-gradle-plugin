@@ -3,7 +3,7 @@
 ## next
 - Fixed JBR resolving for MacOSX M1
 - Fix compiler resolution for long build numbers [#883](../../issues/883)
-- Build number fallback when product-info.json is missing [#880](../../issues/880)
+- Build number fallback when `product-info.json` is missing [#880](../../issues/880)
 - Consider `sinceBuild` and `untilBuild` properties of `ListProductsReleasesTask` in task caching [#891](../../issues/891)
 
 ## 1.3.1
