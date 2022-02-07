@@ -29,10 +29,14 @@ open class JbrResolverTest : IntelliJPluginSpecBase() {
     @Test
     fun `resolve jbr_nomod-11_0_13b1751_16`() = testJbrResolving("jbr_nomod-11_0_13b1751.16", "jbr_nomod-11_0_13-$platform-$arch-b1751.16")
 
-    private fun testJbrResolving(version: String, expected: String) {
+    @Test
+    fun `resolve 11_0_13b1751_16 in fd variant`() = testJbrResolving("11_0_13b1751.16", "jbr_fd-11_0_13-$platform-$arch-b1751.16", "fd")
+
+    private fun testJbrResolving(version: String, expected: String, variant: String? = null) {
         buildFile.groovy("""
             runIde {
                 jbrVersion = "$version"
+                ${"jbrVariant = \"$variant\"".takeIf { variant != null }}
             }
             task $TASK_NAME {
                 doLast {

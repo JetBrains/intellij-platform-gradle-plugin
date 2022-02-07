@@ -636,6 +636,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
             jbrResolver.resolveRuntime(
                 jbrVersion = task.jbrVersion.orNull,
+                jbrVariant = task.jbrVariant.orNull,
                 ideDir = task.ideDir.orNull,
             )
         })

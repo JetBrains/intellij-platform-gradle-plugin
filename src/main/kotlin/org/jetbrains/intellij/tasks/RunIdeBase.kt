@@ -42,6 +42,15 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     @Optional
     val jbrVersion = objectFactory.property<String>()
 
+    /**
+     * JetBrains Java runtime variant to use when running the IDE with the plugin.
+     * Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`.
+     * See JetBrains Runtime Releases: https://github.com/JetBrains/JetBrainsRuntime/releases
+     */
+    @Input
+    @Optional
+    val jbrVariant = objectFactory.property<String>()
+
     @InputDirectory
     @PathSensitive(PathSensitivity.NONE)
     val pluginsDir: DirectoryProperty = objectFactory.directoryProperty()
