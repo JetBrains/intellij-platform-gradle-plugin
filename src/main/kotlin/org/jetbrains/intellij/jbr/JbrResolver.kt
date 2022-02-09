@@ -8,6 +8,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.ifNull
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
@@ -63,7 +64,7 @@ open class JbrResolver @Inject constructor(
                         .takeIf(File::exists)
                         ?.canonicalPath
                         .also { debug(context, "Runtime specified with runtimeDir='$path' resolved as: $it") }
-                        .ifNull { warn(context, "Cannot resolve runtime with runtimeDir='$path'") }
+                        .ifNull { debug(context, "Cannot resolve runtime with runtimeDir='$path'") }
                 }
             },
             {
@@ -75,7 +76,7 @@ open class JbrResolver @Inject constructor(
                         }
                     }
                         .also { debug(context, "Runtime specified with jbrVersion='$version', jbrVariant='$jbrVariant' resolved as: $it") }
-                        .ifNull { warn(context, "Cannot resolve runtime with jbrVersion='$version', jbrVariant='$jbrVariant'") }
+                        .ifNull { debug(context, "Cannot resolve runtime with jbrVersion='$version', jbrVariant='$jbrVariant'") }
                 }
             },
             {
@@ -91,7 +92,7 @@ open class JbrResolver @Inject constructor(
                             }
                         }
                         .also { debug(context, "Runtime specified with ideDir='$file' resolved as: $it") }
-                        .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file'") }
+                        .ifNull { debug(context, "Cannot resolve runtime with ideDir='$file'") }
                 }
             },
             {
@@ -105,9 +106,9 @@ open class JbrResolver @Inject constructor(
                                 }
                             }
                                 .also { debug(context, "Runtime specified with ideDir='$file', version='$version' resolved as: $it") }
-                                .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file', version='$version'") }
+                                .ifNull { debug(context, "Cannot resolve runtime with ideDir='$file', version='$version'") }
                         }
-                        .ifNull { warn(context, "Cannot resolve runtime with ideDir='$file'") }
+                        .ifNull { debug(context, "Cannot resolve runtime with ideDir='$file'") }
                 }
             },
             {
@@ -119,13 +120,13 @@ open class JbrResolver @Inject constructor(
                         }
                     }
                     .also { debug(context, "Using current JVM: $it") }
-                    .ifNull { warn(context, "Cannot resolve current JVM") }
+                    .ifNull { debug(context, "Cannot resolve current JVM") }
             },
         )
             .asSequence()
             .mapNotNull { it()?.takeIf(validate) }
             .firstOrNull()
-            ?.also { debug(context, "Resolved JVM Runtime directory: $it") }
+            ?.also { info(context, "Resolved JVM Runtime directory: $it") }
     }
 
     fun resolve(version: String?, variant: String?): Jbr? {
