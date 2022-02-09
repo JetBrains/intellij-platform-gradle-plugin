@@ -11,7 +11,7 @@ jobs:
   # Run reusable test workflow
   test:
     name: Test
-    uses: JetBrains/gradle-intellij-plugin/.github/workflows/reusable-test.yml@master
+    uses: ./.github/workflows/reusable-test.yml
 
   build:
     name: Build
