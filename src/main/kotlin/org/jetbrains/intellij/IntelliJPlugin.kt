@@ -436,13 +436,14 @@ open class IntelliJPlugin : Plugin<Project> {
 
                 ideVersions.map { ideVersion ->
                     val downloadDir = File(downloadDir.get())
+                    val context = logCategory()
 
-                    RunPluginVerifierTask.resolveIdePath(ideVersion, downloadDir, logCategory()) { type, version, buildType ->
+                    resolveIdePath(ideVersion, downloadDir, context) { type, version, buildType ->
                         val name = "$type-$version"
                         val ideDir = downloadDir.resolve(name)
                         info(context, "Downloading IDE '$name' to: $ideDir")
 
-                        val url = RunPluginVerifierTask.resolveIdeUrl(type, version, buildType, logCategory())
+                        val url = resolveIdeUrl(type, version, buildType, context)
                         val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
                         val group = when (type) {
                             IntelliJPluginConstants.ANDROID_STUDIO_TYPE -> "com.android"
@@ -451,7 +452,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         debug(context, "Downloading IDE from $url")
 
                         try {
-                            val ideArchive = dependenciesDownloader.downloadFromRepository(logCategory(), {
+                            val ideArchive = dependenciesDownloader.downloadFromRepository(context, {
                                 create(
                                     group = group,
                                     name = "ides",
@@ -463,7 +464,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             }).first()
 
                             debug(context, "IDE downloaded, extracting...")
-                            archiveUtils.extract(ideArchive, ideDir, logCategory())
+                            archiveUtils.extract(ideArchive, ideDir, context)
                             ideDir.listFiles()?.let { files ->
                                 files.filter(File::isDirectory).forEach { container ->
                                     container.listFiles()?.forEach { file ->
@@ -483,7 +484,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }.let { files -> project.files(files) }
             })
             verifierPath.convention(project.provider {
-                val resolvedVerifierVersion = RunPluginVerifierTask.resolveVerifierVersion(verifierVersion.orNull)
+                val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
                 debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
 
                 dependenciesDownloader.downloadFromRepository(logCategory(), {
