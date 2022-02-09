@@ -106,17 +106,24 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             classpath += objectFactory.fileCollection().from(it)
         }
 
-        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last()
-        if (Version.parse(buildNumber) > Version.parse("203.0")) {
-            classpath += objectFactory.fileCollection().from(
+        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last().let(Version.Companion::parse)
+        val build203 = Version.parse("203.0")
+        val build221 = Version.parse("221.0")
+
+        classpath += when {
+            buildNumber > build221 -> listOf(
+                "$ideDirFile/lib/3rd-party-rt.jar",
+                "$ideDirFile/lib/util.jar",
+                "$ideDirFile/lib/jna.jar",
+            )
+            buildNumber > build203 -> listOf(
                 "$ideDirFile/lib/bootstrap.jar",
                 "$ideDirFile/lib/util.jar",
                 "$ideDirFile/lib/jdom.jar",
                 "$ideDirFile/lib/log4j.jar",
                 "$ideDirFile/lib/jna.jar",
             )
-        } else {
-            classpath += objectFactory.fileCollection().from(
+            else -> listOf(
                 "$ideDirFile/lib/bootstrap.jar",
                 "$ideDirFile/lib/extensions.jar",
                 "$ideDirFile/lib/util.jar",
@@ -125,7 +132,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 "$ideDirFile/lib/jna.jar",
                 "$ideDirFile/lib/trove4j.jar",
             )
-        }
+        }.let { objectFactory.fileCollection().from(it) }
     }
 
     private fun configureSystemProperties() {
