@@ -203,6 +203,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
         return pluginDependencies.orNull?.toSet() ?: emptySet()
     }
 
+    @Suppress("DEPRECATION")
     @Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     fun getIdeaDependency(@Suppress("UNUSED_PARAMETER") project: Project): IdeaDependency = ideaDependency.get()
 }
