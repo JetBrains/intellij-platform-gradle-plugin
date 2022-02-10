@@ -7,6 +7,7 @@
 - Consider `sinceBuild` and `untilBuild` properties of `ListProductsReleasesTask` in task caching [#891](../../issues/891)
 - Introduce `jbrVariant` property next to the `jbrVersion` property in `runIde`, `runPluginVerifier`, `buildSearchableOptions`, and `runIdeForUiTest` tasks [#852](../../issues/852)
 - Change log level of `JbrResolver.resolveRuntime` logs from `warn` to `debug` [#849](../../issues/849)
+- Update runtime classpath for `221+`
 
 ## 1.3.1
 - Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)
