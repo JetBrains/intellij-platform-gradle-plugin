@@ -3,6 +3,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
+import org.jetbrains.intellij.Version
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -186,7 +187,10 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     private fun BuildResult.taskOutput() = output.lines().run {
         val from = indexOf("> Task :${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}") + 1
-        val to = indexOfFirst { it.startsWith("BUILD SUCCESSFUL") }
+        val to = indexOfFirst { it.startsWith("BUILD SUCCESSFUL") } - when {
+            Version.parse(gradleVersion) >= Version.parse("7.4") -> 4
+            else -> 0
+        }
         subList(from, to)
     }
 }
