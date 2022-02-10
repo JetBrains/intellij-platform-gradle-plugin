@@ -116,7 +116,7 @@ open class JbrResolver @Inject constructor(
                     .run {
                         when (resolveExecutable) {
                             true -> javaExecutable.canonicalPath
-                            else -> javaHome.let(::getJbrRoot).canonicalPath
+                            false -> javaHome.let(::getJbrRoot).canonicalPath
                         }
                     }
                     .also { debug(context, "Using current JVM: $it") }
@@ -187,16 +187,17 @@ open class JbrResolver @Inject constructor(
     }
 
     private fun getJbrRoot(javaHome: File): File {
-        val jbr = javaHome.listFiles()?.firstOrNull { it.name == "jbr" || it.name == "jbrsdk" }
-        if (jbr != null && jbr.exists()) {
-            return when (operatingSystem.isMacOsX) {
-                true -> jbr.resolve("Contents/Home")
-                false -> jbr
+        val jbr = javaHome.listFiles()?.firstOrNull { it.name == "jbr" || it.name == "jbrsdk" }?.takeIf(File::exists)
+        return when {
+            operatingSystem.isMacOsX -> when {
+                javaHome.endsWith("Contents/Home") -> javaHome
+                jbr != null -> jbr.resolve("Contents/Home")
+                else -> javaHome.resolve("jdk/Contents/Home")
             }
-        }
-        return when (operatingSystem.isMacOsX) {
-            true -> javaHome.resolve("jdk/Contents/Home")
-            false -> javaHome
+            else -> when {
+                jbr != null -> jbr
+                else -> javaHome
+            }
         }
     }
 
