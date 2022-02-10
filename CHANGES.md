@@ -9,6 +9,7 @@
 - Change log level of `JbrResolver.resolveRuntime` logs from `warn` to `debug` [#849](../../issues/849)
 - Update runtime classpath for `221+`
 - Fixed resolving Java Runtime for MacOSX [#895](../../issues/895)
+- ProductInfo: parse custom properties in `product-info.json` [#897](../../issues/897)
 
 ## 1.3.1
 - Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)
