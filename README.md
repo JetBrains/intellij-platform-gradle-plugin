@@ -8,7 +8,7 @@
 
 # gradle-intellij-plugin
 
-<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 1.3.1</h4>
+<h4><a id="the-latest-version" class="anchor" aria-hidden="true" href="#the-latest-version"><svg class="octicon octicon-link" viewBox="0 0 16 16" version="1.1" width="16" height="16" aria-hidden="true"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>The latest version is 1.4.0</h4>
 
 > 
 > **Important:**
@@ -44,7 +44,7 @@ Also, please take a look at [the FAQ](../../blob/master/FAQ.md).
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.3.1"
+  id "org.jetbrains.intellij" version "1.4.0"
 }
 ```
  
@@ -54,7 +54,7 @@ plugins {
 
 ```groovy
 plugins {
-  id "org.jetbrains.intellij" version "1.4.0-SNAPSHOT"
+  id "org.jetbrains.intellij" version "1.5.0-SNAPSHOT"
 }
 ```
 
@@ -142,14 +142,14 @@ all configuration attributes of `JavaExec` task can be used in `RunIde` as well.
 
 In addition to that, following attributes may be used to customize IDE running:
 
-| **Attributes**              | **Default Value**  |
-| :-------------------------- | :----------------- |
+| **Attributes**                                                                                    | **Default Value**            |
+| :------------------------------------------------------------------------------------------------ | :--------------------------- |
 | <kbd>jbrVersion</kbd> JetBrains Java runtime version to use when running the IDE with the plugin. | **Acceptable Values:** <kbd>String</kbd> - E.g. `'8u112b752.4'`, `'8u202b1483.24'`, or `'11_0_2b159'`. Prefixes `jbrex`, `jbrx` or `jbr` are allowed.<br/><br/>All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).<br/><br/>**Default Value:** <kdb>null</kdb> for IDE &lt; 2017.3, <kdb>builtin java version</kdb>  for IDE &gt;= 2017.3 |
-| <kbd>jbrVariant</kbd> JetBrains Java runtime variant to use when running the IDE with the plugin. | **Acceptable Values:** <kbd>String</kbd> - `jcef`, `sdk`, `dcevm`, `fd`, `nomod`. By default, an empty  and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).<br/><br/>**Default Value:** <kdb>""</kdb> |
-| <kbd>ideDir</kbd> Path to IDE distribution that will be used to run the IDE with the plugin. | path to IDE-dependency |
-| <kbd>configDir</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDir}/config</kbd> |
-| <kbd>pluginsDir</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDir}/plugins</kbd> |
-| <kbd>systemDir</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDir}/system</kbd> |
+| <kbd>jbrVariant</kbd> JetBrains Java runtime variant to use when running the IDE with the plugin. | Optional. Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`. See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases) |
+| <kbd>ideDir</kbd> Path to IDE distribution that will be used to run the IDE with the plugin.      | path to IDE-dependency |
+| <kbd>configDir</kbd> Path to configuration directory. | <kbd>${intellij.sandboxDir}/config</kbd>  |
+| <kbd>pluginsDir</kbd> Path to plugins directory. | <kbd>${intellij.sandboxDir}/plugins</kbd>      |
+| <kbd>systemDir</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDir}/system</kbd>        |
 | <kbd>autoReloadPlugins</kbd> Enable/disable [auto-reload](https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#enabling-auto-reload) of dynamic plugins. | <kbd>true</kbd> for IDE >= 2020.2 |
 
 ### Patching DSL
@@ -174,21 +174,22 @@ Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDE
 
 > **TIP** For more details, examples or issues reporting, go to the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) repository.
 
-| **Attributes**                                                                                                                                                                                  | **Default Value**                                                                                                                              |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| <kbd>ideVersions</kbd> - IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`. Check the available build versions on https://jb.gg/intellij-platform-builds-list | none                                                                                                                                           |
-| <kbd>verifierVersion</kbd> - IntelliJ Plugin Verifier version, by default uses the latest available. It's recommended to use always the latest version.                                         | <kbd>latest</kbd>                                                                                                                              |
-| <kbd>verifierPath</kbd> - IntelliJ Plugin Verifier local path to the pre-downloaded jar file. If set, `verifierVersion` is ignored.                                                             | none                                                                                                                                           |
-| <kbd>localPaths</kbd> - A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in `ideVersions`.                        | <kbd>[]</kbd>                                                                                                                                  |
-| <kbd>distributionFile</kbd> - Jar or Zip file of plugin to verify.                                                                                                                              | output of `buildPlugin` task                                                                                                                   |
-| <kbd>failureLevel</kbd> - Defines the verification level at which task should fail. Can be set as `FailureLevel` enum or `EnumSet<FailureLevel>`.                                               | <kbd>FailureLevel.INVALID_PLUGIN</kbd>                                                                                                         |
-| <kbd>verificationReportsDir</kbd> - The path to directory where verification reports will be saved.                                                                                             | <kbd>${project.buildDir}/reports/pluginVerifier</kbd>                                                                                          |
-| <kbd>downloadDir</kbd> - The path to directory where IDEs used for the verification will be downloaded.                                                                                         | `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides` or system temporary directory. |
-| <kbd>jbrVersion</kbd> - JBR version used by the Verifier.                                                                                                                                       | none                                                                                                                                           |
-| <kbd>runtimeDir</kbd> - The path to directory containing Java runtime, overrides JBR.                                                                                                           | none                                                                                                                                           |
-| <kbd>externalPrefixes</kbd> - The prefixes of classes from the external libraries.                                                                                                              | none                                                                                                                                           |
-| <kbd>teamCityOutputFormat</kbd> - Specify this flag if you want to print the TeamCity compatible output on stdout.                                                                              | none                                                                                                                                           |
-| <kbd>subsystemsToCheck</kbd> - Specifies which subsystems of IDE should be checked. Available options: `all` (default), `android-only`, `without-android`.                                      | none                                                                                                                                           |
+| **Attributes**                                                                                                                                                                                  | **Default Value**                                                                                                                                         |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| <kbd>ideVersions</kbd> - IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`. Check the available build versions on https://jb.gg/intellij-platform-builds-list | none                                                                                                                                                      |
+| <kbd>verifierVersion</kbd> - IntelliJ Plugin Verifier version, by default uses the latest available. It's recommended to use always the latest version.                                         | <kbd>latest</kbd>                                                                                                                                         |
+| <kbd>verifierPath</kbd> - IntelliJ Plugin Verifier local path to the pre-downloaded jar file. If set, `verifierVersion` is ignored.                                                             | none                                                                                                                                                      |
+| <kbd>localPaths</kbd> - A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in `ideVersions`.                        | <kbd>[]</kbd>                                                                                                                                             |
+| <kbd>distributionFile</kbd> - Jar or Zip file of plugin to verify.                                                                                                                              | output of `buildPlugin` task                                                                                                                              |
+| <kbd>failureLevel</kbd> - Defines the verification level at which task should fail. Can be set as `FailureLevel` enum or `EnumSet<FailureLevel>`.                                               | <kbd>FailureLevel.INVALID_PLUGIN</kbd>                                                                                                                    |
+| <kbd>verificationReportsDir</kbd> - The path to directory where verification reports will be saved.                                                                                             | <kbd>${project.buildDir}/reports/pluginVerifier</kbd>                                                                                                     |
+| <kbd>downloadDir</kbd> - The path to directory where IDEs used for the verification will be downloaded.                                                                                         | `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides` or system temporary directory.            |
+| <kbd>jbrVersion</kbd> - JBR version used by the Verifier.                                                                                                                                       | none                                                                                                                                                      |
+| <kbd>jbrVariant</kbd> - JetBrains Java runtime variant to use when running the IDE with the plugin.                                                                                             | Optional. Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`. See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases) |
+| <kbd>runtimeDir</kbd> - The path to directory containing Java runtime, overrides JBR.                                                                                                           | none                                                                                                                                                      |
+| <kbd>externalPrefixes</kbd> - The prefixes of classes from the external libraries.                                                                                                              | none                                                                                                                                                      |
+| <kbd>teamCityOutputFormat</kbd> - Specify this flag if you want to print the TeamCity compatible output on stdout.                                                                              | none                                                                                                                                                      |
+| <kbd>subsystemsToCheck</kbd> - Specifies which subsystems of IDE should be checked. Available options: `all` (default), `android-only`, `without-android`.                                      | none                                                                                                                                                      |
 
 > **TIP** To run Plugin Verifier in [`-offline mode`](https://github.com/JetBrains/intellij-plugin-verifier/pull/58), set the Gradle [`offline` start parameter](https://docs.gradle.org/current/javadoc/org/gradle/StartParameter.html#setOffline-boolean-).
 
