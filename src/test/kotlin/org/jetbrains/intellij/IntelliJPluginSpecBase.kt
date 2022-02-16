@@ -28,7 +28,11 @@ abstract class IntelliJPluginSpecBase {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     val intellijVersion = "2020.1"
-    val dir: File = createTempDirectory("tmp").toFile()
+    val dir: File by lazy {
+        createTempDirectory("tmp").toFile().also {
+            println("Created temp directory: ${it.absolutePath}")
+        }
+    }
 
     private val gradleProperties = file("gradle.properties")
     val buildFile = file("build.gradle")
