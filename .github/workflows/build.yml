@@ -53,7 +53,7 @@ jobs:
           echo "::set-output name=changelog::$CHANGELOG"
 
       - name: Build Plugin
-        run: ./gradlew build
+        run: ./gradlew build -x test
 
       # Store already-built plugin as an artifact for downloading
       - name: Upload artifact
