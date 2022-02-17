@@ -102,8 +102,6 @@ tasks {
     }
 
     test {
-        maxParallelForks = Runtime.getRuntime().availableProcessors()
-
         val testGradleHomePath = "$buildDir/testGradleHome"
         doFirst {
             File(testGradleHomePath).mkdir()
