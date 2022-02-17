@@ -28,6 +28,9 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             intellij {
                 version = '$intellijVersion'
             }
+            buildSearchableOptions {
+                enabled = true
+            }
         """)
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
@@ -37,7 +40,6 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         assertTrue(libsSearchableOptions.exists())
         assertEquals(setOf("/lib/searchableOptions.jar"), collectPaths(libsSearchableOptions))
     }
-
 
     @Test
     fun `reuse configuration cache`() {

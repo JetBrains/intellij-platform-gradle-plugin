@@ -28,6 +28,9 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             intellij {
                 version = '$intellijVersion'
             }
+            buildSearchableOptions {
+                enabled = true
+            }
         """)
 
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
