@@ -45,6 +45,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies { 
                 implementation 'joda-time:joda-time:2.8.1'
             }
+            buildSearchableOptions {
+                enabled = true
+            }
         """)
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
@@ -108,6 +111,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
             intellij {
                 pluginName = 'myPluginName'
+            }
+            buildSearchableOptions {
+                enabled = true
             }
         """)
 
@@ -174,6 +180,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myPluginName' 
                 plugins = ['copyright'] 
                 sandboxDir = '$sandboxPath'
+            }
+            buildSearchableOptions {
+                enabled = true
             }
         """)
 
@@ -309,6 +318,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 pluginName = 'myPluginName'
             } 
+            buildSearchableOptions {
+                enabled = true
+            }
         """)
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
@@ -362,6 +374,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             
             intellij {
                 pluginName = 'myPluginName'
+            }
+            buildSearchableOptions {
+                enabled = true
             }
         """)
 
