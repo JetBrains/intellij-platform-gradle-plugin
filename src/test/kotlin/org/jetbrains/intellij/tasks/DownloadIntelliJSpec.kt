@@ -31,7 +31,6 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
     @Test
     fun `download sources if option is enabled`() {
         val cacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1")
-        val sourcesJar = File(cacheDir, "a2c781ea46fb47d00ee87bfe0d9e43283928657f/ideaIC-2020.1-sources.jar")
 
         buildFile.groovy("""
             intellij {
