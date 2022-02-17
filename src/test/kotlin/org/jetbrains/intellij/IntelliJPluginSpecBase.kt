@@ -28,11 +28,7 @@ abstract class IntelliJPluginSpecBase {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     val intellijVersion = "2020.1"
-    val dir: File by lazy {
-        createTempDirectory("tmp").toFile().also {
-            println("Created temp directory: ${it.absolutePath}")
-        }
-    }
+    val dir: File by lazy { createTempDirectory("tmp").toFile() }
 
     private val gradleProperties = file("gradle.properties")
     val buildFile = file("build.gradle")
@@ -61,6 +57,9 @@ abstract class IntelliJPluginSpecBase {
                     maven('$pluginsRepository')
                 }
                 instrumentCode = false
+            }
+            buildSearchableOptions {
+                enabled = false
             }
 
             // Define tasks with a minimal set of tasks required to build a source set
