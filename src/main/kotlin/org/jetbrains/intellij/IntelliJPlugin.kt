@@ -39,6 +39,8 @@ import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.model.ProfilerName
+import org.jetbrains.intellij.performanceTest.PerfUtils
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
@@ -127,7 +129,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configureRunPluginVerifierTask(project, extension)
         configurePluginVerificationTask(project)
         configureRunIdeaTask(project)
-        configureRunIdePerformanceTestTask(project)
+        configureRunIdePerformanceTestTask(project,extension)
         configureRunIdeaForUiTestsTask(project)
         configureBuildSearchableOptionsTask(project)
         configureJarSearchableOptionsTask(project)
@@ -544,14 +546,55 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureRunIdePerformanceTestTask(project: Project) {
+    private fun configureRunIdePerformanceTestTask(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring run IDE performance test task")
 
-        project.tasks.register(IntelliJPluginConstants.RUN_IDE_PERFORMACNE_TEST_TASK_NAME, RunIdePerformanceTestTask::class.java) {
+        project.tasks.register(
+            IntelliJPluginConstants.RUN_IDE_PERFORMACNE_TEST_TASK_NAME,
+            RunIdePerformanceTestTask::class.java
+        ) {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Runs performance tests."
 
+            profilerName.convention(ProfilerName.ASYNC)
+
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+
+            with(project.configurations) {
+                val perfConf = create(IntelliJPluginConstants.PERF_CONFIGURATION_NAME)
+                perfConf.withDependencies {
+                    val setupDependenciesTask = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME).get()
+
+                    //Check that `runIdePerformanceTest` task was launched
+                    //Check that `perfomanceTesting.jar` is absent(that means it's community version)
+                    //Check that user didn't pass custom version of the performance plugin
+                    if (IntelliJPluginConstants.RUN_IDE_PERFORMACNE_TEST_TASK_NAME in project.gradle.startParameter.taskNames &&
+                        setupDependenciesTask.idea.get().pluginsRegistry.findPlugin(IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID) == null &&
+                        PerfUtils.isPerfPluginPassedByUser(extension)
+                    ) {
+                        val resolver = project.objects.newInstance(
+                            PluginDependencyManager::class.java,
+                            project.gradle.gradleUserHomeDir.absolutePath,
+                            setupDependenciesTask.idea.get(),
+                            extension.getPluginsRepositories(),
+                            archiveUtils,
+                            context,
+                        )
+
+                        val (pluginXmlId, version) = PerfUtils.get(setupDependenciesTask).first()
+                        val plugin = resolver.resolve(
+                            project, PluginDependencyNotation(pluginXmlId, version, null)
+                        ) ?: throw BuildException(
+                            "Failed to resolve plugin $pluginXmlId:$version",
+                            null
+                        )
+
+                        configurePluginDependency(project, plugin, extension, this, resolver)
+                    }
+                }
+
+                getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(perfConf)
+            }
         }
     }
 

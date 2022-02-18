@@ -45,7 +45,7 @@ open class RunIdePerformanceTestTask : RunIdeTask() {
      * ASYNC profiler is by default.
      */
     @get:Input
-    val profilerName = objectFactory.property<ProfilerName>().value(ProfilerName.ASYNC)
+    val profilerName = objectFactory.property<ProfilerName>()
 
     private lateinit var scriptPath: String
 

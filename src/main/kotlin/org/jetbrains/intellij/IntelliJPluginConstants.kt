@@ -26,6 +26,7 @@ object IntelliJPluginConstants {
     const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
 
     const val IDEA_CONFIGURATION_NAME = "idea"
+    const val PERF_CONFIGURATION_NAME = "perfConf"
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
     const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "intellijDefaultDependencies"
 
@@ -46,5 +47,6 @@ object IntelliJPluginConstants {
     const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"
     const val ANDROID_STUDIO_TYPE = "AI"
+    const val PERFORMANCE_PLUGIN_ID = "com.jetbrains.performancePlugin"
 }
 
