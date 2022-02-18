@@ -45,5 +45,6 @@ object IntelliJPluginConstants {
     const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"
     const val ANDROID_STUDIO_TYPE = "AI"
+    const val EAP_SUFFIX = "-EAP-SNAPSHOT"
 }
 
