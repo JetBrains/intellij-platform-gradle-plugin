@@ -716,7 +716,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             }
                         } else {
                             val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
-                            val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
+                            val eapSuffix = IntelliJPluginConstants.EAP_SUFFIX.takeIf { isEap } ?: ""
 
                             IdeVersion.createIdeVersion(ideaDependency.buildNumber)
                                 .stripExcessComponents()
@@ -732,17 +732,37 @@ open class IntelliJPlugin : Plugin<Project> {
                         if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION ||
                             Version.parse(compilerVersion) >= Version(183, 3795, 13)
                         ) {
-                            dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
-                                create(
-                                    group = "com.jetbrains.intellij.java",
-                                    name = "java-compiler-ant-tasks",
-                                    version = compilerVersion,
-                                )
-                            }, {
-                                listOf(
-                                    "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
-                                    IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
-                                ).map { url -> mavenRepository(url) }
+                            val downloadCompiler: (String) -> List<File> = { version ->
+                                dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
+                                    create(
+                                        group = "com.jetbrains.intellij.java",
+                                        name = "java-compiler-ant-tasks",
+                                        version = version,
+                                    )
+                                }, {
+                                    listOf(
+                                        "${extension.intellijRepository.get()}/${releaseType(version)}",
+                                        IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
+                                    ).map(::mavenRepository)
+                                })
+                            }
+
+                            runCatching {
+                                downloadCompiler(compilerVersion)
+                            }.fold(onSuccess = { it }, onFailure = {
+                                /**
+                                 * Try falling back on the version without the -EAP-SNAPSHOT suffix if the download
+                                 * for it fails - not all versions have a corresponding -EAP-SNAPSHOT version present
+                                 * in the snapshot repository.
+                                 */
+                                if (compilerVersion.endsWith(IntelliJPluginConstants.EAP_SUFFIX)) {
+                                    val nonEapVersion = compilerVersion.replace(
+                                        IntelliJPluginConstants.EAP_SUFFIX, ""
+                                    )
+                                    downloadCompiler(nonEapVersion)
+                                } else {
+                                    throw it
+                                }
                             })
                         } else {
                             warn(
