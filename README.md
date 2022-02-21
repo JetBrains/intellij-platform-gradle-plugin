@@ -166,7 +166,6 @@ In addition to that, following attributes may be used to customize test executio
 | <kbd>artifactsDir</kbd> Path to IDE distribution that will be used to run the IDE with the plugin.                           | none              |
 | <kbd>profilerName</kbd> Name of the profiler which will be used while execution(ProfilerName.YOURKIT or ProfilerName.ASYNC). | <kbd>ASYNC</kbd>  |                                                                                                                               | <kbd>${intellij.sandboxDir}/system</kbd>                                                                                                                                                                                                                                                                                                                                                                                           |
 
-
 ### Patching DSL
 The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
 
