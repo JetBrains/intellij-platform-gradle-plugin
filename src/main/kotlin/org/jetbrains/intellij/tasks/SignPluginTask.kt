@@ -33,7 +33,9 @@ open class SignPluginTask @Inject constructor(
 ) : ConventionTask() {
 
     companion object {
-        private const val LATEST_RELEASE_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases/latest"
+        private const val MARKETPLACE_ZIP_SIGNER_RELEASES_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases"
+        private const val LATEST_RELEASE_URL = "$MARKETPLACE_ZIP_SIGNER_RELEASES_URL/latest"
+        private const val RELEASE_DOWNLOAD_URL = "$MARKETPLACE_ZIP_SIGNER_RELEASES_URL/download/%VERSION%/marketplace-zip-signer-cli.jar"
 
         /**
          * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
@@ -50,25 +52,6 @@ open class SignPluginTask @Inject constructor(
             } catch (e: IOException) {
                 throw GradleException("Cannot resolve the latest Marketplace ZIP Signer CLI version")
             }
-        }
-
-        /**
-         * Resolves Marketplace ZIP Signer CLI version.
-         * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #METADATA_URL}
-         * performed for the latest available verifier version.
-         *
-         * @return Marketplace ZIP Signer CLI version
-         */
-        fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST }
-            ?: resolveLatestVersion()
-
-        /**
-         * Resolves Marketplace ZIP Signer CLI download URL.
-         *
-         * @return Marketplace ZIP Signer CLI download URL
-         */
-        fun resolveCliUrl(version: String?) = resolveCliVersion(version).let {
-            "https://github.com/JetBrains/marketplace-zip-signer/releases/download/$it/marketplace-zip-signer-cli.jar"
         }
     }
 
@@ -305,5 +288,24 @@ open class SignPluginTask @Inject constructor(
         }
 
         return args
+    }
+
+    /**
+     * Resolves Marketplace ZIP Signer CLI version.
+     * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #METADATA_URL}
+     * performed for the latest available verifier version.
+     *
+     * @return Marketplace ZIP Signer CLI version
+     */
+    internal fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST }
+        ?: resolveLatestVersion()
+
+    /**
+     * Resolves Marketplace ZIP Signer CLI download URL.
+     *
+     * @return Marketplace ZIP Signer CLI download URL
+     */
+    internal fun resolveCliUrl(version: String?) = resolveCliVersion(version).let {
+        RELEASE_DOWNLOAD_URL.replace("%VERSION%", it)
     }
 }

@@ -915,8 +915,8 @@ open class IntelliJPlugin : Plugin<Project> {
             }))
             cliVersion.convention(IntelliJPluginConstants.VERSION_LATEST)
             cliPath.convention(project.provider {
-                val resolvedCliVersion = SignPluginTask.resolveCliVersion(cliVersion.orNull)
-                val url = SignPluginTask.resolveCliUrl(resolvedCliVersion)
+                val resolvedCliVersion = resolveCliVersion(cliVersion.orNull)
+                val url = resolveCliUrl(resolvedCliVersion)
                 debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
 
                 dependenciesDownloader.downloadFromRepository(logCategory(), {
