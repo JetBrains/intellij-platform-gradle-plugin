@@ -32,6 +32,8 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -700,11 +702,11 @@ open class IntelliJPlugin : Plugin<Project> {
                         val localPath = extension.localPath.orNull
                         val ideaDependency = setupDependenciesTask.idea.get()
 
-                        if (localPath.isNullOrBlank() && version.endsWith("-SNAPSHOT")) {
+                        if (localPath.isNullOrBlank() && version.endsWith(RELEASE_SUFFIX_SNAPSHOT)) {
                             val type = extension.getVersionType()
                             if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && listOf("CL", "RD", "PY").contains(type)) {
                                 ideProductInfo(ideaDependency.classes)?.buildNumber?.let { buildNumber ->
-                                    Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}-EAP-CANDIDATE-SNAPSHOT" }
+                                    Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                                 } ?: version
                             } else {
                                 when (type) {
@@ -716,7 +718,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             }
                         } else {
                             val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
-                            val eapSuffix = IntelliJPluginConstants.EAP_SUFFIX.takeIf { isEap } ?: ""
+                            val eapSuffix = IntelliJPluginConstants.RELEASE_SUFFIX_EAP.takeIf { isEap } ?: ""
 
                             IdeVersion.createIdeVersion(ideaDependency.buildNumber)
                                 .stripExcessComponents()
@@ -755,9 +757,9 @@ open class IntelliJPlugin : Plugin<Project> {
                                  * for it fails - not all versions have a corresponding -EAP-SNAPSHOT version present
                                  * in the snapshot repository.
                                  */
-                                if (compilerVersion.endsWith(IntelliJPluginConstants.EAP_SUFFIX)) {
+                                if (compilerVersion.endsWith(IntelliJPluginConstants.RELEASE_SUFFIX_EAP)) {
                                     val nonEapVersion = compilerVersion.replace(
-                                        IntelliJPluginConstants.EAP_SUFFIX, ""
+                                        IntelliJPluginConstants.RELEASE_SUFFIX_EAP, ""
                                     )
                                     downloadCompiler(nonEapVersion)
                                 } else {

@@ -31,6 +31,15 @@ object IntelliJPluginConstants {
     const val ANNOTATIONS_DEPENDENCY_VERSION = "22.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
+    const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"
+    const val RELEASE_SUFFIX_EAP_CANDIDATE = "-EAP-CANDIDATE-SNAPSHOT"
+    const val RELEASE_SUFFIX_SNAPSHOT = "-SNAPSHOT"
+    const val RELEASE_SUFFIX_CUSTOM_SNAPSHOT = "-CUSTOM-SNAPSHOT"
+
+    const val RELEASE_TYPE_SNAPSHOTS = "snapshots"
+    const val RELEASE_TYPE_NIGHTLY = "nightly"
+    const val RELEASE_TYPE_RELEASES = "releases"
+
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
     const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
 //    const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://dl.google.com/android/studio/patches/updates.xml"
@@ -45,6 +54,5 @@ object IntelliJPluginConstants {
     const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"
     const val ANDROID_STUDIO_TYPE = "AI"
-    const val EAP_SUFFIX = "-EAP-SNAPSHOT"
 }
 
