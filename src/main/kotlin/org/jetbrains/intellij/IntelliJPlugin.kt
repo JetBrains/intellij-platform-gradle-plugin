@@ -368,8 +368,8 @@ open class IntelliJPlugin : Plugin<Project> {
                         else -> setupDependenciesTask.idea.get().classes.let { ideaClasses ->
                             ideProductInfo(ideaClasses)
                                 ?.run { "$productCode-$version" }
-                                // Fall back on build number if product-info.json is not present, this is the case
-                                // for recent versions of Android Studio.
+                            // Fall back on build number if product-info.json is not present, this is the case
+                            // for recent versions of Android Studio.
                                 ?: ideBuildNumber(ideaClasses)
                         }
                     },
@@ -734,7 +734,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION ||
                             Version.parse(compilerVersion) >= Version(183, 3795, 13)
                         ) {
-                            val downloadCompiler: (String) -> List<File> = { version ->
+                            val downloadCompiler = { version: String ->
                                 dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
                                     create(
                                         group = "com.jetbrains.intellij.java",
