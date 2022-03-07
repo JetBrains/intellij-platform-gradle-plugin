@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.tasks
 
 import groovy.lang.Closure
-import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.internal.ConventionTask
@@ -23,7 +22,6 @@ import org.jetbrains.intellij.logCategory
 import java.io.File
 import javax.inject.Inject
 
-@Incubating
 @Suppress("UnstableApiUsage")
 open class IntelliJInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,

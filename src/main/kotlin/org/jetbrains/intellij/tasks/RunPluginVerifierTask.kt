@@ -3,7 +3,6 @@ package org.jetbrains.intellij.tasks
 import org.apache.commons.io.FileUtils
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
-import org.gradle.api.Incubating
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
@@ -45,7 +44,6 @@ import java.nio.file.Paths
 import java.util.EnumSet
 import javax.inject.Inject
 
-@Incubating
 @Suppress("UnstableApiUsage")
 open class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,

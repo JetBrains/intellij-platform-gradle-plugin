@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.utils
 
-import org.gradle.api.Incubating
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.jetbrains.intellij.debug
@@ -15,7 +14,6 @@ open class ArchiveUtils @Inject constructor(
 ) {
 
     @Suppress("UnstableApiUsage")
-    @Incubating
     fun extract(
         archiveFile: File,
         targetDirectory: File,

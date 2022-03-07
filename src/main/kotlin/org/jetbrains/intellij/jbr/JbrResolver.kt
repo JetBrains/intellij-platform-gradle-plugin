@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.jbr
 
-import org.gradle.api.Incubating
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
@@ -20,7 +19,6 @@ import java.nio.file.Path
 import java.util.Properties
 import javax.inject.Inject
 
-@Incubating
 open class JbrResolver @Inject constructor(
     private val jreRepository: String,
     private val isOffline: Boolean,
