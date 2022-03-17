@@ -19,6 +19,7 @@ import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
+import org.jetbrains.intellij.utils.ToolboxEnterprisePluginRepositoryService
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -42,6 +43,10 @@ open class PublishPluginTask @Inject constructor(
     @Optional
     val channels = objectFactory.listProperty<String>()
 
+    @Input
+    @Optional
+    val toolboxEnterprise = objectFactory.property<Boolean>()
+
     private val context = logCategory()
 
     @TaskAction
@@ -55,7 +60,15 @@ open class PublishPluginTask @Inject constructor(
                 channels.get().forEach { channel ->
                     info(context, "Uploading plugin '$pluginId' from '${file.absolutePath}' to '${host.get()}', channel: '$channel'")
                     try {
-                        val repositoryClient = PluginRepositoryFactory.create(host.get(), token.get())
+                        val repositoryClient = when (toolboxEnterprise.get()) {
+                            true -> PluginRepositoryFactory.createWithImplementationClass(
+                                host.get(),
+                                token.get(),
+                                "Automation",
+                                ToolboxEnterprisePluginRepositoryService::class.java,
+                            )
+                            false -> PluginRepositoryFactory.create(host.get(), token.get())
+                        }
                         repositoryClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
                         info(context, "Uploaded successfully")
                     } catch (exception: Exception) {
@@ -63,10 +76,12 @@ open class PublishPluginTask @Inject constructor(
                     }
                 }
             }
+
             is PluginCreationFail -> {
                 val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
                 throw TaskExecutionException(this, GradleException("Cannot upload plugin: $problems"))
             }
+
             else -> {
                 throw TaskExecutionException(this, GradleException("Cannot upload plugin: $creationResult"))
             }
