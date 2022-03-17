@@ -374,6 +374,7 @@ See [Publishing Plugins with Gradle](https://plugins.jetbrains.com/docs/intellij
 | <kbd>channels</kbd> List of channel names to upload plugin to.  | <kbd>[default]</kbd> |
 | <kbd>host</kbd>  URL host of a plugin repository.               | <kbd>https://plugins.jetbrains.com</kbd> |
 | <kbd>distributionFile</kbd> Jar or Zip file of plugin to upload. | output of `buildPlugin` task |
+| <kbd>toolboxEnterprise</kbd> Specifies if the Toolbox Enterprise plugin repository service should be used. | <kbd>false</kbd> |
 
 ### Instrumenting DSL
 The following attributes help you to tune instrumenting behaviour in <kbd>instrumentCode { ... }</kbd> block.

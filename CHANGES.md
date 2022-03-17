@@ -3,6 +3,7 @@
 ## next
 - Include Android Studio builds in the `ListProductsReleasesTask` results
 - Fix compiler resolution for EAP versions [#906](../../issues/906)
+- Initial Toolbox Enterprise integration [#913](../../issues/913)
 
 ## 1.4.0
 - Fixed JBR resolving for MacOSX M1
