@@ -129,10 +129,12 @@ open class IntelliJPlugin : Plugin<Project> {
                 prepareConventionMappingsForRunIdeTask(project, extension, this, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             }
             if (this is RunIdeForUiTestTask) {
-                prepareConventionMappingsForRunIdeTask(project,
+                prepareConventionMappingsForRunIdeTask(
+                    project,
                     extension,
                     this,
-                    IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+                    IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+                )
             }
         }
         configureSetupDependenciesTask(project, extension)
@@ -863,12 +865,14 @@ open class IntelliJPlugin : Plugin<Project> {
                 task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get())
                 task.classpath += ideaDependencyLibrariesProvider.get()
 
-                task.systemProperties(getIdeaSystemProperties(
-                    configDirectoryProvider.get(),
-                    systemDirectoryProvider.get(),
-                    pluginsDirectoryProvider.get(),
-                    pluginIds,
-                ))
+                task.systemProperties(
+                    getIdeaSystemProperties(
+                        configDirectoryProvider.get(),
+                        systemDirectoryProvider.get(),
+                        pluginsDirectoryProvider.get(),
+                        pluginIds,
+                    )
+                )
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as task's the very first source of plugins
@@ -996,11 +1000,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "List all available IntelliJ-based IDEs with their updates."
 
             updatePaths.convention(project.provider {
-
-                mapOf(
-                    "idea-releases" to IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL,
-//                    "android-studio-releases" to IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL,
-                ).entries.map { (name, repository) ->
+                mapOf("idea-releases" to IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL).entries.map { (name, repository) ->
                     dependenciesDownloader.downloadFromRepository(logCategory(), {
                         create(
                             group = "org.jetbrains",
@@ -1010,6 +1010,16 @@ open class IntelliJPlugin : Plugin<Project> {
                         )
                     }, { ivyRepository(repository) }).first().canonicalPath
                 }
+            })
+            androidStudioUpdatePath.convention(project.provider {
+                dependenciesDownloader.downloadFromRepository(logCategory(), {
+                    create(
+                        group = "org.jetbrains",
+                        name = "android-studio-products-releases",
+                        version = "1.0",
+                        ext = "xml",
+                    )
+                }, { ivyRepository(IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL) }).first().canonicalPath
             })
             outputFile.convention {
                 File(project.buildDir, "${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}.txt")
@@ -1052,11 +1062,13 @@ open class IntelliJPlugin : Plugin<Project> {
                 val defaultDependencies =
                     create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME).setVisible(false).apply {
                         defaultDependencies {
-                            add(project.dependencies.create(
-                                group = "org.jetbrains",
-                                name = "annotations",
-                                version = IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION,
-                            ))
+                            add(
+                                project.dependencies.create(
+                                    group = "org.jetbrains",
+                                    name = "annotations",
+                                    version = IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION,
+                                )
+                            )
                         }
                     }
 
@@ -1089,6 +1101,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                 extraDependencies,
                             )
                         }
+
                         else -> {
                             if (extension.version.orNull != null) {
                                 warn(context, "Both 'localPath' and 'version' specified, second would be ignored")

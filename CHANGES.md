@@ -1,6 +1,7 @@
 # Changelog
 
 ## next
+- Include Android Studio builds in the `ListProductsReleasesTask` results
 - Fix compiler resolution for EAP versions [#906](../../issues/906)
 
 ## 1.4.0

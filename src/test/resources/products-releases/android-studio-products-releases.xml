@@ -1,0 +1,2693 @@
+<content version="78">
+    <item>
+        <name>Android Studio Dolphin (2021.3.1) Canary 7</name>
+        <build>AI-213.6777.52.2113.8305692</build>
+        <version>2021.3.1.7</version>
+        <channel>Canary</channel>
+        <platformBuild>213.6777.52</platformBuild>
+        <platformVersion>2021.3.2</platformVersion>
+        <date>March 17, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Dolphin (2021.3.1) Canary 6</name>
+        <build>AI-213.6777.52.2113.8265607</build>
+        <version>2021.3.1.6</version>
+        <channel>Canary</channel>
+        <platformBuild>213.6777.52</platformBuild>
+        <platformVersion>2021.3.2</platformVersion>
+        <date>March 14, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Beta 4</name>
+        <build>AI-212.5712.43.2112.8233820</build>
+        <version>2021.2.1.11</version>
+        <channel>Beta</channel>
+        <platformBuild>212.5712.43</platformBuild>
+        <platformVersion>2021.2.4</platformVersion>
+        <date>March 9, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Dolphin (2021.3.1) Canary 5</name>
+        <build>AI-213.6777.52.2113.8233036</build>
+        <version>2021.3.1.5</version>
+        <channel>Canary</channel>
+        <platformBuild>213.6777.52</platformBuild>
+        <platformVersion>2021.3.2</platformVersion>
+        <date>March 3, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Dolphin (2021.3.1) Canary 4</name>
+        <build>AI-213.6777.52.2113.8195552</build>
+        <version>2021.3.1.4</version>
+        <channel>Canary</channel>
+        <platformBuild>213.6777.52</platformBuild>
+        <platformVersion>2021.3.2</platformVersion>
+        <date>February 28, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Beta 3</name>
+        <build>AI-212.5712.43.2112.8184640</build>
+        <version>2021.2.1.10</version>
+        <channel>Beta</channel>
+        <platformBuild>212.5712.43</platformBuild>
+        <platformVersion>2021.2.4</platformVersion>
+        <date>February 28, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Patch 2</name>
+        <build>AI-211.7628.21.2111.8193401</build>
+        <version>2021.1.1.22</version>
+        <channel>Patch</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>February 23, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Dolphin (2021.3.1) Canary 3</name>
+        <build>AI-213.6777.52.2113.8172706</build>
+        <version>2021.3.1.3</version>
+        <channel>Canary</channel>
+        <platformBuild>213.6777.52</platformBuild>
+        <platformVersion>2021.3.2</platformVersion>
+        <date>February 14, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Dolphin (2021.3.1) Canary 2</name>
+        <build>AI-213.6777.52.2113.8156070</build>
+        <version>2021.3.1.2</version>
+        <channel>Canary</channel>
+        <platformBuild>213.6777.52</platformBuild>
+        <platformVersion>2021.3.2</platformVersion>
+        <date>February 9, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Beta 2</name>
+        <build>AI-212.5712.43.2112.8125332</build>
+        <version>2021.2.1.9</version>
+        <channel>Beta</channel>
+        <platformBuild>212.5712.43</platformBuild>
+        <platformVersion>2021.2.4</platformVersion>
+        <date>February 9, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Patch 1</name>
+        <build>AI-211.7628.21.2111.8139111</build>
+        <version>2021.1.1.21</version>
+        <channel>Patch</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>February 04, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Dolphin (2021.3.1) Canary 1</name>
+        <build>AI-213.5744.223.2113.8103819</build>
+        <version>2021.3.1.1</version>
+        <channel>Canary</channel>
+        <platformBuild>213.5744.223</platformBuild>
+        <platformVersion>2021.3.0</platformVersion>
+        <date>January 31, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Beta 1</name>
+        <build>AI-212.5457.46.2112.8094850</build>
+        <version>2021.2.1.8</version>
+        <channel>Beta</channel>
+        <platformBuild>212.5457.46</platformBuild>
+        <platformVersion>2021.2.3</platformVersion>
+        <date>January 25, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1)</name>
+        <build>AI-211.7628.21.2111.8092744</build>
+        <version>2021.1.1.20</version>
+        <channel>Release</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>January 25, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Canary 7</name>
+        <build>AI-212.5457.46.2112.8043657</build>
+        <version>2021.2.1.7</version>
+        <channel>Canary</channel>
+        <platformBuild>212.5457.46</platformBuild>
+        <platformVersion>2021.2.3</platformVersion>
+        <date>January 10, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) RC 1</name>
+        <build>AI-211.7628.21.2111.8005941</build>
+        <version>2021.1.1.19</version>
+        <channel>RC</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>January 4, 2022</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Canary 6</name>
+        <build>AI-212.5457.46.2112.7968471</build>
+        <version>2021.2.1.6</version>
+        <channel>Canary</channel>
+        <platformBuild>212.5457.46</platformBuild>
+        <platformVersion>2021.2.3</platformVersion>
+        <date>December 15, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Beta 5</name>
+        <build>AI-211.7628.21.2111.7956428</build>
+        <version>2021.1.1.18</version>
+        <channel>Beta</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>December 13, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Patch 4</name>
+        <build>AI-203.7717.56.2031.7935034</build>
+        <version>2020.3.1.26</version>
+        <channel>Patch</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>December 8, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Beta 4</name>
+        <build>AI-211.7628.21.2111.7905991</build>
+        <version>2021.1.1.17</version>
+        <channel>Beta</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>November 22, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Canary 5</name>
+        <build>AI-212.5457.46.2112.7905983</build>
+        <version>2021.2.1.5</version>
+        <channel>Canary</channel>
+        <platformBuild>212.5457.46</platformBuild>
+        <platformVersion>2021.2.3</platformVersion>
+        <date>November 15, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Canary 4</name>
+        <build>AI-212.5284.40.2112.7863073</build>
+        <version>2021.2.1.4</version>
+        <channel>Canary</channel>
+        <platformBuild>212.5284.40</platformBuild>
+        <platformVersion>2021.2.2</platformVersion>
+        <date>November 9, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Beta 3</name>
+        <build>AI-211.7628.21.2111.7863044</build>
+        <version>2021.1.1.16</version>
+        <channel>Beta</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>November 9, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Beta 2</name>
+        <build>AI-211.7628.21.2111.7824002</build>
+        <version>2021.1.1.15</version>
+        <channel>Beta</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>October 28, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Canary 3</name>
+        <build>AI-212.5284.40.2112.7855545</build>
+        <version>2021.2.1.3</version>
+        <channel>Canary</channel>
+        <platformBuild>212.5284.40</platformBuild>
+        <platformVersion>2021.2.2</platformVersion>
+        <date>October 27, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Canary 2</name>
+        <build>AI-212.5284.40.2112.7824075</build>
+        <version>2021.2.1.2</version>
+        <channel>Canary</channel>
+        <platformBuild>212.5284.40</platformBuild>
+        <platformVersion>2021.2.2</platformVersion>
+        <date>October 19, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Chipmunk (2021.2.1) Canary 1</name>
+        <build>AI-212.4037.9.2112.7818732</build>
+        <version>2021.2.1.1</version>
+        <channel>Canary</channel>
+        <platformBuild>212.4037.9</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>October 13, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Beta 1</name>
+        <build>AI-211.7628.21.2111.7785763</build>
+        <version>2021.1.1.14</version>
+        <channel>Beta</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>October 13, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Patch 3</name>
+        <build>AI-203.7717.56.2031.7784292</build>
+        <version>2020.3.1.25</version>
+        <channel>Patch</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>October 11, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 13</name>
+        <build>AI-211.7628.21.2111.7762732</build>
+        <version>2021.1.1.13</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>September 29, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 12</name>
+        <build>AI-211.7628.21.2111.7699744</build>
+        <version>2021.1.1.12</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>September 17, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 11</name>
+        <build>AI-211.7628.21.2111.7676841</build>
+        <version>2021.1.1.11</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>September 2, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Patch 2</name>
+        <build>AI-203.7717.56.2031.7678000</build>
+        <version>2020.3.1.24</version>
+        <channel>Patch</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>September 1, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 10</name>
+        <build>AI-211.7628.21.2111.7667256</build>
+        <version>2021.1.1.10</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>August 25, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 9</name>
+        <build>AI-211.7628.21.2111.7653804</build>
+        <version>2021.1.1.9</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>August 23, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Patch 1</name>
+        <build>AI-203.7717.56.2031.7621141</build>
+        <version>2020.3.1.23</version>
+        <channel>Patch</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>August 18, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 8</name>
+        <build>AI-211.7628.21.2111.7619903</build>
+        <version>2021.1.1.8</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>August 11, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 7</name>
+        <build>AI-211.7628.21.2111.7615328</build>
+        <version>2021.1.1.7</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>August 9, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 6</name>
+        <build>AI-211.7628.21.2111.7584175</build>
+        <version>2021.1.1.6</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>July 29, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1)</name>
+        <build>AI-203.7717.56.2031.7583922</build>
+        <version>2020.3.1.22</version>
+        <channel>ReReleaselease</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>July 28, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 5</name>
+        <build>AI-211.7628.21.2111.7579519</build>
+        <version>2021.1.1.5</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>July 27, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 4</name>
+        <build>AI-211.7628.21.2111.7545178</build>
+        <version>2021.1.1.4</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7628.21</platformBuild>
+        <platformVersion>2021.1.3</platformVersion>
+        <date>July 21, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) RC 1</name>
+        <build>AI-203.7717.56.2031.7557721</build>
+        <version>2020.3.1.21</version>
+        <channel>RC</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>July 20, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 3</name>
+        <build>AI-211.7442.40.2111.7518594</build>
+        <version>2021.1.1.3</version>
+        <channel>Canary</channel>
+        <platformBuild>211.7442.40</platformBuild>
+        <platformVersion>2021.1.2</platformVersion>
+        <date>July 8, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Beta 5</name>
+        <build>AI-203.7717.56.2031.7479365</build>
+        <version>2020.3.1.20</version>
+        <channel>Beta</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>July 2, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2.2</name>
+        <build>AI-202.7660.26.42.7486908</build>
+        <version>4.2.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>June 30, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Beta 4</name>
+        <build>AI-203.7717.56.2031.7435690</build>
+        <version>2020.3.1.19</version>
+        <channel>Beta</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>June 16, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 2</name>
+        <build>AI-211.6222.4.2111.7407564</build>
+        <version>2021.1.1.2</version>
+        <channel>Canary</channel>
+        <platformBuild>211.6222.4</platformBuild>
+        <platformVersion>2020.3.4</platformVersion>
+        <date>June 7, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Beta 3</name>
+        <build>AI-203.7717.56.2031.7395685</build>
+        <version>2020.3.1.18</version>
+        <channel>Beta</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>May 27, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Beta 2</name>
+        <build>AI-203.7717.56.2031.7375522</build>
+        <version>2020.3.1.17</version>
+        <channel>Beta</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>May 20, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Bumblebee (2021.1.1) Canary 1</name>
+        <build>AI-203.7717.56.2111.7361063</build>
+        <version>2021.1.1.1</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>May 18, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Beta 1</name>
+        <build>AI-203.7717.56.2031.7360992</build>
+        <version>2020.3.1.16</version>
+        <channel>Beta</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>May 18, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2.1</name>
+        <build>AI-202.7660.26.42.7351085</build>
+        <version>4.2.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>May 13, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2.0</name>
+        <build>AI-202.7660.26.42.7322048</build>
+        <version>4.2.0.24</version>
+        <channel>Release</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>May 4, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 15</name>
+        <build>AI-203.7717.56.2031.7321754</build>
+        <version>2020.3.1.15</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>April 29, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 14</name>
+        <build>AI-203.7717.56.2031.7260174</build>
+        <version>2020.3.1.14</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7717.56</platformBuild>
+        <platformVersion>2020.3.3</platformVersion>
+        <date>April 7, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 RC 1</name>
+        <build>AI-202.7660.26.42.7231092</build>
+        <version>4.2.0.23</version>
+        <channel>RC</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>April 6, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 13</name>
+        <build>AI-203.7148.57.2031.7242491</build>
+        <version>2020.3.1.13</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7148.57</platformBuild>
+        <platformVersion>2020.3.2</platformVersion>
+        <date>April 5, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 12</name>
+        <build>AI-203.7148.57.2031.7226969</build>
+        <version>2020.3.1.12</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7148.57</platformBuild>
+        <platformVersion>2020.3.2</platformVersion>
+        <date>March 25, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 11</name>
+        <build>AI-203.7148.57.2031.7209405</build>
+        <version>2020.3.1.11</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7148.57</platformBuild>
+        <platformVersion>2020.3.2</platformVersion>
+        <date>March 22, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1.3</name>
+        <build>AI-201.8743.12.41.7199119</build>
+        <version>4.1.3.0</version>
+        <channel>Release</channel>
+        <platformBuild>201.8743.12</platformBuild>
+        <platformVersion>2020.1.4</platformVersion>
+        <date>March 18, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 10</name>
+        <build>AI-203.7148.57.2031.7194378</build>
+        <version>2020.3.1.10</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7148.57</platformBuild>
+        <platformVersion>2020.3.2</platformVersion>
+        <date>March 15, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Beta 6</name>
+        <build>AI-202.7660.26.42.7188722</build>
+        <version>4.2.0.22</version>
+        <channel>Beta</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>March 9, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 9</name>
+        <build>AI-203.7148.57.2031.7185775</build>
+        <version>2020.3.1.9</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7148.57</platformBuild>
+        <platformVersion>2020.3.2</platformVersion>
+        <date>March 8, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 8</name>
+        <build>AI-203.7148.57.2031.7165533</build>
+        <version>2020.3.1.8</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7148.57</platformBuild>
+        <platformVersion>2020.3.2</platformVersion>
+        <date>February 24, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Beta 5</name>
+        <build>AI-202.7660.26.42.7141121</build>
+        <version>4.2.0.21</version>
+        <channel>Beta</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>February 22, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 7</name>
+        <build>AI-203.7148.57.2031.7136282</build>
+        <version>2020.3.1.7</version>
+        <channel>Canary</channel>
+        <platformBuild>203.7148.57</platformBuild>
+        <platformVersion>2020.3.2</platformVersion>
+        <date>February 18, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 6</name>
+        <build>AI-203.6682.168.2031.7132434</build>
+        <version>2020.3.1.6</version>
+        <channel>Canary</channel>
+        <platformBuild>203.6682.168</platformBuild>
+        <platformVersion>2020.3.1</platformVersion>
+        <date>February 10, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Beta 4</name>
+        <build>AI-202.7660.26.42.7094744</build>
+        <version>4.2.0.20</version>
+        <channel>Beta</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>January 28, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio Arctic Fox (2020.3.1) Canary 5</name>
+        <build>AI-203.6682.168.2031.7101492</build>
+        <version>2020.3.1.5</version>
+        <channel>Canary</channel>
+        <platformBuild>203.6682.168</platformBuild>
+        <platformVersion>2020.3.1</platformVersion>
+        <date>January 26, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1.2</name>
+        <build>AI-201.8743.12.41.7042882</build>
+        <version>4.1.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>201.8743.12</platformBuild>
+        <platformVersion>2020.1.4</platformVersion>
+        <date>January 19, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 2020.3.1 Canary 4</name>
+        <build>AI-202.7319.50.2031.7049475</build>
+        <version>2020.3.1.4</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7319.50</platformBuild>
+        <platformVersion>2020.2.2</platformVersion>
+        <date>January 6, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Beta 3</name>
+        <build>AI-202.7660.26.42.7033425</build>
+        <version>4.2.0.19</version>
+        <channel>Beta</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>January 6, 2021</date>
+    </item>
+    <item>
+        <name>Android Studio 2020.3.1 Canary 3</name>
+        <build>AI-202.7319.50.2031.7019041</build>
+        <version>2020.3.1.3</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7319.50</platformBuild>
+        <platformVersion>2020.2.2</platformVersion>
+        <date>December 14, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Beta 2</name>
+        <build>AI-202.7660.26.42.7008469</build>
+        <version>4.2.0.18</version>
+        <channel>Beta</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>December 14, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 2020.3.1 Canary 2</name>
+        <build>AI-202.7319.50.2031.7006259</build>
+        <version>2020.3.1.2</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7319.50</platformBuild>
+        <platformVersion>2020.2.2</platformVersion>
+        <date>December 3, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 2020.3.1 Canary 1</name>
+        <build>AI-202.7319.50.2031.6983675</build>
+        <version>2020.3.1.1</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7319.50</platformBuild>
+        <platformVersion>2020.2.2</platformVersion>
+        <date>December 1, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Beta 1</name>
+        <build>AI-202.7660.26.42.6987402</build>
+        <version>4.2.0.17</version>
+        <channel>Beta</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>December 1, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1.1</name>
+        <build>AI-201.8743.12.41.6953283</build>
+        <version>4.1.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>201.8743.12</platformBuild>
+        <platformVersion>2020.1.4</platformVersion>
+        <date>November 10, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 16</name>
+        <build>AI-202.7660.26.42.6939830</build>
+        <version>4.2.0.16</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>November 5, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 15</name>
+        <build>AI-202.7660.26.42.6922807</build>
+        <version>4.2.0.15</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>October 27, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 14</name>
+        <build>AI-202.7660.26.42.6907010</build>
+        <version>4.2.0.14</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7660.26</platformBuild>
+        <platformVersion>2020.2.3</platformVersion>
+        <date>October 20, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1</name>
+        <build>AI-201.8743.12.41.6858069</build>
+        <version>4.1.0.19</version>
+        <channel>Release</channel>
+        <platformBuild>201.8743.12</platformBuild>
+        <platformVersion>2020.1.4</platformVersion>
+        <date>October 12, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0.2</name>
+        <build>AI-193.6911.18.40.6821437</build>
+        <version>4.0.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>October 6, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 13</name>
+        <build>AI-202.7319.50.42.6863838</build>
+        <version>4.2.0.13</version>
+        <channel>Canary</channel>
+        <platformBuild>202.7319.50</platformBuild>
+        <platformVersion>2020.2.2</platformVersion>
+        <date>October 1, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 12</name>
+        <build>AI-202.6397.94.42.6847140</build>
+        <version>4.2.0.12</version>
+        <channel>Canary</channel>
+        <platformBuild>202.6397.94</platformBuild>
+        <platformVersion>2020.2.0</platformVersion>
+        <date>September 22, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 11</name>
+        <build>AI-202.6397.94.42.6825553</build>
+        <version>4.2.0.11</version>
+        <channel>Canary</channel>
+        <platformBuild>202.6397.94</platformBuild>
+        <platformVersion>2020.2.0</platformVersion>
+        <date>September 17, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 RC 3</name>
+        <build>AI-201.8743.12.41.6823847</build>
+        <version>4.1.0.18</version>
+        <channel>RC</channel>
+        <platformBuild>201.8743.12</platformBuild>
+        <platformVersion>2020.1.4</platformVersion>
+        <date>September 15, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 10</name>
+        <build>AI-202.6397.94.42.6811877</build>
+        <version>4.2.0.10</version>
+        <channel>Canary</channel>
+        <platformBuild>202.6397.94</platformBuild>
+        <platformVersion>2020.2.0</platformVersion>
+        <date>September 8, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 9</name>
+        <build>AI-202.6397.94.42.6795674</build>
+        <version>4.2.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>202.6397.94</platformBuild>
+        <platformVersion>2020.2.0</platformVersion>
+        <date>September 1, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 RC 2</name>
+        <build>AI-201.8743.12.41.6776251</build>
+        <version>4.1.0.17</version>
+        <channel>RC</channel>
+        <platformBuild>201.8743.12</platformBuild>
+        <platformVersion>2020.1.4</platformVersion>
+        <date>August 31, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 8</name>
+        <build>AI-202.6397.94.42.6787931</build>
+        <version>4.2.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>202.6397.94</platformBuild>
+        <platformVersion>2020.2.0</platformVersion>
+        <date>August 26, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 RC 1</name>
+        <build>AI-201.8743.12.41.6719854</build>
+        <version>4.1.0.16</version>
+        <channel>RC</channel>
+        <platformBuild>201.8743.12</platformBuild>
+        <platformVersion>2020.1.4</platformVersion>
+        <date>August 10, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 7</name>
+        <build>AI-201.7846.76.42.6720134</build>
+        <version>4.2.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>July 30, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 6</name>
+        <build>AI-201.7846.76.42.6712195</build>
+        <version>4.2.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>July 28, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Beta 5</name>
+        <build>AI-201.8538.31.41.6692364</build>
+        <version>4.1.0.15</version>
+        <channel>Beta</channel>
+        <platformBuild>201.8538.31</platformBuild>
+        <platformVersion>2020.1.3</platformVersion>
+        <date>July 23, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 5</name>
+        <build>AI-201.7846.76.42.6682321</build>
+        <version>4.2.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>July 21, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Beta 4</name>
+        <build>AI-201.7846.76.41.6667167</build>
+        <version>4.1.0.14</version>
+        <channel>Beta</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>July 16, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0.1</name>
+        <build>AI-193.6911.18.40.6626763</build>
+        <version>4.0.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>July 14, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 4</name>
+        <build>AI-201.7846.76.42.6636798</build>
+        <version>4.2.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>July 8, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Beta 3</name>
+        <build>AI-201.7846.76.41.6636797</build>
+        <version>4.1.0.13</version>
+        <channel>Beta</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>July 7, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 3</name>
+        <build>AI-201.7846.76.42.6630367</build>
+        <version>4.2.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>June 30, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Beta 2</name>
+        <build>AI-201.7846.76.41.6604631</build>
+        <version>4.1.0.12</version>
+        <channel>Beta</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>June 25, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 2</name>
+        <build>AI-201.7846.76.42.6582697</build>
+        <version>4.2.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7846.76</platformBuild>
+        <platformVersion>2020.1.2</platformVersion>
+        <date>June 18, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Beta 1</name>
+        <build>AI-201.7223.91.41.6565218</build>
+        <version>4.1.0.11</version>
+        <channel>Beta</channel>
+        <platformBuild>201.7223.91</platformBuild>
+        <platformVersion>2020.1.1</platformVersion>
+        <date>June 10, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.2 Canary 1</name>
+        <build>AI-201.7223.91.42.6568795</build>
+        <version>4.2.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7223.91</platformBuild>
+        <platformVersion>2020.1.1</platformVersion>
+        <date>June 10, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0</name>
+        <build>AI-193.6911.18.40.6514223</build>
+        <version>4.0.0.16</version>
+        <channel>Release</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>May 28, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 10</name>
+        <build>AI-201.7223.91.41.6507185</build>
+        <version>4.1.0.10</version>
+        <channel>Canary</channel>
+        <platformBuild>201.7223.91</platformBuild>
+        <platformVersion>2020.1.1</platformVersion>
+        <date>May 26, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 RC 1</name>
+        <build>AI-193.6911.18.40.6453388</build>
+        <version>4.0.0.15</version>
+        <channel>RC</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>May 12, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 9</name>
+        <build>AI-201.3803.71.41.6466190</build>
+        <version>4.1.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>201.3803.71</platformBuild>
+        <platformVersion>2019.3.5</platformVersion>
+        <date>May 7, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 8</name>
+        <build>AI-193.6911.18.41.6423924</build>
+        <version>4.1.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>April 28, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 7</name>
+        <build>AI-193.6911.18.41.6401718</build>
+        <version>4.1.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>April 23, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Beta 5</name>
+        <build>AI-193.6911.18.40.6401094</build>
+        <version>4.0.0.14</version>
+        <channel>Beta</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>April 23, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 6</name>
+        <build>AI-193.6911.18.41.6381907</build>
+        <version>4.1.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>April 17, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6.3</name>
+        <build>AI-192.7142.36.36.6392135</build>
+        <version>3.6.3.0</version>
+        <channel>Release</channel>
+        <platformBuild>192.7142.36</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>April 17, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 5</name>
+        <build>AI-193.6911.18.41.6362631</build>
+        <version>4.1.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>April 9, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Beta 4</name>
+        <build>AI-193.6911.18.40.6348893</build>
+        <version>4.0.0.13</version>
+        <channel>Beta</channel>
+        <platformBuild>193.6911.18</platformBuild>
+        <platformVersion>2019.3.4</platformVersion>
+        <date>April 7, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6.2</name>
+        <build>AI-192.7142.36.36.6308749</build>
+        <version>3.6.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>192.7142.36</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>March 31, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 4</name>
+        <build>AI-193.6494.35.41.6325121</build>
+        <version>4.1.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6494.35</platformBuild>
+        <platformVersion>2019.3.3</platformVersion>
+        <date>March 24, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Beta 3</name>
+        <build>AI-193.6494.35.40.6296804</build>
+        <version>4.0.0.12</version>
+        <channel>Beta</channel>
+        <platformBuild>193.6494.35</platformBuild>
+        <platformVersion>2019.3.3</platformVersion>
+        <date>March 19, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 3</name>
+        <build>AI-193.6494.35.41.6297379</build>
+        <version>4.1.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6494.35</platformBuild>
+        <platformVersion>2019.3.3</platformVersion>
+        <date>March 18, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Beta 2</name>
+        <build>AI-193.6494.35.40.6254973</build>
+        <version>4.0.0.11</version>
+        <channel>Beta</channel>
+        <platformBuild>193.6494.35</platformBuild>
+        <platformVersion>2019.3.3</platformVersion>
+        <date>March 11, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 2</name>
+        <build>AI-193.6494.35.41.6264773</build>
+        <version>4.1.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6494.35</platformBuild>
+        <platformVersion>2019.3.3</platformVersion>
+        <date>March 9, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6.1</name>
+        <build>AI-192.7142.36.36.6241897</build>
+        <version>3.6.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>192.7142.36</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>February 28, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.1 Canary 1</name>
+        <build>AI-193.6494.35.41.6224510</build>
+        <version>4.1.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>193.6494.35</platformBuild>
+        <platformVersion>2019.3.3</platformVersion>
+        <date>February 27, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Beta 1</name>
+        <build>AI-193.6494.35.40.6220182</build>
+        <version>4.0.0.10</version>
+        <channel>Beta</channel>
+        <platformBuild>193.6494.35</platformBuild>
+        <platformVersion>2019.3.3</platformVersion>
+        <date>February 25, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6</name>
+        <build>AI-192.7142.36.36.6200805</build>
+        <version>3.6.0.21</version>
+        <channel>Release</channel>
+        <platformBuild>192.7142.36</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>February 24, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 RC 3</name>
+        <build>AI-192.7142.36.36.6186006</build>
+        <version>3.6.0.20</version>
+        <channel>RC</channel>
+        <platformBuild>192.7142.36</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>February 10, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 RC 2</name>
+        <build>AI-192.7142.36.36.6165589</build>
+        <version>3.6.0.19</version>
+        <channel>RC</channel>
+        <platformBuild>192.7142.36</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>January 29, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 9</name>
+        <build>AI-193.5233.102.40.6137316</build>
+        <version>4.0.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>193.5233.102</platformBuild>
+        <platformVersion>2019.3.0</platformVersion>
+        <date>January 21, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 8</name>
+        <build>AI-193.5233.102.40.6107147</build>
+        <version>4.0.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>193.5233.102</platformBuild>
+        <platformVersion>2019.3.0</platformVersion>
+        <date>January 7, 2020</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 7</name>
+        <build>AI-193.5233.102.40.6085562</build>
+        <version>4.0.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>193.5233.102</platformBuild>
+        <platformVersion>2019.3.0</platformVersion>
+        <date>December 23, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 RC 1</name>
+        <build>AI-192.7142.36.36.6071332</build>
+        <version>3.6.0.18</version>
+        <channel>RC</channel>
+        <platformBuild>192.7142.36</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>December 17, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 6</name>
+        <build>AI-193.2956.37.40.6052267</build>
+        <version>4.0.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>193.2956.37</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>December 10, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5.3</name>
+        <build>AI-191.8026.42.35.6010548</build>
+        <version>3.5.3.0</version>
+        <channel>Release</channel>
+        <platformBuild>191.8026.42</platformBuild>
+        <platformVersion>2019.1.4</platformVersion>
+        <date>December 5, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Beta 5</name>
+        <build>AI-192.6817.14.36.6018865</build>
+        <version>3.6.0.17</version>
+        <channel>Beta</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>December 4, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 5</name>
+        <build>AI-193.2956.37.40.6039983</build>
+        <version>4.0.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>193.2956.37</platformBuild>
+        <platformVersion>2019.2.4</platformVersion>
+        <date>December 4, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 4</name>
+        <build>AI-192.6817.14.36.6008643</build>
+        <version>4.0.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>November 20, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 3</name>
+        <build>AI-192.6817.14.36.5994236</build>
+        <version>4.0.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>November 14, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Beta 4</name>
+        <build>AI-192.6817.14.36.5994180</build>
+        <version>3.6.0.16</version>
+        <channel>Beta</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>November 14, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 2</name>
+        <build>AI-192.6817.14.36.5984562</build>
+        <version>4.0.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>November 7, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Beta 3</name>
+        <build>AI-192.6817.14.36.5982640</build>
+        <version>3.6.0.15</version>
+        <channel>Beta</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>November 6, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5.2</name>
+        <build>AI-191.8026.42.35.5977832</build>
+        <version>3.5.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>191.8026.42</platformBuild>
+        <platformVersion>2019.1.4</platformVersion>
+        <date>November 4, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Beta 2</name>
+        <build>AI-192.6817.14.36.5947919</build>
+        <version>3.6.0.14</version>
+        <channel>Beta</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>October 31, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 4.0 Canary 1</name>
+        <build>AI-192.6817.14.36.5959023</build>
+        <version>4.0.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>192.6817.14</platformBuild>
+        <platformVersion>2019.2.3</platformVersion>
+        <date>October 23, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Beta 1</name>
+        <build>AI-192.6603.28.36.5916306</build>
+        <version>3.6.0.13</version>
+        <channel>Beta</channel>
+        <platformBuild>192.6603.28</platformBuild>
+        <platformVersion>2019.2.2</platformVersion>
+        <date>October 10, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5.1</name>
+        <build>AI-191.8026.42.35.5900203</build>
+        <version>3.5.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>191.8026.42</platformBuild>
+        <platformVersion>2019.1.4</platformVersion>
+        <date>October 2, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 12</name>
+        <build>AI-192.6262.58.36.5871855</build>
+        <version>3.6.0.12</version>
+        <channel>Canary</channel>
+        <platformBuild>192.6262.58</platformBuild>
+        <platformVersion>2019.2.1</platformVersion>
+        <date>September 18, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 11</name>
+        <build>AI-192.6262.58.36.5863777</build>
+        <version>3.6.0.11</version>
+        <channel>Canary</channel>
+        <platformBuild>192.6262.58</platformBuild>
+        <platformVersion>2019.2.1</platformVersion>
+        <date>September 11, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 10</name>
+        <build>AI-192.5728.98.36.5842447</build>
+        <version>3.6.0.10</version>
+        <channel>Canary</channel>
+        <platformBuild>192.5728.98</platformBuild>
+        <platformVersion>2019.2.0</platformVersion>
+        <date>September 5, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 9</name>
+        <build>AI-192.5728.98.36.5830636</build>
+        <version>3.6.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>192.5728.98</platformBuild>
+        <platformVersion>2019.2.0</platformVersion>
+        <date>August 29, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 8</name>
+        <build>AI-192.5728.98.36.5825043</build>
+        <version>3.6.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>192.5728.98</platformBuild>
+        <platformVersion>2019.2.0</platformVersion>
+        <date>August 27, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 7</name>
+        <build>AI-192.5728.98.36.5807797</build>
+        <version>3.6.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>192.5728.98</platformBuild>
+        <platformVersion>2019.2.0</platformVersion>
+        <date>August 23, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5</name>
+        <build>AI-191.8026.42.35.5791312</build>
+        <version>3.5.0.21</version>
+        <channel>Release</channel>
+        <platformBuild>191.8026.42</platformBuild>
+        <platformVersion>2019.1.4</platformVersion>
+        <date>August 20, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 6</name>
+        <build>AI-192.5587.17.36.5787298</build>
+        <version>3.6.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>192.5587.17</platformBuild>
+        <platformVersion>2019.1.4</platformVersion>
+        <date>August 13, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 RC 3</name>
+        <build>AI-191.8026.42.35.5781497</build>
+        <version>3.5.0.20</version>
+        <channel>RC</channel>
+        <platformBuild>191.8026.42</platformBuild>
+        <platformVersion>2019.1.4</platformVersion>
+        <date>August 8, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 RC 2</name>
+        <build>AI-191.7479.19.35.5763348</build>
+        <version>3.5.0.19</version>
+        <channel>RC</channel>
+        <platformBuild>191.7479.19</platformBuild>
+        <platformVersion>2019.1.3</platformVersion>
+        <date>August 1, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 RC 1</name>
+        <build>AI-191.7479.19.35.5717577</build>
+        <version>3.5.0.18</version>
+        <channel>RC</channel>
+        <platformBuild>191.7479.19</platformBuild>
+        <platformVersion>2019.1.3</platformVersion>
+        <date>July 17, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 5</name>
+        <build>AI-191.7479.19.36.5721125</build>
+        <version>3.6.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>191.7479.19</platformBuild>
+        <platformVersion>2019.1.3</platformVersion>
+        <date>July 17, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4.2</name>
+        <build>AI-183.6156.11.34.5692245</build>
+        <version>3.4.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>183.6156.11</platformBuild>
+        <platformVersion>2018.3.6</platformVersion>
+        <date>July 9, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Beta 5</name>
+        <build>AI-191.7479.19.35.5675373</build>
+        <version>3.5.0.17</version>
+        <channel>Beta</channel>
+        <platformBuild>191.7479.19</platformBuild>
+        <platformVersion>2019.1.3</platformVersion>
+        <date>June 26, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 4</name>
+        <build>AI-191.7479.19.36.5679705</build>
+        <version>3.6.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>191.7479.19</platformBuild>
+        <platformVersion>2019.1.3</platformVersion>
+        <date>June 26, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Beta 4</name>
+        <build>AI-191.7141.44.35.5619324</build>
+        <version>3.5.0.16</version>
+        <channel>Beta</channel>
+        <platformBuild>191.7141.44</platformBuild>
+        <platformVersion>2019.1.2</platformVersion>
+        <date>June 7, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 3</name>
+        <build>AI-191.7141.44.36.5618338</build>
+        <version>3.6.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>191.7141.44</platformBuild>
+        <platformVersion>2019.1.2</platformVersion>
+        <date>June 7, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 2</name>
+        <build>AI-191.7141.44.36.5599242</build>
+        <version>3.6.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>191.7141.44</platformBuild>
+        <platformVersion>2019.1.2</platformVersion>
+        <date>May 30, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Beta 3</name>
+        <build>AI-191.7141.44.35.5585527</build>
+        <version>3.5.0.15</version>
+        <channel>Beta</channel>
+        <platformBuild>191.7141.44</platformBuild>
+        <platformVersion>2019.1.2</platformVersion>
+        <date>May 28, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.6 Canary 1</name>
+        <build>AI-191.7141.44.36.5595896</build>
+        <version>3.6.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>191.7141.44</platformBuild>
+        <platformVersion>2019.1.2</platformVersion>
+        <date>May 23, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Beta 2</name>
+        <build>AI-191.6707.61.35.5549111</build>
+        <version>3.5.0.14</version>
+        <channel>Beta</channel>
+        <platformBuild>191.6707.61</platformBuild>
+        <platformVersion>2019.1.1</platformVersion>
+        <date>May 20, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4.1</name>
+        <build>AI-183.6156.11.34.5522156</build>
+        <version>3.4.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>183.6156.11</platformBuild>
+        <platformVersion>2018.3.6</platformVersion>
+        <date>May 15, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Beta 1</name>
+        <build>AI-191.6707.61.35.5529924</build>
+        <version>3.5.0.13</version>
+        <channel>Beta</channel>
+        <platformBuild>191.6707.61</platformBuild>
+        <platformVersion>2019.1.1</platformVersion>
+        <date>May 7, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 13</name>
+        <build>AI-191.6183.87.35.5487692</build>
+        <version>3.5.0.12</version>
+        <channel>Canary</channel>
+        <platformBuild>191.6183.87</platformBuild>
+        <platformVersion>2019.1.0</platformVersion>
+        <date>April 24, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 12</name>
+        <build>AI-191.6183.87.35.5471097</build>
+        <version>3.5.0.11</version>
+        <channel>Canary</channel>
+        <platformBuild>191.6183.87</platformBuild>
+        <platformVersion>2019.1.0</platformVersion>
+        <date>April 18, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4</name>
+        <build>AI-183.5429.30.34.5452501</build>
+        <version>3.4.0.18</version>
+        <channel>Release</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>April 17, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 11</name>
+        <build>AI-191.6183.87.35.5455988</build>
+        <version>3.5.0.10</version>
+        <channel>Canary</channel>
+        <platformBuild>191.6183.87</platformBuild>
+        <platformVersion>2019.1.0</platformVersion>
+        <date>April 15, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 10</name>
+        <build>AI-191.6183.62.35.5416148</build>
+        <version>3.5.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>191.6183.62</platformBuild>
+        <platformVersion>2018.3.6</platformVersion>
+        <date>April 4, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 RC 3</name>
+        <build>AI-183.5429.30.34.5400832</build>
+        <version>3.4.0.17</version>
+        <channel>RC</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>April 1, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 9</name>
+        <build>AI-191.6183.20.35.5409101</build>
+        <version>3.5.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>191.6183.20</platformBuild>
+        <platformVersion>2018.3.6</platformVersion>
+        <date>March 28, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 8</name>
+        <build>AI-191.6014.8.35.5375575</build>
+        <version>3.5.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>191.6014.8</platformBuild>
+        <platformVersion>2018.3.6</platformVersion>
+        <date>March 25, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 RC 2</name>
+        <build>AI-183.5429.30.34.5370308</build>
+        <version>3.4.0.16</version>
+        <channel>RC</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>March 14, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 7</name>
+        <build>AI-183.5429.30.35.5346365</build>
+        <version>3.5.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>March 11, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 RC 1</name>
+        <build>AI-183.5429.30.34.5341121</build>
+        <version>3.4.0.15</version>
+        <channel>RC</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>March 7, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3.2</name>
+        <build>AI-182.5107.16.33.5314842</build>
+        <version>3.3.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>182.5107.16</platformBuild>
+        <platformVersion>2018.2.6</platformVersion>
+        <date>March 4, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 6</name>
+        <build>AI-183.5429.30.35.5326993</build>
+        <version>3.5.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>February 26, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 5</name>
+        <build>AI-183.5429.30.35.5320907</build>
+        <version>3.5.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>February 21, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Beta 5</name>
+        <build>AI-183.5429.30.34.5310756</build>
+        <version>3.4.0.14</version>
+        <channel>Beta</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>February 21, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 4</name>
+        <build>AI-183.5429.30.35.5290690</build>
+        <version>3.5.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>February 14, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Beta 4</name>
+        <build>AI-183.5429.30.34.5304277</build>
+        <version>3.4.0.13</version>
+        <channel>Beta</channel>
+        <platformBuild>183.5429.30</platformBuild>
+        <platformVersion>2018.3.4</platformVersion>
+        <date>February 14, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3.1</name>
+        <build>AI-182.5107.16.33.5264788</build>
+        <version>3.3.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>182.5107.16</platformBuild>
+        <platformVersion>2018.2.6</platformVersion>
+        <date>February 6, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 3</name>
+        <build>AI-183.5153.38.35.5256920</build>
+        <version>3.5.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>183.5153.38</platformBuild>
+        <platformVersion>2018.3.3</platformVersion>
+        <date>January 31, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Beta 3</name>
+        <build>AI-183.5153.38.34.5256591</build>
+        <version>3.4.0.12</version>
+        <channel>Beta</channel>
+        <platformBuild>183.5153.38</platformBuild>
+        <platformVersion>2018.3.3</platformVersion>
+        <date>January 31, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 2</name>
+        <build>AI-183.5153.38.35.5240547</build>
+        <version>3.5.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>183.5153.38</platformBuild>
+        <platformVersion>2018.3.3</platformVersion>
+        <date>January 24, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Beta 2</name>
+        <build>AI-183.5153.38.34.5240537</build>
+        <version>3.4.0.11</version>
+        <channel>Beta</channel>
+        <platformBuild>183.5153.38</platformBuild>
+        <platformVersion>2018.3.3</platformVersion>
+        <date>January 24, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Beta 1</name>
+        <build>AI-183.4886.37.34.5217543</build>
+        <version>3.4.0.10</version>
+        <channel>Beta</channel>
+        <platformBuild>183.4886.37</platformBuild>
+        <platformVersion>2018.3.2</platformVersion>
+        <date>January 15, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.5 Canary 1</name>
+        <build>AI-183.4886.37.35.5215047</build>
+        <version>3.5.0.0</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4886.37</platformBuild>
+        <platformVersion>2018.3.2</platformVersion>
+        <date>January 15, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3.0</name>
+        <build>AI-182.5107.16.33.5199772</build>
+        <version>3.3.0.20</version>
+        <channel>Release</channel>
+        <platformBuild>182.5107.16</platformBuild>
+        <platformVersion>2018.2.6</platformVersion>
+        <date>January 14, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 10</name>
+        <build>AI-183.4588.61.34.5202479</build>
+        <version>3.4.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4588.61</platformBuild>
+        <platformVersion>2018.3.1</platformVersion>
+        <date>January 3, 2019</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 RC 3</name>
+        <build>AI-182.5107.16.33.5183351</build>
+        <version>3.3.0.19</version>
+        <channel>RC</channel>
+        <platformBuild>182.5107.16</platformBuild>
+        <platformVersion>2018.2.6</platformVersion>
+        <date>December 20, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 9</name>
+        <build>AI-183.4588.61.34.5186062</build>
+        <version>3.4.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4588.61</platformBuild>
+        <platformVersion>2018.3.1</platformVersion>
+        <date>December 20, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 8</name>
+        <build>AI-183.4588.61.34.5173923</build>
+        <version>3.4.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4588.61</platformBuild>
+        <platformVersion>2018.3.1</platformVersion>
+        <date>December 12, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 RC 2</name>
+        <build>AI-182.5107.16.33.5160847</build>
+        <version>3.3.0.18</version>
+        <channel>RC</channel>
+        <platformBuild>182.5107.16</platformBuild>
+        <platformVersion>2018.2.6</platformVersion>
+        <date>December 6, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 7</name>
+        <build>AI-183.4284.148.34.5159543</build>
+        <version>3.4.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4284.148</platformBuild>
+        <platformVersion>2018.3.0</platformVersion>
+        <date>December 6, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 6</name>
+        <build>AI-183.4284.148.34.5146016</build>
+        <version>3.4.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4284.148</platformBuild>
+        <platformVersion>2018.3.0</platformVersion>
+        <date>November 29, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 RC 1</name>
+        <build>AI-182.5107.16.33.5138683</build>
+        <version>3.3.0.17</version>
+        <channel>RC</channel>
+        <platformBuild>182.5107.16</platformBuild>
+        <platformVersion>2018.2.6</platformVersion>
+        <date>November 26, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 5</name>
+        <build>AI-183.4284.36.34.5141831</build>
+        <version>3.4.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4284.36</platformBuild>
+        <platformVersion>2018.2.8</platformVersion>
+        <date>November 26, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 4</name>
+        <build>AI-183.4139.22.34.5129585</build>
+        <version>3.4.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>183.4139.22</platformBuild>
+        <platformVersion>2018.2.8</platformVersion>
+        <date>November 15, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Beta 4</name>
+        <build>AI-182.4892.20.33.5114240</build>
+        <version>3.3.0.16</version>
+        <channel>Beta</channel>
+        <platformBuild>182.4892.20</platformBuild>
+        <platformVersion>2018.2.5</platformVersion>
+        <date>November 12, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Beta 3</name>
+        <build>AI-182.4892.20.33.5105271</build>
+        <version>3.3.0.15</version>
+        <channel>Beta</channel>
+        <platformBuild>182.4892.20</platformBuild>
+        <platformVersion>2018.2.5</platformVersion>
+        <date>November 7, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 3</name>
+        <build>AI-183.3975.18.34.5112304</build>
+        <version>3.4.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>183.3975.18</platformBuild>
+        <platformVersion>2018.2.8</platformVersion>
+        <date>November 7, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Beta 2</name>
+        <build>AI-182.4892.20.33.5078385</build>
+        <version>3.3.0.14</version>
+        <channel>Beta</channel>
+        <platformBuild>182.4892.20</platformBuild>
+        <platformVersion>2018.2.5</platformVersion>
+        <date>October 30, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 2</name>
+        <build>AI-183.2153.8.34.5081642</build>
+        <version>3.4.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>183.2153.8</platformBuild>
+        <platformVersion>2018.2.8</platformVersion>
+        <date>October 24, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Beta 1</name>
+        <build>AI-182.4505.22.33.5073496</build>
+        <version>3.3.0.13</version>
+        <channel>Beta</channel>
+        <platformBuild>182.4505.22</platformBuild>
+        <platformVersion>2018.2.4</platformVersion>
+        <date>October 19, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.4 Canary 1</name>
+        <build>AI-182.4505.22.34.5070326</build>
+        <version>3.4.0.0</version>
+        <channel>Canary</channel>
+        <platformBuild>182.4505.22</platformBuild>
+        <platformVersion>2018.2.4</platformVersion>
+        <date>October 19, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2.1</name>
+        <build>AI-181.5540.7.32.5056338</build>
+        <version>3.2.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>181.5540.7</platformBuild>
+        <platformVersion>2018.1.6</platformVersion>
+        <date>October 11, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 13</name>
+        <build>AI-182.4505.22.33.5035453</build>
+        <version>3.3.0.12</version>
+        <channel>Canary</channel>
+        <platformBuild>182.4505.22</platformBuild>
+        <platformVersion>2018.2.4</platformVersion>
+        <date>October 2, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 12</name>
+        <build>AI-182.4505.22.33.5026711</build>
+        <version>3.3.0.11</version>
+        <channel>Canary</channel>
+        <platformBuild>182.4505.22</platformBuild>
+        <platformVersion>2018.2.4</platformVersion>
+        <date>September 26, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2.0</name>
+        <build>AI-181.5540.7.32.5014246</build>
+        <version>3.2.0.26</version>
+        <channel>Release</channel>
+        <platformBuild>181.5540.7</platformBuild>
+        <platformVersion>2018.1.6</platformVersion>
+        <date>September 24, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 11</name>
+        <build>AI-182.4323.46.33.5012296</build>
+        <version>3.3.0.10</version>
+        <channel>Canary</channel>
+        <platformBuild>182.4323.46</platformBuild>
+        <platformVersion>2018.2.3</platformVersion>
+        <date>September 19, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 10</name>
+        <build>AI-182.4129.33.33.4996246</build>
+        <version>3.3.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>182.4129.33</platformBuild>
+        <platformVersion>2018.2.2</platformVersion>
+        <date>September 12, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 9</name>
+        <build>AI-182.4129.33.33.4989483</build>
+        <version>3.3.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>182.4129.33</platformBuild>
+        <platformVersion>2018.2.2</platformVersion>
+        <date>September 11, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 RC 3</name>
+        <build>AI-181.5540.7.32.4987877</build>
+        <version>3.2.0.25</version>
+        <channel>RC</channel>
+        <platformBuild>181.5540.7</platformBuild>
+        <platformVersion>2018.1.6</platformVersion>
+        <date>September 10, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 8</name>
+        <build>AI-182.3911.36.33.4978721</build>
+        <version>3.3.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>182.3911.36</platformBuild>
+        <platformVersion>2018.2.1</platformVersion>
+        <date>August 29, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 RC 2</name>
+        <build>AI-181.5540.7.32.4974118</build>
+        <version>3.2.0.24</version>
+        <channel>RC</channel>
+        <platformBuild>181.5540.7</platformBuild>
+        <platformVersion>2018.1.6</platformVersion>
+        <date>August 24, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 RC 1</name>
+        <build>AI-181.5540.7.32.4963425</build>
+        <version>3.2.0.23</version>
+        <channel>RC</channel>
+        <platformBuild>181.5540.7</platformBuild>
+        <platformVersion>2018.1.6</platformVersion>
+        <date>August 23, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 7</name>
+        <build>AI-182.3911.36.33.4968538</build>
+        <version>3.3.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>182.3911.36</platformBuild>
+        <platformVersion>2018.2.1</platformVersion>
+        <date>August 23, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 6</name>
+        <build>AI-182.3684.101.33.4954005</build>
+        <version>3.3.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>182.3684.101</platformBuild>
+        <platformVersion>2018.2.0</platformVersion>
+        <date>August 16, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 5</name>
+        <build>AI-182.3684.101.33.4928781</build>
+        <version>3.3.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>182.3684.101</platformBuild>
+        <platformVersion>2018.2.0</platformVersion>
+        <date>August 7, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1.4</name>
+        <build>AI-173.4907809</build>
+        <version>3.1.4.0</version>
+        <channel>Release</channel>
+        <platformBuild>173.4907.0</platformBuild>
+        <platformVersion>2017.3.7</platformVersion>
+        <date>August 6, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 4</name>
+        <build>AI-182.3208.16.33.4924367</build>
+        <version>3.3.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>182.3208.16</platformBuild>
+        <platformVersion>2018.1.8</platformVersion>
+        <date>August 2, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Beta 5</name>
+        <build>AI-181.5281.24.32.4913314</build>
+        <version>3.2.0.22</version>
+        <channel>Beta</channel>
+        <platformBuild>181.5281.24</platformBuild>
+        <platformVersion>2018.1.5</platformVersion>
+        <date>July 30, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Beta 4</name>
+        <build>AI-181.5281.24.32.4886486</build>
+        <version>3.2.0.21</version>
+        <channel>Beta</channel>
+        <platformBuild>181.5281.24</platformBuild>
+        <platformVersion>2018.1.5</platformVersion>
+        <date>July 16, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 3</name>
+        <build>AI-181.5281.24.33.4884283</build>
+        <version>3.3.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>181.5281.24</platformBuild>
+        <platformVersion>2018.1.5</platformVersion>
+        <date>July 12, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Beta 3</name>
+        <build>AI-181.5281.24.32.4868252</build>
+        <version>3.2.0.20</version>
+        <channel>Beta</channel>
+        <platformBuild>181.5281.24</platformBuild>
+        <platformVersion>2018.1.5</platformVersion>
+        <date>July 10, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 2</name>
+        <build>AI-181.5281.24.33.4869471</build>
+        <version>3.3.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>181.5281.24</platformBuild>
+        <platformVersion>2018.1.5</platformVersion>
+        <date>July 3, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Beta 2</name>
+        <build>AI-181.5281.24.32.4860949</build>
+        <version>3.2.0.19</version>
+        <channel>Beta</channel>
+        <platformBuild>181.5281.24</platformBuild>
+        <platformVersion>2018.1.5</platformVersion>
+        <date>June 28, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.3 Canary 1</name>
+        <build>AI-181.4892.42.33.4861037</build>
+        <version>3.3.0.0</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4892.42</platformBuild>
+        <platformVersion>2018.1.3</platformVersion>
+        <date>June 28, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Beta 1</name>
+        <build>AI-181.4892.42.32.4847800</build>
+        <version>3.2.0.18</version>
+        <channel>Beta</channel>
+        <platformBuild>181.4892.42</platformBuild>
+        <platformVersion>2018.1.3</platformVersion>
+        <date>June 21, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 18</name>
+        <build>AI-181.4892.42.32.4830125</build>
+        <version>3.2.0.17</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4892.42</platformBuild>
+        <platformVersion>2018.1.3</platformVersion>
+        <date>June 11, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 17</name>
+        <build>AI-181.4892.42.32.4823740</build>
+        <version>3.2.0.16</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4892.42</platformBuild>
+        <platformVersion>2018.1.3</platformVersion>
+        <date>June 7, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1.3</name>
+        <build>AI-173.4819257</build>
+        <version>3.1.3.0</version>
+        <channel>Release</channel>
+        <platformBuild>173.4819.0</platformBuild>
+        <platformVersion>2017.3.7</platformVersion>
+        <date>June 7, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 16</name>
+        <build>AI-181.4668.68.32.4802120</build>
+        <version>3.2.0.15</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4668.68</platformBuild>
+        <platformVersion>2018.1.2</platformVersion>
+        <date>May 29, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 15</name>
+        <build>AI-181.4668.68.32.4773949</build>
+        <version>3.2.0.14</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4668.68</platformBuild>
+        <platformVersion>2018.1.2</platformVersion>
+        <date>May 17, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 14</name>
+        <build>AI-181.4668.68.32.4763614</build>
+        <version>3.2.0.13</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4668.68</platformBuild>
+        <platformVersion>2018.1.2</platformVersion>
+        <date>May 8, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 13</name>
+        <build>AI-181.4445.78.32.4749738</build>
+        <version>3.2.0.12</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4445.78</platformBuild>
+        <platformVersion>2018.1.1</platformVersion>
+        <date>April 30, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1.2</name>
+        <build>AI-173.4720617</build>
+        <version>3.1.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>173.4720.0</platformBuild>
+        <platformVersion>2017.3.7</platformVersion>
+        <date>April 23, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 12</name>
+        <build>AI-181.4203.550.32.4729833</build>
+        <version>3.2.0.11</version>
+        <channel>Canary</channel>
+        <platformBuild>181.4203.550</platformBuild>
+        <platformVersion>2018.1.0</platformVersion>
+        <date>April 23, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 11</name>
+        <build>AI-181.3007.14.32.4720098</build>
+        <version>3.2.0.10</version>
+        <channel>Canary</channel>
+        <platformBuild>181.3007.14</platformBuild>
+        <platformVersion>2017.3.7</platformVersion>
+        <date>April 16, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 10</name>
+        <build>AI-181.2784.17.32.4705630</build>
+        <version>3.2.0.9</version>
+        <channel>Canary</channel>
+        <platformBuild>181.2784.17</platformBuild>
+        <platformVersion>2017.3.7</platformVersion>
+        <date>April 9, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1.1</name>
+        <build>AI-173.4697961</build>
+        <version>3.1.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>173.4697.0</platformBuild>
+        <platformVersion>2017.3.6</platformVersion>
+        <date>April 9, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 9</name>
+        <build>AI-173.4688006</build>
+        <version>3.2.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4688.0</platformBuild>
+        <platformVersion>2017.3.6</platformVersion>
+        <date>April 2, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 8</name>
+        <build>AI-173.4670218</build>
+        <version>3.2.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4670.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 26, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1</name>
+        <build>AI-173.4670197</build>
+        <version>3.1.0.16</version>
+        <channel>Release</channel>
+        <platformBuild>173.4670.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 26, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 7</name>
+        <build>AI-173.4658582</build>
+        <version>3.2.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4658.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 19, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 RC 3</name>
+        <build>AI-173.4658569</build>
+        <version>3.1.0.15</version>
+        <channel>RC</channel>
+        <platformBuild>173.4658.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 19, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 6</name>
+        <build>AI-173.4640885</build>
+        <version>3.2.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4640.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 12, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 RC 2</name>
+        <build>AI-173.4640767</build>
+        <version>3.1.0.14</version>
+        <channel>RC</channel>
+        <platformBuild>173.4640.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 12, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 5</name>
+        <build>AI-173.4630681</build>
+        <version>3.2.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4630.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 5, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 RC 1</name>
+        <build>AI-173.4625007</build>
+        <version>3.1.0.13</version>
+        <channel>RC</channel>
+        <platformBuild>173.4625.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>March 5, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 4</name>
+        <build>AI-173.4615518</build>
+        <version>3.2.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4615.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>February 23, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Beta 4</name>
+        <build>AI-173.4615496</build>
+        <version>3.1.0.12</version>
+        <channel>Beta</channel>
+        <platformBuild>173.4615.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>February 23, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 3</name>
+        <build>AI-173.4595177</build>
+        <version>3.2.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4595.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>February 15, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Beta 3</name>
+        <build>AI-173.4595152</build>
+        <version>3.1.0.11</version>
+        <channel>Beta</channel>
+        <platformBuild>173.4595.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>February 15, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 2</name>
+        <build>AI-173.4591728</build>
+        <version>3.2.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4591.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>February 9, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Beta 2</name>
+        <build>AI-173.4580418</build>
+        <version>3.1.0.10</version>
+        <channel>Beta</channel>
+        <platformBuild>173.4580.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>February 9, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.2 Canary 1</name>
+        <build>AI-173.4572754</build>
+        <version>3.2.0.0</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4572.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>February 1, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Beta 1</name>
+        <build>AI-173.4567466</build>
+        <version>3.1.0.9</version>
+        <channel>Beta</channel>
+        <platformBuild>173.4567.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>January 30, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 9</name>
+        <build>AI-173.4559767</build>
+        <version>3.1.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4559.0</platformBuild>
+        <platformVersion>2017.3.4</platformVersion>
+        <date>January 24, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 8</name>
+        <build>AI-173.4529993</build>
+        <version>3.1.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4529.0</platformBuild>
+        <platformVersion>2017.3.3</platformVersion>
+        <date>January 12, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 7</name>
+        <build>AI-173.4524538</build>
+        <version>3.1.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4524.0</platformBuild>
+        <platformVersion>2017.3.3</platformVersion>
+        <date>January 5, 2018</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 6</name>
+        <build>AI-173.4506631</build>
+        <version>3.1.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>173.4506.0</platformBuild>
+        <platformVersion>2017.3.3</platformVersion>
+        <date>December 20, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 5</name>
+        <build>AI-171.4474551</build>
+        <version>3.1.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4474.0</platformBuild>
+        <platformVersion>2017.1.3</platformVersion>
+        <date>December 5, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0.1</name>
+        <build>AI-171.4443003</build>
+        <version>3.0.1.0</version>
+        <channel>Release</channel>
+        <platformBuild>171.4443.0</platformBuild>
+        <platformVersion>2017.1.3</platformVersion>
+        <date>November 20, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 4</name>
+        <build>AI-171.4444016</build>
+        <version>3.1.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4444.0</platformBuild>
+        <platformVersion>2017.1.3</platformVersion>
+        <date>November 17, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 3</name>
+        <build>AI-171.4435470</build>
+        <version>3.1.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4435.0</platformBuild>
+        <platformVersion>2017.1.3</platformVersion>
+        <date>November 10, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 2</name>
+        <build>AI-171.4429293</build>
+        <version>3.1.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4429.0</platformBuild>
+        <platformVersion>2017.1.3</platformVersion>
+        <date>November 3, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.1 Canary 1</name>
+        <build>AI-171.4415322</build>
+        <version>3.1.0.0</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4415.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>October 25, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0</name>
+        <build>AI-171.4408382</build>
+        <version>3.0.0.18</version>
+        <channel>Release</channel>
+        <platformBuild>171.4408.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>October 25, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 RC 2</name>
+        <build>AI-171.4402976</build>
+        <version>3.0.0.17</version>
+        <channel>RC</channel>
+        <platformBuild>171.4402.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>October 19, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 RC 1</name>
+        <build>AI-171.4392136</build>
+        <version>3.0.0.16</version>
+        <channel>RC</channel>
+        <platformBuild>171.4392.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>October 13, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Beta 7</name>
+        <build>AI-171.4365657</build>
+        <version>3.0.0.15</version>
+        <channel>Beta</channel>
+        <platformBuild>171.4365.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>October 3, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Beta 6</name>
+        <build>AI-171.4333198</build>
+        <version>3.0.0.14</version>
+        <channel>Beta</channel>
+        <platformBuild>171.4333.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>September 15, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Beta 5</name>
+        <build>AI-171.4316950</build>
+        <version>3.0.0.13</version>
+        <channel>Beta</channel>
+        <platformBuild>171.4316.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>September 8, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Beta 4</name>
+        <build>AI-171.4304935</build>
+        <version>3.0.0.12</version>
+        <channel>Beta</channel>
+        <platformBuild>171.4304.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>September 1, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Beta 2</name>
+        <build>AI-171.4263559</build>
+        <version>3.0.0.10</version>
+        <channel>Beta</channel>
+        <platformBuild>171.4263.0</platformBuild>
+        <platformVersion>2017.1.2</platformVersion>
+        <date>August 11, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Beta 1</name>
+        <build>AI-171.4243858</build>
+        <version>3.0.0.9</version>
+        <channel>Beta</channel>
+        <platformBuild>171.4243.0</platformBuild>
+        <platformVersion>2017.1.1</platformVersion>
+        <date>August 9, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 9</name>
+        <build>AI-171.4220116</build>
+        <version>3.0.0.8</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4220.0</platformBuild>
+        <platformVersion>2017.1.1</platformVersion>
+        <date>July 31, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 8</name>
+        <build>AI-171.4195411</build>
+        <version>3.0.0.7</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4195.0</platformBuild>
+        <platformVersion>2017.1.1</platformVersion>
+        <date>July 24, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 7</name>
+        <build>AI-171.4182969</build>
+        <version>3.0.0.6</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4182.0</platformBuild>
+        <platformVersion>2017.1.1</platformVersion>
+        <date>July 17, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 6</name>
+        <build>AI-171.4163606</build>
+        <version>3.0.0.5</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4163.0</platformBuild>
+        <platformVersion>2017.1.1</platformVersion>
+        <date>July 10, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 5</name>
+        <build>AI-171.4141229</build>
+        <version>3.0.0.4</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4141.0</platformBuild>
+        <platformVersion>2017.1.1</platformVersion>
+        <date>June 30, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 4</name>
+        <build>AI-171.4101728</build>
+        <version>3.0.0.3</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4101.0</platformBuild>
+        <platformVersion>2017.1.1</platformVersion>
+        <date>June 15, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 3</name>
+        <build>AI-171.4056697</build>
+        <version>3.0.0.2</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4056.0</platformBuild>
+        <platformVersion>2017.1.0</platformVersion>
+        <date>June 2, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 2</name>
+        <build>AI-171.4041253</build>
+        <version>3.0.0.1</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4041.0</platformBuild>
+        <platformVersion>2017.1.0</platformVersion>
+        <date>May 26, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 3.0 Canary 1</name>
+        <build>AI-171.4010489</build>
+        <version>3.0.0.0</version>
+        <channel>Canary</channel>
+        <platformBuild>171.4010.0</platformBuild>
+        <platformVersion>2017.1.0</platformVersion>
+        <date>May 17, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 2.4 Preview 7</name>
+        <build>AI-171.3934896</build>
+        <version>2.4.0.6</version>
+        <channel>Preview</channel>
+        <platformBuild>171.3934.0</platformBuild>
+        <platformVersion>2017.1.0</platformVersion>
+        <date>April 28, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 2.4 Preview 6</name>
+        <build>AI-171.3909050</build>
+        <version>2.4.0.5</version>
+        <channel>Preview</channel>
+        <platformBuild>171.3909.0</platformBuild>
+        <platformVersion>2017.1.0</platformVersion>
+        <date>April 13, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 2.4 Preview 5</name>
+        <build>AI-171.3883974</build>
+        <version>2.4.0.4</version>
+        <channel>Preview</channel>
+        <platformBuild>171.3883.0</platformBuild>
+        <platformVersion>2017.1.0</platformVersion>
+        <date>April 7, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 2.4 Preview 4</name>
+        <build>AI-171.3870562</build>
+        <version>2.4.0.3</version>
+        <channel>Preview</channel>
+        <platformBuild>171.3870.0</platformBuild>
+        <platformVersion>2017.1.0</platformVersion>
+        <date>April 3, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 2.3.3</name>
+        <build>AI-162.4069837</build>
+        <version>2.3.3.0</version>
+        <channel>Release</channel>
+        <platformBuild>162.4069.0</platformBuild>
+        <platformVersion>2016.2.5</platformVersion>
+        <date>June 8, 2017</date>
+    </item>
+    <item>
+        <name>Android Studio 2.3.2</name>
+        <build>AI-162.3934792</build>
+        <version>2.3.2.0</version>
+        <channel>Release</channel>
+        <platformBuild>162.3934.0</platformBuild>
+        <platformVersion>2016.2.5</platformVersion>
+        <date>May 11, 2017</date>
+    </item>
+</content>
