@@ -281,6 +281,17 @@ In addition to that, following attributes may be used to customize IDE running:
 | <kbd>systemDir</kbd> Path to indexes directory. | <kbd>${intellij.sandboxDir}/system</kbd>        |
 | <kbd>autoReloadPlugins</kbd> Enable/disable [auto-reload](https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#enabling-auto-reload) of dynamic plugins. | <kbd>true</kbd> for IDE >= 2020.2 |
 
+### Running performance test DSL
+`RunIdePerformanceTest` task extends `RunIdeBase` task, all configuration attributes of `JavaExec` and `RunIde` task can be used in `RunIdePerformanceTest` as well.
+
+In addition to that, following attributes may be used to customize test execution:
+
+| **Attributes**                                                                                                               | **Default Value** |
+|:-----------------------------------------------------------------------------------------------------------------------------|:------------------|
+| <kbd>testDataDir</kbd> Path to the directory with the test projects and '.ijperf' files.                                     | none              |
+| <kbd>artifactsDir</kbd> Path to IDE distribution that will be used to run the IDE with the plugin.                           | none              |
+| <kbd>profilerName</kbd> Name of the profiler which will be used while execution(ProfilerName.YOURKIT or ProfilerName.ASYNC). | <kbd>ASYNC</kbd>  |                                                                                                                               | <kbd>${intellij.sandboxDir}/system</kbd>                                                                                                                                                                                                                                                                                                                                                                                           |
+
 ### Patching DSL
 The following attributes are a part of the Patching DSL <kbd>patchPluginXml { ... }</kbd> in which allows Gradle to patch specific attributes in a set of `plugin.xml` files.
 

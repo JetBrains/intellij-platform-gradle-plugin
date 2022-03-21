@@ -1,3 +1,3 @@
 package org.jetbrains.intellij.performanceTest
 
-class TestExecutionFailException(str: String) : RuntimeException(str)
+class TestExecutionFailException(message: String) : RuntimeException(message)

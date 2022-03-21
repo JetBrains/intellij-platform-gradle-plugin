@@ -1,28 +1,27 @@
 package org.jetbrains.intellij.performanceTest.parsers
 
-import org.jetbrains.intellij.performanceTest.model.PerfTestStatistic
+import org.jetbrains.intellij.model.PerformanceTestStatistic
 import java.io.File
 
 class IdeaLogParser(private val logPath: String) {
 
-    fun getTestStatistic(): PerfTestStatistic {
-        val perfTestStatisticBuilder = PerfTestStatistic.Builder()
+    fun getTestStatistic() = PerformanceTestStatistic.Builder().apply {
         File(logPath).forEachLine {
-            when {
-                it.contains("##teamcity[buildStatisticValue") -> {
-                    when {
-                        it.contains("Average Responsiveness") -> perfTestStatisticBuilder.averageResponsive(parseValue(it))
-                        it.contains("Responsiveness") -> perfTestStatisticBuilder.responsive(parseValue(it))
-                        else -> perfTestStatisticBuilder.totalTime(parseValue(it))
+            with(it) {
+                when {
+                    contains("##teamcity[buildStatisticValue") -> {
+                        when {
+                            contains("Average Responsiveness") -> averageResponsive(parseValue())
+                            contains("Responsiveness") -> responsive(parseValue())
+                            else -> totalTime(parseValue())
+                        }
                     }
                 }
             }
+
         }
+    }.build()
 
-        return perfTestStatisticBuilder.build()
-    }
-
-    private fun parseValue(rawString: String): Long? {
-        return "value='(?<time>[0-9]*)'".toRegex().find(rawString)?.groups?.get("time")?.value?.toLong()
-    }
+    private fun String.parseValue() =
+        "value='(?<time>\\d*)'".toRegex().find(this)?.groups?.get("time")?.value?.toLong()
 }

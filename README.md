@@ -154,9 +154,7 @@ In addition to that, following attributes may be used to customize IDE running:
 | <kbd>autoReloadPlugins</kbd> Enable/disable [auto-reload](https://plugins.jetbrains.com/docs/intellij/ide-development-instance.html#enabling-auto-reload) of dynamic plugins. | <kbd>true</kbd> for IDE >= 2020.2 |
 
 ### Running performance test DSL
-
-`RunIdePerformanceTest` task extends [RunIde] task,
-all configuration attributes of `JavaExec` and `RunIde` task can be used in `RunIdePerformanceTest` as well.
+`RunIdePerformanceTest` task extends `RunIdeBase` task, all configuration attributes of `JavaExec` and `RunIde` task can be used in `RunIdePerformanceTest` as well.
 
 In addition to that, following attributes may be used to customize test execution:
 

@@ -30,7 +30,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME,
                 IntelliJPluginConstants.RUN_IDE_TASK_NAME,
                 IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME,
-                IntelliJPluginConstants.RUN_IDE_PERFORMACNE_TEST_TASK_NAME,
+                IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
                 IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME,
                 IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME,
                 IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME,

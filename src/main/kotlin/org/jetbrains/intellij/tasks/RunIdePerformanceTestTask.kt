@@ -1,28 +1,24 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.Incubating
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
-import org.jetbrains.intellij.IntelliJPluginExtension
+import org.jetbrains.intellij.error
 import org.jetbrains.intellij.getIdeJvmArgs
 import org.jetbrains.intellij.info
-import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.model.ProfilerName
-import org.jetbrains.intellij.performanceTest.parsers.IdeaLogParser
-import org.jetbrains.intellij.performanceTest.model.PerfTestResult
-import org.jetbrains.intellij.performanceTest.parsers.SimpleIJPerfParser
+import org.jetbrains.intellij.model.PerformanceTestResult
+import org.jetbrains.intellij.performanceTest.ProfilerName
 import org.jetbrains.intellij.performanceTest.TestExecutionFailException
+import org.jetbrains.intellij.performanceTest.parsers.IdeaLogParser
+import org.jetbrains.intellij.performanceTest.parsers.SimpleIJPerformanceParser
 import java.nio.file.Path
 import java.nio.file.Paths
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Incubating
-open class RunIdePerformanceTestTask : RunIdeTask() {
+open class RunIdePerformanceTestTask : RunIdeBase(true) {
 
     private val context = logCategory()
 
@@ -54,17 +50,9 @@ open class RunIdePerformanceTestTask : RunIdeTask() {
     @TaskAction
     @Override
     override fun exec() {
-        val ideaExtension = project.extensions.getByType(IntelliJPluginExtension::class.java)
-        val newArtifactsDir =
-            "${artifactsDir.get()}/${ideaExtension.type.get()}${ideaExtension.version.get()}-${project.version}-${
-                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
-            }"
-        Paths.get(newArtifactsDir)
-            .takeIf { !it.exists() }
-            ?.createDir()
-
+        val dir = Paths.get(artifactsDir.get()).createDir()
         val testData = Path.of(testDataDir.get()).toFile()
-        val testExecutionResults: MutableList<PerfTestResult> = mutableListOf()
+        val testExecutionResults: MutableList<PerformanceTestResult> = mutableListOf()
 
         testData
             .walk()
@@ -72,13 +60,12 @@ open class RunIdePerformanceTestTask : RunIdeTask() {
             .filter { it.extension == "ijperf" }
             .forEach {
                 val testName = it.nameWithoutExtension
-                val testScript = SimpleIJPerfParser(it.path).parse()
+                val testScript = SimpleIJPerformanceParser(it.path).parse()
+
                 scriptPath = it.toPath().toAbsolutePath().toString()
+                testArtifactsDirPath = dir.resolve(testName).createDir().toAbsolutePath()
 
-                testArtifactsDirPath =
-                    Path.of(newArtifactsDir).resolve(testName).createDir().toAbsolutePath()
-
-                //Passing to IDE project to open
+                // Passing to IDE project to open
                 args = listOf("${testDataDir.get()}/${testScript.projectName}")
 
                 super.exec()
@@ -88,7 +75,7 @@ open class RunIdePerformanceTestTask : RunIdeTask() {
                 info(context, "Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
 
                 if (testScript.assertionTimeout != null && testResults.totalTime!! > testScript.assertionTimeout) {
-                    testExecutionResults.add(PerfTestResult(testName, testResults, testScript))
+                    testExecutionResults.add(PerformanceTestResult(testName, testResults, testScript))
                 }
             }
 
@@ -121,5 +108,4 @@ open class RunIdePerformanceTestTask : RunIdeTask() {
             )
         )
     }
-
 }
