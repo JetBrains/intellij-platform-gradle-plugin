@@ -1,6 +1,10 @@
 # Changelog
 
 ## next
+- Include Android Studio builds in the `ListProductsReleasesTask` results
+- Fix compiler resolution for EAP versions [#906](../../issues/906)
+
+## 1.4.0
 - Fixed JBR resolving for MacOSX M1
 - Fixed compiler resolution for long build numbers [#883](../../issues/883)
 - Build number fallback when `product-info.json` is missing [#880](../../issues/880)

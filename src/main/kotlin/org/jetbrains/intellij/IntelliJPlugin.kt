@@ -32,6 +32,8 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.IdeaDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -115,10 +117,12 @@ open class IntelliJPlugin : Plugin<Project> {
                 prepareConventionMappingsForRunIdeTask(project, extension, this, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
             }
             if (this is RunIdeForUiTestTask) {
-                prepareConventionMappingsForRunIdeTask(project,
+                prepareConventionMappingsForRunIdeTask(
+                    project,
                     extension,
                     this,
-                    IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+                    IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+                )
             }
         }
         configureSetupDependenciesTask(project, extension)
@@ -355,8 +359,8 @@ open class IntelliJPlugin : Plugin<Project> {
                         else -> setupDependenciesTask.idea.get().classes.let { ideaClasses ->
                             ideProductInfo(ideaClasses)
                                 ?.run { "$productCode-$version" }
-                                // Fall back on build number if product-info.json is not present, this is the case
-                                // for recent versions of Android Studio.
+                            // Fall back on build number if product-info.json is not present, this is the case
+                            // for recent versions of Android Studio.
                                 ?: ideBuildNumber(ideaClasses)
                         }
                     },
@@ -741,11 +745,11 @@ open class IntelliJPlugin : Plugin<Project> {
                         val localPath = extension.localPath.orNull
                         val ideaDependency = setupDependenciesTask.idea.get()
 
-                        if (localPath.isNullOrBlank() && version.endsWith("-SNAPSHOT")) {
+                        if (localPath.isNullOrBlank() && version.endsWith(RELEASE_SUFFIX_SNAPSHOT)) {
                             val type = extension.getVersionType()
                             if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && listOf("CL", "RD", "PY").contains(type)) {
                                 ideProductInfo(ideaDependency.classes)?.buildNumber?.let { buildNumber ->
-                                    Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}-EAP-CANDIDATE-SNAPSHOT" }
+                                    Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                                 } ?: version
                             } else {
                                 when (type) {
@@ -757,7 +761,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             }
                         } else {
                             val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
-                            val eapSuffix = "-EAP-SNAPSHOT".takeIf { isEap } ?: ""
+                            val eapSuffix = IntelliJPluginConstants.RELEASE_SUFFIX_EAP.takeIf { isEap } ?: ""
 
                             IdeVersion.createIdeVersion(ideaDependency.buildNumber)
                                 .stripExcessComponents()
@@ -773,17 +777,37 @@ open class IntelliJPlugin : Plugin<Project> {
                         if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION ||
                             Version.parse(compilerVersion) >= Version(183, 3795, 13)
                         ) {
-                            dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
-                                create(
-                                    group = "com.jetbrains.intellij.java",
-                                    name = "java-compiler-ant-tasks",
-                                    version = compilerVersion,
-                                )
-                            }, {
-                                listOf(
-                                    "${extension.intellijRepository.get()}/${releaseType(compilerVersion)}",
-                                    IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
-                                ).map { url -> mavenRepository(url) }
+                            val downloadCompiler = { version: String ->
+                                dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
+                                    create(
+                                        group = "com.jetbrains.intellij.java",
+                                        name = "java-compiler-ant-tasks",
+                                        version = version,
+                                    )
+                                }, {
+                                    listOf(
+                                        "${extension.intellijRepository.get()}/${releaseType(version)}",
+                                        IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
+                                    ).map(::mavenRepository)
+                                })
+                            }
+
+                            runCatching {
+                                downloadCompiler(compilerVersion)
+                            }.fold(onSuccess = { it }, onFailure = {
+                                /**
+                                 * Try falling back on the version without the -EAP-SNAPSHOT suffix if the download
+                                 * for it fails - not all versions have a corresponding -EAP-SNAPSHOT version present
+                                 * in the snapshot repository.
+                                 */
+                                if (compilerVersion.endsWith(IntelliJPluginConstants.RELEASE_SUFFIX_EAP)) {
+                                    val nonEapVersion = compilerVersion.replace(
+                                        IntelliJPluginConstants.RELEASE_SUFFIX_EAP, ""
+                                    )
+                                    downloadCompiler(nonEapVersion)
+                                } else {
+                                    throw it
+                                }
                             })
                         } else {
                             warn(
@@ -882,12 +906,14 @@ open class IntelliJPlugin : Plugin<Project> {
                 task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get())
                 task.classpath += ideaDependencyLibrariesProvider.get()
 
-                task.systemProperties(getIdeaSystemProperties(
-                    configDirectoryProvider.get(),
-                    systemDirectoryProvider.get(),
-                    pluginsDirectoryProvider.get(),
-                    pluginIds,
-                ))
+                task.systemProperties(
+                    getIdeaSystemProperties(
+                        configDirectoryProvider.get(),
+                        systemDirectoryProvider.get(),
+                        pluginsDirectoryProvider.get(),
+                        pluginIds,
+                    )
+                )
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as task's the very first source of plugins
@@ -956,8 +982,8 @@ open class IntelliJPlugin : Plugin<Project> {
             }))
             cliVersion.convention(IntelliJPluginConstants.VERSION_LATEST)
             cliPath.convention(project.provider {
-                val resolvedCliVersion = SignPluginTask.resolveCliVersion(cliVersion.orNull)
-                val url = SignPluginTask.resolveCliUrl(resolvedCliVersion)
+                val resolvedCliVersion = resolveCliVersion(cliVersion.orNull)
+                val url = resolveCliUrl(resolvedCliVersion)
                 debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
 
                 dependenciesDownloader.downloadFromRepository(logCategory(), {
@@ -1015,11 +1041,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "List all available IntelliJ-based IDEs with their updates."
 
             updatePaths.convention(project.provider {
-
-                mapOf(
-                    "idea-releases" to IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL,
-//                    "android-studio-releases" to IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL,
-                ).entries.map { (name, repository) ->
+                mapOf("idea-releases" to IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL).entries.map { (name, repository) ->
                     dependenciesDownloader.downloadFromRepository(logCategory(), {
                         create(
                             group = "org.jetbrains",
@@ -1029,6 +1051,16 @@ open class IntelliJPlugin : Plugin<Project> {
                         )
                     }, { ivyRepository(repository) }).first().canonicalPath
                 }
+            })
+            androidStudioUpdatePath.convention(project.provider {
+                dependenciesDownloader.downloadFromRepository(logCategory(), {
+                    create(
+                        group = "org.jetbrains",
+                        name = "android-studio-products-releases",
+                        version = "1.0",
+                        ext = "xml",
+                    )
+                }, { ivyRepository(IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL) }).first().canonicalPath
             })
             outputFile.convention {
                 File(project.buildDir, "${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}.txt")
@@ -1071,11 +1103,13 @@ open class IntelliJPlugin : Plugin<Project> {
                 val defaultDependencies =
                     create(IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME).setVisible(false).apply {
                         defaultDependencies {
-                            add(project.dependencies.create(
-                                group = "org.jetbrains",
-                                name = "annotations",
-                                version = IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION,
-                            ))
+                            add(
+                                project.dependencies.create(
+                                    group = "org.jetbrains",
+                                    name = "annotations",
+                                    version = IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION,
+                                )
+                            )
                         }
                     }
 
@@ -1108,6 +1142,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                 extraDependencies,
                             )
                         }
+
                         else -> {
                             if (extension.version.orNull != null) {
                                 warn(context, "Both 'localPath' and 'version' specified, second would be ignored")

@@ -14,6 +14,7 @@ import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.Version.Companion.parse
 import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
 import javax.inject.Inject
@@ -26,6 +27,10 @@ open class ListProductsReleasesTask @Inject constructor(
     @Input
     @Optional
     val updatePaths = objectFactory.listProperty<String>()
+
+    @Input
+    @Optional
+    val androidStudioUpdatePath = objectFactory.property<String>()
 
     @OutputFile
     val outputFile: RegularFileProperty = objectFactory.fileProperty()
@@ -58,16 +63,21 @@ open class ListProductsReleasesTask @Inject constructor(
 
     @TaskAction
     fun list() {
-        val extractor = XmlExtractor<ProductsReleases>(context)
-        val releases = updatePaths.get().mapNotNull(extractor::fetch)
+        val releases = XmlExtractor<ProductsReleases>(context).let {
+            updatePaths.get().mapNotNull(it::fetch)
+        }
+        val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let {
+            androidStudioUpdatePath.get().let(it::fetch)
+        } ?: AndroidStudioReleases()
 
         val since = (sinceVersion.orNull ?: sinceBuild.get()).run(::parse)
         val until = (untilVersion.orNull ?: untilBuild.get().takeUnless { sinceVersion.isPresent })?.run {
             replace("*", "9999").run(::parse)
         }
+        val types = types.get()
         val channels = releaseChannels.get()
 
-        fun testVersion(version: Version, build: Version): Boolean {
+        fun testVersion(version: Version?, build: Version?): Boolean {
             val a = when (since.major) {
                 in 100..999 -> build
                 else -> version
@@ -77,22 +87,50 @@ open class ListProductsReleasesTask @Inject constructor(
                 else -> version
             }
 
-            return a >= since && (until == null || b <= until)
+            return a != null && b != null && a >= since && (until == null || b <= until)
         }
 
         val result = releases.map(ProductsReleases::products).flatten().asSequence()
-            .flatMap { product -> product.codes.map { it to product }.asSequence() }.filter { (type) -> types.get().contains(type) }
+            .flatMap { product -> product.codes.map { it to product }.asSequence() }
+            .filter { (type) -> types.contains(type) }
             .flatMap { (type, product) -> product.channels.map { type to it }.asSequence() }
             .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.toUpperCase())) }
-            .flatMap { (type, channel) -> channel.builds.map { type to (it.version.run(::parse) to it.number.run(::parse)) }.asSequence() }
+            .flatMap { (type, channel) ->
+                channel.builds.map {
+                    type to (it.version.run(::parse) to it.number.run(::parse))
+                }.asSequence()
+            }
             .filter { (_, version) -> testVersion(version.first, version.second) }
-            .groupBy { (type, version) -> "$type-${version.first.major}.${version.first.minor}" }.mapNotNull {
-                it.value.maxByOrNull { (_, version) -> version.first.patch }
-                    ?.let { (type, version) -> "$type-${version.first.asRelease()}" }
-            }.distinct().toList()
+            .groupBy { (type, version) -> "$type-${version.first.major}.${version.first.minor}" }
+            .mapNotNull {
+                it.value.maxByOrNull { (_, version) ->
+                    version.first.patch
+                }?.let { (type, version) -> "$type-${version.first.asRelease()}" }
+            }
+            .distinct()
+            .toList()
+
+        val androidStudioResult = when (types.contains("AI")) {
+            true -> androidStudioReleases.items
+                .asSequence()
+                .filter { item ->
+                    val version = item.platformVersion?.let(::parse)
+                    val build = item.platformBuild?.let(::parse)
+                    testVersion(version, build)
+                }
+                .filter { channels.contains(Channel.valueOf(it.channel.toUpperCase())) }
+                .groupBy { it.version }
+                .mapNotNull { entry ->
+                    entry.value.maxByOrNull { it.platformBuild?.let(::parse) ?: Version() }
+                }
+                .map { "AI-${it.version}" }
+                .toList()
+
+            false -> emptyList()
+        }
 
         outputFile.get().asFile.outputStream().use { os ->
-            result.joinToString("\n").apply {
+            (result + androidStudioResult).joinToString("\n").apply {
                 TeeOutputStream(System.out, os).write(toByteArray())
             }
         }
@@ -101,6 +139,6 @@ open class ListProductsReleasesTask @Inject constructor(
     private fun Version.asRelease() = "$major.$minor" + (".$patch".takeIf { patch > 0 } ?: "")
 
     enum class Channel {
-        EAP, MILESTONE, BETA, RELEASE,
+        EAP, MILESTONE, BETA, RELEASE, CANARY, PATCH, RC,
     }
 }

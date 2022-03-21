@@ -11,6 +11,8 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.ideBuildNumber
 import org.jetbrains.intellij.ideaDir
@@ -259,7 +261,7 @@ open class IdeaDependencyManager @Inject constructor(
                 "com.jetbrains.intellij.goland" to "goland"
             }
             type == "RD" -> {
-                if (sources && releaseType == "snapshots") {
+                if (sources && releaseType == RELEASE_TYPE_SNAPSHOTS) {
                     warn(context, "IDE sources are not available for Rider SNAPSHOTS")
                     hasSources = false
                 }
@@ -284,7 +286,7 @@ open class IdeaDependencyManager @Inject constructor(
             mavenRepository("$repositoryUrl/$releaseType")
         }).first().let {
             debug(context, "IDE zip: " + it.path)
-            unzipDependencyFile(getZipCacheDirectory(it, project, type), it, type, version.endsWith("-SNAPSHOT"))
+            unzipDependencyFile(getZipCacheDirectory(it, project, type), it, type, version.endsWith(RELEASE_SUFFIX_SNAPSHOT))
         }
 
         info(context, "IDE dependency cache directory: $classesDirectory")
@@ -374,7 +376,7 @@ open class IdeaDependencyManager @Inject constructor(
                     depFile.name.endsWith(".zip") -> {
                         val cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
                         debug(context, "IDE extra dependency '$name': " + cacheDirectory.path)
-                        unzipDependencyFile(cacheDirectory, depFile, "IC", version.endsWith("-SNAPSHOT"))
+                        unzipDependencyFile(cacheDirectory, depFile, "IC", version.endsWith(RELEASE_SUFFIX_SNAPSHOT))
                     }
                     else -> {
                         debug(context, "IDE extra dependency '$name': " + depFile.path)

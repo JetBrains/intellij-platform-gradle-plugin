@@ -33,9 +33,18 @@ object IntelliJPluginConstants {
     const val ANNOTATIONS_DEPENDENCY_VERSION = "22.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
+    const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"
+    const val RELEASE_SUFFIX_EAP_CANDIDATE = "-EAP-CANDIDATE-SNAPSHOT"
+    const val RELEASE_SUFFIX_SNAPSHOT = "-SNAPSHOT"
+    const val RELEASE_SUFFIX_CUSTOM_SNAPSHOT = "-CUSTOM-SNAPSHOT"
+
+    const val RELEASE_TYPE_SNAPSHOTS = "snapshots"
+    const val RELEASE_TYPE_NIGHTLY = "nightly"
+    const val RELEASE_TYPE_RELEASES = "releases"
+
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
     const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
-//    const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://dl.google.com/android/studio/patches/updates.xml"
+    const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://raw.githubusercontent.com/JetBrains/intellij-sdk-docs/main/topics/_generated/android_studio_releases.xml"
     const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
     const val INTELLIJ_DEPENDENCIES = "$CACHE_REDIRECTOR/intellij-dependencies"
     const val DEFAULT_INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository"

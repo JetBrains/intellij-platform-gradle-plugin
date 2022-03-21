@@ -10,7 +10,7 @@ jobs:
     steps:
 
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
 
       - name: Gradle Wrapper Validation
         uses: gradle/wrapper-validation-action@v1.0.4
@@ -22,7 +22,7 @@ jobs:
     steps:
 
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
 
       - name: Qodana - Code Inspection
         uses: JetBrains/qodana-action@v4.2.5
@@ -37,7 +37,7 @@ jobs:
         gradleVersion:
           - 6.6.1
           - 6.9.2
-          - 7.4
+          - 7.4.1
         os:
           - windows-latest
           - ubuntu-latest
@@ -46,7 +46,7 @@ jobs:
     steps:
 
       - name: Fetch Sources
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v3
 
       - name: Setup Java
         uses: actions/setup-java@v2
@@ -60,7 +60,7 @@ jobs:
 
       - name: Collect Test Results
         if: ${{ failure() }}
-        uses: actions/upload-artifact@v2.3.1
+        uses: actions/upload-artifact@v3
         with:
           name: test-results-${{ matrix.gradleVersion }}-${{ runner.os }}
           path: ${{ github.workspace }}/build/reports/tests

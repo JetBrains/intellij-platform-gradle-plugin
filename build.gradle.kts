@@ -26,17 +26,17 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.204") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.207") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.204") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.207") {
         exclude(group = "org.jetbrains.kotlin")
     }
     // should be changed together with plugin-repository-rest-client
     implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.20") {
+    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.22") {
         exclude(group = "org.jetbrains.kotlin")
     }
 

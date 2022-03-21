@@ -11,4 +11,6 @@ class ObjectFactory {
     fun createPluginVerifierRepository() = SpacePackagesMavenMetadata()
 
     fun createProductsReleases() = ProductsReleases()
+
+    fun createAndroidStudioReleases() = AndroidStudioReleases()
 }

@@ -30,6 +30,13 @@ import org.jdom2.Document
 import org.jdom2.JDOMException
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_CUSTOM_SNAPSHOT
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_NIGHTLY
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_RELEASES
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.model.ProductInfo
 import org.xml.sax.SAXParseException
@@ -137,13 +144,13 @@ fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = wh
 }
 
 fun releaseType(version: String) = when {
-    version.endsWith("-EAP-SNAPSHOT") ||
-        version.endsWith("-EAP-CANDIDATE-SNAPSHOT") ||
-        version.endsWith("-CUSTOM-SNAPSHOT") ||
+    version.endsWith(RELEASE_SUFFIX_EAP) ||
+        version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
+        version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
         version.matches(MAJOR_VERSION_PATTERN.toRegex())
-    -> "snapshots"
-    version.endsWith("-SNAPSHOT") -> "nightly"
-    else -> "releases"
+    -> RELEASE_TYPE_SNAPSHOTS
+    version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> RELEASE_TYPE_NIGHTLY
+    else -> RELEASE_TYPE_RELEASES
 }
 
 fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
