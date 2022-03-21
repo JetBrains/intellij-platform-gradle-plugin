@@ -87,7 +87,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             runPluginVerifier {
-                ideVersions = ["AI-2021.1.1.20"]
+                ideVersions = ["AI-2021.1.1.15"]
             }
         """)
 
