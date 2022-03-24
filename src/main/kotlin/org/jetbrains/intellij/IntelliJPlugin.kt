@@ -1036,6 +1036,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Publish plugin distribution on plugins.jetbrains.com."
 
             host.convention(IntelliJPluginConstants.MARKETPLACE_HOST)
+            toolboxEnterprise.convention(false)
             channels.convention(listOf("default"))
             distributionFile.convention(project.layout.file(project.provider {
                 signPluginTaskProvider.get().let { signPluginTask ->
