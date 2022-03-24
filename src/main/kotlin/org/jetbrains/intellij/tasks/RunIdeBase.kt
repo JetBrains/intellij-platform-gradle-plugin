@@ -213,7 +213,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
     }
 
-    private fun configureJvmArgs() {
+    protected open fun configureJvmArgs() {
         jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get())
     }
 

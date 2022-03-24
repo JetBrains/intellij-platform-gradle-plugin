@@ -1,0 +1,6 @@
+%%project project1
+%startProfile test_alloc event=alloc
+%openFile wi63254/alias.php
+%stopProfile traces=999,flamegraph
+%exitApp
+%%assertTimeout 1M

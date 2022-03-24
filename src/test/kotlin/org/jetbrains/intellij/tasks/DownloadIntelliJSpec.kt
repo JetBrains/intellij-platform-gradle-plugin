@@ -68,9 +68,9 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         val ideaCommunityCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.4")
 
         buildFile.groovy("""
-            intellij { 
+            intellij {
                 version = 'IU-14.1.4'
-                downloadSources = true 
+                downloadSources = true
             }
         """)
         build(BasePlugin.ASSEMBLE_TASK_NAME)
