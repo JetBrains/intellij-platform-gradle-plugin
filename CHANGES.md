@@ -5,6 +5,9 @@
 - Fix compiler resolution for EAP versions [#906](../../issues/906)
 - Initial Toolbox Enterprise integration [#913](../../issues/913)
 - Make IDEA products releases cached daily [#848](../../issues/848)
+- Fixed `ListProductsReleasesTask` to allow for empty `untilBuild` [#909](../../issues/909)
+- Resolved closest lower java-compiler-ant-tasks version if provided isn't available [#910](../../issues/910)
+- Fixed XML parsing with JAXB - drop intermediate JDOM Document
 
 ## 1.4.0
 - Fixed JBR resolving for MacOSX M1
