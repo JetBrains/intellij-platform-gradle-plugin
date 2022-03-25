@@ -1,8 +1,6 @@
 package org.jetbrains.intellij.model
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
-import org.jdom2.Document
-import org.jdom2.transform.JDOMSource
 import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -20,11 +18,7 @@ class XmlExtractor<T>(private val context: String? = null) {
     fun unmarshal(file: File) = unmarshal(file.inputStream())
 
     @Throws(JAXBException::class)
-    fun unmarshal(inputStream: InputStream) = unmarshal(JDOMUtil.loadDocument(inputStream))
-
-    @Suppress("UNCHECKED_CAST")
-    @Throws(JAXBException::class)
-    fun unmarshal(document: Document) = jaxbContext.createUnmarshaller().unmarshal(JDOMSource(document)) as T
+    fun unmarshal(inputStream: InputStream) = jaxbContext.createUnmarshaller().unmarshal(inputStream) as T
 
     @Throws(JAXBException::class)
     fun marshal(bean: T, file: File) {
