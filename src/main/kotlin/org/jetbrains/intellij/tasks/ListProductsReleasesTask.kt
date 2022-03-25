@@ -71,7 +71,7 @@ open class ListProductsReleasesTask @Inject constructor(
         } ?: AndroidStudioReleases()
 
         val since = (sinceVersion.orNull ?: sinceBuild.get()).run(::parse)
-        val until = (untilVersion.orNull ?: untilBuild.get().takeUnless { sinceVersion.isPresent })?.run {
+        val until = (untilVersion.orNull ?: untilBuild.orNull.takeUnless { it.isNullOrBlank() || sinceVersion.isPresent })?.run {
             replace("*", "9999").run(::parse)
         }
         val types = types.get()
