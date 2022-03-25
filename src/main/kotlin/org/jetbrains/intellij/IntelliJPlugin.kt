@@ -1133,7 +1133,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         create(
                             group = "org.jetbrains",
                             name = name,
-                            version = "1.0",
+                            version = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE),
                             ext = "xml",
                         )
                     }, { ivyRepository(repository) }).first().canonicalPath
