@@ -8,7 +8,7 @@ class ObjectFactory {
 
     fun createPluginsCache() = PluginsCache()
 
-    fun createPluginVerifierRepository() = SpacePackagesMavenMetadata()
+    fun createPluginVerifierRepository() = MavenMetadata()
 
     fun createProductsReleases() = ProductsReleases()
 

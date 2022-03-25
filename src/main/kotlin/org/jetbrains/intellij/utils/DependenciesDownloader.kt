@@ -20,14 +20,16 @@ open class DependenciesDownloader @Inject constructor(
         context: String?,
         dependenciesBlock: DependencyHandler.() -> Dependency,
         repositoriesBlock: (RepositoryHandler.() -> ArtifactRepository)? = null,
-    ) = downloadFromMultipleRepositories(context, dependenciesBlock) {
+        silent: Boolean = false,
+    ) = downloadFromMultipleRepositories(context, dependenciesBlock, {
         listOfNotNull(repositoriesBlock?.invoke(this))
-    }
+    }, silent)
 
     fun downloadFromMultipleRepositories(
         context: String?,
         dependenciesBlock: DependencyHandler.() -> Dependency,
         repositoriesBlock: RepositoryHandler.() -> List<ArtifactRepository>,
+        silent: Boolean = false,
     ): List<File> {
         val dependency = dependenciesBlock.invoke(dependencyHandler)
         val repositories = repositoriesBlock.invoke(repositoryHandler) + repositoryHandler.mavenCentral()
@@ -35,7 +37,9 @@ open class DependenciesDownloader @Inject constructor(
         try {
             return configurationContainer.detachedConfiguration(dependency).files.toList()
         } catch (e: Exception) {
-            error(context, "Error when resolving dependency: $dependency", e)
+            if (!silent) {
+                error(context, "Error when resolving dependency: $dependency", e)
+            }
             throw e
         } finally {
             repositoryHandler.removeAll(repositories.toSet())

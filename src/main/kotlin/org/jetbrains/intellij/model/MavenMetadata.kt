@@ -5,7 +5,7 @@ import javax.xml.bind.annotation.XmlElementWrapper
 import javax.xml.bind.annotation.XmlRootElement
 
 @XmlRootElement(name = "metadata")
-data class SpacePackagesMavenMetadata(
+data class MavenMetadata(
 
     @set:XmlElement
     var groupId: String? = null,
@@ -14,10 +14,10 @@ data class SpacePackagesMavenMetadata(
     var artifactId: String? = null,
 
     @set:XmlElement
-    var versioning: SpacePackagesMavenMetadataVersioning? = null,
+    var versioning: MavenMetadataVersioning? = null,
 )
 
-data class SpacePackagesMavenMetadataVersioning(
+data class MavenMetadataVersioning(
 
     @set:XmlElement
     var latest: String? = null,

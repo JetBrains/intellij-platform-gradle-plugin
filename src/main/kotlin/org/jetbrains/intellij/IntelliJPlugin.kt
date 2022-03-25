@@ -41,6 +41,8 @@ import org.jetbrains.intellij.dependency.PluginDependencyManager
 import org.jetbrains.intellij.dependency.PluginDependencyNotation
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.model.MavenMetadata
+import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.performanceTest.ProfilerName
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.tasks.*
@@ -807,28 +809,92 @@ open class IntelliJPlugin : Plugin<Project> {
                                 }, {
                                     listOf(
                                         "${extension.intellijRepository.get()}/${releaseType(version)}",
-                                        IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
+                                        IntelliJPluginConstants.INTELLIJ_DEPENDENCIES,
                                     ).map(::mavenRepository)
-                                })
+                                }, true)
                             }
 
-                            runCatching {
-                                downloadCompiler(compilerVersion)
-                            }.fold(onSuccess = { it }, onFailure = {
-                                /**
-                                 * Try falling back on the version without the -EAP-SNAPSHOT suffix if the download
-                                 * for it fails - not all versions have a corresponding -EAP-SNAPSHOT version present
-                                 * in the snapshot repository.
-                                 */
-                                if (compilerVersion.endsWith(IntelliJPluginConstants.RELEASE_SUFFIX_EAP)) {
-                                    val nonEapVersion = compilerVersion.replace(
-                                        IntelliJPluginConstants.RELEASE_SUFFIX_EAP, ""
+                            listOf(
+                                {
+                                    runCatching {
+                                        downloadCompiler(compilerVersion)
+                                    }.fold(
+                                        onSuccess = { it },
+                                        onFailure = {
+                                            warn(logCategory(), "Cannot resolve java-compiler-ant-tasks in version: $compilerVersion")
+                                            null
+                                        },
                                     )
-                                    downloadCompiler(nonEapVersion)
-                                } else {
-                                    throw it
-                                }
-                            })
+                                },
+                                {
+                                    /**
+                                     * Try falling back on the version without the -EAP-SNAPSHOT suffix if the download
+                                     * for it fails - not all versions have a corresponding -EAP-SNAPSHOT version present
+                                     * in the snapshot repository.
+                                     */
+                                    if (compilerVersion.endsWith(IntelliJPluginConstants.RELEASE_SUFFIX_EAP)) {
+                                        val nonEapVersion = compilerVersion.replace(
+                                            IntelliJPluginConstants.RELEASE_SUFFIX_EAP, ""
+                                        )
+                                        runCatching {
+                                            downloadCompiler(nonEapVersion)
+                                        }.fold(
+                                            onSuccess = {
+                                                warn(logCategory(), "Resolved non-EAP java-compiler-ant-tasks version: $nonEapVersion")
+                                                it
+                                            },
+                                            onFailure = {
+                                                warn(logCategory(), "Cannot resolve java-compiler-ant-tasks in version: $nonEapVersion")
+                                                null
+                                            },
+                                        )
+                                    } else {
+                                        null
+                                    }
+                                },
+                                {
+                                    /**
+                                     * Get the list of available packages and pick the closest lower one.
+                                     */
+                                    val url = URL(IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA)
+                                    val version = Version.parse(compilerVersion)
+                                    val closestCompilerVersion = XmlExtractor<MavenMetadata>()
+                                        .unmarshal(url.openStream())
+                                        .versioning?.versions?.let { versions ->
+                                            versions
+                                                .map(Version.Companion::parse)
+                                                .filter { it <= version }
+                                                .maxOf { it }.version
+                                        }
+
+                                    if (closestCompilerVersion == null) {
+                                        warn(logCategory(), "Cannot resolve java-compiler-ant-tasks Maven metadata")
+                                        null
+                                    } else {
+                                        runCatching {
+                                            downloadCompiler(closestCompilerVersion)
+                                        }.fold(
+                                            onSuccess = {
+                                                warn(
+                                                    logCategory(),
+                                                    "Resolved closest lower java-compiler-ant-tasks version: $closestCompilerVersion"
+                                                )
+                                                it
+                                            },
+                                            onFailure = {
+                                                warn(
+                                                    logCategory(),
+                                                    "Cannot resolve java-compiler-ant-tasks in version: $closestCompilerVersion"
+                                                )
+                                                null
+                                            },
+                                        )
+                                    }
+                                },
+                            )
+                                .asSequence()
+                                .mapNotNull { it() }
+                                .firstOrNull()
                         } else {
                             warn(
                                 logCategory(),

@@ -29,7 +29,7 @@ import org.jetbrains.intellij.ifFalse
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
+import org.jetbrains.intellij.model.MavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
@@ -58,7 +58,7 @@ open class RunPluginVerifierTask @Inject constructor(
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Plugin Verifier version")
             val url = URL(METADATA_URL)
-            return XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(url.openStream()).versioning?.latest
+            return XmlExtractor<MavenMetadata>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
         }
     }

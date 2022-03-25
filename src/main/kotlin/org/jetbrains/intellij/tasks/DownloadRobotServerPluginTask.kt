@@ -13,7 +13,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.model.SpacePackagesMavenMetadata
+import org.jetbrains.intellij.model.MavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.ArchiveUtils
 import java.io.File
@@ -32,7 +32,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: Obje
         fun resolveLatestVersion(): String {
             debug(message = "Resolving latest Robot Server Plugin version")
             val url = URL(METADATA_URL)
-            return XmlExtractor<SpacePackagesMavenMetadata>().unmarshal(url.openStream()).versioning?.latest
+            return XmlExtractor<MavenMetadata>().unmarshal(url.openStream()).versioning?.latest
                 ?: throw GradleException("Cannot resolve the latest Robot Server Plugin version")
         }
 
