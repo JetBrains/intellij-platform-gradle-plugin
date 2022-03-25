@@ -44,7 +44,7 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.3")
-    api("com.squareup.okhttp3:okhttp:4.4.1")
+    api("com.squareup.okhttp3:okhttp:4.9.3")
     api("com.squareup.retrofit2:retrofit:2.9.0") {
         exclude("okhttp")
     }
