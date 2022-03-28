@@ -208,6 +208,23 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `get Android Studio releases for all channels`() {
+        buildFile.groovy("""
+            listProductsReleases {
+                sinceVersion = "2021.1"
+                types = ["AI"]
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+
+        assertEquals(
+            listOf("AI-2021.3.1.7", "AI-2021.2.1.11", "AI-2021.1.1.22"),
+            result.taskOutput()
+        )
+    }
+
+    @Test
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")

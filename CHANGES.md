@@ -2,6 +2,7 @@
 
 ## next
 - Make IDEA products releases cached hourly [#848](../../issues/848)
+- Fixed `ListProductReleasesTask` to return only significant versions for Android Studio [#928](../../issues/928)
 
 ## 1.5.0
 - Include Android Studio builds in the `ListProductsReleasesTask` results

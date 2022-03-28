@@ -119,9 +119,11 @@ open class ListProductsReleasesTask @Inject constructor(
                     testVersion(version, build)
                 }
                 .filter { channels.contains(Channel.valueOf(it.channel.toUpperCase())) }
-                .groupBy { it.version }
+                .groupBy { it.version.split('.').dropLast(1).joinToString(".") }
                 .mapNotNull { entry ->
-                    entry.value.maxByOrNull { it.platformBuild?.let(::parse) ?: Version() }
+                    entry.value.maxByOrNull {
+                        it.version.split('.').last().toInt()
+                    }
                 }
                 .map { "AI-${it.version}" }
                 .toList()
