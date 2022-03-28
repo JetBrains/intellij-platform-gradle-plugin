@@ -1341,7 +1341,7 @@ open class IntelliJPlugin : Plugin<Project> {
      * fails because it tries to resolve a non-existent compiler version (203.7717.56.2031.7935034). This function
      * strips it down so that only major minor and patch are used.
      */
-    private fun IdeVersion.stripExcessComponents(): IdeVersion = asStringWithoutProductCode().split(".")
+    private fun IdeVersion.stripExcessComponents() = asStringWithoutProductCode().split(".")
         .filterIndexed { index, component -> index < 3 || component == "SNAPSHOT" || component == "*" }
         .joinToString(prefix = "$productCode-", separator = ".")
         .let(IdeVersion::createIdeVersion)
