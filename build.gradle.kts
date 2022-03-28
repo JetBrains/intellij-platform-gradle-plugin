@@ -155,6 +155,12 @@ publishing {
         }
     }
     publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifact(sourcesJar)
+            artifact(javadocJar)
+        }
+
         create<MavenPublication>("snapshot") {
             groupId = "org.jetbrains.intellij"
             artifactId = "org.jetbrains.intellij.gradle.plugin"
