@@ -54,6 +54,8 @@ import java.io.File
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import java.util.EnumSet
 import java.util.jar.Manifest
 
@@ -1123,6 +1125,12 @@ open class IntelliJPlugin : Plugin<Project> {
         project.tasks.register(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, ListProductsReleasesTask::class.java) {
             val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
             val patchPluginXmlTask = patchPluginXmlTaskProvider.get()
+            val repositoryVersion = LocalDateTime.now().format(
+                DateTimeFormatterBuilder()
+                    .append(DateTimeFormatter.BASIC_ISO_DATE)
+                    .appendValue(ChronoField.HOUR_OF_DAY, 2)
+                    .toFormatter()
+            )
 
             group = IntelliJPluginConstants.GROUP_NAME
             description = "List all available IntelliJ-based IDEs with their updates."
@@ -1133,7 +1141,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         create(
                             group = "org.jetbrains",
                             name = name,
-                            version = LocalDateTime.now().format(DateTimeFormatter.BASIC_ISO_DATE),
+                            version = repositoryVersion,
                             ext = "xml",
                         )
                     }, { ivyRepository(repository) }).first().canonicalPath
@@ -1144,7 +1152,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     create(
                         group = "org.jetbrains",
                         name = "android-studio-products-releases",
-                        version = "1.0",
+                        version = repositoryVersion,
                         ext = "xml",
                     )
                 }, { ivyRepository(IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL) }).first().canonicalPath

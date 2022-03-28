@@ -1,6 +1,9 @@
 # Changelog
 
 ## next
+- Make IDEA products releases cached hourly [#848](../../issues/848)
+
+## 1.5.0
 - Include Android Studio builds in the `ListProductsReleasesTask` results
 - Fix compiler resolution for EAP versions [#906](../../issues/906)
 - Initial Toolbox Enterprise integration [#913](../../issues/913)
