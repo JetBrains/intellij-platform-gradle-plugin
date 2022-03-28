@@ -175,14 +175,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf(
-                "AI-2021.3.1.7", "AI-2021.3.1.6", "AI-2021.2.1.11", "AI-2021.3.1.5", "AI-2021.3.1.4", "AI-2021.2.1.10", "AI-2021.1.1.22",
-                "AI-2021.3.1.3", "AI-2021.3.1.2", "AI-2021.2.1.9", "AI-2021.1.1.21", "AI-2021.3.1.1", "AI-2021.2.1.8", "AI-2021.1.1.20",
-                "AI-2021.2.1.7", "AI-2021.1.1.19", "AI-2021.2.1.6", "AI-2021.1.1.18", "AI-2021.1.1.17", "AI-2021.2.1.5", "AI-2021.2.1.4",
-                "AI-2021.1.1.16", "AI-2021.1.1.15", "AI-2021.2.1.3", "AI-2021.2.1.2", "AI-2021.2.1.1", "AI-2021.1.1.14", "AI-2021.1.1.13",
-                "AI-2021.1.1.12", "AI-2021.1.1.11", "AI-2021.1.1.10", "AI-2021.1.1.9", "AI-2021.1.1.8", "AI-2021.1.1.7", "AI-2021.1.1.6",
-                "AI-2021.1.1.5", "AI-2021.1.1.4", "AI-2021.1.1.3"
-            ),
+            listOf("AI-2021.3.1.7", "AI-2021.2.1.11", "AI-2021.1.1.22"),
             result.taskOutput()
         )
     }
@@ -203,23 +196,6 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             listOf("AI-2021.1.1.20"),
-            result.taskOutput()
-        )
-    }
-
-    @Test
-    fun `get Android Studio releases for all channels`() {
-        buildFile.groovy("""
-            listProductsReleases {
-                sinceVersion = "2021.1"
-                types = ["AI"]
-            }
-        """)
-
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf("AI-2021.3.1.7", "AI-2021.2.1.11", "AI-2021.1.1.22"),
             result.taskOutput()
         )
     }
