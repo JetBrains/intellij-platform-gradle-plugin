@@ -1,7 +1,7 @@
 # Changelog
 
 ## next
-- Add `util_rt.jar` to the classpath of run-like tasks for `2021.1+` compatibility
+- Add `util_rt.jar` to the classpath of run-like tasks for `2022.1+` compatibility
 
 ## 1.5.1
 - Make IDEA products releases cached hourly [#848](../../issues/848)
