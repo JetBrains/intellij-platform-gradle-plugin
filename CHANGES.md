@@ -1,6 +1,9 @@
 # Changelog
 
 ## next
+- Add `util_rt.jar` to the classpath of run-like tasks for `2021.1+` compatibility
+
+## 1.5.1
 - Make IDEA products releases cached hourly [#848](../../issues/848)
 - Fixed `ListProductReleasesTask` to return only significant versions for Android Studio [#928](../../issues/928)
 

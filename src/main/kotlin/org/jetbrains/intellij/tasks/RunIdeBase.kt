@@ -114,6 +114,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             buildNumber > build221 -> listOf(
                 "$ideDirFile/lib/3rd-party-rt.jar",
                 "$ideDirFile/lib/util.jar",
+                "$ideDirFile/lib/util_rt.jar",
                 "$ideDirFile/lib/jna.jar",
             )
             buildNumber > build203 -> listOf(
