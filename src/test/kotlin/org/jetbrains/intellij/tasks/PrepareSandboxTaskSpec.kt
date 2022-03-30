@@ -63,7 +63,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        file("nestedProject/src/main/java/NestedAppFile.java").java("""
+        createFile("nestedProject/src/main/java/NestedAppFile.java").java("""
             class NestedAppFile {}
         """)
 
@@ -150,7 +150,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             include 'nestedProject'            
         """)
 
-        file("nestedProject/src/main/java/NestedAppFile.java").java("""
+        createFile("nestedProject/src/main/java/NestedAppFile.java").java("""
             class NestedAppFile {}
         """)
 

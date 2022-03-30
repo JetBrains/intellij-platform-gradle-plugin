@@ -17,7 +17,7 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
        </idea-plugin>
     """.trimIndent()
 
-    fun getTestSearchableConfigurableJava() = file("src/main/java/TestSearchableConfigurable.java")
+    fun getTestSearchableConfigurableJava() = createFile("src/main/java/TestSearchableConfigurable.java")
 
     @Language("Java")
     fun getSearchableConfigurableCode() = """

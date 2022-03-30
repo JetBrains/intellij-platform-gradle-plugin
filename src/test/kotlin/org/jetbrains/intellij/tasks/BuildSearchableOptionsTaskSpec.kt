@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.create
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.SearchableOptionsSpecBase
 import kotlin.test.Test
@@ -33,7 +34,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             }
         """)
 
-        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
+        getTestSearchableConfigurableJava().resolve(getSearchableConfigurableCode()).create()
 
         val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
         assertTrue(result.output.contains("Starting searchable options index builder"))

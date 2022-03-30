@@ -326,7 +326,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun writeJavaFileWithDeprecation() {
-        file("src/main/java/App.java").java("""  
+        createFile("src/main/java/App.java").java("""  
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import com.intellij.openapi.util.text.StringUtil;

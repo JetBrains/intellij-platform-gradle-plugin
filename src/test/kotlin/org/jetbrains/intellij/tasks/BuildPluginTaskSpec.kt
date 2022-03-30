@@ -228,10 +228,11 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `can compile classes that depends on external plugins`() {
-        file("src/main/java/App.java").java("""
+        createFile("src/main/java/App.java").java("""
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import org.intellij.plugins.markdown.lang.MarkdownLanguage;
+            
             class App {
                 public static void main(@NotNull String[] strings) {
                     System.out.println(MarkdownLanguage.INSTANCE.getDisplayName());
@@ -266,7 +267,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `can compile classes that depend on external plugin with classes directory`() {
-        file("src/main/java/App.java").java("""
+        createFile("src/main/java/App.java").java("""
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import org.asciidoc.intellij.AsciiDoc;

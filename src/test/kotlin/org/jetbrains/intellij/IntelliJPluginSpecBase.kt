@@ -89,7 +89,7 @@ abstract class IntelliJPluginSpecBase {
         )
     }
 
-    fun writeTestFile() = file("src/test/java/AppTest.java").java(
+    fun writeTestFile() = createFile("src/test/java/AppTest.java").java(
         """
         import java.lang.String;
         import org.junit.Test;
@@ -162,7 +162,7 @@ abstract class IntelliJPluginSpecBase {
         else -> dir.resolve(path)
     }.apply { if (!exists()) create() }
 
-    protected fun writeJavaFile() = file("src/main/java/App.java").java(
+    protected fun writeJavaFile() = createFile("src/main/java/App.java").java(
         """
         import java.lang.String;
         import java.util.Arrays;
@@ -248,7 +248,7 @@ abstract class IntelliJPluginSpecBase {
 
     fun Path.groovy(@Language("Groovy") content: String) = append(content)
 
-    fun File.java(@Language("Java") content: String) = append(content)
+    fun Path.java(@Language("Java") content: String) = append(content)
 
     fun File.kotlin(@Language("kotlin") content: String) = append(content)
 
