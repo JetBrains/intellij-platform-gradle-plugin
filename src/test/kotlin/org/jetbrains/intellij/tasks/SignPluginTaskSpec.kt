@@ -1,8 +1,9 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.listFiles
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -12,14 +13,16 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `run Marketplace ZIP Signer in the latest version`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-        """)
+        """
+        )
 
         val version = SignPluginTask.resolveLatestVersion()
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
@@ -29,7 +32,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `run Marketplace ZIP Signer in specified version`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
@@ -37,7 +41,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-        """)
+        """
+        )
 
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
 
@@ -46,9 +51,11 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `skip Marketplace ZIP Signer task if no key and certificateChain were provided`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
-        """)
+        """
+        )
 
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
 
@@ -57,13 +64,15 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `run Marketplace ZIP Signer and fail on invalid version`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 cliVersion = "0.0.1"
             }
-        """)
+        """
+        )
 
         val result = buildAndFail(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
 
@@ -72,20 +81,24 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `output file contains version when specified in build file`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-        """)
+        """
+        )
         build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
 
-        val distributionFolder = File(buildDirectory, "distributions")
-        assertTrue(distributionFolder.listFiles()?.asList()?.any {
-            it.name.equals("projectName-1.0.0-signed.zip")
-        } ?: false)
+        val distributionFolder = buildDirectory.resolve("distributions")
+        assertTrue {
+            distributionFolder.listFiles().any {
+                it.simpleName == "projectName-1.0.0-signed.zip"
+            }
+        }
     }
 
     @Test
@@ -104,13 +117,15 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 .output.contains("Reusing configuration cache.")
         )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 password = "foo"
             }
-        """)
+        """
+        )
         assertFalse(
             build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
                 .output.contains("Reusing configuration cache.")

@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 import org.intellij.lang.annotations.Language
 import java.io.File
+import java.nio.file.Path
 
 abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
 
@@ -60,7 +61,7 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
         }
     """.trimIndent()
 
-    fun getSearchableOptionsXml(jar: String) = File(getSearchableOptions(), "/$jar.jar/search/$jar.jar.searchableOptions.xml")
+    fun getSearchableOptionsXml(jar: String): Path = getSearchableOptions().resolve("$jar.jar/search/$jar.jar.searchableOptions.xml")
 
-    private fun getSearchableOptions() = File(buildDirectory, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME)
+    private fun getSearchableOptions() = buildDirectory.resolve(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME)
 }

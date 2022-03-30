@@ -1,12 +1,14 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.listFiles
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import java.io.File
+import java.nio.file.Path
 import java.util.jar.Manifest
-import java.util.zip.ZipFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -19,23 +21,30 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `build plugin distribution`() {
         writeJavaFile()
 
-        createFile("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
               <name>MyPluginName</name>
               <vendor>JetBrains</vendor>
               <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij { 
@@ -48,28 +57,28 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zipFile = ZipFile(distribution)
         assertEquals(
-            setOf(
+            listOf(
                 "myPluginName/",
                 "myPluginName/lib/",
                 "myPluginName/lib/joda-time-2.8.1.jar",
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(zipFile)
+            collectPathsFromZip(distribution),
         )
 
-        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
+        val jar = extractFile(distribution, "myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
                 "App.class",
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
@@ -77,7 +86,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "META-INF/other.xml",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(jar)
+            collectPathsFromZip(jar)
         )
 
         assertEquals(
@@ -99,14 +108,17 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
         writeKotlinUIFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123' 
 
             intellij {
@@ -115,36 +127,36 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zipFile = ZipFile(distribution)
         assertEquals(
-            setOf(
+            listOf(
                 "myPluginName/",
                 "myPluginName/lib/",
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(zipFile),
+            collectPathsFromZip(distribution),
         )
 
-        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
+        val jar = extractFile(distribution, "myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
                 "App.class",
-                "pack/",
-                "pack/AppKt.class",
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
                 "META-INF/plugin.xml",
                 "META-INF/projectName.kotlin_module",
+                "pack/",
+                "pack/AppKt.class",
             ),
-            collectPaths(jar),
+            collectPathsFromZip(jar),
         )
     }
 
@@ -152,24 +164,31 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `use custom sandbox for distribution`() {
         writeJavaFile()
 
-        createFile("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin >
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
                 <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+        """
+        )
 
-        val sandboxPath = adjustWindowsPath(dir.resolve("customSandbox").toString())
-        buildFile.groovy("""
+        val sandboxPath = dir.resolve("customSandbox")
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             dependencies { 
@@ -184,51 +203,54 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
         assertEquals(
-            setOf(
+            listOf(
                 "myPluginName/",
                 "myPluginName/lib/",
                 "myPluginName/lib/joda-time-2.8.1.jar",
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(ZipFile(distribution))
+            collectPathsFromZip(distribution)
         )
     }
 
     @Test
     fun `use gradle project name for distribution if plugin name is not defined`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "projectName-0.42.123.zip",
-            ),
-            File(buildDirectory, "distributions").list()?.toSet(),
+            listOf("projectName-0.42.123.zip"), buildDirectory.resolve("distributions").listFiles().map(Path::simpleName)
         )
     }
 
     @Test
     fun `can compile classes that depends on external plugins`() {
-        createFile("src/main/java/App.java").java("""
+        createFile("src/main/java/App.java").java(
+            """
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import org.intellij.plugins.markdown.lang.MarkdownLanguage;
@@ -238,36 +260,45 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                     System.out.println(MarkdownLanguage.INSTANCE.getDisplayName());
                 }
             }
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
 
             intellij {
                 pluginName = 'myPluginName'
                 plugins = ['org.intellij.plugins.markdown:201.6668.74']
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/projectName-0.42.123.jar")
-        assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
+        val jar = extractFile(distribution, "myPluginName/lib/projectName-0.42.123.jar")
+        assertEquals(
+            listOf("App.class", "META-INF/", "META-INF/MANIFEST.MF", "META-INF/plugin.xml"),
+            collectPathsFromZip(jar),
+        )
     }
 
     @Test
     fun `can compile classes that depend on external plugin with classes directory`() {
-        createFile("src/main/java/App.java").java("""
+        createFile("src/main/java/App.java").java(
+            """
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import org.asciidoc.intellij.AsciiDoc;
@@ -277,43 +308,54 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                     System.out.println(AsciiDoc.class.getName());
                 }
             }
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij {
                 pluginName = 'myPluginName'
                 plugins = ['org.asciidoctor.intellij.asciidoc:0.20.6']
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/projectName-0.42.123.jar")
-        assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
+        val jar = extractFile(distribution, "myPluginName/lib/projectName-0.42.123.jar")
+        assertEquals(
+            listOf("App.class", "META-INF/", "META-INF/MANIFEST.MF", "META-INF/plugin.xml"),
+            collectPathsFromZip(jar),
+        )
     }
 
     @Test
     fun `build plugin without sources`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
 
             intellij {
@@ -322,55 +364,60 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zip = ZipFile(distribution)
         assertEquals(
-            setOf(
+            listOf(
                 "myPluginName/",
                 "myPluginName/lib/",
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(zip)
+            collectPathsFromZip(distribution),
         )
 
-        val jar = extractFile(zip, "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(distribution, "myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar))
+            collectPathsFromZip(jar),
         )
     }
 
     @Test
     fun `include only relevant searchableOptions_jar`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.321'
             
             intellij {
                 pluginName = 'myPluginName'
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij {
@@ -379,54 +426,58 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zip = ZipFile(distribution)
         assertEquals(
-            setOf(
+            listOf(
                 "myPluginName/",
                 "myPluginName/lib/",
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(zip)
+            collectPathsFromZip(distribution),
         )
 
-        val jar = extractFile(zip, "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(distribution, "myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar))
+            collectPathsFromZip(jar)
         )
     }
 
     @Test
     fun `provide MANIFEST_MF with build details`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
-        val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
+        val artifact = extractFile(archive, "projectName/lib/projectName-0.42.123.jar")
 
-        val content = fileText(ZipFile(artifact), "META-INF/MANIFEST.MF")
+        val content = fileText(artifact, "META-INF/MANIFEST.MF")
         val attributes = Manifest(content.byteInputStream()).mainAttributes
 
         assertNotNull(attributes)
@@ -442,20 +493,24 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.321'
             
             intellij {
                 pluginName = 'myPluginName'
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache")

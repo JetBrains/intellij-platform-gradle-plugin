@@ -4,6 +4,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.Assume.assumeFalse
 import java.io.File
+import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -51,7 +52,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
 
         val result = build(JavaPlugin.TEST_TASK_NAME, "--info")
-        val sandboxPath = adjustWindowsPath("${buildDirectory.canonicalPath}/idea-sandbox")
+        val sandboxPath = buildDirectory.resolve("idea-sandbox")
         val testCommand = parseCommand(result.output)
 
         assertPathParameters(testCommand, sandboxPath)
@@ -128,7 +129,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null) // TODO: use raw Path
 
         buildFile.groovy("""
-            intellij.plugins = ["copyright", "${adjustWindowsPath(plugin?.canonicalPath ?: "")}"]
+            intellij.plugins = ["copyright", "$plugin"]
            
             task printMainRuntimeClassPath {
                 doLast { println "runtimeOnly: " + sourceSets.main.runtimeClasspath.asPath }
@@ -312,7 +313,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `custom sandbox directory`() {
         writeTestFile()
 
-        val sandboxPath = adjustWindowsPath(dir.resolve("customSandbox").toString()) // TODO: use raw Path
+        val sandboxPath = dir.resolve("customSandbox")
         buildFile.groovy("""
             intellij {
                 sandboxDir = '$sandboxPath'    
@@ -323,10 +324,19 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
-    fun assertPathParameters(testCommand: ProcessProperties, sandboxPath: String) {
-        assertEquals("$sandboxPath/config-test", adjustWindowsPath(testCommand.properties["idea.config.path"] ?: ""))
-        assertEquals("$sandboxPath/system-test", adjustWindowsPath(testCommand.properties["idea.system.path"] ?: ""))
-        assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"] ?: ""))
+    fun assertPathParameters(testCommand: ProcessProperties, sandboxPath: Path) {
+        assertEquals(
+            "$sandboxPath/config-test".removePrefix("/private"),
+            (testCommand.properties["idea.config.path"] ?: "").removePrefix("/private"),
+        )
+        assertEquals(
+            "$sandboxPath/system-test".removePrefix("/private"),
+            (testCommand.properties["idea.system.path"] ?: "").removePrefix("/private"),
+        )
+        assertEquals(
+            "$sandboxPath/plugins-test".removePrefix("/private"),
+            (testCommand.properties["idea.plugins.path"] ?: "").removePrefix("/private"),
+        )
     }
 
     private fun parseCommand(output: String) = output.lines()

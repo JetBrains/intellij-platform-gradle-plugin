@@ -1,9 +1,9 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -11,7 +11,7 @@ import kotlin.test.assertNotEquals
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
-    private val outputPluginXml = lazy { File(buildDirectory, "resources/main/META-INF/").listFiles()?.first() }
+    private val outputPluginXml = lazy { buildDirectory.resolve("resources/main/META-INF/").listFiles().first() }
 
     @Test
     fun `use patched plugin xml files`() {

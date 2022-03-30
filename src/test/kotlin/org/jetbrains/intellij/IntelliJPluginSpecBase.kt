@@ -4,9 +4,9 @@ import com.jetbrains.plugin.structure.base.utils.create
 import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.isDirectory
+import com.jetbrains.plugin.structure.base.utils.outputStream
 import com.jetbrains.plugin.structure.base.utils.readText
 import com.jetbrains.plugin.structure.base.utils.writeText
-import org.apache.commons.io.FileUtils
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -42,14 +42,15 @@ abstract class IntelliJPluginSpecBase {
     private val gradleProperties = createFile("gradle.properties")
     val buildFile = createFile("build.gradle")
     val pluginXml = createFile("src/main/resources/META-INF/plugin.xml")
-    val buildDirectoryPath: Path by lazy { dir.resolve("build") }
-    val buildDirectory: File by lazy { buildDirectoryPath.toFile() } // TODO: use raw Path
+    val buildDirectory: Path by lazy { dir.resolve("build") }
 
     @BeforeTest
     open fun setUp() {
-        createFile("settings.gradle").groovy("""
+        createFile("settings.gradle").groovy(
+            """
             rootProject.name = 'projectName'
-        """)
+        """
+        )
 
         buildFile.groovy(
             """
@@ -202,44 +203,32 @@ abstract class IntelliJPluginSpecBase {
     """
     )
 
-    fun adjustWindowsPath(s: String) = s.replace("\\", "/")
-
-    protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.replace("\r", "")?.trim())
+    protected fun assertFileContent(path: Path, @Language("xml") expectedContent: String) =
+        assertEquals(expectedContent.trimIndent().trim(), path.readText().replace("\r", "").trim())
 
     @Suppress("SameParameterValue")
-    protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
-        assertEquals(expectedContent.trimIndent(), fileText(zip, path))
+    protected fun assertZipContent(zipPath: Path, path: String, expectedContent: String) =
+        assertEquals(expectedContent.trimIndent(), fileText(zipPath, path))
 
     @Suppress("SameParameterValue")
-    protected fun extractFile(zipFile: ZipFile, path: String): File =
-        File.createTempFile("gradle-test", "").apply {
-            deleteOnExit()
-            FileUtils.copyInputStreamToFile(zipFile.getInputStream(zipFile.getEntry(path)), this)
+    protected fun extractFile(zipPath: Path, path: String): Path =
+        Files.createTempFile("gradle-test", "").apply {
+            ZipFile(zipPath.toFile()).run { getInputStream(getEntry(path)) }.copyTo(outputStream())
         }
 
-    protected fun fileText(zipFile: ZipFile, path: String) = zipFile
-        .getInputStream(zipFile.getEntry(path))
+    protected fun fileText(zipPath: Path, path: String) = ZipFile(zipPath.toFile()).run {
+        getInputStream(getEntry(path))
+    }
         .bufferedReader()
         .use(BufferedReader::readText)
         .replace("\r", "")
         .trim()
 
-    protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
+    protected fun collectPathsFromZip(zipPath: Path) = ZipFile(zipPath.toFile()).entries().toList().mapNotNull { it.name }.sorted()
 
-    protected fun collectPaths(directory: File): Set<String> {
-        assert(directory.exists())
-        return directory.walkTopDown().filterNot { it.isDirectory }.map {
-            adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length))
-        }.toSet()
-    }
-
-    protected fun collectPaths(path: Path): Set<String> {
-        assert(path.exists())
-        return Files.walk(path).filter { !it.isDirectory }.map {
-            adjustWindowsPath(it.toAbsolutePath().toString().substring(path.toAbsolutePath().toString().length))
-        }.toList().toSet()
-    }
+    protected fun collectPaths(path: Path) = Files.walk(path).filter { !it.isDirectory }.map {
+        path.relativize(it).toString()
+    }.toList().sorted()
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517

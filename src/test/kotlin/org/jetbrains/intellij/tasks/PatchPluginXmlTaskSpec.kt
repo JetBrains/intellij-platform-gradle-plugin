@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
@@ -13,7 +14,7 @@ import kotlin.test.assertTrue
 @Suppress("PluginXmlValidity")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
-    private val patchedPluginXml = lazy { File(buildDirectory, IntelliJPluginConstants.PLUGIN_XML_DIR_NAME).listFiles()?.first() }
+    private val patchedPluginXml = lazy { buildDirectory.resolve(IntelliJPluginConstants.PLUGIN_XML_DIR_NAME).listFiles().first() }
 
     @Test
     fun `patch version and since until builds`() {

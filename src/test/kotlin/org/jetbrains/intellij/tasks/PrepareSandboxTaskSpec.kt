@@ -5,9 +5,7 @@ import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.readText
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import java.io.File
 import java.nio.file.Files.createTempDirectory
-import java.util.zip.ZipFile
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -15,7 +13,7 @@ import kotlin.test.assertTrue
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox = buildDirectoryPath.resolve(IntelliJPluginConstants.DEFAULT_SANDBOX)
+    private val sandbox = buildDirectory.resolve(IntelliJPluginConstants.DEFAULT_SANDBOX)
 
     @Test
     fun `prepare sandbox for two plugins`() {
@@ -72,34 +70,34 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
         assertEquals(
-            setOf(
-                "/config/options/updates.xml",
-                "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
+                "plugins/myPluginName/lib/projectName-0.42.123.jar",
             ),
             collectPaths(sandbox),
         )
 
         val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
+                "App.class",
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
-                "App.class",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar.toFile())),
+            collectPathsFromZip(jar),
         )
 
         val nestedProjectJar = sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
-                "NestedAppFile.class",
                 "META-INF/plugin.xml",
+                "NestedAppFile.class",
             ),
-            collectPaths(ZipFile(nestedProjectJar.toFile())),
+            collectPathsFromZip(nestedProjectJar),
         )
     }
 
@@ -159,34 +157,34 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
         assertEquals(
-            setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
+                "plugins/myPluginName/lib/projectName-0.42.123.jar",
             ),
             collectPaths(sandbox),
         )
 
         val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
+                "App.class",
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
-                "App.class",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar.toFile())),
+            collectPathsFromZip(jar),
         )
 
         val nestedProjectJar = sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
-                "NestedAppFile.class",
                 "META-INF/plugin.xml",
+                "NestedAppFile.class",
             ),
-            collectPaths(ZipFile(nestedProjectJar.toFile())),
+            collectPathsFromZip(nestedProjectJar),
         )
     }
 
@@ -208,10 +206,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myPluginName/lib/joda-time-2.8.1.jar",
+                "plugins/myPluginName/lib/projectName-0.42.123.jar",
             ),
             collectPaths(sandbox),
         )
@@ -249,25 +247,25 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myPluginName/lib/joda-time-2.8.1.jar",
+                "plugins/myPluginName/lib/projectName-0.42.123.jar",
             ),
             collectPaths(sandbox),
         )
 
-        val jar = ZipFile(sandbox.resolve("plugins/myPluginName/lib/projectName-0.42.123.jar").toFile())
+        val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
-            setOf(
+            listOf(
+                "App.class",
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
-                "App.class",
                 "META-INF/nonIncluded.xml",
                 "META-INF/other.xml",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(jar),
+            collectPathsFromZip(jar),
         )
 
         assertZipContent(jar, "META-INF/plugin.xml", """
@@ -312,11 +310,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
 
         assertTrue(
-            collectPaths(sandbox).containsAll(setOf(
-                "/plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar",
-                "/config-uiTest/options/updates.xml",
-                "/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
+            collectPaths(sandbox).containsAll(listOf(
+                "plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar",
+                "plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar",
+                "config-uiTest/options/updates.xml",
+                "plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
             ))
         )
     }
@@ -339,10 +337,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/org.jetbrains.postfixCompletion-0.8-beta.jar",
-                "/plugins/myPluginName/lib/projectName.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myPluginName/lib/projectName.jar",
+                "plugins/org.jetbrains.postfixCompletion-0.8-beta.jar",
             ),
             collectPaths(sandbox),
         )
@@ -366,12 +364,12 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/myPluginName/lib/projectName.jar",
-                "/plugins/markdown/lib/markdown.jar",
-                "/plugins/markdown/lib/resources_en.jar",
-                "/config/options/updates.xml",
-                "/plugins/markdown/lib/markdown-0.1.41.jar",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/markdown/lib/markdown-0.1.41.jar",
+                "plugins/markdown/lib/markdown.jar",
+                "plugins/markdown/lib/resources_en.jar",
+                "plugins/myPluginName/lib/projectName.jar",
             ),
             collectPaths(sandbox),
         )
@@ -389,7 +387,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                plugins = ['${adjustWindowsPath(plugin.toString())}']
+                plugins = ['$plugin']
                 pluginName = 'myPluginName'
             }
         """)
@@ -397,12 +395,12 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/myPluginName/lib/projectName.jar",
-                "/config/options/updates.xml",
-                "/plugins/${plugin.fileName}/classes/A.class",
-                "/plugins/${plugin.fileName}/classes/someResources.properties",
-                "/plugins/${plugin.fileName}/META-INF/plugin.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myPluginName/lib/projectName.jar",
+                "plugins/${plugin.fileName}/META-INF/plugin.xml",
+                "plugins/${plugin.fileName}/classes/A.class",
+                "plugins/${plugin.fileName}/classes/someResources.properties",
             ),
             collectPaths(sandbox),
         )
@@ -446,7 +444,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val sandboxPath = adjustWindowsPath(dir.resolve("customSandbox").toString()) // TODO: use raw Path
+        val sandboxPath = dir.resolve("customSandbox")
         buildFile.groovy("""
             version = '0.42.123'
             intellij {
@@ -461,14 +459,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
-        val sandbox = File(sandboxPath)
         assertEquals(
-            setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myPluginName/lib/joda-time-2.8.1.jar",
+                "plugins/myPluginName/lib/projectName-0.42.123.jar",
             ),
-            collectPaths(sandbox),
+            collectPaths(sandboxPath),
         )
     }
 
@@ -481,9 +478,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/projectName/lib/projectName.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/projectName/lib/projectName.jar",
             ),
             collectPaths(sandbox),
         )
@@ -498,7 +495,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            buildDirectory.resolve("${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -526,7 +523,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            buildDirectory.resolve("${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="SomeOtherComponent">
@@ -557,7 +554,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            buildDirectory.resolve("${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -586,7 +583,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            buildDirectory.resolve("${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -614,7 +611,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            buildDirectory.resolve("${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -636,7 +633,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            buildDirectory.resolve("${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -677,7 +674,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
-            File(buildDirectory, "${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
+            buildDirectory.resolve("${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml"),
             """
                 <application>
                   <component name="UpdatesConfigurable">
@@ -720,9 +717,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/projectName/lib/projectName-0.42.124.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/projectName/lib/projectName-0.42.124.jar",
             ),
             collectPaths(sandbox),
         )
@@ -753,13 +750,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
-            setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
-                "/plugins/myPluginName/lib/core.jar",
-                "/plugins/myPluginName/lib/core_1.jar",
-                "/plugins/myPluginName/lib/core_2.jar",
-                "/config/options/updates.xml",
+            listOf(
+                "config/options/updates.xml",
+                "plugins/myPluginName/lib/core.jar",
+                "plugins/myPluginName/lib/core_1.jar",
+                "plugins/myPluginName/lib/core_2.jar",
+                "plugins/myPluginName/lib/joda-time-2.8.1.jar",
+                "plugins/myPluginName/lib/projectName-0.42.123.jar",
             ),
             collectPaths(sandbox),
         )
@@ -787,10 +784,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         build("test")
 
         assertEquals(
-            setOf(
-                "/plugins-test/myPluginName/lib/projectName.jar",
-                "/plugins-test/some-file",
-                "/config-test/options/updates.xml",
+            listOf(
+                "config-test/options/updates.xml",
+                "plugins-test/myPluginName/lib/projectName.jar",
+                "plugins-test/some-file",
             ),
             collectPaths(sandbox),
         )

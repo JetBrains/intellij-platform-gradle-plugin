@@ -2,7 +2,6 @@ package org.jetbrains.intellij.tasks
 
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -13,21 +12,28 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `download old robot server plugin task`() {
         writeJavaFile()
 
-        createFile("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <depends config-file="other.xml"/>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -37,13 +43,13 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
-                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-0.10.0.jar"))
+            collectPaths(buildDirectory.resolve("robotServerPlugin")).contains("robot-server-plugin/lib/robot-server-plugin-0.10.0.jar")
         )
     }
 
@@ -51,21 +57,28 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `download new robot server plugin task`() {
         writeJavaFile()
 
-        createFile("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <depends config-file="other.xml"/>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -75,13 +88,13 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
-                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar"))
+            collectPaths(buildDirectory.resolve("robotServerPlugin")).contains("robot-server-plugin/lib/robot-server-plugin-0.11.1.jar")
         )
     }
 
@@ -89,21 +102,28 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `download latest robot server plugin task`() {
         writeJavaFile()
 
-        createFile("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+        """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <depends config-file="other.xml"/>
             </idea-plugin>
-        """)
+        """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -112,14 +132,14 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+        """
+        )
 
         build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         val resolvedVersion = DownloadRobotServerPluginTask.resolveLatestVersion()
         assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
-                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-$resolvedVersion.jar"))
+            collectPaths(buildDirectory.resolve("robotServerPlugin")).contains("robot-server-plugin/lib/robot-server-plugin-$resolvedVersion.jar")
         )
     }
 
