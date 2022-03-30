@@ -18,7 +18,7 @@ import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
-import org.jetbrains.intellij.pluginRepository.model.PluginXmlId
+import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 import org.jetbrains.intellij.utils.ToolboxEnterprisePluginRepositoryService
 import javax.inject.Inject
 
@@ -69,7 +69,7 @@ open class PublishPluginTask @Inject constructor(
                             )
                             false -> PluginRepositoryFactory.create(host.get(), token.get())
                         }
-                        repositoryClient.uploader.uploadPlugin(pluginId as PluginXmlId, file, channel.takeIf { it != "default" }, null)
+                        repositoryClient.uploader.uploadPlugin(pluginId as StringPluginId, file, channel.takeIf { it != "default" }, null)
                         info(context, "Uploaded successfully")
                     } catch (exception: Exception) {
                         throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
