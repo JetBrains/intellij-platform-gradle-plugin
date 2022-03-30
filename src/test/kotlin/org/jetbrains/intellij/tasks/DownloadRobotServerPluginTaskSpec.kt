@@ -13,11 +13,11 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `download old robot server plugin task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 
@@ -51,11 +51,11 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `download new robot server plugin task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 
@@ -89,11 +89,11 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `download latest robot server plugin task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 

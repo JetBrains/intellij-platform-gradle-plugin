@@ -19,11 +19,11 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `build plugin distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 
@@ -152,11 +152,11 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `use custom sandbox for distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 

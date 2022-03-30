@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.deleteLogged
 import org.apache.commons.io.FileUtils
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
@@ -162,7 +163,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `fail on verifyPlugin task`() {
         writeJavaFile()
-        pluginXml.delete()
+        pluginXml.deleteLogged()
         buildFile.groovy("""
             version = "1.0.0"
         """)

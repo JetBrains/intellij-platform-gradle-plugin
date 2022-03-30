@@ -1,5 +1,8 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.create
+import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.readText
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
@@ -12,7 +15,7 @@ import kotlin.test.assertTrue
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox = File(buildDirectory, IntelliJPluginConstants.DEFAULT_SANDBOX)
+    private val sandbox = buildDirectoryPath.resolve(IntelliJPluginConstants.DEFAULT_SANDBOX)
 
     @Test
     fun `prepare sandbox for two plugins`() {
@@ -42,7 +45,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             include 'nestedProject'
         """)
 
-        file("nestedProject/build.gradle").groovy("""
+        createFile("nestedProject/build.gradle").groovy("""
             repositories { mavenCentral() }
             apply plugin: 'org.jetbrains.intellij'
             version = '0.42.123'
@@ -60,11 +63,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        file("nestedProject/src/main/java/NestedAppFile.java").groovy("""
+        file("nestedProject/src/main/java/NestedAppFile.java").java("""
             class NestedAppFile {}
         """)
 
-        file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
+        createFile("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
         build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
@@ -77,7 +80,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(sandbox),
         )
 
-        val jar = File(sandbox, "/plugins/myPluginName/lib/projectName-0.42.123.jar")
+        val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
             setOf(
                 "META-INF/",
@@ -85,10 +88,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 "App.class",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar)),
+            collectPaths(ZipFile(jar.toFile())),
         )
 
-        val nestedProjectJar = File(sandbox, "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar")
+        val nestedProjectJar = sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar")
         assertEquals(
             setOf(
                 "META-INF/",
@@ -96,7 +99,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 "NestedAppFile.class",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(nestedProjectJar)),
+            collectPaths(ZipFile(nestedProjectJar.toFile())),
         )
     }
 
@@ -151,7 +154,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             class NestedAppFile {}
         """)
 
-        file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
+        createFile("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
         build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
 
@@ -164,7 +167,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(sandbox),
         )
 
-        val jar = File(sandbox, "/plugins/myPluginName/lib/projectName-0.42.123.jar")
+        val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-0.42.123.jar")
         assertEquals(
             setOf(
                 "META-INF/",
@@ -172,10 +175,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 "App.class",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar)),
+            collectPaths(ZipFile(jar.toFile())),
         )
 
-        val nestedProjectJar = File(sandbox, "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar")
+        val nestedProjectJar = sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar")
         assertEquals(
             setOf(
                 "META-INF/",
@@ -183,7 +186,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 "NestedAppFile.class",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(nestedProjectJar)),
+            collectPaths(ZipFile(nestedProjectJar.toFile())),
         )
     }
 
@@ -218,11 +221,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 
@@ -254,7 +257,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(sandbox),
         )
 
-        val jar = ZipFile(File(sandbox, "/plugins/myPluginName/lib/projectName-0.42.123.jar"))
+        val jar = ZipFile(sandbox.resolve("plugins/myPluginName/lib/projectName-0.42.123.jar").toFile())
         assertEquals(
             setOf(
                 "META-INF/",
@@ -280,11 +283,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare ui tests sandbox task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 
@@ -386,7 +389,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                plugins = ['${adjustWindowsPath(plugin.canonicalPath)}']
+                plugins = ['${adjustWindowsPath(plugin.toString())}']
                 pluginName = 'myPluginName'
             }
         """)
@@ -397,43 +400,43 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             setOf(
                 "/plugins/myPluginName/lib/projectName.jar",
                 "/config/options/updates.xml",
-                "/plugins/${plugin.name}/classes/A.class",
-                "/plugins/${plugin.name}/classes/someResources.properties",
-                "/plugins/${plugin.name}/META-INF/plugin.xml",
+                "/plugins/${plugin.fileName}/classes/A.class",
+                "/plugins/${plugin.fileName}/classes/someResources.properties",
+                "/plugins/${plugin.fileName}/META-INF/plugin.xml",
             ),
             collectPaths(sandbox),
         )
     }
 
-    private fun createPlugin(): File {
-        val plugin = createTempDirectory("tmp").toFile()
-        File(plugin, "classes/").mkdir()
-        File(plugin, "META-INF/").mkdir()
-        File(plugin, "classes/A.class").createNewFile()
-        File(plugin, "classes/someResources.properties").createNewFile()
-        File(plugin, "META-INF/plugin.xml").xml("""
-            <idea-plugin>
-              <id>${plugin.name}</id>
-              <name>Test</name>
-              <version>1.0</version>
-              <idea-version since-build="201.6668" until-build="201.*" />
-              <vendor url="https://jetbrains.com">JetBrains</vendor>
-              <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-              <change-notes/>
-            </idea-plugin>
-        """)
-        return plugin
+    private fun createPlugin() = createTempDirectory("tmp").apply {
+        resolve("classes/").createDir()
+        resolve("META-INF/").createDir()
+        resolve("classes/A.class").create()
+        resolve("classes/someResources.properties").create()
+        resolve("META-INF/plugin.xml").create().xml(
+            """
+        <idea-plugin>
+          <id>$fileName</id>
+          <name>Test</name>
+          <version>1.0</version>
+          <idea-version since-build="201.6668" until-build="201.*" />
+          <vendor url="https://jetbrains.com">JetBrains</vendor>
+          <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+          <change-notes/>
+        </idea-plugin>
+    """
+        )
     }
 
     @Test
     fun `prepare custom sandbox task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 
@@ -512,8 +515,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
-        updatesFile.xml("""
+        createFile("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml").xml("""
             <application>
                 <component name="SomeOtherComponent">
                     <option name="SomeOption" value="false" />
@@ -544,8 +546,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
-        updatesFile.xml("""
+        createFile("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml").xml("""
             <application>
                 <component name="UpdatesConfigurable">
                     <option name="SomeOption" value="false" />
@@ -574,9 +575,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
-
-        updatesFile.xml("""
+        createFile("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml").xml("""
             <application>
                 <component name="UpdatesConfigurable">
                     <option name="CHECK_NEEDED" />
@@ -604,9 +603,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
-
-        updatesFile.xml("""
+        createFile("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml").xml("""
             <application>
                 <component name="UpdatesConfigurable">
                     <option name="CHECK_NEEDED" value="true" />
@@ -634,9 +631,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
-
-        updatesFile.xml("")
+        createFile("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml")
 
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
@@ -658,9 +653,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin />
         """)
 
-        val updatesFile = File(directory("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options"), "updates.xml")
-
-        updatesFile.xml("""
+        createFile("build/${IntelliJPluginConstants.DEFAULT_SANDBOX}/config/options/updates.xml").xml("""
             <application>
                 <component name="UpdatesConfigurable">
                     <enabledExternalComponentSources>
@@ -849,11 +842,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `reuse configuration cache for prepareUiTestingSandbox`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        createFile("src/main/resources/META-INF/other.xml").xml("""
             <idea-plugin />
         """)
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        createFile("src/main/resources/META-INF/nonIncluded.xml").xml("""
             <idea-plugin />
         """)
 

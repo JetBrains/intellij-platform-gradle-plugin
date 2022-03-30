@@ -3,6 +3,7 @@ package org.jetbrains.intellij
 import com.jetbrains.plugin.structure.base.utils.create
 import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.isDirectory
 import com.jetbrains.plugin.structure.base.utils.readText
 import com.jetbrains.plugin.structure.base.utils.writeText
 import org.apache.commons.io.FileUtils
@@ -13,10 +14,12 @@ import org.intellij.lang.annotations.Language
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import kotlin.streams.toList
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -38,8 +41,9 @@ abstract class IntelliJPluginSpecBase {
 
     private val gradleProperties = createFile("gradle.properties")
     val buildFile = createFile("build.gradle")
-    val pluginXml = file("src/main/resources/META-INF/plugin.xml")
-    val buildDirectory: File = dir.resolve("build").toFile() // TODO: use raw Path
+    val pluginXml = createFile("src/main/resources/META-INF/plugin.xml")
+    val buildDirectoryPath: Path by lazy { dir.resolve("build") }
+    val buildDirectory: File by lazy { buildDirectoryPath.toFile() } // TODO: use raw Path
 
     @BeforeTest
     open fun setUp() {
@@ -135,12 +139,12 @@ abstract class IntelliJPluginSpecBase {
         drop(start).takeWhile(String::isNotEmpty).map { it.substringBefore(' ') }
     }
 
-    protected fun directory(path: String) = dir.resolve(path).createDir().toFile() // TODO: use raw Path
+    protected fun directory(path: String) = dir.resolve(path).createDir()
 
     protected fun emptyZipFile(path: String): File {
         val splitted = path.split('/')
         val directory = when {
-            splitted.size > 1 -> directory(splitted.dropLast(1).joinToString("/"))
+            splitted.size > 1 -> directory(splitted.dropLast(1).joinToString("/")).toFile()
             else -> dir.toFile() // TODO: use raw Path
         }
         val file = File(directory, splitted.last())
@@ -230,12 +234,18 @@ abstract class IntelliJPluginSpecBase {
         }.toSet()
     }
 
+    protected fun collectPaths(path: Path): Set<String> {
+        assert(path.exists())
+        return Files.walk(path).filter { !it.isDirectory }.map {
+            adjustWindowsPath(it.toAbsolutePath().toString().substring(path.toAbsolutePath().toString().length))
+        }.toList().toSet()
+    }
+
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
-    fun File.xml(@Language("XML") content: String) = append(content)
+    fun Path.xml(@Language("XML") content: String) = append(content)
 
-    fun File.groovy(@Language("Groovy") content: String) = append(content)
     fun Path.groovy(@Language("Groovy") content: String) = append(content)
 
     fun File.java(@Language("Java") content: String) = append(content)
