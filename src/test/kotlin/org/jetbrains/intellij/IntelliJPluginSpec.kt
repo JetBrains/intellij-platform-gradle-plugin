@@ -1,9 +1,9 @@
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.plugins.JavaPlugin
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.Assume.assumeFalse
-import java.io.File
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -58,8 +58,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         assertPathParameters(testCommand, sandboxPath)
         assertFalse(testCommand.properties.containsKey("idea.required.plugins.id"))
 
-        assertEquals("boot.jar", File(testCommand.xclasspath).name)
-        assertEquals("lib", File(testCommand.xclasspath).parentFile.name)
+        assertEquals("boot.jar", Path.of(testCommand.xclasspath).simpleName)
+        assertEquals("lib", Path.of(testCommand.xclasspath).parent.simpleName)
         assertEquals("256m", testCommand.xms)
         assertEquals("512m", testCommand.xmx)
     }

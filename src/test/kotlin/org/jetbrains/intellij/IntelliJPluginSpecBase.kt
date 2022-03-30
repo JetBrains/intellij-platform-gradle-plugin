@@ -12,8 +12,6 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
 import java.io.BufferedReader
-import java.io.File
-import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
@@ -142,18 +140,17 @@ abstract class IntelliJPluginSpecBase {
 
     protected fun directory(path: String) = dir.resolve(path).createDir()
 
-    protected fun emptyZipFile(path: String): File {
+    protected fun emptyZipFile(path: String) {
         val splitted = path.split('/')
         val directory = when {
-            splitted.size > 1 -> directory(splitted.dropLast(1).joinToString("/")).toFile()
-            else -> dir.toFile() // TODO: use raw Path
+            splitted.size > 1 -> directory(splitted.dropLast(1).joinToString("/"))
+            else -> dir
         }
-        val file = File(directory, splitted.last())
-        val outputStream = FileOutputStream(file)
+        val file = directory.resolve(splitted.last())
+        val outputStream = file.outputStream()
         val zipOutputStream = ZipOutputStream(outputStream)
         zipOutputStream.close()
         outputStream.close()
-        return file
     }
 
     protected fun file(path: String) = createFile(path).toFile()

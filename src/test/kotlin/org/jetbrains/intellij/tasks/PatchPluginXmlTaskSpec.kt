@@ -4,7 +4,6 @@ import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

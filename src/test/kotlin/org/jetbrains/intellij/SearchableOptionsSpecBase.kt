@@ -1,7 +1,6 @@
 package org.jetbrains.intellij
 
 import org.intellij.lang.annotations.Language
-import java.io.File
 import java.nio.file.Path
 
 abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
