@@ -443,7 +443,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val sandboxPath = adjustWindowsPath("${dir.absolutePath}/customSandbox")
+        val sandboxPath = adjustWindowsPath(dir.resolve("customSandbox").toString()) // TODO: use raw Path
         buildFile.groovy("""
             version = '0.42.123'
             intellij {

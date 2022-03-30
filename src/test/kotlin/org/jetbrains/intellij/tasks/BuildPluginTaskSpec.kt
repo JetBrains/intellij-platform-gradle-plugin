@@ -168,7 +168,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val sandboxPath = adjustWindowsPath("${dir.absolutePath}/customSandbox")
+        val sandboxPath = adjustWindowsPath(dir.resolve("customSandbox").toString())
         buildFile.groovy("""
             version = '0.42.123'
             

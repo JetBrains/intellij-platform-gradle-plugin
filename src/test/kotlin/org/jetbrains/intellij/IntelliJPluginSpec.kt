@@ -125,7 +125,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add local plugin to compile only classpath`() {
         val repositoryInstance = PluginRepositoryFactory.create(IntelliJPluginConstants.MARKETPLACE_HOST, null)
-        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
+        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null) // TODO: use raw Path
 
         buildFile.groovy("""
             intellij.plugins = ["copyright", "${adjustWindowsPath(plugin?.canonicalPath ?: "")}"]
@@ -312,7 +312,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `custom sandbox directory`() {
         writeTestFile()
 
-        val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
+        val sandboxPath = adjustWindowsPath(dir.resolve("customSandbox").toString()) // TODO: use raw Path
         buildFile.xml("""
             intellij {
                 sandboxDir = '$sandboxPath'    

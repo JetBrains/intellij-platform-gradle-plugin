@@ -1,5 +1,6 @@
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.createDir
 import org.apache.commons.io.FileUtils
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
@@ -9,6 +10,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Path
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.test.BeforeTest
@@ -28,12 +30,12 @@ abstract class IntelliJPluginSpecBase {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     val intellijVersion = "2020.1"
-    val dir: File by lazy { createTempDirectory("tmp").toFile() }
+    val dir: Path by lazy { createTempDirectory("tmp") }
 
     private val gradleProperties = file("gradle.properties")
     val buildFile = file("build.gradle")
     val pluginXml = file("src/main/resources/META-INF/plugin.xml")
-    val buildDirectory = File(dir, "build")
+    val buildDirectory: File = dir.resolve("build").toFile() // TODO: use raw Path
 
     @BeforeTest
     open fun setUp() {
@@ -108,7 +110,7 @@ abstract class IntelliJPluginSpecBase {
 
     private fun builder(gradleVersion: String, vararg tasks: String) =
         GradleRunner.create()
-            .withProjectDir(dir)
+            .withProjectDir(dir.toFile())
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
@@ -121,13 +123,13 @@ abstract class IntelliJPluginSpecBase {
         drop(start).takeWhile(String::isNotEmpty).map { it.substringBefore(' ') }
     }
 
-    protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
+    protected fun directory(path: String) = dir.resolve(path).createDir().toFile() // TODO: use raw Path
 
     protected fun emptyZipFile(path: String): File {
         val splitted = path.split('/')
         val directory = when {
             splitted.size > 1 -> directory(splitted.dropLast(1).joinToString("/"))
-            else -> dir
+            else -> dir.toFile() // TODO: use raw Path
         }
         val file = File(directory, splitted.last())
         val outputStream = FileOutputStream(file)
@@ -138,7 +140,7 @@ abstract class IntelliJPluginSpecBase {
     }
 
     protected fun file(path: String) = path
-        .run { takeIf { startsWith('/') } ?: "${dir.path}/$this" }
+        .run { takeIf { startsWith('/') } ?: dir.resolve(this).toString() } // TODO: use raw Path
         .split('/')
         .run { File(dropLast(1).joinToString("/")) to last() }
         .apply { if (!first.exists()) first.mkdirs() }
