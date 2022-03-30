@@ -176,7 +176,7 @@ abstract class IntelliJPluginSpecBase {
     """
     )
 
-    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin(
+    protected fun writeKotlinFile() = createFile("src/main/kotlin/App.kt").kotlin(
         """
         object App {
             @JvmStatic
@@ -187,7 +187,7 @@ abstract class IntelliJPluginSpecBase {
     """
     )
 
-    protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin(
+    protected fun writeKotlinUIFile() = createFile("src/main/kotlin/pack/AppKt.kt").kotlin(
         """
         package pack
 
@@ -250,8 +250,7 @@ abstract class IntelliJPluginSpecBase {
 
     fun Path.java(@Language("Java") content: String) = append(content)
 
-    fun File.kotlin(@Language("kotlin") content: String) = append(content)
+    fun Path.kotlin(@Language("kotlin") content: String) = append(content)
 
-    private fun File.append(content: String) = appendText(content.trimIndent() + "\n")
     private fun Path.append(content: String) = writeText(readText() + content.trimIndent() + "\n")
 }
