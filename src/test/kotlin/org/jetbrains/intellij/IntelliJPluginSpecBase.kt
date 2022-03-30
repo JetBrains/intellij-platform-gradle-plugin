@@ -1,6 +1,10 @@
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.create
 import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.readText
+import com.jetbrains.plugin.structure.base.utils.writeText
 import org.apache.commons.io.FileUtils
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
@@ -32,50 +36,57 @@ abstract class IntelliJPluginSpecBase {
     val intellijVersion = "2020.1"
     val dir: Path by lazy { createTempDirectory("tmp") }
 
-    private val gradleProperties = file("gradle.properties")
-    val buildFile = file("build.gradle")
+    private val gradleProperties = createFile("gradle.properties")
+    val buildFile = createFile("build.gradle")
     val pluginXml = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory: File = dir.resolve("build").toFile() // TODO: use raw Path
 
     @BeforeTest
     open fun setUp() {
-        file("settings.gradle").groovy("rootProject.name = 'projectName'")
+        createFile("settings.gradle").groovy("""
+            rootProject.name = 'projectName'
+        """)
 
-        buildFile.groovy("""
-            plugins {
-                id 'java'
-                id 'org.jetbrains.intellij'
-                id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
-            }
-            sourceCompatibility = 1.8
-            targetCompatibility = 1.8
-            repositories {
-                mavenCentral()
-            }
-            intellij {
-                version = '$intellijVersion'
-                downloadSources = false
-                pluginsRepositories {
-                    maven('$pluginsRepository')
+        buildFile.groovy(
+            """
+                plugins {
+                    id 'java'
+                    id 'org.jetbrains.intellij'
+                    id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
                 }
-                instrumentCode = false
-            }
-            buildSearchableOptions {
-                enabled = false
-            }
+                sourceCompatibility = 1.8
+                targetCompatibility = 1.8
+                repositories {
+                    mavenCentral()
+                }
+                intellij {
+                    version = '$intellijVersion'
+                    downloadSources = false
+                    pluginsRepositories {
+                        maven('$pluginsRepository')
+                    }
+                    instrumentCode = false
+                }
+                buildSearchableOptions {
+                    enabled = false
+                }
+    
+                // Define tasks with a minimal set of tasks required to build a source set
+                sourceSets.all {
+                    task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
+                }
+            """
+        )
 
-            // Define tasks with a minimal set of tasks required to build a source set
-            sourceSets.all {
-                task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
-            }
-        """)
-
-        gradleProperties.groovy("""
-            kotlin.stdlib.default.dependency = false
-        """)
+        gradleProperties.groovy(
+            """
+                kotlin.stdlib.default.dependency = false
+            """
+        )
     }
 
-    fun writeTestFile() = file("src/test/java/AppTest.java").java("""
+    fun writeTestFile() = file("src/test/java/AppTest.java").java(
+        """
         import java.lang.String;
         import org.junit.Test;
         import org.jetbrains.annotations.NotNull;
@@ -86,7 +97,8 @@ abstract class IntelliJPluginSpecBase {
         
             private void print(@NotNull String s) { System.out.println(s); }
         }
-    """)
+    """
+    )
 
     @Suppress("SameParameterValue")
     protected fun disableDebug(reason: String) {
@@ -139,15 +151,15 @@ abstract class IntelliJPluginSpecBase {
         return file
     }
 
-    protected fun file(path: String) = path
-        .run { takeIf { startsWith('/') } ?: dir.resolve(this).toString() } // TODO: use raw Path
-        .split('/')
-        .run { File(dropLast(1).joinToString("/")) to last() }
-        .apply { if (!first.exists()) first.mkdirs() }
-        .run { File(first, second) }
-        .apply { createNewFile() }
+    protected fun file(path: String) = createFile(path).toFile()
 
-    protected fun writeJavaFile() = file("src/main/java/App.java").java("""
+    protected fun createFile(path: String): Path = when {
+        path.startsWith('/') -> Path.of(path)
+        else -> dir.resolve(path)
+    }.apply { if (!exists()) create() }
+
+    protected fun writeJavaFile() = file("src/main/java/App.java").java(
+        """
         import java.lang.String;
         import java.util.Arrays;
         import org.jetbrains.annotations.NotNull;
@@ -157,18 +169,22 @@ abstract class IntelliJPluginSpecBase {
                 System.out.println(Arrays.toString(strings));
             }
         }
-    """)
+    """
+    )
 
-    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin("""
+    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin(
+        """
         object App {
             @JvmStatic
             fun main(args: Array<String>) {
                 println(args.joinToString())
             }
         }
-    """)
+    """
+    )
 
-    protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin("""
+    protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin(
+        """
         package pack
 
         import javax.swing.JPanel
@@ -179,7 +195,8 @@ abstract class IntelliJPluginSpecBase {
                 panel.toString()
             }
         }
-    """)
+    """
+    )
 
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
@@ -219,10 +236,12 @@ abstract class IntelliJPluginSpecBase {
     fun File.xml(@Language("XML") content: String) = append(content)
 
     fun File.groovy(@Language("Groovy") content: String) = append(content)
+    fun Path.groovy(@Language("Groovy") content: String) = append(content)
 
     fun File.java(@Language("Java") content: String) = append(content)
 
     fun File.kotlin(@Language("kotlin") content: String) = append(content)
 
     private fun File.append(content: String) = appendText(content.trimIndent() + "\n")
+    private fun Path.append(content: String) = writeText(readText() + content.trimIndent() + "\n")
 }

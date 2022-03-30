@@ -38,7 +38,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        file("settings.gradle").groovy("""
+        createFile("settings.gradle").groovy("""
             include 'nestedProject'
         """)
 
@@ -143,7 +143,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        file("settings.gradle").groovy("""
+        createFile("settings.gradle").groovy("""
             include 'nestedProject'            
         """)
 

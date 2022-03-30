@@ -313,7 +313,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
 
         val sandboxPath = adjustWindowsPath(dir.resolve("customSandbox").toString()) // TODO: use raw Path
-        buildFile.xml("""
+        buildFile.groovy("""
             intellij {
                 sandboxDir = '$sandboxPath'    
             }
