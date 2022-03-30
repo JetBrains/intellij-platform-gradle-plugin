@@ -33,7 +33,7 @@ abstract class IntelliJPluginSpecBase {
         .split(' ').filter(String::isNotEmpty).toTypedArray()
     protected val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
 
-    val gradleHome: String = System.getProperty("test.gradle.home")
+    val gradleHome: Path = Path.of(System.getProperty("test.gradle.home"))
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     val intellijVersion = "2020.1"
@@ -131,7 +131,7 @@ abstract class IntelliJPluginSpecBase {
             .forwardOutput()
             .withPluginClasspath()
             .withDebug(debugEnabled)
-            .withTestKitDir(File(gradleHome))
+            .withTestKitDir(gradleHome.toFile())
             .withArguments(*tasks, "--stacktrace", "--configuration-cache", *gradleArguments)//, "-Dorg.gradle.debug=true")
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
