@@ -6,6 +6,7 @@ import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.isDirectory
 import com.jetbrains.plugin.structure.base.utils.outputStream
 import com.jetbrains.plugin.structure.base.utils.readText
+import com.jetbrains.plugin.structure.base.utils.toSystemIndependentName
 import com.jetbrains.plugin.structure.base.utils.writeText
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
@@ -226,6 +227,8 @@ abstract class IntelliJPluginSpecBase {
     protected fun collectPaths(path: Path) = Files.walk(path).filter { !it.isDirectory }.map {
         path.relativize(it).toString()
     }.toList().sorted()
+
+    fun Path?.toSystemIndependentString() = toString().toSystemIndependentName()
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517

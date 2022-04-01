@@ -126,10 +126,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add local plugin to compile only classpath`() {
         val repositoryInstance = PluginRepositoryFactory.create(IntelliJPluginConstants.MARKETPLACE_HOST, null)
-        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null) // TODO: use raw Path
+        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null)?.toPath()
 
         buildFile.groovy("""
-            intellij.plugins = ["copyright", "$plugin"]
+            intellij.plugins = ["copyright", "${plugin.toSystemIndependentString()}"]
            
             task printMainRuntimeClassPath {
                 doLast { println "runtimeOnly: " + sourceSets.main.runtimeClasspath.asPath }
@@ -316,7 +316,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val sandboxPath = dir.resolve("customSandbox")
         buildFile.groovy("""
             intellij {
-                sandboxDir = '$sandboxPath'    
+                sandboxDir = '${sandboxPath.toSystemIndependentString()}'    
             }
         """)
         val result = build(JavaPlugin.TEST_TASK_NAME, "--info")
