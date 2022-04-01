@@ -2,6 +2,7 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.create
 import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.inputStream
 import com.jetbrains.plugin.structure.base.utils.readText
 import com.jetbrains.plugin.structure.base.utils.writeText
@@ -135,7 +136,12 @@ open class PrepareSandboxTask @Inject constructor(
             .getOrThrow()
 
         val updatesConfig = optionsDir.resolve("updates.xml")
-            .runCatching { create() }
+            .runCatching {
+                when {
+                    !exists() -> create()
+                    else -> this
+                }
+            }
             .onFailure {
                 when (it) {
                     is FileAlreadyExistsException -> return@onFailure
