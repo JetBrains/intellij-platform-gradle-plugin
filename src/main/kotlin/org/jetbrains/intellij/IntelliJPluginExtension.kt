@@ -17,7 +17,6 @@ import javax.inject.Inject
 /**
  * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
  */
-@Suppress("UnstableApiUsage")
 abstract class IntelliJPluginExtension @Inject constructor(
     objectFactory: ObjectFactory,
 ) {
@@ -187,11 +186,9 @@ abstract class IntelliJPluginExtension @Inject constructor(
         pluginDependencies.add(pluginDependency)
     }
 
-    fun getUnresolvedPluginDependencies(): Set<PluginDependency> {
-        if (pluginDependenciesConfigured) {
-            return emptySet()
-        }
-        return pluginDependencies.orNull?.toSet() ?: emptySet()
+    fun getUnresolvedPluginDependencies() = when {
+        pluginDependenciesConfigured -> emptySet()
+        else -> pluginDependencies.orNull?.toSet() ?: emptySet()
     }
 
     fun getPluginDependenciesList(project: Project): Set<PluginDependency> {

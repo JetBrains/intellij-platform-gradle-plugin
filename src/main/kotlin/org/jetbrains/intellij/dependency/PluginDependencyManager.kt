@@ -145,7 +145,7 @@ open class PluginDependencyManager @Inject constructor(
                 artifact.conf = "sources"
                 addArtifact(artifact)
             }
-            writeTo(ivyFile)
+            writeTo(ivyFile.toPath())
         }
     }
 

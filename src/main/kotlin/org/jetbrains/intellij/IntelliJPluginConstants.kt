@@ -55,7 +55,6 @@ object IntelliJPluginConstants {
     const val JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA =
         "$DEFAULT_INTELLIJ_REPOSITORY/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml"
 
-
     const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"
     const val ANDROID_STUDIO_TYPE = "AI"

@@ -5,10 +5,10 @@ import org.gradle.api.publish.ivy.IvyConfiguration
 import org.gradle.api.publish.ivy.internal.publisher.IvyPublicationIdentity
 import org.gradle.internal.xml.SimpleXmlWriter
 import org.gradle.internal.xml.XmlTransformer
-import java.io.File
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.io.Writer
+import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -29,8 +29,8 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
         artifacts.add(ivyArtifact)
     }
 
-    fun writeTo(file: File) {
-        xmlTransformer.transform(file, ivyFileEncoding) {
+    fun writeTo(path: Path) {
+        xmlTransformer.transform(path.toFile(), ivyFileEncoding) {
             try {
                 writeDescriptor(this)
             } catch (e: IOException) {
@@ -99,9 +99,7 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
         }
 
         override fun attribute(name: String?, value: String?): OptionalAttributeXmlWriter {
-            if (value != null) {
-                super.attribute(name, value)
-            }
+            value?.let { super.attribute(name, it) }
             return this
         }
     }

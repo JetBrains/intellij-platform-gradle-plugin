@@ -226,7 +226,7 @@ open class IdeaDependencyManager @Inject constructor(
                     addArtifact(artifact)
                 }
 
-                writeTo(ivyFile)
+                writeTo(ivyFile.toPath())
             }
         }
         return ivyFile
