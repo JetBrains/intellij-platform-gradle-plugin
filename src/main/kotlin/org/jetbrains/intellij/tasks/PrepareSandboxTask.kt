@@ -1,5 +1,10 @@
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.create
+import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.inputStream
+import com.jetbrains.plugin.structure.base.utils.readText
+import com.jetbrains.plugin.structure.base.utils.writeText
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -24,6 +29,7 @@ import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.transformXml
 import java.io.File
+import java.nio.file.Path
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -120,19 +126,26 @@ open class PrepareSandboxTask @Inject constructor(
     }
 
     private fun disableIdeUpdate() {
-        val optionsDir = File(configDir.get(), "/options").apply {
-            if (!exists() && !mkdirs()) {
-                error(context, "Cannot disable update checking in host IDE")
+        val optionsDir = Path.of(configDir.get()).resolve("options")
+            .runCatching { createDir() }
+            .onFailure {
+                error(context, "Cannot disable update checking in host IDE", it)
                 return
             }
-        }
+            .getOrThrow()
 
-        val updatesConfig = File(optionsDir, "updates.xml").apply {
-            if (!exists() && !createNewFile()) {
-                error(context, "Cannot disable update checking in host IDE")
-                return
+        val updatesConfig = optionsDir.resolve("updates.xml")
+            .runCatching { create() }
+            .onFailure {
+                when (it) {
+                    is FileAlreadyExistsException -> return@onFailure
+                    else -> {
+                        error(context, "Cannot disable update checking in host IDE", it)
+                        return
+                    }
+                }
             }
-        }
+            .getOrThrow()
 
         if (updatesConfig.readText().trim().isEmpty()) {
             updatesConfig.writeText("<application/>")

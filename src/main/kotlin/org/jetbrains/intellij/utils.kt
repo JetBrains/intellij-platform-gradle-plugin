@@ -8,6 +8,7 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.base.utils.isZip
+import com.jetbrains.plugin.structure.base.utils.writeText
 import com.jetbrains.plugin.structure.intellij.beans.PluginBean
 import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
@@ -44,6 +45,7 @@ import java.io.File
 import java.io.IOException
 import java.io.StringWriter
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Path
 import java.util.function.Predicate
 
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
@@ -72,7 +74,7 @@ fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
     return null
 }
 
-fun transformXml(document: Document, file: File) {
+fun transformXml(document: Document, path: Path) {
     val xmlOutput = XMLOutputter()
     xmlOutput.format.apply {
         indent = "  "
@@ -82,7 +84,7 @@ fun transformXml(document: Document, file: File) {
 
     StringWriter().use {
         xmlOutput.output(document, it)
-        file.writeText(it.toString())
+        path.writeText(it.toString())
     }
 }
 

@@ -17,6 +17,7 @@ import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
+import java.nio.file.Path
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -64,10 +65,10 @@ open class ListProductsReleasesTask @Inject constructor(
     @TaskAction
     fun list() {
         val releases = XmlExtractor<ProductsReleases>(context).let {
-            updatePaths.get().mapNotNull(it::fetch)
+            updatePaths.get().map(Path::of).mapNotNull(it::fetch)
         }
         val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let {
-            androidStudioUpdatePath.get().let(it::fetch)
+            androidStudioUpdatePath.get().let(Path::of).let(it::fetch)
         } ?: AndroidStudioReleases()
 
         val since = (sinceVersion.orNull ?: sinceBuild.get()).run(::parse)

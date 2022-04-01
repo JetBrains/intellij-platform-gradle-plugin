@@ -84,7 +84,7 @@ open class PatchPluginXmlTask @Inject constructor(
                     patchTag(document, "id", it)
                 }
 
-                val destination = File(destinationDir.get().asFile, file.name)
+                val destination = destinationDir.get().asFile.toPath().resolve(file.name)
                 transformXml(document, destination)
             }
         }

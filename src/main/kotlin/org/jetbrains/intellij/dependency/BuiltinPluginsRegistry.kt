@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.model.PluginsCache
@@ -8,6 +9,7 @@ import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
+import java.nio.file.Path
 
 class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val context: String?) : Serializable {
     private val plugins = mutableMapOf<String, PluginsCachePlugin>()
@@ -28,7 +30,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     }
 
     private fun fillFromCache(extractor: XmlExtractor<PluginsCache>): Boolean {
-        val cache = cacheFile().takeIf { it.exists() } ?: return false
+        val cache = cacheFile().takeIf(Path::exists) ?: return false
 
         debug(context, "Builtin registry cache is found. Loading from: $cache")
         return try {
@@ -61,7 +63,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
         }
     }
 
-    private fun cacheFile() = File(pluginsDirectory, "builtinRegistry-$version.xml")
+    private fun cacheFile() = pluginsDirectory.toPath().resolve("builtinRegistry-$version.xml")
 
     fun findPlugin(name: String): File? {
         val plugin = plugins[name] ?: plugins[directoryNameMapping[name]] ?: return null
