@@ -20,7 +20,6 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
             listOf(
                 "cbeeb1f1aebd4c9ea8fb5ab990c5904a676fc41a",
                 "116a3a8911c3a4bd49b2cb23f9576d13eaa721df",
-                "6becac80419981b057df9cf0c62efcd94e6075a8",
             ),
             cacheDir.listFiles().map(Path::simpleName)
         )
