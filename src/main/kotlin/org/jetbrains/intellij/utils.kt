@@ -137,7 +137,7 @@ fun File.isJar() = toPath().isJar()
 
 fun File.isZip() = toPath().isZip()
 
-fun collectJars(directory: File, filter: Predicate<File>): Collection<File> = when {
+fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> = when {
     !directory.isDirectory -> emptyList()
     else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
         override fun accept(file: File) = file.isJar() && filter.test(file)

@@ -29,7 +29,7 @@ class PluginDependencyImpl(
         if (artifact.isDirectory) {
             val lib = File(artifact, "lib")
             if (lib.isDirectory) {
-                jarFiles = collectJars(lib) { true }
+                jarFiles = collectJars(lib)
             }
             val classes = File(artifact, "classes")
             if (classes.isDirectory) {
