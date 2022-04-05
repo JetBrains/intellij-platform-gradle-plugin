@@ -344,11 +344,13 @@ As examples of using this plugin, you can also check out following projects:
 
 Contributing tips:
 
-You can debug the source code of gradle-intellij-plugin (e.g. put breakpoints there) if you add a reference to your local copy into `settings.gradle` of your IntelliJ plugin:
+You can debug the source code of gradle-intellij-plugin (e.g. put breakpoints there), if you add a reference to your local copy into `settings.gradle` of your IntelliJ plugin:
 
 ```groovy
 includeBuild '/path/to/gradle-intellij-plugin'
 ```
+
+After adding the above reference, gradle-intellij-plugin sources should appear in your IntelliJ plugin Project view, and you can edit and debug them in a standard way.
 
 # License
 
