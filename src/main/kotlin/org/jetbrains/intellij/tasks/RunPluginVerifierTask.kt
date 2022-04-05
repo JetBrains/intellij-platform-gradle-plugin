@@ -64,14 +64,14 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * List of the {@link FailureLevel} values used for failing the task if any reported issue will match.
+     * List of the [FailureLevel] values used for failing the task if any reported issue will match.
      */
     @Input
     val failureLevel = objectFactory.listProperty<FailureLevel>()
 
     /**
-     * A fallback file with a list of the releases generated with {@link ListProductsReleasesTask}.
-     * Used if {@link #ideVersions} is not provided.
+     * A fallback file with a list of the releases generated with [ListProductsReleasesTask].
+     * Used if [ideVersions] is not provided.
      */
     @Input
     @Optional
@@ -86,15 +86,15 @@ open class RunPluginVerifierTask @Inject constructor(
     val ideVersions = objectFactory.listProperty<String>()
 
     /**
-     * List of the paths to the specified IDE versions in {@link #ideVersions} used for the verification.
-     * By default, it resolves paths to the downloaded {@link #ideVersions} IDEs.
+     * List of the paths to the specified IDE versions in [ideVersions] used for the verification.
+     * By default, it resolves paths to the downloaded [ideVersions] IDEs.
      */
     @Input
     val ides = objectFactory.listProperty<File>()
 
     /**
      * List of the paths to locally installed IDE distributions that should be used for verification
-     * in addition to those specified in {@link #ideVersions}.
+     * in addition to those specified in [ideVersions].
      */
     @Input
     val localPaths = objectFactory.listProperty<File>()
@@ -109,7 +109,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Local path to the IntelliJ Plugin Verifier that will be used.
-     * If provided, {@link #verifierVersion} is ignored.
+     * If provided, [verifierVersion] is ignored.
      */
     @Input
     @Optional
@@ -164,7 +164,7 @@ open class RunPluginVerifierTask @Inject constructor(
     val jreRepository = objectFactory.property<String>()
 
     /**
-     * The path to directory containing JVM runtime, overrides {@link #jbrVersion}.
+     * The path to directory containing JVM runtime, overrides [jbrVersion].
      */
     @Input
     @Optional
@@ -206,7 +206,6 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
-     * {@link String}
      */
     @TaskAction
     fun runPluginVerifier() {
@@ -251,8 +250,8 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Resolves path to the IntelliJ Plugin Verifier file.
-     * At first, checks if it was provided with {@link #verifierPath}.
-     * Fetches IntelliJ Plugin Verifier artifact from the {@link IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGIN_VERIFIER_REPOSITORY}
+     * At first, checks if it was provided with [verifierPath].
+     * Fetches IntelliJ Plugin Verifier artifact from the [IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY]
      * repository and resolves the path to verifier-cli jar file.
      *
      * @return path to verifier-cli jar
@@ -380,9 +379,9 @@ open class RunPluginVerifierTask @Inject constructor(
 
 
     /**
-     * Resolves Plugin Verifier version.
-     * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #METADATA_URL}
-     * performed for the latest available verifier version.
+     * Resolves the Plugin Verifier version.
+     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [METADATA_URL]
+     * performed for the latest available version.
      *
      * @return Plugin Verifier version
      */
@@ -438,13 +437,13 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Resolves direct IDE download URL provided by the JetBrains Data Services.
-     * The URL created with {@link #IDE_DOWNLOAD_URL} contains HTTP redirection, which is supposed to be resolved.
-     * Direct download URL is prepended with {@link #CACHE_REDIRECTOR} host for providing caching mechanism.
+     * The URL created with [IDEA_DOWNLOAD_URL] contains HTTP redirection, which is supposed to be resolved.
+     * Direct download URL is prepended with [CACHE_REDIRECTOR] host for providing caching mechanism.
      *
      * @param type IDE type, i.e. IC, PS
      * @param version IDE version, i.e. 2020.2 or 203.1234.56
      * @param buildType release, rc, eap, beta
-     * @return direct download URL prepended with {@link #CACHE_REDIRECTOR} host
+     * @return direct download URL prepended with [CACHE_REDIRECTOR] host
      */
     internal fun resolveIdeUrl(type: String, version: String, buildType: String, context: String?): String {
         val isAndroidStudio = type == IntelliJPluginConstants.ANDROID_STUDIO_TYPE
