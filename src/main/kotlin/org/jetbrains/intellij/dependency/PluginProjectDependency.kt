@@ -44,6 +44,9 @@ class PluginProjectDependency(private val pluginDirectory: File, val context: St
     override val jarFiles: Collection<File>
         get() = pluginDependency?.jarFiles ?: emptyList()
 
+    override val sourceJarFiles: Collection<File>
+        get() = pluginDependency?.sourceJarFiles ?: emptyList()
+
     override val classesDirectory: File?
         get() = pluginDependency?.classesDirectory
 

@@ -22,6 +22,8 @@ interface PluginDependency : Serializable {
 
     val jarFiles: Collection<File>
 
+    val sourceJarFiles: Collection<File>
+
     val classesDirectory: File?
 
     val metaInfDirectory: File?

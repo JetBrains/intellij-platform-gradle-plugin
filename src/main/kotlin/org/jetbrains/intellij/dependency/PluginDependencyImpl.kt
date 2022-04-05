@@ -17,6 +17,7 @@ class PluginDependencyImpl(
 
     override var channel: String? = null
     override var jarFiles: Collection<File> = emptyList()
+    override var sourceJarFiles: Collection<File> = emptyList()
     override var classesDirectory: File? = null
     override var metaInfDirectory: File? = null
     override val sourcesDirectory: File? = null
@@ -32,6 +33,7 @@ class PluginDependencyImpl(
             val lib = File(artifact, "lib")
             if (lib.isDirectory) {
                 jarFiles = collectJars(lib)
+                sourceJarFiles = collectJars(File(lib, "src"))
             }
             val classes = File(artifact, "classes")
             if (classes.isDirectory) {
