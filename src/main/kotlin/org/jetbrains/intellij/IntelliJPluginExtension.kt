@@ -15,7 +15,7 @@ import org.jetbrains.intellij.dependency.PluginsRepositoryConfiguration
 import javax.inject.Inject
 
 /**
- * Configuration options for the {@link org.jetbrains.intellij.IntelliJPlugin}.
+ * Configuration options for the [org.jetbrains.intellij.IntelliJPlugin].
  */
 @Suppress("UnstableApiUsage")
 abstract class IntelliJPluginExtension @Inject constructor(
@@ -49,7 +49,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The version of the IntelliJ Platform IDE that will be used to build the plugin.
-     * <p/>
+     *
      * Please see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
      */
     @Input
@@ -57,8 +57,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
-     * <p/>
-     * The type might be included as a prefix in {@link #version} value.
+     *
+     * The type might be included as a prefix in [version] value.
      */
     @Input
     @Optional

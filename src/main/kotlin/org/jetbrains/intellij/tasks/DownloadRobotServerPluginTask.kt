@@ -37,11 +37,11 @@ open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: Obje
         }
 
         /**
-         * Resolves Plugin Verifier version.
-         * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #VERIFIER_METADATA_URL}
-         * performed for the latest available verifier version.
+         * Resolves the Robot Server version.
+         * If set to [org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST], there's request to [METADATA_URL]
+         * performed for the latest available version.
          *
-         * @return Plugin Verifier version
+         * @return Robot Server version
          */
         fun resolveVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
 

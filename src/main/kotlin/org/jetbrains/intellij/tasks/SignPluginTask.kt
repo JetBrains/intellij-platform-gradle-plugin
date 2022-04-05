@@ -80,7 +80,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Local path to the Marketplace ZIP Signer CLI that will be used.
-     * If provided, {@link #cliVersion} is ignored.
+     * If provided, [cliVersion] is ignored.
      */
     @Input
     @Optional
@@ -214,7 +214,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Resolves path to the IntelliJ Marketplace ZIP Signer.
-     * At first, checks if it was provided with {@link #cliPath}.
+     * At first, checks if it was provided with [cliPath].
      * Fetches Marketplace ZIP Signer artifact from the GitHub Releases and resolves the path to zip-signer-cli jar file.
      *
      * @return path to zip-signer-cli jar
@@ -291,9 +291,9 @@ open class SignPluginTask @Inject constructor(
     }
 
     /**
-     * Resolves Marketplace ZIP Signer CLI version.
-     * If set to {@link IntelliJPluginConstants#VERSION_LATEST}, there's request to {@link #METADATA_URL}
-     * performed for the latest available verifier version.
+     * Resolves the Marketplace ZIP Signer CLI version.
+     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [LATEST_RELEASE_URL]
+     * performed for the latest available version.
      *
      * @return Marketplace ZIP Signer CLI version
      */
