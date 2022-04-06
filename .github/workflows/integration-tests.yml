@@ -1,0 +1,66 @@
+name: Integration Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  subtasksList:
+    name: Collect Modules
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.set-modules.outputs.modules }}
+
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: zulu
+          java-version: 11
+
+      - id: Collect Available Modules
+        run: |
+          MODULES_LIST="$(./.github/scripts/list_integration_test_modules.main.kts)"
+          echo "::set-output name=modules::$MODULES_LIST"
+
+
+  test:
+    name: Test
+    needs: subtasksList
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        gradleVersion:
+          - 6.6.1
+          - 6.9.2
+          - 7.4.2
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+        module: ${{fromJson(needs.subtasksList.outputs.modules)}}
+
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v2
+        with:
+          distribution: zulu
+          java-version: 11
+
+      - uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: ${{ matrix.gradleVersion }}
+
+      - name: Run Gradle task
+        run: gradle :${{ matrix.module }}:integrationTest --info --console=plain 2>&1 | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
+
+      - name: Run Verification
+        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }}/build/integrationTestOutput.txt
