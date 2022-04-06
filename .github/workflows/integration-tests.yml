@@ -21,7 +21,7 @@ jobs:
           distribution: zulu
           java-version: 11
 
-      - id: Collect Available Modules
+      - name: Collect Available Modules
         run: |
           MODULES_LIST="$(./.github/scripts/list_integration_test_modules.main.kts)"
           echo "::set-output name=modules::$MODULES_LIST"
