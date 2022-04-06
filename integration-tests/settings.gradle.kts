@@ -1,5 +1,4 @@
 import java.nio.file.Files
-import kotlin.streams.toList
 
 pluginManagement {
     repositories {
@@ -11,10 +10,10 @@ rootProject.name = "integration-tests"
 
 includeBuild("..")
 
-val submodules = Files.list(rootDir.toPath())
+Files.list(rootDir.toPath())
     .filter { Files.isDirectory(it) }
     .map { it.fileName.toString() }
     .filter { !it.startsWith(".") }
-    .toList()
-
-include(submodules)
+    .forEach {
+        include(it)
+    }
