@@ -24,10 +24,18 @@ jobs:
       - name: Collect Available Modules
         run: |
           MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
-          echo "xxx"
-          echo $MODULES_LIST
-          echo "yyy"
           echo "::set-output name=modules::$MODULES_LIST"
+          
+
+  my_echo:
+    runs-on: ubuntu-latest
+    needs: subtasksList
+    steps:
+      - name: Echo previous outputs
+        run: |
+          echo "${{ needs.subtasksList.outputs.modules }}"
+          echo "${{ fromJSON(needs.subtasksList.outputs.modules) }}"
+          echo "${{ toJSON(needs.subtasksList.outputs.modules) }}"
 
 
   test:
