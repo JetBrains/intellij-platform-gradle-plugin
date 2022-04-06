@@ -22,6 +22,7 @@ jobs:
           java-version: 11
 
       - name: Collect Available Modules
+        id: set-modules
         run: |
           MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
           echo "::set-output name=modules::$MODULES_LIST"
