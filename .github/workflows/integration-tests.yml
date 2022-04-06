@@ -26,19 +26,6 @@ jobs:
         run: |
           MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
           echo "::set-output name=modules::$MODULES_LIST"
-          
-
-  my_echo:
-    runs-on: ubuntu-latest
-    needs: subtasksList
-    steps:
-      - name: a1
-        run: echo "${{ needs.subtasksList.outputs.modules }}"
-      - name: a2
-        run: echo "${{ fromJSON(needs.subtasksList.outputs.modules) }}"
-      - name: a3
-        run: echo "${{ toJSON(needs.subtasksList.outputs.modules) }}"
-
 
   test:
     name: Test
@@ -73,7 +60,11 @@ jobs:
           gradle-version: ${{ matrix.gradleVersion }}
 
       - name: Run Gradle task
-        run: gradle :${{ matrix.module }}:integrationTest --info --console=plain 2>&1 | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
+        run: |
+          cd $GITHUB_WORKSPACE/integration-tests
+          gradle :${{ matrix.module }}:integrationTest --info --console=plain 2>&1 | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
 
       - name: Run Verification
-        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }}/build/integrationTestOutput.txt
+        run: |
+          cd $GITHUB_WORKSPACE/integration-tests
+          ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }}/build/integrationTestOutput.txt
