@@ -23,7 +23,7 @@ jobs:
 
       - name: Collect Available Modules
         run: |
-          MODULES_LIST="$(./.github/scripts/list_integration_test_modules.main.kts)"
+          MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
           echo "::set-output name=modules::$MODULES_LIST"
 
 
