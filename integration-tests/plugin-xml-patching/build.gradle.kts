@@ -7,7 +7,7 @@ repositories {
 }
 
 intellij {
-    version.set("LATEST-EAP-SNAPSHOT")
+    version.set("2021.3.3")
 }
 
 tasks {

@@ -12,7 +12,7 @@ val buildDirectory by lazy {
         .throwIf("build directory does not exist", Files::notExists)
 }
 
-val pluginXml: String by lazy {
+val patchedPluginXml: String by lazy {
     buildDirectory
         .resolve("patchedPluginXmlFiles/plugin.xml")
         .throwIf("plugin.xml file does not exist", Files::notExists)

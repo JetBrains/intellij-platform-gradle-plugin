@@ -4,9 +4,9 @@
 
 The Gradle IntelliJ Plugin already contains a set of unit tests, but in some cases, it is not enough when a more complex configuration is used.
 
-Integration Tests are supposed to build the Gradle IntelliJ Plugin from the sources held in the currently used branch (i.e., for specific commits, pull request) and use it against the curated list of modules.
+Integration Tests are supposed to build the Gradle IntelliJ Plugin from the sources held in the currently used branch (i.e., for specific commits, pull request) and use it against the curated list of subprojects.
 
-Each of the Integration Tests modules is a standalone project that focuses on the specific flow, like patching the `plugin.xml` file, running one of the small IDEs with extra dependencies and feature implemented, etc.
+Each of the Integration Tests is a standalone project that focuses on the specific flow, like patching the `plugin.xml` file, running one of the small IDEs with extra dependencies and feature implemented, etc.
 
 ## How it works
 
@@ -17,10 +17,9 @@ Running Integration Tests is based on GitHub Actions and makes use of the matrix
   - last from `6.x` branch: `6.9.2`
   - last available: `7.4.2`
 - IntelliJ IDEA SDK versions:
-  - latest EAP: `LATEST-EAP-SNAPSHOT`
   - latest stable: `2021.3.3`
 
-Each matrix variation is used to run the Integration Tests module as a separate step. Its Gradle build output (if succeeded) is used for further verification with the dedicated `verify.main.kts` script using assertions.
+Each matrix variation is used to run the Integration Tests projects as a separate step. Its Gradle build output (if succeeded) is used for further verification with the dedicated `verify.main.kts` script using assertions.
 
 ### GitHub Actions Workflow
 
@@ -47,11 +46,11 @@ The output of this run is stored in the module's `./build/integrationTestOutput.
 │   ├── [module name]
 │   │   ├── build                 output build directory
 │   │   ├── build.gradle.kts      custom project configuration
-│   │   ├── settings.gradle.kts   module settings – should contain just the project name
+│   │   ├── settings.gradle.kts   module settings – usually contain just the project name
 │   │   ├── src                   module sources, like Java/Kotlin implementation, plugin.xml, other resources
 │   │   └── verify.main.kts       custom verification script containing assertions against build output, artifact, and Gradle output
 │   ├── settings.gradle.kts       combines modules, loads Gradle IntelliJ Plugin
-│   └── verify.utils.kts          until methods for verification scripts are located in modules
+│   └── verify.utils.kts          util methods for verify.main.kts scripts which are located in modules
 └── ...
 ```
 
@@ -88,8 +87,8 @@ The `verify.main.kts` file for assertions used to check the given module's outpu
 
 ### Verification file
 
-Each module should provide the `verify.main.kts` that run assertions against files/logs produced within the run.
-The utility file provides common methods used for assertions or files handlers one may be interested in, like: `rootPath` ,`pluginXml` ,`buildOutput`.
+Each module should provide the `verify.main.kts` that run assertions against files/logs produced during the run.
+The utility file provides common methods used for assertions or file handlers one may be interested in, like: `rootPath` ,`pluginXml` ,`buildOutput`.
 
 To verify the correctness of the output, you may check if it contains specific strings or matches regular expressions:
 
