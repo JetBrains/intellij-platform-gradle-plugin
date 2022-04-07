@@ -1,11 +1,12 @@
 import java.nio.file.Files
 import java.nio.file.Path
 
-args.exitIf({ size < 2 }) { "Not enought arguments were not provided. Use: ./verify.main.kts <project dir path> <logs path>" }
+args.exitIf({ size < 2 }) { "Not enought arguments were not provided: '${joinToString()}'. Use: ./verify.main.kts <project dir path> <logs path>" }
+val (workingDirArg, logsArg) = args
 
-val workingDirPath = Path.of("").resolve(args[0])
+val workingDirPath = Path.of("").resolve(workingDirArg)
     .exitIf(Files::notExists) { "Working dir does not exist: ${toAbsolutePath()}" }
-val logsPath = Path.of("").resolve(args[1])
+val logsPath = Path.of("").resolve(logsArg)
     .exitIf(Files::notExists) { "Logs file does not exist: ${toAbsolutePath()}" }
 
 val buildDirectory by lazy {
