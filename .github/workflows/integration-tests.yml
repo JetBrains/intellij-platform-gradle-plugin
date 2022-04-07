@@ -63,7 +63,7 @@ jobs:
         working-directory: ${{ github.workspace }}/integration-tests
         run: |
           mkdir -p ./${{ matrix.module }}/build
-          gradle :${{ matrix.module }}:integrationTest --info --console=plain 2>&1 | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
+          gradle :${{ matrix.module }}:integrationTest --info --console=plain | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
 
       - name: Run Verification
         working-directory: ${{ github.workspace }}/integration-tests
