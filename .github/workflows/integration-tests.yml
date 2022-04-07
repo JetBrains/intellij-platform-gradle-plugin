@@ -62,6 +62,7 @@ jobs:
       - name: Run Gradle task
         working-directory: ${{ github.workspace }}/integration-tests
         run: |
+          kotlin -version
           mkdir -p ./${{ matrix.module }}/build
           gradle :${{ matrix.module }}:integrationTest --info --console=plain | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
 
