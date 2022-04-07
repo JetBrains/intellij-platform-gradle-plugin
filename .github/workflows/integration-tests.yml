@@ -60,11 +60,9 @@ jobs:
           gradle-version: ${{ matrix.gradleVersion }}
 
       - name: Run Gradle task
-        run: |
-          cd $GITHUB_WORKSPACE/integration-tests
-          gradle :${{ matrix.module }}:integrationTest --info --console=plain 2>&1 | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
+        working-directory: ${{ github.workspace }}/integration-tests
+        run: gradle :${{ matrix.module }}:integrationTest --info --console=plain 2>&1 | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
 
       - name: Run Verification
-        run: |
-          cd $GITHUB_WORKSPACE/integration-tests
-          ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }}/build/integrationTestOutput.txt
+        working-directory: ${{ github.workspace }}/integration-tests
+        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }}/build/integrationTestOutput.txt
