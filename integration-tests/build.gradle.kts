@@ -9,7 +9,7 @@ repositories {
 
 tasks {
     wrapper {
-        jarFile = file("../wrapper/gradle-wrapper.jar")
+        jarFile = file("../gradle/wrapper/gradle-wrapper.jar")
     }
 }
 
