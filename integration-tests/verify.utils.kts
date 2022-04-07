@@ -9,13 +9,13 @@ val rootPath: Path by lazy {
 val buildDirectory by lazy {
     Path.of("")
         .resolve("build")
-        .throwIf({ "build directory does not exist: ${toAbsolutePath()}" }, Files::notExists)
+        .throwIf({ RuntimeException("build directory does not exist: ${toAbsolutePath()}") }, Files::notExists)
 }
 
 val patchedPluginXml: String by lazy {
     buildDirectory
         .resolve("patchedPluginXmlFiles/plugin.xml")
-        .throwIf({ "plugin.xml file does not exist: ${toAbsolutePath()}" }, Files::notExists)
+        .throwIf({ RuntimeException("plugin.xml file does not exist: ${toAbsolutePath()}") }, Files::notExists)
         .let(Files::readString)
 }
 
@@ -23,7 +23,7 @@ val buildOutput by lazy {
     args
         .throwIf("Input file was not provided", Array<String>::isEmpty)
         .let { Path.of(it.first()) }
-        .throwIf({ "Input file does not exist: ${toAbsolutePath()}" }, Files::notExists)
+        .throwIf({ RuntimeException("Input file does not exist: ${toAbsolutePath()}") }, Files::notExists)
         .let(Files::readString)
 }
 
@@ -48,6 +48,6 @@ infix fun String.matchesRegex(regex: Regex) {
     assert(regex.containsMatchIn(this))
 }
 
-infix fun Path.containsFile(path: File) {
+infix fun Path.containsFile(path: String) {
     assert(resolve(path).let(Files::exists))
 }

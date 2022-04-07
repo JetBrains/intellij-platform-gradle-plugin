@@ -1,4 +1,4 @@
-#!/usr/bin/env kotlin -J-ea
+#!/usr/bin/env -S kotlin -J-ea
 
 @file:Import("../verify.utils.kts")
 
