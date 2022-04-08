@@ -55,6 +55,10 @@ jobs:
           distribution: zulu
           java-version: 11
 
+      - name: Build and Publish Plugin to MavenLocal
+        run: |
+          - ./gradlew -Pversion=0.0.0 :publishToMavenLocal
+
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: ${{ matrix.gradleVersion }}

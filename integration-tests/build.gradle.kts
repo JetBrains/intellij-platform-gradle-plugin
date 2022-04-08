@@ -1,5 +1,6 @@
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.6.20"
+    id("org.jetbrains.intellij") version "0.0.0" apply false
     `kotlin-dsl`
 }
 
