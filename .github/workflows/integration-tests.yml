@@ -20,7 +20,6 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-          cache: gradle
 
       - name: Cache local Maven repository
         uses: actions/cache@v3
@@ -64,13 +63,13 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-          cache: gradle
 
       - name: Cache local Maven repository
         uses: actions/cache@v3
         with:
           path: ~/.m2/repository
-          key: ${{ github.run_id }}
+          key: ${{ github.run_id }}_${{ github.run_number }}
+          restore-keys: ${{ github.run_id }}
 
       - uses: gradle/gradle-build-action@v2
         with:
@@ -79,7 +78,6 @@ jobs:
       - name: Run Gradle task
         working-directory: ${{ github.workspace }}/integration-tests
         run: |
-          kotlin -version
           mkdir -p ./${{ matrix.module }}/build
           gradle :${{ matrix.module }}:integrationTest --info --console=plain | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
 
