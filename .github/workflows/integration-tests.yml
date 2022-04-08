@@ -21,12 +21,6 @@ jobs:
           distribution: zulu
           java-version: 11
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ github.run_id }}
-
       - name: Collect Available Modules
         id: set-modules
         run: |
@@ -35,6 +29,12 @@ jobs:
 
       - name: Build and Publish Plugin to MavenLocal
         run: ./gradlew -Pversion="0.0.0" :publishToMavenLocal
+
+      - name: Store Built Plugin
+        uses: actions/upload-artifact@v3
+        with:
+          name: m2-repository
+          path: ~/.m2/repository
 
   test:
     name: Test
@@ -64,12 +64,10 @@ jobs:
           distribution: zulu
           java-version: 11
 
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
+      - uses: actions/download-artifact@v3
         with:
+          name: m2-repository
           path: ~/.m2/repository
-          key: ${{ github.run_id }}_${{ github.run_number }}
-          restore-keys: ${{ github.run_id }}
 
       - uses: gradle/gradle-build-action@v2
         with:
