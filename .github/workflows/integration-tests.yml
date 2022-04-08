@@ -68,4 +68,4 @@ jobs:
 
       - name: Run Verification
         working-directory: ${{ github.workspace }}/integration-tests
-        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }}/build/integrationTestOutput.txt
+        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }} ./${{ matrix.module }}/build/integrationTestOutput.txt

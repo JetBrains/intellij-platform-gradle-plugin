@@ -8,5 +8,3 @@ buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml"
 
 patchedPluginXml containsText "<version>1.0.0</version>"
 patchedPluginXml containsText "<idea-version since-build=\"2021.1\" until-build=\"2021.3.*\" />"
-
-println(3333)
