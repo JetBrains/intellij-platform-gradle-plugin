@@ -1,20 +1,26 @@
 import java.nio.file.Files
-import kotlin.streams.toList
 
 pluginManagement {
     repositories {
+        mavenLocal()
         maven("https://cache-redirector.jetbrains.com/plugins.gradle.org")
+    }
+
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == "org.jetbrains.intellij") {
+                useModule("org.jetbrains.intellij.plugins:gradle-intellij-plugin:${requested.version}")
+            }
+        }
     }
 }
 
 rootProject.name = "integration-tests"
 
-includeBuild("..")
-
-val submodules = Files.list(rootDir.toPath())
+Files.list(rootDir.toPath())
     .filter { Files.isDirectory(it) }
     .map { it.fileName.toString() }
     .filter { !it.startsWith(".") }
-    .toList()
-
-include(submodules)
+    .forEach {
+        include(it)
+    }

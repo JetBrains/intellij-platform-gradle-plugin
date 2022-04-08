@@ -1,37 +1,36 @@
 import java.nio.file.Files
 import java.nio.file.Path
 
-val rootPath: Path by lazy {
-    System.getenv("GITHUB_WORKSPACE")?.let(Path::of)
-        ?: Path.of("").toAbsolutePath().parent.parent
-}
+args.exitIf({ size < 2 }) { "Not enought arguments were not provided: '${joinToString()}'. Use: ./verify.main.kts <project dir path> <logs path>" }
+val (workingDirArg, logsArg) = args
+
+val workingDirPath = Path.of("").resolve(workingDirArg)
+    .exitIf(Files::notExists) { "Working dir does not exist: ${toAbsolutePath()}" }
+val logsPath = Path.of("").resolve(logsArg)
+    .exitIf(Files::notExists) { "Logs file does not exist: ${toAbsolutePath()}" }
 
 val buildDirectory by lazy {
-    Path.of("")
+    workingDirPath
         .resolve("build")
-        .throwIf({ "build directory does not exist: ${toAbsolutePath()}" }, Files::notExists)
+        .exitIf(Files::notExists) { "build directory does not exist: ${toAbsolutePath()}" }
 }
 
 val patchedPluginXml: String by lazy {
     buildDirectory
         .resolve("patchedPluginXmlFiles/plugin.xml")
-        .throwIf({ "plugin.xml file does not exist: ${toAbsolutePath()}" }, Files::notExists)
+        .exitIf(Files::notExists) { "plugin.xml file does not exist: ${toAbsolutePath()}" }
         .let(Files::readString)
 }
 
-val buildOutput by lazy {
-    args
-        .throwIf("Input file was not provided", Array<String>::isEmpty)
-        .let { Path.of(it.first()) }
-        .throwIf({ "Input file does not exist: ${toAbsolutePath()}" }, Files::notExists)
-        .let(Files::readString)
+val logs by lazy {
+    logsPath.let(Files::readString)
 }
 
 
-fun <T> T.throwIf(message: String, block: T.() -> Boolean) = throwIf({ RuntimeException(message) }, block)
-fun <T> T.throwIf(exception: T.() -> Exception, block: T.() -> Boolean): T {
+fun <T> T.exitIf(block: T.() -> Boolean, message: T.() -> String = { "" }): T {
     if (block()) {
-        throw exception()
+        println(message())
+        System.exit(-1)
     }
     return this
 }
@@ -48,6 +47,6 @@ infix fun String.matchesRegex(regex: Regex) {
     assert(regex.containsMatchIn(this))
 }
 
-infix fun Path.containsFile(path: File) {
+infix fun Path.containsFile(path: String) {
     assert(resolve(path).let(Files::exists))
 }

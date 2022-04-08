@@ -1,9 +1,8 @@
-#!/usr/bin/env kotlin -J-ea
+#!/usr/bin/env -S kotlin -J-ea
 
 @file:Import("../verify.utils.kts")
 
-buildOutput containsText "BUILD SUCCESSFUL"
-buildOutput matchesRegex ":plugin-xml-patching:patchPluginXml .*? completed."
+logs matchesRegex ":plugin-xml-patching:patchPluginXml .*? completed."
 
 buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml"
 

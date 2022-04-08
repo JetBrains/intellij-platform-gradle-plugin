@@ -5,7 +5,7 @@ on:
 
 jobs:
   subtasksList:
-    name: Collect Modules
+    name: Prepare Environment
     runs-on: ubuntu-latest
     outputs:
       modules: ${{ steps.set-modules.outputs.modules }}
@@ -21,11 +21,20 @@ jobs:
           distribution: zulu
           java-version: 11
 
-      - id: Collect Available Modules
+      - name: Collect Available Modules
+        id: set-modules
         run: |
-          MODULES_LIST="$(./.github/scripts/list_integration_test_modules.main.kts)"
+          MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
           echo "::set-output name=modules::$MODULES_LIST"
 
+      - name: Build and Publish Plugin to MavenLocal
+        run: ./gradlew -Pversion="0.0.0" :publishToMavenLocal
+
+      - name: Store Built Plugin
+        uses: actions/upload-artifact@v3
+        with:
+          name: m2-repository
+          path: ~/.m2/repository
 
   test:
     name: Test
@@ -55,12 +64,21 @@ jobs:
           distribution: zulu
           java-version: 11
 
+      - uses: actions/download-artifact@v3
+        with:
+          name: m2-repository
+          path: ~/.m2/repository
+
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: ${{ matrix.gradleVersion }}
 
       - name: Run Gradle task
-        run: gradle :${{ matrix.module }}:integrationTest --info --console=plain 2>&1 | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
+        working-directory: ${{ github.workspace }}/integration-tests
+        run: |
+          mkdir -p ./${{ matrix.module }}/build
+          gradle :${{ matrix.module }}:integrationTest --info --console=plain | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
 
       - name: Run Verification
-        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }}/build/integrationTestOutput.txt
+        working-directory: ${{ github.workspace }}/integration-tests
+        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }} ./${{ matrix.module }}/build/integrationTestOutput.txt
