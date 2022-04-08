@@ -5,7 +5,7 @@ on:
 
 jobs:
   subtasksList:
-    name: Collect Modules
+    name: Prepare Environment
     runs-on: ubuntu-latest
     outputs:
       modules: ${{ steps.set-modules.outputs.modules }}
@@ -26,6 +26,9 @@ jobs:
         run: |
           MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
           echo "::set-output name=modules::$MODULES_LIST"
+
+      - name: Build and Publish Plugin to MavenLocal
+        run: ./gradlew -Pversion="0.0.0" :publishToMavenLocal
 
   test:
     name: Test
@@ -54,9 +57,6 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-
-      - name: Build and Publish Plugin to MavenLocal
-        run: ./gradlew -Pversion="0.0.0" :publishToMavenLocal
 
       - uses: gradle/gradle-build-action@v2
         with:
