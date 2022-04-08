@@ -42,7 +42,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
-    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.3")
+    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4")
     api("com.squareup.okhttp3:okhttp:4.9.3")
     api("com.squareup.retrofit2:retrofit:2.9.0") {
         exclude("okhttp")
