@@ -20,6 +20,13 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
+          cache: gradle
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ env.GITHUB_SHA }}
 
       - name: Collect Available Modules
         id: set-modules
@@ -57,6 +64,13 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
+          cache: gradle
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ env.GITHUB_SHA }}
 
       - uses: gradle/gradle-build-action@v2
         with:
