@@ -1,0 +1,84 @@
+name: Reusable Integration Tests
+
+on:
+  workflow_call:
+
+jobs:
+  subtasksList:
+    name: Prepare Environment
+    runs-on: ubuntu-latest
+    outputs:
+      modules: ${{ steps.set-modules.outputs.modules }}
+
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+
+      - name: Collect Available Modules
+        id: set-modules
+        run: |
+          MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
+          echo "::set-output name=modules::$MODULES_LIST"
+
+      - name: Build and Publish Plugin to MavenLocal
+        run: ./gradlew -Pversion="0.0.0" :publishToMavenLocal
+
+      - name: Store Built Plugin
+        uses: actions/upload-artifact@v3
+        with:
+          name: m2-repository
+          path: ~/.m2/repository
+
+  test:
+    name: Test
+    needs: subtasksList
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        gradleVersion:
+          - 6.6.1
+          - 6.9.2
+          - 7.4.2
+        os:
+          - windows-latest
+          - ubuntu-latest
+          - macos-latest
+        module: ${{fromJson(needs.subtasksList.outputs.modules)}}
+
+    steps:
+
+      - name: Fetch Sources
+        uses: actions/checkout@v3
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: m2-repository
+          path: ~/.m2/repository
+
+      - uses: gradle/gradle-build-action@v2
+        with:
+          gradle-version: ${{ matrix.gradleVersion }}
+
+      - name: Run Gradle task
+        working-directory: ${{ github.workspace }}/integration-tests
+        run: |
+          mkdir -p ./${{ matrix.module }}/build
+          gradle :${{ matrix.module }}:integrationTest --info --console=plain | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
+
+      - name: Run Verification
+        working-directory: ${{ github.workspace }}/integration-tests
+        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }} ./${{ matrix.module }}/build/integrationTestOutput.txt

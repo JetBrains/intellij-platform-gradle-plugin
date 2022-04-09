@@ -8,12 +8,19 @@ jobs:
   # Run reusable test workflow
   test:
     name: Test
-    uses: ./.github/workflows/reusable-test.yml
+    uses: ./.github/workflows/reusable-tests.yml
+
+  # Run reusable integration tests workflow
+  integrationTests:
+    name: Integration Tests
+    uses: ./.github/workflows/reusable-integration-tests.yml
 
   # Prepare and publish the Gradle Plugins repository
   release:
     name: Release to Gradle Plugins
-    needs: test
+    needs:
+      - test
+      - integrationTests
     runs-on: ubuntu-latest
     steps:
 
