@@ -5,22 +5,28 @@ on:
 
 jobs:
 
-  # Run reusable test workflow
-  test:
-    name: Test
-    uses: ./.github/workflows/reusable-tests.yml
+  gradleValidation:
+    uses: ./.github/workflows/reusable-gradleValidation.yml
 
-  # Run reusable integration tests workflow
+  unitTests:
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-unitTests.yml
+
   integrationTests:
-    name: Integration Tests
-    uses: ./.github/workflows/reusable-integration-tests.yml
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-integrationTests.yml
+
+  codeInspection:
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-codeInspection.yml
 
   # Prepare and publish the Gradle Plugins repository
   release:
     name: Release to Gradle Plugins
     needs:
-      - test
+      - unitTests
       - integrationTests
+      - codeInspection
     runs-on: ubuntu-latest
     steps:
 

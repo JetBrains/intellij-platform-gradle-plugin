@@ -36,8 +36,8 @@ jobs:
           name: m2-repository
           path: ~/.m2/repository
 
-  test:
-    name: Test
+  integrationTests:
+    name: Integration Tests
     needs: subtasksList
     runs-on: ${{ matrix.os }}
     strategy:

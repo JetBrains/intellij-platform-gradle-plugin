@@ -4,32 +4,8 @@ on:
   workflow_call:
 
 jobs:
-  gradleValidation:
-    name: Gradle Wrapper
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Fetch Sources
-        uses: actions/checkout@v3
-
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.4
-
-  codeInspection:
-    name: Code Inspection
-    needs: gradleValidation
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Fetch Sources
-        uses: actions/checkout@v3
-
-      - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v5.0.2
-
-  test:
-    name: Test
-    needs: gradleValidation
+  unitTests:
+    name: Unit Tests
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -55,7 +31,7 @@ jobs:
           java-version: 11
           cache: gradle
 
-      - name: Run Linters and Test
+      - name: Run Tests
         run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}"
 
       - name: Collect Test Results
