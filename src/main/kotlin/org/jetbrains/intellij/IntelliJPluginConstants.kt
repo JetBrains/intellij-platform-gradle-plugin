@@ -30,7 +30,7 @@ object IntelliJPluginConstants {
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
     const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "intellijDefaultDependencies"
 
-    const val ANNOTATIONS_DEPENDENCY_VERSION = "22.0.0"
+    const val ANNOTATIONS_DEPENDENCY_VERSION = "23.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
 
     const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"
