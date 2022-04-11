@@ -9,7 +9,7 @@ import java.io.Serializable
 @Suppress("BooleanMethodIsAlwaysInverted")
 interface PluginDependency : Serializable {
     companion object {
-        private const val formatVersion = 1
+        private const val formatVersion = 2
     }
 
     val id: String
