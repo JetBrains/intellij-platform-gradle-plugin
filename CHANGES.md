@@ -1,6 +1,9 @@
 # Changelog
 
 ## next
+- Fixed code instrumentation disabling via `tasks.instrumentCode.enabled`
+
+## 1.5.1
 - Add `util_rt.jar` to the classpath of run-like tasks for `2022.1+` compatibility
 
 ## 1.5.1

@@ -920,7 +920,7 @@ open class IntelliJPlugin : Plugin<Project> {
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
             val updateTask = project.tasks.register("post${instrumentTask.name.capitalize()}") {
-                val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
+                val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.get().isEnabled }
                 val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
                 val outputDir = instrumentTask.get().outputDir
 
