@@ -46,7 +46,6 @@ The output of this run is stored in the module's `./build/integrationTestOutput.
 │   ├── [module name]
 │   │   ├── build                 output build directory
 │   │   ├── build.gradle.kts      custom project configuration
-│   │   ├── settings.gradle.kts   module settings – usually contain just the project name
 │   │   ├── src                   module sources, like Java/Kotlin implementation, plugin.xml, other resources
 │   │   └── verify.main.kts       custom verification script containing assertions against build output, artifact, and Gradle output
 │   ├── settings.gradle.kts       combines modules, loads Gradle IntelliJ Plugin
@@ -54,7 +53,7 @@ The output of this run is stored in the module's `./build/integrationTestOutput.
 └── ...
 ```
 
-To introduce a new module to the Integration Tests set, it is required to create a new directory within the `integration-tests` module and provide `build.gradle.kts`, `settings.gradle.kts`, `src`, `verify.main.kts`, similar way to other modules.
+To introduce a new module to the Integration Tests set, it is required to create a new directory within the `integration-tests` module and provide `build.gradle.kts`, `src`, `verify.main.kts`, similar way to other modules.
 
 The `build.gradle.kts` should apply the Gradle IntelliJ Plugin without the version specified and define dependencies of the `integrationTest` task:
 ```kotlin
@@ -69,11 +68,6 @@ tasks {
     dependsOn(patchPluginXml)
   }
 }
-```
-
-The `settings.gradle.kts` settings file should contain the module name, like:
-```kotlin
-rootProject.name = "my-module"
 ```
 
 The `verify.main.kts` file for assertions used to check the given module's output has to import a utility file with shebang having assertions enabled:
