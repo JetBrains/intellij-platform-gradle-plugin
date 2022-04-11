@@ -13,8 +13,8 @@ intellij {
 tasks {
     patchPluginXml {
         version.set("1.0.0")
-        sinceBuild.set("2021.1")
-        untilBuild.set("2021.3.*")
+        sinceBuild.set("211")
+        untilBuild.set("213.*")
     }
 
     integrationTest {
