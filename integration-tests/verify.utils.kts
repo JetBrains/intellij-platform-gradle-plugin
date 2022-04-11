@@ -1,5 +1,7 @@
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.zip.ZipFile
 
 args.exitIf({ size < 2 }) { "Not enought arguments were not provided: '${joinToString()}'. Use: ./verify.main.kts <project dir path> <logs path>" }
 val (workingDirArg, logsArg) = args
@@ -49,4 +51,14 @@ infix fun String.matchesRegex(regex: Regex) {
 
 infix fun Path.containsFile(path: String) {
     assert(resolve(path).let(Files::exists))
+}
+
+infix fun Path.containsFileInArchive(path: String) {
+    val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
+    assert(fs.getPath(path).let(Files::exists))
+}
+
+infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
+    val entry = zip.getEntry(path)
+    zip.getInputStream(entry).bufferedReader().use { it.readText() }
 }
