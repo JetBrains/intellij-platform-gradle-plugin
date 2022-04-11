@@ -15,4 +15,5 @@ buildDirectory.resolve("libs/code-instrumentation.jar").run {
     this readEntry "META-INF/plugin.xml" containsText "<action id=\"ExampleAction\" class=\"ExampleAction\" text=\"Example Action\">"
 
     this containsFileInArchive "ExampleAction.class"
+
 }

@@ -22,6 +22,6 @@ tasks {
     }
 
     integrationTest {
-        dependsOn(buildPlugin)
+        dependsOn(clean, buildPlugin)
     }
 }
