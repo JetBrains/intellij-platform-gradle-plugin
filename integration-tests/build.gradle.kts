@@ -15,7 +15,9 @@ tasks {
 }
 
 subprojects {
-    tasks.create("integrationTest")
+    tasks.create("integrationTest") {
+        group = "verification"
+    }
 }
 
 val TaskContainer.integrationTest: TaskProvider<Task>

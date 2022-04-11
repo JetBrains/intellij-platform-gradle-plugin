@@ -7,7 +7,7 @@ repositories {
 }
 
 intellij {
-    version.set("2021.3.3")
+    version.set("2021.1.3")
 }
 
 tasks {
