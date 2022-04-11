@@ -1,0 +1,13 @@
+<idea-plugin>
+    <id>code-instrumentation</id>
+    <name>Code Instrumentation</name>
+    <vendor>JetBrains</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <actions>
+        <action id="ExampleAction" class="ExampleAction" text="Example Action">
+            <add-to-group group-id="EditorPopupMenu"/>
+        </action>
+    </actions>
+</idea-plugin>
