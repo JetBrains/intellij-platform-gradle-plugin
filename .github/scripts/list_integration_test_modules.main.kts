@@ -21,4 +21,4 @@ val modules: List<String> = rootPath
     .filter { !it.startsWith(".") }
     .toList()
 
-println("[\"${modules.joinToString()}\"]")
+println("[\"${modules.joinToString("\", \"")}\"]")
