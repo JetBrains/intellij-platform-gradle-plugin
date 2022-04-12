@@ -18,6 +18,6 @@ tasks {
     }
 
     integrationTest {
-        dependsOn(clean, patchPluginXml)
+        dependsOn(patchPluginXml)
     }
 }
