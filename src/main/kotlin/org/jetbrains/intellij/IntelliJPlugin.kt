@@ -48,8 +48,11 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.getBundledKotlinStdlib
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
+import org.jetbrains.kotlin.gradle.plugin.getKotlinPluginVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
 import java.time.LocalDateTime
@@ -72,6 +75,7 @@ open class IntelliJPlugin : Plugin<Project> {
         context = project.logCategory()
 
         checkGradleVersion(project)
+        checkKotlinVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(IdeaExtPlugin::class.java)
 
@@ -113,6 +117,54 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun checkGradleVersion(project: Project) {
         if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.6")) {
             throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 6.6 and higher")
+        }
+    }
+
+    private fun checkKotlinVersion(project: Project) {
+        project.afterEvaluate {
+            // Current project is Kotlin-based, as Kotlin JVM plugin is loaded
+            project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+                val setupDependenciesTaskProvider =
+                    project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+                val setupDependenciesTask = setupDependenciesTaskProvider.get()
+                val kotlinCompileTaskProvider = project.tasks.named<KotlinCompile>("compileKotlin")
+                val kotlinCompileTask = kotlinCompileTaskProvider.get()
+
+                val ideVersion = setupDependenciesTask.idea.get().version
+                val ideKotlinVersion = getBundledKotlinStdlib(ideVersion)?.let(Version.Companion::parse)
+                val ideKotlinVersionNoPatch = ideKotlinVersion?.run { Version(major, minor, 0) } ?: Version()
+                val kotlinVersion = project.getKotlinPluginVersion().let(Version.Companion::parse)
+                val kotlinVersionNoPatch = Version(kotlinVersion.major, kotlinVersion.minor, 0)
+                val kotlinApiVersion = kotlinCompileTask.kotlinOptions.apiVersion?.let(Version.Companion::parse)
+                val kotlinLanguageVersion = kotlinCompileTask.kotlinOptions.languageVersion?.let(Version.Companion::parse)
+                val kotlinBundled = project.property("kotlin.stdlib.default.dependency").toString().toBoolean()
+
+                println("kotlinLanguageVersion='${kotlinLanguageVersion}'")
+                println("kotlinApiVersion='${kotlinApiVersion}'")
+
+                val stdlib = "Kotlin Standard Library (kotlin-stdlib)"
+                val ide = "IntelliJ Platform ($ideVersion)"
+
+                when (kotlinBundled) {
+                    true -> when (ideKotlinVersion) {
+                        null -> null // This is fine. Kotlin not bundled in the given version as: Since Kotlin 1.4, a dependency on the standard library stdlib is added automatically.
+                        else -> "You bundle $stdlib with your plugin. Please consider removing it to avoid potential issues in the runtime and decrease the size of your archive."
+                    }
+
+                    false -> when {
+                        ideKotlinVersion == null -> "$stdlib is not bundled in the $ide."
+                        kotlinVersion == ideKotlinVersion -> null // Kotlin versions match, we're good
+                        kotlinVersion < ideKotlinVersion -> "$stdlib version is lower than the one bundled within the $ide, consider upgrading your Kotlin plugin to: $ideKotlinVersion"
+                        else -> when { // Current Kotlin version is higher than bundled. We need to check if kotlinApiVersion matches bundled version.
+                            kotlinApiVersion == ideKotlinVersionNoPatch -> null // This is fine.
+                            kotlinApiVersion == null && kotlinVersionNoPatch == ideKotlinVersionNoPatch -> null // This is fine.
+                            else -> "$stdlib version is higher than the one bundled within the $ide and the 'compileKotlin.kotlinOptions.apiVersion' doesn't match the bundled API level: " + with(ideKotlinVersionNoPatch) {"$major.$minor"}
+                        }
+                    }
+                }?.apply {
+                    warn(context, "$this Please check: https://jb.gg/ijsdk-kotlin for more details.")
+                }
+            }
         }
     }
 

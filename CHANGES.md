@@ -2,6 +2,7 @@
 
 ## next
 - Fixed code instrumentation disabling via `tasks.instrumentCode.enabled`
+- Check if used Kotlin version matches the bundled one
 
 ## 1.5.1
 - Add `util_rt.jar` to the classpath of run-like tasks for `2022.1+` compatibility
