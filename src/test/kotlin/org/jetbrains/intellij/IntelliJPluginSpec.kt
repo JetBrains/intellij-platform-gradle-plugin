@@ -3,6 +3,7 @@
 package org.jetbrains.intellij
 
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.Assume.assumeFalse
 import java.io.File
@@ -117,6 +118,125 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             assertFalse(runtimeClasspath.contains("markdown.jar"))
             assertFalse(runtimeClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
             assertFalse(runtimeClasspath.contains("kotlin-stdlib-jdk8.jar"))
+        }
+    }
+
+    @Test
+    fun `add bundled zip plugin source artifacts from src directory when downloadSources = true`() {
+        // The bundled Go plugin contains lib/src/go-openapi-sources.jar
+        buildFile.groovy("""
+            intellij {
+              type = 'GO'
+              version = '2021.2.4'
+              plugins = ['org.jetbrains.plugins.go']
+              downloadSources = true
+            }
+        """)
+        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
+
+        val result = build("printPluginSourceArtifacts")
+        assertContainsSourceArtifacts(result,
+            "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-sources.jar " +
+                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
+            "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
+                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)"
+        )
+    }
+
+    @Test
+    fun `add bundled zip plugin source artifacts from src directory when downloadSources = false`() {
+        buildFile.groovy("""
+            intellij {
+              type = 'GO'
+              version = '2021.2.4'
+              plugins = ['org.jetbrains.plugins.go']
+              downloadSources = false
+            }
+        """)
+        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
+
+        val result = build("printPluginSourceArtifacts")
+        assertContainsSourceArtifacts(result,
+            "lib/src/go-openapi-src-goland-GO-212.5457.54-sources.jar " +
+                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
+        )
+    }
+
+    @Test
+    fun `add external zip plugin source artifacts from src directory when downloadSources = true`() {
+        buildFile.groovy("""
+            intellij {
+              type = 'IC'
+              version = '2021.2.4'
+              plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
+              downloadSources = true
+            }
+        """)
+        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+
+        val result = build("printPluginSourceArtifacts")
+        assertContainsSourceArtifacts(result,
+            "go/lib/src/go-openapi-src-212.5712.14-sources.jar " +
+                    "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+        )
+    }
+
+    @Test
+    fun `add external zip plugin source artifacts from src directory when downloadSources = false`() {
+        buildFile.groovy("""
+            intellij {
+              type = 'IC'
+              version = '2021.2.4'
+              plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
+              downloadSources = false
+            }
+        """)
+        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+
+        val result = build("printPluginSourceArtifacts")
+        assertContainsSourceArtifacts(result,
+            "go/lib/src/go-openapi-src-212.5712.14-sources.jar " +
+                    "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+        )
+    }
+
+    private fun File.appendPluginSourceArtifactsTask(pluginComponentId: String) {
+        this.groovy(
+            """
+                task printPluginSourceArtifacts {
+                  doLast {
+                    def pluginComponentId = configurations.compileClasspath
+                      .resolvedConfiguration.lenientConfiguration
+                      .allModuleDependencies
+                      .collect { it.moduleArtifacts }
+                      .flatten()
+                      .collect { it.id.componentIdentifier }
+                      .find { it.displayName.startsWith("$pluginComponentId") }
+        
+                    dependencies.createArtifactResolutionQuery()
+                      .forComponents([pluginComponentId])
+                      .withArtifacts(JvmLibrary.class, SourcesArtifact.class)
+                      .execute()
+                      .resolvedComponents
+                      .collect { it.getArtifacts(SourcesArtifact.class) }
+                      .flatten()
+                      .each { println("source artifact:" + it.id.displayName) }
+                  }
+                }
+            """
+        )
+    }
+
+    private fun assertContainsSourceArtifacts(result: BuildResult, vararg expectedSourceArtifacts: String) {
+        result.output.lines().let { lines ->
+            val actualSourceArtifacts = lines
+                .filter { it.startsWith("source artifact:") }
+                .map { it.removePrefix("source artifact:") }
+            for (expectedArtifact in expectedSourceArtifacts) {
+                assertTrue("Expected $actualSourceArtifacts to contain source artifact: $expectedArtifact") {
+                    actualSourceArtifacts.any { it == expectedArtifact }
+                }
+            }
         }
     }
 

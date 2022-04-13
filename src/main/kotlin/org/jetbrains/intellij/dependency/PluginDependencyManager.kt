@@ -128,6 +128,7 @@ open class PluginDependencyManager @Inject constructor(
         val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
         val compileConfig = DefaultIvyConfiguration("compile")
         val sourcesConfig = DefaultIvyConfiguration("sources")
+        val sourcesClassifier = "sources"
         IntelliJIvyDescriptorFileGenerator(identity).apply {
             addConfiguration(compileConfig)
             addConfiguration(sourcesConfig)
@@ -143,11 +144,11 @@ open class PluginDependencyManager @Inject constructor(
                 addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, compileConfig.name, baseDir, groupId))
             }
             plugin.sourceJarFiles.forEach {
-                addArtifact(IntellijIvyArtifact.createJarDependency(it, sourcesConfig.name, baseDir, groupId))
+                addArtifact(IntellijIvyArtifact.createJarDependency(it, sourcesConfig.name, baseDir, sourcesClassifier))
             }
             ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
                 val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
-                val artifact = IntellijIvyArtifact(it, name, "jar", "sources", "sources")
+                val artifact = IntellijIvyArtifact(it, name, "jar", "sources", sourcesClassifier)
                 artifact.conf = sourcesConfig.name
                 addArtifact(artifact)
             }

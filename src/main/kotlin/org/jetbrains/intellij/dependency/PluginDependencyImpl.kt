@@ -64,6 +64,7 @@ class PluginDependencyImpl(
         if (maven != other.maven) return false
         if (channel != other.channel) return false
         if (jarFiles != other.jarFiles) return false
+        if (sourceJarFiles != other.sourceJarFiles) return false
         if (classesDirectory != other.classesDirectory) return false
         if (metaInfDirectory != other.metaInfDirectory) return false
         if (sourcesDirectory != other.sourcesDirectory) return false
@@ -82,6 +83,7 @@ class PluginDependencyImpl(
         result = 31 * result + maven.hashCode()
         result = 31 * result + (channel?.hashCode() ?: 0)
         result = 31 * result + jarFiles.hashCode()
+        result = 31 * result + sourceJarFiles.hashCode()
         result = 31 * result + (classesDirectory?.hashCode() ?: 0)
         result = 31 * result + (metaInfDirectory?.hashCode() ?: 0)
         result = 31 * result + (sourcesDirectory?.hashCode() ?: 0)
