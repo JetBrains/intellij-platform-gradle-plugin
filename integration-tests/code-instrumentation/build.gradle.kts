@@ -7,14 +7,14 @@ repositories {
 }
 
 intellij {
-    version.set("2021.1.3")
+    version.set("2022.1")
 }
 
 tasks {
     patchPluginXml {
         version.set("1.0.0")
-        sinceBuild.set("211")
-        untilBuild.set("213.*")
+        sinceBuild.set("221")
+        untilBuild.set("221.*")
     }
 
     instrumentCode {
