@@ -7,11 +7,7 @@ import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.Assume.assumeFalse
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 @Suppress("GroovyAssignabilityCheck")
 class IntelliJPluginSpec : IntelliJPluginSpecBase() {
@@ -135,7 +131,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
 
         val result = build("printPluginSourceArtifacts")
-        assertContainsSourceArtifacts(result,
+        assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-sources.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
             "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
@@ -156,7 +152,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
 
         val result = build("printPluginSourceArtifacts")
-        assertContainsSourceArtifacts(result,
+        assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-goland-GO-212.5457.54-sources.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
         )
@@ -175,7 +171,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
         val result = build("printPluginSourceArtifacts")
-        assertContainsSourceArtifacts(result,
+        assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-sources.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
         )
@@ -194,7 +190,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
         val result = build("printPluginSourceArtifacts")
-        assertContainsSourceArtifacts(result,
+        assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-sources.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
         )
@@ -227,15 +223,19 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun assertContainsSourceArtifacts(result: BuildResult, vararg expectedSourceArtifacts: String) {
+    private fun assertContainsOnlySourceArtifacts(result: BuildResult, vararg expectedSourceArtifacts: String) {
         result.output.lines().let { lines ->
             val actualSourceArtifacts = lines
                 .filter { it.startsWith("source artifact:") }
                 .map { it.removePrefix("source artifact:") }
-            for (expectedArtifact in expectedSourceArtifacts) {
-                assertTrue("Expected $actualSourceArtifacts to contain source artifact: $expectedArtifact") {
-                    actualSourceArtifacts.any { it == expectedArtifact }
-                }
+            val sortedActualSourceArtifacts = actualSourceArtifacts.sorted()
+            val sortedExpectedSourceArtifacts = expectedSourceArtifacts.asList().sorted()
+            if (sortedActualSourceArtifacts != sortedExpectedSourceArtifacts) {
+                fail(
+                    "Expected and actual source artifacts differ:\n" +
+                            "Expected: $sortedExpectedSourceArtifacts\n" +
+                            "Actual:   $sortedActualSourceArtifacts"
+                )
             }
         }
     }
