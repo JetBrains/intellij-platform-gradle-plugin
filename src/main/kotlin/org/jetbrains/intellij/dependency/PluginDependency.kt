@@ -28,8 +28,6 @@ interface PluginDependency : Serializable {
 
     val metaInfDirectory: File?
 
-    val sourcesDirectory: File?
-
     val builtin: Boolean
 
     val maven: Boolean

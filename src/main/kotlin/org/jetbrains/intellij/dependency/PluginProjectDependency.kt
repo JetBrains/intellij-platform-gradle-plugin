@@ -53,9 +53,6 @@ class PluginProjectDependency(private val pluginDirectory: File, val context: St
     override val metaInfDirectory: File?
         get() = pluginDependency?.metaInfDirectory
 
-    override val sourcesDirectory: File?
-        get() = pluginDependency?.sourcesDirectory
-
     override val builtin: Boolean
         get() = false
 

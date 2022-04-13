@@ -20,7 +20,6 @@ class PluginDependencyImpl(
     override var sourceJarFiles: Collection<File> = emptyList()
     override var classesDirectory: File? = null
     override var metaInfDirectory: File? = null
-    override val sourcesDirectory: File? = null
     override val notation = PluginDependencyNotation(id, version, channel)
     var sinceBuild: String? = null
     var untilBuild: String? = null
@@ -67,7 +66,6 @@ class PluginDependencyImpl(
         if (sourceJarFiles != other.sourceJarFiles) return false
         if (classesDirectory != other.classesDirectory) return false
         if (metaInfDirectory != other.metaInfDirectory) return false
-        if (sourcesDirectory != other.sourcesDirectory) return false
         if (notation != other.notation) return false
         if (sinceBuild != other.sinceBuild) return false
         if (untilBuild != other.untilBuild) return false
@@ -86,7 +84,6 @@ class PluginDependencyImpl(
         result = 31 * result + sourceJarFiles.hashCode()
         result = 31 * result + (classesDirectory?.hashCode() ?: 0)
         result = 31 * result + (metaInfDirectory?.hashCode() ?: 0)
-        result = 31 * result + (sourcesDirectory?.hashCode() ?: 0)
         result = 31 * result + notation.hashCode()
         result = 31 * result + (sinceBuild?.hashCode() ?: 0)
         result = 31 * result + (untilBuild?.hashCode() ?: 0)
