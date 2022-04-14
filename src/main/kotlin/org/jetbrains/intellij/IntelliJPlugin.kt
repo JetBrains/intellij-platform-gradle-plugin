@@ -59,7 +59,6 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.EnumSet
 import java.util.jar.Manifest
-import kotlin.properties.Delegates
 
 @Suppress("UnstableApiUsage", "unused")
 open class IntelliJPlugin : Plugin<Project> {
@@ -67,16 +66,14 @@ open class IntelliJPlugin : Plugin<Project> {
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader
     private lateinit var context: String
-    private var isOffline by Delegates.notNull<Boolean>()
 
     override fun apply(project: Project) {
         archiveUtils = project.objects.newInstance(ArchiveUtils::class.java)
         dependenciesDownloader = project.objects.newInstance(DependenciesDownloader::class.java)
         context = project.logCategory()
-        isOffline = project.gradle.startParameter.isOffline
 
         checkGradleVersion(project)
-        checkPluginVersion()
+        checkPluginVersion(project)
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(IdeaExtPlugin::class.java)
 
@@ -121,8 +118,8 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun checkPluginVersion() {
-        if (isOffline) {
+    private fun checkPluginVersion(project: Project) {
+        if (project.gradle.startParameter.isOffline) {
             return
         }
         val version = getVersion()
@@ -528,7 +525,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }).first().canonicalPath
             })
             jreRepository.convention(extension.jreRepository)
-            offline.set(isOffline)
+            offline.set(project.gradle.startParameter.isOffline)
 
             dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
@@ -714,7 +711,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val jbrResolver = project.objects.newInstance(
                 JbrResolver::class.java,
                 extension.jreRepository.orNull ?: "",
-                isOffline,
+                project.gradle.startParameter.isOffline,
                 archiveUtils,
                 dependenciesDownloader,
                 taskContext,
@@ -1114,6 +1111,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.tasks.register(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishPluginTask::class.java) {
             val signPluginTaskProvider = project.tasks.named<SignPluginTask>(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+            val isOffline = project.gradle.startParameter.isOffline
 
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Publish plugin distribution on plugins.jetbrains.com."
