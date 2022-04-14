@@ -103,3 +103,11 @@ Note, if you run Gradle tasks from CLI, your working directory should be set to 
 
 To invoke the `verify.main.kts` script, navigate to the file and click the green arrow on the first script line.
 It'll fail as it requires the path to the logs file provided; however, it opens the Terminal Tool Window when you can re-run it with the required argument.
+
+# Integration Tests List
+
+| Name                           | Description                                                                                |
+|--------------------------------|--------------------------------------------------------------------------------------------|
+| instrumentation-task-disabled  | Check if plugin is correctly assembled with the instrumentation task manually disabled.    |
+| instrumentation-task-java-only | Process only Java and Swing form files during the code instrumentation.                    |
+| plugin-xml-patching            | Verify if the content of the generated `plugin.xml` file has properties correctly updated. |
