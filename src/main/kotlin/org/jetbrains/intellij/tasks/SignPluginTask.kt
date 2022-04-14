@@ -1,7 +1,6 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.util.TeeOutputStream
-import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.internal.ConventionTask
@@ -19,11 +18,9 @@ import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.ByteArrayOutputStream
 import java.io.File
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.URL
 import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
@@ -33,26 +30,15 @@ open class SignPluginTask @Inject constructor(
 ) : ConventionTask() {
 
     companion object {
-        private const val MARKETPLACE_ZIP_SIGNER_RELEASES_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases"
-        private const val LATEST_RELEASE_URL = "$MARKETPLACE_ZIP_SIGNER_RELEASES_URL/latest"
-        private const val RELEASE_DOWNLOAD_URL = "$MARKETPLACE_ZIP_SIGNER_RELEASES_URL/download/%VERSION%/marketplace-zip-signer-cli.jar"
+        private const val MARKETPLACE_ZIP_SIGNER_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases"
+        private const val RELEASE_DOWNLOAD_URL = "$MARKETPLACE_ZIP_SIGNER_URL/releases/download/v%VERSION%/marketplace-zip-signer-cli.jar"
 
         /**
          * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
          *
          * @return latest CLI version
          */
-        fun resolveLatestVersion(): String {
-            debug(message = "Resolving latest Marketplace ZIP Signer CLI version")
-            try {
-                return URL(LATEST_RELEASE_URL).openConnection().run {
-                    (this as HttpURLConnection).instanceFollowRedirects = false
-                    getHeaderField("Location").split('/').last()
-                }
-            } catch (e: IOException) {
-                throw GradleException("Cannot resolve the latest Marketplace ZIP Signer CLI version")
-            }
-        }
+        fun resolveLatestVersion() = LatestVersionResolver.fromGitHub("Marketplace ZIP Signer CLI", MARKETPLACE_ZIP_SIGNER_URL)
     }
 
     /**
@@ -292,7 +278,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Resolves the Marketplace ZIP Signer CLI version.
-     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [LATEST_RELEASE_URL]
+     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [MARKETPLACE_ZIP_SIGNER_URL]
      * performed for the latest available version.
      *
      * @return Marketplace ZIP Signer CLI version

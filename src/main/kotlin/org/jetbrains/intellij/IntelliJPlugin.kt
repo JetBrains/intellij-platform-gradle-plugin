@@ -48,6 +48,7 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.LatestVersionResolver
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
@@ -58,6 +59,7 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.EnumSet
 import java.util.jar.Manifest
+import kotlin.properties.Delegates
 
 @Suppress("UnstableApiUsage", "unused")
 open class IntelliJPlugin : Plugin<Project> {
@@ -65,13 +67,16 @@ open class IntelliJPlugin : Plugin<Project> {
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader
     private lateinit var context: String
+    private var isOffline by Delegates.notNull<Boolean>()
 
     override fun apply(project: Project) {
         archiveUtils = project.objects.newInstance(ArchiveUtils::class.java)
         dependenciesDownloader = project.objects.newInstance(DependenciesDownloader::class.java)
         context = project.logCategory()
+        isOffline = project.gradle.startParameter.isOffline
 
         checkGradleVersion(project)
+        checkPluginVersion()
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(IdeaExtPlugin::class.java)
 
@@ -113,6 +118,16 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun checkGradleVersion(project: Project) {
         if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.6")) {
             throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 6.6 and higher")
+        }
+    }
+
+    private fun checkPluginVersion() {
+        if (isOffline) {
+            return
+        }
+        val latestVersion = LatestVersionResolver.fromGitHub("Gradle IntelliJ Plugin", IntelliJPluginConstants.GITHUB_REPOSITORY)
+        if (Version.parse(getVersion()) < Version.parse(latestVersion)) {
+            warn(context, "gradle-intellij-plugin is outdated. The latest available version is: $latestVersion")
         }
     }
 
@@ -317,8 +332,8 @@ open class IntelliJPlugin : Plugin<Project> {
                 project.layout.projectDirectory.dir("${project.buildDir}/robotServerPlugin")
             })
             pluginArchive.convention(project.provider {
-                val resolvedVersion = DownloadRobotServerPluginTask.resolveVersion(version.orNull)
-                val (group, name) = DownloadRobotServerPluginTask.getDependency(resolvedVersion).split(':')
+                val resolvedVersion = resolveRobotServerPluginVersion(version.orNull)
+                val (group, name) = getDependency(resolvedVersion).split(':')
                 dependenciesDownloader.downloadFromRepository(logCategory(), {
                     create(
                         group = group,
@@ -512,7 +527,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }).first().canonicalPath
             })
             jreRepository.convention(extension.jreRepository)
-            offline.set(project.gradle.startParameter.isOffline)
+            offline.set(isOffline)
 
             dependsOn(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
             dependsOn(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
@@ -698,7 +713,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val jbrResolver = project.objects.newInstance(
                 JbrResolver::class.java,
                 extension.jreRepository.orNull ?: "",
-                project.gradle.startParameter.isOffline,
+                isOffline,
                 archiveUtils,
                 dependenciesDownloader,
                 taskContext,
@@ -1098,7 +1113,6 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.tasks.register(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishPluginTask::class.java) {
             val signPluginTaskProvider = project.tasks.named<SignPluginTask>(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
-            val isOffline = project.gradle.startParameter.isOffline
 
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Publish plugin distribution on plugins.jetbrains.com."

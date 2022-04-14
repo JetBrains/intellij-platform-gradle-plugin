@@ -29,10 +29,9 @@ import org.jetbrains.intellij.ifFalse
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.model.MavenMetadata
-import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -55,12 +54,7 @@ open class RunPluginVerifierTask @Inject constructor(
         private const val IDEA_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
         private const val ANDROID_STUDIO_DOWNLOAD_URL = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
 
-        fun resolveLatestVersion(): String {
-            debug(message = "Resolving latest Plugin Verifier version")
-            val url = URL(METADATA_URL)
-            return XmlExtractor<MavenMetadata>().unmarshal(url.openStream()).versioning?.latest
-                ?: throw GradleException("Cannot resolve the latest Plugin Verifier version")
-        }
+        fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Plugin Verifier", METADATA_URL)
     }
 
     /**
