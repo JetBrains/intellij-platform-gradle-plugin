@@ -30,8 +30,8 @@ open class SignPluginTask @Inject constructor(
 ) : ConventionTask() {
 
     companion object {
-        private const val MARKETPLACE_ZIP_SIGNER_URL = "https://github.com/JetBrains/marketplace-zip-signer/releases"
-        private const val RELEASE_DOWNLOAD_URL = "$MARKETPLACE_ZIP_SIGNER_URL/releases/download/v%VERSION%/marketplace-zip-signer-cli.jar"
+        private const val MARKETPLACE_ZIP_SIGNER_URL = "https://github.com/JetBrains/marketplace-zip-signer"
+        private const val RELEASE_DOWNLOAD_URL = "$MARKETPLACE_ZIP_SIGNER_URL/releases/download/%VERSION%/marketplace-zip-signer-cli.jar"
 
         /**
          * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
@@ -207,7 +207,7 @@ open class SignPluginTask @Inject constructor(
      */
     private fun resolveCliPath(): String {
         val path = cliPath.orNull
-        if (path != null && path.isNotEmpty()) {
+        if (!path.isNullOrEmpty()) {
             val verifier = File(path)
             if (verifier.exists()) {
                 return path

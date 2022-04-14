@@ -62,22 +62,6 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `do not instrument kotlin code`() {
-        buildFile.groovy("""
-            intellij {
-                instrumentCode = true
-            }
-        """)
-
-        writeKotlinFile()
-
-        disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
-
-        val result = build("buildSourceSet", "--info")
-        assertTrue(result.output.contains("Added @NotNull assertions to 0 files"))
-    }
-
-    @Test
     fun `instrument kotlin forms`() {
         writeKotlinUIFile()
 
