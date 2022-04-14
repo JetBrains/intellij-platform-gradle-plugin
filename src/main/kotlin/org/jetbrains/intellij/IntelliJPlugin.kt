@@ -117,7 +117,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun checkGradleVersion(project: Project) {
         if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.6")) {
-            throw PluginInstantiationException("gradle-intellij-plugin requires Gradle 6.6 and higher")
+            throw PluginInstantiationException("${IntelliJPluginConstants.NAME} requires Gradle 6.6 and higher")
         }
     }
 
@@ -125,9 +125,9 @@ open class IntelliJPlugin : Plugin<Project> {
         if (isOffline) {
             return
         }
-        val latestVersion = LatestVersionResolver.fromGitHub("Gradle IntelliJ Plugin", IntelliJPluginConstants.GITHUB_REPOSITORY)
+        val latestVersion = LatestVersionResolver.fromGitHub(IntelliJPluginConstants.NAME, IntelliJPluginConstants.GITHUB_REPOSITORY)
         if (Version.parse(getVersion()) < Version.parse(latestVersion)) {
-            warn(context, "gradle-intellij-plugin is outdated. The latest available version is: $latestVersion")
+            warn(context, "${IntelliJPluginConstants.NAME} is outdated. Update `${IntelliJPluginConstants.ID}` to: $latestVersion")
         }
     }
 

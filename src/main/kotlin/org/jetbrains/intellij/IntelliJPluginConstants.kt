@@ -2,6 +2,7 @@ package org.jetbrains.intellij
 
 object IntelliJPluginConstants {
     const val NAME = "Gradle IntelliJ Plugin"
+    const val ID = "org.jetbrains.intellij"
     const val GROUP_NAME = "intellij"
     const val EXTENSION_NAME = "intellij"
     const val DEFAULT_SANDBOX = "idea-sandbox"
