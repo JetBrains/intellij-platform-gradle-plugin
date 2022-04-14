@@ -1,0 +1,7 @@
+<idea-plugin>
+    <id>org.jetbrains.plugins.integration-tests.plugin-xml-patching</id>
+    <name>Plugin XML Patching</name>
+    <vendor>JetBrains</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+</idea-plugin>

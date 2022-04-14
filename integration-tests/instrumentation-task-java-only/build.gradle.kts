@@ -1,6 +1,5 @@
-
 tasks {
     integrationTest {
-        dependsOn(patchPluginXml)
+        dependsOn(assemble)
     }
 }

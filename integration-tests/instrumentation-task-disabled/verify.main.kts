@@ -2,12 +2,12 @@
 
 @file:Import("../verify.utils.kts")
 
-logs matchesRegex ":code-instrumentation:buildPlugin .*? completed."
-logs containsText "> Task :code-instrumentation:instrumentCode SKIPPED"
+logs matchesRegex ":instrumentation-task-disabled:buildPlugin .*? completed."
+logs containsText "> Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 
-buildDirectory containsFile "libs/code-instrumentation.jar"
+buildDirectory containsFile "libs/instrumentation-task-disabled-1.0.0.jar"
 
-buildDirectory.resolve("libs/code-instrumentation.jar").run {
+buildDirectory.resolve("libs/instrumentation-task-disabled-1.0.0.jar").run {
 
     this containsFileInArchive "META-INF/MANIFEST.MF"
 
