@@ -1,11 +1,12 @@
 # Changelog
 
 ## next
+- Updated dependencies marked as vulnerable [#459](../../issues/459)
 - Fixed code instrumentation disabling via `tasks.instrumentCode.enabled`
 - `instrumentCode` task – limit the scope of the task to `sourceSets.main.java` [#459](../../issues/459)
 - Introduce Gradle IntelliJ Plugin version check against the latest available
 
-## 1.5.1
+## 1.5.2
 - Add `util_rt.jar` to the classpath of run-like tasks for `2022.1+` compatibility
 
 ## 1.5.1
