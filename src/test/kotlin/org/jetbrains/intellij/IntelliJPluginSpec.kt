@@ -132,9 +132,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
-            "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-sources.jar " +
-                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
             "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
+                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
+            "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)"
         )
     }
@@ -153,7 +153,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
-            "lib/src/go-openapi-src-goland-GO-212.5457.54-sources.jar " +
+            "lib/src/go-openapi-src-goland-GO-212.5457.54-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
         )
     }
@@ -172,7 +172,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
-            "go/lib/src/go-openapi-src-212.5712.14-sources.jar " +
+            "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
         )
     }
@@ -191,7 +191,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
-            "go/lib/src/go-openapi-src-212.5712.14-sources.jar " +
+            "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
         )
     }
@@ -199,6 +199,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun File.appendPluginSourceArtifactsTask(pluginComponentId: String) {
         this.groovy(
             """
+                import org.gradle.api.artifacts.result.UnresolvedArtifactResult
+
                 task printPluginSourceArtifacts {
                   doLast {
                     def pluginComponentId = configurations.compileClasspath
@@ -216,6 +218,14 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                       .resolvedComponents
                       .collect { it.getArtifacts(SourcesArtifact.class) }
                       .flatten()
+                      .findAll {
+                         if (it instanceof UnresolvedArtifactResult) {
+                           println "WARNING:"
+                           it.failure.printStackTrace()
+                           return false
+                        }
+                        return true
+                      }
                       .each { println("source artifact:" + it.id.displayName) }
                   }
                 }
@@ -224,10 +234,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     private fun assertContainsOnlySourceArtifacts(result: BuildResult, vararg expectedSourceArtifacts: String) {
+        val sourceArtifactLinePrefix = "source artifact:"
         result.output.lines().let { lines ->
             val actualSourceArtifacts = lines
-                .filter { it.startsWith("source artifact:") }
-                .map { it.removePrefix("source artifact:") }
+                .filter { it.startsWith(sourceArtifactLinePrefix) }
+                .map { it.removePrefix(sourceArtifactLinePrefix) }
             val sortedActualSourceArtifacts = actualSourceArtifacts.sorted()
             val sortedExpectedSourceArtifacts = expectedSourceArtifacts.asList().sorted()
             if (sortedActualSourceArtifacts != sortedExpectedSourceArtifacts) {
