@@ -127,7 +127,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = true
             }
         """)
-        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
+        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
@@ -148,7 +148,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = false
             }
         """)
-        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
+        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
@@ -167,7 +167,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = true
             }
         """)
-        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
@@ -186,7 +186,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = false
             }
         """)
-        buildFile.appendPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
@@ -195,7 +195,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun File.appendPluginSourceArtifactsTask(pluginComponentId: String) {
+    private fun File.appendPrintPluginSourceArtifactsTask(pluginComponentId: String) {
         this.groovy(
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
