@@ -5,9 +5,9 @@
 logs matchesRegex ":instrumentation-task-disabled:buildPlugin .*? completed."
 logs containsText "> Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 
-buildDirectory containsFile "libs/instrumentation-task-disabled.jar"
+buildDirectory containsFile "libs/code-instrumentation.jar"
 
-buildDirectory.resolve("libs/instrumentation-task-disabled.jar").run {
+buildDirectory.resolve("libs/code-instrumentation.jar").run {
 
     this containsFileInArchive "META-INF/MANIFEST.MF"
 
