@@ -125,9 +125,10 @@ open class IntelliJPlugin : Plugin<Project> {
         if (isOffline) {
             return
         }
+        val version = getVersion()
         val latestVersion = LatestVersionResolver.fromGitHub(IntelliJPluginConstants.NAME, IntelliJPluginConstants.GITHUB_REPOSITORY)
-        if (Version.parse(getVersion()) < Version.parse(latestVersion)) {
-            warn(context, "${IntelliJPluginConstants.NAME} is outdated. Update `${IntelliJPluginConstants.ID}` to: $latestVersion")
+        if (Version.parse(version) < Version.parse(latestVersion)) {
+            warn(context, "${IntelliJPluginConstants.NAME} is outdated: $version. Update `${IntelliJPluginConstants.ID}` to: $latestVersion")
         }
     }
 
