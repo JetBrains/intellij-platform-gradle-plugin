@@ -2,6 +2,7 @@
 
 ## next
 - Fixed code instrumentation disabling via `tasks.instrumentCode.enabled`
+- `instrumentCode` task – limit the scope of the task to `sourceSets.main.java` [#459](../../issues/459)
 
 ## 1.5.1
 - Add `util_rt.jar` to the classpath of run-like tasks for `2022.1+` compatibility

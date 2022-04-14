@@ -756,7 +756,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         sourceSet.output.classesDirs.files
                     })
                     sourceSetAllDirs.convention(project.provider {
-                        sourceSet.allSource.srcDirs
+                        sourceSet.java.srcDirs
                     })
                     sourceSetResources.convention(project.provider {
                         sourceSet.resources.files
