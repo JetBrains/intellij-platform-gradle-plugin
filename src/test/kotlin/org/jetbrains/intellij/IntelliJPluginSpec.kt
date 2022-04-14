@@ -119,7 +119,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled zip plugin source artifacts from src directory when downloadSources = true`() {
-        // The bundled Go plugin contains lib/src/go-openapi-sources.jar
         buildFile.groovy("""
             intellij {
               type = 'GO'

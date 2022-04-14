@@ -350,7 +350,7 @@ You can debug the source code of gradle-intellij-plugin (e.g. put breakpoints th
 includeBuild '/path/to/gradle-intellij-plugin'
 ```
 
-After adding the above reference, gradle-intellij-plugin sources should appear in your IntelliJ plugin Project view, and you can edit and debug them in a standard way.
+After adding the above reference, gradle-intellij-plugin sources should appear in your IntelliJ plugin Project view.
 
 # License
 
