@@ -110,15 +110,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("markdown.jar"))
-            assertTrue(compileClasspath.contains("resources_en.jar"))
-            assertTrue(compileClasspath.contains("kotlin-reflect-1.3.70.jar"))
-            assertTrue(compileClasspath.contains("kotlin-stdlib-1.3.70.jar"))
-            assertTrue(compileClasspath.contains("markdown-0.1.41.jar"))
+            assertTrue(compileClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
+            assertTrue(compileClasspath.contains("kotlin-stdlib-jdk8.jar"))
             assertFalse(runtimeClasspath.contains("markdown.jar"))
-            assertFalse(runtimeClasspath.contains("resources_en.jar"))
-            assertFalse(runtimeClasspath.contains("kotlin-reflect-1.3.70.jar"))
-            assertFalse(runtimeClasspath.contains("kotlin-stdlib-1.3.70.jar"))
-            assertFalse(runtimeClasspath.contains("markdown-0.1.41.jar"))
+            assertFalse(runtimeClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
+            assertFalse(runtimeClasspath.contains("kotlin-stdlib-jdk8.jar"))
         }
     }
 

@@ -12,10 +12,12 @@ import kotlin.test.assertTrue
 class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     private val pluginsRepositoryCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.plugins")
-    private val pluginsNightlyRepositoryCacheDir = File(gradleHome, "caches/modules-2/files-2.1/nightly.com.jetbrains.plugins")
-    private val pluginsCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
-    private val pluginsNightlyCacheDir =
-        File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.nightly.com.jetbrains.plugins")
+    private val pluginsNightlyRepositoryCacheDir =
+        File(gradleHome, "caches/modules-2/files-2.1/nightly.com.jetbrains.plugins")
+    private val pluginsCacheDir =
+        File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
+    private val pluginsDevCacheDir =
+        File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.dev.com.jetbrains.plugins")
 
     @BeforeTest
     override fun setUp() {
@@ -24,7 +26,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         pluginsRepositoryCacheDir.delete()
         pluginsNightlyRepositoryCacheDir.delete()
         pluginsCacheDir.delete()
-        pluginsNightlyCacheDir.delete()
+        pluginsDevCacheDir.delete()
     }
 
     @Test
@@ -59,22 +61,22 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     fun `download zip plugin from non-default channel`() {
         buildFile.groovy("""
             intellij {
-                plugins = ["CSS-X-Fire:1.55@nightly"]
+                plugins = ["io.flutter:67.0.2-dev.1@dev"]
             }
         """)
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        val pluginDir = File(pluginsNightlyRepositoryCacheDir, "nightly.com.jetbrains.plugins/CSS-X-Fire/1.55")
+        val pluginDir = File(pluginsNightlyRepositoryCacheDir, "dev.com.jetbrains.plugins/io.flutter/67.0.2-dev.1")
         pluginDir.list()?.let {
             assertTrue(it.contains("9cab70cc371b245cd808ade65630f505a6443b0d"))
         }
 
         File(pluginDir, "9cab70cc371b245cd808ade65630f505a6443b0d").list()?.let {
-            assertTrue(it.contains("CSS-X-Fire-1.55.zip"))
+            assertTrue(it.contains("io.flutter-67.0.2-dev.1.zip"))
         }
-        pluginsNightlyCacheDir.list()?.let {
-            assertTrue(it.contains("CSS-X-Fire-1.55"))
+        pluginsDevCacheDir.list()?.let {
+            assertTrue(it.contains("io.flutter-67.0.2-dev.1"))
         }
     }
 

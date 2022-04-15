@@ -270,7 +270,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         assertZipContent(jar, "META-INF/plugin.xml", """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="201.6668" until-build="201.*" />
+              <idea-version since-build="212.5712" until-build="212.*" />
               <depends config-file="other.xml" />
             </idea-plugin>
         """)
@@ -364,11 +364,15 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/myPluginName/lib/projectName.jar",
-                "/plugins/markdown/lib/markdown.jar",
-                "/plugins/markdown/lib/resources_en.jar",
                 "/config/options/updates.xml",
-                "/plugins/markdown/lib/markdown-0.1.41.jar",
+                "/plugins/markdown/lib/google-api-client-1.25.0.jar",
+                "/plugins/markdown/lib/google-api-services-drive-v3-rev197-1.25.0.jar",
+                "/plugins/markdown/lib/google-http-client-1.25.0.jar",
+                "/plugins/markdown/lib/google-http-client-jackson2-1.25.0.jar",
+                "/plugins/markdown/lib/google-oauth-client-1.25.0.jar",
+                "/plugins/markdown/lib/j2objc-annotations-1.1.jar",
+                "/plugins/markdown/lib/markdown.jar",
+                "/plugins/myPluginName/lib/projectName.jar",
             ),
             collectPaths(sandbox),
         )
@@ -416,7 +420,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <id>${plugin.name}</id>
               <name>Test</name>
               <version>1.0</version>
-              <idea-version since-build="201.6668" until-build="201.*" />
+              <idea-version since-build="212.5712" until-build="212.*" />
               <vendor url="https://jetbrains.com">JetBrains</vendor>
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>

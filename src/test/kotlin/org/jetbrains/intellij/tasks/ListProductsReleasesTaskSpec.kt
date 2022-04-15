@@ -15,17 +15,20 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     override fun setUp() {
         super.setUp()
 
-        val resources = listOf(
-            "products-releases/idea-releases.xml",
-        ).joinToString { "'${javaClass.classLoader.getResource(it)?.path}'" }
-        val asResource = "products-releases/android-studio-products-releases.xml".let {
+        val ideaReleasesPath = "products-releases/idea-releases.xml".let {
+            "'${javaClass.classLoader.getResource(it)?.path}'"
+        }
+        val asReleasesPath = "products-releases/android-studio-products-releases.xml".let {
             "'${javaClass.classLoader.getResource(it)?.path}'"
         }
 
         buildFile.groovy("""
+            intellij {
+                version = "2020.1"
+            }
             listProductsReleases {
-                updatePaths = [${resources}]
-                androidStudioUpdatePath = $asResource
+                updatePaths = [${ideaReleasesPath}]
+                androidStudioUpdatePath = $asReleasesPath
             }
         """)
     }
@@ -51,7 +54,13 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("IC-2021.2.2", "IC-2021.1.3", "IC-2020.3.4", "IC-2020.2.4", "IC-2020.1.4"),
+            listOf(
+                "IC-2021.2.2",
+                "IC-2021.1.3",
+                "IC-2020.3.4",
+                "IC-2020.2.4",
+                "IC-2020.1.4",
+            ),
             result.taskOutput()
         )
     }
@@ -68,7 +77,11 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("IC-2021.2.1", "IC-2021.1.3", "IC-2020.3.4"),
+            listOf(
+                "IC-2021.2.1",
+                "IC-2021.1.3",
+                "IC-2020.3.4"
+            ),
             result.taskOutput()
         )
     }
@@ -85,7 +98,11 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("IC-2021.2.2", "IC-2021.1.3", "IC-2020.3.4"),
+            listOf(
+                "IC-2021.2.2",
+                "IC-2021.1.3",
+                "IC-2020.3.4",
+            ),
             result.taskOutput()
         )
     }
@@ -105,7 +122,11 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("IC-2021.2.2", "IC-2021.1.3", "IC-2020.3.4"),
+            listOf(
+                "IC-2021.2.2",
+                "IC-2021.1.3",
+                "IC-2020.3.4",
+            ),
             result.taskOutput()
         )
     }
@@ -141,7 +162,11 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("IC-2021.2.1", "IC-2021.1.3"),
+            listOf(
+                // "IC-2021.2.2" - available only in the EAP channel and shouldn't be listed here
+                "IC-2021.2.1",
+                "IC-2021.1.3"
+            ),
             result.taskOutput()
         )
     }
@@ -158,7 +183,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("IU-2021.2.2", "IU-2021.1.3", "PS-2021.2.2", "PS-2021.1.4", "PY-2021.2.2", "PY-2021.1.3"),
+            listOf(
+                "IU-2021.2.2",
+                "IU-2021.1.3",
+                "PS-2021.2.2",
+                "PS-2021.1.4",
+                "PY-2021.2.2",
+                "PY-2021.1.3",
+            ),
             result.taskOutput()
         )
     }
@@ -175,7 +207,11 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
         assertEquals(
-            listOf("AI-2021.3.1.7", "AI-2021.2.1.11", "AI-2021.1.1.22"),
+            listOf(
+                "AI-2021.3.1.7",
+                "AI-2021.2.1.11",
+                "AI-2021.1.1.22",
+            ),
             result.taskOutput()
         )
     }

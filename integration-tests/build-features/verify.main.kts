@@ -3,10 +3,17 @@
 @file:Import("../verify.utils.kts")
 
 with(__FILE__.toPath()) {
-    val propertyName = "org.jetbrains.intellij.buildFeature.selfUpdateCheck"
-    runGradleTask(
-        mapOf(propertyName to false), "assemble"
-    ).let { logs ->
-        logs containsText "Build feature is disabled: $propertyName"
+
+    "org.jetbrains.intellij.buildFeature.selfUpdateCheck".let { flag ->
+        runGradleTask("assemble", projectProperties = mapOf(flag to false)).let { logs ->
+            println(logs.length)
+            logs containsText "Build feature is disabled: $flag"
+        }
+
+        runGradleTask("assemble", projectProperties = mapOf(flag to true), debug = false).let { logs ->
+            println(logs.length)
+            logs containsText "Build feature is disabled: $flag"
+        }
     }
+
 }
