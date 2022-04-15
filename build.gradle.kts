@@ -13,7 +13,7 @@ plugins {
     kotlin("plugin.serialization") version "1.6.20"
     id("com.gradle.plugin-publish") version "0.21.0"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.dokka") version "1.6.10"
+    id("org.jetbrains.dokka") version "1.6.20"
     id("synapticloop.documentr") version "3.1.0"
 }
 
