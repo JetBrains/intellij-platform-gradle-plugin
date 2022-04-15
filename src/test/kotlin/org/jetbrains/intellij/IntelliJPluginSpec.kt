@@ -238,15 +238,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val actualSourceArtifacts = lines
                 .filter { it.startsWith(sourceArtifactLinePrefix) }
                 .map { it.removePrefix(sourceArtifactLinePrefix) }
-            val sortedActualSourceArtifacts = actualSourceArtifacts.sorted()
-            val sortedExpectedSourceArtifacts = expectedSourceArtifacts.asList().sorted()
-            if (sortedActualSourceArtifacts != sortedExpectedSourceArtifacts) {
-                fail(
-                    "Expected and actual source artifacts differ:\n" +
-                            "Expected: $sortedExpectedSourceArtifacts\n" +
-                            "Actual:   $sortedActualSourceArtifacts"
-                )
-            }
+            assertEquals(
+                expectedSourceArtifacts.asList(),
+                actualSourceArtifacts,
+                "Expected and actual source artifacts differ"
+            )
         }
     }
 
