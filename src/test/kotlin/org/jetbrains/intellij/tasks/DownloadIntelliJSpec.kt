@@ -108,4 +108,5 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         assertTrue(dir.exists(), "Expected directory '${dir.path}' to exist")
         assertEquals(fileNames.toSet(), dir.list()?.toSet(), "Unexpected '${dir.path}' directory contents")
     }
+
 }

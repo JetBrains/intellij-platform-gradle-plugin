@@ -81,10 +81,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
             val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
 
-            assertTrue(compileClasspath.contains("copyright.jar"))
-            assertFalse(runtimeClasspath.contains("copyright.jar"))
-            assertTrue(compileClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
-            assertFalse(runtimeClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+            assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
+            assertAddedToCompileClassPathOnly(
+                compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
+            )
         }
     }
 
@@ -117,6 +117,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    private fun assertAddedToCompileClassPathOnly(compileClasspath: String, runtimeClasspath: String, jarName: String) {
+        assertTrue(
+            compileClasspath.contains(jarName),
+            "Expected $jarName to be included in the compile classpath: $compileClasspath"
+        )
+        assertFalse(
+            runtimeClasspath.contains(jarName),
+            "Expected $jarName to not be included in the runtime classpath: $runtimeClasspath"
+        )
+    }
+
     @Test
     fun `add bundled zip plugin source artifacts from src directory when downloadSources = true`() {
         buildFile.groovy("""
@@ -131,9 +142,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
-            "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
-                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
             "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-unzipped.com.jetbrains.plugins.jar " +
+                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
+            "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)"
         )
     }
