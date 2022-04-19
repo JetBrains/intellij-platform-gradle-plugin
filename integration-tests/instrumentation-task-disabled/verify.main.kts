@@ -2,6 +2,8 @@
 
 @file:Import("../verify.utils.kts")
 
+val logs = runGradleTask("buildPlugin")
+
 logs matchesRegex ":instrumentation-task-disabled:buildPlugin .*? completed."
 logs containsText "> Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 

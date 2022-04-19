@@ -1,15 +1,18 @@
+import java.io.ByteArrayOutputStream
+import java.io.OutputStream
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
 
-args.exitIf({ size < 2 }) { "Not enought arguments were not provided: '${joinToString()}'. Use: ./verify.main.kts <project dir path> <logs path>" }
-val (workingDirArg, logsArg) = args
+val workingDirPath by lazy {
+    Path.of("")
+        .toAbsolutePath()
+        .exitIf(Files::notExists) { "Working dir does not exist: ${toAbsolutePath()}" }
+}
 
-val workingDirPath = Path.of("").resolve(workingDirArg)
-    .exitIf(Files::notExists) { "Working dir does not exist: ${toAbsolutePath()}" }
-val logsPath = Path.of("").resolve(logsArg)
-    .exitIf(Files::notExists) { "Logs file does not exist: ${toAbsolutePath()}" }
+val (gradleArg) = args.toList() + listOf(null)
+val gradle = gradleArg ?: workingDirPath.parent.parent.resolve("gradlew").toString()
 
 val buildDirectory by lazy {
     workingDirPath
@@ -24,10 +27,20 @@ val patchedPluginXml: String by lazy {
         .let(Files::readString)
 }
 
-val logs by lazy {
-    logsPath.let(Files::readString)
-}
+fun runGradleTask(task: String) =
+    ProcessBuilder()
+        .command(gradle, task, "--info")
+        .directory(workingDirPath.toAbsolutePath().toFile())
+        .start()
+        .run {
+            val stdoutBuffer = ByteArrayOutputStream()
+            val stderrBuffer = ByteArrayOutputStream()
 
+            inputStream.copyTo(TeeOutputStream(stdoutBuffer, System.out))
+            errorStream.copyTo(TeeOutputStream(stderrBuffer, System.err))
+
+            stdoutBuffer.toString() + stderrBuffer.toString()
+        }
 
 fun <T> T.exitIf(block: T.() -> Boolean, message: T.() -> String = { "" }): T {
     if (block()) {
@@ -61,4 +74,21 @@ infix fun Path.containsFileInArchive(path: String) {
 infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
     val entry = zip.getEntry(path)
     zip.getInputStream(entry).bufferedReader().use { it.readText() }
+}
+
+
+class TeeOutputStream(vararg targets: OutputStream) : OutputStream() {
+
+    val targets = targets.toList()
+    override fun write(b: Int) {
+        targets.forEach { it.write(b) }
+    }
+
+    override fun flush() {
+        targets.forEach(OutputStream::flush)
+    }
+
+    override fun close() {
+        targets.forEach(OutputStream::close)
+    }
 }

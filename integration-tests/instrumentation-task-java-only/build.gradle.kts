@@ -1,5 +1,0 @@
-tasks {
-    integrationTest {
-        dependsOn(assemble)
-    }
-}

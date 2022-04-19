@@ -37,11 +37,4 @@ subprojects {
         sinceBuild.set(properties("pluginSinceBuild"))
         untilBuild.set(properties("pluginUntilBuild"))
     }
-
-    tasks.create("integrationTest") {
-        group = "verification"
-    }
 }
-
-val TaskContainer.integrationTest: TaskProvider<Task>
-    get() = named<Task>("integrationTest")

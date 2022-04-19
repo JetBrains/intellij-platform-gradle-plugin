@@ -73,12 +73,6 @@ jobs:
         with:
           gradle-version: ${{ matrix.gradleVersion }}
 
-      - name: Run Gradle task
-        working-directory: ${{ github.workspace }}/integration-tests
-        run: |
-          mkdir -p ./${{ matrix.module }}/build
-          gradle :${{ matrix.module }}:integrationTest --info --console=plain | tee ./${{ matrix.module }}/build/integrationTestOutput.txt
-
       - name: Run Verification
         working-directory: ${{ github.workspace }}/integration-tests
-        run: ./${{ matrix.module }}/verify.main.kts ./${{ matrix.module }} ./${{ matrix.module }}/build/integrationTestOutput.txt
+        run: ./${{ matrix.module }}/verify.main.kts `whereis -q gradle`
