@@ -68,24 +68,18 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
-            task printMainRuntimeClassPath { 
-                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
-            }
-            task printMainCompileClassPath { 
-                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
-            }
         """)
+        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
 
-        val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
-        result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
-            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
+        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
+            "printMainRuntimeClassPath",
+            "printMainCompileClassPath"
+        )
 
-            assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
-            assertAddedToCompileClassPathOnly(
-                compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
-            )
-        }
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
+        assertAddedToCompileClassPathOnly(
+            compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
+        )
     }
 
     @Test
@@ -94,38 +88,122 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
-
-            task printMainRuntimeClassPath { 
-                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
-            }
-            task printMainCompileClassPath { 
-                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
-            }
         """)
+        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
 
-        val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
-        result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
+            "printMainRuntimeClassPath",
+            "printMainCompileClassPath"
+        )
 
-            assertTrue(compileClasspath.contains("markdown.jar"))
-            assertTrue(compileClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
-            assertTrue(compileClasspath.contains("kotlin-stdlib-jdk8.jar"))
-            assertFalse(runtimeClasspath.contains("markdown.jar"))
-            assertFalse(runtimeClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
-            assertFalse(runtimeClasspath.contains("kotlin-stdlib-jdk8.jar"))
-        }
+        assertTrue(compileClasspath.contains("markdown.jar"))
+        assertTrue(compileClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
+        assertTrue(compileClasspath.contains("kotlin-stdlib-jdk8.jar"))
+        assertFalse(runtimeClasspath.contains("markdown.jar"))
+        assertFalse(runtimeClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
+        assertFalse(runtimeClasspath.contains("kotlin-stdlib-jdk8.jar"))
     }
 
-    private fun assertAddedToCompileClassPathOnly(compileClasspath: String, runtimeClasspath: String, jarName: String) {
-        assertTrue(
-            compileClasspath.contains(jarName),
-            "Expected $jarName to be included in the compile classpath: $compileClasspath"
+    @Test
+    fun `add local plugin to compile only classpath`() {
+        val repositoryInstance = PluginRepositoryFactory.create(IntelliJPluginConstants.MARKETPLACE_HOST, null)
+        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
+
+        buildFile.groovy("""
+            intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath ?: "")}"]
+        """)
+        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+
+        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
+            "printMainRuntimeClassPath",
+            "printMainCompileClassPath"
         )
-        assertFalse(
-            runtimeClasspath.contains(jarName),
-            "Expected $jarName to not be included in the runtime classpath: $runtimeClasspath"
+
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "intellij-postfix.jar")
+    }
+
+    @Test
+    fun `add builtin plugin dependencies to classpath`() {
+        buildFile.groovy("""
+            intellij.plugins = ['com.jetbrains.changeReminder']
+        """)
+        buildFile.appendPrintTestRuntimeAndCompileClassPathsTasks()
+
+        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
+            "printTestRuntimeClassPath",
+            "printTestCompileClassPath"
         )
+
+        assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "vcs-changeReminder.jar")
+        assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "git4idea.jar")
+    }
+
+    @Test
+    fun `add ant dependencies to classpath`() {
+        buildFile.appendPrintTestRuntimeAndCompileClassPathsTasks()
+
+        val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
+        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") } ?: ""
+        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") } ?: ""
+
+        assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "ant.jar")
+    }
+
+    @Test
+    fun `use test compile classpath for non-builtin plugins if Gradle lte 2_12`() {
+        writeTestFile()
+
+        buildFile.groovy("""
+            intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
+        """)
+        buildFile.appendPrintTestRuntimeAndCompileClassPathsTasks()
+
+        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
+            "printTestRuntimeClassPath",
+            "printTestCompileClassPath"
+        )
+
+        assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "copyright.jar")
+        assertAddedToCompileAndRuntimeClassPaths(
+            compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
+        )
+    }
+
+    @Test
+    fun `resolve plugins in Gradle lte 4_3`() {
+        writeTestFile()
+
+        buildFile.groovy("""
+            intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
+        """)
+        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+
+        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
+            "printMainRuntimeClassPath",
+            "printMainCompileClassPath"
+        )
+
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
+        assertAddedToCompileClassPathOnly(
+            compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
+        )
+    }
+
+    @Test
+    fun `resolve bundled plugin by its id`() {
+        writeTestFile()
+
+        buildFile.groovy("""
+            intellij.plugins = ['com.intellij.copyright']
+        """)
+        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+
+        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
+            "printMainRuntimeClassPath",
+            "printMainCompileClassPath"
+        )
+
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
     }
 
     @Test
@@ -206,206 +284,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun File.appendPrintPluginSourceArtifactsTask(pluginComponentId: String) {
-        this.groovy(
-            """
-                import org.gradle.api.artifacts.result.UnresolvedArtifactResult
-
-                task printPluginSourceArtifacts {
-                  doLast {
-                    def pluginComponentId = configurations.compileClasspath
-                      .resolvedConfiguration.lenientConfiguration
-                      .allModuleDependencies
-                      .collect { it.moduleArtifacts }
-                      .flatten()
-                      .collect { it.id.componentIdentifier }
-                      .find { it.displayName.startsWith("$pluginComponentId") }
-        
-                    dependencies.createArtifactResolutionQuery()
-                      .forComponents([pluginComponentId])
-                      .withArtifacts(JvmLibrary.class, SourcesArtifact.class)
-                      .execute()
-                      .resolvedComponents
-                      .collect { it.getArtifacts(SourcesArtifact.class) }
-                      .flatten()
-                      .findAll {
-                         if (it instanceof UnresolvedArtifactResult) {
-                           println "WARNING:"
-                           it.failure.printStackTrace()
-                           return false
-                        }
-                        return true
-                      }
-                      .each { println("source artifact:" + it.id.displayName) }
-                  }
-                }
-            """
-        )
-    }
-
-    private fun assertContainsOnlySourceArtifacts(result: BuildResult, vararg expectedSourceArtifacts: String) {
-        val sourceArtifactLinePrefix = "source artifact:"
-        result.output.lines().let { lines ->
-            val actualSourceArtifacts = lines
-                .filter { it.startsWith(sourceArtifactLinePrefix) }
-                .map { it.removePrefix(sourceArtifactLinePrefix) }
-            assertEquals(
-                expectedSourceArtifacts.asList(),
-                actualSourceArtifacts,
-                "Expected and actual source artifacts differ"
-            )
-        }
-    }
-
-    @Test
-    fun `add local plugin to compile only classpath`() {
-        val repositoryInstance = PluginRepositoryFactory.create(IntelliJPluginConstants.MARKETPLACE_HOST, null)
-        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
-
-        buildFile.groovy("""
-            intellij.plugins = ["copyright", "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
-           
-            task printMainRuntimeClassPath {
-                doLast { println "runtimeOnly: " + sourceSets.main.runtimeClasspath.asPath }
-            }
-            task printMainCompileClassPath {
-                doLast { println "implementation: " + sourceSets.main.compileClasspath.asPath }
-            }
-        """)
-
-        val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
-        result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
-
-            assertTrue(compileClasspath.contains("intellij-postfix.jar"))
-            assertFalse(runtimeClasspath.contains("intellij-postfix.jar"))
-        }
-    }
-
-    @Test
-    fun `add builtin plugin dependencies to classpath`() {
-        buildFile.groovy("""
-            intellij.plugins = ["com.jetbrains.changeReminder"]
-            task printTestRuntimeClassPath {
-                doLast { println "runtimeOnly: " + sourceSets.test.runtimeClasspath.asPath }
-            }
-            task printTestCompileClassPath {
-                doLast { println "implementation: " + sourceSets.test.compileClasspath.asPath }
-            }
-        """)
-
-        val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
-        result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
-
-            assertTrue(compileClasspath.contains("vcs-changeReminder.jar"))
-            assertTrue(runtimeClasspath.contains("vcs-changeReminder.jar"))
-            assertTrue(compileClasspath.contains("git4idea.jar"))
-            assertTrue(runtimeClasspath.contains("git4idea.jar"))
-        }
-    }
-
-    @Test
-    fun `add ant dependencies to classpath`() {
-        buildFile.groovy("""
-            task printTestRuntimeClassPath {
-                doLast { println "runtimeOnly: " + sourceSets.test.runtimeClasspath.asPath }
-            }
-            
-            task printTestCompileClassPath {
-                doLast { println "implementation: " + sourceSets.test.compileClasspath.asPath }
-            }
-        """)
-
-        val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
-        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
-        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()
-
-        assertTrue(compileClasspath.contains("ant.jar"))
-        assertTrue(runtimeClasspath.contains("ant.jar"))
-    }
-
-    @Test
-    fun `use test compile classpath for non-builtin plugins if Gradle lte 2_12`() {
-        writeTestFile()
-
-        buildFile.groovy("""
-            intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
-            
-            task printTestRuntimeClassPath {
-                doLast { println 'runtimeOnly: ' + sourceSets.test.runtimeClasspath.asPath }
-            }
-            task printTestCompileClassPath {
-                doLast { println 'implementation: ' + sourceSets.test.compileClasspath.asPath }
-            }
-        """)
-
-        val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
-        result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
-            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
-
-            assertTrue(compileClasspath.contains("copyright.jar"))
-            assertTrue(runtimeClasspath.contains("copyright.jar"))
-            assertTrue(compileClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
-            assertTrue(runtimeClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
-        }
-    }
-
-    @Test
-    fun `resolve plugins in Gradle lte 4_3`() {
-        writeTestFile()
-
-        buildFile.groovy("""
-            intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
-            
-            task printMainRuntimeClassPath {
-                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
-            }
-            task printMainCompileClassPath {
-                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
-            }
-        """)
-
-        val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
-        result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
-            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
-
-            assertTrue(compileClasspath.contains("copyright.jar"))
-            assertFalse(runtimeClasspath.contains("copyright.jar"))
-            assertTrue(compileClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
-            assertFalse(runtimeClasspath.contains("org.jetbrains.postfixCompletion-0.8-beta.jar"))
-        }
-    }
-
-    @Test
-    fun `resolve bundled plugin by its id`() {
-        writeTestFile()
-
-        buildFile.groovy("""
-            intellij.plugins = ['com.intellij.copyright']
-
-            task printMainRuntimeClassPath {
-                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
-            }
-            task printMainCompileClassPath {
-                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
-            }            
-        """)
-
-        val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
-        result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
-            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
-
-            assertTrue(compileClasspath.contains("copyright.jar"))
-            assertFalse(runtimeClasspath.contains("copyright.jar"))
-        }
-    }
-
     @Test
     fun `add require plugin id parameter in test tasks`() {
         writeTestFile()
@@ -476,6 +354,116 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         assertEquals("$sandboxPath/config-test", adjustWindowsPath(testCommand.properties["idea.config.path"].orEmpty()))
         assertEquals("$sandboxPath/system-test", adjustWindowsPath(testCommand.properties["idea.system.path"].orEmpty()))
         assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"].orEmpty()))
+    }
+
+    private fun File.appendPrintMainRuntimeAndCompileClassPathsTasks() {
+        this.groovy(
+            """
+            task printMainRuntimeClassPath { 
+                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
+            }
+            task printMainCompileClassPath { 
+                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
+            }
+            """
+        )
+    }
+
+    private fun File.appendPrintTestRuntimeAndCompileClassPathsTasks() {
+        this.groovy(
+            """
+            task printTestRuntimeClassPath { 
+                doLast { println 'runtimeOnly: ' + sourceSets.test.runtimeClasspath.asPath }
+            }
+            task printTestCompileClassPath { 
+                doLast { println 'implementation: ' + sourceSets.test.compileClasspath.asPath }
+            }
+            """
+        )
+    }
+
+    private fun buildAndGetClassPaths(vararg tasks: String):Pair<String, String> {
+        val result = build(*tasks)
+        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") } ?: ""
+        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") } ?: ""
+        return Pair(compileClasspath, runtimeClasspath)
+    }
+
+    private fun assertAddedToCompileClassPathOnly(compileClasspath: String, runtimeClasspath: String, jarName: String) {
+        assertTrue(
+            compileClasspath.contains(jarName),
+            "Expected $jarName to be included in the compile classpath: $compileClasspath"
+        )
+        assertFalse(
+            runtimeClasspath.contains(jarName),
+            "Expected $jarName to not be included in the runtime classpath: $runtimeClasspath"
+        )
+    }
+
+    private fun assertAddedToCompileAndRuntimeClassPaths(
+        compileClasspath: String,
+        runtimeClasspath: String,
+        jarName: String
+    ) {
+        assertTrue(
+            compileClasspath.contains(jarName),
+            "Expected $jarName to be included in the compile classpath: $compileClasspath"
+        )
+        assertTrue(
+            runtimeClasspath.contains(jarName),
+            "Expected $jarName to be included in the runtime classpath: $runtimeClasspath"
+        )
+    }
+
+    private fun File.appendPrintPluginSourceArtifactsTask(pluginComponentId: String) {
+        this.groovy(
+            """
+                import org.gradle.api.artifacts.result.UnresolvedArtifactResult
+
+                task printPluginSourceArtifacts {
+                  doLast {
+                    def pluginComponentId = configurations.compileClasspath
+                      .resolvedConfiguration.lenientConfiguration
+                      .allModuleDependencies
+                      .collect { it.moduleArtifacts }
+                      .flatten()
+                      .collect { it.id.componentIdentifier }
+                      .find { it.displayName.startsWith("$pluginComponentId") }
+        
+                    dependencies.createArtifactResolutionQuery()
+                      .forComponents([pluginComponentId])
+                      .withArtifacts(JvmLibrary.class, SourcesArtifact.class)
+                      .execute()
+                      .resolvedComponents
+                      .collect { it.getArtifacts(SourcesArtifact.class) }
+                      .flatten()
+                      .findAll {
+                         if (it instanceof UnresolvedArtifactResult) {
+                           println "WARNING:"
+                           it.failure.printStackTrace()
+                           return false
+                        }
+                        return true
+                      }
+                      .each { println("source artifact:" + it.id.displayName) }
+                  }
+                }
+            """
+        )
+    }
+
+    private fun assertContainsOnlySourceArtifacts(result: BuildResult, vararg expectedSourceArtifacts: String) {
+        val sourceArtifactLinePrefix = "source artifact:"
+        result.output.lines().let { lines ->
+            val actualSourceArtifacts = lines
+                .filter { it.startsWith(sourceArtifactLinePrefix) }
+                .map { it.removePrefix(sourceArtifactLinePrefix) }
+            assertEquals(
+                expectedSourceArtifacts.asList(),
+                actualSourceArtifacts,
+                "Expected and actual source artifacts differ"
+            )
+        }
     }
 
     private fun parseCommand(output: String) = output.lines()
