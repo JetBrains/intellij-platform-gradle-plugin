@@ -1,6 +1,9 @@
 # Changelog
 
 ## next
+- Set minimal supported Gradle version to 6.7
+
+## 1.5.3
 - Updated dependencies marked as vulnerable [#459](../../issues/459)
 - Fixed code instrumentation disabling via `tasks.instrumentCode.enabled`
 - `instrumentCode` task – limit the scope of the task to `sourceSets.main.java` [#459](../../issues/459)

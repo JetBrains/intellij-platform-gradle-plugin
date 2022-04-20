@@ -12,7 +12,7 @@
 
 > 
 > **Important:**
-> - This project requires **Gradle 6.6** or newer, however it is recommended to **use the [latest Gradle available](https://gradle.org/releases/)**. Update it with:
+> - This project requires **Gradle 6.7** or newer, however it is recommended to **use the [latest Gradle available](https://gradle.org/releases/)**. Update it with:
 >   ```bash
 >   ./gradlew wrapper --gradle-version=VERSION
 >   ```
