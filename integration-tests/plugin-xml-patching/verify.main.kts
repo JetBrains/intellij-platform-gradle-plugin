@@ -2,9 +2,9 @@
 
 @file:Import("../verify.utils.kts")
 
-val logs = runGradleTask("patchPluginXml")
-
-logs matchesRegex ":plugin-xml-patching:patchPluginXml .*? completed."
+runGradleTask("patchPluginXml").let { logs ->
+    logs matchesRegex ":plugin-xml-patching:patchPluginXml .*? completed."
+}
 
 buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml"
 

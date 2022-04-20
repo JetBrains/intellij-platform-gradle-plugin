@@ -96,13 +96,8 @@ patchedPluginXml containsText "<idea-version since-build=\"2021.1\" until-build=
 
 ## Running Integration Tests locally
 
-Open the Gradle Tool Window, click the `+` button, and point to the `integration-tests` directory.
-
-To perform a test of a specific subproject, navigate to `integration-tests > integration-tests (root) > my-subproject > Tasks > other > integrationTest` or use the `Run Anything...` action with `my-subproject:integrationTest` Gradle task directly.
-Note, if you run Gradle tasks from CLI, your working directory should be set to `/integration-tests` to keep all dependencies working.
-
 To invoke the `verify.main.kts` script, navigate to the file and click the green arrow on the first script line.
-It'll fail as it requires the path to the logs file provided; however, it opens the Terminal Tool Window when you can re-run it with the required argument.
+
 
 # Integration Tests List
 
