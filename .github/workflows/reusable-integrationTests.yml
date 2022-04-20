@@ -75,4 +75,4 @@ jobs:
 
       - name: Run Verification
         working-directory: ${{ github.workspace }}/integration-tests
-        run: ./${{ matrix.module }}/verify.main.kts `whereis -q gradle`
+        run: ./${{ matrix.module }}/verify.main.kts `which gradle`
