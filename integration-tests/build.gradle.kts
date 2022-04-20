@@ -27,6 +27,12 @@ subprojects {
         mavenCentral()
     }
 
+    java {
+        toolchain {
+            languageVersion.set(JavaLanguageVersion.of(11))
+        }
+    }
+
     configure<IntelliJPluginExtension> {
         type.set(properties("platformType"))
         version.set(properties("platformVersion"))
