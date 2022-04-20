@@ -27,9 +27,9 @@ val patchedPluginXml: String by lazy {
         .let(Files::readString)
 }
 
-fun runGradleTask(task: String) =
+fun runGradleTask(vararg tasks: String) =
     ProcessBuilder()
-        .command(gradle, task, "--info")
+        .command(gradle, *tasks, "--info")
         .directory(workingDirPath.toAbsolutePath().toFile())
         .start()
         .run {
