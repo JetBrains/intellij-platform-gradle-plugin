@@ -1,36 +1,50 @@
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.OutputStream
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
 
-val workingDirPath by lazy {
-    Path.of("")
-        .toAbsolutePath()
-        .exitIf(Files::notExists) { "Working dir does not exist: ${toAbsolutePath()}" }
-}
+// Path to the integration tests single project, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/
+val Path.projectDirectory
+    get() = toAbsolutePath().parent
 
-val (gradleArg) = args.toList() + listOf(null)
-val gradle = gradleArg ?: workingDirPath.parent.parent.resolve("gradlew").toString()
+// Path to the integration tests root directory, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/
+val Path.testsRootDirectory
+    get() = projectDirectory.parent
 
-val buildDirectory by lazy {
-    workingDirPath
-        .resolve("build")
-        .exitIf(Files::notExists) { "build directory does not exist: ${toAbsolutePath()}" }
-}
+// Path to the Gradle IntelliJ Plugin root directory, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/
+val Path.rootDirectory
+    get() = testsRootDirectory.parent
 
-val patchedPluginXml: String by lazy {
-    buildDirectory
+// Path to the build directory of the integration tests single project, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/
+val Path.buildDirectory
+    get() = projectDirectory.resolve("build").exitIf(Files::notExists) { "build directory does not exist: ${toAbsolutePath()}" }
+
+// Path to the Gradle Wrapper – uses first argument provided to the script or falls back to the project instance, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/gradlew
+val Path.gradleWrapper
+    get() = args.firstOrNull() ?: rootDirectory.resolve("gradlew")
+
+// Path to the patched `plugin.xml` file located within the build directory of the integration tests single project, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml
+val Path.patchedPluginXml
+    get() = buildDirectory
         .resolve("patchedPluginXmlFiles/plugin.xml")
         .exitIf(Files::notExists) { "plugin.xml file does not exist: ${toAbsolutePath()}" }
         .let(Files::readString)
-}
 
-fun runGradleTask(vararg tasks: String) =
+// Runs the given Gradle task(s) within the current integration test.
+// Provides logs to STDOUT and as a returned value for the further assertions.
+fun Path.runGradleTask(vararg tasks: String) =
     ProcessBuilder()
-        .command(gradle, *tasks, "--info")
-        .directory(workingDirPath.toAbsolutePath().toFile())
+        .command(gradleWrapper.toString(), *tasks, "--info")
+        .directory(testsRootDirectory.toFile())
         .start()
         .run {
             val stdoutBuffer = ByteArrayOutputStream()
@@ -76,19 +90,13 @@ infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
     zip.getInputStream(entry).bufferedReader().use { it.readText() }
 }
 
-
 class TeeOutputStream(vararg targets: OutputStream) : OutputStream() {
 
-    val targets = targets.toList()
-    override fun write(b: Int) {
-        targets.forEach { it.write(b) }
-    }
+    private val targets = targets.toList()
 
-    override fun flush() {
-        targets.forEach(OutputStream::flush)
-    }
+    override fun write(b: Int) = targets.forEach { it.write(b) }
 
-    override fun close() {
-        targets.forEach(OutputStream::close)
-    }
+    override fun flush() = targets.forEach(OutputStream::flush)
+
+    override fun close() = targets.forEach(OutputStream::close)
 }
