@@ -112,7 +112,7 @@ tasks {
     }
 
     test {
-        val testGradleHomePath = "$buildDir/testGradleHome"
+        val testGradleHomePath = System.getenv("TEST_GRADLE_USER_HOME") ?: "$buildDir/testGradleHome"
         doFirst {
             File(testGradleHomePath).mkdir()
         }
