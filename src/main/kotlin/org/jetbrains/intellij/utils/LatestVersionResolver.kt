@@ -4,7 +4,6 @@ import org.gradle.api.GradleException
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.model.MavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -24,8 +23,8 @@ class LatestVersionResolver {
                     (this as HttpURLConnection).instanceFollowRedirects = false
                     getHeaderField("Location").split('/').last().removePrefix("v")
                 }
-            } catch (e: IOException) {
-                throw GradleException("Cannot resolve the latest $subject version")
+            } catch (e: Exception) {
+                throw GradleException("Cannot resolve the latest $subject version", e)
             }
         }
     }
