@@ -17,12 +17,10 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
+    env:
+      TEST_GRADLE_USER_HOME: ${{ runner.os == "Windows" && "C:\\testGradleHome" || "" }}
 
     steps:
-      - name: Set Windows Specific Test Gradle User Home Path
-        if: runner.os == "Windows"
-        env:
-          TEST_GRADLE_USER_HOME: "C:\\testGradleHome"
 
       - name: Fetch Sources
         uses: actions/checkout@v3

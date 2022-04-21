@@ -112,7 +112,8 @@ tasks {
     }
 
     test {
-        val testGradleHomePath = System.getenv("TEST_GRADLE_USER_HOME") ?: "$buildDir/testGradleHome"
+        val testGradleHomePath = System.getenv("TEST_GRADLE_USER_HOME").takeIf { it.isNotBlank() }
+            ?: "$buildDir/testGradleHome"
         doFirst {
             File(testGradleHomePath).mkdir()
         }
