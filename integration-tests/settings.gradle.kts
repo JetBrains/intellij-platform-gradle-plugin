@@ -17,6 +17,12 @@ pluginManagement {
 
 rootProject.name = "integration-tests"
 
+// Include current soources if building project locally.
+// On CI, `mavenLocal` is used instead for the sake of performance.
+if (!System.getenv().containsKey("CI")) {
+    includeBuild("..")
+}
+
 Files.list(rootDir.toPath())
     .filter { Files.isDirectory(it) }
     .map { it.fileName.toString() }
