@@ -6,17 +6,21 @@ on:
 jobs:
 
   gradleValidation:
+    name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
   unitTests:
+    name: Unit Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
 
   integrationTests:
+    name: Integration Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-integrationTests.yml
 
   codeInspection:
+    name: Code Inspection
     needs: gradleValidation
     uses: ./.github/workflows/reusable-codeInspection.yml
 

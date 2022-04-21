@@ -1,7 +1,6 @@
 name: Reusable Gradle Wrapper Test
 
-on:
-  workflow_call:
+on: [workflow_call]
 
 jobs:
   gradleValidation:

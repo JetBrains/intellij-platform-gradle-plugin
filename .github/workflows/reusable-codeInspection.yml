@@ -1,7 +1,6 @@
 name: Reusable test workflow
 
-on:
-  workflow_call:
+on: [workflow_call]
 
 jobs:
   codeInspection:

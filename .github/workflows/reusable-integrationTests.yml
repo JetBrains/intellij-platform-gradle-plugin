@@ -1,7 +1,6 @@
 name: Reusable Integration Tests
 
-on:
-  workflow_call:
+on: [workflow_call]
 
 jobs:
   subtasksList:
@@ -37,7 +36,7 @@ jobs:
           path: ~/.m2/repository
 
   integrationTests:
-    name: Integration Tests
+    name: ${{ matrix.module }} / Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
     needs: subtasksList
     runs-on: ${{ matrix.os }}
     strategy:

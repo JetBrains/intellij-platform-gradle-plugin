@@ -1,11 +1,10 @@
 name: Reusable test workflow
 
-on:
-  workflow_call:
+on: [workflow_call]
 
 jobs:
   unitTests:
-    name: Unit Tests
+    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

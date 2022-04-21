@@ -1,13 +1,14 @@
 name: Integration Tests
 
-on:
-  workflow_dispatch:
+on: [workflow_dispatch]
 
 jobs:
 
   gradleValidation:
+    name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
   integrationTests:
+    name: Integration Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-integrationTests.yml
