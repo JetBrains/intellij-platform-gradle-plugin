@@ -10,13 +10,13 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - 6.7
-          - 6.9.2
+#          - 6.7 FIXME: uncomment
+#          - 6.9.2 FIXME: uncomment
           - 7.4.2
         os:
           - windows-latest
-          - ubuntu-latest
-          - macos-latest
+#          - ubuntu-latest
+#          - macos-latest FIXME: uncomment
 
     steps:
 
