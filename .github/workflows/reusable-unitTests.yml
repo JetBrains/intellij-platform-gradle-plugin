@@ -18,7 +18,7 @@ jobs:
           - ubuntu-latest
           - macos-latest
     env:
-      TEST_GRADLE_USER_HOME: ${{ runner.os == "Windows" && "C:\\testGradleHome" || "" }}
+      TEST_GRADLE_USER_HOME: ${{ matrix.os == "windows-latest" && "C:\\testGradleHome" || "" }}
 
     steps:
 
