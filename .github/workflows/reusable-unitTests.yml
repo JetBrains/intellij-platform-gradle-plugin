@@ -17,8 +17,6 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
-    env:
-      TEST_GRADLE_USER_HOME: ${{ matrix.os == "windows-latest" && "C:\\testGradleHome" || "" }}
 
     steps:
 
@@ -32,7 +30,7 @@ jobs:
           java-version: 11
 
       - name: Run Tests
-        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}"
+        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
 
       - name: Collect Test Results
         if: ${{ failure() }}
