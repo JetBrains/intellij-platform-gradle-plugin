@@ -5,6 +5,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.plugins.BasePlugin
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
+import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
