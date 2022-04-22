@@ -37,13 +37,25 @@ val Path.patchedPluginXml
     get() = buildDirectory
         .resolve("patchedPluginXmlFiles/plugin.xml")
         .exitIf(Files::notExists) { "plugin.xml file does not exist: ${toAbsolutePath()}" }
-        .let(Files::readString)
+
+// Path to the generated plugin ZIP achive located in build/distrubutions directory, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/distributions/plugin-xml-patching-1.0.0.zip
+val Path.pluginArchive
+    get() = buildDirectory
+        .resolve("distributions/${projectDirectory.fileName}-1.0.0.zip")
+
+// Path to the generated plugin JAR achive located in build/libs directory, like:
+// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/libs/plugin-xml-patching-1.0.0.jar
+val Path.pluginJar
+    get() = buildDirectory
+        .resolve("libs/${projectDirectory.fileName}-1.0.0.jar")
+        .exitIf(Files::notExists) { "Plugin jar file does not exist: ${toAbsolutePath()}" }
 
 // Runs the given Gradle task(s) within the current integration test.
 // Provides logs to STDOUT and as a returned value for the further assertions.
 fun Path.runGradleTask(vararg tasks: String) =
     ProcessBuilder()
-        .command(gradleWrapper.toString(), *tasks, "--info")
+        .command(gradleWrapper.toString(), *tasks.map { ":${projectDirectory.fileName}:$it" }.toTypedArray(), "--info")
         .directory(testsRootDirectory.toFile())
         .start()
         .run {
@@ -66,6 +78,10 @@ fun <T> T.exitIf(block: T.() -> Boolean, message: T.() -> String = { "" }): T {
 
 infix fun String.containsText(string: String) {
     assert(contains(string))
+}
+
+infix fun Path.containsText(string: String) {
+    Files.readString(this).containsText(string)
 }
 
 infix fun String.matchesRegex(regex: String) {

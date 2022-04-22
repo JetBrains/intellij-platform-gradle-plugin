@@ -12,5 +12,3 @@ with(__FILE__.toPath()) {
     patchedPluginXml containsText "<version>1.0.0</version>"
     patchedPluginXml containsText "<idea-version since-build=\"211\" until-build=\"213.*\" />"
 }
-
-
