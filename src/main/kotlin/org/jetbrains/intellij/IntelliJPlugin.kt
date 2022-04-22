@@ -122,10 +122,13 @@ open class IntelliJPlugin : Plugin<Project> {
         if (project.gradle.startParameter.isOffline) {
             return
         }
-        val version = getVersion()
+        val version = getVersion()?.let(Version::parse) ?: Version()
         val latestVersion = LatestVersionResolver.fromGitHub(IntelliJPluginConstants.NAME, IntelliJPluginConstants.GITHUB_REPOSITORY)
-        if (Version.parse(version) < Version.parse(latestVersion)) {
-            warn(context, "${IntelliJPluginConstants.NAME} is outdated: $version. Update `${IntelliJPluginConstants.ID}` to: $latestVersion")
+        if (version < Version.parse(latestVersion)) {
+            warn(
+                context,
+                "${IntelliJPluginConstants.NAME} is outdated: $version. Update `${IntelliJPluginConstants.ID}` to: $latestVersion"
+            )
         }
     }
 
@@ -371,7 +374,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     "Build-JVM" to Jvm.current(),
                     "Version" to project.version,
                     "Build-Plugin" to IntelliJPluginConstants.NAME,
-                    "Build-Plugin-Version" to getVersion(),
+                    "Build-Plugin-Version" to (getVersion() ?: "0.0.0"),
                     "Build-OS" to OperatingSystem.current(),
                     "Build-SDK" to when (extension.localPath.orNull) {
                         null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
@@ -877,7 +880,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                         .unmarshal(url.openStream())
                                         .versioning?.versions?.let { versions ->
                                             versions
-                                                .map(Version.Companion::parse)
+                                                .map(Version::parse)
                                                 .filter { it <= version }
                                                 .maxOf { it }.version
                                         }
@@ -1337,10 +1340,13 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun getVersion() =
-        IntelliJPlugin::class.java.run { getResource("$simpleName.class")?.toString() }?.takeIf { it.startsWith("jar") }?.runCatching {
-            val manifestPath = substring(0, lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF"
-            Manifest(URL(manifestPath).openStream()).mainAttributes.getValue("Version")
-        }?.getOrNull() ?: ""
+        IntelliJPlugin::class.java
+            .run { getResource("$simpleName.class") }
+            .runCatching {
+                val path = this?.path?.takeIf { it.startsWith("jar") } ?: return@runCatching null
+                val manifestPath = path.substring(0, path.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF"
+                Manifest(URL(manifestPath).openStream()).mainAttributes.getValue("Version")
+            }.getOrNull()
 
     private fun Project.idea(
         action: IdeaModel.() -> Unit,

@@ -12,7 +12,6 @@ import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.Version.Companion.parse
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
@@ -70,9 +69,9 @@ open class ListProductsReleasesTask @Inject constructor(
             androidStudioUpdatePath.get().let(it::fetch)
         } ?: AndroidStudioReleases()
 
-        val since = (sinceVersion.orNull ?: sinceBuild.get()).run(::parse)
+        val since = (sinceVersion.orNull ?: sinceBuild.get()).run(Version::parse)
         val until = (untilVersion.orNull ?: untilBuild.orNull.takeUnless { it.isNullOrBlank() || sinceVersion.isPresent })?.run {
-            replace("*", "9999").run(::parse)
+            replace("*", "9999").run(Version::parse)
         }
         val types = types.get()
         val channels = releaseChannels.get()
@@ -97,7 +96,7 @@ open class ListProductsReleasesTask @Inject constructor(
             .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.toUpperCase())) }
             .flatMap { (type, channel) ->
                 channel.builds.map {
-                    type to (it.version.run(::parse) to it.number.run(::parse))
+                    type to (it.version.run(Version::parse) to it.number.run(Version::parse))
                 }.asSequence()
             }
             .filter { (_, version) -> testVersion(version.first, version.second) }
@@ -114,8 +113,8 @@ open class ListProductsReleasesTask @Inject constructor(
             true -> androidStudioReleases.items
                 .asSequence()
                 .filter { item ->
-                    val version = item.platformVersion?.let(::parse)
-                    val build = item.platformBuild?.let(::parse)
+                    val version = item.platformVersion?.let(Version::parse)
+                    val build = item.platformBuild?.let(Version::parse)
                     testVersion(version, build)
                 }
                 .filter { channels.contains(Channel.valueOf(it.channel.toUpperCase())) }

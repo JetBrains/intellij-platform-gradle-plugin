@@ -106,7 +106,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             classpath += objectFactory.fileCollection().from(it)
         }
 
-        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last().let(Version.Companion::parse)
+        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse)
         val build203 = Version.parse("203.0")
         val build221 = Version.parse("221.0")
 
