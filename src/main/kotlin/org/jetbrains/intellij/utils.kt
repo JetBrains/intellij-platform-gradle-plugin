@@ -159,7 +159,7 @@ fun info(logCategory: String? = null, message: String, e: Throwable? = null) = l
 fun debug(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, logCategory, message, e)
 
 private fun log(level: LogLevel, logCategory: String?, message: String, e: Throwable?) {
-    val category = "gradle-intellij-plugin ${logCategory ?: ""}".trim()
+    val category = "gradle-intellij-plugin ${logCategory.orEmpty()}".trim()
     val logger = Logging.getLogger(IntelliJPlugin::class.java)
     if (e != null && level != LogLevel.ERROR && !logger.isDebugEnabled) {
         logger.log(level, "[$category] $message. Run with --debug option to get more log output.")
@@ -168,9 +168,9 @@ private fun log(level: LogLevel, logCategory: String?, message: String, e: Throw
     }
 }
 
-fun Project.logCategory(): String = path
+fun Project.logCategory(): String = path + name.takeIf { it != path }.orEmpty()
 
-fun Task.logCategory(): String = path
+fun Task.logCategory(): String = project.logCategory() + path
 
 fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): IdePlugin? {
     val extractDirectory = createTempDirectory("tmp")
