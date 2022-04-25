@@ -23,10 +23,9 @@ if (!System.getenv().containsKey("CI")) {
     includeBuild("..")
 }
 
-Files.list(rootDir.toPath())
-    .filter { Files.isDirectory(it) }
-    .map { it.fileName.toString() }
-    .filter { !it.startsWith(".") }
-    .forEach {
-        include(it)
-    }
+// Avoid including all subproject as all of them will have to be preconfigured by Gradle.
+// Load only the givem subproject provided with INTEGRATION_TEST environment variable.
+if (!System.getenv().containsKey("INTEGRATION_TEST")) {
+    throw GradleException("INTEGRATION_TEST environment variable has to be provided with the integration test subroject name specified.")
+}
+include(System.getenv().get("INTEGRATION_TEST"))

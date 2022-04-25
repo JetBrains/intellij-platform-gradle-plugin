@@ -1,5 +1,4 @@
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.OutputStream
 import java.nio.file.FileSystems
 import java.nio.file.Files
@@ -10,6 +9,11 @@ import java.util.zip.ZipFile
 // /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/
 val Path.projectDirectory
     get() = toAbsolutePath().parent
+
+// Integration test name extracted from the project directory, like:
+// plugin-xml-patching
+val Path.projectName
+    get() = projectDirectory.fileName.toString()
 
 // Path to the integration tests root directory, like:
 // /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/
@@ -42,21 +46,29 @@ val Path.patchedPluginXml
 // /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/distributions/plugin-xml-patching-1.0.0.zip
 val Path.pluginArchive
     get() = buildDirectory
-        .resolve("distributions/${projectDirectory.fileName}-1.0.0.zip")
+        .resolve("distributions/$projectName-1.0.0.zip")
 
 // Path to the generated plugin JAR achive located in build/libs directory, like:
 // /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/libs/plugin-xml-patching-1.0.0.jar
 val Path.pluginJar
     get() = buildDirectory
-        .resolve("libs/${projectDirectory.fileName}-1.0.0.jar")
+        .resolve("libs/$projectName-1.0.0.jar")
         .exitIf(Files::notExists) { "Plugin jar file does not exist: ${toAbsolutePath()}" }
 
 // Runs the given Gradle task(s) within the current integration test.
 // Provides logs to STDOUT and as a returned value for the further assertions.
-fun Path.runGradleTask(vararg tasks: String) =
+fun Path.runGradleTask(projectProperties: Map<String, Any> = emptyMap(), vararg tasks: String) =
     ProcessBuilder()
-        .command(gradleWrapper.toString(), *tasks.map { ":${projectDirectory.fileName}:$it" }.toTypedArray(), "--info")
-        .directory(testsRootDirectory.toFile())
+        .command(
+            gradleWrapper.toString(),
+            *projectProperties.map { "-P${it.key}=${it.value}" }.toTypedArray(),
+            *tasks.map { ":$projectName:$it" }.toTypedArray(),
+            "--info",
+        )
+        .also {
+            it.environment().put("INTEGRATION_TEST", projectName)
+        }
+        .directory(projectDirectory.toFile())
         .start()
         .run {
             val stdoutBuffer = ByteArrayOutputStream()
