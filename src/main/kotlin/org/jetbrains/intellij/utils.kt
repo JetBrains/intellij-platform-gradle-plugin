@@ -121,11 +121,12 @@ fun ideBuildNumber(ideDirectory: File) = (
         ?: File(ideDirectory, "build.txt")
     ).readText().trim()
 
+private val json = Json { ignoreUnknownKeys = true }
 fun ideProductInfo(ideDirectory: File) = (
     File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
         ?: File(ideDirectory, "product-info.json")
     )
-    .runCatching { Json { ignoreUnknownKeys = true }.decodeFromString<ProductInfo>(readText()) }
+    .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
 
 fun ideaDir(path: String) = File(path).let {
