@@ -40,10 +40,10 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             "printTestRuntimeClassPath",
             "printMainRuntimeClassPath",
         ).output.lines().let { lines ->
-            val mainClasspath = lines.find { it.startsWith("implementation:") } ?: ""
-            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
-            val testClasspath = lines.find { it.startsWith("testImplementation:") } ?: ""
-            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") } ?: ""
+            val mainClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+            val testClasspath = lines.find { it.startsWith("testImplementation:") }.orEmpty()
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") }.orEmpty()
 
             assertTrue(mainClasspath.contains("openapi.jar"))           // included explicitly in compileOnly
             assertTrue(mainRuntimeClasspath.contains("openapi.jar"))    // includes all but idea.jar
@@ -99,10 +99,10 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             "printTestRuntimeClassPath",
             "printMainRuntimeClassPath",
         ).output.lines().let { lines ->
-            val mainClasspath = lines.find { it.startsWith("implementation:") } ?: ""
-            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
-            val testClasspath = lines.find { it.startsWith("testImplementation:") } ?: ""
-            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") } ?: ""
+            val mainClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+            val testClasspath = lines.find { it.startsWith("testImplementation:") }.orEmpty()
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") }.orEmpty()
 
             assertTrue(mainClasspath.contains("junit-rt.jar"))              // included explicitly in compileOnly
             assertFalse(mainRuntimeClasspath.contains("junit-rt.jar"))
@@ -161,10 +161,10 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             "printTestRuntimeClassPath",
             "printMainRuntimeClassPath",
         ).output.lines().let { lines ->
-            val mainClasspath = lines.find { it.startsWith("implementation:") } ?: ""
-            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
-            val testClasspath = lines.find { it.startsWith("testImplementation:") } ?: ""
-            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") } ?: ""
+            val mainClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
+            val mainRuntimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+            val testClasspath = lines.find { it.startsWith("testImplementation:") }.orEmpty()
+            val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") }.orEmpty()
 
             assertTrue(mainClasspath.contains("jps-build-test"))            // included explicitly in compileOnly (note - versioned jar, checking by name only)
             assertTrue(mainRuntimeClasspath.contains("jps-build-test"))

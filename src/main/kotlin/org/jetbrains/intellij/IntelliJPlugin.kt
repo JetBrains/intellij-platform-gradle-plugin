@@ -713,7 +713,7 @@ open class IntelliJPlugin : Plugin<Project> {
         task.projectExecutable.convention(project.provider {
             val jbrResolver = project.objects.newInstance(
                 JbrResolver::class.java,
-                extension.jreRepository.orNull ?: "",
+                extension.jreRepository.orNull.orEmpty()
                 project.gradle.startParameter.isOffline,
                 archiveUtils,
                 dependenciesDownloader,
@@ -801,7 +801,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             }
                         } else {
                             val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
-                            val eapSuffix = IntelliJPluginConstants.RELEASE_SUFFIX_EAP.takeIf { isEap } ?: ""
+                            val eapSuffix = IntelliJPluginConstants.RELEASE_SUFFIX_EAP.takeIf { isEap }.orEmpty()
 
                             IdeVersion.createIdeVersion(ideaDependency.buildNumber)
                                 .stripExcessComponents()
@@ -1026,7 +1026,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 if (ideVersion.baselineVersion >= 193) {
                     task.systemProperty(
                         IntelliJPluginConstants.PLUGIN_PATH,
-                        pluginsDirectoryProvider.get().listFiles()?.joinToString("${File.pathSeparator},") { it.path } ?: "",
+                        pluginsDirectoryProvider.get().listFiles()?.joinToString("${File.pathSeparator},") { it.path }.orEmpty(),
                     )
                 }
             }
@@ -1235,7 +1235,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     val dependencyManager = project.objects.newInstance(
                         IdeaDependencyManager::class.java,
                         extension.intellijRepository.get(),
-                        extension.ideaDependencyCachePath.orNull ?: "",
+                        extension.ideaDependencyCachePath.orNull.orEmpty(),
                         archiveUtils,
                         dependenciesDownloader,
                         context,

@@ -56,7 +56,7 @@ dependencies {
 version = when (properties("snapshot")?.toBoolean() ?: false) {
     true -> "${properties("snapshotVersion")}-SNAPSHOT"
     false -> properties("version")
-} ?: ""
+}.orEmpty()
 group = "org.jetbrains.intellij.plugins"
 description = """
 > **Important:**

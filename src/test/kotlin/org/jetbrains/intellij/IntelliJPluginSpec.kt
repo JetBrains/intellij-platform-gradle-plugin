@@ -79,8 +79,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
-            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
@@ -106,8 +106,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("markdown.jar"))
             assertTrue(compileClasspath.contains("resources_en.jar"))
@@ -128,7 +128,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
 
         buildFile.groovy("""
-            intellij.plugins = ["copyright", "${adjustWindowsPath(plugin?.canonicalPath ?: "")}"]
+            intellij.plugins = ["copyright", "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
            
             task printMainRuntimeClassPath {
                 doLast { println "runtimeOnly: " + sourceSets.main.runtimeClasspath.asPath }
@@ -140,8 +140,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("intellij-postfix.jar"))
             assertFalse(runtimeClasspath.contains("intellij-postfix.jar"))
@@ -162,8 +162,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
         result.output.lines().let { lines ->
-            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
+            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("vcs-changeReminder.jar"))
             assertTrue(runtimeClasspath.contains("vcs-changeReminder.jar"))
@@ -185,8 +185,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
-        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") } ?: ""
-        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") } ?: ""
+        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
+        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()
 
         assertTrue(compileClasspath.contains("ant.jar"))
         assertTrue(runtimeClasspath.contains("ant.jar"))
@@ -209,8 +209,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
         result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
-            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertTrue(runtimeClasspath.contains("copyright.jar"))
@@ -236,8 +236,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
-            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
@@ -263,8 +263,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         val result = build("printMainRuntimeClassPath", "printMainCompileClassPath")
         result.output.lines().let { lines ->
-            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") } ?: ""
-            val compileClasspath = lines.find { it.startsWith("implementation:") } ?: ""
+            val runtimeClasspath = lines.find { it.startsWith("runtimeOnly:") }.orEmpty()
+            val compileClasspath = lines.find { it.startsWith("implementation:") }.orEmpty()
 
             assertTrue(compileClasspath.contains("copyright.jar"))
             assertFalse(runtimeClasspath.contains("copyright.jar"))
@@ -338,9 +338,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
     fun assertPathParameters(testCommand: ProcessProperties, sandboxPath: String) {
-        assertEquals("$sandboxPath/config-test", adjustWindowsPath(testCommand.properties["idea.config.path"] ?: ""))
-        assertEquals("$sandboxPath/system-test", adjustWindowsPath(testCommand.properties["idea.system.path"] ?: ""))
-        assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"] ?: ""))
+        assertEquals("$sandboxPath/config-test", adjustWindowsPath(testCommand.properties["idea.config.path"].orEmpty()))
+        assertEquals("$sandboxPath/system-test", adjustWindowsPath(testCommand.properties["idea.system.path"].orEmpty()))
+        assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"].orEmpty()))
     }
 
     private fun parseCommand(output: String) = output.lines()

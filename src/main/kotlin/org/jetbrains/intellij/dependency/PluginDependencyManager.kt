@@ -40,7 +40,7 @@ open class PluginDependencyManager @Inject constructor(
                 info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.absolutePath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
-                        ("-withSources".takeIf { ideaDependency.sources != null } ?: "")
+                        "-withSources".takeIf { ideaDependency.sources != null }.orEmpty()
                     return PluginDependencyImpl(it.name, builtinPluginVersion, it, true)
                 }
             }
@@ -57,7 +57,7 @@ open class PluginDependencyManager @Inject constructor(
         }
         throw BuildException(
             "Cannot resolve plugin '${dependency.id}' in version '${dependency.version}'" +
-                (" from channel '${dependency.channel}'".takeIf { dependency.channel != null } ?: ""),
+                " from channel '${dependency.channel}'".takeIf { dependency.channel != null }.orEmpty(),
             null
         )
     }

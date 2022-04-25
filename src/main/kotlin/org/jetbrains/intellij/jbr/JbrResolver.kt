@@ -179,7 +179,7 @@ open class JbrResolver @Inject constructor(
         val jre = File(root, "jre")
         val java = File(
             jre.takeIf { it.exists() } ?: root,
-            "bin/java" + (".exe".takeIf { operatingSystem.isWindows } ?: "")
+            "bin/java" + ".exe".takeIf { operatingSystem.isWindows }.orEmpty()
         )
         return java.toPath().takeIf { java.exists() }
     }
@@ -203,7 +203,7 @@ open class JbrResolver @Inject constructor(
 
         companion object {
             fun from(jbrVersion: String, jbrVariant: String?, operatingSystem: OperatingSystem): JbrArtifact {
-                val version = ("8".takeIf { jbrVersion.startsWith('u') } ?: "") + jbrVersion
+                val version = "8".takeIf { jbrVersion.startsWith('u') }.orEmpty() + jbrVersion
                 var prefix = getPrefix(version, jbrVariant)
                 val lastIndexOfB = version.lastIndexOf('b')
                 val lastIndexOfDash = version.lastIndexOf('-') + 1

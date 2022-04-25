@@ -137,7 +137,7 @@ open class ListProductsReleasesTask @Inject constructor(
         }
     }
 
-    private fun Version.asRelease() = "$major.$minor" + (".$patch".takeIf { patch > 0 } ?: "")
+    private fun Version.asRelease() = "$major.$minor" + (".$patch".takeIf { patch > 0 }.orEmpty())
 
     enum class Channel {
         EAP, MILESTONE, BETA, RELEASE, CANARY, PATCH, RC,

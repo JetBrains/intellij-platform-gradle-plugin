@@ -24,7 +24,7 @@ class PluginDependencyNotation(val id: String, val version: String?, val channel
     fun toDependency(project: Project): Dependency = project.dependencies.create(toString())
 
     override fun toString(): String {
-        val groupPrefix = channel.takeUnless { channel.isNullOrBlank() }?.let { "$it." } ?: ""
+        val groupPrefix = channel.takeUnless { channel.isNullOrBlank() }?.let { "$it." }.orEmpty()
         return "${groupPrefix}com.jetbrains.plugins:$id:$version"
     }
 

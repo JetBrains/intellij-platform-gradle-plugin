@@ -274,7 +274,7 @@ open class RunPluginVerifierTask @Inject constructor(
         val dependenciesDownloader = objectFactory.newInstance(DependenciesDownloader::class.java)
         val jbrResolver = objectFactory.newInstance(
             JbrResolver::class.java,
-            jreRepository.orNull ?: "",
+            jreRepository.orNull.orEmpty(),
             offline.get(),
             archiveUtils,
             dependenciesDownloader,
