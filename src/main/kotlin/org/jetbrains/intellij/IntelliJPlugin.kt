@@ -713,7 +713,7 @@ open class IntelliJPlugin : Plugin<Project> {
         task.projectExecutable.convention(project.provider {
             val jbrResolver = project.objects.newInstance(
                 JbrResolver::class.java,
-                extension.jreRepository.orNull.orEmpty()
+                extension.jreRepository.orNull.orEmpty(),
                 project.gradle.startParameter.isOffline,
                 archiveUtils,
                 dependenciesDownloader,
