@@ -116,7 +116,7 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkGradleVersion(project: Project) {
-        if (project.isDisabled(BUILD_FEATURE_CHECK_GRADLE_VERSION)) {
+        if (project.isBuildFeatureDisabled(BUILD_FEATURE_CHECK_GRADLE_VERSION)) {
             return
         }
         if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.7")) {
@@ -125,7 +125,7 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkPluginVersion(project: Project) {
-        if (project.isDisabled(BUILD_FEATURE_CHECK_GRADLE_INTELLIJ_PLUGIN_VERSION)) {
+        if (project.isBuildFeatureDisabled(BUILD_FEATURE_CHECK_GRADLE_INTELLIJ_PLUGIN_VERSION)) {
             return
         }
         if (project.gradle.startParameter.isOffline) {

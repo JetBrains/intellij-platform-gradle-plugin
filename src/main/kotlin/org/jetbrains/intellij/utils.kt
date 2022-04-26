@@ -229,10 +229,10 @@ fun Boolean.ifTrue(block: () -> Unit): Boolean {
     return this
 }
 
-internal fun Project.isEnabled(feature: String) = (project.findProperty(feature) == "true").ifTrue {
+internal fun Project.isBuildFeatureEnabled(feature: String) = (project.findProperty(feature) == "true").ifTrue {
     info(logCategory(), "Build feature is enabled: $feature")
 }
 
-internal fun Project.isDisabled(feature: String) = (project.findProperty(feature) != "false").ifTrue {
+internal fun Project.isBuildFeatureDisabled(feature: String) = (project.findProperty(feature) == "false").ifTrue {
     info(logCategory(), "Build feature is disabled: $feature")
 }
