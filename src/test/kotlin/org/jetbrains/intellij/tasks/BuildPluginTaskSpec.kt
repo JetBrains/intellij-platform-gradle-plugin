@@ -435,7 +435,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         assertEquals(Jvm.current().toString(), attributes.getValue("Build-JVM"))
         assertEquals("0.42.123", attributes.getValue("Version"))
         assertEquals(IntelliJPluginConstants.NAME, attributes.getValue("Build-Plugin"))
-        assertEquals("", attributes.getValue("Build-Plugin-Version"))
+        assertEquals("0.0.0", attributes.getValue("Build-Plugin-Version"))
         assertEquals(OperatingSystem.current().toString(), attributes.getValue("Build-OS"))
     }
 
