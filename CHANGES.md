@@ -1,6 +1,8 @@
 # Changelog
 
 ## next
+### Added
+- Automatically detect bundled sources in plugin dependency
 
 ## 1.6.0
 ### Added

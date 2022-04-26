@@ -110,7 +110,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
 
         buildFile.groovy("""
-            intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath ?: "")}"]
+            intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
         """)
         buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
 
@@ -143,8 +143,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.appendPrintTestRuntimeAndCompileClassPathsTasks()
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
-        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") } ?: ""
-        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") } ?: ""
+        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
+        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "ant.jar")
     }
@@ -384,8 +384,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     private fun buildAndGetClassPaths(vararg tasks: String):Pair<String, String> {
         val result = build(*tasks)
-        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") } ?: ""
-        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") } ?: ""
+        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
+        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()
         return Pair(compileClasspath, runtimeClasspath)
     }
 
