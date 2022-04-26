@@ -15,8 +15,8 @@ jobs:
           - 7.4.2
         os:
           - windows-latest
-#          - ubuntu-latest FIXME: uncomment
-#          - macos-latest FIXME: uncomment
+          - ubuntu-latest
+          - macos-latest
 
     steps:
 
