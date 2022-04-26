@@ -57,7 +57,8 @@ val Path.pluginJar
 
 // Runs the given Gradle task(s) within the current integration test.
 // Provides logs to STDOUT and as a returned value for the further assertions.
-fun Path.runGradleTask(projectProperties: Map<String, Any> = emptyMap(), vararg tasks: String) =
+fun Path.runGradleTask(vararg tasks: String) = runGradleTask(emptyMap(), *tasks)
+fun Path.runGradleTask(projectProperties: Map<String, Any>, vararg tasks: String) =
     ProcessBuilder()
         .command(
             gradleWrapper.toString(),

@@ -14,6 +14,3 @@ with(__FILE__.toPath()) {
         this containsText "Build-Plugin-Version: 0.0.0"
     }
 }
-
-
-
