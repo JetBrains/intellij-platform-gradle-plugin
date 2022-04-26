@@ -17,6 +17,7 @@ class XmlExtractor<T>(private val context: String? = null) {
     @Throws(JAXBException::class)
     fun unmarshal(file: File) = unmarshal(file.inputStream())
 
+    @Suppress("UNCHECKED_CAST")
     @Throws(JAXBException::class)
     fun unmarshal(inputStream: InputStream) = jaxbContext.createUnmarshaller().unmarshal(inputStream) as T
 
