@@ -32,6 +32,8 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_FEATURE_CHECK_GRADLE_INTELLIJ_PLUGIN_VERSION
+import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_FEATURE_CHECK_GRADLE_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.dependency.IdeaDependency
@@ -74,6 +76,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         checkGradleVersion(project)
         checkPluginVersion(project)
+
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(IdeaExtPlugin::class.java)
 
@@ -113,12 +116,18 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkGradleVersion(project: Project) {
+        if (project.isDisabled(BUILD_FEATURE_CHECK_GRADLE_VERSION)) {
+            return
+        }
         if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.7")) {
             throw PluginInstantiationException("${IntelliJPluginConstants.NAME} requires Gradle 6.7 and higher")
         }
     }
 
     private fun checkPluginVersion(project: Project) {
+        if (project.isDisabled(BUILD_FEATURE_CHECK_GRADLE_INTELLIJ_PLUGIN_VERSION)) {
+            return
+        }
         if (project.gradle.startParameter.isOffline) {
             return
         }
@@ -1376,4 +1385,14 @@ open class IntelliJPlugin : Plugin<Project> {
         .filterIndexed { index, component -> index < 3 || component == "SNAPSHOT" || component == "*" }
         .joinToString(prefix = "$productCode-", separator = ".")
         .let(IdeVersion::createIdeVersion)
+
+    enum class BuildFeature {
+        checkGradleIntellijPluginVersion,
+        checkGradleVersion;
+
+        companion object {
+            val ALL: EnumSet<BuildFeature> = EnumSet.allOf(BuildFeature::class.java)
+            val NONE: EnumSet<BuildFeature> = EnumSet.noneOf(BuildFeature::class.java)
+        }
+    }
 }

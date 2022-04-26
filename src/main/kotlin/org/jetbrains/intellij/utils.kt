@@ -150,6 +150,7 @@ fun releaseType(version: String) = when {
         version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
         version.matches(MAJOR_VERSION_PATTERN.toRegex())
     -> RELEASE_TYPE_SNAPSHOTS
+
     version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> RELEASE_TYPE_NIGHTLY
     else -> RELEASE_TYPE_RELEASES
 }
@@ -169,7 +170,7 @@ private fun log(level: LogLevel, logCategory: String?, message: String, e: Throw
     }
 }
 
-fun Project.logCategory(): String = path + name.takeIf { it != path }.orEmpty()
+fun Project.logCategory(): String = path + name.takeIf { ":$it" != path }.orEmpty()
 
 fun Task.logCategory(): String = project.logCategory() + path
 
@@ -185,6 +186,7 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): 
             warn(context, "Cannot create plugin from file '$artifact': $problems")
             null
         }
+
         else -> {
             warn(context, "Cannot create plugin from file '$artifact'. $creationResult")
             null
@@ -218,4 +220,19 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
         block()
     }
     return this
+}
+
+fun Boolean.ifTrue(block: () -> Unit): Boolean {
+    if (this) {
+        block()
+    }
+    return this
+}
+
+internal fun Project.isEnabled(feature: String) = (project.findProperty(feature) == "true").ifTrue {
+    info(logCategory(), "Build feature is enabled: $feature")
+}
+
+internal fun Project.isDisabled(feature: String) = (project.findProperty(feature) != "false").ifTrue {
+    info(logCategory(), "Build feature is disabled: $feature")
 }
