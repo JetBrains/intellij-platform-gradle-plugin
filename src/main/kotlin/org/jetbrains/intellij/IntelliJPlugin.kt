@@ -122,13 +122,17 @@ open class IntelliJPlugin : Plugin<Project> {
         if (project.gradle.startParameter.isOffline) {
             return
         }
-        val version = getVersion()?.let(Version::parse) ?: Version()
-        val latestVersion = LatestVersionResolver.fromGitHub(IntelliJPluginConstants.NAME, IntelliJPluginConstants.GITHUB_REPOSITORY)
-        if (version < Version.parse(latestVersion)) {
-            warn(
-                context,
-                "${IntelliJPluginConstants.NAME} is outdated: $version. Update `${IntelliJPluginConstants.ID}` to: $latestVersion"
-            )
+        try {
+            val version = getVersion()?.let(Version::parse) ?: Version()
+            val latestVersion = LatestVersionResolver.fromGitHub(IntelliJPluginConstants.NAME, IntelliJPluginConstants.GITHUB_REPOSITORY)
+            if (version < Version.parse(latestVersion)) {
+                warn(
+                    context,
+                    "${IntelliJPluginConstants.NAME} is outdated: $version. Update `${IntelliJPluginConstants.ID}` to: $latestVersion"
+                )
+            }
+        } catch (e: Exception) {
+            error(context, e.message.orEmpty(), e)
         }
     }
 
