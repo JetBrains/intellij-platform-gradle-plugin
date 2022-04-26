@@ -30,6 +30,7 @@ jobs:
           java-version: 11
 
       - name: Run Tests
+        # cache test Gradle instance files on disk C: on Windows due to the limited space on D:
         run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
 
       - name: Collect Test Results
