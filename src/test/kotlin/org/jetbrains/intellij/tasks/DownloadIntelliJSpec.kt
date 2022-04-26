@@ -13,90 +13,124 @@ import kotlin.test.assertTrue
 
 class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
 
-    private val icCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2021.2.4")
-    private val icPomCacheDir = File(icCacheDir, "bef2a5b3f61bf389fbcabf2432529c75e9bfa3f6")
-    private val icSourcesCacheDir = File(icCacheDir, "c7b0c46e54134935b76651e9a363273449bfb18c")
-    private val icDistCacheDir = File(icCacheDir, "f6a20f715554259dbbbc5aabcba5e2c5f4492cc3")
+    private val icCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC")
+    private val iuCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU")
 
-    private val iuCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU/2021.2.4")
-    private val iuPomCacheDir = File(iuCacheDir, "ce57678957ace9d81c43781d764159807c225e10")
-    private val iuDistCacheDir = File(iuCacheDir, "4493a5312869afef74b9cc9f0223b40794762ea4")
-
-    override fun setUp() {
-        super.setUp()
-        // delete only dist and sources directories, as POM dir is not recreated
-        deleteIfExists(icSourcesCacheDir)
-        deleteIfExists(icDistCacheDir)
-        deleteIfExists(iuDistCacheDir)
-    }
+    /*
+      Use unique IDEs versions which are not used in other tests to be sure that they are actually downloaded
+      and don't exist because other tests downloaded them. Using a single version and deleting directories before tests
+      causes issues on Windows GitHub Actions runners (file is locked by another process).
+     */
 
     @Test
     fun `download idea dependencies without sources when downloadSources = false`() {
+        val testedVersion = "2019.3.1"
+        val icVersionCacheDir = File(icCacheDir, testedVersion)
+        val icPomCacheDir = File(icVersionCacheDir, "6c69524caec42364796bb99471fa4057c4daf567")
+        val icDistCacheDir = File(icVersionCacheDir, "52292e4f8a0ccb3ceb08bd81fd57b88923ac8e99")
+        val iuVersionCacheDir = File(iuCacheDir, testedVersion)
+        deleteIfExists(icDistCacheDir)
+
+        buildFile.groovy(
+            """
+            intellij {
+                type = 'IC'
+                version = '$testedVersion'
+                downloadSources = false
+            }"""
+        )
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        assertDirExistsAndContainsOnly(icCacheDir, icPomCacheDir.name, icDistCacheDir.name)
-        assertDirExistsAndContainsOnly(icPomCacheDir, "ideaIC-2021.2.4.pom")
-        assertDirExistsAndContainsOnly(icDistCacheDir, "ideaIC-2021.2.4", "ideaIC-2021.2.4.zip")
+        assertDirExistsAndContainsOnly(icVersionCacheDir, icPomCacheDir.name, icDistCacheDir.name)
+        assertDirExistsAndContainsOnly(icPomCacheDir, "ideaIC-2019.3.1.pom")
+        assertDirExistsAndContainsOnly(icDistCacheDir, "ideaIC-2019.3.1", "ideaIC-2019.3.1.zip")
+        assertFalse(iuVersionCacheDir.exists(), "Expected Ultimate cache directory to not exist")
     }
 
     @Test
     fun `download idea with sources when downloadSources = true`() {
+        val testedVersion = "2019.3.2"
+        val icVersionCacheDir = File(icCacheDir, testedVersion)
+        val icPomCacheDir = File(icVersionCacheDir, "a436b9e0ec0f51f21317eb3d9d839112f9c32223")
+        val icDistCacheDir = File(icVersionCacheDir, "b911671d7501d9fd63cea3eee8287d8ceb4113c6")
+        val icSourcesCacheDir = File(icVersionCacheDir, "db705bd2f3911c2e35b53c9084ed96c3c0b7e900")
+        val iuVersionCacheDir = File(iuCacheDir, testedVersion)
+        deleteIfExists(icDistCacheDir)
+        deleteIfExists(icSourcesCacheDir)
+
         buildFile.groovy(
             """
             intellij {
+                type = 'IC'
+                version = '$testedVersion'
                 downloadSources = true
-            }
-        """
+            }"""
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        assertDirExistsAndContainsOnly(icCacheDir, icPomCacheDir.name, icDistCacheDir.name, icSourcesCacheDir.name)
-        assertDirExistsAndContainsOnly(icPomCacheDir, "ideaIC-2021.2.4.pom")
-        assertDirExistsAndContainsOnly(icDistCacheDir, "ideaIC-2021.2.4", "ideaIC-2021.2.4.zip")
-        assertDirExistsAndContainsOnly(icSourcesCacheDir, "ideaIC-2021.2.4-sources.jar")
+        assertDirExistsAndContainsOnly(icVersionCacheDir, icPomCacheDir.name, icDistCacheDir.name, icSourcesCacheDir.name)
+        assertDirExistsAndContainsOnly(icPomCacheDir, "ideaIC-2019.3.2.pom")
+        assertDirExistsAndContainsOnly(icDistCacheDir, "ideaIC-2019.3.2", "ideaIC-2019.3.2.zip")
+        assertDirExistsAndContainsOnly(icSourcesCacheDir, "ideaIC-2019.3.2-sources.jar")
+        assertFalse(iuVersionCacheDir.exists(), "Expected Ultimate cache directory to not exist")
     }
 
     @Test
     fun `download ultimate idea dependencies without sources when downloadSources = false`() {
+        val testedVersion = "2019.3.3"
+        val iuVersionCacheDir = File(iuCacheDir, testedVersion)
+        val iuPomCacheDir = File(iuVersionCacheDir, "9d81b0a2416de8815bbe266ffc4065a2e4a2fda0")
+        val iuDistCacheDir = File(iuVersionCacheDir, "9bf72a4b290a00d569759db11454eb3347026fc7")
+        val icVersionCacheDir = File(icCacheDir, testedVersion)
+        deleteIfExists(iuDistCacheDir)
+
         buildFile.groovy(
             """
             intellij {
                 type = 'IU'
-                version = '2021.2.4'
+                version = '$testedVersion'
                 downloadSources = false
-            }
-        """
+            }"""
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        assertDirExistsAndContainsOnly(iuCacheDir, iuPomCacheDir.name, iuDistCacheDir.name)
-        assertDirExistsAndContainsOnly(iuPomCacheDir, "ideaIU-2021.2.4.pom")
-        assertDirExistsAndContainsOnly(iuDistCacheDir, "ideaIU-2021.2.4", "ideaIU-2021.2.4.zip")
-        assertFalse(icDistCacheDir.exists(), "Expected community dist cache directory to not exist")
-        assertFalse(icSourcesCacheDir.exists(), "Expected community sources cache directory to not exist")
+        assertDirExistsAndContainsOnly(iuVersionCacheDir, iuPomCacheDir.name, iuDistCacheDir.name)
+        assertDirExistsAndContainsOnly(iuPomCacheDir, "ideaIU-2019.3.3.pom")
+        assertDirExistsAndContainsOnly(iuDistCacheDir, "ideaIU-2019.3.3", "ideaIU-2019.3.3.zip")
+        assertFalse(icVersionCacheDir.exists(), "Expected Community cache directory to not exist")
     }
 
     @Test
     fun `download ultimate idea dependencies and community sources without dist when downloadSources = true`() {
+        val testedVersion = "2019.3.4"
+        val iuVersionCacheDir = File(iuCacheDir, testedVersion)
+        val iuPomCacheDir = File(iuVersionCacheDir, "a5798bbf342eda50bbedfac9522f3d6ca18e5801")
+        val iuDistCacheDir = File(iuVersionCacheDir, "af9f7c58d349e438353801a36e629a1672b92fc")
+        val icVersionCacheDir = File(icCacheDir, testedVersion)
+        val icPomCacheDir = File(icVersionCacheDir, "55441dcc36ee231de051150455a395f775dac552")
+        val icSourcesCacheDir = File(icVersionCacheDir, "11facb5d520efd78d3145de5fa01449179465e5")
+        deleteIfExists(iuDistCacheDir)
+        deleteIfExists(icSourcesCacheDir)
+
         buildFile.groovy(
             """
             intellij {
                 type = 'IU'
-                version = '2021.2.4'
+                version = '$testedVersion'
                 downloadSources = true
-            }
-        """
+            }"""
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        assertDirExistsAndContainsOnly(iuCacheDir, iuPomCacheDir.name, iuDistCacheDir.name)
-        assertDirExistsAndContainsOnly(iuPomCacheDir, "ideaIU-2021.2.4.pom")
-        assertDirExistsAndContainsOnly(iuDistCacheDir, "ideaIU-2021.2.4", "ideaIU-2021.2.4.zip")
-        assertDirExistsAndContainsOnly(icSourcesCacheDir, "ideaIC-2021.2.4-sources.jar")
-        assertFalse(icDistCacheDir.exists(), "Expected community dist cache directory to not exist")
+        assertDirExistsAndContainsOnly(iuVersionCacheDir, iuPomCacheDir.name, iuDistCacheDir.name)
+        assertDirExistsAndContainsOnly(iuPomCacheDir, "ideaIU-2019.3.4.pom")
+        assertDirExistsAndContainsOnly(iuDistCacheDir, "ideaIU-2019.3.4", "ideaIU-2019.3.4.zip")
+        assertDirExistsAndContainsOnly(icVersionCacheDir, icPomCacheDir.name, icSourcesCacheDir.name)
+        assertDirExistsAndContainsOnly(icPomCacheDir, "ideaIC-2019.3.4.pom")
+        assertDirExistsAndContainsOnly(icSourcesCacheDir, "ideaIC-2019.3.4-sources.jar")
     }
 
     private fun deleteIfExists(dir: File) {
