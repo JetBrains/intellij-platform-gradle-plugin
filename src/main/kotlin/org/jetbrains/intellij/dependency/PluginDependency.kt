@@ -1,11 +1,9 @@
 package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import groovy.transform.CompileStatic
 import java.io.File
 import java.io.Serializable
 
-@CompileStatic
 @Suppress("BooleanMethodIsAlwaysInverted")
 interface PluginDependency : Serializable {
     companion object {

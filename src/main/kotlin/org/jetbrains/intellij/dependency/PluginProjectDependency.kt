@@ -3,13 +3,9 @@ package org.jetbrains.intellij.dependency
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import groovy.transform.CompileStatic
-import groovy.transform.ToString
 import org.jetbrains.intellij.error
 import java.io.File
 
-@CompileStatic
-@ToString(includeNames = true, includeFields = true, ignoreNulls = true)
 @Suppress("UnstableApiUsage")
 class PluginProjectDependency(private val pluginDirectory: File, val context: String?) : PluginDependency {
 
