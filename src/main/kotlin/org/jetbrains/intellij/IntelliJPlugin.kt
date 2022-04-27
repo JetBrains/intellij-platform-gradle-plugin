@@ -32,6 +32,7 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import org.jetbrains.intellij.BuildFeature.CHECK_UPDATES
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.dependency.IdeaDependency
@@ -74,6 +75,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         checkGradleVersion(project)
         checkPluginVersion(project)
+
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(IdeaExtPlugin::class.java)
 
@@ -119,6 +121,9 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkPluginVersion(project: Project) {
+        if (!project.isBuildFeatureEnabled(CHECK_UPDATES)) {
+            return
+        }
         if (project.gradle.startParameter.isOffline) {
             return
         }
