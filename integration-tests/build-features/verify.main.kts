@@ -3,21 +3,10 @@
 @file:Import("../verify.utils.kts")
 
 with(__FILE__.toPath()) {
-    runGradleTask(mapOf(
-        "org.jetbrains.intellij.buildFeature.checkGradleVersion" to false,
-    ), "assemble").let { logs ->
-        logs containsText "Build feature is disabled: org.jetbrains.intellij.buildFeature.checkGradleVersion"
-    }
-    runGradleTask(mapOf(
-        "org.jetbrains.intellij.buildFeature.checkGradleIntellijPluginVersion" to false,
-    ), "assemble").let { logs ->
-        logs containsText "Build feature is disabled: org.jetbrains.intellij.buildFeature.checkGradleIntellijPluginVersion"
-    }
-    runGradleTask(mapOf(
-        "org.jetbrains.intellij.buildFeature.checkGradleVersion" to false,
-        "org.jetbrains.intellij.buildFeature.checkGradleIntellijPluginVersion" to false,
-    ), "assemble").let { logs ->
-        logs containsText "Build feature is disabled: org.jetbrains.intellij.buildFeature.checkGradleVersion"
-        logs containsText "Build feature is disabled: org.jetbrains.intellij.buildFeature.checkGradleIntellijPluginVersion"
+    val propertyName = "org.jetbrains.intellij.buildFeature.checkUpdates"
+    runGradleTask(
+        mapOf(propertyName to false), "assemble"
+    ).let { logs ->
+        logs containsText "Build feature is disabled: $propertyName"
     }
 }

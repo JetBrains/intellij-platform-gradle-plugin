@@ -221,18 +221,3 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
     }
     return this
 }
-
-fun Boolean.ifTrue(block: () -> Unit): Boolean {
-    if (this) {
-        block()
-    }
-    return this
-}
-
-internal fun Project.isBuildFeatureEnabled(feature: String) = (project.findProperty(feature) == "true").ifTrue {
-    info(logCategory(), "Build feature is enabled: $feature")
-}
-
-internal fun Project.isBuildFeatureDisabled(feature: String) = (project.findProperty(feature) == "false").ifTrue {
-    info(logCategory(), "Build feature is disabled: $feature")
-}

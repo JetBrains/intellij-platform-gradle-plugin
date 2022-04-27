@@ -66,9 +66,7 @@ fun Path.runGradleTask(projectProperties: Map<String, Any>, vararg tasks: String
             *tasks.map { ":$projectName:$it" }.toTypedArray(),
             "--info",
         )
-        .also {
-            it.environment().put("INTEGRATION_TEST", projectName)
-        }
+        .apply { environment().put("INTEGRATION_TEST", projectName) }
         .directory(projectDirectory.toFile())
         .start()
         .run {
