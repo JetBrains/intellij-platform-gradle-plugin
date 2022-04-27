@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.dependency
 
-import groovy.transform.CompileStatic
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
@@ -30,7 +29,6 @@ interface MavenRepository : PluginsRepository {
     }
 }
 
-@CompileStatic
 class MavenRepositoryPluginByAction(private val maven: Action<in MavenArtifactRepository>) : MavenRepository {
 
     override var resolvedDependency = false
@@ -49,7 +47,6 @@ class MavenRepositoryPluginByAction(private val maven: Action<in MavenArtifactRe
         }
 }
 
-@CompileStatic
 class MavenRepositoryPlugin(private val repositoryUrl: String) : MavenRepository {
 
     override var resolvedDependency = false

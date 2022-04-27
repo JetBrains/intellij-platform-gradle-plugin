@@ -1,12 +1,10 @@
 package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import groovy.transform.CompileStatic
 import org.jetbrains.intellij.collectJars
 import org.jetbrains.intellij.isJar
 import java.io.File
 
-@CompileStatic
 class PluginDependencyImpl(
     override val id: String,
     override val version: String,
