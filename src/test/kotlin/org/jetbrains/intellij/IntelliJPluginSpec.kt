@@ -260,7 +260,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-              localPath = '$localPath'
+              localPath = '${adjustWindowsPath(localPath)}'
               plugins = ['org.jetbrains.plugins.go']
             }
             """,
@@ -290,7 +290,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-              localPath = '$localPath'
+              localPath = '${adjustWindowsPath(localPath)}'
               plugins = ['org.jetbrains.plugins.go:212.5712.14']
             }
             """,
