@@ -7,22 +7,20 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     CHECK_UPDATES(true),
     ;
 
-     fun getKey() = name
+    fun getValue(project: Project) = project.findProperty(toString())?.toString()?.toBoolean() ?: defaultValue
+
+    override fun toString() = name
         .toLowerCase()
         .split('_')
         .joinToString("", transform = String::capitalize)
         .decapitalize()
         .let { "$prefix.buildFeature.$it" }
-
-    fun getValue(project: Project) = project.findProperty(getKey())?.toString()?.toBoolean() ?: defaultValue
-
-    override fun toString() = getKey()
 }
 
 fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
     feature.getValue(this).apply {
         when (this) {
-            true -> "Build feature is enabled: ${feature.getKey()}"
-            false -> "Build feature is disabled: ${feature.getKey()}"
+            true -> "Build feature is enabled: $feature"
+            false -> "Build feature is disabled: $feature"
         }.also { info(logCategory(), it) }
     }
