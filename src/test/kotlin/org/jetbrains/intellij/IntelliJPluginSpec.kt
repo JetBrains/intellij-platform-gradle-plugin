@@ -72,7 +72,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
         """)
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
@@ -86,7 +86,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
         """)
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
         assertTrue(compileClasspath.contains("markdown.jar"))
         assertTrue(compileClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
@@ -105,7 +105,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
         """)
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "intellij-postfix.jar")
     }
@@ -116,7 +116,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['com.jetbrains.changeReminder']
         """)
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetTestClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectTestClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "vcs-changeReminder.jar")
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "git4idea.jar")
@@ -124,7 +124,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add ant dependencies to classpath`() {
-        val (compileClasspath, runtimeClasspath) = buildAndGetTestClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectTestClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "ant.jar")
     }
@@ -136,7 +136,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
         """)
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetTestClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectTestClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "copyright.jar")
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
@@ -150,7 +150,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
         """)
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
@@ -164,7 +164,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['com.intellij.copyright']
         """)
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
     }
@@ -179,9 +179,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = true
             }
         """)
-        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
 
-        val result = build("printPluginSourceArtifacts")
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO")
+
         assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
@@ -200,9 +200,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = false
             }
         """)
-        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:goland-GO")
 
-        val result = build("printPluginSourceArtifacts")
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO")
+
         assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-goland-GO-212.5457.54-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
@@ -219,9 +219,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = true
             }
         """)
-        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
-        val result = build("printPluginSourceArtifacts")
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+
         assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
@@ -238,9 +238,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = false
             }
         """)
-        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
-        val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
@@ -268,9 +267,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             overwrite = true
         )
 
-        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:ideaLocal-GO")
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO")
 
-        val result = build("printPluginSourceArtifacts")
         assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-ideaLocal-GO-221.5080.224-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
@@ -298,9 +296,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """,
             overwrite = true
         )
-        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
-        val result = build("printPluginSourceArtifacts")
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+
         assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
@@ -379,7 +377,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"].orEmpty()))
     }
 
-    private fun buildAndGetMainClassPaths(): Pair<String, String> {
+    private fun collectMainClassPaths(): Pair<String, String> {
         buildFile.appendPrintMainClassPathsTasks()
         return buildAndGetClassPaths("printMainCompileClassPath", "printMainRuntimeClassPath")
     }
@@ -397,7 +395,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun buildAndGetTestClassPaths(): Pair<String, String> {
+    private fun collectTestClassPaths(): Pair<String, String> {
         buildFile.appendPrintTestClassPathsTasks()
         return buildAndGetClassPaths("printTestCompileClassPath", "printTestRuntimeClassPath")
     }
@@ -446,6 +444,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             runtimeClasspath.contains(jarName),
             "Expected $jarName to be included in the runtime classpath: $runtimeClasspath"
         )
+    }
+
+    private fun printSourceArtifacts(pluginComponentId: String): BuildResult {
+        buildFile.appendPrintPluginSourceArtifactsTask(pluginComponentId)
+        return build("printPluginSourceArtifacts")
     }
 
     private fun File.appendPrintPluginSourceArtifactsTask(pluginComponentId: String) {
