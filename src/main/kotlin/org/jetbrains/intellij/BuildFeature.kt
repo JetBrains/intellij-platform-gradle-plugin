@@ -12,7 +12,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     override fun toString() = name
         .toLowerCase()
         .split('_')
-        .joinToString("", transform = String::capitalize)
+        .joinToString(separator = "", transform = String::capitalize)
         .decapitalize()
         .let { "$prefix.buildFeature.$it" }
 }
