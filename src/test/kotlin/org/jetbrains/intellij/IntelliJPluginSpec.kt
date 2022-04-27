@@ -5,8 +5,10 @@ package org.jetbrains.intellij
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
+import org.jetbrains.intellij.test.createLocalIdeIfNotExists
 import org.junit.Assume.assumeFalse
-import java.io.File
+import java.io.*
+import java.nio.file.Path
 import kotlin.test.*
 
 @Suppress("GroovyAssignabilityCheck")
@@ -69,7 +71,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
         """)
-        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintMainClassPathsTasks()
 
         val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
             "printMainRuntimeClassPath",
@@ -89,7 +91,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
         """)
-        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintMainClassPathsTasks()
 
         val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
             "printMainRuntimeClassPath",
@@ -112,7 +114,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
         """)
-        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintMainClassPathsTasks()
 
         val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
             "printMainRuntimeClassPath",
@@ -127,7 +129,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['com.jetbrains.changeReminder']
         """)
-        buildFile.appendPrintTestRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintTestClassPathsTasks()
 
         val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
             "printTestRuntimeClassPath",
@@ -140,7 +142,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add ant dependencies to classpath`() {
-        buildFile.appendPrintTestRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintTestClassPathsTasks()
 
         val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
         val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
@@ -156,7 +158,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
         """)
-        buildFile.appendPrintTestRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintTestClassPathsTasks()
 
         val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
             "printTestRuntimeClassPath",
@@ -176,7 +178,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
         """)
-        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintMainClassPathsTasks()
 
         val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
             "printMainRuntimeClassPath",
@@ -196,7 +198,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['com.intellij.copyright']
         """)
-        buildFile.appendPrintMainRuntimeAndCompileClassPathsTasks()
+        buildFile.appendPrintMainClassPathsTasks()
 
         val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
             "printMainRuntimeClassPath",
@@ -285,6 +287,66 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `add bundled zip plugin source artifacts from src directory when localPath used`() {
+        val localPath = createLocalIdeIfNotExists(
+            Path.of(gradleHome).parent.resolve("local-ides"),
+            "com/jetbrains/intellij/goland/goland/2022.1/goland-2022.1.zip"
+        )
+        buildFile.groovy(
+            """
+            plugins {
+              id 'java'
+              id 'org.jetbrains.intellij'
+              id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
+            }
+            intellij {
+              localPath = '$localPath'
+              plugins = ['org.jetbrains.plugins.go']
+            }
+            """,
+            overwrite = true
+        )
+
+        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:go:ideaLocal-GO")
+
+        val result = build("printPluginSourceArtifacts")
+        assertContainsOnlySourceArtifacts(result,
+            "lib/src/go-openapi-src-ideaLocal-GO-221.5080.224-unzipped.com.jetbrains.plugins.jar " +
+                    "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
+        )
+    }
+
+    @Test
+    fun `add external zip plugin source artifacts from src directory when localPath used`() {
+        val localPath = createLocalIdeIfNotExists(
+            Path.of(gradleHome).parent.resolve("local-ides"),
+            "com/jetbrains/intellij/idea/ideaIC/2021.2.4/ideaIC-2021.2.4.zip"
+        )
+
+        buildFile.groovy(
+            """
+            plugins {
+              id 'java'
+              id 'org.jetbrains.intellij'
+              id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
+            }
+            intellij {
+              localPath = '$localPath'
+              plugins = ['org.jetbrains.plugins.go:212.5712.14']
+            }
+            """,
+            overwrite = true
+        )
+        buildFile.appendPrintPluginSourceArtifactsTask("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
+
+        val result = build("printPluginSourceArtifacts")
+        assertContainsOnlySourceArtifacts(result,
+            "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
+                    "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+        )
+    }
+
+    @Test
     fun `add require plugin id parameter in test tasks`() {
         writeTestFile()
 
@@ -356,7 +418,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"].orEmpty()))
     }
 
-    private fun File.appendPrintMainRuntimeAndCompileClassPathsTasks() {
+    private fun File.appendPrintMainClassPathsTasks() {
         this.groovy(
             """
             task printMainRuntimeClassPath { 
@@ -369,7 +431,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun File.appendPrintTestRuntimeAndCompileClassPathsTasks() {
+    private fun File.appendPrintTestClassPathsTasks() {
         this.groovy(
             """
             task printTestRuntimeClassPath { 
@@ -382,7 +444,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun buildAndGetClassPaths(vararg tasks: String):Pair<String, String> {
+    private fun buildAndGetClassPaths(vararg tasks: String): Pair<String, String> {
         val result = build(*tasks)
         val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
         val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()

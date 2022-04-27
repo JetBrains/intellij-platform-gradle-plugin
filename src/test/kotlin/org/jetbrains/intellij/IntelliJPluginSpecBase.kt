@@ -21,10 +21,10 @@ import kotlin.test.assertEquals
 abstract class IntelliJPluginSpecBase {
 
     private var debugEnabled = true
-    private val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     private val gradleDefault = System.getProperty("test.gradle.default")
     private val gradleArguments = System.getProperty("test.gradle.arguments", "")
         .split(' ').filter(String::isNotEmpty).toTypedArray()
+    protected val kotlinPluginVersion: String = System.getProperty("test.kotlin.version")
     protected val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
 
     val gradleHome: String = System.getProperty("test.gradle.home")
@@ -236,7 +236,15 @@ abstract class IntelliJPluginSpecBase {
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun File.xml(@Language("XML") content: String) = append(content)
 
-    fun File.groovy(@Language("Groovy") content: String) = append(content)
+    /**
+     * Appends the passed content to this file. Overwrites existing content if the `overwrite` parameter is true.
+     */
+    fun File.groovy(@Language("Groovy") content: String, overwrite: Boolean = false) {
+        if (overwrite) {
+            writeText("")
+        }
+        append(content)
+    }
 
     fun File.java(@Language("Java") content: String) = append(content)
 
