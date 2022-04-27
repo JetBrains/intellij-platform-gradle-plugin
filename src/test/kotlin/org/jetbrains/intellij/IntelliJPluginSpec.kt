@@ -71,17 +71,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
         """)
-        buildFile.appendPrintMainClassPathsTasks()
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
-            "printMainRuntimeClassPath",
-            "printMainCompileClassPath"
-        )
+        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
-        assertAddedToCompileClassPathOnly(
-            compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
-        )
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
     }
 
     @Test
@@ -91,12 +85,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
         """)
-        buildFile.appendPrintMainClassPathsTasks()
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
-            "printMainRuntimeClassPath",
-            "printMainCompileClassPath"
-        )
+        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
 
         assertTrue(compileClasspath.contains("markdown.jar"))
         assertTrue(compileClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
@@ -114,12 +104,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
         """)
-        buildFile.appendPrintMainClassPathsTasks()
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
-            "printMainRuntimeClassPath",
-            "printMainCompileClassPath"
-        )
+        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "intellij-postfix.jar")
     }
@@ -129,12 +115,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['com.jetbrains.changeReminder']
         """)
-        buildFile.appendPrintTestClassPathsTasks()
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
-            "printTestRuntimeClassPath",
-            "printTestCompileClassPath"
-        )
+        val (compileClasspath, runtimeClasspath) = buildAndGetTestClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "vcs-changeReminder.jar")
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "git4idea.jar")
@@ -142,11 +124,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add ant dependencies to classpath`() {
-        buildFile.appendPrintTestClassPathsTasks()
-
-        val result = build("printTestRuntimeClassPath", "printTestCompileClassPath")
-        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
-        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()
+        val (compileClasspath, runtimeClasspath) = buildAndGetTestClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "ant.jar")
     }
@@ -154,21 +132,14 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `use test compile classpath for non-builtin plugins if Gradle lte 2_12`() {
         writeTestFile()
-
         buildFile.groovy("""
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
         """)
-        buildFile.appendPrintTestClassPathsTasks()
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
-            "printTestRuntimeClassPath",
-            "printTestCompileClassPath"
-        )
+        val (compileClasspath, runtimeClasspath) = buildAndGetTestClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "copyright.jar")
-        assertAddedToCompileAndRuntimeClassPaths(
-            compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
-        )
+        assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
     }
 
     @Test
@@ -178,17 +149,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
         """)
-        buildFile.appendPrintMainClassPathsTasks()
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
-            "printMainRuntimeClassPath",
-            "printMainCompileClassPath"
-        )
+        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
-        assertAddedToCompileClassPathOnly(
-            compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar"
-        )
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
     }
 
     @Test
@@ -198,12 +163,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy("""
             intellij.plugins = ['com.intellij.copyright']
         """)
-        buildFile.appendPrintMainClassPathsTasks()
 
-        val (compileClasspath, runtimeClasspath) = buildAndGetClassPaths(
-            "printMainRuntimeClassPath",
-            "printMainCompileClassPath"
-        )
+        val (compileClasspath, runtimeClasspath) = buildAndGetMainClassPaths()
 
         assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
     }
@@ -418,6 +379,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"].orEmpty()))
     }
 
+    private fun buildAndGetMainClassPaths(): Pair<String, String> {
+        buildFile.appendPrintMainClassPathsTasks()
+        return buildAndGetClassPaths("printMainCompileClassPath", "printMainRuntimeClassPath")
+    }
+
     private fun File.appendPrintMainClassPathsTasks() {
         this.groovy(
             """
@@ -429,6 +395,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
             """
         )
+    }
+
+    private fun buildAndGetTestClassPaths(): Pair<String, String> {
+        buildFile.appendPrintTestClassPathsTasks()
+        return buildAndGetClassPaths("printTestCompileClassPath", "printTestRuntimeClassPath")
     }
 
     private fun File.appendPrintTestClassPathsTasks() {
