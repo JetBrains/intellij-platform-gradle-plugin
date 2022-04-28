@@ -37,10 +37,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     val sourceSetOutputClassesDirs = objectFactory.listProperty<File>()
 
     @Internal
-    val sourceSetAllDirs = objectFactory.listProperty<File>()
-
-    @Internal
-    val sourceSetResources = objectFactory.listProperty<File>()
+    val sourceSetJavaDirs = objectFactory.listProperty<File>()
 
     @Internal
     val sourceSetCompileClasspath = objectFactory.listProperty<File>()
@@ -62,9 +59,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     private val context = logCategory()
 
     @InputFiles
-    fun getSourceDirs() = sourceSetAllDirs.get().filter {
-        it.exists() && !sourceSetResources.get().contains(it)
-    }
+    fun getSourceDirs(): List<File> = sourceSetJavaDirs.get().filter { it.exists() }
 
     @Input
     val compilerClassPathFromMaven = objectFactory.listProperty<File>()
@@ -139,6 +134,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     private fun instrumentCode(srcDirs: List<File>, outputDir: File, instrumentNotNull: Boolean) {
+        println("srcDirs='${srcDirs}'")
         if (srcDirs.isEmpty()) {
             return
         }
@@ -160,14 +156,14 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                 ),
                 object : Closure<Any>(this, this) {
                     @Suppress("unused") // Groovy calls using reflection inside of Closure
-                    fun doCall(): Any? {
-                        if (instrumentNotNull) {
-                            return ant.invokeMethod("skip", mapOf(
+                    fun doCall() = when {
+                        instrumentNotNull -> {
+                            ant.invokeMethod("skip", mapOf(
                                 "pattern" to "kotlin/Metadata"
                             ))
                         }
 
-                        return null
+                        else -> null
                     }
                 }
             ))

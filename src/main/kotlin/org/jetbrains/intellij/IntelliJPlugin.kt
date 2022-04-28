@@ -778,13 +778,10 @@ open class IntelliJPlugin : Plugin<Project> {
                     val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
                     sourceSetOutputClassesDirs.convention(project.provider {
-                        sourceSet.output.classesDirs.files
+                        setOf(sourceSet.java.destinationDirectory.get().asFile)
                     })
-                    sourceSetAllDirs.convention(project.provider {
+                    sourceSetJavaDirs.convention(project.provider {
                         sourceSet.java.srcDirs
-                    })
-                    sourceSetResources.convention(project.provider {
-                        sourceSet.resources.files
                     })
                     sourceSetCompileClasspath.convention(project.provider {
                         sourceSet.compileClasspath
@@ -952,7 +949,8 @@ open class IntelliJPlugin : Plugin<Project> {
                 dependsOn(instrumentTask)
                 onlyIf { instrumentCodeProvider.get() }
                 // Set the classes' dir to the one with the instrumented classes
-                doLast { classesDirs.setFrom(outputDir) }
+                val nonJavaOutputDirs = sourceSet.output.classesDirs.files.minus(instrumentTask.get().sourceSetOutputClassesDirs.get().toSet())
+                doLast { classesDirs.setFrom(outputDir, nonJavaOutputDirs) }
             }
 
             // Ensure that our task is invoked when the source set is built
