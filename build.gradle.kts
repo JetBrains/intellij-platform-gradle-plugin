@@ -28,7 +28,7 @@ dependencies {
     implementation("org.jetbrains.intellij.plugins:structure-base:3.212") {
         exclude(group = "org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.212") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.213") {
         exclude(group = "org.jetbrains.kotlin")
     }
     // should be changed together with plugin-repository-rest-client
