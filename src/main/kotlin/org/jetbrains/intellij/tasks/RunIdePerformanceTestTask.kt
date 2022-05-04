@@ -30,15 +30,14 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
 
     /**
      * Path to directory where performance test artifacts (IDE logs, snapshots, screenshots, etc.) will be stored.
-     * If directory doesn't exist, it will be created.
+     * If the directory doesn't exist, it will be created.
      */
     @get:Input
     val artifactsDir = objectFactory.property<String>()
 
     /**
-     * Name of the profiler which will be used while execution.
-     * Enum ProfilerName, possible values ASYNC, YOURKIT
-     * ASYNC profiler is by default.
+     * Name of the profiler which will be used during execution.
+     * Possible values: [ProfilerName.ASYNC] (default), [ProfilerName.YOURKIT].
      */
     @get:Input
     val profilerName = objectFactory.property<ProfilerName>()
