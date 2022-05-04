@@ -3,7 +3,7 @@
 @file:Import("../verify.utils.kts")
 
 with(__FILE__.toPath()) {
-    val propertyName = "org.jetbrains.intellij.buildFeature.checkUpdates"
+    val propertyName = "org.jetbrains.intellij.buildFeature.selfUpdateCheck"
     runGradleTask(
         mapOf(propertyName to false), "assemble"
     ).let { logs ->

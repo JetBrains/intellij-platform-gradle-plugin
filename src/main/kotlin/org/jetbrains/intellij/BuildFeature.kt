@@ -4,7 +4,7 @@ import org.gradle.api.Project
 import org.jetbrains.intellij.IntelliJPluginConstants.ID as prefix
 
 enum class BuildFeature(private val defaultValue: Boolean) {
-    CHECK_UPDATES(true),
+    SELF_UPDATE_CHECK(true),
     ;
 
     fun getValue(project: Project) = project.findProperty(toString())?.toString()?.toBoolean() ?: defaultValue
