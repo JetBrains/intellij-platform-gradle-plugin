@@ -7,6 +7,7 @@
 - `instrumentCode` task – changes in Kotlin code no longer rebuild the plugin [#959](../../issues/959)
 - Kotlin-generated classes aren't packed into the plugin distribution [#978](../../issues/978)
 - Integration Tests: Cover `instrumentCode` task
+- Add `java.system.class.loader=com.intellij.util.lang.PathClassLoader` system property for tests run on 221+
 
 ## 1.5.3
 - Updated dependencies marked as vulnerable [#459](../../issues/459)
