@@ -1,11 +1,10 @@
-import org.jetbrains.intellij.IntelliJPlugin
 import org.jetbrains.intellij.IntelliJPluginExtension
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.6.21"
+    id("org.jetbrains.kotlin.jvm") version "1.6.21" apply false
     id("org.jetbrains.intellij") version "0.0.0" apply false
     `kotlin-dsl`
 }
@@ -21,7 +20,8 @@ tasks {
 }
 
 subprojects {
-    apply<IntelliJPlugin>()
+    apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.intellij")
 
     repositories {
         mavenCentral()

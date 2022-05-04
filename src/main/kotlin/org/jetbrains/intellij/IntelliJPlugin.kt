@@ -777,9 +777,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     val setupDependenciesTask = setupDependenciesTaskProvider.get()
                     val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
-                    sourceSetOutputClassesDirs.convention(project.provider {
-                        setOf(sourceSet.java.destinationDirectory.get().asFile)
-                    })
+                    sourceSetOutputClassesDir.convention(sourceSet.java.destinationDirectory.asFile)
                     sourceSetJavaDirs.convention(project.provider {
                         sourceSet.java.srcDirs
                     })
@@ -929,8 +927,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     })
 
                     outputDir.convention(project.provider {
-                        val classesDir = sourceSet.output.classesDirs.first()
-                        val outputDir = File(classesDir.parentFile, "${sourceSet.name}-instrumented")
+                        val outputDir = sourceSetOutputClassesDir.get().parentFile.resolve("${sourceSet.name}-instrumented")
                         project.layout.projectDirectory.dir(outputDir.path)
                     })
 
@@ -944,13 +941,12 @@ open class IntelliJPlugin : Plugin<Project> {
             val updateTask = project.tasks.register("post${instrumentTask.name.capitalize()}") {
                 val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.get().isEnabled }
                 val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
-                val outputDir = instrumentTask.get().outputDir
+                val outputClassesDir = instrumentTask.get().sourceSetOutputClassesDir.get()
+                val instrumentedOutputClassesDir = instrumentTask.get().outputDir
 
                 dependsOn(instrumentTask)
                 onlyIf { instrumentCodeProvider.get() }
-                // Set the classes' dir to the one with the instrumented classes
-                val nonJavaOutputDirs = sourceSet.output.classesDirs.files.minus(instrumentTask.get().sourceSetOutputClassesDirs.get().toSet())
-                doLast { classesDirs.setFrom(outputDir, nonJavaOutputDirs) }
+                doLast { classesDirs.setFrom(classesDirs - outputClassesDir + instrumentedOutputClassesDir) }
             }
 
             // Ensure that our task is invoked when the source set is built

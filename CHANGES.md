@@ -5,6 +5,8 @@
 - Fix for `getHeaderField("Location") must not be null` [#960](../../issues/960)
 - Added `BuildFeature` feature flags
 - `instrumentCode` task – changes in Kotlin code no longer rebuild the plugin [#959](../../issues/959)
+- Kotlin-generated classes aren't packed into the plugin distribution [#978](../../issues/978)
+- Integration Tests: Cover `instrumentCode` task
 
 ## 1.5.3
 - Updated dependencies marked as vulnerable [#459](../../issues/459)

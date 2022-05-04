@@ -98,11 +98,16 @@ patchedPluginXml containsText "<idea-version since-build=\"2021.1\" until-build=
 
 To invoke the `verify.main.kts` script, navigate to the file and click the green arrow on the first script line.
 
+> **Important:** Because of [KT-42101](https://youtrack.jetbrains.com/issue/KT-42101), Kotlin Script doesn't invalidate changes of the imported `verify.utils.kts` file.
+> If you modify scripts loaded using `@file:Import`, make sure to update the content of the `verify.main.kts` file to invalidate cache, or set the `KOTLIN_MAIN_KTS_COMPILED_SCRIPTS_CACHE_DIR` environment variable to an empty value, like:
+> ```Bash
+> KOTLIN_MAIN_KTS_COMPILED_SCRIPTS_CACHE_DIR= /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/instrumentation-task/verify.main.kts
+> ```
 
 # Integration Tests List
 
-| Name                           | Description                                                                                |
-|--------------------------------|--------------------------------------------------------------------------------------------|
-| instrumentation-task-disabled  | Check if plugin is correctly assembled with the instrumentation task manually disabled.    |
-| instrumentation-task-java-only | Process only Java and Swing form files during the code instrumentation.                    |
-| plugin-xml-patching            | Verify if the content of the generated `plugin.xml` file has properties correctly updated. |
+| Name                          | Description                                                                                |
+|-------------------------------|--------------------------------------------------------------------------------------------|
+| instrumentation-task-disabled | Check if plugin is correctly assembled with the instrumentation task manually disabled.    |
+| instrumentation-task          | Process only Java and Swing form files during the code instrumentation.                    |
+| plugin-xml-patching           | Verify if the content of the generated `plugin.xml` file has properties correctly updated. |

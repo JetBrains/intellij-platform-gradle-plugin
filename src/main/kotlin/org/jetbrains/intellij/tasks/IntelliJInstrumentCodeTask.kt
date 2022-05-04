@@ -34,7 +34,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     @Internal
-    val sourceSetOutputClassesDirs = objectFactory.listProperty<File>()
+    val sourceSetOutputClassesDir = objectFactory.property<File>()
 
     @Internal
     val sourceSetJavaDirs = objectFactory.listProperty<File>()
@@ -104,7 +104,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         outputDir.deleteRecursively()
         outputDir.mkdir()
         fileSystemOperations.copy {
-            from(sourceSetOutputClassesDirs.get())
+            from(sourceSetOutputClassesDir.get())
             into(outputDir)
         }
     }
@@ -134,7 +134,6 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     private fun instrumentCode(srcDirs: List<File>, outputDir: File, instrumentNotNull: Boolean) {
-        println("srcDirs='${srcDirs}'")
         if (srcDirs.isEmpty()) {
             return
         }
