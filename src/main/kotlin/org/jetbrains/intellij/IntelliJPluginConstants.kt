@@ -43,9 +43,6 @@ object IntelliJPluginConstants {
     const val RELEASE_TYPE_NIGHTLY = "nightly"
     const val RELEASE_TYPE_RELEASES = "releases"
 
-    const val BUILD_FEATURE_CHECK_GRADLE_VERSION = "org.jetbrains.intellij.buildFeature.checkGradleVersion"
-    const val BUILD_FEATURE_CHECK_GRADLE_INTELLIJ_PLUGIN_VERSION = "org.jetbrains.intellij.buildFeature.checkGradleIntellijPluginVersion"
-
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
     const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
     const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://raw.githubusercontent.com/JetBrains/intellij-sdk-docs/main/topics/_generated/android_studio_releases.xml"
