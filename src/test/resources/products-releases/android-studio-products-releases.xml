@@ -354,7 +354,7 @@
         <name>Android Studio Arctic Fox (2020.3.1)</name>
         <build>AI-203.7717.56.2031.7583922</build>
         <version>2020.3.1.22</version>
-        <channel>ReReleaselease</channel>
+        <channel>Release</channel>
         <platformBuild>203.7717.56</platformBuild>
         <platformVersion>2020.3.3</platformVersion>
         <date>July 28, 2021</date>

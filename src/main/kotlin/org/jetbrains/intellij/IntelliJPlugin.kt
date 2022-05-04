@@ -1264,7 +1264,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
                         else -> {
                             if (extension.version.orNull != null) {
-                                throw GradleException("Both 'localPath' and 'version' specified, second would be ignored")
+                                throw GradleException("Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present.")
                             }
                             info(context, "Using path to locally installed IDE: $localPath")
                             dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
