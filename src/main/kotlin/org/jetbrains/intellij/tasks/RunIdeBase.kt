@@ -43,9 +43,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     val jbrVersion = objectFactory.property<String>()
 
     /**
-     * JetBrains Java runtime variant to use when running the IDE with the plugin.
+     * JetBrains Runtime variant to use when running the IDE with the plugin.
      * Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`.
-     * See JetBrains Runtime Releases: https://github.com/JetBrains/JetBrainsRuntime/releases
+     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases)
      */
     @Input
     @Optional
@@ -56,9 +56,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     val pluginsDir: DirectoryProperty = objectFactory.directoryProperty()
 
     /**
-     * Enables auto-reload of dynamic plugins. Dynamic plugins will be reloaded automatically when their JARs are
-     * modified. This allows a much faster development cycle by avoiding a full restart of the development instance
-     * after code changes. Enabled by default in 2020.2 and higher.
+     * Enables auto-reload of dynamic plugins.
+     * Dynamic plugins will be reloaded automatically when their JARs are modified.
+     * This allows a much faster development cycle by avoiding a full restart of the development instance
+     * after code changes.
+     * Enabled by default in 2020.2 and higher.
      */
     @Input
     @Optional
