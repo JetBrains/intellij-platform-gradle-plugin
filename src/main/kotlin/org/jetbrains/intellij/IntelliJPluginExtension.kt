@@ -26,7 +26,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
     }
 
     /**
-     * The list of bundled IDE plugins and plugins from the <a href="https://plugins.jetbrains.com/">JetBrains Plugin Repository</a>.
+     * The list of bundled IDE plugins and plugins from the [JetBrains Marketplace](https://plugins.jetbrains.com/)/
+     * configured [pluginsRepositories].
      * It accepts values of `String` or `Project`.
      */
     @Input
@@ -34,7 +35,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     val plugins = objectFactory.listProperty<Any>()
 
     /**
-     * The path to locally installed IDE distribution that should be used as a dependency.
+     * The path to locally installed IDE distribution that should be used to build the plugin.
      */
     @Input
     @Optional
@@ -50,13 +51,14 @@ abstract class IntelliJPluginExtension @Inject constructor(
     /**
      * The version of the IntelliJ Platform IDE that will be used to build the plugin.
      *
-     * Please see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html">Plugin Compatibility</a> in SDK docs for more details.
+     * Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html)
+     * topic in SDK docs for more details.
      */
     @Input
     val version = objectFactory.property<String>()
 
     /**
-     * The type of IDE distribution (IC, IU, CL, PY, PC, RD or JPS).
+     * The type of IDE distribution (IC, IU, CL, PY, PC, RD, GO, or JPS).
      *
      * The type might be included as a prefix in [version] value.
      */
@@ -66,21 +68,21 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The name of the target zip-archive and defines the name of plugin artifact.
-     * By default, <code>${project.name}</code>
+     * By default, `${project.name}`.
      */
     @Input
     @Optional
     val pluginName = objectFactory.property<String>()
 
     /**
-     * Patch plugin.xml with since and until build values inferred from IDE version.
+     * Patch `plugin.xml` with `since/until-build` values.
      */
     @Input
     @Optional
     val updateSinceUntilBuild = objectFactory.property<Boolean>()
 
     /**
-     * Patch plugin.xml with an until build value that is just an "open" since build.
+     * Patch `plugin.xml` with an `until-build` value that is just an "open" `since-build`.
      */
     @Input
     @Optional
@@ -95,14 +97,14 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The path of sandbox directory that is used for running IDE with developing plugin.
-     * By default, <code>${project.buildDir}/idea-sandbox</code>.
+     * By default, `${project.buildDir}/idea-sandbox`.
      */
     @Input
     @Optional
     val sandboxDir = objectFactory.property<String>()
 
     /**
-     * Url of repository for downloading IDE distributions.
+     * URL of repository for downloading IDE distributions.
      */
     @Input
     @Optional
@@ -134,7 +136,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     }
 
     /**
-     * Url of repository for downloading JetBrains Java Runtime.
+     * URL of repository for downloading JetBrains Runtime.
      */
     @Input
     @Optional
@@ -146,23 +148,23 @@ abstract class IntelliJPluginExtension @Inject constructor(
     val ideaDependencyCachePath = objectFactory.property<String>()
 
     /**
-     * Download IntelliJ sources while configuring Gradle project.
+     * Download IntelliJ Platform sources.
      */
     @Input
     @Optional
     val downloadSources = objectFactory.property<Boolean>()
 
     /**
-     * Turning it off disables configuring dependencies to intellij sdk jars automatically,
-     * instead the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration
+     * Turning it off disables configuring dependencies to Intellij SDK jars automatically,
+     * instead, the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration.
      */
     @Input
     @Optional
     val configureDefaultDependencies = objectFactory.property<Boolean>()
 
     /**
-     * Configure extra dependency artifacts from intellij repository
-     * The dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block
+     * Configure extra dependency artifacts from intellij repository.
+     * The dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block.
      */
     @Input
     @Optional
