@@ -138,7 +138,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Certificate chain content.
-     * First certificate from the chain will be used as a certificate authority (CA).
+     * The first certificate from the chain will be used as a certificate authority (CA).
      * Refers to `cert` option.
      */
     @Input
@@ -147,7 +147,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Certificate chain file.
-     * First certificate from the chain will be used as a certificate authority (CA).
+     * The first certificate from the chain will be used as a certificate authority (CA).
      * Refers to `cert-file` option.
      */
     @InputFile
@@ -199,9 +199,9 @@ open class SignPluginTask @Inject constructor(
     }
 
     /**
-     * Resolves path to the IntelliJ Marketplace ZIP Signer.
+     * Resolves the path to the IntelliJ Marketplace ZIP Signer.
      * At first, checks if it was provided with [cliPath].
-     * Fetches Marketplace ZIP Signer artifact from the GitHub Releases and resolves the path to zip-signer-cli jar file.
+     * Fetches Marketplace ZIP Signer artifact from the GitHub Releases and resolves the path to `zip-signer-cli` jar file.
      *
      * @return path to zip-signer-cli jar
      */
@@ -220,7 +220,7 @@ open class SignPluginTask @Inject constructor(
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
-     * @return array with available CLI options
+     * @return array with all available CLI options
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
