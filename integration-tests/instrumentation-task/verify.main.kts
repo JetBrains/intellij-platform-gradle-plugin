@@ -36,4 +36,23 @@ with(__FILE__.toPath()) {
             assert((jar readEntry "MainKt\$Companion.class").length == 1319)
         }
     }
+
+    runGradleTask("jar").let { logs ->
+        logs containsText "> Task :instrumentation-task:compileKotlin UP-TO-DATE"
+        logs containsText "> Task :instrumentation-task:compileJava UP-TO-DATE"
+    }
+
+    projectDirectory.resolve("src/main/kotlin/MainKt.kt").toFile().appendText("// foo\n")
+
+    runGradleTask("jar").let { logs ->
+        logs containsText "Task ':instrumentation-task:compileKotlin' is not up-to-date"
+        logs containsText "> Task :instrumentation-task:compileJava UP-TO-DATE"
+    }
+
+    projectDirectory.resolve("src/main/java/Main.java").toFile().appendText("// foo\n")
+
+    runGradleTask("jar").let { logs ->
+        logs containsText "Task ':instrumentation-task:compileKotlin' is not up-to-date"
+        logs containsText "Task ':instrumentation-task:compileJava' is not up-to-date"
+    }
 }
