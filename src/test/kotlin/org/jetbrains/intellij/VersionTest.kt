@@ -20,6 +20,7 @@ class VersionTest {
         assertEquals(Version.parse("GOLAND-212.4535.15-EAP-SNAPSHOT"), Version(212, 4535, 15, "GOLAND-212.4535.15-EAP-SNAPSHOT"))
         assertEquals(Version.parse("GOLAND-212.4416-EAP-CANDIDATE-SNAPSHOT"), Version(212, 4416, 0, "GOLAND-212.4416-EAP-CANDIDATE-SNAPSHOT"))
         assertEquals(Version.parse("GOLAND-212-EAP-SNAPSHOT"), Version(212, 0, 0, "GOLAND-212-EAP-SNAPSHOT"))
+        assertEquals(Version.parse("2021.1 Beta 4"), Version(2021, 1, 0, "2021.1 Beta 4"))
     }
 
     @Test
