@@ -111,3 +111,4 @@ To invoke the `verify.main.kts` script, navigate to the file and click the green
 | instrumentation-task-disabled | Check if plugin is correctly assembled with the instrumentation task manually disabled.    |
 | instrumentation-task          | Process only Java and Swing form files during the code instrumentation.                    |
 | plugin-xml-patching           | Verify if the content of the generated `plugin.xml` file has properties correctly updated. |
+| throwing-exceptions           | Forces plugin to throw exceptions due to misconfigurations or other unexpected behaviours. |
