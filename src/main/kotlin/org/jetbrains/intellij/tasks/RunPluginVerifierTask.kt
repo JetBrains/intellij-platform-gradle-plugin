@@ -95,7 +95,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Returns the version of the IntelliJ Plugin Verifier that will be used.
-     * By default, set to "latest".
+     * By default, set to "latest".7
      */
     @Input
     @Optional
@@ -111,47 +111,47 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * An instance of the distribution file generated with the build task.
-     * If empty, task will be skipped.
+     * If empty, the task will be skipped.
      */
     @InputFile
     @SkipWhenEmpty
     val distributionFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
-     * The path to directory where verification reports will be saved.
-     * By default, set to ${project.buildDir}/reports/pluginVerifier.
+     * The path to the directory where verification reports will be saved.
+     * By default, set to `${project.buildDir}/reports/pluginVerifier`.
      */
     @OutputDirectory
     @Optional
     val verificationReportsDir = objectFactory.property<String>()
 
     /**
-     * The path to directory where IDEs used for the verification will be downloaded.
-     * By default, set to ${project.buildDir}/pluginVerifier.
+     * The path to the directory where IDEs used for the verification will be downloaded.
+     * By default, set to `${project.buildDir}/pluginVerifier`.
      */
     @Input
     @Optional
     val downloadDir = objectFactory.property<String>()
 
     /**
-     * JBR version used by the IntelliJ Plugin Verifier, i.e. "11_0_2b159".
-     * All JetBrains Java versions are available at JetBrains Space Packages: https://cache-redirector.jetbrains.com/intellij-jbr
+     * JBR version used by the IntelliJ Plugin Verifier, i.e. `11_0_2b159`.
+     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
     @Input
     @Optional
     val jbrVersion = objectFactory.property<String>()
 
     /**
-     * JetBrains Java runtime variant to use when running the IDE with the plugin.
+     * JetBrains Runtime variant to use when running the IDE with the plugin.
      * Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`.
-     * See JetBrains Runtime Releases: https://github.com/JetBrains/JetBrainsRuntime/releases
+     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
     @Input
     @Optional
     val jbrVariant = objectFactory.property<String>()
 
     /**
-     * Url of repository for downloading JetBrains Java Runtime.
+     * URL of repository for downloading JetBrains Runtime.
      */
     @Input
     @Optional
@@ -173,7 +173,7 @@ open class RunPluginVerifierTask @Inject constructor(
     val externalPrefixes = objectFactory.listProperty<String>()
 
     /**
-     * A flag that controls the output format - if set to <code>true</code>, the TeamCity compatible output
+     * A flag that controls the output format - if set to `true`, the TeamCity compatible output
      * will be returned to stdout.
      */
     @Input
@@ -243,12 +243,12 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * Resolves path to the IntelliJ Plugin Verifier file.
+     * Resolves the path to the IntelliJ Plugin Verifier file.
      * At first, checks if it was provided with [verifierPath].
      * Fetches IntelliJ Plugin Verifier artifact from the [IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY]
-     * repository and resolves the path to verifier-cli jar file.
+     * repository and resolves the path to `verifier-cli` jar file.
      *
-     * @return path to verifier-cli jar
+     * @return path to `verifier-cli` jar
      */
     private fun resolveVerifierPath(): String {
         val path = verifierPath.orNull
@@ -263,9 +263,10 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * Resolves the Java Runtime directory. `runtimeDir` property is used if provided with the task configuration.
-     * Otherwise, `jbrVersion` is used for resolving the JBR. If it's not set, or it's impossible to resolve valid
-     * version, built-in JBR will be used.
+     * Resolves the Java Runtime directory.
+     * [runtimeDir] property is used if provided with the task configuration.
+     * Otherwise, [jbrVersion] is used for resolving the JBR.
+     * If it's not set, or it's impossible to resolve a valid version, built-in JBR will be used.
      * As a last fallback, current JVM will be used.
      *
      * @return path to the Java Runtime directory
@@ -295,9 +296,9 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * Verifies if provided Java Runtime directory points to Java 11 in case of Plugin Verifier 1.260+.
+     * Verifies if provided Java Runtime directory points to Java 11 when using Plugin Verifier 1.260+.
      *
-     * @return Java Runtime directory points to Java 8 for Plugin Verifier version < 1.260, or Java 11 for 1.260+.
+     * @return Java Runtime directory points to Java 8 for Plugin Verifier versions < 1.260, or Java 11 for 1.260+.
      */
     private fun validateRuntimeDir(runtimeDirPath: String) = ByteArrayOutputStream().use { os ->
         debug(context, "Plugin Verifier JRE verification: $runtimeDirPath")
@@ -320,14 +321,14 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * Checks Plugin Verifier version, if 1.260+ – require Java 11 to run.
+     * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
      */
     private fun requiresJava11() = Version.parse(resolveVerifierVersion(verifierVersion.orNull)) >= Version(1, 260)
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
-     * @return array with available CLI options
+     * @return array with all available CLI options
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
@@ -382,7 +383,7 @@ open class RunPluginVerifierTask @Inject constructor(
     internal fun resolveVerifierVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
 
     /**
-     * Resolves the IDE type and version. If just version is provided, type is set to "IC".
+     * Resolves the IDE type and version. If only `version` is provided, `type` is set to "IC".
      *
      * @param ideVersion IDE version. Can be "2020.2", "IC-2020.2", "202.1234.56"
      * @return path to the resolved IDE
@@ -477,7 +478,8 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * Obtains version parameter name used for downloading IDE artifact.
+     * Obtains the version parameter name used for downloading IDE artifact.
+     *
      * Examples:
      * - 202.7660.26 -> build
      * - 2020.1, 2020.2.3 -> version
