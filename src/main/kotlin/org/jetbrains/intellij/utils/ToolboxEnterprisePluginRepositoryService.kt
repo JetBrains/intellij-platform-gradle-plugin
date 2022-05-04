@@ -23,9 +23,9 @@ interface ToolboxEnterprisePluginRepositoryService : PluginRepositoryService {
     @Multipart
     @POST("/api/ij-plugins/upload")
     override fun uploadByStringId(
-        pluginXmlId: RequestBody,
-        channel: RequestBody?,
-        notes: RequestBody?,
-        file: MultipartBody.Part
+        @Part("xmlId") pluginXmlId: RequestBody,
+        @Part("channel") channel: RequestBody?,
+        @Part("notes") notes: RequestBody?,
+        @Part file: MultipartBody.Part
     ): Call<PluginUpdateBean>
 }
