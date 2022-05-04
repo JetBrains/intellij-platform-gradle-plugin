@@ -199,7 +199,7 @@
 - documentation improvements
 
 ## 0.4.21
-- fix adding serchable options to the distribution for Gradle > 5.1 [#487](../../issues/487)
+- fix adding searchable options to the distribution for Gradle > 5.1 [#487](../../issues/487)
 
 ## 0.4.20
 - fixed caching builtin plugins data
@@ -267,15 +267,15 @@
 
 ## 0.4.6
 - support Gradle 5.3 [#379](../../issues/379)
-- fixed downloading JBR 8 for IDEAE 2018.3 and earlier
+- fixed downloading JBR 8 for IDEA 2018.3 and earlier
 
 ## 0.4.5
-- support JBR 11 from the new JetBrains Runtime Reposiotry
+- support JBR 11 from the new JetBrains Runtime Repository
 - support running using JBR 11 [IDEA-208692](https://youtrack.jetbrains.com/issue/IDEA-208692)
 
 ## 0.4.4
 - support the new bintray repository for JetBrains Runtime artifacts
-- fixed downloading of old JBR  builds [#367](../../issues/367)
+- fixed downloading of old JBR builds [#367](../../issues/367)
 - fix instrumentation for local IDE instances [#369](../../issues/369)
 
 ## 0.4.3
