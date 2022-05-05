@@ -1,6 +1,7 @@
 package org.jetbrains.intellij
 
 import org.apache.commons.io.FileUtils
+import org.gradle.api.GradleException
 import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
@@ -27,7 +28,7 @@ abstract class IntelliJPluginSpecBase {
     val gradleHome: String = System.getProperty("test.gradle.home")
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val intellijVersion = "2020.1"
+    val intellijVersion: String = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() } ?: throw GradleException("'test.intellij.version' isn't provided")
     val dir: File by lazy { createTempDirectory("tmp").toFile() }
 
     private val gradleProperties = file("gradle.properties")

@@ -114,6 +114,7 @@ tasks {
         systemProperties["test.gradle.default"] = properties("gradleVersion")
         systemProperties["test.gradle.version"] = properties("testGradleVersion")
         systemProperties["test.gradle.arguments"] = properties("testGradleArguments")
+        systemProperties["test.intellij.version"] = properties("testIntelliJVersion")
         systemProperties["plugins.repository"] = properties("pluginsRepository")
         outputs.dir(testGradleHomePath)
     }
