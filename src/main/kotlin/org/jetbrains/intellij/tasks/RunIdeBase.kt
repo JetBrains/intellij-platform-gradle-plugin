@@ -152,6 +152,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
         systemPropertyIfNotDefined("idea.classpath.index.enabled", false, userDefinedSystemProperties)
         systemPropertyIfNotDefined("idea.is.internal", true, userDefinedSystemProperties)
+        systemPropertyIfNotDefined("jdk.module.illegalAccess.silent", true, userDefinedSystemProperties)
 
         if (!userDefinedSystemProperties.containsKey("idea.auto.reload.plugins") && autoReloadPlugins.get()) {
             systemProperty("idea.auto.reload.plugins", "true")
