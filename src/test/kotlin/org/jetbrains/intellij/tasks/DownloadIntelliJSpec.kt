@@ -99,9 +99,6 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
     private fun deleteIfExists(dir: File) {
         if (dir.exists()) {
             dir.deleteRecursively()
-            if (dir.exists()) {
-                throw IllegalStateException("'${dir.path}' directory should not exist")
-            }
         }
     }
 
@@ -109,5 +106,4 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         assertTrue(dir.exists(), "Expected directory '${dir.path}' to exist")
         assertEquals(fileNames.toSet(), dir.list()?.toSet(), "Unexpected '${dir.path}' directory contents")
     }
-
 }
