@@ -28,31 +28,33 @@ repositories {
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.216") {
-        exclude(group = "org.jetbrains.kotlin")
+        exclude("com.fasterxml.jackson.module")
     }
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.216") {
-        exclude(group = "org.jetbrains.kotlin")
-    }
-    // should be changed together with plugin-repository-rest-client
-    implementation("org.jetbrains.intellij:blockmap:1.0.5") {
-        exclude(group = "org.jetbrains.kotlin")
+        exclude("com.fasterxml.jackson.module")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.25") {
-        exclude(group = "org.jetbrains.kotlin")
+        exclude("com.fasterxml.jackson.core")
+        exclude("org.slf4j")
+        exclude("com.squareup.okhttp3")
     }
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4")
-    api("com.squareup.okhttp3:okhttp:4.9.3")
-    api("com.squareup.retrofit2:retrofit:2.9.0") {
-        exclude("okhttp")
-    }
+    api("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+}
+
+configurations {
+    // exclude Kotlin libraries from every dependency other than Kotlin configurations
+    asSequence()
+        .filterNot { it.name.startsWith("kotlin") }
+        .forEach { it.exclude("org.jetbrains.kotlin") }
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {
