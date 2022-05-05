@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Files with Copyrights" pattern="file:*.kt||file:*.kts" />
+</component>

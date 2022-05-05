@@ -1,0 +1,6 @@
+<component name="CopyrightManager">
+  <copyright>
+    <option name="notice" value="Copyright &amp;#36;originalComment.match(&quot;Copyright 2000-(\d+)&quot;, 1, &quot;-&quot;, &quot;&amp;#36;today.year&quot;)2000-&amp;#36;today.year JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license." />
+    <option name="myName" value="JetBrains Copyrights" />
+  </copyright>
+</component>
