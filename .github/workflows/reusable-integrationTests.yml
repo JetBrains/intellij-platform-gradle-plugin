@@ -70,6 +70,7 @@ jobs:
 
       - uses: gradle/gradle-build-action@v2
         with:
+          cache-disabled: true
           gradle-version: ${{ matrix.gradleVersion }}
 
       - name: Run Verification
