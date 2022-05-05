@@ -5,8 +5,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
 
-fun foo() = println("foo")
-
 // Path to the integration tests single project, like:
 // /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/
 val Path.projectDirectory

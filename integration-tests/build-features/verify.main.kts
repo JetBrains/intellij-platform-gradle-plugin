@@ -9,11 +9,6 @@ with(__FILE__.toPath()) {
             println(logs.length)
             logs containsText "Build feature is disabled: $flag"
         }
-
-        runGradleTask("assemble", projectProperties = mapOf(flag to true), debug = false).let { logs ->
-            println(logs.length)
-            logs containsText "Build feature is disabled: $flag"
-        }
     }
 
 }

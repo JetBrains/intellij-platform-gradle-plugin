@@ -266,6 +266,20 @@ The following attributes help you to tune instrumenting behaviour in <kbd>instru
 | :------------------------ |  :---------------- |
 | <kbd>compilerVersion</kbd> is a version of instrumenting compiler. It's used for non-IDEA plugins (e.g. CLion or Rider). | <kbd>Build number of the IDE dependency</kbd> |
 
+## Build Features
+With the Gradle IntelliJ Plugin releases, new features are introduced that require additional research, collecting more feedback from developers, or should be enabled or disabled under particular conditions.
+Build Features are an implementation of the feature flags concept and let you control some behaviors of the Gradle IntelliJ Plugin.
+To enable or disable a particular feature, add the Project property to the `gradle.properties` file, like:
+
+```properties
+org.jetbrains.intellij.buildFeature.buildFeatureName=false
+```
+
+| **Build Feature Name** | **Description**                                                 | **Default Value** |
+|------------------------|-----------------------------------------------------------------|-------------------|
+| `selfUpdateCheck`      | Check if the currently used Gradle IntelliJ Plugin is outdated. | `true`            |
+
+
 # Examples
 
 Marketplace platform provides the [IntelliJ Platform Explorer](https://jb.gg/ipe) – a search tool for browsing Extension Points inside existing implementations of open-source IntelliJ Platform plugins.
@@ -330,13 +344,11 @@ As examples of using this plugin, you can also check out following projects:
 
 Contributing tips:
 
-You can debug the source code of gradle-intellij-plugin (e.g. put breakpoints there), if you add a reference to your local copy into `settings.gradle` of your IntelliJ plugin:
+You can debug the source code of gradle-intellij-plugin (e.g. put breakpoints there) if you add a reference to your local copy into `settings.gradle` of your IntelliJ plugin:
 
 ```groovy
 includeBuild '/path/to/gradle-intellij-plugin'
 ```
-
-After adding the above reference, gradle-intellij-plugin sources should appear in your IntelliJ plugin Project view, and you can edit and debug them in a standard way.
 
 # License
 
