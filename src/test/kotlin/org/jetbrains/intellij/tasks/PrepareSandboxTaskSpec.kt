@@ -355,7 +355,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy("""
             intellij {
-                plugins = ['org.intellij.plugins.markdown:201.6668.74']
+                plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
                 pluginName = 'myPluginName'
             }
         """)

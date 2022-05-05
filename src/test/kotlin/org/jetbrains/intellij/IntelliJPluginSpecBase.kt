@@ -29,6 +29,7 @@ abstract class IntelliJPluginSpecBase {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
     val intellijVersion: String = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() } ?: throw GradleException("'test.intellij.version' isn't provided")
+    val testMarkdownPluginVersion: String = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() } ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
     val dir: File by lazy { createTempDirectory("tmp").toFile() }
 
     private val gradleProperties = file("gradle.properties")

@@ -94,7 +94,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
 
         buildFile.groovy("""
-            intellij.plugins = ['org.intellij.plugins.markdown:201.6668.74']
+            intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
 
             task printMainRuntimeClassPath { 
                 doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }

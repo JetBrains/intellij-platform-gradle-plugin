@@ -82,22 +82,22 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     fun `download zip plugin`() {
         buildFile.groovy("""
             intellij {
-                plugins = ["org.intellij.plugins.markdown:201.6668.74"]
+                plugins = ["org.intellij.plugins.markdown:$testMarkdownPluginVersion"]
             }
         """)
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
-        val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.intellij.plugins.markdown/201.6668.74")
+        val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.intellij.plugins.markdown/$testMarkdownPluginVersion")
         pluginDir.list()?.let {
             assertTrue(it.contains("17328855fcd031f39a805db934c121eaa25dedfb"))
         }
 
         File(pluginDir, "17328855fcd031f39a805db934c121eaa25dedfb").list()?.let {
-            assertTrue(it.contains("org.intellij.plugins.markdown-201.6668.74.zip"))
+            assertTrue(it.contains("org.intellij.plugins.markdown-$testMarkdownPluginVersion.zip"))
         }
         File(pluginsCacheDir, "unzipped.com.jetbrains.plugins").list()?.let {
-            assertTrue(it.contains("org.intellij.plugins.markdown-201.6668.74"))
+            assertTrue(it.contains("org.intellij.plugins.markdown-$testMarkdownPluginVersion"))
         }
     }
 

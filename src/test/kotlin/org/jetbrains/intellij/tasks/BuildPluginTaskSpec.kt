@@ -251,7 +251,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
             intellij {
                 pluginName = 'myPluginName'
-                plugins = ['org.intellij.plugins.markdown:201.6668.74']
+                plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
             }
         """)
 
