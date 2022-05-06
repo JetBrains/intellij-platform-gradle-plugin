@@ -28,15 +28,19 @@ repositories {
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.216") {
+        exclude("org.jetbrains.kotlin")
         exclude("com.fasterxml.jackson.module")
     }
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.216") {
+        exclude("org.jetbrains.kotlin")
         exclude("com.fasterxml.jackson.module")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.25") {
+        exclude("org.jetbrains.kotlin")
         exclude("com.fasterxml.jackson.core")
         exclude("org.slf4j")
         exclude("com.squareup.okhttp3")
+        exclude("junit")
     }
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
@@ -48,13 +52,6 @@ dependencies {
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
-}
-
-configurations {
-    // exclude Kotlin libraries from every dependency other than Kotlin configurations
-    asSequence()
-        .filterNot { it.name.startsWith("kotlin") }
-        .forEach { it.exclude("org.jetbrains.kotlin") }
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {
