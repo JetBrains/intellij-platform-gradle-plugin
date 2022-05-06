@@ -29,25 +29,27 @@ dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.216") {
         exclude("org.jetbrains.kotlin")
-        exclude("com.fasterxml.jackson.module")
     }
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.216") {
         exclude("org.jetbrains.kotlin")
-        exclude("com.fasterxml.jackson.module")
+    }
+    // should be changed together with plugin-repository-rest-client
+    implementation("org.jetbrains.intellij:blockmap:1.0.5") {
+        exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.25") {
         exclude("org.jetbrains.kotlin")
-        exclude("com.fasterxml.jackson.core")
         exclude("org.slf4j")
-        exclude("com.squareup.okhttp3")
-        exclude("junit")
     }
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4")
-    api("com.squareup.retrofit2:retrofit:2.9.0")
+    api("com.squareup.okhttp3:okhttp:4.9.3")
+    api("com.squareup.retrofit2:retrofit:2.9.0") {
+        exclude("okhttp")
+    }
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
