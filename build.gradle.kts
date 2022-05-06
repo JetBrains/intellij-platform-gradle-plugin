@@ -25,36 +25,200 @@ repositories {
     maven("https://plugins.gradle.org/m2")
 }
 
+configurations.all {
+    resolutionStrategy {
+        failOnVersionConflict()
+    }
+}
+
 dependencies {
-    implementation("org.jetbrains:annotations:23.0.0")
+    constraints {
+        configurations.compileClasspath {
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+//            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+//                version { strictly("1.6.21") }
+//            }
+//            this("org.jetbrains.kotlin", "kotlin-reflect") {
+//                version { strictly("1.6.21") }
+//            }
+            this("org.jetbrains", "annotations") {
+                version { strictly("23.0.0") }
+            }
+        }
+        configurations.testRuntimeClasspath {
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains", "annotations") {
+                version { strictly("23.0.0") }
+            }
+        }
+        configurations.testImplementation {
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains", "annotations") {
+                version { strictly("23.0.0") }
+            }
+        }
+        configurations.testCompileClasspath {
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains", "annotations") {
+                version { strictly("23.0.0") }
+            }
+        }
+        configurations.dokkaGfmPlugin {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+        configurations.dokkaHtmlPlugin {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+        configurations.dokkaJavadocPlugin {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+        configurations.dokkaJekyllPlugin {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+        configurations.dokkaGfmRuntime {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+        configurations.dokkaHtmlRuntime {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+        configurations.dokkaJavadocRuntime {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+        configurations.dokkaJekyllRuntime {
+            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-reflect") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+                version { strictly("1.6.21") }
+            }
+            this("org.jetbrains.kotlin", "kotlin-stdlib-common") {
+                version { strictly("1.6.21") }
+            }
+        }
+
+
+//        configurations.all {
+//            this("org.jetbrains.kotlin", "kotlin-stdlib") {
+//                version { strictly("1.6.10") }
+//            }
+//            this("org.jetbrains.kotlin", "kotlin-stdlib-jdk8") {
+//                version { strictly("1.6.0") }
+//            }
+//            this("org.jetbrains", "annotations") {
+//                version { strictly("23.0.0") }
+//            }
+//        }
+    }
+//    implementation("org.jetbrains:annotations:23.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.216") {
-        exclude("com.fasterxml.jackson.module")
+//        exclude("com.fasterxml.jackson.module")
+        exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.216") {
-        exclude("com.fasterxml.jackson.module")
+//        exclude("com.fasterxml.jackson.module")
+        exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.25") {
         exclude("com.fasterxml.jackson.core")
-        exclude("org.slf4j")
+        exclude("com.fasterxml.jackson.module")
         exclude("com.squareup.okhttp3")
+        exclude("org.slf4j")
+        exclude("org.jetbrains.kotlin")
+//        exclude("junit")
+
+
+//        exclude("com.squareup.retrofit2", "converter-jackson")
+//        exclude("com.fasterxml.jackson.module", "jackson-module-kotlin")
     }
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2") {
+        exclude("org.jetbrains.kotlin")
+    }
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
-    testImplementation(gradleTestKit())
+    testImplementation(kotlin("stdlib"))
+//    testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
-}
-
-configurations {
-    // exclude Kotlin libraries from every dependency other than Kotlin configurations
-    asSequence()
-        .filterNot { it.name.startsWith("kotlin") }
-        .forEach { it.exclude("org.jetbrains.kotlin") }
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {
