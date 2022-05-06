@@ -780,10 +780,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     val setupDependenciesTask = setupDependenciesTaskProvider.get()
                     val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
-                    sourceSetOutputClassesDir.convention(sourceSet.java.destinationDirectory.asFile)
-                    sourceSetJavaDirs.convention(project.provider {
-                        sourceSet.java.srcDirs
-                    })
+                    inputDir.convention(sourceSet.java.destinationDirectory)
                     sourceSetCompileClasspath.convention(project.provider {
                         sourceSet.compileClasspath
                     })
@@ -929,8 +926,12 @@ open class IntelliJPlugin : Plugin<Project> {
                         }
                     })
 
+                    toInstrumentDir.convention(project.provider {
+                        val toInstrumentDir = inputDir.get().asFile.parentFile.resolve("${sourceSet.name}-to-instrument")
+                        project.layout.projectDirectory.dir(toInstrumentDir.path)
+                    })
                     outputDir.convention(project.provider {
-                        val outputDir = sourceSetOutputClassesDir.get().parentFile.resolve("${sourceSet.name}-instrumented")
+                        val outputDir = inputDir.get().asFile.parentFile.resolve("${sourceSet.name}-instrumented")
                         project.layout.projectDirectory.dir(outputDir.path)
                     })
 
@@ -944,7 +945,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val updateTask = project.tasks.register("post${instrumentTask.name.capitalize()}") {
                 val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.get().isEnabled }
                 val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
-                val outputClassesDir = instrumentTask.get().sourceSetOutputClassesDir.get()
+                val outputClassesDir = instrumentTask.get().inputDir
                 val instrumentedOutputClassesDir = instrumentTask.get().outputDir
 
                 dependsOn(instrumentTask)

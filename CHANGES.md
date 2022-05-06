@@ -11,9 +11,10 @@
 - Fixed version parsing for `listProductsReleases` task which resulted in incorrect IDE releases versions
 - Throw an exception instead of warning when both `localPath` and `version` are specified
 - Set `-Djdk.module.illegalAccess.silent=true` flag by default to mute `WARNING: An illegal reflective access operation has occurred`
+- `instrumentCode` task – incremental instrumentation [#459](../../issues/459)
 
 ## 1.5.3
-- Updated dependencies marked as vulnerable [#459](../../issues/459)
+- Updated dependencies marked as vulnerable
 - Fixed code instrumentation disabling via `tasks.instrumentCode.enabled`
 - `instrumentCode` task – limit the scope of the task to `sourceSets.main.java` [#459](../../issues/459)
 - Introduce Gradle IntelliJ Plugin version check against the latest available
@@ -44,6 +45,7 @@
 - Update runtime classpath for `221+`
 - Fixed resolving Java Runtime for MacOSX [#895](../../issues/895)
 - ProductInfo: parse custom properties in `product-info.json` [#897](../../issues/897)
+- Make `IntelliJInstrumentCodeTask` incremental
 
 ## 1.3.1
 - Fixed execution bit filter when extracting Rider [RIDER-72922](https://youtrack.jetbrains.com/issue/RIDER-72922)
