@@ -33,7 +33,7 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 open class IntelliJInstrumentCodeTask @Inject constructor(
-    private val objectFactory: ObjectFactory,
+    objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
     companion object {
