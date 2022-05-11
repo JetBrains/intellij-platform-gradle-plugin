@@ -169,7 +169,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             //    <skip pattern=".."/>
             // </instrumentIdeaExtensions>
 
-            val dirs = sourceDirs.filter(File::exists)
+            val dirs = sourceDirs.filter { it.exists() }
             if (!dirs.isEmpty) {
                 ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
                     mapOf(
