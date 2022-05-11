@@ -27,10 +27,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.216") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.218") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.216") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.218") {
         exclude("org.jetbrains.kotlin")
     }
     // should be changed together with plugin-repository-rest-client
