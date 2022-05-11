@@ -103,4 +103,22 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         val result = build("buildSourceSet")
         assertEquals(TaskOutcome.UP_TO_DATE, result.task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
     }
+
+    @Test
+    fun `reuse configuration cache`() {
+        writeJavaFile()
+
+        buildFile.groovy("""
+            intellij {
+                instrumentCode = true
+            }
+        """)
+
+        disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+
+        build("buildSourceSet", "--configuration-cache")
+        val result = build("buildSourceSet", "--configuration-cache")
+
+        assertTrue(result.output.contains("Reusing configuration cache."))
+    }
 }
