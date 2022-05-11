@@ -777,7 +777,6 @@ open class IntelliJPlugin : Plugin<Project> {
             jarTask.duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
 
-        val outputDirectory = project.layout.buildDirectory.dir("instrumented")
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
@@ -786,7 +785,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 project.files(this).filter { it.exists() }
             }
 
-            val instrumentTask =
+            val instrumentTaskProvider =
                 project.tasks.register(name, IntelliJInstrumentCodeTask::class.java) {
                     val setupDependenciesTaskProvider =
                         project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
@@ -937,7 +936,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             null
                         }
                     })
-                    outputDir.convention(outputDirectory)
+                    outputDir.convention(project.layout.buildDirectory.dir("instrumented"))
 
                     dependsOn(sourceSet.classesTaskName)
                     dependsOn(setupDependenciesTask)
@@ -947,11 +946,13 @@ open class IntelliJPlugin : Plugin<Project> {
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
             val updateTask = project.tasks.register("post${name.capitalize()}") {
-                val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.get().isEnabled }
+                val instrumentTask = instrumentTaskProvider.get()
+                val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.isEnabled }
                 val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
+                val outputDir = project.provider { instrumentTask.outputDir.get() }
 
                 onlyIf { instrumentCodeProvider.get() }
-                doLast { classesDirs.setFrom(classesDirsCopy + outputDirectory) }
+                doLast { classesDirs.setFrom(classesDirs + outputDir ) }
 
                 dependsOn(instrumentTask)
             }

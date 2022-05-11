@@ -169,27 +169,32 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             //    <skip pattern=".."/>
             // </instrumentIdeaExtensions>
 
-            ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
-                mapOf(
-                    "srcdir" to sourceDirs.filter(File::exists).joinToString(":"),
-                    "destdir" to temporaryDir,
-                    "classpath" to sourceSetCompileClasspath.joinToString(":"),
-                    "includeantruntime" to false,
-                    "instrumentNotNull" to instrumentNotNull
-                ),
-                object : Closure<Any>(this, this) {
-                    @Suppress("unused") // Groovy calls using reflection inside of Closure
-                    fun doCall() = when {
-                        instrumentNotNull -> {
-                            ant.invokeMethod("skip", mapOf(
-                                "pattern" to "kotlin/Metadata"
-                            ))
-                        }
+            val dirs = sourceDirs.filter(File::exists)
+            if (!dirs.isEmpty) {
+                ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
+                    mapOf(
+                        "srcdir" to dirs.joinToString(":"),
+                        "destdir" to temporaryDir,
+                        "classpath" to sourceSetCompileClasspath.joinToString(":"),
+                        "includeantruntime" to false,
+                        "instrumentNotNull" to instrumentNotNull
+                    ),
+                    object : Closure<Any>(this, this) {
+                        @Suppress("unused") // Groovy calls using reflection inside of Closure
+                        fun doCall() = when {
+                            instrumentNotNull -> {
+                                ant.invokeMethod(
+                                    "skip", mapOf(
+                                        "pattern" to "kotlin/Metadata"
+                                    )
+                                )
+                            }
 
-                        else -> null
+                            else -> null
+                        }
                     }
-                }
-            ))
+                ))
+            }
         } finally {
             block()
 
