@@ -771,19 +771,31 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring compile tasks")
 
+        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+        val jarTask = jarTaskProvider.get()
+        if (extension.instrumentCode.get()) {
+            jarTask.duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        }
+
+        val outputDirectory = project.layout.buildDirectory.dir("instrumented")
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
+            val name = sourceSet.getTaskName("instrument", "code")
+
+            val classesDirsCopy = (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
+                project.files(this).filter { it.exists() }
+            }
+
             val instrumentTask =
-                project.tasks.register(sourceSet.getTaskName("instrument", "code"), IntelliJInstrumentCodeTask::class.java) {
+                project.tasks.register(name, IntelliJInstrumentCodeTask::class.java) {
                     val setupDependenciesTaskProvider =
                         project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
                     val setupDependenciesTask = setupDependenciesTaskProvider.get()
                     val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
-                    inputDir.convention(sourceSet.java.destinationDirectory)
-                    sourceSetCompileClasspath.convention(project.provider {
-                        sourceSet.compileClasspath
-                    })
+                    sourceDirs.from(sourceSet.allJava.srcDirs)
+                    classesDirs.from(classesDirsCopy)
+                    sourceSetCompileClasspath.from(sourceSet.compileClasspath)
                     compilerVersion.convention(project.provider {
                         val version by lazy { extension.getVersionNumber() }
                         val localPath = extension.localPath.orNull
@@ -925,15 +937,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             null
                         }
                     })
-
-                    toInstrumentDir.convention(project.provider {
-                        val toInstrumentDir = inputDir.get().asFile.parentFile.resolve("${sourceSet.name}-to-instrument")
-                        project.layout.projectDirectory.dir(toInstrumentDir.path)
-                    })
-                    outputDir.convention(project.provider {
-                        val outputDir = inputDir.get().asFile.parentFile.resolve("${sourceSet.name}-instrumented")
-                        project.layout.projectDirectory.dir(outputDir.path)
-                    })
+                    outputDir.convention(outputDirectory)
 
                     dependsOn(sourceSet.classesTaskName)
                     dependsOn(setupDependenciesTask)
@@ -942,15 +946,14 @@ open class IntelliJPlugin : Plugin<Project> {
 
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
-            val updateTask = project.tasks.register("post${instrumentTask.name.capitalize()}") {
+            val updateTask = project.tasks.register("post${name.capitalize()}") {
                 val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.get().isEnabled }
                 val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
-                val outputClassesDir = instrumentTask.get().inputDir
-                val instrumentedOutputClassesDir = instrumentTask.get().outputDir
+
+                onlyIf { instrumentCodeProvider.get() }
+                doLast { classesDirs.setFrom(classesDirsCopy + outputDirectory) }
 
                 dependsOn(instrumentTask)
-                onlyIf { instrumentCodeProvider.get() }
-                doLast { classesDirs.setFrom(classesDirs - outputClassesDir + instrumentedOutputClassesDir) }
             }
 
             // Ensure that our task is invoked when the source set is built

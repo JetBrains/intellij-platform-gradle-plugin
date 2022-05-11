@@ -5,14 +5,14 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createParentDirs
+import com.jetbrains.plugin.structure.base.utils.deleteLogged
 import com.jetbrains.plugin.structure.base.utils.isDirectory
 import groovy.lang.Closure
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileType
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
@@ -33,7 +33,7 @@ import javax.inject.Inject
 
 @Suppress("UnstableApiUsage")
 open class IntelliJInstrumentCodeTask @Inject constructor(
-    objectFactory: ObjectFactory,
+    private val objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
     companion object {
@@ -42,7 +42,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     @Internal
-    val sourceSetCompileClasspath = objectFactory.listProperty<File>()
+    val sourceSetCompileClasspath = objectFactory.fileCollection()
 
     @Input
     @Optional
@@ -56,14 +56,14 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     val compilerVersion = objectFactory.property<String>()
 
     @Incremental
-    @InputDirectory
-    val inputDir: DirectoryProperty = objectFactory.directoryProperty()
+    @InputFiles
+    val classesDirs = objectFactory.fileCollection()
 
     @Internal
-    val toInstrumentDir: DirectoryProperty = objectFactory.directoryProperty()
+    val sourceDirs = objectFactory.fileCollection()
 
     @OutputDirectory
-    val outputDir: DirectoryProperty = objectFactory.directoryProperty()
+    val outputDir = objectFactory.directoryProperty()
 
     private val context = logCategory()
 
@@ -84,33 +84,39 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         info(context, "Compiling forms and instrumenting code with nullability preconditions")
         val instrumentNotNull = prepareNotNullInstrumenting(classpath)
 
-        val toInstrument = toInstrumentDir.get().asFile
-        toInstrument.deleteRecursively()
-        toInstrument.mkdirs()
+        val outputDirPath = outputDir.get().asFile.toPath()
+        val temporaryDirPath = temporaryDir.also {
+            it.deleteRecursively()
+            it.mkdirs()
+        }.toPath()
 
-        inputChanges.getFileChanges(inputDir).forEach {
+        inputChanges.getFileChanges(classesDirs).forEach {
             if (it.fileType == FileType.FILE) {
-                if (it.changeType == ChangeType.REMOVED) {
-                    val instrumentedFilePath = it.file.toPath().toAbsolutePath().toString()
-                        .replace(inputDir.get().asFile.canonicalPath, outputDir.get().asFile.canonicalPath)
+                val path = it.file.toPath()
+                val sourceDir = classesDirs.find { classesDir -> path.startsWith(classesDir.toPath()) }?.toPath() ?: return@forEach
+                val relativePath = sourceDir.relativize(path)
 
-                    File(instrumentedFilePath).apply {
-                        if (exists()) {
-                            delete()
-                        }
+                when (it.changeType) {
+                    ChangeType.REMOVED -> {
+                        outputDirPath.resolve(relativePath).deleteLogged()
                     }
-                } else {
-                    val toInstrumentFilePath = it.file.toPath().toAbsolutePath().toString()
-                        .replace(inputDir.get().asFile.canonicalPath, toInstrumentDir.get().asFile.canonicalPath)
 
-                    File(toInstrumentFilePath).apply {
-                        it.file.copyTo(this, true)
+                    else -> {
+                        val tempClassPath = temporaryDirPath.resolve(relativePath)
+                        Files.copy(path, tempClassPath.apply { createParentDirs() })
                     }
                 }
             }
         }
 
-        instrumentCode(instrumentNotNull)
+        instrumentCode(instrumentNotNull) {
+            Files.walk(temporaryDirPath).filter { !it.isDirectory }.forEach { file ->
+                outputDirPath.resolve(temporaryDirPath.relativize(file)).apply {
+                    createParentDirs()
+                    Files.copy(file, this, StandardCopyOption.REPLACE_EXISTING)
+                }
+            }
+        }
     }
 
     // local compiler
@@ -155,7 +161,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         return true
     }
 
-    private fun instrumentCode(instrumentNotNull: Boolean) {
+    private fun instrumentCode(instrumentNotNull: Boolean, block: () -> Unit) {
         val headlessOldValue = System.setProperty("java.awt.headless", "true")
         try {
             // Builds up the Ant XML:
@@ -165,9 +171,9 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
             ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
                 mapOf(
-                    "srcdir" to inputDir.get().asFile,
-                    "destdir" to toInstrumentDir.get().asFile,
-                    "classpath" to sourceSetCompileClasspath.get().joinToString(":"),
+                    "srcdir" to sourceDirs.filter(File::exists).joinToString(":"),
+                    "destdir" to temporaryDir,
+                    "classpath" to sourceSetCompileClasspath.joinToString(":"),
                     "includeantruntime" to false,
                     "instrumentNotNull" to instrumentNotNull
                 ),
@@ -185,16 +191,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                 }
             ))
         } finally {
-            val src = toInstrumentDir.get().asFile.toPath()
-            val dest = outputDir.get().asFile.toPath()
-            Files.walk(src).forEach {
-                if (!it.isDirectory) {
-                    dest.resolve(src.relativize(it)).apply {
-                        createParentDirs()
-                        Files.copy(it, this, StandardCopyOption.REPLACE_EXISTING)
-                    }
-                }
-            }
+            block()
 
             if (headlessOldValue != null) {
                 System.setProperty("java.awt.headless", headlessOldValue)

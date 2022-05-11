@@ -1,8 +1,8 @@
+import javax.swing.JPanel
+
 class MainKt {
-  companion object {
-    @JvmStatic
-    fun main(args: Array<String>) {
-      println("Hi!")
-    }
+  private lateinit var panel: JPanel
+  init {
+    panel.toString()
   }
 }
