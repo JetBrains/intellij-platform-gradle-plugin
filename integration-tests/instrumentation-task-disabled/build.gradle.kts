@@ -1,5 +1,5 @@
-tasks {
-    instrumentCode {
-        enabled = false
-    }
+val instrumentCodeProperty = project.property("instrumentCode") == "true"
+
+intellij {
+    instrumentCode.set(instrumentCodeProperty)
 }

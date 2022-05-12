@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -777,6 +779,20 @@ open class IntelliJPlugin : Plugin<Project> {
             jarTask.duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
 
+        val setupInstrumentCodeTaskProvider = project.tasks.register("setupInstrumentCode") {
+            val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
+            val instrumentedDirectoryPathProvider = project.provider { project.layout.buildDirectory.dir("instrumented").get().asFile.toPath() }
+
+            doLast {
+                instrumentedDirectoryPathProvider.get().run {
+                    if (!instrumentCodeProvider.get()) {
+                        deleteQuietly()
+                    }
+                    createDir()
+                }
+            }
+        }
+
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
@@ -940,6 +956,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
                     dependsOn(sourceSet.classesTaskName)
                     dependsOn(setupDependenciesTask)
+                    dependsOn(setupInstrumentCodeTaskProvider)
                     onlyIf { instrumentCodeProvider.get() }
                 }
 
