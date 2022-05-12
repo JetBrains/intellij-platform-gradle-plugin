@@ -62,8 +62,10 @@ fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.sr
 
 fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
     try {
-        val document = JDOMUtil.loadDocument(pluginXml.inputStream())
-        return PluginBeanExtractor.extractPluginBean(document)
+        pluginXml.inputStream().use {
+            val document = JDOMUtil.loadDocument(it)
+            return PluginBeanExtractor.extractPluginBean(document)
+        }
     } catch (e: SAXParseException) {
         warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
     } catch (e: JDOMException) {
