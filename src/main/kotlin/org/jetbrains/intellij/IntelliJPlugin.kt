@@ -1375,9 +1375,18 @@ open class IntelliJPlugin : Plugin<Project> {
         IntelliJPlugin::class.java
             .run { getResource("$simpleName.class") }
             .runCatching {
-                val path = this?.path?.takeIf { it.startsWith("jar") } ?: return@runCatching null
-                val manifestPath = path.substring(0, path.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF"
-                Manifest(URL(manifestPath).openStream()).mainAttributes.getValue("Version")
+                val manifestPath = with(this?.path) {
+                    when {
+                        this == null -> return@runCatching null
+                        startsWith("jar:") -> this
+                        startsWith("file:") -> "jar:$this"
+                        else -> return@runCatching null
+                    }
+                }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
+                info(context, "Resolving Gradle IntelliJ Plugin version with: $manifestPath")
+                URL(manifestPath).openStream().use {
+                    Manifest(it).mainAttributes.getValue("Version")
+                }
             }.getOrNull()
 
     private fun Project.idea(
