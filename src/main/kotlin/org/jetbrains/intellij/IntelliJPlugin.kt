@@ -776,7 +776,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
         val jarTask = jarTaskProvider.get()
         if (extension.instrumentCode.get()) {
-            jarTask.duplicatesStrategy = DuplicatesStrategy.INCLUDE
+            jarTask.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
         val setupInstrumentCodeTaskProvider = project.tasks.register("setupInstrumentCode") {
@@ -971,7 +971,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 val outputDir = project.provider { instrumentTask.outputDir.get() }
 
                 onlyIf { instrumentCodeProvider.get() }
-                doLast { classesDirs.setFrom(classesDirs + outputDir ) }
+                doLast { classesDirs.setFrom(listOf(outputDir.get()) + classesDirs) }
 
                 dependsOn(instrumentTask)
             }
