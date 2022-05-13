@@ -457,15 +457,15 @@ open class RunPluginVerifierTask @Inject constructor(
             with(URL(url).openConnection() as HttpURLConnection) {
                 connection = this
                 instanceFollowRedirects = false
-                inputStream
-
-                if ((responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) && !isAndroidStudio) {
-                    val redirectUrl = URL(getHeaderField("Location"))
-                    disconnect()
-                    debug(context, "Resolved IDE download URL: $url")
-                    return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
-                } else {
-                    debug(context, "IDE download URL has no redirection provided. Skipping")
+                inputStream.use {
+                    if ((responseCode == HttpURLConnection.HTTP_MOVED_PERM || responseCode == HttpURLConnection.HTTP_MOVED_TEMP) && !isAndroidStudio) {
+                        val redirectUrl = URL(getHeaderField("Location"))
+                        disconnect()
+                        debug(context, "Resolved IDE download URL: $url")
+                        return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
+                    } else {
+                        debug(context, "IDE download URL has no redirection provided. Skipping")
+                    }
                 }
             }
         } catch (e: Exception) {

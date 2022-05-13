@@ -14,8 +14,10 @@ class LatestVersionResolver {
     companion object {
         fun fromMaven(subject: String, url: String): String {
             debug(message = "Resolving latest $subject version")
-            return XmlExtractor<MavenMetadata>().unmarshal(URL(url).openStream()).versioning?.latest
-                ?: throw GradleException("Cannot resolve the latest $subject version")
+            return URL(url).openStream().use {
+                XmlExtractor<MavenMetadata>().unmarshal(it).versioning?.latest
+                    ?: throw GradleException("Cannot resolve the latest $subject version")
+            }
         }
 
         fun fromGitHub(subject: String, url: String): String {

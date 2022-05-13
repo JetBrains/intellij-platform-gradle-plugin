@@ -30,8 +30,10 @@ abstract class IntelliJPluginSpecBase {
     val gradleHome: String = System.getProperty("test.gradle.home")
 
     val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val intellijVersion: String = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() } ?: throw GradleException("'test.intellij.version' isn't provided")
-    val testMarkdownPluginVersion: String = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() } ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
+    val intellijVersion: String = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.intellij.version' isn't provided")
+    val testMarkdownPluginVersion: String = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
     val dir: File by lazy { createTempDirectory("tmp").toFile() }
 
     private val gradleProperties = file("gradle.properties")
@@ -43,7 +45,8 @@ abstract class IntelliJPluginSpecBase {
     open fun setUp() {
         file("settings.gradle").groovy("rootProject.name = 'projectName'")
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             plugins {
                 id 'java'
                 id 'org.jetbrains.intellij'
@@ -70,14 +73,18 @@ abstract class IntelliJPluginSpecBase {
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
-        """)
+        """
+        )
 
-        gradleProperties.groovy("""
+        gradleProperties.groovy(
+            """
             kotlin.stdlib.default.dependency = false
-        """)
+        """
+        )
     }
 
-    fun writeTestFile() = file("src/test/java/AppTest.java").java("""
+    fun writeTestFile() = file("src/test/java/AppTest.java").java(
+        """
         import java.lang.String;
         import org.junit.Test;
         import org.jetbrains.annotations.NotNull;
@@ -88,7 +95,8 @@ abstract class IntelliJPluginSpecBase {
         
             private void print(@NotNull String s) { System.out.println(s); }
         }
-    """)
+    """
+    )
 
     @Suppress("SameParameterValue")
     protected fun disableDebug(reason: String) {
@@ -149,7 +157,8 @@ abstract class IntelliJPluginSpecBase {
         .run { File(first, second) }
         .apply { createNewFile() }
 
-    protected fun writeJavaFile() = file("src/main/java/App.java").java("""
+    protected fun writeJavaFile() = file("src/main/java/App.java").java(
+        """
         import java.lang.String;
         import java.util.Arrays;
         import org.jetbrains.annotations.NotNull;
@@ -159,18 +168,22 @@ abstract class IntelliJPluginSpecBase {
                 System.out.println(Arrays.toString(strings));
             }
         }
-    """)
+    """
+    )
 
-    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin("""
+    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin(
+        """
         object App {
             @JvmStatic
             fun main(args: Array<String>) {
                 println(args.joinToString())
             }
         }
-    """)
+    """
+    )
 
-    protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin("""
+    protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin(
+        """
         package pack
 
         import javax.swing.JPanel
@@ -181,7 +194,8 @@ abstract class IntelliJPluginSpecBase {
                 panel.toString()
             }
         }
-    """)
+    """
+    )
 
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
@@ -201,10 +215,12 @@ abstract class IntelliJPluginSpecBase {
 
     protected fun fileText(zipFile: ZipFile, path: String) = zipFile
         .getInputStream(zipFile.getEntry(path))
-        .bufferedReader()
-        .use(BufferedReader::readText)
-        .replace("\r", "")
-        .trim()
+        .use {
+            it.bufferedReader()
+                .use(BufferedReader::readText)
+                .replace("\r", "")
+                .trim()
+        }
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
 

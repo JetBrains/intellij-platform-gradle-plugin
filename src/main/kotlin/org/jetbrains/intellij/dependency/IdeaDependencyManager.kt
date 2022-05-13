@@ -162,7 +162,7 @@ open class IdeaDependencyManager @Inject constructor(
         }
         ZipFile(zipFile).use { zip ->
             val entry = zip.getEntry("build.txt")
-            if (entry != null && zip.getInputStream(entry).bufferedReader().use { it.readText() } != markerFile.readText()) {
+            if (entry != null && zip.getInputStream(entry).use { it.bufferedReader().readText() } != markerFile.readText()) {
                 return false
             }
         }

@@ -289,10 +289,10 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val version = RunPluginVerifierTask.resolveLatestVersion()
-        FileUtils.copyInputStreamToFile(
-            URL("${IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar").openStream(),
-            file("build/pluginVerifier.jar")
-        )
+        URL("${IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar")
+            .openStream().use {
+                FileUtils.copyInputStreamToFile(it, file("build/pluginVerifier.jar"))
+            }
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
         assertTrue(result.output.contains("Gradle runs in offline mode."))

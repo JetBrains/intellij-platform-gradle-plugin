@@ -17,7 +17,7 @@ class XmlExtractor<T>(private val context: String? = null) {
     }
 
     @Throws(JAXBException::class)
-    fun unmarshal(file: File) = unmarshal(file.inputStream())
+    fun unmarshal(file: File) = file.inputStream().use { unmarshal(it) }
 
     @Suppress("UNCHECKED_CAST")
     @Throws(JAXBException::class)
@@ -26,7 +26,7 @@ class XmlExtractor<T>(private val context: String? = null) {
     @Throws(JAXBException::class)
     fun marshal(bean: T, file: File) {
         jaxbContext.createMarshaller().marshal(bean, file)
-        val document = JDOMUtil.loadDocument(file.inputStream())
+        val document = file.inputStream().use { JDOMUtil.loadDocument(it) }
         transformXml(document, file)
     }
 

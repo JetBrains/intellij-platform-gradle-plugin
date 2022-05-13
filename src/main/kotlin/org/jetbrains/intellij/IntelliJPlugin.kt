@@ -905,15 +905,17 @@ open class IntelliJPlugin : Plugin<Project> {
                                     /**
                                      * Get the list of available packages and pick the closest lower one.
                                      */
-                                    val url = URL(IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA)
-                                    val version = Version.parse(compilerVersion)
-                                    val closestCompilerVersion = XmlExtractor<MavenMetadata>()
-                                        .unmarshal(url.openStream())
-                                        .versioning?.versions?.let { versions ->
-                                            versions
-                                                .map(Version::parse)
-                                                .filter { it <= version }
-                                                .maxOf { it }.version
+                                    val closestCompilerVersion = URL(IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA)
+                                        .openStream().use { inputStream ->
+                                            val version = Version.parse(compilerVersion)
+                                            XmlExtractor<MavenMetadata>()
+                                                .unmarshal(inputStream)
+                                                .versioning?.versions?.let { versions ->
+                                                    versions
+                                                        .map(Version::parse)
+                                                        .filter { it <= version }
+                                                        .maxOf { it }.version
+                                                }
                                         }
 
                                     if (closestCompilerVersion == null) {
