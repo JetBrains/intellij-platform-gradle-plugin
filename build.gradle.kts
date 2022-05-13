@@ -42,18 +42,27 @@ dependencies {
         exclude("org.slf4j")
     }
 
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.2.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.4")
-    api("com.squareup.okhttp3:okhttp:4.9.3")
-    api("com.squareup.retrofit2:retrofit:2.9.0") {
-        exclude("okhttp")
-    }
+    api("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+
+    constraints {
+        configurations.implementation {
+            listOf(
+                Triple("org.jetbrains", "annotations", "23.0.0"),
+                Triple("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.13.2"),
+                Triple("com.fasterxml.jackson.core", "jackson-databind", "2.13.2.2"),
+                Triple("com.squareup.okhttp3", "okhttp", "4.4.1"),
+            ).forEach { (group, module, version) -> this(group, module) { version { strictly(version) } } }
+        }
+    }
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {
