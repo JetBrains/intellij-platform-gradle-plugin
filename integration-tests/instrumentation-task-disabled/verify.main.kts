@@ -71,12 +71,10 @@ with(__FILE__.toPath()) {
                 assert(Files.size(this) == 1015L)
             }
             resolve("MainKt.class").run {
-                assert(Files.exists(this))
-                assert(Files.size(this) == 982L)
+                assert(!Files.exists(this))
             }
             resolve("MainKt\$Companion.class").run {
-                assert(Files.exists(this))
-                assert(Files.size(this) == 1332L)
+                assert(!Files.exists(this))
             }
         }
 
