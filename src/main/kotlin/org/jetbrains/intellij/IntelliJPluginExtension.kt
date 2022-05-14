@@ -19,7 +19,6 @@ import javax.inject.Inject
 /**
  * Configuration options for the [org.jetbrains.intellij.IntelliJPlugin].
  */
-@Suppress("UnstableApiUsage")
 abstract class IntelliJPluginExtension @Inject constructor(
     objectFactory: ObjectFactory,
 ) {

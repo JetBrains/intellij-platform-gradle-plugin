@@ -31,7 +31,6 @@ import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class IntelliJInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {

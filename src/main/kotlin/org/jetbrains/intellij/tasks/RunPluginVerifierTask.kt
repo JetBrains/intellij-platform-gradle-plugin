@@ -45,7 +45,6 @@ import java.nio.file.Paths
 import java.util.EnumSet
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,

@@ -20,7 +20,6 @@ import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class VerifyPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask(), VerificationTask {

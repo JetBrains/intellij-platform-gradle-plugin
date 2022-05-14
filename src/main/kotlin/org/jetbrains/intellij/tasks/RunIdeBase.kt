@@ -29,7 +29,6 @@ import java.io.FileNotFoundException
 import java.nio.file.Files
 import kotlin.streams.asSequence
 
-@Suppress("UnstableApiUsage")
 abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     companion object {
         private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")

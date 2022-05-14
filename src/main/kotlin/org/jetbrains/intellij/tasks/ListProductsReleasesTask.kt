@@ -20,7 +20,6 @@ import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class ListProductsReleasesTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {

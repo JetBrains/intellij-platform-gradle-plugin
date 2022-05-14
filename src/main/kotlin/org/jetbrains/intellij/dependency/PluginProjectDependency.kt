@@ -8,7 +8,6 @@ import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.jetbrains.intellij.error
 import java.io.File
 
-@Suppress("UnstableApiUsage")
 class PluginProjectDependency(private val pluginDirectory: File, val context: String?) : PluginDependency {
 
     private val pluginDependency: PluginDependencyImpl? by lazy {

@@ -15,7 +15,6 @@ open class ArchiveUtils @Inject constructor(
     private val fileSystemOperations: FileSystemOperations,
 ) {
 
-    @Suppress("UnstableApiUsage")
     fun extract(
         archiveFile: File,
         targetDirectory: File,

@@ -18,8 +18,9 @@ import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.File
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
-open class DownloadRobotServerPluginTask @Inject constructor(objectFactory: ObjectFactory) : ConventionTask() {
+open class DownloadRobotServerPluginTask @Inject constructor(
+    objectFactory: ObjectFactory
+) : ConventionTask() {
 
     companion object {
         private const val METADATA_URL = "$INTELLIJ_DEPENDENCIES/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"

@@ -12,7 +12,6 @@ import org.gradle.kotlin.dsl.property
 import java.io.File
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class JarSearchableOptionsTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : Jar() {

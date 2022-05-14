@@ -23,7 +23,6 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class PatchPluginXmlTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {

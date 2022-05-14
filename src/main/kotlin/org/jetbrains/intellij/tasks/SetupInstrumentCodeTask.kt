@@ -12,7 +12,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class SetupInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {

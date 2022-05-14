@@ -28,7 +28,6 @@ import org.jetbrains.intellij.transformXml
 import java.io.File
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class PrepareSandboxTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : Sync() {

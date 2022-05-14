@@ -25,7 +25,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage")
 open class SignPluginTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
