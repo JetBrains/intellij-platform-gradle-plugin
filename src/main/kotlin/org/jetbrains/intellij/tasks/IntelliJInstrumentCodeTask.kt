@@ -90,10 +90,10 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             it.mkdirs()
         }.toPath()
 
-        inputChanges.getFileChanges(classesDirs).forEach {
+        val changes = inputChanges.getFileChanges(classesDirs).mapNotNull {
             if (it.fileType == FileType.FILE) {
                 val path = it.file.toPath()
-                val sourceDir = classesDirs.find { classesDir -> path.startsWith(classesDir.toPath()) }?.toPath() ?: return@forEach
+                val sourceDir = classesDirs.find { classesDir -> path.startsWith(classesDir.toPath()) }?.toPath() ?: return@mapNotNull null
                 val relativePath = sourceDir.relativize(path)
 
                 when (it.changeType) {
@@ -106,14 +106,22 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                         Files.copy(path, tempClassPath.apply { createParentDirs() })
                     }
                 }
+
+                path
+            } else {
+                null
             }
         }
 
         instrumentCode(instrumentNotNull) {
             Files.walk(temporaryDirPath).filter { !it.isDirectory }.forEach { file ->
-                outputDirPath.resolve(temporaryDirPath.relativize(file)).apply {
-                    createParentDirs()
-                    Files.copy(file, this, StandardCopyOption.REPLACE_EXISTING)
+                val relativePath = temporaryDirPath.relativize(file)
+                val originalClass = changes.find { it.endsWith(relativePath) }
+                if (Files.size(file) != originalClass?.let { Files.size(it) }) {
+                    outputDirPath.resolve(relativePath).apply {
+                        createParentDirs()
+                        Files.copy(file, this, StandardCopyOption.REPLACE_EXISTING)
+                    }
                 }
             }
         }
