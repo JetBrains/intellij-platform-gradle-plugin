@@ -76,7 +76,7 @@ abstract class IntelliJPluginSpecBase {
         """
         )
 
-        gradleProperties.groovy(
+        gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
         """
@@ -249,6 +249,8 @@ abstract class IntelliJPluginSpecBase {
     fun File.java(@Language("Java") content: String) = append(content)
 
     fun File.kotlin(@Language("kotlin") content: String) = append(content)
+
+    fun File.properties(@Language("Properties") content: String) = append(content)
 
     private fun File.append(content: String) = appendText(content.trimIndent() + "\n")
 }
