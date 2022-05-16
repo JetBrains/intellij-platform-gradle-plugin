@@ -253,7 +253,7 @@ open class RunPluginVerifierTask @Inject constructor(
      */
     private fun resolveVerifierPath(): String {
         val path = verifierPath.orNull
-        if (path != null && path.isNotEmpty()) {
+        if (!path.isNullOrEmpty()) {
             val verifier = File(path)
             if (verifier.exists()) {
                 return path

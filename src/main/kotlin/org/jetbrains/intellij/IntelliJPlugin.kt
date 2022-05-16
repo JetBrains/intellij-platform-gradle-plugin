@@ -64,7 +64,7 @@ import java.time.temporal.ChronoField
 import java.util.EnumSet
 import java.util.jar.Manifest
 
-@Suppress("UnstableApiUsage", "unused")
+@Suppress("UnstableApiUsage")
 open class IntelliJPlugin : Plugin<Project> {
 
     private lateinit var archiveUtils: ArchiveUtils

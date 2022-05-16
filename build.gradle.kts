@@ -1,7 +1,5 @@
 // Copyright 2000-2022 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-@file:Suppress("UnstableApiUsage")
-
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -23,6 +21,7 @@ repositories {
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
     maven("https://plugins.gradle.org/m2")
+    mavenCentral()
 }
 
 dependencies {
@@ -31,10 +30,6 @@ dependencies {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.218") {
-        exclude("org.jetbrains.kotlin")
-    }
-    // should be changed together with plugin-repository-rest-client
-    implementation("org.jetbrains.intellij:blockmap:1.0.5") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.25") {
