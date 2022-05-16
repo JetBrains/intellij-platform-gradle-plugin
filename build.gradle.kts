@@ -26,10 +26,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.218") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.219") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.218") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.219") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.25") {
@@ -37,7 +37,7 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.2.2")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
@@ -52,8 +52,8 @@ dependencies {
         configurations.implementation {
             listOf(
                 Triple("org.jetbrains", "annotations", "23.0.0"),
-                Triple("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.13.2"),
-                Triple("com.fasterxml.jackson.core", "jackson-databind", "2.13.2.2"),
+                Triple("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.13.3"),
+                Triple("com.fasterxml.jackson.core", "jackson-databind", "2.13.3"),
                 Triple("com.squareup.okhttp3", "okhttp", "4.4.1"),
             ).forEach { (group, module, version) -> this(group, module) { version { strictly(version) } } }
         }
