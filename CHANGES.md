@@ -13,6 +13,7 @@
 - Set `-Djdk.module.illegalAccess.silent=true` flag by default to mute `WARNING: An illegal reflective access operation has occurred`
 - `instrumentCode` task – incremental instrumentation [#459](../../issues/459)
 - Release `plugin.xml` file after reading it [IDEA-291836](https://youtrack.jetbrains.com/issue/IDEA-291836)
+- Add `intellijRepository` to the beginning of the repositories list when resolving dependencies [#615](../../issues/615)
 
 ## 1.5.3
 - Updated dependencies marked as vulnerable

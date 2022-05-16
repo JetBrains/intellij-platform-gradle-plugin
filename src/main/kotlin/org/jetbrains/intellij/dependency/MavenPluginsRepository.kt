@@ -26,7 +26,7 @@ interface MavenRepository : PluginsRepository {
 
     fun postResolve(project: Project, func: () -> Unit) {
         if (resolvedDependency) {
-            return func.invoke()
+            return func()
         }
     }
 }

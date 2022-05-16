@@ -33,8 +33,15 @@ open class DependenciesDownloader @Inject constructor(
         repositoriesBlock: RepositoryHandler.() -> List<ArtifactRepository>,
         silent: Boolean = false,
     ): List<File> {
-        val dependency = dependenciesBlock.invoke(dependencyHandler)
-        val repositories = repositoriesBlock.invoke(repositoryHandler) + repositoryHandler.mavenCentral()
+        val dependency = dependenciesBlock(dependencyHandler)
+        val baseRepositories = with (repositoryHandler) {
+            toList().also {
+                clear()
+                repositoriesBlock(this)
+                mavenCentral()
+                addAll(it)
+            }
+        }
 
         try {
             return configurationContainer.detachedConfiguration(dependency).files.toList()
@@ -44,7 +51,10 @@ open class DependenciesDownloader @Inject constructor(
             }
             throw e
         } finally {
-            repositoryHandler.removeAll(repositories.toSet())
+            with (repositoryHandler) {
+                clear()
+                addAll(baseRepositories)
+            }
         }
     }
 }
