@@ -47,14 +47,14 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         build(BasePlugin.ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.intellij.lang.jsgraphql/2.9.1")
         pluginDir.list()?.let {
-            assertTrue(it.contains("7145468b33e1c1e246ec5c9127c219d1c7e54cc2"))
+            assertTrue(it.contains("941149d2af84d374af5571b29469fd97ac6a9f6e"))
         }
 
         File(pluginDir, "7c426d70e7d2b270ba3eb896fc7c5e7cbf8330b1").list()?.let {
             assertTrue(it.contains("com.intellij.lang.jsgraphql-2.9.1.zip"))
         }
 
-        File(pluginDir, "7145468b33e1c1e246ec5c9127c219d1c7e54cc2").list()?.let {
+        File(pluginDir, "941149d2af84d374af5571b29469fd97ac6a9f6e").list()?.let {
             assertTrue(it.contains("com.intellij.lang.jsgraphql-2.9.1.pom"))
         }
     }
