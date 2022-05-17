@@ -47,7 +47,6 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-          cache: gradle
 
       # Publish the plugin to the Gradle Plugins
       - name: Publish Plugin
