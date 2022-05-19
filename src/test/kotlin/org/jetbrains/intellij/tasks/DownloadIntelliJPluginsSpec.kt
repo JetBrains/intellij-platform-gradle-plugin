@@ -7,6 +7,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import org.junit.Assume.assumeFalse
 import java.io.File
+import java.nio.file.Files
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -49,14 +50,16 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         println("pluginDir.list()='${pluginDir.list()?.joinToString()}'")
 
         pluginDir.resolve("941149d2af84d374af5571b29469fd97ac6a9f6e").takeIf { it.exists() }?.let {
-            val text = it.resolve("com.intellij.lang.jsgraphql-2.9.1.pom").readText()
+            val file = it.resolve("com.intellij.lang.jsgraphql-2.9.1.pom")
             println("1")
-            println("text='${text}'")
+            println("text='${file.readText()}'")
+            println("size=${Files.size(file.toPath())}")
         }
         pluginDir.resolve("7145468b33e1c1e246ec5c9127c219d1c7e54cc2").takeIf { it.exists() }?.let {
-            val text = it.resolve("com.intellij.lang.jsgraphql-2.9.1.pom").readText()
+            val file = it.resolve("com.intellij.lang.jsgraphql-2.9.1.pom")
             println("2")
-            println("text='${text}'")
+            println("text='${file.readText()}'")
+            println("size=${Files.size(file.toPath())}")
         }
 
         throw Exception("pluginDir.list()='${pluginDir.list()?.joinToString()}'")
