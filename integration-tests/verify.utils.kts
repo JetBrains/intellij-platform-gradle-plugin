@@ -5,58 +5,79 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
 
-// Path to the integration tests single project, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/
+/**
+ * Path to the integration tests single project,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/`.
+ */
 val Path.projectDirectory
     get() = toAbsolutePath().parent
 
-// Integration test name extracted from the project directory, like:
-// plugin-xml-patching
+/**
+ * Integration test name extracted from the project directory,
+ * e.g., `plugin-xml-patching`.
+ */
 val Path.projectName
     get() = projectDirectory.fileName.toString()
 
-// Path to the integration tests root directory, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/
+/**
+ * Path to the integration tests root directory,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/`.
+ */
 val Path.testsRootDirectory
     get() = projectDirectory.parent
 
-// Path to the Gradle IntelliJ Plugin root directory, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/
+/**
+ * Path to the Gradle IntelliJ Plugin root directory,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/`.
+ */
 val Path.rootDirectory
     get() = testsRootDirectory.parent
 
-// Path to the build directory of the integration tests single project, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/
+/**
+ * Path to the build directory of the integration tests single project,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/`.
+ */
 val Path.buildDirectory
-    get() = projectDirectory.resolve("build").exitIf(Files::notExists) { "build directory does not exist: ${toAbsolutePath()}" }
+    get() = projectDirectory.resolve("build")
+        .exitIf(Files::notExists) { "build directory does not exist: ${toAbsolutePath()}" }
 
-// Path to the Gradle Wrapper – uses first argument provided to the script or falls back to the project instance, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/gradlew
+/**
+ * Path to the Gradle Wrapper – uses first argument provided to the script or falls back to the project instance,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/gradlew`.
+ */
 val Path.gradleWrapper
     get() = args.firstOrNull() ?: rootDirectory.resolve("gradlew")
 
-// Path to the patched `plugin.xml` file located within the build directory of the integration tests single project, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml
+/**
+ * Path to the patched `plugin.xml` file located within the build directory of the integration tests single project,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml`.
+ */
 val Path.patchedPluginXml
     get() = buildDirectory
         .resolve("patchedPluginXmlFiles/plugin.xml")
         .exitIf(Files::notExists) { "plugin.xml file does not exist: ${toAbsolutePath()}" }
 
-// Path to the generated plugin ZIP achive located in build/distrubutions directory, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/distributions/plugin-xml-patching-1.0.0.zip
+/**
+ * Path to the generated plugin ZIP achive located in build/distrubutions directory,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/distributions/plugin-xml-patching-1.0.0.zip`.
+ */
 val Path.pluginArchive
     get() = buildDirectory
         .resolve("distributions/$projectName-1.0.0.zip")
 
-// Path to the generated plugin JAR achive located in build/libs directory, like:
-// /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/libs/plugin-xml-patching-1.0.0.jar
+/**
+ * Path to the generated plugin JAR achive located in build/libs directory,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/libs/plugin-xml-patching-1.0.0.jar`.
+ */
 val Path.pluginJar
     get() = buildDirectory
         .resolve("libs/$projectName-1.0.0.jar")
         .exitIf(Files::notExists) { "Plugin jar file does not exist: ${toAbsolutePath()}" }
 
-// Runs the given Gradle task(s) within the current integration test.
-// Provides logs to STDOUT and as a returned value for the further assertions.
+/**
+ * Runs the given Gradle task(s) within the current integration test.
+ * Provides logs to STDOUT and as a returned value for further assertions.
+ */
 fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any> = emptyMap()) =
     ProcessBuilder()
         .command(
