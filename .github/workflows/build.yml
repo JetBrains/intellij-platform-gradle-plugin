@@ -10,5 +10,4 @@ jobs:
 
   unitTests:
     name: Unit Tests
-    needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
