@@ -1,19 +1,24 @@
 # Changelog
 
 ## next
-- Set minimal supported Gradle version to 6.7
+### Added
+- Added `BuildFeature` feature flags. See [Feature Flags](https://github.com/JetBrains/gradle-intellij-plugin#build-features) in README.
+- `instrumentCode` task – incremental instrumentation [#459](../../issues/459)
+- Add `intellijRepository` to the beginning of the repositories list when resolving dependencies [#615](../../issues/615)
+- Set `-Djdk.module.illegalAccess.silent=true` flag by default to mute `WARNING: An illegal reflective access operation has occurred`
+- Add `java.system.class.loader=com.intellij.util.lang.PathClassLoader` system property for tests run on 221+
+- Integration Tests: Cover `instrumentCode` task
+
+### Changed
+- Set minimal supported Gradle version from `6.6` to `6.7`
+- Throw an exception instead of warning when both `intellij.localPath` and `intellij.version` are specified
+
+### Fixed
 - Fix for `getHeaderField("Location") must not be null` [#960](../../issues/960)
-- Added `BuildFeature` feature flags
 - `instrumentCode` task – changes in Kotlin code no longer rebuild the plugin [#959](../../issues/959)
 - Kotlin-generated classes aren't packed into the plugin distribution [#978](../../issues/978)
-- Integration Tests: Cover `instrumentCode` task
-- Add `java.system.class.loader=com.intellij.util.lang.PathClassLoader` system property for tests run on 221+
-- Fixed version parsing for `listProductsReleases` task which resulted in incorrect IDE releases versions
-- Throw an exception instead of warning when both `localPath` and `version` are specified
-- Set `-Djdk.module.illegalAccess.silent=true` flag by default to mute `WARNING: An illegal reflective access operation has occurred`
-- `instrumentCode` task – incremental instrumentation [#459](../../issues/459)
+- Fixed version parsing for `listProductsReleases` task which resulted in incorrect IDE releases versions [#995](../../issues/995)
 - Release `plugin.xml` file after reading it [IDEA-291836](https://youtrack.jetbrains.com/issue/IDEA-291836)
-- Add `intellijRepository` to the beginning of the repositories list when resolving dependencies [#615](../../issues/615)
 
 ## 1.5.3
 - Updated dependencies marked as vulnerable
