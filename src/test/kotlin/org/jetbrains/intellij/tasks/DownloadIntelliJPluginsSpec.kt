@@ -46,6 +46,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.intellij.lang.jsgraphql/2.9.1")
+        println("pluginDir.list()='${pluginDir.list()?.joinToString()}'")
         pluginDir.list()?.let {
             assertTrue(it.contains("941149d2af84d374af5571b29469fd97ac6a9f6e"))
         }
