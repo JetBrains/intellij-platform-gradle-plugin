@@ -19,6 +19,9 @@ interface MavenRepository : PluginsRepository {
         runCatching {
             project.objects.newInstance(DependenciesDownloader::class.java)
                 .downloadFromRepository(context, { dependency }, { repository })
+                .also {
+                    println("it='${it}'")
+                }
                 .first().also {
                     resolvedDependency = true
                 }

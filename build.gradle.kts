@@ -37,7 +37,7 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
+    implementation("com.fasterxml.jackson:jackson-bom:2.13.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
@@ -52,9 +52,11 @@ dependencies {
         configurations.implementation {
             listOf(
                 Triple("org.jetbrains", "annotations", "23.0.0"),
-                Triple("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.13.3"),
-                Triple("com.fasterxml.jackson.core", "jackson-databind", "2.13.3"),
+                Triple("com.fasterxml.jackson", "jackson-bom", "2.13.3"),
+                Triple("com.fasterxml.jackson.core", "jackson-annotations", "2.13.3"),
                 Triple("com.squareup.okhttp3", "okhttp", "4.4.1"),
+                Triple("software.amazon.awssdk", "bom", "2.17.188"),
+                Triple("org.jetbrains.kotlin", "kotlin-stdlib", "1.6.21"),
             ).forEach { (group, module, version) -> this(group, module) { version { strictly(version) } } }
         }
     }
