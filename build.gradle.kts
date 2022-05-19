@@ -32,7 +32,7 @@ dependencies {
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.219") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.25") {
+    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.28") {
         exclude("org.jetbrains.kotlin")
         exclude("org.slf4j")
     }
