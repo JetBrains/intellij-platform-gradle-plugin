@@ -82,7 +82,9 @@ fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any>
     ProcessBuilder()
         .command(
             gradleWrapper.toString(),
-            *projectProperties.map { "-P${it.key}=${it.value}" }.toTypedArray(),
+            *projectProperties
+                .run { this + mapOf("platformVersion" to System.getenv("PLATFORM_VERSION")) }
+                .map { "-P${it.key}=${it.value}" }.toTypedArray(),
             *tasks.map { ":$projectName:$it" }.toTypedArray(),
             "--info",
         )

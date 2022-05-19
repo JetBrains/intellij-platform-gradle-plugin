@@ -1,6 +1,12 @@
 name: Reusable Integration Tests
 
-on: [workflow_call]
+on:
+  workflow_call:
+    inputs:
+      platformVersion:
+        required: false
+        default: 2022.1.1
+        type: string
 
 jobs:
   subtasksList:
@@ -75,4 +81,6 @@ jobs:
 
       - name: Run Verification
         working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
         run: ./${{ matrix.module }}/verify.main.kts `which gradle`

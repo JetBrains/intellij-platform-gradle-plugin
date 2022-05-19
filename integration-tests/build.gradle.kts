@@ -40,7 +40,5 @@ subprojects {
 
     tasks.named<PatchPluginXmlTask>("patchPluginXml") {
         version.set(properties("version"))
-        sinceBuild.set(properties("pluginSinceBuild"))
-        untilBuild.set(properties("pluginUntilBuild"))
     }
 }
