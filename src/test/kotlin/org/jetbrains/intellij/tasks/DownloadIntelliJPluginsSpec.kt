@@ -35,7 +35,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     fun `download plugin through maven block`() {
         buildFile.groovy("""
             intellij {
-                plugins = ["com.intellij.lang.jsgraphql:2.9.1"]
+                plugins = ["com.intellij.lang.jsgraphql:3.1.3"]
                 pluginsRepositories {
                       maven {
                         url = uri("$pluginsRepository")
@@ -45,17 +45,20 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         """)
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
-        val pluginDir = File(pluginsRepositoryCacheDir, "com.intellij.lang.jsgraphql/2.9.1")
+        val pluginDir = File(pluginsRepositoryCacheDir, "com.intellij.lang.jsgraphql/3.1.3")
+        println("pluginDir='${pluginDir}'")
+        println("pluginDir.list()='${pluginDir.list().joinToString()}'")
         pluginDir.list()?.let {
-            assertTrue(it.contains("941149d2af84d374af5571b29469fd97ac6a9f6e"))
+            assertTrue(it.contains("66d55a3c058ca86736643dc8c9f26b7555a5aa5b"))
+            assertTrue(it.contains("b87b317bc80c5773d2a1ab83390e8849e50b098b"))
         }
 
-        File(pluginDir, "7c426d70e7d2b270ba3eb896fc7c5e7cbf8330b1").list()?.let {
-            assertTrue(it.contains("com.intellij.lang.jsgraphql-2.9.1.zip"))
+        File(pluginDir, "66d55a3c058ca86736643dc8c9f26b7555a5aa5b").list()?.let {
+            assertTrue(it.contains("com.intellij.lang.jsgraphql-3.1.3.zip"))
         }
 
-        File(pluginDir, "941149d2af84d374af5571b29469fd97ac6a9f6e").list()?.let {
-            assertTrue(it.contains("com.intellij.lang.jsgraphql-2.9.1.pom"))
+        File(pluginDir, "b87b317bc80c5773d2a1ab83390e8849e50b098b").list()?.let {
+            assertTrue(it.contains("com.intellij.lang.jsgraphql-3.1.3.pom"))
         }
     }
 
