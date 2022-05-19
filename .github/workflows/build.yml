@@ -17,11 +17,6 @@ jobs:
     needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
 
-  integrationTests:
-    name: Integration Tests
-    needs: gradleValidation
-    uses: ./.github/workflows/reusable-integrationTests.yml
-
   codeInspection:
     name: Code Inspection
     needs: gradleValidation
@@ -31,7 +26,6 @@ jobs:
     name: Build
     needs:
       - unitTests
-      - integrationTests
       - codeInspection
     runs-on: ubuntu-latest
     outputs:
