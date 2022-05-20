@@ -288,7 +288,7 @@ open class JbrResolver @Inject constructor(
             val reader = FileReader(dependenciesFile)
             try {
                 properties.load(reader)
-                return properties.getProperty("jdkBuild")
+                return properties.getProperty("runtimeBuild") ?: properties.getProperty("jdkBuild")
             } catch (ignore: IOException) {
             } finally {
                 reader.close()

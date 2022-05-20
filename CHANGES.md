@@ -16,6 +16,7 @@
 ### Fixed
 - Fix for `getHeaderField("Location") must not be null` [#960](../../issues/960)
 - `instrumentCode` task – changes in Kotlin code no longer rebuild the plugin [#959](../../issues/959)
+- Could not resolve JBR for 222-EAP-SNAPSHOT [#997](../../issues/997)
 - Kotlin-generated classes aren't packed into the plugin distribution [#978](../../issues/978)
 - Fixed version parsing for `listProductsReleases` task which resulted in incorrect IDE releases versions [#995](../../issues/995)
 - Release `plugin.xml` file after reading it [IDEA-291836](https://youtrack.jetbrains.com/issue/IDEA-291836)
