@@ -82,6 +82,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     @Internal
     val projectExecutable = objectFactory.property<String>()
 
+    private val buildNumber by lazy { ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse) }
+    private val build203 by lazy { Version.parse("203.0") }
+    private val build221 by lazy { Version.parse("221.0") }
+    private val build222 by lazy { Version.parse("222.0") }
+
     init {
         mainClass.set("com.intellij.idea.Main")
         enableAssertions = true
@@ -109,10 +114,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             classpath += objectFactory.fileCollection().from(it)
         }
 
-        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse)
-        val build203 = Version.parse("203.0")
-        val build221 = Version.parse("221.0")
-
         classpath += when {
             buildNumber > build221 -> listOf(
                 "$ideDirFile/lib/3rd-party-rt.jar",
@@ -120,6 +121,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 "$ideDirFile/lib/util_rt.jar",
                 "$ideDirFile/lib/jna.jar",
             )
+
             buildNumber > build203 -> listOf(
                 "$ideDirFile/lib/bootstrap.jar",
                 "$ideDirFile/lib/util.jar",
@@ -127,6 +129,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 "$ideDirFile/lib/log4j.jar",
                 "$ideDirFile/lib/jna.jar",
             )
+
             else -> listOf(
                 "$ideDirFile/lib/bootstrap.jar",
                 "$ideDirFile/lib/extensions.jar",
@@ -173,8 +176,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             info(context, "Using idea.platform.prefix=$prefix")
         }
 
-        val buildNumber = ideBuildNumber(ideDir.get()).split('-').last()
-        if (Version.parse(buildNumber) > Version.parse("221.0")) {
+        if (buildNumber > build221) {
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
     }
@@ -192,6 +194,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             prefix != null -> {
                 prefix
             }
+
             OperatingSystem.current().isMacOsX -> {
                 val infoPlist = ideDir.get().toPath().resolve("Info.plist")
                 try {
@@ -206,6 +209,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                     null
                 }
             }
+
             else -> {
                 null
             }
@@ -219,7 +223,10 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     }
 
     protected open fun configureJvmArgs() {
-        jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get())
+        jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get()) + when {
+            buildNumber >= build222 -> listOf("--jbr-illegal-access", "-XX:+IgnoreUnrecognizedVMOptions")
+            else -> emptyList()
+        }
     }
 
     private fun resolveToolsJar(javaExec: String): File {

@@ -112,7 +112,7 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirector
     options.minHeapSize = options.minHeapSize ?: "256m"
 
     ideDirectory?.let {
-        val bootJar = File(ideDirectory, "lib/boot.jar")
+        val bootJar = File(it, "lib/boot.jar")
         if (bootJar.exists()) {
             return arguments + "-Xbootclasspath/a:${bootJar.absolutePath}"
         }
