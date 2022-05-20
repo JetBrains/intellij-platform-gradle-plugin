@@ -11,6 +11,6 @@ with(__FILE__.toPath()) {
     with(pluginJar readEntry "META-INF/MANIFEST.MF") {
         this containsText "Version: 1.0.0"
         this containsText "Build-Plugin: Gradle IntelliJ Plugin"
-        this containsText "Build-Plugin-Version: 0.0.0"
+        this containsText "Build-Plugin-Version:"
     }
 }
