@@ -25,10 +25,6 @@ with(__FILE__.toPath()) {
                 assert(Files.exists(this))
                 assert(Files.size(this) == 982L)
             }
-            resolve("MainKt\$Companion.class").run {
-                assert(Files.exists(this))
-                assert(Files.size(this) == 1332L)
-            }
         }
 
         buildDirectory.resolve("libs/instrumentation-task-disabled-1.0.0.jar").let { jar ->
@@ -45,9 +41,6 @@ with(__FILE__.toPath()) {
 
             jar containsFileInArchive "MainKt.class"
             assert((jar readEntry "MainKt.class").length == 980)
-
-            jar containsFileInArchive "MainKt\$Companion.class"
-            assert((jar readEntry "MainKt\$Companion.class").length == 1328)
 
             buildDirectory.resolve("instrumented").run {
                 assert(Files.isDirectory(this))
@@ -73,9 +66,6 @@ with(__FILE__.toPath()) {
             resolve("MainKt.class").run {
                 assert(!Files.exists(this))
             }
-            resolve("MainKt\$Companion.class").run {
-                assert(!Files.exists(this))
-            }
         }
 
         buildDirectory.resolve("libs/instrumentation-task-disabled-1.0.0.jar").let { jar ->
@@ -92,9 +82,6 @@ with(__FILE__.toPath()) {
 
             jar containsFileInArchive "MainKt.class"
             assert((jar readEntry "MainKt.class").length == 980)
-
-            jar containsFileInArchive "MainKt\$Companion.class"
-            assert((jar readEntry "MainKt\$Companion.class").length == 1328)
         }
     }
 
