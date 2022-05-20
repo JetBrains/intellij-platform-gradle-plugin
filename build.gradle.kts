@@ -168,6 +168,8 @@ publishing {
             artifactId = "org.jetbrains.intellij.gradle.plugin"
             version = version.toString()
 
+            from(components["java"])
+
             pom {
                 name.set("Gradle IntelliJ Plugin")
                 description.set(project.description)
