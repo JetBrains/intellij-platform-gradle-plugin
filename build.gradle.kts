@@ -11,7 +11,7 @@ plugins {
     `maven-publish`
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.serialization") version "1.6.21"
-    id("com.gradle.plugin-publish") version "0.21.0"
+    id("com.gradle.plugin-publish") version "1.0.0-rc-2"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.6.21"
     id("synapticloop.documentr") version "3.1.0"
@@ -163,20 +163,10 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("maven") {
-            from(components["java"])
-            artifact(sourcesJar)
-            artifact(javadocJar)
-        }
-
         create<MavenPublication>("snapshot") {
             groupId = "org.jetbrains.intellij"
             artifactId = "org.jetbrains.intellij.gradle.plugin"
             version = version.toString()
-
-            from(components["java"])
-            artifact(sourcesJar)
-            artifact(javadocJar)
 
             pom {
                 name.set("Gradle IntelliJ Plugin")
