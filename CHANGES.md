@@ -13,6 +13,7 @@
 ### Changed
 - Set minimal supported Gradle version from `6.6` to `6.7`
 - Throw an exception instead of warning when both `intellij.localPath` and `intellij.version` are specified
+- Publish sources and javadocs within the release [#810](../../issues/810)
 
 ### Fixed
 - Fix for `getHeaderField("Location") must not be null` [#960](../../issues/960)
