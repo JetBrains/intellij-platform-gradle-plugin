@@ -6,7 +6,7 @@
 ### Added
 - Added `BuildFeature` feature flags. See [Feature Flags](https://github.com/JetBrains/gradle-intellij-plugin#build-features) in README.
 - Added `--jbr-illegal-access` and `-XX:+IgnoreUnrecognizedVMOptions` flags for tasks based on `RunIdeBase` to support `2022.2` which runs on Java 17
-- For JBR 17, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomodis` variants are no longer available.
+- For JBR 17, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomod` variants are no longer available.
 - `instrumentCode` task – incremental instrumentation [#459](../../issues/459)
 - Add `intellijRepository` to the beginning of the repositories list when resolving dependencies [#615](../../issues/615)
 - Set `-Djdk.module.illegalAccess.silent=true` flag by default to mute `WARNING: An illegal reflective access operation has occurred`
