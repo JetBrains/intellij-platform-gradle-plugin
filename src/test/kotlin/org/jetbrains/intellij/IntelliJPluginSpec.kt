@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
@@ -273,6 +274,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             "lib/src/go-openapi-src-ideaLocal-GO-221.5080.224-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
         )
+        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
     @Test
@@ -303,6 +305,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
         )
+        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
     @Test
