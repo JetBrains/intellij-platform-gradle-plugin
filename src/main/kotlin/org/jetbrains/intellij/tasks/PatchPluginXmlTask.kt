@@ -4,7 +4,6 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.Project
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
@@ -27,33 +26,67 @@ open class PatchPluginXmlTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
+    /**
+     * The directory where the patched plugin.xml will be written.
+     *
+     * Default value: `${project.buildDir}/patchedPluginXmlFiles`
+     */
     @OutputDirectory
-    val destinationDir: DirectoryProperty = objectFactory.directoryProperty()
+    val destinationDir = objectFactory.directoryProperty()
 
+    /**
+     * The list of `plugin.xml` files to patch.
+     *
+     * Default value: auto-discovered from the project
+     */
     @SkipWhenEmpty
     @InputFiles
     val pluginXmlFiles = objectFactory.listProperty<File>()
 
+    /**
+     * The description of the plugin – will be set to the `<description>` tag.
+     */
     @Input
     @Optional
     val pluginDescription = objectFactory.property<String>()
 
+    /**
+     * The lower bound of the version range to be patched – will be set for the `since-build` attribute of the `<idea-version>` tag.
+     *
+     * Default value: `intellij.version` in `Branch.Build.Fix` format
+     */
     @Input
     @Optional
     val sinceBuild = objectFactory.property<String>()
 
+    /**
+     * The upper bound of the version range to be patched – will be set for the `until-build` attribute of the `<idea-version>` tag.
+     *
+     * Default value: `intellij.version` in `Branch.Build.*` format
+     */
     @Input
     @Optional
     val untilBuild = objectFactory.property<String>()
 
+    /**
+     * The version of the plugin – will be set for the `<version>` tag.
+     *
+     * Default value: `${project.version}`
+     */
     @Input
     @Optional
     val version = objectFactory.property<String>()
 
+    /**
+     * The change notes of the plugin – will be set for the `<change-notes>` tag.
+     */
     @Input
     @Optional
     val changeNotes = objectFactory.property<String>()
 
+    /**
+     * The ID of the plugin – will be set for the `<id>` tag.
+     */
     @Input
     @Optional
     val pluginId = objectFactory.property<String>()
@@ -91,6 +124,9 @@ open class PatchPluginXmlTask @Inject constructor(
         }
     }
 
+    /**
+     * Sets the [content] value of the given [document] to the given [name] tag.
+     */
     private fun patchTag(document: Document, name: String, content: String) {
         if (content.isEmpty()) {
             return
@@ -109,6 +145,9 @@ open class PatchPluginXmlTask @Inject constructor(
         }
     }
 
+    /**
+     * Sets the [attributeValue] value for the given [attributeName] of the given [document] under the specific [tagName] tag.
+     */
     private fun patchAttribute(document: Document, tagName: String, attributeName: String, attributeValue: String) {
         if (attributeValue.isEmpty()) {
             return

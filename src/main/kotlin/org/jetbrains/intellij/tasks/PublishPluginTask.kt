@@ -28,22 +28,45 @@ open class PublishPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
+    /**
+     * Jar or Zip file of plugin to upload.
+     *
+     * Default value: output of the `buildPlugin` task
+     */
     @InputFile
     @Optional
     val distributionFile: RegularFileProperty = objectFactory.fileProperty()
 
+    /**
+     * URL host of a plugin repository.
+     *
+     * Default value: `https://plugins.jetbrains.com`
+     */
     @Input
     @Optional
     val host = objectFactory.property<String>()
 
+    /**
+     * Authentication token.
+     */
     @Input
     @Optional
     val token = objectFactory.property<String>()
 
+    /**
+     * List of channel names to upload plugin to.
+     *
+     * Default value: `["default"]`
+     */
     @Input
     @Optional
     val channels = objectFactory.listProperty<String>()
 
+    /**
+     * Specifies if the Toolbox Enterprise plugin repository service should be used.
+     *
+     * Default value: `false`
+     */
     @Input
     @Optional
     val toolboxEnterprise = objectFactory.property<Boolean>()

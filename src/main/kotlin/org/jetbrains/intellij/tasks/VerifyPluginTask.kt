@@ -24,8 +24,29 @@ open class VerifyPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask(), VerificationTask {
 
+    /**
+     * Specifies whether the build should break when the verifications performed by this task fail.
+     *
+     * Default value: `false`
+     */
     @Input
-    val ignoreFailures = objectFactory.property<Boolean>().convention(false)
+    val ignoreFailures = objectFactory.property<Boolean>()
+
+    /**
+     * Specifies whether the build should break when the verifications performed by this task emit warnings.
+     *
+     * Default value: `true`
+     */
+    @Input
+    val ignoreWarnings = objectFactory.property<Boolean>()
+
+    /**
+     * The location of the built plugin file which will be used for verification.
+     *
+     * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
+     */
+    @InputDirectory
+    val pluginDir: DirectoryProperty = objectFactory.directoryProperty()
 
     private val context = logCategory()
 
@@ -34,12 +55,6 @@ open class VerifyPluginTask @Inject constructor(
     override fun setIgnoreFailures(ignoreFailures: Boolean) {
         this.ignoreFailures.set(ignoreFailures)
     }
-
-    @Input
-    val ignoreWarnings = objectFactory.property<Boolean>().convention(true)
-
-    @InputDirectory
-    val pluginDir: DirectoryProperty = objectFactory.directoryProperty()
 
     @TaskAction
     fun verifyPlugin() {

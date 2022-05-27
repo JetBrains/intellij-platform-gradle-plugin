@@ -27,16 +27,41 @@ abstract class IntelliJPluginExtension @Inject constructor(
     }
 
     /**
-     * The list of bundled IDE plugins and plugins from the [JetBrains Marketplace](https://plugins.jetbrains.com/)/
-     * configured [pluginsRepositories].
-     * It accepts values of `String` or `Project`.
+     * The list of bundled IDE plugins and plugins from the [JetBrains Marketplace](https://plugins.jetbrains.com)
+     * or configured [pluginsRepositories].
+     *
+     * Please see [Plugin Dependencies](https://plugins.jetbrains.com/docs/intellij/plugin-dependencies.html) for more details.
+     *
+     * Notes:
+     * - For plugins from JetBrains Plugin Repository, use format `pluginId:version`.
+     * - For bundled plugins, version should be omitted: e.g. `org.intellij.groovy`.
+     * - For subprojects, use project reference `project(':subproject')`.
+     * - If you need to refer plugin's classes from your project, you also have to define a dependency in your `plugin.xml` file.
+     *
+     * **Acceptable Values:**
+     * - `org.plugin.id:version[@channel]` format, `String` type:
+     *     - `org.intellij.plugins.markdown:8.5.0`
+     *     - `org.intellij.scala:2017.2.638@nightly`
+     * - `bundledPluginName` format, `String` type:
+     *     - `android`
+     *     - `Groovy`
+     * - `project(...)` format, `Project` type:
+     *     - `project(":projectName")`
+     *     - `project(":plugin-subproject")`
      */
     @Input
     @Optional
     val plugins = objectFactory.listProperty<Any>()
 
     /**
-     * The path to locally installed IDE distribution that should be used to build the plugin.
+     * The path to the locally installed IDE distribution that should be used to build the plugin.
+     *
+     * Acceptable values:
+     * - `C:\Users\user\AppData\Local\JetBrains\Toolbox\apps\IDEA-U\ch-0\211.7142.45`
+     * - `/Applications/Android Studio 4.2 Preview.app/Contents`
+     * - `/home/user/idea-IC-181.4445.78`
+     *
+     * Warning: [version] and [localPath] should not be specified at the same time.
      */
     @Input
     @Optional
@@ -44,46 +69,77 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * The path to local archive with IDE sources.
+     *
+     * Default value: `null`
      */
     @Input
     @Optional
     val localSourcesPath = objectFactory.property<String>()
 
     /**
+     * Required.
      * The version of the IntelliJ Platform IDE that will be used to build the plugin.
+     * Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html) topic in SDK docs for more details.
      *
-     * Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html)
-     * topic in SDK docs for more details.
+     * Acceptable values:
+     * - version number: `2022.1.1` or `IC-2022.1.1`
+     * - build number: `221.5080.210` or `IC-221.5080.210`
+     * - snapshot: `221-EAP-SNAPSHOT` or `LATEST-EAP-SNAPSHOT`
+     *
+     * All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://plugins.jetbrains.com/docs/intellij/intellij-artifacts.html) page.
      */
     @Input
     val version = objectFactory.property<String>()
 
     /**
-     * The type of IDE distribution (IC, IU, CL, PY, PC, RD, GO, or JPS).
+     * The type of the IntelliJ-based IDE distribution.
+     * The type may also be specified as a prefix of the value for the [version] property.
      *
-     * The type might be included as a prefix in [version] value.
+     * Default value: `IC`
+     *
+     * Acceptable values:
+     * - `IC` - IntelliJ IDEA Community Edition
+     * - `IU` - IntelliJ IDEA Ultimate Edition
+     * - `CL` - CLion
+     * - `PY` - PyCharm Professional Edition
+     * - `PC` - PyCharm Community Edition
+     * - `RD` - Rider
+     * - `GO` - GoLand
+     * - `JPS` - JPS-only
+     * - `GW` - Gateway
      */
     @Input
     @Optional
     val type = objectFactory.property<String>()
 
     /**
-     * The name of the target zip-archive and defines the name of plugin artifact.
-     * By default, `${project.name}`.
+     * The name of the generated ZIP archive distribution, e.g. `/build/distributions/PluginName-1.0.0.zip`.
+     *
+     * Default value: `${project.name}`
      */
     @Input
     @Optional
     val pluginName = objectFactory.property<String>()
 
     /**
-     * Patch `plugin.xml` with `since/until-build` values.
+     * Defines if the `plugin.xml` should be patched with the values of [org.jetbrains.intellij.tasks.PatchPluginXmlTask.sinceBuild]
+     * and [org.jetbrains.intellij.tasks.PatchPluginXmlTask.untilBuild] properties.
+     *
+     * Default value: `true`
      */
     @Input
     @Optional
     val updateSinceUntilBuild = objectFactory.property<Boolean>()
 
     /**
-     * Patch `plugin.xml` with an `until-build` value that is just an "open" `since-build`.
+     * Patches `plugin.xml` with the `patchPluginXml.untilBuild` with the value
+     * of [org.jetbrains.intellij.tasks.PatchPluginXmlTask.sinceBuild] used with `*` wildcard, like `sinceBuild.*`, e.g., `220.*`.
+     *
+     * Notes:
+     * - Useful for building plugins against EAP IDE builds.
+     * - If [org.jetbrains.intellij.tasks.PatchPluginXmlTask.sinceBuild] has a value set, then [sameSinceUntilBuild] is ignored.
+     *
+     * Default value: `false`
      */
     @Input
     @Optional
@@ -91,28 +147,41 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
+     *
+     * Default value: `true`
      */
     @Input
     @Optional
     val instrumentCode = objectFactory.property<Boolean>()
 
     /**
-     * The path of sandbox directory that is used for running IDE with developing plugin.
-     * By default, `${project.buildDir}/idea-sandbox`.
+     * The path of sandbox directory that is used for running IDE with developed plugin.
+     *
+     * Default value: `${project.buildDir}/idea-sandbox`
      */
     @Input
     @Optional
     val sandboxDir = objectFactory.property<String>()
 
     /**
-     * URL of repository for downloading IDE distributions.
+     * The IntelliJ-based IDE distributions repository URL.
+     *
+     * Default value: `https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository`
      */
     @Input
     @Optional
     val intellijRepository = objectFactory.property<String>()
 
     /**
-     * Object to configure multiple repositories for downloading plugins.
+     * Configures repositories for downloading plugin dependencies.
+     *
+     * Default value: `pluginsRepositories { marketplace() }`
+     *
+     * Acceptable values:
+     * - `marketplace()` - use Maven repository with plugins listed in the JetBrains Marketplace
+     * - `maven(repositoryUrl)` - use custom Maven repository with plugins
+     * - `maven { repositoryUrl }` - use custom Maven repository with plugins where you can configure additional parameters (credentials, authentication and etc.)
+     * - `custom(pluginsXmlUrl)` - use custom plugin repository
      */
     @Input
     @Optional
@@ -138,34 +207,46 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * URL of repository for downloading JetBrains Runtime.
+     *
+     * Default value: `null`
      */
     @Input
     @Optional
     val jreRepository = objectFactory.property<String>()
 
     /**
-     * The absolute path to the local directory that should be used for storing IDE distributions.
+     * Path to the directory where IntelliJ IDEA dependency cache is stored.
+     * If not set, the dependency will be extracted next to the downloaded ZIP archive in Gradle cache directory.
+     *
+     * Default value: `null`
      */
+    @Input
+    @Optional
     val ideaDependencyCachePath = objectFactory.property<String>()
 
     /**
      * Download IntelliJ Platform sources.
+     * Enabled by default if not on `CI` environment.
+     *
+     * Default value: `!System.getenv().containsKey("CI")`
      */
     @Input
     @Optional
     val downloadSources = objectFactory.property<Boolean>()
 
     /**
-     * Turning it off disables configuring dependencies to Intellij SDK jars automatically,
-     * instead, the intellij, intellijPlugin and intellijPlugins functions could be used for an explicit configuration.
+     * If enabled, automatically configures the default IntelliJ Platform dependencies in the current project.
+     * Otherwise, the [intellij], [intellijPlugin], and [intellijPlugins] functions could be used for an explicit configuration.
+     *
+     * Default value: `true`
      */
     @Input
     @Optional
     val configureDefaultDependencies = objectFactory.property<Boolean>()
 
     /**
-     * Configure extra dependency artifacts from intellij repository.
-     * The dependencies on them could be configured only explicitly using intellijExtra function in the dependencies block.
+     * Configure extra dependency artifacts from the IntelliJ repository.
+     * The dependencies on them could be configured only explicitly using the [intellijExtra] function in the `dependencies` block.
      */
     @Input
     @Optional
@@ -210,4 +291,3 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     fun getIdeaDependency(@Suppress("UNUSED_PARAMETER") project: Project): IdeaDependency = ideaDependency.get()
 }
-

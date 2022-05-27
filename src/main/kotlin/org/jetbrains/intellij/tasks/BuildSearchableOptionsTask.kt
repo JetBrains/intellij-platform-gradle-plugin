@@ -10,6 +10,9 @@ import org.gradle.api.tasks.OutputDirectory
 @CacheableTask
 open class BuildSearchableOptionsTask : RunIdeBase(false) {
 
+    /**
+     * The directory where the searchable options will be generated.
+     */
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 

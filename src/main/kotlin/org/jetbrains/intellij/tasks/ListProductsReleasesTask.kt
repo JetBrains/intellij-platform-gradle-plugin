@@ -24,14 +24,29 @@ open class ListProductsReleasesTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
+    /**
+     * Path to the products releases update file. By default, falls back to the Maven cache.
+     *
+     * Default value: _Maven cache_
+     */
     @Input
     @Optional
     val updatePaths = objectFactory.listProperty<String>()
 
+    /**
+     * For Android Studio releases, a separated storage for the updates is used.
+     *
+     * Default value: `https://raw.githubusercontent.com/JetBrains/intellij-sdk-docs/main/topics/_generated/android_studio_releases.xml`
+     */
     @Input
     @Optional
     val androidStudioUpdatePath = objectFactory.property<String>()
 
+    /**
+     * Path to the file, where the output list will be stored.
+     *
+     * Default value: `File("${project.buildDir}/listProductsReleases.txt")`
+     */
     @OutputFile
     val outputFile: RegularFileProperty = objectFactory.fileProperty()
 
@@ -39,22 +54,49 @@ open class ListProductsReleasesTask @Inject constructor(
     @Optional
     val types = objectFactory.listProperty<String>()
 
+    /**
+     * Lower boundary of the listed results in marketing product version format, like `2020.2.1`.
+     * Takes the precedence over [sinceBuild] property.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.version]
+     */
     @Input
     @Optional
     val sinceVersion = objectFactory.property<String>()
 
+    /**
+     * Upper boundary of the listed results in product marketing version format, like `2020.2.1`.
+     * Takes the precedence over [untilBuild] property.
+     *
+     * Default value: `null`
+     */
     @Input
     @Optional
     val untilVersion = objectFactory.property<String>()
 
+    /**
+     * Lower boundary of the listed results in build number format, like `192`.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.version]
+     */
     @Input
     @Optional
     val sinceBuild = objectFactory.property<String>()
 
+    /**
+     * Upper boundary of the listed results in build number format, like `192`.
+     *
+     * Default value: `null`
+     */
     @Input
     @Optional
     val untilBuild = objectFactory.property<String>()
 
+    /**
+     * Channels that product updates will be filtered with.
+     *
+     * Default value: `EnumSet.allOf(ListProductsReleasesTask.Channel)`
+     */
     @Input
     @Optional
     val releaseChannels = objectFactory.setProperty<Channel>()

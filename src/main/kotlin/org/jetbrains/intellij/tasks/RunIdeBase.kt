@@ -36,22 +36,66 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
     private val context = logCategory()
 
+    /**
+     * The IDEA dependency sources path.
+     * Configured automatically with the [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea] dependency.
+     *
+     * Default value: `setupDependenciesTask.idea.get().classes.path`
+     *
+     * TODO: Should be @Internal
+     */
     @Input
     val ideDir = objectFactory.property<File>()
 
+    /**
+     * Custom JBR version to use for running the IDE.
+     *
+     * All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
+     *
+     * Accepted values:
+     * - `8u112b752.4`
+     * - `8u202b1483.24`
+     * - `11_0_2b159`
+     */
     @Input
     @Optional
     val jbrVersion = objectFactory.property<String>()
 
     /**
      * JetBrains Runtime variant to use when running the IDE with the plugin.
-     * Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`.
-     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases)
+     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases).
+     *
+     * Default value: `null`
+     *
+     * Acceptable values:
+     * - `jcef`
+     * - `sdk`
+     * - `fd`
+     * - `dcevm`
+     * - `nomod`
+     *
+     * Note: For `JBR 17`, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomod` variants are no longer available.
+     *
+     * **Accepted values:**
+     * - `8u112b752.4`
+     * - `8u202b1483.24`
+     * - `11_0_2b159`
+     *
+     * All JetBrains Java versions are available at JetBrains Space Packages,
+     * and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
     @Input
     @Optional
     val jbrVariant = objectFactory.property<String>()
 
+    /**
+     * Path to the `plugins` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
+     * Provided to the `idea.plugins.path` system property.
+     *
+     * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.getDestinationDir]
+     *
+     * TODO: Should be @Internal
+     */
     @InputDirectory
     @PathSensitive(PathSensitivity.NONE)
     val pluginsDir: DirectoryProperty = objectFactory.directoryProperty()
@@ -59,26 +103,49 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     /**
      * Enables auto-reload of dynamic plugins.
      * Dynamic plugins will be reloaded automatically when their JARs are modified.
-     * This allows a much faster development cycle by avoiding a full restart of the development instance
-     * after code changes.
+     * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.
      * Enabled by default in 2020.2 and higher.
      */
     @Input
     @Optional
     val autoReloadPlugins = objectFactory.property<Boolean>()
 
+    /**
+     * List of plugins required to be present when running the IDE.
+     * Provided to the `idea.required.plugins.id` system property.
+     */
     @Internal
     val requiredPluginIds = objectFactory.listProperty<String>()
 
+    /**
+     * Path to the `config` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
+     * Provided to the `idea.config.path` system property.
+     *
+     * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.configDir]
+     */
     @Internal
     val configDir = objectFactory.property<File>()
 
+    /**
+     * Path to the `system` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
+     * Provided to the `idea.system.path` system property.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.sandboxDir]/system
+     */
     @Internal
     val systemDir = objectFactory.property<File>()
 
+    /**
+     * The IDEA binary working directory.
+     *
+     * Default value: [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea]/bin
+     */
     @Internal
     val projectWorkingDir = objectFactory.property<File>()
 
+    /**
+     * Path to the resolved JBR executable.
+     */
     @Internal
     val projectExecutable = objectFactory.property<String>()
 
@@ -95,6 +162,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
     }
 
+    /**
+     * Executes the task, configures and runs the IDE.
+     */
     @TaskAction
     override fun exec() {
         workingDir = projectWorkingDir.get()
@@ -105,6 +175,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         super.exec()
     }
 
+    /**
+     * Prepares the classpath for the IDE based on the IDEA version.
+     */
     private fun configureClasspath() {
         val ideDirFile = ideDir.get()
 
@@ -142,6 +215,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }.let { objectFactory.fileCollection().from(it) }
     }
 
+    /**
+     * Configures the system properties for the IDE based on the IDEA version.
+     */
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
         systemProperties(getIdeaSystemProperties(configDir.get(), systemDir.get(), pluginsDir.get().asFile, requiredPluginIds.get()))
@@ -181,6 +257,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
     }
 
+    /**
+     * Resolves the IDE prefix.
+     */
     private fun findIdePrefix(): String? {
         info(context, "Looking for platform prefix")
         val prefix = Files.list(ideDir.get().toPath().resolve("bin"))
@@ -216,12 +295,18 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
     }
 
+    /**
+     * Helper function to set system property if it is not defined yet.
+     */
     private fun systemPropertyIfNotDefined(name: String, value: Any, userDefinedSystemProperties: Map<String, Any>) {
         if (!userDefinedSystemProperties.containsKey(name)) {
             systemProperty(name, value)
         }
     }
 
+    /**
+     * Configures JVM arguments based on the current IDE version.
+     */
     protected open fun configureJvmArgs() {
         jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get()) + when {
             buildNumber >= build222 -> listOf("--jbr-illegal-access", "-XX:+IgnoreUnrecognizedVMOptions")
@@ -229,6 +314,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
     }
 
+    /**
+     * Resolves the path to the `tools.jar` library.
+     */
     private fun resolveToolsJar(javaExec: String): File {
         val binDir = File(javaExec).parent
         val path = when {

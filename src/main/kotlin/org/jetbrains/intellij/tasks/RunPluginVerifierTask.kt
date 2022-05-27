@@ -59,7 +59,10 @@ open class RunPluginVerifierTask @Inject constructor(
     }
 
     /**
-     * List of the [FailureLevel] values used for failing the task if any reported issue will match.
+     * Defines the verification level at which task should fail if any reported issue will match.
+     * Can be set as [FailureLevel] enum or [EnumSet<FailureLevel>].
+     *
+     * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
      */
     @Input
     val failureLevel = objectFactory.listProperty<FailureLevel>()
@@ -73,8 +76,10 @@ open class RunPluginVerifierTask @Inject constructor(
     val productsReleasesFile = objectFactory.property<File>()
 
     /**
-     * List of the specified IDE versions used for the verification.
-     * By default, it uses the plugin target IDE version.
+     * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
+     * Check the available build versions on [IntelliJ Platform Builds list](https://jb.gg/intellij-platform-builds-list).
+     *
+     * Default value: output of the [org.jetbrains.intellij.tasks.ListProductsReleasesTask] task
      */
     @Input
     @Optional
@@ -88,7 +93,7 @@ open class RunPluginVerifierTask @Inject constructor(
     val ides = objectFactory.listProperty<File>()
 
     /**
-     * List of the paths to locally installed IDE distributions that should be used for verification
+     * A list of the paths to locally installed IDE distributions that should be used for verification
      * in addition to those specified in [ideVersions].
      */
     @Input
@@ -96,7 +101,8 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Returns the version of the IntelliJ Plugin Verifier that will be used.
-     * By default, set to "latest".7
+     *
+     * Default value: `latest`
      */
     @Input
     @Optional
@@ -105,14 +111,18 @@ open class RunPluginVerifierTask @Inject constructor(
     /**
      * Local path to the IntelliJ Plugin Verifier that will be used.
      * If provided, [verifierVersion] is ignored.
+     *
+     * Default value: path to the JAR file resolved using the [verifierVersion] property
      */
     @Input
     @Optional
     val verifierPath = objectFactory.property<String>()
 
     /**
-     * An instance of the distribution file generated with the build task.
+     * JAR or ZIP file of the plugin to verify.
      * If empty, the task will be skipped.
+     *
+     * Default value: output of the `buildPlugin` task
      */
     @InputFile
     @SkipWhenEmpty
@@ -120,7 +130,8 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * The path to the directory where verification reports will be saved.
-     * By default, set to `${project.buildDir}/reports/pluginVerifier`.
+     *
+     * Default value: `${project.buildDir}/reports/pluginVerifier`
      */
     @OutputDirectory
     @Optional
@@ -128,15 +139,23 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * The path to the directory where IDEs used for the verification will be downloaded.
-     * By default, set to `${project.buildDir}/pluginVerifier`.
+     *
+     * Default value: `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides`
+     * or system temporary directory.
      */
     @Input
     @Optional
     val downloadDir = objectFactory.property<String>()
 
     /**
-     * JBR version used by the IntelliJ Plugin Verifier, i.e. `11_0_2b159`.
-     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases).
+     * Custom JBR version to use for running the IDE.
+     *
+     * All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
+     *
+     * Accepted values:
+     * - `8u112b752.4`
+     * - `8u202b1483.24`
+     * - `11_0_2b159`
      */
     @Input
     @Optional
@@ -144,8 +163,26 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * JetBrains Runtime variant to use when running the IDE with the plugin.
-     * Example values: `jcef`, `sdk`, `dcevm`, `fd`, `nomod`.
      * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases).
+     *
+     * Default value: `null`
+     *
+     * Acceptable values:
+     * - `jcef`
+     * - `sdk`
+     * - `fd`
+     * - `dcevm`
+     * - `nomod`
+     *
+     * Note: For `JBR 17`, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomod` variants are no longer available.
+     *
+     * **Accepted values:**
+     * - `8u112b752.4`
+     * - `8u202b1483.24`
+     * - `11_0_2b159`
+     *
+     * All JetBrains Java versions are available at JetBrains Space Packages,
+     * and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
     @Input
     @Optional
@@ -167,7 +204,7 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * The list of classes prefixes from the external libraries.
-     * The Plugin Verifier will not report 'No such class' for classes of these packages.
+     * The Plugin Verifier will not report `No such class` for classes of these packages.
      */
     @Input
     @Optional
@@ -176,6 +213,8 @@ open class RunPluginVerifierTask @Inject constructor(
     /**
      * A flag that controls the output format - if set to `true`, the TeamCity compatible output
      * will be returned to stdout.
+     *
+     * Default value: `false`
      */
     @Input
     @Optional
@@ -183,7 +222,13 @@ open class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Specifies which subsystems of IDE should be checked.
-     * Available options: `all` (default), `android-only`, `without-android`.
+     *
+     * Default value: `all`
+     *
+     * Acceptable values:**
+     * - `all`
+     * - `android-only`
+     * - `without-android`
      */
     @Input
     @Optional

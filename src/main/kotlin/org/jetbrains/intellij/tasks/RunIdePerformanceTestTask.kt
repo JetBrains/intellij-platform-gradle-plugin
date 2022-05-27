@@ -39,7 +39,12 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
 
     /**
      * Name of the profiler which will be used during execution.
-     * Possible values: [ProfilerName.ASYNC] (default), [ProfilerName.YOURKIT].
+     *
+     * Default value: [ProfilerName.ASYNC]
+     *
+     * Acceptable values:
+     * - [ProfilerName.ASYNC]
+     * - [ProfilerName.YOURKIT]
      */
     @get:Input
     val profilerName = objectFactory.property<ProfilerName>()
@@ -89,6 +94,9 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
         }
     }
 
+    /**
+     * Configures arguments passed to JVM.
+     */
     override fun configureJvmArgs() {
         jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get())
         jvmArgs(

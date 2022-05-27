@@ -14,6 +14,9 @@ open class SetupDependenciesTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
+    /**
+     * Reference to the resolved `idea` dependency.
+     */
     @Internal
     val idea = objectFactory.property<IdeaDependency>()
 

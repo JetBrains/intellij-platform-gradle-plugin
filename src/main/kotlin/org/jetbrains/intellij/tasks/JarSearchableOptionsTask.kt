@@ -16,14 +16,29 @@ open class JarSearchableOptionsTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : Jar() {
 
+    /**
+     * The output directory where the JAR file will be created.
+     *
+     * Default value: `build/searchableOptions`
+     */
     @OutputDirectory
     @Optional
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
+    /**
+     * The name of the plugin.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.pluginName]
+     */
     @Input
     @Optional
     val pluginName = objectFactory.property<String>()
 
+    /**
+     * The sandbox output directory.
+     *
+     * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.getDestinationDir]
+     */
     @Input
     @Optional
     val sandboxDir = objectFactory.property<String>()
