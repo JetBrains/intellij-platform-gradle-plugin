@@ -61,5 +61,8 @@ As examples of using this plugin, you can also check out following projects:
   - Uses other IntelliJ IDEA plugins as test dependencies
   - Uses [Grammar Kit]
   - Uses a Kotlin version not bundled with IntelliJ IDEA
+- [EduTools](https://github.com/JetBrains/educational-plugin)
+  - Uses the Gradle Kotlin DSL
+  - Mixes Java and Kotlin code 
 
 [Grammar Kit]: https://github.com/JetBrains/Grammar-Kit
