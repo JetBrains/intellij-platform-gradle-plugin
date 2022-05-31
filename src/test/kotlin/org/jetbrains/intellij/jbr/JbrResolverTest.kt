@@ -49,10 +49,10 @@ open class JbrResolverTest : IntelliJPluginSpecBase() {
 
         val output = build(TASK_NAME).output
         output.apply {
-            assertTrue(output) {
+            assertTrue(this) {
                 contains(expected)
             }
-            assertFalse(output) {
+            assertFalse(this) {
                 contains("Error when resolving dependency")
             }
         }
