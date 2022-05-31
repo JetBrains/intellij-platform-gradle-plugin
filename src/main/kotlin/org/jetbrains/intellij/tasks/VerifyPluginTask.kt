@@ -25,7 +25,7 @@ open class VerifyPluginTask @Inject constructor(
 ) : ConventionTask(), VerificationTask {
 
     /**
-     * Specifies whether the build should break when the verifications performed by this task fail.
+     * Specifies whether the build should fail when the verifications performed by this task fail.
      *
      * Default value: `false`
      */
@@ -33,7 +33,7 @@ open class VerifyPluginTask @Inject constructor(
     val ignoreFailures = objectFactory.property<Boolean>()
 
     /**
-     * Specifies whether the build should break when the verifications performed by this task emit warnings.
+     * Specifies whether the build should fail when the verifications performed by this task emit warnings.
      *
      * Default value: `true`
      */

@@ -47,6 +47,7 @@ open class PublishPluginTask @Inject constructor(
     val host = objectFactory.property<String>()
 
     /**
+     * Required.
      * Authentication token.
      */
     @Input
