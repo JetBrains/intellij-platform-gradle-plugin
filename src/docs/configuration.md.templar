@@ -50,7 +50,7 @@ Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/pl
 **Notes:**
     <ul>
         <li>Value may have `IC-`, `IU-`, `CL-`, `PY-`, `PC-`, `RD-`, `GO-` or `JPS-` prefix in order to define IDE distribution type.</li>
-        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>
+        <li>`intellij.version` and `intellij.localPath` must not be specified at the same time.</li>
     </ul>
 |
 **Acceptable Values:**
@@ -90,7 +90,7 @@ Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/pl
 
 **Notes:**
     <ul>
-        <li>`intellij.version` and `intellij.localPath` should not be specified at the same time.</li>
+        <li>`intellij.version` and `intellij.localPath` must not be specified at the same time.</li>
     </ul>
 
 |

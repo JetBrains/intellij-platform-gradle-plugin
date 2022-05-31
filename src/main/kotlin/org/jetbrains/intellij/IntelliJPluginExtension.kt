@@ -61,7 +61,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * - `/Applications/Android Studio 4.2 Preview.app/Contents`
      * - `/home/user/idea-IC-181.4445.78`
      *
-     * Warning: [version] and [localPath] should not be specified at the same time.
+     * Warning: [version] and [localPath] must not be specified at the same time.
      */
     @Input
     @Optional
