@@ -47,11 +47,12 @@ open class JbrResolverTest : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(TASK_NAME).output.apply {
-            assertTrue {
+        val output = build(TASK_NAME).output
+        output.apply {
+            assertTrue(output) {
                 contains(expected)
             }
-            assertFalse {
+            assertFalse(output) {
                 contains("Error when resolving dependency")
             }
         }
