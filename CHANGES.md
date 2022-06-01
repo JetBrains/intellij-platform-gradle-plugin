@@ -1,6 +1,8 @@
 # Changelog
 
 ## next
+### Fixed
+- Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)
 
 ## 1.6.0
 ### Added

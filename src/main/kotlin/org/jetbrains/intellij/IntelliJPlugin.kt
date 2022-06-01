@@ -801,7 +801,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     val setupDependenciesTask = setupDependenciesTaskProvider.get()
                     val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
-                    sourceDirs.from(sourceSet.allJava.srcDirs)
+                    sourceDirs.from(project.provider { sourceSet.allJava.srcDirs })
                     classesDirs.from(classesDirsCopy)
                     sourceSetCompileClasspath.from(sourceSet.compileClasspath)
                     compilerVersion.convention(project.provider {
