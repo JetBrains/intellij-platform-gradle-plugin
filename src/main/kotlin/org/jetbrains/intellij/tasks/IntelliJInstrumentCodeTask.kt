@@ -64,21 +64,24 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     @OutputDirectory
     val outputDir = objectFactory.directoryProperty()
 
-    private val context = logCategory()
-
     @Input
     val compilerClassPathFromMaven = objectFactory.listProperty<File>()
+
+    private val context = logCategory()
 
     @TaskAction
     fun instrumentClasses(inputChanges: InputChanges) {
         val classpath = compilerClassPath()
 
-        ant.invokeMethod("taskdef", mapOf(
-            "name" to "instrumentIdeaExtensions",
-            "classpath" to classpath.joinToString(":"),
-            "loaderref" to LOADER_REF,
-            "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
-        ))
+        ant.invokeMethod(
+            "taskdef",
+            mapOf(
+                "name" to "instrumentIdeaExtensions",
+                "classpath" to classpath.joinToString(":"),
+                "loaderref" to LOADER_REF,
+                "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
+            ),
+        )
 
         info(context, "Compiling forms and instrumenting code with nullability preconditions")
         val instrumentNotNull = prepareNotNullInstrumenting(classpath)
@@ -96,13 +99,11 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                 val relativePath = sourceDir.relativize(path)
 
                 when (it.changeType) {
-                    ChangeType.REMOVED -> {
-                        outputDirPath.resolve(relativePath).deleteLogged()
-                    }
+                    ChangeType.REMOVED -> outputDirPath.resolve(relativePath).deleteLogged()
 
-                    else -> {
-                        val tempClassPath = temporaryDirPath.resolve(relativePath)
-                        Files.copy(path, tempClassPath.apply { createParentDirs() })
+                    else -> temporaryDirPath.resolve(relativePath).apply {
+                        createParentDirs()
+                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
                     }
                 }
 
@@ -146,12 +147,15 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
     private fun prepareNotNullInstrumenting(classpath: List<File>): Boolean {
         try {
-            ant.invokeMethod("typedef", mapOf(
-                "name" to "skip",
-                "classpath" to classpath.joinToString(":"),
-                "loaderref" to LOADER_REF,
-                "classname" to FILTER_ANNOTATION_REGEXP_CLASS,
-            ))
+            ant.invokeMethod(
+                "typedef",
+                mapOf(
+                    "name" to "skip",
+                    "classpath" to classpath.joinToString(":"),
+                    "loaderref" to LOADER_REF,
+                    "classname" to FILTER_ANNOTATION_REGEXP_CLASS,
+                ),
+            )
         } catch (e: BuildException) {
             val cause = e.cause
             if (cause is ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.message) {

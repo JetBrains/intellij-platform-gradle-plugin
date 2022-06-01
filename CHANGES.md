@@ -3,6 +3,7 @@
 ## next
 ### Fixed
 - Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)
+- Fixed `java.nio.file.FileAlreadyExistsException: instrumentCode/classpath.index` [#998](../../issues/998)
 
 ## 1.6.0
 ### Added
