@@ -6,11 +6,15 @@ import java.nio.file.Files
 
 with(__FILE__.toPath()) {
     runGradleTask("clean", "jar").let { logs ->
-        logs containsText "[ant:instrumentIdeaExtensions] Added @NotNull assertions to 2 files"
+        logs containsText "[ant:instrumentIdeaExtensions] Added @NotNull assertions to 3 files"
 
         buildDirectory.resolve("classes/java/main/Main.class").run {
             assert(Files.exists(this))
             assert(Files.size(this) == 658L)
+        }
+        buildDirectory.resolve("classes/java/main/CustomMain.class").run {
+            assert(Files.exists(this))
+            assert(Files.size(this) == 683L)
         }
         buildDirectory.resolve("tmp/instrumentCode/Main.class").run {
             assert(Files.exists(this))
@@ -38,6 +42,9 @@ with(__FILE__.toPath()) {
 
             jar containsFileInArchive "MainKt.class"
             assert((jar readEntry "MainKt.class").length == 1190)
+
+            jar containsFileInArchive "CustomMain.class"
+            assert((jar readEntry "CustomMain.class").length == 1040)
         }
     }
 
