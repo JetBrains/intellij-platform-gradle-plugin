@@ -14,7 +14,6 @@ plugins {
     id("com.gradle.plugin-publish") version "1.0.0-rc-2"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.6.21"
-    id("synapticloop.documentr") version "3.1.0"
 }
 
 repositories {
