@@ -32,23 +32,52 @@ open class PrepareSandboxTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : Sync() {
 
+    /**
+     * The name of the plugin.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.pluginName]
+     */
     @Input
     val pluginName = objectFactory.property<String>()
 
+    /**
+     * The directory with the plugin configuration.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.sandboxDir]/config
+     */
     @Input
     val configDir = objectFactory.property<String>()
 
+    /**
+     * The input plugin JAR file used to prepare the sandbox.
+     *
+     * Default value: `jar` task output
+     */
     @InputFile
     val pluginJar: RegularFileProperty = objectFactory.fileProperty()
 
+    /**
+     * Libraries that will be ignored when preparing the sandbox. By default, excludes all libraries that are a part
+     * of the [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea] dependency.
+     *
+     * Default value: [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea.get().jarFiles]
+     */
     @Input
     @Optional
     val librariesToIgnore = objectFactory.listProperty<File>()
 
+    /**
+     * List of dependencies of the current plugin.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.getPluginDependenciesList]
+     */
     @Input
     @Optional
     val pluginDependencies = objectFactory.listProperty<PluginDependency>()
 
+    /**
+     * Default sandbox destination directory.
+     */
     @Internal
     val defaultDestinationDir = objectFactory.property<File>()
 

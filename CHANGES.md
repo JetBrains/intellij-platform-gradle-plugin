@@ -4,6 +4,11 @@
 ### Added
 - Automatically detect bundled sources in plugin dependency
 
+### Fixed
+- Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)
+- Fixed `java.nio.file.FileAlreadyExistsException: instrumentCode/classpath.index` [#998](../../issues/998)
+- Fixed `Execution optimizations have been disabled for task ':jar' to ensure correctness` [#1000](../../issues/1000)
+
 ## 1.6.0
 ### Added
 - Added `BuildFeature` feature flags. See [Feature Flags](https://github.com/JetBrains/gradle-intellij-plugin#build-features) in README.

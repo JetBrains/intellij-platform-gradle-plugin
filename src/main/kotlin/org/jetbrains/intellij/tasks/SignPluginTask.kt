@@ -44,7 +44,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Input, unsigned ZIP archive file.
-     * Refers to `in` option.
+     * Refers to `in` CLI option.
      */
     @InputFile
     @SkipWhenEmpty
@@ -52,14 +52,17 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Output, signed ZIP archive file.
-     * Refers to `out` option.
+     * Refers to `out` CLI option.
+     * 
+     * Predefined with the name of the ZIP archive file with `-signed` name suffix attached.
      */
     @OutputFile
     val outputArchiveFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
      * Returns the version of the Marketplace ZIP Signer CLI that will be used.
-     * By default, set to "latest".
+     * 
+     * Default value: `LATEST`
      */
     @Input
     @Optional
@@ -75,7 +78,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * KeyStore file path.
-     * Refers to `ks` option.
+     * Refers to `ks` CLI option.
      */
     @Input
     @Optional
@@ -83,7 +86,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * KeyStore password.
-     * Refers to `ks-pass` option.
+     * Refers to `ks-pass` CLI option.
      */
     @Input
     @Optional
@@ -91,7 +94,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * KeyStore key alias.
-     * Refers to `ks-key-alias` option.
+     * Refers to `ks-key-alias` CLI option.
      */
     @Input
     @Optional
@@ -99,7 +102,7 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * KeyStore type.
-     * Refers to `ks-type` option.
+     * Refers to `ks-type` CLI option.
      */
     @Input
     @Optional
@@ -107,49 +110,49 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * JCA KeyStore Provider name.
-     * Refers to `ks-provider-name` option.
+     * Refers to `ks-provider-name` CLI option.
      */
     @Input
     @Optional
     val keyStoreProviderName = objectFactory.property<String>()
 
     /**
-     * Private key content.
-     * Refers to `key` option.
+     * Encoded private key in PEM format.
+     * Refers to `key` CLI option.
      */
     @Input
     @Optional
     val privateKey = objectFactory.property<String>()
 
     /**
-     * Private key file.
-     * Refers to `key-file` option.
+     * A file with encoded private key in PEM format.
+     * Refers to `key-file` CLI option.
      */
     @InputFile
     @Optional
     val privateKeyFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
-     * Private key password.
-     * Refers to `key-pass` option.
+     * Password required to decrypt the private key.
+     * Refers to `key-pass` CLI option.
      */
     @Input
     @Optional
     val password = objectFactory.property<String>()
 
     /**
-     * Certificate chain content.
+     * A string containing X509 certificates.
      * The first certificate from the chain will be used as a certificate authority (CA).
-     * Refers to `cert` option.
+     * Refers to `cert` CLI option.
      */
     @Input
     @Optional
     val certificateChain = objectFactory.property<String>()
 
     /**
-     * Certificate chain file.
+     * Path to the file containing X509 certificates.
      * The first certificate from the chain will be used as a certificate authority (CA).
-     * Refers to `cert-file` option.
+     * Refers to `cert-file` CLI option.
      */
     @InputFile
     @Optional

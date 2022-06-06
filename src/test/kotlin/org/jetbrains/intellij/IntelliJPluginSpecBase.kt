@@ -130,7 +130,7 @@ abstract class IntelliJPluginSpecBase {
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
-        drop(start).takeWhile(String::isNotEmpty).map { it.substringBefore(' ') }
+        drop(start).takeWhile { !it.startsWith('-') }.dropLast(1).map { it.substringBefore(' ') }.filterNot { it.isEmpty() }
     }
 
     protected fun directory(path: String) = File(dir, path).apply { mkdirs() }

@@ -31,12 +31,27 @@ open class DownloadRobotServerPluginTask @Inject constructor(
         fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Robot Server Plugin", METADATA_URL)
     }
 
+    /**
+     * The version of the Robot Server Plugin to download.
+     *
+     * Default value: `LATEST`
+     */
     @Input
     val version = objectFactory.property<String>()
 
+    /**
+     * The archive with the Robot Server Plugin, by default downloaded by to the Maven cache.
+     *
+     * Default value: Maven cache
+     */
     @Input
     val pluginArchive = objectFactory.property<File>()
 
+    /**
+     * Location of the extracted archive.
+     *
+     * Default value: `build/robotServerPlugin`
+     */
     @OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
