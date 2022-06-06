@@ -9,7 +9,7 @@ import java.io.Serializable
 @Suppress("BooleanMethodIsAlwaysInverted")
 interface PluginDependency : Serializable {
     companion object {
-        private const val formatVersion = 1
+        private const val formatVersion = 2
     }
 
     val id: String
@@ -22,11 +22,11 @@ interface PluginDependency : Serializable {
 
     val jarFiles: Collection<File>
 
+    val sourceJarFiles: Collection<File>
+
     val classesDirectory: File?
 
     val metaInfDirectory: File?
-
-    val sourcesDirectory: File?
 
     val builtin: Boolean
 

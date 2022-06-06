@@ -111,7 +111,7 @@ tasks {
     }
 
     test {
-        val testGradleHomePath = "$buildDir/testGradleHome"
+        val testGradleHomePath = properties("testGradleUserHome") ?: "$buildDir/testGradleHome"
         doFirst {
             File(testGradleHomePath).mkdir()
         }
