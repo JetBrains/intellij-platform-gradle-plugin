@@ -5,7 +5,6 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.plugins.BasePlugin
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
-import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -143,5 +142,4 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         assertTrue(dir.exists(), "Expected directory '${dir.path}' to exist")
         assertEquals(fileNames.toSet(), dir.list()?.toSet(), "Unexpected '${dir.path}' directory contents")
     }
-
 }

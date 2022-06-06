@@ -239,12 +239,7 @@ abstract class IntelliJPluginSpecBase {
     /**
      * Appends the passed content to this file. Overwrites existing content if the `overwrite` parameter is true.
      */
-    fun File.groovy(@Language("Groovy") content: String, overwrite: Boolean = false) {
-        if (overwrite) {
-            writeText("")
-        }
-        append(content)
-    }
+    fun File.groovy(@Language("Groovy") content: String) = append(content)
 
     fun File.java(@Language("Java") content: String) = append(content)
 

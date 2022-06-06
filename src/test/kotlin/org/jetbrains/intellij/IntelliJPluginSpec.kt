@@ -253,8 +253,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             Path.of(gradleHome).parent.resolve("local-ides"),
             "com/jetbrains/intellij/goland/goland/2022.1/goland-2022.1.zip"
         )
-        buildFile.groovy(
-            """
+        buildFile.writeText("")
+        buildFile.groovy("""
             plugins {
               id 'java'
               id 'org.jetbrains.intellij'
@@ -264,9 +264,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               localPath = '${adjustWindowsPath(localPath)}'
               plugins = ['org.jetbrains.plugins.go']
             }
-            """,
-            overwrite = true
-        )
+        """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO")
 
@@ -284,8 +282,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             "com/jetbrains/intellij/idea/ideaIC/2021.2.4/ideaIC-2021.2.4.zip"
         )
 
-        buildFile.groovy(
-            """
+        buildFile.writeText("")
+        buildFile.groovy("""
             plugins {
               id 'java'
               id 'org.jetbrains.intellij'
@@ -295,9 +293,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               localPath = '${adjustWindowsPath(localPath)}'
               plugins = ['org.jetbrains.plugins.go:212.5712.14']
             }
-            """,
-            overwrite = true
-        )
+        """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
 
