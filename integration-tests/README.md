@@ -104,6 +104,8 @@ To invoke the `verify.main.kts` script, navigate to the file and click the green
 > KOTLIN_MAIN_KTS_COMPILED_SCRIPTS_CACHE_DIR= /Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/instrumentation-task/verify.main.kts
 > ```
 
+Alternatively, set this environment variable in [Preferences | Tools | Terminal](jetbrains://idea/settings?name=Tools--Terminal) to make it available in the IntelliJ IDEA Terminal.
+
 # Integration Tests List
 
 | Name                          | Description                                                                                  |

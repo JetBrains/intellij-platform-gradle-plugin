@@ -54,7 +54,7 @@ with(__FILE__.toPath()) {
 
         buildDirectory containsFile "libs/instrumentation-task-disabled-1.0.0.jar"
 
-        buildDirectory.resolve("instrumented").run {
+        buildDirectory.resolve("instrumented/instrumentCode").run {
             resolve("ExampleAction.class").run {
                 assert(Files.exists(this))
                 assert(Files.size(this) == 1028L)
