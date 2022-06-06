@@ -110,6 +110,7 @@ Alternatively, set this environment variable in [Preferences | Tools | Terminal]
 
 | Name                          | Description                                                                                  |
 |-------------------------------|----------------------------------------------------------------------------------------------|
+| attaching-bundled-sources     | Verifies if plugin bundled source JARs are attached in the Ivy file as source artefacts.     |
 | build-features                | Tests enabling/disabling build features. See: `org.jetbrains.intellij.BuildFeature`.         |
 | instrumentation-task          | Process only Java and Swing form files during the code instrumentation.                      |
 | instrumentation-task-disabled | Check if plugin is correctly assembled with the instrumentation task manually disabled.      |
