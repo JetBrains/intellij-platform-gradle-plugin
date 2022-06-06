@@ -785,6 +785,7 @@ open class IntelliJPlugin : Plugin<Project> {
             })
             instrumentedDir.convention(project.layout.buildDirectory.dir("instrumented"))
         }
+        val setupInstrumentCodeTask = setupInstrumentCodeTaskProvider.get()
 
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
@@ -947,11 +948,14 @@ open class IntelliJPlugin : Plugin<Project> {
                             null
                         }
                     })
-                    outputDir.convention(project.layout.buildDirectory.dir("instrumented"))
+
+                    outputDir.convention(setupInstrumentCodeTask.instrumentedDir.map {
+                        it.dir(name)
+                    })
 
                     dependsOn(sourceSet.classesTaskName)
                     dependsOn(setupDependenciesTask)
-                    dependsOn(setupInstrumentCodeTaskProvider)
+                    dependsOn(setupInstrumentCodeTask)
                     onlyIf { instrumentCodeProvider.get() }
                 }
 
