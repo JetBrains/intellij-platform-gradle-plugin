@@ -32,8 +32,8 @@ It defines a couple of triggers:
 
 The very first job is `Collect Modules` which, using the dedicated [`list_integration_test_modules.main.kts`](../.github/scripts/list_integration_test_modules.main.kts) Kotlin Script that dynamically lists available modules stored in the [`integration-tests`](../integration-tests) directory.
 
-Each variation triggers the Gradle `integrationTest` dedicated task that each subproject can configure – i.e., to make it dependent on other tasks.
-The output of this run is stored in the module's `./build/integrationTestOutput.txt` file, which is further passed to the module's `verify.main.kts` script.
+Each variation executes the `verify.main.kts` script which should execute a Gradle task required for the test.
+The Gradle task execution is performed via the `runGradleTask()` function, which returns build log that can be used for verification of the build correctness.
 
 ### Integration Tests structure
 
@@ -53,13 +53,13 @@ The output of this run is stored in the module's `./build/integrationTestOutput.
 └── ...
 ```
 
-To introduce a new subproject to the Integration Tests set, it is required to create a new directory within the `integration-tests` folder and provide `build.gradle.kts`, `src`, `verify.main.kts`.
+To introduce a new subproject to the Integration Tests set, it is required to create a new directory within the `integration-tests` folder and provide at least `build.gradle.kts` and `verify.main.kts` scripts.
 
 The `build.gradle.kts` should apply the Gradle IntelliJ Plugin without specifying its version and define dependencies of the `integrationTest` task:
 
 ```kotlin
 plugins {
-    id("org.jetbrains.intellij")
+  id("org.jetbrains.intellij")
 }
 
 // ...
@@ -84,7 +84,7 @@ The `verify.main.kts` file for assertions used to check the given module's outpu
 ### Verification file
 
 Each subproject must provide `verify.main.kts` that runs assertions against files/logs produced during the run.
-The utility file provides common methods used for assertions or file handlers one may be interested in, like: `workingDirPath` ,`patchedPluginXml` ,`buildDirectory`.
+The utility file provides common methods used for assertions or file handlers one may be interested in, like: `workingDirPath`, `patchedPluginXml`, `buildDirectory`.
 
 To verify the correctness of the output, you may check if it contains specific strings or matches regular expressions:
 
