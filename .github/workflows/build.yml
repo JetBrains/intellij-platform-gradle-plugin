@@ -12,10 +12,11 @@ jobs:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
-  unitTests:
-    name: Unit Tests
-    needs: gradleValidation
-    uses: ./.github/workflows/reusable-unitTests.yml
+# FIXME: disabled for faster CI experiments
+#  unitTests:
+#    name: Unit Tests
+#    needs: gradleValidation
+#    uses: ./.github/workflows/reusable-unitTests.yml
 
   integrationTests:
     name: Integration Tests
