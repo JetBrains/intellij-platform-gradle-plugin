@@ -8,6 +8,7 @@
 
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.streams.toList
 
 val rootPath: Path = System.getenv("GITHUB_WORKSPACE")?.let(Path::of)
     ?: Path.of("").toAbsolutePath().parent.parent
