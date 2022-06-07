@@ -38,7 +38,7 @@ jobs:
   build:
     name: Build
     needs:
-      - unitTests
+#      - unitTests FIXME: disabled for faster CI experiments
       - integrationTests
 #      - integrationTestsEAP
       - codeInspection
