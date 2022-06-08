@@ -19,7 +19,7 @@ Steps to reproduce the behavior – provide your build configuration, and/or lin
 A clear and concise description of what you expected to happen.
 
 **Environment:**
- - OS: [e.g. iOS]
+ - OS: [e.g. macOS]
  - Gradle IntelliJ Plugin Version [e.g. 1.6.0]
  - Gradle Version [e.g. 7.4.2]
 
