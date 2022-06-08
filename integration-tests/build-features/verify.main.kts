@@ -8,4 +8,10 @@ with(__FILE__.toPath()) {
             logs containsText "Build feature is disabled: $flag"
         }
     }
+
+    "org.jetbrains.intellij.buildFeature.useDependencyFirstResolutionStrategy".let { flag ->
+        runGradleTask("assemble", projectProperties = mapOf(flag to false)).let { logs ->
+            logs containsText "Build feature is disabled: $flag"
+        }
+    }
 }
