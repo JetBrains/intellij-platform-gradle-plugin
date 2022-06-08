@@ -3,6 +3,7 @@
 ## next
 ### Added
 - Automatically detect bundled sources in plugin dependency
+- Throw an error when `intellij.version` is missing [#1010](../../issues/1004)
 
 ### Fixed
 - Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)

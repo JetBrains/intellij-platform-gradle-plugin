@@ -99,6 +99,12 @@ open class IntelliJPlugin : Plugin<Project> {
         )
 
         intellijExtension.apply {
+            version.convention(project.provider {
+                throw GradleException(
+                    "The value for the 'intellij.version' property was not specified, " +
+                        "see: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#intellij-extension-version"
+                )
+            })
             pluginName.convention(project.provider {
                 project.name
             })
