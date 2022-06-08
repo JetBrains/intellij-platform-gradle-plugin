@@ -75,6 +75,34 @@ val Path.pluginJar
         .exitIf(Files::notExists) { "Plugin jar file does not exist: ${toAbsolutePath()}" }
 
 /**
+ * Path to the Gradle user home directory., e.g., `/Users/hsz/.gradle`.
+ */
+val Path.gradleUserHomeDirectory
+    get() = Path.of(
+        System.getProperty("gradle.user.home")
+            ?: System.getenv("GRADLE_USER_HOME")
+            ?: "${System.getProperty("user.home")}/.gradle"
+    ).exitIf(Files::notExists) { "Gradle user home directory does not exist: ${toAbsolutePath()}" }
+
+/**
+ * Path to the Gradle cache directory.,
+ * e.g., `/Users/hsz/.gradle/caches/modules-2/files-2.1`
+ */
+val Path.gradleCacheDirectory
+    get() = gradleUserHomeDirectory
+        .resolve("caches/modules-2/files-2.1")
+        .exitIf(Files::notExists) { "Gradle cache directory does not exist: ${toAbsolutePath()}" }
+
+/**
+ * Path to the IDE plugins cache directory.,
+ * e.g., `/Users/hsz/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins`.
+ */
+val Path.pluginsCacheDirectory
+    get() = gradleCacheDirectory
+        .resolve("com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
+        .exitIf(Files::notExists) { "IDE Plugins cache directory does not exist: ${toAbsolutePath()}" }
+
+/**
  * Runs the given Gradle task(s) within the current integration test.
  * Provides logs to STDOUT and as a returned value for further assertions.
  */
