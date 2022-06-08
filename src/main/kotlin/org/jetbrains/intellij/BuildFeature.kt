@@ -7,6 +7,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.ID as prefix
 
 enum class BuildFeature(private val defaultValue: Boolean) {
     SELF_UPDATE_CHECK(true),
+    USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY(true),
     ;
 
     fun getValue(project: Project) = project.findProperty(toString())?.toString()?.toBoolean() ?: defaultValue

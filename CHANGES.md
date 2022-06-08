@@ -4,6 +4,8 @@
 ### Added
 - Automatically detect bundled sources in plugin dependency
 - Throw an error when `intellij.version` is missing [#1010](../../issues/1004)
+- Set `ResolutionStrategy.SortOrder.DEPENDENCY_FIRST` for `compileClasspath` and `testCompileClasspath` configurations [#656](../../issues/656)
+- Added `useDependencyFirstResolutionStrategy` feature flag. See [Feature Flags](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#build-features).
 
 ### Fixed
 - Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)
@@ -12,7 +14,7 @@
 
 ## 1.6.0
 ### Added
-- Added `BuildFeature` feature flags. See [Feature Flags](https://github.com/JetBrains/gradle-intellij-plugin#build-features) in README.
+- Added `BuildFeature` feature flags. See [Feature Flags](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#build-features).
 - Added `--jbr-illegal-access` and `-XX:+IgnoreUnrecognizedVMOptions` flags for tasks based on `RunIdeBase` to support `2022.2` which runs on Java 17
 - For JBR 17, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomod` variants are no longer available.
 - `instrumentCode` task – incremental instrumentation [#459](../../issues/459)
