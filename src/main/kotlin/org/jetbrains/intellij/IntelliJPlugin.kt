@@ -1267,16 +1267,13 @@ open class IntelliJPlugin : Plugin<Project> {
                     }
 
                 if (project.isBuildFeatureEnabled(USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY)) {
-                    listOf(
-                        getByName(JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                        getByName(JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                    ).forEach {
-                        it.resolutionStrategy.sortArtifacts(ResolutionStrategy.SortOrder.DEPENDENCY_FIRST)
+                    all {
+                        resolutionStrategy.sortArtifacts(ResolutionStrategy.SortOrder.DEPENDENCY_FIRST)
                     }
                 }
 
                 getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
-                getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
+                getByName(JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
 
                 idea
             }
