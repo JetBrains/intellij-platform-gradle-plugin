@@ -13,7 +13,7 @@ Each of the Integration Tests is a standalone project that focuses on a specific
 Running Integration Tests is based on GitHub Actions and makes use of the matrix build so that we can run all tests with variations of different properties:
 - Operating systems: macOS, Windows, Linux
 - Gradle versions:
-  - first supported: `6.7`
+  - first supported: `6.7.1`
   - last from `6.x` branch: `6.9.2`
   - last available: `7.4.2`
 - IntelliJ IDEA SDK versions:

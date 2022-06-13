@@ -4,7 +4,7 @@
  * This script is used to list all modules available for integration tests.
  */
 
-@file:DependsOn("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.20")
+@file:DependsOn("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.0")
 
 import java.nio.file.Files
 import java.nio.file.Path

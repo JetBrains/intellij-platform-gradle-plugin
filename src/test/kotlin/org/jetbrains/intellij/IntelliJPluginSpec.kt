@@ -357,13 +357,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `throws exception if Gradle is lt 6_7`() {
-        val message = "Gradle IntelliJ Plugin requires Gradle 6.7 and higher"
+        val message = "Gradle IntelliJ Plugin requires Gradle 6.7.1 and higher"
         build("6.6", true, "help").output.let {
             assertTrue(it.contains("FAILURE: Build failed with an exception."))
             assertTrue(it.contains(message))
         }
 
-        build("6.7", false, "help").output.let {
+        build("6.7.1", false, "help").output.let {
             assertTrue(it.contains("BUILD SUCCESSFUL"))
             assertFalse(it.contains(message))
         }
