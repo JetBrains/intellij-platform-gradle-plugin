@@ -9,6 +9,7 @@ import java.io.File
 
 class PluginDependencyImpl(
     override val id: String,
+    override val platformPluginId: String?,
     override val version: String,
     override val artifact: File,
     override val builtin: Boolean = false,
@@ -57,6 +58,7 @@ class PluginDependencyImpl(
         other as PluginDependencyImpl
 
         if (id != other.id) return false
+        if (platformPluginId != other.platformPluginId) return false
         if (version != other.version) return false
         if (artifact != other.artifact) return false
         if (builtin != other.builtin) return false
@@ -75,18 +77,19 @@ class PluginDependencyImpl(
 
     override fun hashCode(): Int {
         var result = id.hashCode()
+        result = 31 * result + platformPluginId.hashCode()
         result = 31 * result + version.hashCode()
         result = 31 * result + artifact.hashCode()
         result = 31 * result + builtin.hashCode()
         result = 31 * result + maven.hashCode()
-        result = 31 * result + (channel?.hashCode() ?: 0)
+        result = 31 * result + channel.hashCode()
         result = 31 * result + jarFiles.hashCode()
         result = 31 * result + sourceJarFiles.hashCode()
-        result = 31 * result + (classesDirectory?.hashCode() ?: 0)
-        result = 31 * result + (metaInfDirectory?.hashCode() ?: 0)
+        result = 31 * result + classesDirectory.hashCode()
+        result = 31 * result + metaInfDirectory.hashCode()
         result = 31 * result + notation.hashCode()
-        result = 31 * result + (sinceBuild?.hashCode() ?: 0)
-        result = 31 * result + (untilBuild?.hashCode() ?: 0)
+        result = 31 * result + sinceBuild.hashCode()
+        result = 31 * result + untilBuild.hashCode()
         return result
     }
 }

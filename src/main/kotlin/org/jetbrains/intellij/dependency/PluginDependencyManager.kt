@@ -43,7 +43,7 @@ open class PluginDependencyManager @Inject constructor(
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
                         "-withSources".takeIf { ideaDependency.sources != null }.orEmpty()
-                    return PluginDependencyImpl(it.name, builtinPluginVersion, it, true)
+                    return PluginDependencyImpl(it.name, dependency.id, builtinPluginVersion, it, true)
                 }
             }
             throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency?.classes?.absolutePath}", null)
@@ -101,7 +101,10 @@ open class PluginDependencyManager @Inject constructor(
             ivyArtifactRepository = project.repositories.ivy {
                 val ivyFileSuffix = plugin.getFqn().substring("${plugin.id}-${plugin.version}".length)
                 ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
-                artifactPattern("${ideaDependency?.classes}/plugins/[module]/[artifact](.[ext])") // builtin plugins
+                ideaDependency?.classes?.let {
+                    artifactPattern("$it/plugins/[module]/[artifact](.[ext])") // builtin plugins
+                    artifactPattern("$it/[artifact](.[ext])") // plugin sources delivered with IDE
+                }
                 artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
                 if (ideaDependency?.sources != null) {
                     artifactPattern("${ideaDependency.sources.parent}/[artifact]-${ideaDependency.version}(-[classifier]).[ext]")
@@ -145,6 +148,17 @@ open class PluginDependencyManager @Inject constructor(
             plugin.sourceJarFiles.forEach {
                 addArtifact(IntellijIvyArtifact.createJarDependency(it, sourcesConfiguration.name, baseDir, groupId))
             }
+            ideaDependency?.sourceZipFiles?.let {
+                IdePluginSourceZipFilesProvider.getSourceZips(ideaDependency, plugin.platformPluginId)?.let {
+                    addArtifact(
+                        IntellijIvyArtifact.createZipDependency(
+                            it,
+                            sourcesConfiguration.name,
+                            ideaDependency.classes
+                        )
+                    )
+                }
+            }
             // see: https://github.com/JetBrains/gradle-intellij-plugin/issues/153
             ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
                 val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
@@ -163,7 +177,7 @@ open class PluginDependencyManager @Inject constructor(
         return createPlugin(artifact, true, context)?.let {
             val pluginId = it.pluginId ?: return null
             val pluginVersion = it.pluginVersion ?: return null
-            return PluginDependencyImpl(pluginId, pluginVersion, artifact, false, maven).apply {
+            return PluginDependencyImpl(pluginId, pluginId, pluginVersion, artifact, false, maven).apply {
                 this.channel = channel
                 this.sinceBuild = it.sinceBuild?.asStringWithoutProductCode()
                 this.untilBuild = it.untilBuild?.asStringWithoutProductCode()

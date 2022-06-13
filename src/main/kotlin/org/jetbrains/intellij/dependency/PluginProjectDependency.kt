@@ -18,7 +18,7 @@ class PluginProjectDependency(private val pluginDirectory: File, val context: St
                 val pluginId = intellijPlugin.pluginId ?: return@let null
                 val pluginVersion = intellijPlugin.pluginVersion ?: return@let null
 
-                PluginDependencyImpl(pluginId, pluginVersion, it, builtin = false, maven = false).apply {
+                PluginDependencyImpl(pluginId, pluginId, pluginVersion, it, builtin = false, maven = false).apply {
                     sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
                     untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
                 }
@@ -31,6 +31,9 @@ class PluginProjectDependency(private val pluginDirectory: File, val context: St
 
     override val id: String
         get() = pluginDependency?.id ?: "<unknown plugin id>"
+
+    override val platformPluginId: String?
+        get() = pluginDependency?.platformPluginId
 
     override val version: String
         get() = pluginDependency?.version ?: "<unknown plugin version>"

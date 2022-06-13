@@ -21,6 +21,9 @@ class IntellijIvyArtifact(
         fun createJarDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
             createDependency(baseDir, file, configuration, "jar", "jar", classifier)
 
+        fun createZipDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
+            createDependency(baseDir, file, configuration, "zip", "zip", classifier)
+
         fun createDirectoryDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
             createDependency(baseDir, file, configuration, "", "directory", classifier)
 
