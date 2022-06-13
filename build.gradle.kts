@@ -9,8 +9,8 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.6.21"
-    kotlin("plugin.serialization") version "1.6.21"
+    kotlin("jvm") version "1.7.0"
+    kotlin("plugin.serialization") version "1.7.0"
     id("com.gradle.plugin-publish") version "1.0.0-rc-2"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.6.21"
@@ -66,7 +66,7 @@ version = when (properties("snapshot")?.toBoolean() ?: false) {
 group = "org.jetbrains.intellij.plugins"
 description = """
 > **Important:**
-> - This project requires **Gradle 6.7** or newer, however it is recommended to **use the [latest Gradle available](https://gradle.org/releases/)**. Update it with:
+> - This project requires **Gradle 6.7.1** or newer, however it is recommended to **use the [latest Gradle available](https://gradle.org/releases/)**. Update it with:
 >   ```bash
 >   ./gradlew wrapper --gradle-version=VERSION
 >   ```

@@ -129,8 +129,8 @@ open class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun checkGradleVersion(project: Project) {
-        if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.7")) {
-            throw PluginInstantiationException("${IntelliJPluginConstants.NAME} requires Gradle 6.7 and higher")
+        if (Version.parse(project.gradle.gradleVersion) < Version.parse("6.7.1")) {
+            throw PluginInstantiationException("${IntelliJPluginConstants.NAME} requires Gradle 6.7.1 and higher")
         }
     }
 
@@ -1267,11 +1267,8 @@ open class IntelliJPlugin : Plugin<Project> {
                     }
 
                 if (project.isBuildFeatureEnabled(USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY)) {
-                    listOf(
-                        getByName(JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                        getByName(JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                    ).forEach {
-                        it.resolutionStrategy.sortArtifacts(ResolutionStrategy.SortOrder.DEPENDENCY_FIRST)
+                    all {
+                        resolutionStrategy.sortArtifacts(ResolutionStrategy.SortOrder.DEPENDENCY_FIRST)
                     }
                 }
 
