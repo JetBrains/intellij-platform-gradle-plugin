@@ -83,4 +83,5 @@ jobs:
         working-directory: ${{ github.workspace }}/integration-tests
         env:
           PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        shell: bash
         run: ./${{ matrix.module }}/verify.main.kts `which gradle`
