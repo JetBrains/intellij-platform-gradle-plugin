@@ -4,7 +4,7 @@
 
 with(__FILE__.toPath()) {
     runGradleTask("buildPlugin").let {
-        val goPluginIvyFileName = "go-goland-GO-212.5457.54-withSources-2.xml"
+        val goPluginIvyFileName = "go-goland-GO-212.5457.54-withSources-3.xml"
 
         pluginsCacheDirectory containsFile goPluginIvyFileName
 
