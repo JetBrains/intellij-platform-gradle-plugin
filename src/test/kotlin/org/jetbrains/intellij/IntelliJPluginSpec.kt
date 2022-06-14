@@ -305,6 +305,89 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `add bundled plugin source artifacts from IDE_ROOT-lib-src directory when downloadSources = true`() {
+        buildFile.groovy("""
+            intellij {
+              type = 'IU'
+              version = '2021.2.4'
+              plugins = ['com.intellij.css']
+              downloadSources = true
+            }
+        """)
+
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources")
+
+        assertContainsOnlySourceArtifacts(result,
+            "lib/src/src_css-api-ideaIU-IU-212.5712.43-withSources.zip (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)",
+            "ideaIC-ideaIU-IU-212.5712.43-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)"
+        )
+    }
+
+    @Test
+    fun `add bundled plugin source artifacts from IDE_ROOT-lib-src directory when downloadSources = false`() {
+        buildFile.groovy("""
+            intellij {
+              type = 'IU'
+              version = '2021.2.4'
+              plugins = ['Tomcat']
+              downloadSources = false
+            }
+        """)
+
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43")
+
+        assertContainsOnlySourceArtifacts(result,
+            "lib/src/src_tomcat-ideaIU-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43)"
+        )
+    }
+
+    @Test
+    fun `add bundled zip plugin source artifacts from IDE_ROOT-lib-src directory when localPath used`() {
+        val localPath = createLocalIdeIfNotExists(
+            Path.of(gradleHome).parent.resolve("local-ides"),
+            "com/jetbrains/intellij/idea/ideaIU/2021.2.4/ideaIU-2021.2.4.zip"
+        )
+        buildFile.writeText("")
+        buildFile.groovy("""
+            plugins {
+              id 'java'
+              id 'org.jetbrains.intellij'
+              id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
+            }
+            intellij {
+              localPath = '${adjustWindowsPath(localPath)}'
+              plugins = ['com.intellij.spring']
+            }
+        """)
+
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43")
+
+        assertContainsOnlySourceArtifacts(result,
+            "lib/src/src_spring-openapi-ideaLocal-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43)"
+        )
+        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
+    }
+
+    @Test
+    fun `does not add zip plugin source artifacts from IDE_ROOT-lib-src directory when sources not provided`() {
+        buildFile.groovy("""
+            intellij {
+              type = 'GO'
+              version = '2021.2.4'
+              plugins = ['com.intellij.css']
+              downloadSources = true
+            }
+        """)
+
+        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources")
+
+        assertContainsOnlySourceArtifacts(result,
+            /* no CSS plugin source artifacts in Go distribution */
+            "ideaIC-goland-GO-212.5457.54-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources)"
+            )
+    }
+
+    @Test
     fun `add require plugin id parameter in test tasks`() {
         writeTestFile()
 
