@@ -9,13 +9,12 @@ object IdePluginSourceZipFilesProvider {
     private val pluginIdToSourceZipFileName = mapOf(
         "com.intellij.css" to "src_css-api.zip",
         "com.intellij.database" to "src_database-openapi.zip",
+        "com.intellij.java" to "src_jam-openapi.zip",
         "com.intellij.javaee" to "src_javaee-openapi.zip",
         "com.intellij.persistence" to "src_persistence-openapi.zip",
         "com.intellij.spring" to "src_spring-openapi.zip",
         "com.intellij.spring.boot" to "src_spring-boot-openapi.zip",
-        "Tomcat" to "src_tomcat.zip",
-
-        "intellij.java.jam" to "src_jam-openapi.zip" // TODO (what is it????????????)
+        "Tomcat" to "src_tomcat.zip"
     )
 
     /**
