@@ -14,10 +14,10 @@ jobs:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
-  unitTests:
-    name: Unit Tests
-    needs: gradleValidation
-    uses: ./.github/workflows/reusable-unitTests.yml
+#  unitTests: # FIXME: revert before merging
+#    name: Unit Tests
+#    needs: gradleValidation
+#    uses: ./.github/workflows/reusable-unitTests.yml
 
   integrationTests:
     name: Integration Tests
@@ -39,7 +39,7 @@ jobs:
   build:
     name: Build
     needs:
-      - unitTests
+#      - unitTests # FIXME: revert before merging
       - integrationTests
 #      - integrationTestsEAP
       - codeInspection
