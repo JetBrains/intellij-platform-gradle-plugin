@@ -1,5 +1,7 @@
+val buildSearchableOptionsEnabledProperty = project.property("buildSearchableOptionsEnabled") == "true"
+
 tasks {
     buildSearchableOptions {
-        enabled = false
+        enabled = buildSearchableOptionsEnabledProperty
     }
 }
