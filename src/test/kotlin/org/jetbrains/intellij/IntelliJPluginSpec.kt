@@ -384,7 +384,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         assertContainsOnlySourceArtifacts(result,
             /* no CSS plugin source artifacts in Go distribution */
             "ideaIC-goland-GO-212.5457.54-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources)"
-            )
+        )
     }
 
     @Test

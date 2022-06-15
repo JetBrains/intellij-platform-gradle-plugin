@@ -13,14 +13,12 @@ import kotlin.streams.toList
 val rootPath: Path = System.getenv("GITHUB_WORKSPACE")?.let(Path::of)
     ?: Path.of("").toAbsolutePath().parent.parent
 
-// FIXME: revert before merging
-/*val modules: List<String> = rootPath
+val modules: List<String> = rootPath
     .let { it.resolve("integration-tests") }
     .let { Files.list(it) }
     .filter { Files.isDirectory(it) }
     .map { it.fileName.toString() }
     .filter { !it.startsWith(".") }
-    .toList()*/
-val modules: List<String> = listOf("attaching-plugin-sources-from-ide-dist")
+    .toList()
 
 println("[\"${modules.joinToString("\", \"")}\"]")
