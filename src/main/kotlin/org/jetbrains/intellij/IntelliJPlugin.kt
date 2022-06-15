@@ -11,9 +11,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.FileTree
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
@@ -61,7 +59,6 @@ import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
 import java.net.URL
-import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -145,7 +142,7 @@ open class IntelliJPlugin : Plugin<Project> {
             return
         }
         try {
-            val version = getVersion()?.let(Version::parse) ?: Version()
+            val version = getCurrentVersion()?.let(Version::parse) ?: Version()
             val latestVersion = LatestVersionResolver.fromGitHub(IntelliJPluginConstants.NAME, IntelliJPluginConstants.GITHUB_REPOSITORY)
             if (version < Version.parse(latestVersion)) {
                 warn(
@@ -397,25 +394,29 @@ open class IntelliJPlugin : Plugin<Project> {
             pluginJar.convention(project.layout.file(project.provider {
                 val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
                 val jarTask = jarTaskProvider.get()
-                jarTask.manifest.attributes(
-                    "Created-By" to "Gradle ${project.gradle.gradleVersion}",
-                    "Build-JVM" to Jvm.current(),
-                    "Version" to project.version,
-                    "Build-Plugin" to IntelliJPluginConstants.NAME,
-                    "Build-Plugin-Version" to (getVersion() ?: "0.0.0"),
-                    "Build-OS" to OperatingSystem.current(),
-                    "Build-SDK" to when (extension.localPath.orNull) {
-                        null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
-                        else -> setupDependenciesTask.idea.get().classes.let { ideaClasses ->
-                            ideProductInfo(ideaClasses)
-                                ?.run { "$productCode-$version" }
-                            // Fall back on build number if product-info.json is not present, this is the case
-                            // for recent versions of Android Studio.
-                                ?: ideBuildNumber(ideaClasses)
-                        }
-                    },
-                )
-                jarTask.archiveFile.orNull?.asFile
+
+                jarTask.run {
+                    exclude("**/classpath.index")
+                    manifest.attributes(
+                        "Created-By" to "Gradle ${project.gradle.gradleVersion}",
+                        "Build-JVM" to Jvm.current(),
+                        "Version" to project.version,
+                        "Build-Plugin" to IntelliJPluginConstants.NAME,
+                        "Build-Plugin-Version" to (getCurrentVersion() ?: "0.0.0"),
+                        "Build-OS" to OperatingSystem.current(),
+                        "Build-SDK" to when (extension.localPath.orNull) {
+                            null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
+                            else -> setupDependenciesTask.idea.get().classes.let { ideaClasses ->
+                                ideProductInfo(ideaClasses)
+                                    ?.run { "$productCode-$version" }
+                                // Fall back on build number if product-info.json is not present, this is the case
+                                // for recent versions of Android Studio.
+                                    ?: ideBuildNumber(ideaClasses)
+                            }
+                        },
+                    )
+                    archiveFile.orNull?.asFile
+                }
             }))
             defaultDestinationDir.convention(project.provider {
                 project.file("${extension.sandboxDir.get()}/plugins$testSuffix")
@@ -1392,7 +1393,7 @@ open class IntelliJPlugin : Plugin<Project> {
         return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
     }
 
-    private fun getVersion() =
+    private fun getCurrentVersion() =
         IntelliJPlugin::class.java
             .run { getResource("$simpleName.class") }
             .runCatching {

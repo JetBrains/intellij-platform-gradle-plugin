@@ -6,6 +6,7 @@
 - Throw an error when `intellij.version` is missing [#1010](../../issues/1004)
 - Set `ResolutionStrategy.SortOrder.DEPENDENCY_FIRST` for `compileClasspath` and `testCompileClasspath` configurations [#656](../../issues/656)
 - Added `useDependencyFirstResolutionStrategy` feature flag. See [Feature Flags](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#build-features).
+- Ensure `classpath.index` is not bundled in the JAR file
 
 ### Changed
 - Set minimal supported Gradle version from `6.7` to `6.7.1`
