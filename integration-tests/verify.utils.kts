@@ -49,10 +49,15 @@ val Path.buildDirectory
 
 /**
  * Path to the Gradle Wrapper – uses first argument provided to the script or falls back to the project instance,
- * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/gradlew`.
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/gradlew`. It adds `.bat` extension if the current
+ * OS is Windows.
  */
-val Path.gradleWrapper
-    get() = args.firstOrNull() ?: rootDirectory.resolve("gradlew")
+val Path.gradleWrapper: String
+    get() {
+        val isWindows = System.getProperty("os.name", "").contains("windows", ignoreCase = true)
+        val gradlewWrapperPath = args.firstOrNull() ?: rootDirectory.resolve("gradlew").toString()
+        return "$gradlewWrapperPath${if (isWindows) ".bat" else ""}"
+    }
 
 /**
  * Path to the patched `plugin.xml` file located within the build directory of the integration tests single project,
@@ -115,7 +120,7 @@ val Path.pluginsCacheDirectory
 fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any> = emptyMap()) =
     ProcessBuilder()
         .command(
-            gradleWrapper.toString(),
+            gradleWrapper,
             *projectProperties
                 .run {
                     this + mapOf(
