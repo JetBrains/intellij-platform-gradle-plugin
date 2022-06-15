@@ -37,6 +37,7 @@ import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
+import org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.SELF_UPDATE_CHECK
 import org.jetbrains.intellij.BuildFeature.USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
@@ -694,6 +695,13 @@ open class IntelliJPlugin : Plugin<Project> {
 
             outputDir.convention(project.provider {
                 project.layout.projectDirectory.dir("${project.buildDir}/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+            })
+            showPaidPluginWarning.convention(project.provider {
+                project.isBuildFeatureEnabled(PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING) && run {
+                    sourcePluginXmlFiles(project).any {
+                        parsePluginXml(it, context)?.productDescriptor != null
+                    }
+                }
             })
 
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
