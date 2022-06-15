@@ -114,16 +114,15 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         }
 
         instrumentCode(instrumentNotNull) {
-            Files.walk(temporaryDirPath).filter { !it.isDirectory }.forEach { file ->
-                val relativePath = temporaryDirPath.relativize(file)
-                val originalClass = changes.find { it.endsWith(relativePath) }
-                if (Files.size(file) != originalClass?.let { Files.size(it) }) {
+            Files.walk(temporaryDirPath)
+                .filter { !it.isDirectory }
+                .forEach { file ->
+                    val relativePath = temporaryDirPath.relativize(file)
                     outputDirPath.resolve(relativePath).apply {
                         createParentDirs()
                         Files.copy(file, this, StandardCopyOption.REPLACE_EXISTING)
                     }
                 }
-            }
         }
     }
 

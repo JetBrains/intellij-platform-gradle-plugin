@@ -11,7 +11,9 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.FileTree
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
@@ -59,6 +61,7 @@ import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
 import java.net.URL
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -213,7 +216,9 @@ open class IntelliJPlugin : Plugin<Project> {
                 parsePluginXml(file, context)?.dependencies?.forEach {
                     if (it.dependencyId == "com.intellij.modules.java") {
                         throw BuildException(
-                            "The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\n" + "Please delete 'depends' tag from '${file.absolutePath}' or add 'java' plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
+                            "The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\n " +
+                                "Please delete 'depends' tag from '${file.absolutePath}' or add 'java' plugin to Gradle dependencies " +
+                                "(e.g. intellij { plugins = ['java'] })",
                             null,
                         )
                     }
@@ -979,7 +984,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 val outputDir = project.provider { instrumentTask.outputDir.get() }
 
                 onlyIf { instrumentCodeProvider.get() }
-                doLast { classesDirs.setFrom(listOf(outputDir.get()) + classesDirs) }
+                doLast { classesDirs.setFrom(outputDir.get()) }
 
                 dependsOn(instrumentTask)
             }
