@@ -36,6 +36,7 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.SELF_UPDATE_CHECK
 import org.jetbrains.intellij.BuildFeature.USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
@@ -780,6 +781,7 @@ open class IntelliJPlugin : Plugin<Project> {
             })
             archiveBaseName.convention("lib/searchableOptions")
             destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
+            noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(NO_SEARCHABLE_OPTIONS_WARNING))
 
             dependsOn(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
