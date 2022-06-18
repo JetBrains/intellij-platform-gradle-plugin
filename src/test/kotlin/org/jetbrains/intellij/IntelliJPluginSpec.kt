@@ -117,7 +117,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['com.jetbrains.changeReminder']
         """)
 
-        val (compileClasspath, runtimeClasspath) = collectTestClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "vcs-changeReminder.jar")
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "git4idea.jar")
@@ -125,7 +125,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add ant dependencies to classpath`() {
-        val (compileClasspath, runtimeClasspath) = collectTestClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "ant.jar")
     }
@@ -137,10 +137,31 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
         """)
 
-        val (compileClasspath, runtimeClasspath) = collectTestClassPaths()
+        val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths()
 
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "copyright.jar")
         assertAddedToCompileAndRuntimeClassPaths(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
+    }
+
+    @Test
+    fun `ide dependencies are added to test fixtures compile only classpath`() {
+        writeTestFile()
+        val originalBuildFile = buildFile.readText()
+        buildFile.writeText("")
+        buildFile.groovy("""
+            plugins {
+              id "java-test-fixtures"
+            }
+        """)
+        buildFile.groovy(originalBuildFile)
+        buildFile.groovy("""
+            intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
+        """)
+
+        val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths("testFixtures")
+
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "copyright.jar")
+        assertAddedToCompileClassPathOnly(compileClasspath, runtimeClasspath, "org.jetbrains.postfixCompletion-0.8-beta.jar")
     }
 
     @Test
@@ -401,19 +422,22 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun collectTestClassPaths(): Pair<String, String> {
-        buildFile.appendPrintTestClassPathsTasks()
-        return buildAndGetClassPaths("printTestCompileClassPath", "printTestRuntimeClassPath")
+    private fun collectSourceSetClassPaths(sourceSetName: String = "test"): Pair<String, String> {
+        buildFile.appendPrintClassPathsTasks(sourceSetName)
+        return buildAndGetClassPaths(
+            "print${sourceSetName.capitalize()}CompileClassPath",
+            "print${sourceSetName.capitalize()}RuntimeClassPath"
+        )
     }
 
-    private fun File.appendPrintTestClassPathsTasks() {
+    private fun File.appendPrintClassPathsTasks(sourceSetName: String) {
         this.groovy(
             """
-            task printTestRuntimeClassPath { 
-                doLast { println 'runtimeOnly: ' + sourceSets.test.runtimeClasspath.asPath }
+            task print${sourceSetName.capitalize()}RuntimeClassPath { 
+                doLast { println 'runtimeOnly: ' + sourceSets.$sourceSetName.runtimeClasspath.asPath }
             }
-            task printTestCompileClassPath { 
-                doLast { println 'implementation: ' + sourceSets.test.compileClasspath.asPath }
+            task print${sourceSetName.capitalize()}CompileClassPath { 
+                doLast { println 'implementation: ' + sourceSets.$sourceSetName.compileClasspath.asPath }
             }
             """
         )
