@@ -1290,7 +1290,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
                 getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
                 getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
-
+                project.pluginManager.withPlugin("java-test-fixtures") {
+                    getByName("testFixturesCompileOnly").extendsFrom(defaultDependencies, idea, ideaPlugins)
+                }
                 idea
             }
 
