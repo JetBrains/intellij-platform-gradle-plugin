@@ -6,4 +6,10 @@ intellij {
     plugins.set(listOf("org.jetbrains.plugins.go"))
     // explicit override of the default false value when the "CI" environment variable exists:
     downloadSources.set(true)
+
+    tasks {
+        buildSearchableOptions {
+            enabled = false
+        }
+    }
 }
