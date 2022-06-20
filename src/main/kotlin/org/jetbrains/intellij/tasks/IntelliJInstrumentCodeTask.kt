@@ -88,18 +88,21 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
         val outputDirPath = outputDir.get().asFile.toPath()
         val temporaryDirPath = temporaryDir.also {
-            it.deleteRecursively()
             it.mkdirs()
         }.toPath()
 
-        val changes = inputChanges.getFileChanges(classesDirs).mapNotNull {
-            if (it.fileType == FileType.FILE) {
-                val path = it.file.toPath()
-                val sourceDir = classesDirs.find { classesDir -> path.startsWith(classesDir.toPath()) }?.toPath() ?: return@mapNotNull null
+        inputChanges.getFileChanges(classesDirs).mapNotNull { change ->
+            if (change.fileType == FileType.FILE) {
+                val path = change.file.toPath()
+                val sourceDir = classesDirs.find { classesDir ->
+                    path.startsWith(classesDir.toPath())
+                }?.toPath() ?: return@mapNotNull null
                 val relativePath = sourceDir.relativize(path)
 
-                when (it.changeType) {
-                    ChangeType.REMOVED -> outputDirPath.resolve(relativePath).deleteLogged()
+                when (change.changeType) {
+                    ChangeType.REMOVED -> listOf(outputDirPath, temporaryDirPath).forEach {
+                        it.resolve(relativePath).deleteLogged()
+                    }
 
                     else -> temporaryDirPath.resolve(relativePath).apply {
                         createParentDirs()
@@ -181,6 +184,9 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
 
             val dirs = sourceDirs.filter { it.exists() }
             if (!dirs.isEmpty) {
+                // to enable debug mode, use:
+                // ant.lifecycleLogLevel = AntBuilder.AntMessagePriority.DEBUG
+
                 ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
                     mapOf(
                         "srcdir" to dirs.joinToString(":"),

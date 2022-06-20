@@ -818,10 +818,6 @@ open class IntelliJPlugin : Plugin<Project> {
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
 
-            val classesDirsCopy = (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
-                project.files(this).filter { it.exists() }
-            }
-
             val instrumentTaskProvider =
                 project.tasks.register(name, IntelliJInstrumentCodeTask::class.java) {
                     val setupDependenciesTaskProvider =
@@ -829,9 +825,17 @@ open class IntelliJPlugin : Plugin<Project> {
                     val setupDependenciesTask = setupDependenciesTaskProvider.get()
                     val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
-                    sourceDirs.from(project.provider { sourceSet.allJava.srcDirs })
-                    classesDirs.from(classesDirsCopy)
-                    sourceSetCompileClasspath.from(sourceSet.compileClasspath)
+                    sourceDirs.from(project.provider {
+                        sourceSet.allJava.srcDirs
+                    })
+                    classesDirs.from(project.provider {
+                        (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
+                            project.files(this).filter { it.exists() }
+                        }
+                    })
+                    sourceSetCompileClasspath.from(project.provider {
+                        sourceSet.compileClasspath
+                    })
                     compilerVersion.convention(project.provider {
                         val version by lazy { extension.getVersionNumber() }
                         val localPath = extension.localPath.orNull
