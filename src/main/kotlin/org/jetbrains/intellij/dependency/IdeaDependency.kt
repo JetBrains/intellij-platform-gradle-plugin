@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.dependency
 
 import org.jetbrains.intellij.collectJars
+import org.jetbrains.intellij.collectZips
 import org.jetbrains.intellij.isKotlinRuntime
 import java.io.File
 import java.io.Serializable
@@ -20,6 +21,7 @@ open class IdeaDependency(
 
     private val formatVersion = 2
     val jarFiles = this.collectJarFiles()
+    val sourceZipFiles = this.collectSourceZipFiles()
 
     protected open fun collectJarFiles(): Collection<File> {
         if (classes.isDirectory) {
@@ -31,6 +33,13 @@ open class IdeaDependency(
                 val antFiles = collectJars(File(lib, "ant/lib")).sorted()
                 return baseFiles + antFiles
             }
+        }
+        return emptyList()
+    }
+
+    private fun collectSourceZipFiles(): Collection<File> {
+        if (classes.isDirectory) {
+            return collectZips(File(classes, "lib/src"))
         }
         return emptyList()
     }
@@ -64,6 +73,7 @@ open class IdeaDependency(
         if (pluginsRegistry != other.pluginsRegistry) return false
         if (extraDependencies != other.extraDependencies) return false
         if (jarFiles != other.jarFiles) return false
+        if (sourceZipFiles != other.sourceZipFiles) return false
 
         return true
     }
@@ -78,6 +88,7 @@ open class IdeaDependency(
         result = 31 * result + pluginsRegistry.hashCode()
         result = 31 * result + extraDependencies.hashCode()
         result = 31 * result + jarFiles.hashCode()
+        result = 31 * result + sourceZipFiles.hashCode()
         return result
     }
 }

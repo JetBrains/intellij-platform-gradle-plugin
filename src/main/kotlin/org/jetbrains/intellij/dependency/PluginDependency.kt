@@ -9,10 +9,12 @@ import java.io.Serializable
 @Suppress("BooleanMethodIsAlwaysInverted")
 interface PluginDependency : Serializable {
     companion object {
-        private const val formatVersion = 2
+        private const val formatVersion = 3
     }
 
     val id: String
+
+    val platformPluginId: String?
 
     val version: String
 
