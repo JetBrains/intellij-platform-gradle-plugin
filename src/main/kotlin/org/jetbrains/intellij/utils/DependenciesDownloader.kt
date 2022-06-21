@@ -35,11 +35,11 @@ open class DependenciesDownloader @Inject constructor(
     ): List<File> {
         val dependency = dependenciesBlock(dependencyHandler)
         val baseRepositories = with (repositoryHandler) {
-            toList().also {
+            toList().also { base ->
+                val custom = repositoriesBlock(this)
                 clear()
-                repositoriesBlock(this)
+                addAll(custom + base)
                 mavenCentral()
-                addAll(it)
             }
         }
 
