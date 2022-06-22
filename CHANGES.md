@@ -2,18 +2,18 @@
 
 ## next
 ### Added
-- Automatically detect bundled sources in plugin dependency
-- Automatically detect plugin dependency sources provided in the IDE distribution
+- Automatically detect bundled sources in plugin dependency [#786](../../issues/786)
+- Automatically detect plugin dependency sources provided in the IDE distribution [#207](../../issues/207)
 - Throw an error when `intellij.version` is missing [#1010](../../issues/1004)
 - Set `ResolutionStrategy.SortOrder.DEPENDENCY_FIRST` for `compileClasspath` and `testCompileClasspath` configurations [#656](../../issues/656)
 - Added `useDependencyFirstResolutionStrategy` feature flag. See [Feature Flags](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#build-features).
 - Ensure `classpath.index` is not bundled in the JAR file
 - Warn about no settings provided by the plugin when running `buildSearchableOptions` and suggest [disabling the task](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options). [#1024](../../issues/1024)
 - Warn about paid plugin running `buildSearchableOptions` and suggest [disabling the task](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options). [#1025](../../issues/1025)
-- IDE dependencies are added to the compileOnly classpath for test fixtures if the `java-test-fixtures` plugin is applied
+- IDE dependencies are added to the `compileOnly` classpath for test fixtures if the `java-test-fixtures` plugin is applied [#1028](../../issues/1028)
 
 ### Changed
-- Set minimal supported Gradle version from `6.7` to `6.7.1`
+- Set minimum supported Gradle version from `6.7` to `6.7.1`
 
 ### Fixed
 - Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)
