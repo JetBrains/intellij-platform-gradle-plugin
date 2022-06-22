@@ -4,7 +4,7 @@
 
 import java.nio.file.Files
 
-with(__FILE__.toPath()) {
+__FILE__.init {
     "org.jetbrains.intellij.buildFeature.selfUpdateCheck".let { flag ->
         runGradleTask("assemble", projectProperties = mapOf(flag to false)).let { logs ->
             logs containsText "Build feature is disabled: $flag"

@@ -4,7 +4,7 @@
 
 import java.nio.file.Files
 
-with(__FILE__.toPath()) {
+__FILE__.init {
     runGradleTask("clean", "jar", projectProperties = mapOf("instrumentCode" to false)).let { logs ->
         logs containsText "> Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 

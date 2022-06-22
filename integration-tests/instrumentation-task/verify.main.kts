@@ -4,7 +4,7 @@
 
 import java.nio.file.Files
 
-with(__FILE__.toPath()) {
+__FILE__.init {
     runGradleTask("clean", "jar").let { logs ->
         logs containsText "[ant:instrumentIdeaExtensions] Added @NotNull assertions to 3 files"
 

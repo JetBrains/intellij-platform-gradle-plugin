@@ -2,7 +2,7 @@
 
 @file:Import("../verify.utils.kts")
 
-with(__FILE__.toPath()) {
+__FILE__.init {
     runGradleTask("assemble").let { logs ->
         logs matchesRegex "Skipping task ':jar-manifest-file:assemble' as it has no actions."
     }

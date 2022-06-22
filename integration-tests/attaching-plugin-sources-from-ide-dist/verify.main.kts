@@ -2,7 +2,7 @@
 
 @file:Import("../verify.utils.kts")
 
-with(__FILE__.toPath()) {
+__FILE__.init {
     runGradleTask("buildPlugin").let {
         val cssPluginIvyFileName = "CSS-ideaIU-IU-212.5712.43-withSources-3.xml"
 

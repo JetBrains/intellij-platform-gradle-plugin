@@ -1,9 +1,15 @@
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.OutputStream
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
+
+/**
+ * Shorthand for the setup method.
+ */
+fun File.init(block: Path.() -> Unit) = toPath().run(block)
 
 /**
  * Path to the integration tests single project,

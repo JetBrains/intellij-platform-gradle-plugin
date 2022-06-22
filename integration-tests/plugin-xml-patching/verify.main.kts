@@ -2,7 +2,7 @@
 
 @file:Import("../verify.utils.kts")
 
-with(__FILE__.toPath()) {
+__FILE__.init {
     runGradleTask("patchPluginXml").let { logs ->
         logs matchesRegex ":plugin-xml-patching:patchPluginXml .*? completed."
     }
