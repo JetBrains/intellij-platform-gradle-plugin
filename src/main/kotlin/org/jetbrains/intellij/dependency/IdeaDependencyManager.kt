@@ -188,7 +188,8 @@ open class IdeaDependencyManager @Inject constructor(
                             || f.name == "mono-sgen"
                             || f.name == "BridgeService"
                             || f.name == "JetBrains.Profiler.PdbServer"
-                            || f.name == "JBDeviceService")
+                            || f.name == "JBDeviceService"
+                            || f.name == "Rider.Backend")
                 ) {
                     setExecutable(cacheDirectory, f.relativeTo(cacheDirectory).toString(), context)
                 }
