@@ -369,7 +369,9 @@ open class IntelliJPlugin : Plugin<Project> {
                         version = resolvedVersion,
                     )
                 }, {
-                    mavenRepository(IntelliJPluginConstants.INTELLIJ_DEPENDENCIES)
+                    mavenRepository(IntelliJPluginConstants.INTELLIJ_DEPENDENCIES) {
+                        content { includeGroup(group) }
+                    }
                 }).first()
             })
         }
@@ -462,7 +464,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val listProductsReleasesTask = listProductsReleasesTaskProvider.get()
 
             group = IntelliJPluginConstants.GROUP_NAME
-            description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds.\n"
+            description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds."
 
             failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
             verifierVersion.convention(IntelliJPluginConstants.VERSION_LATEST)

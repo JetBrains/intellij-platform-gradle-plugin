@@ -2,11 +2,15 @@
 
 package org.jetbrains.intellij.utils
 
+import org.gradle.api.artifacts.ArtifactRepositoryContainer
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
+import org.gradle.api.artifacts.repositories.IvyArtifactRepository
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
 import org.jetbrains.intellij.error
 import java.io.File
 import java.net.URI
@@ -34,12 +38,28 @@ open class DependenciesDownloader @Inject constructor(
         silent: Boolean = false,
     ): List<File> {
         val dependency = dependenciesBlock(dependencyHandler)
-        val baseRepositories = with (repositoryHandler) {
+        val baseRepositories = with(repositoryHandler) {
             toList().also { base ->
-                val custom = repositoriesBlock(this)
-                clear()
-                addAll(custom + base)
-                mavenCentral()
+                // Remove common repositories from the beginning of the list and keep project custom ones only
+                removeIf {
+                    it is MavenArtifactRepository && listOf(
+                        ArtifactRepositoryContainer.DEFAULT_MAVEN_CENTRAL_REPO_NAME,
+                        DefaultRepositoryHandler.GRADLE_PLUGIN_PORTAL_REPO_NAME,
+                        DefaultRepositoryHandler.DEFAULT_BINTRAY_JCENTER_REPO_NAME,
+                        DefaultRepositoryHandler.GOOGLE_REPO_NAME,
+                    ).contains(it.name)
+                }
+
+                // Add custom plugin repositories after project custom repositories
+                repositoriesBlock(this)
+
+                // Add common project repositories after to the end of the list
+                addAll(base)
+
+                // Ensure MavenCentral is available at the end of the list
+                if (none { it is MavenArtifactRepository && it.name == ArtifactRepositoryContainer.DEFAULT_MAVEN_CENTRAL_REPO_NAME }) {
+                    mavenCentral()
+                }
             }
         }
 
@@ -51,7 +71,8 @@ open class DependenciesDownloader @Inject constructor(
             }
             throw e
         } finally {
-            with (repositoryHandler) {
+            with(repositoryHandler) {
+                // Revert to the original project repositories
                 clear()
                 addAll(baseRepositories)
             }
@@ -59,14 +80,15 @@ open class DependenciesDownloader @Inject constructor(
     }
 }
 
-internal fun RepositoryHandler.ivyRepository(repositoryUrl: String, pattern: String = "") =
+internal fun RepositoryHandler.ivyRepository(repositoryUrl: String, block: (IvyArtifactRepository.() -> Unit)? = null) =
     ivy {
         url = URI(repositoryUrl)
-        patternLayout { artifact(pattern) }
         metadataSources { artifact() }
+        block?.invoke(this)
     }
 
-internal fun RepositoryHandler.mavenRepository(repositoryUrl: String) =
+internal fun RepositoryHandler.mavenRepository(repositoryUrl: String, block: (MavenArtifactRepository.() -> Unit)? = null) =
     maven {
         url = URI(repositoryUrl)
+        block?.invoke(this)
     }

@@ -14,10 +14,11 @@
 
 ### Changed
 - Set minimum supported Gradle version from `6.7` to `6.7.1`
+- Resolve dependencies using repositories in the following order: project custom repositories (if any), plugin custom repositories, common repositories (like Maven Central)
 
 ### Fixed
 - Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)
-- Fixed `java.nio.file.FileAlreadyExistsException: instrumentCode/classpath.index` [#998](../../issues/998)
+- Fixed `java.nio.file.FileAlreadyExistsException` when instrumenting code [#998](../../issues/998)
 - Fixed `Execution optimizations have been disabled for task ':jar' to ensure correctness` [#1000](../../issues/1000)
 - Fixed JaCoCo `Can't add different class with same name` exception when using code instrumentation [#1020](../../issues/1020)
 - Fixed failing instrumentation due to the `Class not found` exception [#1029](../../issues/1029)
