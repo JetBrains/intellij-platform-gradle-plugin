@@ -168,11 +168,7 @@ open class JbrResolver @Inject constructor(
                     ext = "tar.gz",
                 )
             }, {
-                ivyRepository(url) {
-                    patternLayout {
-                        artifact("[revision].tar.gz")
-                    }
-                }
+                ivyRepository(url, "[revision].tar.gz")
             }).first()
         } catch (e: Exception) {
             warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'")

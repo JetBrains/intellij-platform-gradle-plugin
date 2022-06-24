@@ -80,9 +80,10 @@ open class DependenciesDownloader @Inject constructor(
     }
 }
 
-internal fun RepositoryHandler.ivyRepository(repositoryUrl: String, block: (IvyArtifactRepository.() -> Unit)? = null) =
+internal fun RepositoryHandler.ivyRepository(repositoryUrl: String, pattern: String = "", block: (IvyArtifactRepository.() -> Unit)? = null) =
     ivy {
         url = URI(repositoryUrl)
+        patternLayout { artifact(pattern) }
         metadataSources { artifact() }
         block?.invoke(this)
     }
