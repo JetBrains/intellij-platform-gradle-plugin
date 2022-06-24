@@ -65,21 +65,9 @@ version = when (properties("snapshot")?.toBoolean() ?: false) {
 }.orEmpty()
 group = "org.jetbrains.intellij.plugins"
 description = """
-> **Important:**
-> - This project requires **Gradle 6.7.1** or newer, however it is recommended to **use the [latest Gradle available](https://gradle.org/releases/)**. Update it with:
->   ```bash
->   ./gradlew wrapper --gradle-version=VERSION
->   ```
-> - Gradle JVM should be set to **Java 11** (see _Settings/Preferences | Build, Execution, Deployment | Build Tools | Gradle_)
+The Gradle IntelliJ Plugin is a plugin for the Gradle build system to help configuring your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
 
-When upgrading to 1.x version, please make sure to follow migration guide to adjust your existing build script: https://lp.jetbrains.com/gradle-intellij-plugin
-
-This plugin allows you to build plugins for IntelliJ Platform using specified IntelliJ SDK and bundled/3rd-party plugins.
-
-The plugin adds extra IntelliJ-specific dependencies, patches `processResources` tasks to fill some tags 
-(name, version) in `plugin.xml` with appropriate values, patches compile tasks to instrument code with 
-nullability assertions and forms classes made with IntelliJ GUI Designer and provides some build steps which might be
-helpful while developing plugins for IntelliJ platform.
+For more information, see [Gradle IntelliJ Plugin documentation](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html).
 """
 
 gradlePlugin {
@@ -93,7 +81,7 @@ gradlePlugin {
 pluginBundle {
     website = "https://github.com/JetBrains/gradle-intellij-plugin"
     vcsUrl = "https://github.com/JetBrains/gradle-intellij-plugin"
-    description = "Plugin for building plugins for IntelliJ IDEs"
+    description = project.description
     tags = listOf("intellij", "jetbrains", "idea")
 }
 
