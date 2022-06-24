@@ -24,6 +24,7 @@
 - Fixed JaCoCo `Can't add different class with same name` exception when using code instrumentation [#1020](../../issues/1020)
 - Fixed failing instrumentation due to the `Class not found` exception [#1029](../../issues/1029)
 - Fixed `'compilerClassPathFromMaven' doesn't have a configured value` when resolving `java-compiler-ant-tasks` [#1003](../../issues/1003)
+- Fixed `NoClassDefFoundError` caused by the stale `classpath.index` created by the `PathClassLoader` [#1032](../../issues/1032)
 
 ## 1.6.0
 ### Added

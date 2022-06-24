@@ -152,7 +152,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     private val buildNumber by lazy { ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse) }
     private val build203 by lazy { Version.parse("203.0") }
     private val build221 by lazy { Version.parse("221.0") }
-    private val build222 by lazy { Version.parse("222.0") }
 
     init {
         mainClass.set("com.intellij.idea.Main")
@@ -252,7 +251,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             info(context, "Using idea.platform.prefix=$prefix")
         }
 
-        if (buildNumber > build221) {
+        if (buildNumber >= build221) {
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
     }
