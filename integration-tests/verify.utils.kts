@@ -55,8 +55,8 @@ val Path.buildDirectory
 val Path.gradleWrapper: String
     get() {
         val isWindows = System.getProperty("os.name", "").contains("windows", ignoreCase = true)
-        val gradlewWrapperPath = args.firstOrNull() ?: rootDirectory.resolve("gradlew").toString()
-        return "$gradlewWrapperPath${if (isWindows) ".bat" else ""}"
+        val gradleWrapperPath = args.firstOrNull() ?: rootDirectory.resolve("gradlew").toString()
+        return "$gradleWrapperPath${if (isWindows) ".bat" else ""}"
     }
 
 /**
