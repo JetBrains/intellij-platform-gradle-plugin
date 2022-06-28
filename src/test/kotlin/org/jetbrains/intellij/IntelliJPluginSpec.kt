@@ -22,6 +22,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             listOf(
                 IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME,
                 IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
+                IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME,
                 IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
                 IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME,
                 IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME,

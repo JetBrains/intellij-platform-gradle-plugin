@@ -29,6 +29,7 @@ object IntelliJPluginConstants {
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
     const val SETUP_INSTRUMENT_CODE_TASK_NAME = "setupInstrumentCode"
     const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
+    const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
 
     const val IDEA_CONFIGURATION_NAME = "idea"
     const val PERFORMANCE_TEST_CONFIGURATION_NAME = "performanceTest"

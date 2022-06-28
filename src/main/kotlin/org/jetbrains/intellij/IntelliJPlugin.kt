@@ -173,6 +173,7 @@ open class IntelliJPlugin : Plugin<Project> {
             }
         }
         configureSetupDependenciesTask(project, extension)
+        configureClassPathIndexCleanupTask(project)
         configurePatchPluginXmlTask(project, extension)
         configureRobotServerDownloadTask(project)
         configurePrepareSandboxTasks(project, extension)
@@ -604,6 +605,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Runs the IDE instance with the developed plugin installed."
 
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
         }
     }
 
@@ -666,6 +668,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
             dependsOn(setupDependenciesTask)
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
         }
     }
 
@@ -685,6 +688,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing."
 
             dependsOn(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
         }
     }
 
@@ -1065,6 +1069,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
             task.dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
             task.dependsOn(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
+            task.finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
             task.doFirst {
                 task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get())
@@ -1402,6 +1407,33 @@ open class IntelliJPlugin : Plugin<Project> {
             extension.getPluginsRepositories().forEach {
                 it.postResolve(project, context)
             }
+        }
+    }
+
+    private fun configureClassPathIndexCleanupTask(project: Project) {
+        info(context, "Configuring setup dependencies task")
+
+        project.tasks.register(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME, ClasspathIndexesCleanupTask::class.java) {
+            val setupDependenciesTaskProvider =
+                project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+            val setupDependenciesTask = setupDependenciesTaskProvider.get()
+
+            group = IntelliJPluginConstants.GROUP_NAME
+            description = "Removes classpath index files created by PathClassLoader"
+
+            val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
+            classesDirs.from(sourceSets.map { it.output.classesDirs })
+
+            val buildNumberProvider = project.provider {
+                setupDependenciesTask.idea.get().buildNumber
+            }
+
+            onlyIf {
+                val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
+                ideVersion.baselineVersion >= 221
+            }
+
+            dependsOn(setupDependenciesTaskProvider)
         }
     }
 
