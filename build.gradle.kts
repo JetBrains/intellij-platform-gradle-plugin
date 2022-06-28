@@ -25,10 +25,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.219") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.223") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.219") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.223") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.28") {
@@ -54,7 +54,9 @@ dependencies {
                 Triple("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.13.3"),
                 Triple("com.fasterxml.jackson.core", "jackson-databind", "2.13.3"),
                 Triple("com.squareup.okhttp3", "okhttp", "4.4.1"),
-            ).forEach { (group, module, version) -> this(group, module) { version { strictly(version) } } }
+            ).forEach { (group, module, version) ->
+//                this(group, module) { version { strictly(version) } }
+            }
         }
     }
 }
