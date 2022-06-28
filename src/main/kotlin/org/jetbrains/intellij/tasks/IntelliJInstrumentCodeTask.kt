@@ -6,7 +6,6 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createParentDirs
 import com.jetbrains.plugin.structure.base.utils.deleteLogged
-import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import com.jetbrains.plugin.structure.base.utils.isDirectory
 import groovy.lang.Closure
 import org.gradle.api.file.FileType
@@ -118,7 +117,6 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         }
 
         instrumentCode(instrumentNotNull) {
-            outputDirPath.resolve("classpath.index").deleteQuietly()
             Files.walk(temporaryDirPath)
                 .filter { !it.isDirectory }
                 .forEach { file ->

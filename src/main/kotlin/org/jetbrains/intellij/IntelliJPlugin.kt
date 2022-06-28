@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -61,6 +62,7 @@ import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
 import java.net.URL
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -603,6 +605,10 @@ open class IntelliJPlugin : Plugin<Project> {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Runs the IDE instance with the developed plugin installed."
 
+            doLast {
+                deleteClasspathIndex(project)
+            }
+
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
         }
     }
@@ -664,6 +670,10 @@ open class IntelliJPlugin : Plugin<Project> {
                 getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(performanceTestConfiguration)
             }
 
+            doLast {
+                deleteClasspathIndex(project)
+            }
+
             dependsOn(setupDependenciesTask)
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
         }
@@ -683,6 +693,10 @@ open class IntelliJPlugin : Plugin<Project> {
         project.tasks.register(IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME, RunIdeForUiTestTask::class.java) {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing."
+
+            doLast {
+                deleteClasspathIndex(project)
+            }
 
             dependsOn(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
         }
@@ -1094,6 +1108,10 @@ open class IntelliJPlugin : Plugin<Project> {
                     task.systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
                 }
             }
+
+            task.doLast {
+                deleteClasspathIndex(project)
+            }
         }
     }
 
@@ -1453,4 +1471,19 @@ open class IntelliJPlugin : Plugin<Project> {
         .filterIndexed { index, component -> index < 3 || component == "SNAPSHOT" || component == "*" }
         .joinToString(prefix = "$productCode-", separator = ".")
         .let(IdeVersion::createIdeVersion)
+
+    /**
+     * Remove `classpath.index` files that are created by the `PathClassLoader`.
+     * This loader, due to the implementation bug, ignores the `idea.classpath.index.enabled=false` flag and as a workaround,
+     * files have to be removed manually.
+     */
+    private fun deleteClasspathIndex(project: Project) {
+        val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
+        sourceSets.forEach { sourceSet ->
+            val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
+            classesDirs.from.forEach { dir ->
+                Path.of(dir.toString()).resolve("classpath.index").deleteQuietly()
+            }
+        }
+    }
 }
