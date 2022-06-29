@@ -15,7 +15,7 @@ import javax.inject.Inject
  * This loader, due to the implementation bug, ignores the `idea.classpath.index.enabled=false` flag and as a workaround,
  * files have to be removed manually.
  */
-open class ClasspathIndexesCleanupTask @Inject constructor(
+open class ClasspathIndexCleanupTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 

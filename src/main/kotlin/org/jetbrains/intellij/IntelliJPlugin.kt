@@ -1413,7 +1413,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureClassPathIndexCleanupTask(project: Project) {
         info(context, "Configuring setup dependencies task")
 
-        project.tasks.register(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME, ClasspathIndexesCleanupTask::class.java) {
+        project.tasks.register(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME, ClasspathIndexCleanupTask::class.java) {
             val setupDependenciesTaskProvider =
                 project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
             val setupDependenciesTask = setupDependenciesTaskProvider.get()
