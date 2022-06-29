@@ -1,6 +1,11 @@
 name: Nightly Release
 on:
   workflow_dispatch:
+    runTests:
+      description: 'Run tests'
+      required: false
+      default: true
+      type: boolean
   schedule:
     - cron: "0 0 * * *"
 
@@ -11,11 +16,13 @@ jobs:
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
   unitTests:
+    if: ${{ inputs.runTests }}
     name: Unit Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
 
   integrationTests:
+    if: ${{ inputs.runTests }}
     name: Integration Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-integrationTests.yml
@@ -28,6 +35,7 @@ jobs:
 #      platformVersion: 222-EAP-SNAPSHOT
 
   codeInspection:
+    if: ${{ inputs.runTests }}
     name: Code Inspection
     needs: gradleValidation
     uses: ./.github/workflows/reusable-codeInspection.yml
