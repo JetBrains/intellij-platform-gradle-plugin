@@ -11,7 +11,7 @@ plugins {
     `maven-publish`
     kotlin("jvm") version "1.7.0"
     kotlin("plugin.serialization") version "1.7.0"
-    id("com.gradle.plugin-publish") version "1.0.0-rc-3"
+    id("com.gradle.plugin-publish") version "1.0.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.7.0"
 }
