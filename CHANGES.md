@@ -12,6 +12,7 @@
 - Warn about paid plugin running `buildSearchableOptions` and suggest [disabling the task](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options). [#1025](../../issues/1025)
 - IDE dependencies are added to the `compileOnly` classpath for test fixtures if the `java-test-fixtures` plugin is applied [#1028](../../issues/1028)
 - `classpathIndexCleanup` task is added to remove `classpath.index` files created by `PathClassLoader` [#1039](../../issues/1039)
+- Improve Plugin Verifier error messages [#1040](../../issues/1040)
 
 ### Changed
 - Set minimum supported Gradle version from `6.7` to `6.7.1`

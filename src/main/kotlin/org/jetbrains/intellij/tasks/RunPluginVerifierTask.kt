@@ -280,9 +280,12 @@ open class RunPluginVerifierTask @Inject constructor(
 
             debug(context, "Current failure levels: ${FailureLevel.values().joinToString(", ")}")
             FailureLevel.values().forEach { level ->
-                if (failureLevel.get().contains(level) && os.toString().contains(level.testValue)) {
+                if (failureLevel.get().contains(level) && os.toString().contains(level.sectionHeading)) {
                     debug(context, "Failing task on '$failureLevel' failure level")
-                    throw GradleException(level.toString())
+                    throw GradleException(
+                        "$level: ${level.message} Check Plugin Verifier report for more details.\n" +
+                            "Incompatible API Changes: https://jb.gg/intellij-api-changes"
+                    )
                 }
             }
         }
@@ -548,18 +551,51 @@ open class RunPluginVerifierTask @Inject constructor(
         Files.createDirectories(it)
     }
 
-    enum class FailureLevel(val testValue: String) {
-        COMPATIBILITY_WARNINGS("Compatibility warnings"),
-        COMPATIBILITY_PROBLEMS("Compatibility problems"),
-        DEPRECATED_API_USAGES("Deprecated API usages"),
-        EXPERIMENTAL_API_USAGES("Experimental API usages"),
-        INTERNAL_API_USAGES("Internal API usages"),
-        OVERRIDE_ONLY_API_USAGES("Override-only API usages"),
-        NON_EXTENDABLE_API_USAGES("Non-extendable API usages"),
-        PLUGIN_STRUCTURE_WARNINGS("Plugin structure warnings"),
-        MISSING_DEPENDENCIES("Missing dependencies"),
-        INVALID_PLUGIN("The following files specified for the verification are not valid plugins"),
-        NOT_DYNAMIC("Plugin cannot be loaded/unloaded without IDE restart");
+    enum class FailureLevel(val sectionHeading: String, val message: String) {
+        COMPATIBILITY_WARNINGS(
+            "Compatibility warnings",
+            "Compatibility warnings detected against the specified IDE version."
+        ),
+        COMPATIBILITY_PROBLEMS(
+            "Compatibility problems",
+            "Compatibility problems detected against the specified IDE version."
+        ),
+        DEPRECATED_API_USAGES(
+            "Deprecated API usages",
+            "Plugin uses API marked as deprecated (@Deprecated, ApiStatus.@ScheduledForRemoval)."
+        ),
+        EXPERIMENTAL_API_USAGES(
+            "Experimental API usages",
+            "Plugin uses API marked as experimental (ApiStatus.@Experimental)."
+        ),
+        INTERNAL_API_USAGES(
+            "Internal API usages",
+            "Plugin uses API marked as internal (ApiStatus.@Internal)."
+        ),
+        OVERRIDE_ONLY_API_USAGES(
+            "Override-only API usages",
+            "Override-only API is used incorrectly (ApiStatus.@OverrideOnly)."
+        ),
+        NON_EXTENDABLE_API_USAGES(
+            "Non-extendable API usages",
+            "Non-extendable API is used incorrectly (ApiStatus.@NonExtendable)."
+        ),
+        PLUGIN_STRUCTURE_WARNINGS(
+            "Plugin structure warnings",
+            "The structure of the plugin is not valid."
+        ),
+        MISSING_DEPENDENCIES(
+            "Missing dependencies",
+            "Plugin has some dependencies missing."
+        ),
+        INVALID_PLUGIN(
+            "The following files specified for the verification are not valid plugins",
+            "Provided plugin artifact is not valid."
+        ),
+        NOT_DYNAMIC(
+            "Plugin cannot be loaded/unloaded without IDE restart",
+            "Plugin cannot be loaded/unloaded without IDE restart."
+        );
 
         companion object {
             val ALL: EnumSet<FailureLevel> = EnumSet.allOf(FailureLevel::class.java)
