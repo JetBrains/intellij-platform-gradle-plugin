@@ -13,6 +13,7 @@
 - IDE dependencies are added to the `compileOnly` classpath for test fixtures if the `java-test-fixtures` plugin is applied [#1028](../../issues/1028)
 - `classpathIndexCleanup` task is added to remove `classpath.index` files created by `PathClassLoader` [#1039](../../issues/1039)
 - Improve Plugin Verifier error messages [#1040](../../issues/1040)
+- Added `FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES` to the Plugin Verifier task
 
 ### Changed
 - Set minimum supported Gradle version from `6.7` to `6.7.1`

@@ -562,7 +562,11 @@ open class RunPluginVerifierTask @Inject constructor(
         ),
         DEPRECATED_API_USAGES(
             "Deprecated API usages",
-            "Plugin uses API marked as deprecated (@Deprecated, ApiStatus.@ScheduledForRemoval)."
+            "Plugin uses API marked as deprecated (@Deprecated)."
+        ),
+        SCHEDULED_FOR_REMOVAL_API_USAGES(
+            /* # usage(s) of */"scheduled for removal API",
+            "Plugin uses API marked as scheduled for removal (ApiStatus.@ScheduledForRemoval)."
         ),
         EXPERIMENTAL_API_USAGES(
             "Experimental API usages",
