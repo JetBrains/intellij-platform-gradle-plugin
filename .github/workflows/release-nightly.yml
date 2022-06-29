@@ -1,11 +1,12 @@
 name: Nightly Release
 on:
   workflow_dispatch:
-    runTests:
-      description: 'Run tests'
-      required: false
-      default: true
-      type: boolean
+    inputs:
+      runTests:
+        description: 'Run tests'
+        required: false
+        default: true
+        type: boolean
   schedule:
     - cron: "0 0 * * *"
 
