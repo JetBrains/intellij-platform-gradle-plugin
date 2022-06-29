@@ -1422,7 +1422,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Removes classpath index files created by PathClassLoader"
 
             val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
-            classesDirs.from(sourceSets.map { it.output.classesDirs })
+            classesDirs.from(sourceSets.map { it.output.classesDirs + it.output.generatedSourcesDirs + it.output.resourcesDir })
 
             val buildNumberProvider = project.provider {
                 setupDependenciesTask.idea.get().buildNumber
