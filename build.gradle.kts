@@ -46,19 +46,6 @@ dependencies {
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
-
-    constraints {
-        configurations.implementation {
-            listOf(
-                Triple("org.jetbrains", "annotations", "23.0.0"),
-                Triple("com.fasterxml.jackson.module", "jackson-module-kotlin", "2.13.3"),
-                Triple("com.fasterxml.jackson.core", "jackson-databind", "2.13.3"),
-                Triple("com.squareup.okhttp3", "okhttp", "4.4.1"),
-            ).forEach { (group, module, version) ->
-//                this(group, module) { version { strictly(version) } }
-            }
-        }
-    }
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {

@@ -19,6 +19,7 @@
 - Set minimum supported Gradle version from `6.7` to `6.7.1`
 - Resolve dependencies using repositories in the following order: project custom repositories (if any), plugin custom repositories, common repositories (like Maven Central)
 - Add executable flag for `Rider.Backend` native launchers in `IdeaDependencyManager#resetExecutablePermissions` [RIDER-59978](https://youtrack.jetbrains.com/issue/RIDER-59978)
+- Remove Gradle dependencies constraints as transitive dependencies don't point to vulnerabilities anymore [#999](../../issues/999)
 
 ### Fixed
 - Fixed broken instrumentation when custom sources directory is set [#1004](../../issues/1004)
