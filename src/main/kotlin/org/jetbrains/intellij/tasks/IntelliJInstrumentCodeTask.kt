@@ -6,7 +6,7 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createParentDirs
 import com.jetbrains.plugin.structure.base.utils.deleteLogged
-import com.jetbrains.plugin.structure.base.utils.deleteQuietly
+import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.isDirectory
 import groovy.lang.Closure
 import org.gradle.api.file.FileType
@@ -59,6 +59,10 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     @InputFiles
     val classesDirs = objectFactory.fileCollection()
 
+    @Incremental
+    @InputFiles
+    val formsDirs = objectFactory.fileCollection()
+
     @Internal
     val sourceDirs = objectFactory.fileCollection()
 
@@ -92,33 +96,44 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             it.mkdirs()
         }.toPath()
 
-        inputChanges.getFileChanges(classesDirs).mapNotNull { change ->
-            if (change.fileType == FileType.FILE) {
-                val path = change.file.toPath()
-                val sourceDir = classesDirs.find { classesDir ->
-                    path.startsWith(classesDir.toPath())
-                }?.toPath() ?: return@mapNotNull null
-                val relativePath = sourceDir.relativize(path)
+        inputChanges.getFileChanges(formsDirs).forEach { change ->
+            val path = change.file.toPath()
+            val sourceDir = sourceDirs.find { sourceDir ->
+                path.startsWith(sourceDir.toPath())
+            }?.toPath() ?: return@forEach
+            val relativePath = sourceDir.relativize(path)
 
-                when (change.changeType) {
-                    ChangeType.REMOVED -> listOf(outputDirPath, temporaryDirPath).forEach {
-                        it.resolve(relativePath).deleteLogged()
-                    }
+            val compiledClassRelativePath = relativePath.parent.resolve(
+                    relativePath.fileName.toString().replace(".form", ".class")
+            )
+            val compiledClassPath = outputDirPath.resolve(compiledClassRelativePath).takeIf { it.exists() } ?: return@forEach
+            val instrumentedClassPath = temporaryDirPath.resolve(compiledClassRelativePath)
+            Files.copy(compiledClassPath, instrumentedClassPath, StandardCopyOption.REPLACE_EXISTING)
+        }
 
-                    else -> temporaryDirPath.resolve(relativePath).apply {
-                        createParentDirs()
-                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
-                    }
+        inputChanges.getFileChanges(classesDirs).forEach { change ->
+            if (change.fileType != FileType.FILE) {
+                return@forEach
+            }
+            val path = change.file.toPath()
+            val sourceDir = classesDirs.find { classesDir ->
+                path.startsWith(classesDir.toPath())
+            }?.toPath() ?: return@forEach
+            val relativePath = sourceDir.relativize(path)
+
+            when (change.changeType) {
+                ChangeType.REMOVED -> listOf(outputDirPath, temporaryDirPath).forEach {
+                    it.resolve(relativePath).deleteLogged()
                 }
 
-                path
-            } else {
-                null
+                else -> temporaryDirPath.resolve(relativePath).apply {
+                    createParentDirs()
+                    Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
+                }
             }
         }
 
         instrumentCode(instrumentNotNull) {
-            outputDirPath.resolve("classpath.index").deleteQuietly()
             Files.walk(temporaryDirPath)
                 .filter { !it.isDirectory }
                 .forEach { file ->
@@ -187,7 +202,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             val dirs = sourceDirs.filter { it.exists() }
             if (!dirs.isEmpty) {
                 // to enable debug mode, use:
-                // ant.lifecycleLogLevel = AntBuilder.AntMessagePriority.DEBUG
+                 ant.lifecycleLogLevel = org.gradle.api.AntBuilder.AntMessagePriority.DEBUG
 
                 ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
                     mapOf(

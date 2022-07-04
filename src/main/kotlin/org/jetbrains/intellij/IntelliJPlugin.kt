@@ -834,6 +834,9 @@ open class IntelliJPlugin : Plugin<Project> {
                     sourceDirs.from(project.provider {
                         sourceSet.allJava.srcDirs
                     })
+                    formsDirs.from(project.provider {
+                        sourceDirs.asFileTree.filter { it.name.endsWith(".form") }
+                    })
                     classesDirs.from(project.provider {
                         (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
                             project.files(this).filter { it.exists() }
