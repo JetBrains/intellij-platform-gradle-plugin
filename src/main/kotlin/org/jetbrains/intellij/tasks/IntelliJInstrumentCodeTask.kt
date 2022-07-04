@@ -103,9 +103,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             }?.toPath() ?: return@forEach
             val relativePath = sourceDir.relativize(path)
 
-            val compiledClassRelativePath = relativePath.parent.resolve(
-                    relativePath.fileName.toString().replace(".form", ".class")
-            )
+            val compiledClassRelativePath = relativePath.toString().replace(".form", ".class")
             val compiledClassPath = outputDirPath.resolve(compiledClassRelativePath).takeIf { it.exists() } ?: return@forEach
             val instrumentedClassPath = temporaryDirPath.resolve(compiledClassRelativePath)
             Files.copy(compiledClassPath, instrumentedClassPath, StandardCopyOption.REPLACE_EXISTING)
@@ -202,7 +200,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             val dirs = sourceDirs.filter { it.exists() }
             if (!dirs.isEmpty) {
                 // to enable debug mode, use:
-                 ant.lifecycleLogLevel = org.gradle.api.AntBuilder.AntMessagePriority.DEBUG
+                // ant.lifecycleLogLevel = org.gradle.api.AntBuilder.AntMessagePriority.DEBUG
 
                 ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
                     mapOf(

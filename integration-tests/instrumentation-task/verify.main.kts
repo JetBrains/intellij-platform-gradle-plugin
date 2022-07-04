@@ -66,4 +66,12 @@ __FILE__.init {
         logs containsText "Task ':instrumentation-task:compileKotlin' is not up-to-date"
         logs containsText "Task ':instrumentation-task:compileJava' is not up-to-date"
     }
+
+    projectDirectory.resolve("src/main/java/Form.form").toFile().appendText("<!-- foo -->\n")
+
+    runGradleTask("jar").let { logs ->
+        logs containsText "> Task :instrumentation-task:compileKotlin UP-TO-DATE"
+        logs containsText "> Task :instrumentation-task:compileJava UP-TO-DATE"
+        logs containsText "Form.form has changed"
+    }
 }
