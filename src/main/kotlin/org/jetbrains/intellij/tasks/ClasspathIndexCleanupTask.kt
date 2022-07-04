@@ -3,11 +3,12 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.deleteQuietly
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.intellij.info
+import org.jetbrains.intellij.logCategory
 import javax.inject.Inject
 
 /**
@@ -20,12 +21,15 @@ open class ClasspathIndexCleanupTask @Inject constructor(
 ) : ConventionTask() {
 
     @InputFiles
-    val classesDirs: ConfigurableFileCollection = objectFactory.fileCollection()
+    val classpathIndexFiles = objectFactory.fileCollection()
+
+    private val context = logCategory()
 
     @TaskAction
-    fun classPathIndexCleanup() {
-        classesDirs.forEach {
-            it.toPath().resolve("classpath.index").deleteQuietly()
+    fun classpathIndexCleanup() {
+        classpathIndexFiles.forEach {
+            it.toPath().deleteQuietly()
+            info(context, "Removed classpath.index file: $it")
         }
     }
 }
