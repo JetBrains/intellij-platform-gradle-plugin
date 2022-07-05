@@ -2,10 +2,10 @@ name: Nightly Release
 on:
   workflow_dispatch:
     inputs:
-      runTests:
-        description: 'Run tests'
+      skipTests:
+        description: 'Skip tests'
         required: false
-        default: true
+        default: false
         type: boolean
   schedule:
     - cron: "0 0 * * *"
@@ -17,13 +17,13 @@ jobs:
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
   unitTests:
-    if: ${{ inputs.runTests }}
+    if: ${{ !inputs.skipTests }}
     name: Unit Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
 
   integrationTests:
-    if: ${{ inputs.runTests }}
+    if: ${{ !inputs.skipTests }}
     name: Integration Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-integrationTests.yml
@@ -36,7 +36,7 @@ jobs:
 #      platformVersion: 222-EAP-SNAPSHOT
 
   codeInspection:
-    if: ${{ inputs.runTests }}
+    if: ${{ !inputs.skipTests }}
     name: Code Inspection
     needs: gradleValidation
     uses: ./.github/workflows/reusable-codeInspection.yml
@@ -49,8 +49,14 @@ jobs:
       - integrationTests
 #      - integrationTestsEAP
       - codeInspection
+    if: always()
     runs-on: ubuntu-latest
     steps:
+
+      # Fail if conditional job failed
+      - name: Safety Check
+        if: ${{ contains(needs.*.result, 'failure') }}
+        run: exit 1
 
       # Check out current repository
       - name: Fetch Sources
