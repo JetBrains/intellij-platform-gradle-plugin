@@ -28,7 +28,7 @@ dependencies {
     implementation("org.jetbrains.intellij.plugins:structure-base:3.225") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.225") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.226") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.28") {
