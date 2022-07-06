@@ -9,20 +9,24 @@
 # Gradle IntelliJ Plugin
 The Gradle IntelliJ Plugin is a plugin for the Gradle build system to help configuring your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
 
-# Documentation
+## Documentation
 The documentation of the Gradle IntelliJ Plugin has moved to the IntelliJ Platform Plugin SDK Documentation:
 https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 
-# Changelog
+### Installation
+To install the Gradle IntelliJ Plugin in your project, follow [Usage](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#usage) section of the plugin documentation.
+There's also a [Snapshot Release](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#snapshot-release) available built nightly form the main branch containing the always-latest version of the plugin.
+
+## Changelog
 All releases are available in the [Releases](https://github.com/JetBrains/gradle-intellij-plugin/releases) section.
 The latest available version is:
 
 [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.intellij?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)](https://plugins.gradle.org/plugin/org.jetbrains.intellij)
 
-# Contributing
+## Contributing
 Please see [CONTRIBUTING](./CONTRIBUTING.md) on how to submit feedback and contribute to this project.
 
-# License
+## License
 Licensed under the Apache License, Version 2.0 (the "License"), see [LICENCE](./LICENSE).
 
 [gh:build]: https://github.com/JetBrains/gradle-intellij-plugin/actions/workflows/build.yml
