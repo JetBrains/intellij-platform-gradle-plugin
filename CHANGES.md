@@ -14,6 +14,7 @@
 - `classpathIndexCleanup` task is added to remove `classpath.index` files created by `PathClassLoader` [#1039](../../issues/1039)
 - Improve Plugin Verifier error messages [#1040](../../issues/1040)
 - Added `FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES` to the Plugin Verifier task
+- Support for JetBrains Runtime 2022.2 directories layout [#1016](../../issues/1016) 
 
 ### Changed
 - Set minimum supported Gradle version from `6.7` to `6.7.1`

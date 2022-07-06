@@ -240,9 +240,13 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         if (!systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = findIdePrefix()
             if (prefix == null && !ideBuildNumber(ideDir.get()).startsWith("IU-")) {
-                throw TaskExecutionException(this,
-                    GradleException("Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
-                        "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."))
+                throw TaskExecutionException(
+                    this,
+                    GradleException(
+                        "Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
+                            "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."
+                    )
+                )
             }
 
             if (prefix != null) {

@@ -1065,9 +1065,14 @@ open class IntelliJPlugin : Plugin<Project> {
             // the same as previous – setting appClassLoader but outdated. Works for part of 203 builds.
             task.systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            task.outputs.dir(systemDirectoryProvider).withPropertyName("System directory")
-            task.inputs.dir(configDirectoryProvider).withPropertyName("Config Directory").withPathSensitivity(PathSensitivity.RELATIVE)
-            task.inputs.files(pluginsDirectoryProvider).withPropertyName("Plugins directory").withPathSensitivity(PathSensitivity.RELATIVE)
+            task.outputs.dir(systemDirectoryProvider)
+                .withPropertyName("System directory")
+            task.inputs.dir(configDirectoryProvider)
+                .withPropertyName("Config Directory")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+            task.inputs.files(pluginsDirectoryProvider)
+                .withPropertyName("Plugins directory")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class.java)
 
             task.dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
