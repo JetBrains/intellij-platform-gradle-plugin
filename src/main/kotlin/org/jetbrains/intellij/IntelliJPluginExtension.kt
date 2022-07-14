@@ -103,6 +103,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * - `CL` - CLion
      * - `PY` - PyCharm Professional Edition
      * - `PC` - PyCharm Community Edition
+     * - `PS` - PhpStorm
      * - `RD` - Rider
      * - `GO` - GoLand
      * - `JPS` - JPS-only
