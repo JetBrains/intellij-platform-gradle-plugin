@@ -1,6 +1,10 @@
 # Changelog
 
 ## next
+### Fixed
+- Exclude non-jar files from the classpath [#1009](../../issues/1009)
+
+## 1.7.0
 ### Added
 - Automatically detect bundled sources in plugin dependency [#786](../../issues/786)
 - Automatically detect plugin dependency sources provided in the IDE distribution [#207](../../issues/207)
