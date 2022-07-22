@@ -1,6 +1,9 @@
 # Changelog
 
 ## next
+### Added
+- Add `sourceSets` output directories to the classpath of the `test` task.
+
 ### Fixed
 - Exclude non-jar files from the classpath [#1009](../../issues/1009)
 

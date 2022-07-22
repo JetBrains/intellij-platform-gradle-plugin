@@ -1084,6 +1084,12 @@ open class IntelliJPlugin : Plugin<Project> {
                 task.classpath += ideaDependencyLibrariesProvider.get()
                 task.classpath -= task.classpath.filter { !it.name.endsWith("jar") }
 
+                // Add source roots to the classpath.
+                val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
+                task.classpath += project.files(sourceSets.map { it.output.run {
+                    classesDirs + generatedSourcesDirs + resourcesDir
+                } })
+
                 task.systemProperties(
                     getIdeaSystemProperties(
                         configDirectoryProvider.get(),
