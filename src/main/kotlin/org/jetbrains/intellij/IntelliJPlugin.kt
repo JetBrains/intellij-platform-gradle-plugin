@@ -1084,6 +1084,15 @@ open class IntelliJPlugin : Plugin<Project> {
                 task.classpath += ideaDependencyLibrariesProvider.get()
                 task.classpath -= task.classpath.filter { !it.isDirectory && !it.name.endsWith("jar") }
 
+                // Rearrange classpath to put idea and plugins in the right order.
+                val idea = project.files(project.configurations.getByName(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).resolve()).also {
+                    task.classpath -= it
+                }
+                val ideaPlugins = project.files(project.configurations.getByName(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()).also {
+                    task.classpath -= it
+                }
+                task.classpath += idea + ideaPlugins
+
                 // Add source roots to the classpath.
                 val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
                 task.classpath += project.files(sourceSets.map { it.output.run {

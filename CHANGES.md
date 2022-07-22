@@ -4,6 +4,9 @@
 ### Added
 - Add `sourceSets` output directories to the classpath of the `test` task.
 
+### Changed
+- Rearrange classpath to put `idea` and `ideaPlugins` dependencies in the right order.
+
 ### Fixed
 - Exclude non-jar files from the classpath [#1009](../../issues/1009)
 
