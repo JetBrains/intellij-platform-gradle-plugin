@@ -1082,7 +1082,7 @@ open class IntelliJPlugin : Plugin<Project> {
             task.doFirst {
                 task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get())
                 task.classpath += ideaDependencyLibrariesProvider.get()
-                task.classpath -= task.classpath.filter { !it.name.endsWith("jar") }
+                task.classpath -= task.classpath.filter { !it.isDirectory && !it.name.endsWith("jar") }
 
                 // Add source roots to the classpath.
                 val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
