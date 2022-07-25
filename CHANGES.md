@@ -3,6 +3,7 @@
 ## next
 ### Added
 - Add `sourceSets` output directories to the classpath of the `test` task.
+- Synchronize `OpenedPackages` list with the [latest version](https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt) available.
 
 ### Changed
 - Rearrange classpath to put `idea` and `ideaPlugins` dependencies in the right order.

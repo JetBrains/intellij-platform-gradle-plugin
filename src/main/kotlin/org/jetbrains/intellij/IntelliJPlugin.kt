@@ -55,6 +55,7 @@ import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.LatestVersionResolver
+import org.jetbrains.intellij.utils.OpenedPackages
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
@@ -1097,7 +1098,7 @@ open class IntelliJPlugin : Plugin<Project> {
             task.finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
             task.doFirst {
-                task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get())
+                task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get()) + OpenedPackages
                 task.classpath += ideaDependencyLibrariesProvider.get()
                 task.classpath -= task.classpath.filter { !it.isDirectory && !it.name.endsWith("jar") }
 
