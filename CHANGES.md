@@ -5,6 +5,7 @@
 - Configure classpath for run-based tasks using `package-info.json` provided with IntelliJ SDK 2022.3+
 - The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#tasks-verifypluginconfiguration) task for validating the plugin project configuration.
 - Make Android Studio (`AI` type) available for resolving as SDK.
+- Add `jarTaskName` to `intellij` extension to allow customization of jar creation [#808](../../issues/808)
 
 ### Changed
 - Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
@@ -566,4 +567,3 @@
 
 ## 0.0.10
 - Support for attaching IntelliJ sources in IDEA
-
