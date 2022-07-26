@@ -254,6 +254,10 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @get:Optional
     val extraDependencies = objectFactory.listProperty<String>()
 
+    @Input
+    @Optional
+    val jarTaskName = objectFactory.property<String>()
+
     @Internal
     val pluginDependencies = objectFactory.listProperty<PluginDependency>()
 

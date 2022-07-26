@@ -130,6 +130,7 @@ open class IntelliJPlugin : Plugin<Project> {
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
             type.convention(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
+            jarTaskName.convention(JavaPlugin.JAR_TASK_NAME)
         }
 
         configureTasks(project, intellijExtension)
@@ -414,7 +415,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
             pluginName.convention(extension.pluginName)
             pluginJar.convention(project.layout.file(project.provider {
-                val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+                val jarTaskName = extension.jarTaskName.get()
+                info(context, "Jar task name in $taskName is $jarTaskName")
+                val jarTaskProvider = project.tasks.named<Jar>(jarTaskName)
                 val jarTask = jarTaskProvider.get()
 
                 jarTask.run {
@@ -453,7 +456,11 @@ open class IntelliJPlugin : Plugin<Project> {
                 extension.getPluginDependenciesList(project)
             })
 
-            dependsOn(JavaPlugin.JAR_TASK_NAME)
+            dependsOn(project.provider {
+              val jarTaskName = extension.jarTaskName.get()
+              info(context, "Jar task name in $taskName for dependsOn is $jarTaskName")
+              jarTaskName
+            })
             dependsOn(project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME))
             dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
 
@@ -857,8 +864,7 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring compile tasks")
 
-        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
-
+        val jarTaskProvider = project.tasks.named<Jar>(extension.jarTaskName.get())
         if (extension.instrumentCode.get()) {
             jarTaskProvider.get().duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
