@@ -11,12 +11,6 @@ __FILE__.init {
         }
     }
 
-    "org.jetbrains.intellij.buildFeature.useDependencyFirstResolutionStrategy".let { flag ->
-        runGradleTask("assemble", projectProperties = mapOf(flag to false)).let { logs ->
-            logs containsText "Build feature is disabled: $flag"
-        }
-    }
-
     "org.jetbrains.intellij.buildFeature.noSearchableOptionsWarning".let { flag ->
         runGradleTask(
             "clean", "jarSearchableOptions", projectProperties = mapOf(
