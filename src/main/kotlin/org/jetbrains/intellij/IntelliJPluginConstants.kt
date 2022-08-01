@@ -31,10 +31,11 @@ object IntelliJPluginConstants {
     const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
 
-    const val IDEA_CONFIGURATION_NAME = "idea"
-    const val PERFORMANCE_TEST_CONFIGURATION_NAME = "performanceTest"
-    const val IDEA_PLUGINS_CONFIGURATION_NAME = "ideaPlugins"
-    const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "intellijDefaultDependencies"
+    // see https://github.com/JetBrains/gradle-intellij-plugin/issues/1060
+    const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "z10_intellijDefaultDependencies"
+    const val PERFORMANCE_TEST_CONFIGURATION_NAME = "z20_performanceTest"
+    const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
+    const val IDEA_CONFIGURATION_NAME = "z90_intellij"
 
     const val ANNOTATIONS_DEPENDENCY_VERSION = "23.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"

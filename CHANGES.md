@@ -6,6 +6,7 @@
 
 ### Changed
 - Rearrange classpath to put `idea` and `ideaPlugins` dependencies in the right order.
+- Rename plugin configurations to move injected dependencies to the end of the classpath. [#1060](../../../1060)
 
 ### Fixed
 - Exclude non-jar files from the classpath [#1009](../../issues/1009)

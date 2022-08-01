@@ -631,37 +631,39 @@ open class IntelliJPlugin : Plugin<Project> {
             profilerName.convention(ProfilerName.ASYNC)
 
             with(project.configurations) {
-                val performanceTestConfiguration = create(IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME).withDependencies {
-                    val ideaDependency = setupDependenciesTask.idea.get()
-                    val plugins = extension.plugins.get()
+                val performanceTestConfiguration = create(IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME)
+                    .setVisible(false)
+                    .withDependencies {
+                        val ideaDependency = setupDependenciesTask.idea.get()
+                        val plugins = extension.plugins.get()
 
-                    // Check that `runIdePerformanceTest` task was launched
-                    // Check that `performanceTesting.jar` is absent (that means it's community version)
-                    // Check that user didn't pass custom version of the performance plugin
-                    if (IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames &&
-                        ideaDependency.pluginsRegistry.findPlugin(IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID) == null &&
-                        plugins.none { it is String && it.startsWith(IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID) }
-                    ) {
-                        val resolver = project.objects.newInstance(
-                            PluginDependencyManager::class.java,
-                            project.gradle.gradleUserHomeDir.absolutePath,
-                            ideaDependency,
-                            extension.getPluginsRepositories(),
-                            archiveUtils,
-                            context,
-                        )
+                        // Check that `runIdePerformanceTest` task was launched
+                        // Check that `performanceTesting.jar` is absent (that means it's community version)
+                        // Check that user didn't pass custom version of the performance plugin
+                        if (IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames &&
+                            ideaDependency.pluginsRegistry.findPlugin(IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID) == null &&
+                            plugins.none { it is String && it.startsWith(IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID) }
+                        ) {
+                            val resolver = project.objects.newInstance(
+                                PluginDependencyManager::class.java,
+                                project.gradle.gradleUserHomeDir.absolutePath,
+                                ideaDependency,
+                                extension.getPluginsRepositories(),
+                                archiveUtils,
+                                context,
+                            )
 
-                        val resolvedPlugin = resolveLatestPluginUpdate(
-                            IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID,
-                            ideaDependency.buildNumber,
-                        )
+                            val resolvedPlugin = resolveLatestPluginUpdate(
+                                IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID,
+                                ideaDependency.buildNumber,
+                            )
 
-                        val plugin = resolver.resolve(project, resolvedPlugin)
-                            ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" }, null)
+                            val plugin = resolver.resolve(project, resolvedPlugin)
+                                ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" }, null)
 
-                        configurePluginDependency(project, plugin, extension, this, resolver)
+                            configurePluginDependency(project, plugin, extension, this, resolver)
+                        }
                     }
-                }
 
                 getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(performanceTestConfiguration)
             }
@@ -812,12 +814,13 @@ open class IntelliJPlugin : Plugin<Project> {
             jarTask.duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         }
 
-        val setupInstrumentCodeTaskProvider = project.tasks.register(IntelliJPluginConstants.SETUP_INSTRUMENT_CODE_TASK_NAME, SetupInstrumentCodeTask::class.java) {
-            instrumentationEnabled.convention(project.provider {
-                extension.instrumentCode.get()
-            })
-            instrumentedDir.convention(project.layout.buildDirectory.dir("instrumented"))
-        }
+        val setupInstrumentCodeTaskProvider =
+            project.tasks.register(IntelliJPluginConstants.SETUP_INSTRUMENT_CODE_TASK_NAME, SetupInstrumentCodeTask::class.java) {
+                instrumentationEnabled.convention(project.provider {
+                    extension.instrumentCode.get()
+                })
+                instrumentedDir.convention(project.layout.buildDirectory.dir("instrumented"))
+            }
         val setupInstrumentCodeTask = setupInstrumentCodeTaskProvider.get()
 
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
@@ -1053,9 +1056,11 @@ open class IntelliJPlugin : Plugin<Project> {
 
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         val sourceSetsOutputs = project.provider {
-            project.files(sourceSets.map { it.output.run {
-                classesDirs + generatedSourcesDirs + resourcesDir
-            } })
+            project.files(sourceSets.map {
+                it.output.run {
+                    classesDirs + generatedSourcesDirs + resourcesDir
+                }
+            })
         }
 
         val ideaConfigurationFiles = project.provider {
