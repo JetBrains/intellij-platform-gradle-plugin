@@ -7,7 +7,6 @@ __FILE__.init {
         val safeLogs = logs.lineSequence().filterNot { it.startsWith("[gradle-intellij-plugin") }.joinToString("\n")
 
         safeLogs containsText """
-            compileClasspath - Compile classpath for compilation 'main' (target  (jvm)).
             +--- org.jetbrains:markdown:0.3.1
             |    \--- org.jetbrains:markdown-jvm:0.3.1
             |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
@@ -18,17 +17,17 @@ __FILE__.init {
             \--- com.jetbrains:ideaIC:2022.1
         """.trimIndent()
 
-        safeLogs containsText """
+        logs containsText """
             implementation - Implementation only dependencies for compilation 'main' (target  (jvm)). (n)
             \--- org.jetbrains:markdown:0.3.1 (n)
         """.trimIndent()
 
-        safeLogs containsText """
+        logs containsText """
             z10_intellijDefaultDependencies
             \--- org.jetbrains:annotations:23.0.0
         """.trimIndent()
 
-        safeLogs containsText """
+        logs containsText """
             z90_intellij
             \--- com.jetbrains:ideaIC:2022.1
         """.trimIndent()
