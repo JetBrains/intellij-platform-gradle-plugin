@@ -8,6 +8,9 @@
 - Rearrange classpath to put `idea` and `ideaPlugins` dependencies in the right order.
 - Rename plugin configurations to move injected dependencies to the end of the classpath. [#1060](../../../1060)
 
+### Removed
+- Remove the `DEPENDENCY_FIRST` resolution strategy set by default along with its `BuildFeature.USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY` flag.
+
 ### Fixed
 - Exclude non-jar files from the classpath [#1009](../../issues/1009)
 

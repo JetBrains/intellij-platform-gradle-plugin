@@ -9,7 +9,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
-import org.gradle.api.artifacts.ResolutionStrategy
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
@@ -39,7 +38,6 @@ import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.SELF_UPDATE_CHECK
-import org.jetbrains.intellij.BuildFeature.USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.dependency.IdeaDependency
@@ -1328,12 +1326,6 @@ open class IntelliJPlugin : Plugin<Project> {
                             )
                         }
                     }
-
-                if (project.isBuildFeatureEnabled(USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY)) {
-                    all {
-                        resolutionStrategy.sortArtifacts(ResolutionStrategy.SortOrder.DEPENDENCY_FIRST)
-                    }
-                }
 
                 getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)
                 getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extendsFrom(defaultDependencies, idea, ideaPlugins)

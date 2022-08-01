@@ -9,7 +9,6 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     NO_SEARCHABLE_OPTIONS_WARNING(true),
     PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING(true),
     SELF_UPDATE_CHECK(true),
-    USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY(true),
     ;
 
     fun getValue(project: Project) = project.findProperty(toString())?.toString()?.toBoolean() ?: defaultValue
