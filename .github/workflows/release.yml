@@ -5,6 +5,10 @@ on:
 
 jobs:
 
+  freeDiskSpace:
+    name: Free Disk Space
+    uses: ./.github/workflows/reusable-freeDiskSpace.yml
+
   # Prepare and publish the Gradle Plugins repository
   release:
     name: Release to Gradle Plugins
