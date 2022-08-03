@@ -12,10 +12,6 @@ on:
 
 jobs:
 
-  freeDiskSpace:
-    name: Free Disk Space
-    uses: ./.github/workflows/reusable-freeDiskSpace.yml
-
   gradleValidation:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
