@@ -1130,10 +1130,6 @@ open class IntelliJPlugin : Plugin<Project> {
                         pluginsDirectoryProvider.get().listFiles()?.joinToString("${File.pathSeparator},") { it.path }.orEmpty(),
                     )
                 }
-
-                if (ideVersion.baselineVersion >= 221) {
-                    task.systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
-                }
             }
         }
     }
