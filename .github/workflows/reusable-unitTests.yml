@@ -18,8 +18,6 @@ jobs:
           - ubuntu-latest
           - macos-latest
         include:
-          - os: windows-latest
-            gradleUserHome: C:\\testGradleHome
           - os: ubuntu-latest
             script: |
               sudo rm -rf /usr/share/dotnet
@@ -29,8 +27,8 @@ jobs:
     steps:
 
       - name: Run OS-dedicated script
+        if: ${{ matrix.script }}
         run: ${{ matrix.script }}
-        if: ${{ matrix.script }} != ""
 
       - name: Fetch Sources
         uses: actions/checkout@v3
@@ -42,7 +40,10 @@ jobs:
           java-version: 11
 
       - name: Run Tests
-        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" -PtestGradleUserHome="${{ matrix.gradleUserHome }}"
+        run: |
+          ./gradlew check \
+            -PtestGradleVersion="${{ matrix.gradleVersion }}" \
+            ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
 
       - name: Collect Test Results
         if: ${{ failure() }}
