@@ -17,6 +17,11 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
+        gradleUserHome:
+          - /mnt/testGradleHome
+        include:
+          - os: windows-latest
+            gradleUserHome: C:\\testGradleHome
 
     steps:
 
@@ -30,8 +35,7 @@ jobs:
           java-version: 11
 
       - name: Run Tests
-        # cache test Gradle instance files on disk C: on Windows due to the limited space on D:
-        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
+        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" -PtestGradleUserHome="${{ matrix.gradleUserHome }}"
 
       - name: Collect Test Results
         if: ${{ failure() }}
