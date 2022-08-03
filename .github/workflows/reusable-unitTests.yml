@@ -17,13 +17,18 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
-        gradleUserHome:
-          - /mnt/testGradleHome
         include:
-          - os: windows-latest
-            gradleUserHome: C:\\testGradleHome
+          - os: ubuntu-latest
+            script: |
+              sudo rm -rf /usr/share/dotnet
+              sudo rm -rf /usr/local/lib/android
+              sudo rm -rf /opt/ghc
 
     steps:
+
+      - name: Run OS-dedicated script
+        if: ${{ matrix.script }}
+        run: ${{ matrix.script }}
 
       - name: Fetch Sources
         uses: actions/checkout@v3
@@ -35,7 +40,7 @@ jobs:
           java-version: 11
 
       - name: Run Tests
-        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" -PtestGradleUserHome="${{ matrix.gradleUserHome }}"
+        run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
 
       - name: Collect Test Results
         if: ${{ failure() }}
