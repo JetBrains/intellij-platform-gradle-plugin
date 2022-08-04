@@ -4,6 +4,7 @@
 ### Added
 - Add `sourceSets` output directories to the classpath of the `test` task.
 - Synchronize `OpenedPackages` list with the [latest version](https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt) available.
+- Make PhpStorm (`PS` type) available for resolving as SDK.
 
 ### Changed
 - Rearrange classpath to put `idea` and `ideaPlugins` dependencies in the right order.
@@ -11,6 +12,7 @@
 
 ### Removed
 - Remove the `DEPENDENCY_FIRST` resolution strategy set by default along with its `BuildFeature.USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY` flag.
+- Remove setting of the `java.system.class.loader` property from tests configuration. 
 
 ### Fixed
 - Exclude non-jar files from the classpath [#1009](../../issues/1009)
@@ -30,7 +32,6 @@
 - Improve Plugin Verifier error messages [#1040](../../issues/1040)
 - Added `FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES` to the Plugin Verifier task
 - Support for JetBrains Runtime 2022.2 directories layout [#1016](../../issues/1016)
-- Support PhpStorm as an SDK
 
 ### Changed
 - Set minimum supported Gradle version from `6.7` to `6.7.1`
