@@ -16,6 +16,8 @@
 
 ### Fixed
 - Exclude non-jar files from the classpath [#1009](../../issues/1009)
+- Jacoco reports false 0% test coverage [#1065](../../issues/1065)
+- Unable to load JUnit4 runner to calculate Ignored test cases [#1033](../../issues/1033)
 
 ## 1.7.0
 ### Added
