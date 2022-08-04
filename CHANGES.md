@@ -2,6 +2,19 @@
 
 ## next
 ### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [1.8.0]
+### Added
 - Add `sourceSets` output directories to the classpath of the `test` task.
 - Synchronize `OpenedPackages` list with the [latest version](https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt) available.
 - Make PhpStorm (`PS` type) available for resolving as SDK.
@@ -49,7 +62,7 @@
 - Fixed failing instrumentation due to the `Class not found` exception [#1029](../../issues/1029)
 - Fixed `'compilerClassPathFromMaven' doesn't have a configured value` when resolving `java-compiler-ant-tasks` [#1003](../../issues/1003)
 - Fixed `NoClassDefFoundError` caused by the stale `classpath.index` created by the `PathClassLoader` [#1032](../../issues/1032)
-- Fixed issue with not updated GUI form during the incremental build [#1044](../../issues/1044)] 
+- Fixed issue with not updated GUI form during the incremental build [#1044](../../issues/1044)]
 
 ## 1.6.0
 ### Added
