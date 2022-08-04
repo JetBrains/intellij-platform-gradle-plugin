@@ -854,7 +854,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
                         if (localPath.isNullOrBlank() && version.endsWith(RELEASE_SUFFIX_SNAPSHOT)) {
                             val type = extension.getVersionType()
-                            if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && listOf("CL", "RD", "PY").contains(type)) {
+                            if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && listOf("CL", "RD", "PY", "PS").contains(type)) {
                                 ideProductInfo(ideaDependency.classes)?.buildNumber?.let { buildNumber ->
                                     Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                                 } ?: version
@@ -863,6 +863,7 @@ open class IntelliJPlugin : Plugin<Project> {
                                     "CL" -> "CLION-$version"
                                     "RD" -> "RIDER-$version"
                                     "PY" -> "PYCHARM-$version"
+                                    "PS" -> "PHPSTORM-$version"
                                     else -> version
                                 }
                             }

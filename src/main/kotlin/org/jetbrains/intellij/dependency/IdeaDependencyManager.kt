@@ -263,6 +263,9 @@ open class IdeaDependencyManager @Inject constructor(
             type == "GO" -> {
                 "com.jetbrains.intellij.goland" to "goland"
             }
+            type == "PS" -> {
+                "com.jetbrains.intellij.phpstorm" to "phpstorm"
+            }
             type == "RD" -> {
                 if (sources && releaseType == RELEASE_TYPE_SNAPSHOTS) {
                     warn(context, "IDE sources are not available for Rider SNAPSHOTS")
@@ -275,7 +278,7 @@ open class IdeaDependencyManager @Inject constructor(
                 "com.jetbrains.gateway" to "JetBrainsGateway"
             }
             else -> {
-                throw BuildException("Specified type '$type' is unknown. Supported values: IC, IU, CL, PY, PC, GO, RD, GW", null)
+                throw BuildException("Specified type '$type' is unknown. Supported values: IC, IU, CL, PY, PS, PC, GO, RD, GW", null)
             }
         }
 
