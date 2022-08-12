@@ -51,7 +51,7 @@ object IntelliJPluginConstants {
 
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
     const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
-    const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://raw.githubusercontent.com/JetBrains/intellij-sdk-docs/main/topics/_generated/android_studio_releases.xml"
+    const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://jb.gg/android-studio-releases-list.xml"
     const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
     const val INTELLIJ_DEPENDENCIES = "$CACHE_REDIRECTOR/intellij-dependencies"
     const val DEFAULT_INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository"

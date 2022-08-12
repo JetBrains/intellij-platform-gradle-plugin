@@ -1,6 +1,10 @@
 # Changelog
 
 ## next
+### Changed
+- Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
+
+## 1.8.0
 ### Added
 - Add `sourceSets` output directories to the classpath of the `test` task.
 - Synchronize `OpenedPackages` list with the [latest version](https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt) available.
