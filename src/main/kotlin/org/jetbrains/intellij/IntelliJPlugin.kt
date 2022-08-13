@@ -4,6 +4,7 @@ package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
+import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -156,6 +157,26 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
+    private fun checkJavaVersion(project: Project, extension: IntelliJPluginExtension) {
+        val javaVersion = Jvm.current().javaVersion
+        val platformVersion = extension.getVersionNumber().let(Version::parse)
+        val platform203 = Version.parse("2020.3")
+        val platform222 = Version.parse("2022.2")
+
+        when {
+            javaVersion == null -> throw GradleException("Could not determine Java version")
+            platformVersion < platform203 && javaVersion != JavaVersion.VERSION_1_8 -> throw GradleException(
+                "Java version $javaVersion is not supported. Please use Java 8 it you target IntelliJ Platform lower than 2020.3"
+            )
+            platformVersion >= platform203 && platformVersion < platform222 && javaVersion != JavaVersion.VERSION_11 -> throw GradleException(
+                "Java version $javaVersion is not supported. Please use Java 11 it you target IntelliJ Platform 2020.3+ and lower than 2022.2"
+            )
+            platformVersion >= platform222 && javaVersion != JavaVersion.VERSION_17 -> throw GradleException(
+                "Java version $javaVersion is not supported. Please use Java 17 it you target IntelliJ Platform 2022.2+"
+            )
+        }
+    }
+
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring plugin")
         project.tasks.whenTaskAdded {
@@ -193,6 +214,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             configureProjectAfterEvaluate(this, extension)
+            checkJavaVersion(this, extension)
         }
     }
 
