@@ -3,7 +3,7 @@
 ## next
 ### Added
 - Check if Java version is suitable for the current `intellij.platformVersion`
-- 
+
 ### Changed
 - Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
 

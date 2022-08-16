@@ -157,7 +157,7 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun checkJavaVersion(project: Project, extension: IntelliJPluginExtension) {
+    private fun checkJavaRuntimeVersion(extension: IntelliJPluginExtension) {
         val javaVersion = Jvm.current().javaVersion
         val platformVersion = extension.getVersionNumber().let(Version::parse)
         val platform203 = Version.parse("2020.3")
@@ -166,13 +166,13 @@ open class IntelliJPlugin : Plugin<Project> {
         when {
             javaVersion == null -> throw GradleException("Could not determine Java version")
             platformVersion < platform203 && javaVersion != JavaVersion.VERSION_1_8 -> throw GradleException(
-                "Java version $javaVersion is not supported. Please use Java 8 it you target IntelliJ Platform lower than 2020.3"
+                "Java $javaVersion is not supported. Please use Java 8 it you target IntelliJ Platform lower than 2020.3"
             )
             platformVersion >= platform203 && platformVersion < platform222 && javaVersion != JavaVersion.VERSION_11 -> throw GradleException(
-                "Java version $javaVersion is not supported. Please use Java 11 it you target IntelliJ Platform 2020.3+ and lower than 2022.2"
+                "Java $javaVersion is not supported. Please use Java 11 it you target IntelliJ Platform 2020.3+ and lower than 2022.2"
             )
             platformVersion >= platform222 && javaVersion != JavaVersion.VERSION_17 -> throw GradleException(
-                "Java version $javaVersion is not supported. Please use Java 17 it you target IntelliJ Platform 2022.2+"
+                "Java $javaVersion is not supported. Please use Java 17 it you target IntelliJ Platform 2022.2+"
             )
         }
     }
@@ -214,7 +214,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             configureProjectAfterEvaluate(this, extension)
-            checkJavaVersion(this, extension)
+            checkJavaRuntimeVersion(extension)
         }
     }
 
