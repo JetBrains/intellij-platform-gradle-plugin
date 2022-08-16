@@ -157,22 +157,25 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun checkJavaRuntimeVersion(extension: IntelliJPluginExtension) {
+    private fun checkJavaRuntimeVersion(project: Project, extension: IntelliJPluginExtension) {
+        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+        val setupDependenciesTask = setupDependenciesTaskProvider.get()
+
         val javaVersion = Jvm.current().javaVersion
-        val platformVersion = extension.getVersionNumber().let(Version::parse)
+        val platformVersion = setupDependenciesTask.idea.get().version.let(Version::parse)
         val platform203 = Version.parse("2020.3")
         val platform222 = Version.parse("2022.2")
 
         when {
             javaVersion == null -> throw GradleException("Could not determine Java version")
-            platformVersion < platform203 && javaVersion != JavaVersion.VERSION_1_8 -> throw GradleException(
-                "Java $javaVersion is not supported. Please use Java 8 it you target IntelliJ Platform lower than 2020.3"
+            platformVersion < platform203 && javaVersion < JavaVersion.VERSION_1_8 -> throw GradleException(
+                "Java $javaVersion is not supported with IntelliJ Platform $platformVersion. Please use Java 8 it you target IntelliJ Platform lower than 2020.3"
             )
-            platformVersion >= platform203 && platformVersion < platform222 && javaVersion != JavaVersion.VERSION_11 -> throw GradleException(
-                "Java $javaVersion is not supported. Please use Java 11 it you target IntelliJ Platform 2020.3+ and lower than 2022.2"
+            platformVersion >= platform203 && platformVersion < platform222 && javaVersion < JavaVersion.VERSION_11 -> throw GradleException(
+                "Java $javaVersion is not supported with IntelliJ Platform $platformVersion. Please use Java 11 it you target IntelliJ Platform 2020.3+ and lower than 2022.2"
             )
-            platformVersion >= platform222 && javaVersion != JavaVersion.VERSION_17 -> throw GradleException(
-                "Java $javaVersion is not supported. Please use Java 17 it you target IntelliJ Platform 2022.2+"
+            platformVersion >= platform222 && javaVersion < JavaVersion.VERSION_17 -> throw GradleException(
+                "Java $javaVersion is not supported with IntelliJ Platform $platformVersion. Please use Java 17 it you target IntelliJ Platform 2022.2+"
             )
         }
     }
@@ -214,7 +217,7 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             configureProjectAfterEvaluate(this, extension)
-            checkJavaRuntimeVersion(extension)
+            checkJavaRuntimeVersion(this, extension)
         }
     }
 
