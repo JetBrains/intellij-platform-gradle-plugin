@@ -182,7 +182,7 @@ private fun log(level: LogLevel, logCategory: String?, message: String, e: Throw
 
 fun Project.logCategory(): String = path + name.takeIf { ":$it" != path }.orEmpty()
 
-fun Task.logCategory(): String = project.logCategory() + path
+fun Task.logCategory(): String = project.logCategory() + path.removePrefix(project.logCategory())
 
 fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): IdePlugin? {
     val extractDirectory = createTempDirectory("tmp")
