@@ -12,9 +12,9 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.warn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import javax.inject.Inject
@@ -77,12 +77,6 @@ open class VerifyPluginConfigurationTask @Inject constructor(
                 val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
                 val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
 
-                println("sinceBuild='${sinceBuild}'")
-
-                println("sinceBuildJavaVersion='${sinceBuildJavaVersion}'")
-                println("targetCompatibilityJavaVersion='${targetCompatibilityJavaVersion}'")
-                println("sinceBuildJavaVersion < targetCompatibilityJavaVersion='${sinceBuildJavaVersion < targetCompatibilityJavaVersion}'")
-
                 listOfNotNull(
                     "The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.".takeIf {
                         (sinceBuild.major < platformBuildVersion.major)
@@ -106,7 +100,7 @@ open class VerifyPluginConfigurationTask @Inject constructor(
                 jvmTargetJavaVersion != null && platformJavaVersion < jvmTargetJavaVersion
             },
         )).takeIf(List<String>::isNotEmpty)?.let { issues ->
-            error(
+            warn(
                 context,
                 "The following compatibility configuration issues were found:" +
                     "\n" +

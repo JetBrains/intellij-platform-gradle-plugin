@@ -52,8 +52,8 @@ abstract class IntelliJPluginSpecBase {
                 id 'org.jetbrains.intellij'
                 id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
-            sourceCompatibility = 1.8
-            targetCompatibility = 1.8
+            sourceCompatibility = 11
+            targetCompatibility = 11
             repositories {
                 mavenCentral()
             }
