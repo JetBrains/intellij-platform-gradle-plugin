@@ -81,6 +81,10 @@ open class PublishPluginTask @Inject constructor(
         val file = distributionFile.get().asFile
         when (val creationResult = IdePluginManager.createManager().createPlugin(file.toPath())) {
             is PluginCreationSuccess -> {
+                if (creationResult.unacceptableWarnings.isNotEmpty()) {
+                    val problems = creationResult.unacceptableWarnings.joinToString()
+                    throw TaskExecutionException(this, GradleException("Cannot upload plugin: $problems"))
+                }
                 val pluginId = creationResult.plugin.pluginId
                 channels.get().forEach { channel ->
                     info(context, "Uploading plugin '$pluginId' from '${file.absolutePath}' to '${host.get()}', channel: '$channel'")

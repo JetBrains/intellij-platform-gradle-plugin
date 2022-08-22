@@ -60,8 +60,13 @@ open class VerifyPluginTask @Inject constructor(
     fun verifyPlugin() {
         val creationResult = pluginDir.get().let { IdePluginManager.createManager().createPlugin(it.asFile.toPath()) }
         when (creationResult) {
-            is PluginCreationSuccess -> creationResult.warnings.forEach {
-                warn(context, it.message)
+            is PluginCreationSuccess -> {
+                creationResult.warnings.forEach {
+                    warn(context, it.message)
+                }
+                creationResult.unacceptableWarnings.forEach {
+                    error(context, it.message)
+                }
             }
             is PluginCreationFail -> creationResult.errorsAndWarnings.forEach {
                 if (it.level == PluginProblem.Level.ERROR) {
@@ -72,7 +77,9 @@ open class VerifyPluginTask @Inject constructor(
             }
             else -> error(context, creationResult.toString())
         }
-        val failBuild = creationResult !is PluginCreationSuccess || !ignoreWarnings.get() && creationResult.warnings.isNotEmpty()
+        val failBuild = creationResult !is PluginCreationSuccess
+                || creationResult.unacceptableWarnings.isNotEmpty()
+                || !ignoreWarnings.get() && creationResult.warnings.isNotEmpty()
         if (failBuild && !ignoreFailures.get()) {
             throw GradleException("Plugin verification failed.")
         }

@@ -20,14 +20,14 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml("""
             <idea-plugin>
                 <name>PluginName</name>
-                <description>Lorem ipsum.</description>
+                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
-        assertTrue(result.output.contains("Description is too short"))
+        assertTrue(result.output.contains("Plugin name specified in plugin.xml should not contain the word 'plugin'"))
     }
 
     @Test
@@ -42,9 +42,28 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("""
             <idea-plugin version="2">
-                <name>PluginName</name>
-                <description>Привет, Мир!</description>
+                <name>intellijtest</name>
+                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>Zolotov</vendor>
+            </idea-plugin>
+        """)
+
+        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
+        assertTrue(result.output.contains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'"))
+    }
+
+    @Test
+    fun `fail on unacceptable warnings by default`() {
+        buildFile.groovy("""
+            version '1.0'
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin>
+                <name>PluginName</name>
+                <description>Lorem ipsum.</description>
+                <vendor>JetBrains</vendor>
             </idea-plugin>
         """)
 
@@ -53,6 +72,28 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         assertTrue(result.output.contains("Description is too short"))
     }
 
+    @Test
+    fun `do not fail on unacceptable warnings if option is enabled`() {
+        buildFile.groovy("""
+            version '1.0'
+
+            verifyPlugin {
+                ignoreFailures = true
+            }
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin version="2">
+                <name>PluginName</name>
+                <description>Привет, Мир!</description>
+                <vendor>Zolotov</vendor>
+            </idea-plugin>
+        """)
+
+        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
+        assertTrue(result.output.contains("Description is too short"))
+    }
 
     @Test
     fun `fail on errors by default`() {
