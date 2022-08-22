@@ -4,7 +4,6 @@ package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
-import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -23,6 +22,7 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
@@ -59,6 +59,7 @@ import org.jetbrains.intellij.utils.LatestVersionResolver
 import org.jetbrains.intellij.utils.OpenedPackages
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
 import java.time.LocalDateTime
@@ -157,29 +158,6 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun checkJavaRuntimeVersion(project: Project, extension: IntelliJPluginExtension) {
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
-        val setupDependenciesTask = setupDependenciesTaskProvider.get()
-
-        val javaVersion = Jvm.current().javaVersion
-        val platformVersion = setupDependenciesTask.idea.get().version.let(Version::parse)
-        val platform203 = Version.parse("2020.3")
-        val platform222 = Version.parse("2022.2")
-
-        when {
-            javaVersion == null -> throw GradleException("Could not determine Java version")
-            platformVersion < platform203 && javaVersion < JavaVersion.VERSION_1_8 -> throw GradleException(
-                "Java $javaVersion is not supported with IntelliJ Platform $platformVersion. Please use Java 8 it you target IntelliJ Platform lower than 2020.3"
-            )
-            platformVersion >= platform203 && platformVersion < platform222 && javaVersion < JavaVersion.VERSION_11 -> throw GradleException(
-                "Java $javaVersion is not supported with IntelliJ Platform $platformVersion. Please use Java 11 it you target IntelliJ Platform 2020.3+ and lower than 2022.2"
-            )
-            platformVersion >= platform222 && javaVersion < JavaVersion.VERSION_17 -> throw GradleException(
-                "Java $javaVersion is not supported with IntelliJ Platform $platformVersion. Please use Java 17 it you target IntelliJ Platform 2022.2+"
-            )
-        }
-    }
-
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring plugin")
         project.tasks.whenTaskAdded {
@@ -203,6 +181,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configureListProductsReleasesTask(project, extension)
         configureRunPluginVerifierTask(project, extension)
         configurePluginVerificationTask(project)
+        configureJavaCompatibilityVerificationTask(project)
         configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
@@ -217,7 +196,6 @@ open class IntelliJPlugin : Plugin<Project> {
 
         project.afterEvaluate {
             configureProjectAfterEvaluate(this, extension)
-            checkJavaRuntimeVersion(this, extension)
         }
     }
 
@@ -334,6 +312,11 @@ open class IntelliJPlugin : Plugin<Project> {
             destinationDir.convention(project.layout.dir(project.provider {
                 File(project.buildDir, IntelliJPluginConstants.PLUGIN_XML_DIR_NAME)
             }))
+            outputFiles.convention(pluginXmlFiles.map {
+                it.map { file ->
+                    destinationDir.get().asFile.resolve(file.name)
+                }
+            })
             sinceBuild.convention(project.provider {
                 if (extension.updateSinceUntilBuild.get()) {
                     val ideVersion = IdeVersion.createIdeVersion(setupDependenciesTask.idea.get().buildNumber)
@@ -618,6 +601,45 @@ open class IntelliJPlugin : Plugin<Project> {
             })
 
             dependsOn(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        }
+    }
+
+    private fun configureJavaCompatibilityVerificationTask(project: Project) {
+        info(context, "Configuring Java compatibility verification task")
+
+        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+        val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
+        val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
+
+        project.tasks.register(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME, VerifyPluginConfigurationTask::class.java) {
+            group = IntelliJPluginConstants.GROUP_NAME
+            description = "Checks if Java and Kotlin compilers configuration meet IntelliJ SDK requirements"
+
+            platformBuild.convention(project.provider {
+                setupDependenciesTaskProvider.get().idea.get().buildNumber
+            })
+            platformVersion.convention(project.provider {
+                setupDependenciesTaskProvider.get().idea.get().version
+            })
+            pluginXmlFiles.convention(project.provider {
+                patchPluginXmlTaskProvider.get().outputFiles.get()
+            })
+            sourceCompatibility.convention(project.provider {
+                compileJavaTaskProvider.get().sourceCompatibility
+            })
+            targetCompatibility.convention(project.provider {
+                compileJavaTaskProvider.get().targetCompatibility
+            })
+            project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+                val compileKotlinTaskProvider = project.tasks.named<KotlinCompile>("compileKotlin")
+
+                jvmTarget.convention(project.provider {
+                    compileKotlinTaskProvider.get().kotlinOptions.jvmTarget
+                })
+            }
+
+            dependsOn(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
+            dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
         }
     }
 

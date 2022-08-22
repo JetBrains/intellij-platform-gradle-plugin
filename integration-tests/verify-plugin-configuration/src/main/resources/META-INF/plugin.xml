@@ -1,0 +1,7 @@
+<idea-plugin>
+  <version>1.0.0</version>
+  <idea-version since-build="191" />
+  <id>java-version-checks</id>
+  <name>Java Version Checks</name>
+  <vendor>JetBrains</vendor>
+</idea-plugin>

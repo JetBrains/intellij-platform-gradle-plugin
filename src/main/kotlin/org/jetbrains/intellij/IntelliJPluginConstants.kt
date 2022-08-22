@@ -16,6 +16,7 @@ object IntelliJPluginConstants {
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
+    const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
     const val RUN_IDE_TASK_NAME = "runIde"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"

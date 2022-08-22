@@ -41,6 +41,7 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.3.1")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6")
+    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation(gradleTestKit())
