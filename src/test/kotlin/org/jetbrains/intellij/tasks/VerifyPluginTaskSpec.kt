@@ -78,7 +78,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             version '1.0'
 
             verifyPlugin {
-                ignoreFailures = true
+                ignoreUnacceptableWarnings = true
             }
         """)
 
@@ -113,6 +113,52 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
 
         result.output.contains("Plugin descriptor 'plugin.xml' is not found")
+    }
+
+    @Test
+    fun `fail on errors if ignore unacceptable warnings option is enabled`() {
+        buildFile.groovy("""
+            version '1.0'
+
+            verifyPlugin {
+                ignoreUnacceptableWarnings = true
+            }
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin version="2">
+                <name>Plugin display name here</name>
+                <description>Привет, Мир!</description>
+                <vendor>Zolotov</vendor>
+            </idea-plugin>
+        """)
+
+        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
+        result.output.contains("<name> must not be equal to default value:")
+    }
+
+    @Test
+    fun `do not fail on unacceptable warnings if ignoreFailures option is enabled`() {
+        buildFile.groovy("""
+            version '1.0'
+
+            verifyPlugin {
+                ignoreFailures = true
+            }
+        """)
+
+        pluginXml.xml("""
+            <idea-plugin version="2">
+                <name>PluginName</name>
+                <description>Привет, Мир!</description>
+                <vendor>Zolotov</vendor>
+            </idea-plugin>
+        """)
+
+        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
+
+        result.output.contains("Description is too short")
     }
 
     @Test

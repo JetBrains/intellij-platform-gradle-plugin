@@ -609,6 +609,7 @@ open class IntelliJPlugin : Plugin<Project> {
             description = "Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure."
 
             ignoreFailures.convention(false)
+            ignoreUnacceptableWarnings.convention(false)
             ignoreWarnings.convention(true)
             pluginDir.convention(project.provider {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)

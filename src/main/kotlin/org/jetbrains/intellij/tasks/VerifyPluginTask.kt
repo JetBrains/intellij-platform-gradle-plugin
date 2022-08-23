@@ -33,6 +33,14 @@ open class VerifyPluginTask @Inject constructor(
     val ignoreFailures = objectFactory.property<Boolean>()
 
     /**
+     * Specifies whether the build should fail when the verifications performed by this task emit unacceptable warnings.
+     *
+     * Default value: `false`
+     */
+    @Input
+    val ignoreUnacceptableWarnings = objectFactory.property<Boolean>()
+
+    /**
      * Specifies whether the build should fail when the verifications performed by this task emit warnings.
      *
      * Default value: `true`
@@ -78,7 +86,7 @@ open class VerifyPluginTask @Inject constructor(
             else -> error(context, creationResult.toString())
         }
         val failBuild = creationResult !is PluginCreationSuccess
-                || creationResult.unacceptableWarnings.isNotEmpty()
+                || !ignoreUnacceptableWarnings.get() && creationResult.unacceptableWarnings.isNotEmpty()
                 || !ignoreWarnings.get() && creationResult.warnings.isNotEmpty()
         if (failBuild && !ignoreFailures.get()) {
             throw GradleException("Plugin verification failed.")
