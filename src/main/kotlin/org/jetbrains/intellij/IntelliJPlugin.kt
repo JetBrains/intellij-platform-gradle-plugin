@@ -633,8 +633,14 @@ open class IntelliJPlugin : Plugin<Project> {
             project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
                 val compileKotlinTaskProvider = project.tasks.named<KotlinCompile>("compileKotlin")
 
-                jvmTarget.convention(project.provider {
+                kotlinJvmTarget.convention(project.provider {
                     compileKotlinTaskProvider.get().kotlinOptions.jvmTarget
+                })
+                kotlinApiVersion.convention(project.provider {
+                    compileKotlinTaskProvider.get().kotlinOptions.apiVersion
+                })
+                kotlinLanguageVersion.convention(project.provider {
+                    compileKotlinTaskProvider.get().kotlinOptions.languageVersion
                 })
             }
 

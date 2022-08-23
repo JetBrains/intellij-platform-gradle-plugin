@@ -14,6 +14,8 @@ import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.utils.PlatformJavaVersions
+import org.jetbrains.intellij.utils.PlatformKotlinVersions
 import org.jetbrains.intellij.warn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
@@ -56,10 +58,22 @@ open class VerifyPluginConfigurationTask @Inject constructor(
     val targetCompatibility = objectFactory.property<String>()
 
     /**
-     * [KotlinCompile.kotlinOptions] property defined in the build script.
+     * [KotlinCompile.kotlinOptions.apiVersion] property defined in the build script
      */
     @Internal
-    val jvmTarget = objectFactory.property<String>()
+    val kotlinApiVersion = objectFactory.property<String>()
+
+    /**
+     * [KotlinCompile.kotlinOptions.languageVersion] property defined in the build script
+     */
+    @Internal
+    val kotlinLanguageVersion = objectFactory.property<String>()
+
+    /**
+     * [KotlinCompile.kotlinOptions.jvmTarget] property defined in the build script.
+     */
+    @Internal
+    val kotlinJvmTarget = objectFactory.property<String>()
 
     private val context = logCategory()
 
@@ -70,22 +84,29 @@ open class VerifyPluginConfigurationTask @Inject constructor(
         val platformJavaVersion = platformBuildVersion.let(::getPlatformJavaVersion)
         val sourceCompatibilityJavaVersion = sourceCompatibility.get().let(JavaVersion::toVersion)
         val targetCompatibilityJavaVersion = targetCompatibility.get().let(JavaVersion::toVersion)
-        val jvmTargetJavaVersion = jvmTarget.orNull?.let(JavaVersion::toVersion)
+        val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.let(JavaVersion::toVersion)
+        val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
+        val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
+        val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)
 
         (pluginXmlFiles.get().flatMap {
             parsePluginXml(it, context)?.let { plugin ->
                 val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
                 val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
+                val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)
 
                 listOfNotNull(
                     "The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.".takeIf {
-                        (sinceBuild.major < platformBuildVersion.major)
+                        sinceBuild.major < platformBuildVersion.major
                     },
                     "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.".takeIf {
                         sinceBuildJavaVersion < targetCompatibilityJavaVersion
                     },
                     "The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.".takeIf {
-                        jvmTargetJavaVersion != null && sinceBuildJavaVersion < jvmTargetJavaVersion
+                        sinceBuildJavaVersion < jvmTargetJavaVersion
+                    },
+                    "The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.".takeIf {
+                        sinceBuildKotlinApiVersion < kotlinApiVersion
                     },
                 )
             } ?: emptyList()
@@ -93,11 +114,14 @@ open class VerifyPluginConfigurationTask @Inject constructor(
             "The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.".takeIf {
                 platformJavaVersion > sourceCompatibilityJavaVersion
             },
+            "The Kotlin configuration specifies languageVersion=$kotlinLanguageVersion but IntelliJ Platform $platformVersion requires languageVersion=$platformKotlinLanguageVersion.".takeIf {
+                platformKotlinLanguageVersion > kotlinLanguageVersion
+            },
             "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires targetCompatibility=$platformJavaVersion.".takeIf {
                 platformJavaVersion < targetCompatibilityJavaVersion
             },
             "The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but IntelliJ Platform $platformVersion requires jvmTarget=$platformJavaVersion.".takeIf {
-                jvmTargetJavaVersion != null && platformJavaVersion < jvmTargetJavaVersion
+                platformJavaVersion < jvmTargetJavaVersion
             },
         )).takeIf(List<String>::isNotEmpty)?.let { issues ->
             warn(
@@ -111,9 +135,10 @@ open class VerifyPluginConfigurationTask @Inject constructor(
         }
     }
 
-    private fun getPlatformJavaVersion(buildNumber: Version) = when {
-        buildNumber >= Version.parse("222") -> JavaVersion.VERSION_17
-        buildNumber >= Version.parse("203") -> JavaVersion.VERSION_11
-        else -> JavaVersion.VERSION_1_8
-    }
+    private fun getPlatformJavaVersion(buildNumber: Version) = PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
+
+    private fun getPlatformKotlinVersion(buildNumber: Version) = PlatformKotlinVersions.entries.firstOrNull { buildNumber >= it.key }?.value
+
+    private operator fun JavaVersion?.compareTo(other: JavaVersion?) = other?.let { this?.compareTo(it) } ?: 0
+    private operator fun Version?.compareTo(other: Version?) = other?.let { this?.compareTo(it) } ?: 0
 }

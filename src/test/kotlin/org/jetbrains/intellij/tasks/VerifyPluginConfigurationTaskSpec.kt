@@ -9,7 +9,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @Suppress("PluginXmlCapitalization", "PluginXmlValidity")
-class VerifyPluginConfigurationSpec : IntelliJPluginSpecBase() {
+class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not show errors when configuration is valid`() {
@@ -51,7 +51,7 @@ class VerifyPluginConfigurationSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `report too low sourceCompatibility`() {
+    fun `report too low Java sourceCompatibility`() {
         buildFile.groovy("""
             sourceCompatibility = 1.8
         """)
@@ -63,7 +63,7 @@ class VerifyPluginConfigurationSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `report too high targetCompatibility`() {
+    fun `report too high Java targetCompatibility`() {
         buildFile.groovy("""
             targetCompatibility = 17
         """)
@@ -75,7 +75,7 @@ class VerifyPluginConfigurationSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `report too high jvmTarget`() {
+    fun `report too high Kotlin jvmTarget`() {
         buildFile.groovy("""
             compileKotlin {
                 kotlinOptions {
@@ -88,6 +88,47 @@ class VerifyPluginConfigurationSpec : IntelliJPluginSpecBase() {
 
         assertTrue(result.output.contains("The following compatibility configuration issues were found"))
         assertTrue(result.output.contains("- The Kotlin configuration specifies jvmTarget=17 but IntelliJ Platform 2021.2.4 requires jvmTarget=11."))
+    }
+
+    @Test
+    fun `report too high Kotlin apiVersion`() {
+        pluginXml.xml("""
+            <idea-plugin>
+                <name>PluginName</name>
+                <description>Lorem ipsum.</description>
+                <vendor>JetBrains</vendor>
+                <idea-version since-build="211" until-build='212.*' />
+            </idea-plugin>
+        """)
+
+        buildFile.groovy("""
+            compileKotlin {
+                kotlinOptions {
+                    apiVersion = "1.9"
+                }
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
+
+        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='212.5712' property requires apiVersion=1.5.10."))
+    }
+
+    @Test
+    fun `report too low Kotlin languageVersion`() {
+        buildFile.groovy("""
+            compileKotlin {
+                kotlinOptions {
+                    languageVersion = "1.3"
+                }
+            }
+        """)
+
+        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
+
+        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains("- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2021.2.4 requires languageVersion=1.5.10."))
     }
 
     @Test
