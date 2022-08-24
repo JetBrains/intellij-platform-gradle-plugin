@@ -2,16 +2,10 @@
 
 ## next
 ### Added
+- Add `app.jar` to the classpath for the latest IntelliJ Platform compatibility
 
 ### Changed
-
-### Deprecated
-
-### Removed
-
-### Fixed
-
-### Security
+- OpenedPackages: add `java.desktop/java.awt.font` for all OSes
 
 ## [1.8.0]
 ### Added
