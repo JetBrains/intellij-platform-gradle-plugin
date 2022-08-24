@@ -630,6 +630,9 @@ open class IntelliJPlugin : Plugin<Project> {
             targetCompatibility.convention(project.provider {
                 compileJavaTaskProvider.get().targetCompatibility
             })
+            kotlinPluginAvailable.convention(project.provider {
+                project.pluginManager.hasPlugin("org.jetbrains.kotlin.jvm")
+            })
             project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
                 val compileKotlinTaskProvider = project.tasks.named<KotlinCompile>("compileKotlin")
 
@@ -641,6 +644,9 @@ open class IntelliJPlugin : Plugin<Project> {
                 })
                 kotlinLanguageVersion.convention(project.provider {
                     compileKotlinTaskProvider.get().kotlinOptions.languageVersion
+                })
+                kotlinStdlibDefaultDependency.convention(project.provider {
+                    project.properties["kotlin.stdlib.default.dependency"]?.toString()?.toBoolean()
                 })
             }
 

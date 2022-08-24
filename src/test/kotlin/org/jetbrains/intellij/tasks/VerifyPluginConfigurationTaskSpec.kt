@@ -11,6 +11,10 @@ import kotlin.test.assertTrue
 @Suppress("PluginXmlCapitalization", "PluginXmlValidity")
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
+    companion object {
+        const val HEADER = "The following plugin configuration issues were found"
+    }
+    
     @Test
     fun `do not show errors when configuration is valid`() {
         pluginXml.xml("""
@@ -24,7 +28,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
 
-        assertFalse(result.output.contains("The following compatibility configuration issues were found"))
+        assertFalse(result.output.contains(HEADER))
     }
 
     @Test
@@ -46,7 +50,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
 
-        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains(HEADER))
         assertTrue(result.output.contains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 212."))
     }
 
@@ -58,7 +62,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
 
-        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains(HEADER))
         assertTrue(result.output.contains("- The Java configuration specifies sourceCompatibility=1.8 but IntelliJ Platform 2021.2.4 requires sourceCompatibility=11."))
     }
 
@@ -70,7 +74,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
 
-        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains(HEADER))
         assertTrue(result.output.contains("- The Java configuration specifies targetCompatibility=17 but IntelliJ Platform 2021.2.4 requires targetCompatibility=11."))
     }
 
@@ -86,7 +90,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
 
-        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains(HEADER))
         assertTrue(result.output.contains("- The Kotlin configuration specifies jvmTarget=17 but IntelliJ Platform 2021.2.4 requires jvmTarget=11."))
     }
 
@@ -111,7 +115,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
 
-        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains(HEADER))
         assertTrue(result.output.contains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='212.5712' property requires apiVersion=1.5.10."))
     }
 
@@ -127,8 +131,39 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
 
-        assertTrue(result.output.contains("The following compatibility configuration issues were found"))
+        assertTrue(result.output.contains(HEADER))
         assertTrue(result.output.contains("- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2021.2.4 requires languageVersion=1.5.10."))
+    }
+
+    @Test
+    fun `report Kotlin stdlib bundling`() {
+        // kotlin.stdlib.default.dependency gets unset
+        gradleProperties.writeText("")
+
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
+            assertTrue(result.output.contains(HEADER))
+            assertTrue(result.output.contains("- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib"))
+        }
+
+        gradleProperties.properties(
+            """
+            kotlin.stdlib.default.dependency = true
+        """
+        )
+
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
+            assertFalse(result.output.contains(HEADER))
+        }
+
+        gradleProperties.properties(
+            """
+            kotlin.stdlib.default.dependency = false
+        """
+        )
+
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
+            assertFalse(result.output.contains(HEADER))
+        }
     }
 
     @Test

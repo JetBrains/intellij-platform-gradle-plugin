@@ -36,7 +36,7 @@ abstract class IntelliJPluginSpecBase {
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
     val dir: File by lazy { createTempDirectory("tmp").toFile() }
 
-    private val gradleProperties = file("gradle.properties")
+    val gradleProperties = file("gradle.properties")
     val buildFile = file("build.gradle")
     val pluginXml = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory = File(dir, "build")

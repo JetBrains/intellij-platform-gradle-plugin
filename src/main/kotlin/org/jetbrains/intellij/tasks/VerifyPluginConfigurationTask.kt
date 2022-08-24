@@ -58,6 +58,12 @@ open class VerifyPluginConfigurationTask @Inject constructor(
     val targetCompatibility = objectFactory.property<String>()
 
     /**
+     * The Gradle Kotlin plugin is loaded.
+     */
+    @Internal
+    val kotlinPluginAvailable = objectFactory.property<Boolean>()
+
+    /**
      * [KotlinCompile.kotlinOptions.apiVersion] property defined in the build script
      */
     @Internal
@@ -75,6 +81,12 @@ open class VerifyPluginConfigurationTask @Inject constructor(
     @Internal
     val kotlinJvmTarget = objectFactory.property<String>()
 
+    /**
+     * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
+     */
+    @Internal
+    val kotlinStdlibDefaultDependency = objectFactory.property<Boolean>()
+
     private val context = logCategory()
 
     @TaskAction
@@ -88,6 +100,9 @@ open class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
         val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)
+
+        println("kotlinPluginAvailable='${kotlinPluginAvailable.get()}'")
+        println("kotlinStdlibDefaultDependency='${kotlinStdlibDefaultDependency.orNull}'")
 
         (pluginXmlFiles.get().flatMap {
             parsePluginXml(it, context)?.let { plugin ->
@@ -123,10 +138,13 @@ open class VerifyPluginConfigurationTask @Inject constructor(
             "The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but IntelliJ Platform $platformVersion requires jvmTarget=$platformJavaVersion.".takeIf {
                 platformJavaVersion < jvmTargetJavaVersion
             },
+            "The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib".takeIf {
+                kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null
+            }
         )).takeIf(List<String>::isNotEmpty)?.let { issues ->
             warn(
                 context,
-                "The following compatibility configuration issues were found:" +
+                "The following plugin configuration issues were found:" +
                     "\n" +
                     issues.joinToString("\n") { "- $it" } +
                     "\n" +
