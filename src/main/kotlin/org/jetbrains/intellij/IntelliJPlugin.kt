@@ -77,12 +77,13 @@ open class IntelliJPlugin : Plugin<Project> {
     private lateinit var context: String
 
     override fun apply(project: Project) {
-        archiveUtils = project.objects.newInstance(ArchiveUtils::class.java)
-        dependenciesDownloader = project.objects.newInstance(DependenciesDownloader::class.java)
         context = project.logCategory()
 
         checkGradleVersion(project)
         checkPluginVersion(project)
+
+        archiveUtils = project.objects.newInstance(ArchiveUtils::class.java)
+        dependenciesDownloader = project.objects.newInstance(DependenciesDownloader::class.java)
 
         project.plugins.apply(JavaPlugin::class.java)
         project.plugins.apply(IdeaExtPlugin::class.java)
