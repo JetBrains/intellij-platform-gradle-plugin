@@ -1064,7 +1064,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val ideDirProvider = project.provider { runIdeTask.ideDir.get() }
         val ideaDependencyLibrariesProvider = project.provider {
             val classes = setupDependenciesTask.idea.get().classes
-            project.files("$classes/lib/resources.jar", "$classes/lib/idea.jar")
+            project.files("$classes/lib/resources.jar", "$classes/lib/idea.jar", "$classes/lib/app.jar")
         }
 
         val sandboxDirProvider = project.provider {
