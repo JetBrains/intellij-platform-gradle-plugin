@@ -1,5 +1,0 @@
-container:
-  image: gradle:jdk11
-
-test_task:
-  test_script: ./gradlew test --stacktrace
