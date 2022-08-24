@@ -187,6 +187,10 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             classpath += objectFactory.fileCollection().from(it)
         }
 
+        classpath += objectFactory.fileCollection().from(
+            "$ideDirFile/lib/app.jar"
+        )
+
         classpath += when {
             buildNumber > build221 -> listOf(
                 "$ideDirFile/lib/3rd-party-rt.jar",

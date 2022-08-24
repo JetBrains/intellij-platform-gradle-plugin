@@ -2,12 +2,13 @@
 
 ## next
 ### Added
-- Check if Java version is suitable for the current `intellij.platformVersion`
+- Add `app.jar` to the classpath for the latest IntelliJ Platform compatibility
 
 ### Changed
+- OpenedPackages: add `java.desktop/java.awt.font` for all OSes
 - Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
 
-## 1.8.0
+## [1.8.0]
 ### Added
 - Add `sourceSets` output directories to the classpath of the `test` task.
 - Synchronize `OpenedPackages` list with the [latest version](https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt) available.
@@ -557,3 +558,4 @@
 
 ## 0.0.10
 - Support for attaching IntelliJ sources in IDEA
+
