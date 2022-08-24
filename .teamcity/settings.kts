@@ -41,9 +41,10 @@ project {
     }
 }
 
-val gradleVersions = listOf("6.7.1", "6.9.2", "7.5.1")
 
 object UnitTests : BuildType({
+    val gradleVersions = listOf("6.7.1", "6.9.2", "7.5.1")
+
     name = "Unit Tests"
 
     vcs {
