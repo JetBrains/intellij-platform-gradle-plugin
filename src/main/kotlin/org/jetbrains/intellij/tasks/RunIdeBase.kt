@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.Input
@@ -13,6 +14,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.internal.impldep.com.dd.plist.NSDictionary
+import org.gradle.internal.impldep.com.dd.plist.PropertyListParser
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.listProperty
@@ -153,6 +156,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     private val buildNumber by lazy { ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse) }
     private val build203 by lazy { Version.parse("203.0") }
     private val build221 by lazy { Version.parse("221.0") }
+    private val build223 by lazy { Version.parse("223.0") }
 
     init {
         mainClass.set("com.intellij.idea.Main")
@@ -187,11 +191,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             classpath += objectFactory.fileCollection().from(it)
         }
 
-        classpath += objectFactory.fileCollection().from(
-            "$ideDirFile/lib/app.jar"
-        )
-
         classpath += when {
+            buildNumber > build223 -> loadInfoPlistClasspath(ideDirFile)
             buildNumber > build221 -> listOf(
                 "$ideDirFile/lib/3rd-party-rt.jar",
                 "$ideDirFile/lib/util.jar",
@@ -217,6 +218,17 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 "$ideDirFile/lib/trove4j.jar",
             )
         }.let { objectFactory.fileCollection().from(it) }
+    }
+
+    private fun loadInfoPlistClasspath(ideDirFile: File): List<String> {
+        val infoPlistFile = ideDirFile.resolve("Info.plist")
+        val plist = PropertyListParser.parse(infoPlistFile) as NSDictionary
+        val jvmOptions = plist.objectForKey("JVMOptions") as NSDictionary
+        val classPath = jvmOptions.objectForKey("ClassPath").toString()
+
+        return classPath.split(':').map {
+            it.replace("\$APP_PACKAGE/Contents", ideDirFile.canonicalPath)
+        }
     }
 
     /**
@@ -263,6 +275,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         if (buildNumber >= build221) {
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
+        systemProperty("idea.vendor.name", "JetBrains")
     }
 
     /**
