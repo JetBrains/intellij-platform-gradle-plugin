@@ -2,7 +2,7 @@
 
 ## next
 ### Added
-- Add `app.jar` to the classpath for the latest IntelliJ Platform compatibility
+- Configure classpath for run-based tasks using `Info.plist` provided with IntelliJ SDK 2022.3+
 
 ### Changed
 - OpenedPackages: add `java.desktop/java.awt.font` for all OSes

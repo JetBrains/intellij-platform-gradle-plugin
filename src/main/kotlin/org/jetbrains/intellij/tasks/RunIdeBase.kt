@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.dd.plist.NSDictionary
+import com.dd.plist.PropertyListParser
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.Input
@@ -153,6 +155,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     private val buildNumber by lazy { ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse) }
     private val build203 by lazy { Version.parse("203.0") }
     private val build221 by lazy { Version.parse("221.0") }
+    private val build223 by lazy { Version.parse("223.0") }
 
     init {
         mainClass.set("com.intellij.idea.Main")
@@ -187,11 +190,13 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             classpath += objectFactory.fileCollection().from(it)
         }
 
-        classpath += objectFactory.fileCollection().from(
-            "$ideDirFile/lib/app.jar"
-        )
-
         classpath += when {
+            buildNumber > build223 -> loadInfoPlist(ideDirFile)
+                .getDictionary("JVMOptions")
+                .getValue("ClassPath")
+                .split(':')
+                .map { it.replace("\$APP_PACKAGE/Contents", ideDirFile.canonicalPath) }
+
             buildNumber > build221 -> listOf(
                 "$ideDirFile/lib/3rd-party-rt.jar",
                 "$ideDirFile/lib/util.jar",
@@ -263,6 +268,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         if (buildNumber >= build221) {
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
+        systemProperty("idea.vendor.name", "JetBrains")
     }
 
     /**
@@ -270,7 +276,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      */
     private fun findIdePrefix(): String? {
         info(context, "Looking for platform prefix")
-        val prefix = Files.list(ideDir.get().toPath().resolve("bin"))
+
+        val ideDirFile = ideDir.get()
+        val prefix = Files.list(ideDirFile.toPath().resolve("bin"))
             .asSequence()
             .filter { file -> file.fileName.toString().endsWith(".sh") || file.fileName.toString().endsWith(".bat") }
             .flatMap { file -> Files.lines(file).asSequence() }
@@ -283,12 +291,12 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             }
 
             OperatingSystem.current().isMacOsX -> {
-                val infoPlist = ideDir.get().toPath().resolve("Info.plist")
+                val infoPlist = loadInfoPlist(ideDirFile)
                 try {
-                    Files.lines(infoPlist).asSequence().windowed(2)
-                        .filter { it.first().trim() == "<key>idea.platform.prefix</key>" }
-                        .map { it.last().trim().removeSurrounding("<string>", "</string>") }
-                        .firstOrNull()
+                    infoPlist
+                        .getDictionary("JVMOptions")
+                        .getDictionary("Properties")
+                        .getValue("idea.platform.prefix")
                 } catch (e: FileNotFoundException) {
                     null
                 } catch (t: Throwable) {
@@ -330,4 +338,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
         return File(binDir, path)
     }
+
+    private fun loadInfoPlist(ideDirFile: File) = ideDirFile.resolve("Info.plist").let(PropertyListParser::parse) as NSDictionary
+
+    private fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
+
+    private fun NSDictionary.getValue(key: String) = this[key].toString()
+
 }
