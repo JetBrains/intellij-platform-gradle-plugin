@@ -41,6 +41,8 @@ project {
     }
 }
 
+val gradleVersions = listOf("6.7.1", "6.9.2", "7.5.1")
+
 object UnitTests : BuildType({
     name = "Unit Tests"
 
@@ -49,9 +51,11 @@ object UnitTests : BuildType({
     }
 
     steps {
-        gradle {
-            name = "Unit Tests"
-            tasks = "check -PtestGradleVersion=7.5.1"
+        gradleVersions.forEach { gradleVersion ->
+            gradle {
+                name = "Unit Tests – Gradle $gradleVersion"
+                tasks = "check -PtestGradleVersion=$gradleVersion"
+            }
         }
     }
 
