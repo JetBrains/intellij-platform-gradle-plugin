@@ -1,12 +1,15 @@
 # Changelog
 
 ## next
+### Changed
+- Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
+
+## [1.8.1]
 ### Added
 - Configure classpath for run-based tasks using `Info.plist` provided with IntelliJ SDK 2022.3+
 
 ### Changed
 - OpenedPackages: add `java.desktop/java.awt.font` for all OSes
-- Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
 
 ## [1.8.0]
 ### Added
@@ -558,3 +561,4 @@
 
 ## 0.0.10
 - Support for attaching IntelliJ sources in IDEA
+
