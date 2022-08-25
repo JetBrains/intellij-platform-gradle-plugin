@@ -12,6 +12,11 @@ To apply the patch, change the root project
 accordingly, and delete the patch script.
 */
 changeProject(DslContext.projectId) {
+    check(description == "") {
+        "Unexpected description: '$description'"
+    }
+    description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/gradle-intellij-plugin"
+
     features {
         val feature1 = find<GitHubIssueTracker> {
             githubIssues {
