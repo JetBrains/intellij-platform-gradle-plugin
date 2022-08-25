@@ -76,4 +76,10 @@ object UnitTests : BuildType({
             param("github_oauth_user", "hsz")
         }
     }
+
+    requirements {
+        add {
+            equals("teamcity.agent.jvm.os.name", "Linux")
+        }
+    }
 })
