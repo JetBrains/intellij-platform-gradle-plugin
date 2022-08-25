@@ -182,7 +182,7 @@ open class IntelliJPlugin : Plugin<Project> {
         configureListProductsReleasesTask(project, extension)
         configureRunPluginVerifierTask(project, extension)
         configurePluginVerificationTask(project)
-        configureJavaCompatibilityVerificationTask(project)
+        configureVerifyPluginConfigurationTask(project)
         configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
@@ -194,6 +194,18 @@ open class IntelliJPlugin : Plugin<Project> {
         configureProcessResources(project)
         configureInstrumentation(project, extension)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
+
+
+        with(project.tasks.named<VerifyPluginConfigurationTask>(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)) {
+            project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+                project.tasks.named<KotlinCompile>("compileKotlin").configure {
+                    dependsOn(this@with)
+                }
+            }
+            project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME).configure {
+                dependsOn(this@with)
+            }
+        }
 
         project.afterEvaluate {
             configureProjectAfterEvaluate(this, extension)
@@ -605,8 +617,8 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureJavaCompatibilityVerificationTask(project: Project) {
-        info(context, "Configuring Java compatibility verification task")
+    private fun configureVerifyPluginConfigurationTask(project: Project) {
+        info(context, "Configuring plugin configuration verification task")
 
         val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
