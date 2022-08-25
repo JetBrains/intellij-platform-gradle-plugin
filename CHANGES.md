@@ -558,4 +558,3 @@
 
 ## 0.0.10
 - Support for attaching IntelliJ sources in IDEA
-
