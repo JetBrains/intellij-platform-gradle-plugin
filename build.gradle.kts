@@ -189,4 +189,5 @@ changelog {
     unreleasedTerm.set("next")
     version.set("${project.version}")
     path.set("${project.projectDir}/CHANGES.md")
+    groups.set(emptyList())
 }
