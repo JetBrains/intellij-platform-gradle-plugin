@@ -25,10 +25,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.229") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.235") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.229") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.235") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.28") {
@@ -37,7 +37,7 @@ dependencies {
     }
 
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.3")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
     implementation("com.googlecode.plist:dd-plist:1.24")
 
