@@ -125,6 +125,7 @@ fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any>
                 .map { "-P${it.key}=${it.value}" }.toTypedArray(),
             *tasks.map { ":$projectName:$it" }.toTypedArray(),
             "--info",
+            "--stacktrace",
         )
         .apply { environment().put("INTEGRATION_TEST", projectName) }
         .directory(projectDirectory.toFile())

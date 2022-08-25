@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.SkipWhenEmpty
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
@@ -33,6 +34,12 @@ open class PatchPluginXmlTask @Inject constructor(
      */
     @OutputDirectory
     val destinationDir = objectFactory.directoryProperty()
+
+    /**
+     * The list of output `plugin.xml` files.
+     */
+    @OutputFiles
+    val outputFiles = objectFactory.listProperty<File>()
 
     /**
      * The list of `plugin.xml` files to patch.
@@ -118,8 +125,9 @@ open class PatchPluginXmlTask @Inject constructor(
                     patchTag(document, "id", it)
                 }
 
-                val destination = File(destinationDir.get().asFile, file.name)
-                transformXml(document, destination)
+                destinationDir.get().asFile.resolve(file.name).let {
+                    transformXml(document, it)
+                }
             }
         }
     }

@@ -37,7 +37,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME,
                 IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME,
                 IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME,
-                IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
+                IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME,
+                IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
             ),
             tasks(IntelliJPluginConstants.GROUP_NAME),
         )
@@ -462,8 +463,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `throws exception if Gradle is lt 6_7_1`() {
-        val kotlinPluginMessage = "The current Gradle version 6.7 is not compatible with the Kotlin Gradle plugin. " +
-            "Please use Gradle 6.7.1 or newer, or the previous version of the Kotlin plugin."
         val message = "Gradle IntelliJ Plugin requires Gradle 6.7.1 and higher"
 
         build("6.4", true, "help").output.let {
@@ -472,7 +471,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         build("6.7", true, "help").output.let {
             assertTrue(it.contains("FAILURE: Build failed with an exception."))
-            assertTrue(it.contains(kotlinPluginMessage))
         }
 
         build("6.7.1", false, "help").output.let {

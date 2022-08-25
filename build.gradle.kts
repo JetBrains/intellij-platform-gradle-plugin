@@ -42,6 +42,7 @@ dependencies {
     implementation("com.googlecode.plist:dd-plist:1.24")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6")
+    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation(gradleTestKit())
