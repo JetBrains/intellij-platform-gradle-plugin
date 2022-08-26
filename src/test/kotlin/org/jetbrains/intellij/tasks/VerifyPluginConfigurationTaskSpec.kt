@@ -151,7 +151,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
+        build("clean", IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
             assertFalse(result.output.contains(HEADER))
         }
 
@@ -161,7 +161,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
+        build("clean", IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
             assertFalse(result.output.contains(HEADER))
         }
     }
