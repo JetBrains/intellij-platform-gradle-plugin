@@ -97,9 +97,9 @@ fun getIdeaSystemProperties(
     requirePluginIds: List<String>,
 ): Map<String, String> {
     val result = mapOf(
-        "idea.config.path" to configDirectory.absolutePath,
-        "idea.system.path" to systemDirectory.absolutePath,
-        "idea.plugins.path" to pluginsDirectory.absolutePath,
+        "idea.config.path" to configDirectory.canonicalPath,
+        "idea.system.path" to systemDirectory.canonicalPath,
+        "idea.plugins.path" to pluginsDirectory.canonicalPath,
     )
     if (requirePluginIds.isNotEmpty()) {
         return result + mapOf("idea.required.plugins.id" to requirePluginIds.joinToString(","))
@@ -114,7 +114,7 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirector
     ideDirectory?.let {
         val bootJar = File(it, "lib/boot.jar")
         if (bootJar.exists()) {
-            return arguments + "-Xbootclasspath/a:${bootJar.absolutePath}"
+            return arguments + "-Xbootclasspath/a:${bootJar.canonicalPath}"
         }
     }
     return arguments

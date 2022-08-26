@@ -114,15 +114,11 @@ open class IntelliJPlugin : Plugin<Project> {
                 }
                 null
             })
-            pluginName.convention(project.provider {
-                project.name
-            })
+            pluginName.convention(project.provider { project.name })
             updateSinceUntilBuild.convention(true)
             sameSinceUntilBuild.convention(false)
             instrumentCode.convention(true)
-            sandboxDir.convention(project.provider {
-                File(project.buildDir, IntelliJPluginConstants.DEFAULT_SANDBOX).absolutePath
-            })
+            sandboxDir.convention(project.provider { File(project.buildDir, IntelliJPluginConstants.DEFAULT_SANDBOX).canonicalPath })
             intellijRepository.convention(IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY)
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
@@ -232,7 +228,7 @@ open class IntelliJPlugin : Plugin<Project> {
                     if (it.dependencyId == "com.intellij.modules.java") {
                         throw BuildException(
                             "The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\n " +
-                                "Please delete 'depends' tag from '${file.absolutePath}' or add 'java' plugin to Gradle dependencies " +
+                                "Please delete 'depends' tag from '${file.canonicalPath}' or add 'java' plugin to Gradle dependencies " +
                                 "(e.g. intellij { plugins = ['java'] })",
                             null,
                         )
@@ -696,7 +692,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         ) {
                             val resolver = project.objects.newInstance(
                                 PluginDependencyManager::class.java,
-                                project.gradle.gradleUserHomeDir.absolutePath,
+                                project.gradle.gradleUserHomeDir.canonicalPath,
                                 ideaDependency,
                                 extension.getPluginsRepositories(),
                                 archiveUtils,
@@ -1442,7 +1438,7 @@ open class IntelliJPlugin : Plugin<Project> {
             val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
             val resolver = project.objects.newInstance(
                 PluginDependencyManager::class.java,
-                project.gradle.gradleUserHomeDir.absolutePath,
+                project.gradle.gradleUserHomeDir.canonicalPath,
                 ideaDependency,
                 extension.getPluginsRepositories(),
                 archiveUtils,

@@ -148,7 +148,7 @@ open class JbrResolver @Inject constructor(
             warn(context, "Cannot find java executable in: $javaDir")
             return null
         }
-        return Jbr(version, javaDir, javaExecutable.toFile().absolutePath)
+        return Jbr(version, javaDir, javaExecutable.toFile().canonicalPath)
     }
 
     private fun getJavaArchive(jbrArtifact: JbrArtifact): File? {

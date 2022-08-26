@@ -103,13 +103,13 @@ open class PrepareSandboxTask @Inject constructor(
         val usedNames = mutableMapOf<String, String>()
         val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
         val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
-        val pluginDirectories = pluginDependencies.get().map { it.artifact.absolutePath }
+        val pluginDirectories = pluginDependencies.get().map { it.artifact.canonicalPath }
 
         plugin.from(project.provider {
             listOf(pluginJar.get().asFile) + runtimeConfiguration.allDependencies.map {
                 runtimeConfiguration.fileCollection(it).filter { file ->
                     !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-                        file.absolutePath == p || file.absolutePath.startsWith("$p${File.separator}")
+                        file.canonicalPath == p || file.canonicalPath.startsWith("$p${File.separator}")
                     })
                 }
             }.flatten()
@@ -124,10 +124,10 @@ open class PrepareSandboxTask @Inject constructor(
                 else -> ""
             }
             var index = 1
-            var previousPath = usedNames.putIfAbsent(name, file.absolutePath)
-            while (previousPath != null && previousPath != file.absolutePath) {
+            var previousPath = usedNames.putIfAbsent(name, file.canonicalPath)
+            while (previousPath != null && previousPath != file.canonicalPath) {
                 name = "${originalName}_${index++}${originalExtension}"
-                previousPath = usedNames.putIfAbsent(name, file.absolutePath)
+                previousPath = usedNames.putIfAbsent(name, file.canonicalPath)
             }
         }
     }

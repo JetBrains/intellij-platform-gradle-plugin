@@ -227,7 +227,7 @@ abstract class IntelliJPluginSpecBase {
     protected fun collectPaths(directory: File): Set<String> {
         assert(directory.exists())
         return directory.walkTopDown().filterNot { it.isDirectory }.map {
-            adjustWindowsPath(it.absolutePath.substring(directory.absolutePath.length))
+            adjustWindowsPath(it.canonicalPath.substring(directory.canonicalPath.length))
         }.toSet()
     }
 

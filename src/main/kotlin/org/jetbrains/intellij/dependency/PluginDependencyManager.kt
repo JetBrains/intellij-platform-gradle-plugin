@@ -39,14 +39,14 @@ open class PluginDependencyManager @Inject constructor(
             if (Paths.get(dependency.id).isAbsolute) {
                 return externalPluginDependency(File(dependency.id))
             } else if (ideaDependency != null) {
-                info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.absolutePath}")
+                info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.canonicalPath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
                         "-withSources".takeIf { ideaDependency.sources != null }.orEmpty()
                     return PluginDependencyImpl(it.name, dependency.id, builtinPluginVersion, it, true)
                 }
             }
-            throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency?.classes?.absolutePath}", null)
+            throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency?.classes?.canonicalPath}", null)
         }
         pluginsRepositories.forEach { repository ->
             repository.resolve(project, dependency, context)?.let {
@@ -113,8 +113,8 @@ open class PluginDependencyManager @Inject constructor(
         }
         if (!plugin.builtin && !plugin.maven) {
             val artifactParent = plugin.artifact.parentFile
-            val pluginSource = artifactParent.absolutePath
-            if (artifactParent.parentFile.absolutePath != cacheDirectoryPath && pluginSources.add(pluginSource)) {
+            val pluginSource = artifactParent.canonicalPath
+            if (artifactParent.parentFile.canonicalPath != cacheDirectoryPath && pluginSources.add(pluginSource)) {
                 ivyArtifactRepository?.artifactPattern("$pluginSource/[artifact](.[ext])")  // local plugins
             }
         }

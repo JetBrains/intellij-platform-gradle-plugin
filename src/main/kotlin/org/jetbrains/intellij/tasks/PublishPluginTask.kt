@@ -87,7 +87,7 @@ open class PublishPluginTask @Inject constructor(
                 }
                 val pluginId = creationResult.plugin.pluginId
                 channels.get().forEach { channel ->
-                    info(context, "Uploading plugin '$pluginId' from '${file.absolutePath}' to '${host.get()}', channel: '$channel'")
+                    info(context, "Uploading plugin '$pluginId' from '${file.canonicalPath}' to '${host.get()}', channel: '$channel'")
                     try {
                         val repositoryClient = when (toolboxEnterprise.get()) {
                             true -> PluginRepositoryFactory.createWithImplementationClass(

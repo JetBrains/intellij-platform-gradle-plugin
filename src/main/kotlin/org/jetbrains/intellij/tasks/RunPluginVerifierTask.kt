@@ -468,7 +468,7 @@ open class RunPluginVerifierTask @Inject constructor(
         buildTypes.forEach { buildType ->
             debug(context, "Downloading IDE '$type-$version' from '$buildType' channel to: $downloadDir")
             try {
-                return block(type!!, version!!, buildType).absolutePath.also {
+                return block(type!!, version!!, buildType).canonicalPath.also {
                     debug(context, "Resolved IDE '$type-$version' path: $it")
                 }
             } catch (e: IOException) {
