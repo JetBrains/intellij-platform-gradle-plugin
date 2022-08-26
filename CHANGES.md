@@ -2,7 +2,7 @@
 
 ## next
 ### Added
-- The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#verifypluginconfiguration-tasl) task for validating the plugin project configuration.
+- The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#tasks-verifypluginconfiguration) task for validating the plugin project configuration.
 
 ### Changed
 - Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`

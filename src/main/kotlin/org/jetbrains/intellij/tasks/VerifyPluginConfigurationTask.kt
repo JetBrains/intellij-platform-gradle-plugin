@@ -67,19 +67,19 @@ open class VerifyPluginConfigurationTask @Inject constructor(
      * [KotlinCompile.kotlinOptions.apiVersion] property defined in the build script
      */
     @Internal
-    val kotlinApiVersion = objectFactory.property<String>()
+    val kotlinApiVersion = objectFactory.property<String?>()
 
     /**
      * [KotlinCompile.kotlinOptions.languageVersion] property defined in the build script
      */
     @Internal
-    val kotlinLanguageVersion = objectFactory.property<String>()
+    val kotlinLanguageVersion = objectFactory.property<String?>()
 
     /**
      * [KotlinCompile.kotlinOptions.jvmTarget] property defined in the build script.
      */
     @Internal
-    val kotlinJvmTarget = objectFactory.property<String>()
+    val kotlinJvmTarget = objectFactory.property<String?>()
 
     /**
      * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
@@ -100,9 +100,6 @@ open class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
         val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)
-
-        println("kotlinPluginAvailable='${kotlinPluginAvailable.get()}'")
-        println("kotlinStdlibDefaultDependency='${kotlinStdlibDefaultDependency.orNull}'")
 
         (pluginXmlFiles.get().flatMap {
             parsePluginXml(it, context)?.let { plugin ->
