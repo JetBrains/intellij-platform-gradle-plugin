@@ -855,6 +855,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
         val setupInstrumentCodeTaskProvider =
             project.tasks.register(IntelliJPluginConstants.SETUP_INSTRUMENT_CODE_TASK_NAME, SetupInstrumentCodeTask::class.java) {
+                description = "Prepares code instrumentation tasks."
+                group = IntelliJPluginConstants.GROUP_NAME
+
                 instrumentationEnabled.convention(project.provider {
                     extension.instrumentCode.get()
                 })
@@ -867,6 +870,9 @@ open class IntelliJPlugin : Plugin<Project> {
 
             val instrumentTaskProvider =
                 project.tasks.register(name, IntelliJInstrumentCodeTask::class.java) {
+                    description = "Code instrumentation task."
+                    group = IntelliJPluginConstants.GROUP_NAME
+
                     val setupDependenciesTaskProvider =
                         project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
                     val setupDependenciesTask = setupDependenciesTaskProvider.get()
@@ -1042,6 +1048,9 @@ open class IntelliJPlugin : Plugin<Project> {
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
             val updateTask = project.tasks.register("post${name.capitalize()}") {
+                description = "Code post-instrumentation task."
+                group = IntelliJPluginConstants.GROUP_NAME
+
                 val instrumentTask = instrumentTaskProvider.get()
                 val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.isEnabled }
                 val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
@@ -1250,10 +1259,10 @@ open class IntelliJPlugin : Plugin<Project> {
         val signPluginTaskProvider = project.tasks.named<SignPluginTask>(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
 
         project.tasks.register(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, PublishPluginTask::class.java) {
-            val isOffline = project.gradle.startParameter.isOffline
-
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Publishes plugin to the remote Marketplace repository."
+
+            val isOffline = project.gradle.startParameter.isOffline
 
             host.convention(IntelliJPluginConstants.MARKETPLACE_HOST)
             toolboxEnterprise.convention(false)
@@ -1276,15 +1285,15 @@ open class IntelliJPlugin : Plugin<Project> {
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
 
         project.tasks.register(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, ListProductsReleasesTask::class.java) {
+            group = IntelliJPluginConstants.GROUP_NAME
+            description = "List all available IntelliJ-based IDE releases with their updates."
+
             val repositoryVersion = LocalDateTime.now().format(
                 DateTimeFormatterBuilder()
                     .append(DateTimeFormatter.BASIC_ISO_DATE)
                     .appendValue(ChronoField.HOUR_OF_DAY, 2)
                     .toFormatter()
             )
-
-            group = IntelliJPluginConstants.GROUP_NAME
-            description = "List all available IntelliJ-based IDE releases with their updates."
 
             updatePaths.convention(project.provider {
                 mapOf("idea-releases" to IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL).entries.map { (name, repository) ->
@@ -1336,10 +1345,10 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring setup dependencies task")
 
         project.tasks.register(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME, SetupDependenciesTask::class.java) {
-            var defaultDependenciesResolved = false
-
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Setups required dependencies for building and running project."
+
+            var defaultDependenciesResolved = false
 
             val ideaConfiguration = with(project.configurations) {
                 val idea = create(IntelliJPluginConstants.IDEA_CONFIGURATION_NAME).setVisible(false)
