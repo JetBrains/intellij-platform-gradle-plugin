@@ -19,10 +19,11 @@ data class ProductInfo(
 
 @Serializable
 data class Launch(
-    var os: String? = null,
+    var os: OS? = null,
     var launcherPath: String? = null,
-    var javaExecutablePath: String? = null,
     var vmOptionsFilePath: String? = null,
+    var startupWmClass: String? = null,
+    var bootClassPathJarNames: List<String> = mutableListOf(),
 )
 
 @Serializable
@@ -30,3 +31,8 @@ data class CustomProperty(
     var key: String? = null,
     var value: String? = null
 )
+
+@Suppress("EnumEntryName")
+enum class OS {
+    Linux, Windows, macOS
+}

@@ -25,8 +25,10 @@ import org.jetbrains.intellij.error
 import org.jetbrains.intellij.getIdeJvmArgs
 import org.jetbrains.intellij.getIdeaSystemProperties
 import org.jetbrains.intellij.ideBuildNumber
+import org.jetbrains.intellij.ideProductInfo
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.model.OS
 import org.jetbrains.intellij.utils.OpenedPackages
 import java.io.File
 import java.io.FileNotFoundException
@@ -192,37 +194,54 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         classpath += when {
-            buildNumber > build223 -> loadInfoPlist(ideDirFile)
-                .getDictionary("JVMOptions")
-                .getValue("ClassPath")
-                .split(':')
-                .map { it.replace("\$APP_PACKAGE/Contents", ideDirFile.canonicalPath) }
+            buildNumber > build223 ->
+                ideProductInfo(ideDirFile)?.let { productInfo ->
+                    productInfo.launch.find {
+                        with(OperatingSystem.current()) {
+                            when {
+                                isLinux -> OS.Linux
+                                isWindows -> OS.Windows
+                                isMacOsX -> OS.macOS
+                                else -> OS.Linux
+                            } == it.os
+                        }
+                    }?.bootClassPathJarNames
+                } ?: loadInfoPlist(ideDirFile)?.let { infoPlist ->
+                    infoPlist.getDictionary("JVMOptions")
+                        .getValue("ClassPath")
+                        .split(':')
+                        .map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
+                } ?: emptyList()
 
             buildNumber > build221 -> listOf(
-                "$ideDirFile/lib/3rd-party-rt.jar",
-                "$ideDirFile/lib/util.jar",
-                "$ideDirFile/lib/util_rt.jar",
-                "$ideDirFile/lib/jna.jar",
+                "3rd-party-rt.jar",
+                "util.jar",
+                "util_rt.jar",
+                "jna.jar",
             )
 
             buildNumber > build203 -> listOf(
-                "$ideDirFile/lib/bootstrap.jar",
-                "$ideDirFile/lib/util.jar",
-                "$ideDirFile/lib/jdom.jar",
-                "$ideDirFile/lib/log4j.jar",
-                "$ideDirFile/lib/jna.jar",
+                "bootstrap.jar",
+                "util.jar",
+                "jdom.jar",
+                "log4j.jar",
+                "jna.jar",
             )
 
             else -> listOf(
-                "$ideDirFile/lib/bootstrap.jar",
-                "$ideDirFile/lib/extensions.jar",
-                "$ideDirFile/lib/util.jar",
-                "$ideDirFile/lib/jdom.jar",
-                "$ideDirFile/lib/log4j.jar",
-                "$ideDirFile/lib/jna.jar",
-                "$ideDirFile/lib/trove4j.jar",
+                "bootstrap.jar",
+                "extensions.jar",
+                "util.jar",
+                "jdom.jar",
+                "log4j.jar",
+                "jna.jar",
+                "trove4j.jar",
             )
-        }.let { objectFactory.fileCollection().from(it) }
+        }.map {
+            "${ideDirFile.canonicalPath}/lib/$it"
+        }.let {
+            objectFactory.fileCollection().from(it)
+        }
     }
 
     /**
@@ -292,7 +311,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             }
 
             OperatingSystem.current().isMacOsX -> {
-                val infoPlist = loadInfoPlist(ideDirFile)
+                val infoPlist = loadInfoPlist(ideDirFile) ?: return null
                 try {
                     infoPlist
                         .getDictionary("JVMOptions")
@@ -342,7 +361,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         return File(binDir, path)
     }
 
-    private fun loadInfoPlist(ideDirFile: File) = ideDirFile.resolve("Info.plist").let(PropertyListParser::parse) as NSDictionary
+    private fun loadInfoPlist(ideDirFile: File) = ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
+        PropertyListParser.parse(it) as NSDictionary
+    }
 
     private fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
 
