@@ -33,8 +33,8 @@ open class PublishPluginTask @Inject constructor(
      *
      * Default value: output of the `buildPlugin` task
      */
-    @InputFile
-    @Optional
+    @get:InputFile
+    @get:Optional
     val distributionFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
@@ -42,16 +42,16 @@ open class PublishPluginTask @Inject constructor(
      *
      * Default value: `https://plugins.jetbrains.com`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val host = objectFactory.property<String>()
 
     /**
      * Required.
      * Authentication token.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val token = objectFactory.property<String>()
 
     /**
@@ -59,8 +59,8 @@ open class PublishPluginTask @Inject constructor(
      *
      * Default value: `["default"]`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val channels = objectFactory.listProperty<String>()
 
     /**
@@ -68,8 +68,8 @@ open class PublishPluginTask @Inject constructor(
      *
      * Default value: `false`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val toolboxEnterprise = objectFactory.property<Boolean>()
 
     private val context = logCategory()

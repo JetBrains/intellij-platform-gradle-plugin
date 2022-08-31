@@ -30,61 +30,61 @@ open class VerifyPluginConfigurationTask @Inject constructor(
      *
      * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
      */
-    @InputFiles
+    @get:InputFiles
     val pluginXmlFiles = objectFactory.listProperty<File>()
 
     /**
      * IntelliJ SDK platform version.
      */
-    @Internal
+    @get:Internal
     val platformVersion = objectFactory.property<String>()
 
     /**
      * IntelliJ SDK platform build number.
      */
-    @Internal
+    @get:Internal
     val platformBuild = objectFactory.property<String>()
 
     /**
      * [JavaCompile.sourceCompatibility] property defined in the build script.
      */
-    @Internal
+    @get:Internal
     val sourceCompatibility = objectFactory.property<String>()
 
     /**
      * [JavaCompile.targetCompatibility] property defined in the build script.
      */
-    @Internal
+    @get:Internal
     val targetCompatibility = objectFactory.property<String>()
 
     /**
      * The Gradle Kotlin plugin is loaded.
      */
-    @Internal
+    @get:Internal
     val kotlinPluginAvailable = objectFactory.property<Boolean>()
 
     /**
      * [KotlinCompile.kotlinOptions.apiVersion] property defined in the build script
      */
-    @Internal
+    @get:Internal
     val kotlinApiVersion = objectFactory.property<String?>()
 
     /**
      * [KotlinCompile.kotlinOptions.languageVersion] property defined in the build script
      */
-    @Internal
+    @get:Internal
     val kotlinLanguageVersion = objectFactory.property<String?>()
 
     /**
      * [KotlinCompile.kotlinOptions.jvmTarget] property defined in the build script.
      */
-    @Internal
+    @get:Internal
     val kotlinJvmTarget = objectFactory.property<String?>()
 
     /**
      * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
      */
-    @Internal
+    @get:Internal
     val kotlinStdlibDefaultDependency = objectFactory.property<Boolean>()
 
     private val context = logCategory()

@@ -16,10 +16,10 @@ open class SetupInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
-    @Input
+    @get:Input
     val instrumentationEnabled = objectFactory.property<Boolean>()
 
-    @Internal
+    @get:Internal
     val instrumentedDir = objectFactory.directoryProperty()
 
     @TaskAction

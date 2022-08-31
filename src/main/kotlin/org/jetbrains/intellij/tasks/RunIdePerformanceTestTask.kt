@@ -53,7 +53,6 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
     private lateinit var testArtifactsDirPath: Path
 
     @TaskAction
-    @Override
     override fun exec() {
         val dir = Paths.get(artifactsDir.get()).createDir()
         val testData = Path.of(testDataDir.get()).toFile()

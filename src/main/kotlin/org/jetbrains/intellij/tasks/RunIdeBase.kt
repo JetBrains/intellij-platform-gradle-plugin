@@ -48,7 +48,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      *
      * TODO: Should be @Internal
      */
-    @Input
+    @get:Input
     val ideDir = objectFactory.property<File>()
 
     /**
@@ -61,7 +61,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * - `8u202b1483.24`
      * - `11_0_2b159`
      */
-    @Input
+    @get:Input
     @Optional
     val jbrVersion = objectFactory.property<String>()
 
@@ -88,7 +88,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * All JetBrains Java versions are available at JetBrains Space Packages,
      * and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
-    @Input
+    @get:Input
     @Optional
     val jbrVariant = objectFactory.property<String>()
 
@@ -100,7 +100,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      *
      * TODO: Should be @Internal
      */
-    @InputDirectory
+    @get:InputDirectory
     @PathSensitive(PathSensitivity.NONE)
     val pluginsDir: DirectoryProperty = objectFactory.directoryProperty()
 
@@ -110,7 +110,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.
      * Enabled by default in 2020.2 and higher.
      */
-    @Input
+    @get:Input
     @Optional
     val autoReloadPlugins = objectFactory.property<Boolean>()
 

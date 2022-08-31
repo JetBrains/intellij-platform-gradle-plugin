@@ -17,7 +17,7 @@ open class SetupDependenciesTask @Inject constructor(
     /**
      * Reference to the resolved `idea` dependency.
      */
-    @Internal
+    @get:Internal
     val idea = objectFactory.property<IdeaDependency>()
 
     @TaskAction

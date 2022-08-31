@@ -41,35 +41,35 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
         const val LOADER_REF = "java2.loader"
     }
 
-    @Internal
+    @get:Internal
     val sourceSetCompileClasspath = objectFactory.fileCollection()
 
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val ideaDependency = objectFactory.property<IdeaDependency>()
 
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val javac2 = objectFactory.property<File>()
 
-    @Input
+    @get:Input
     val compilerVersion = objectFactory.property<String>()
 
-    @Incremental
-    @InputFiles
+    @get:Incremental
+    @get:InputFiles
     val classesDirs = objectFactory.fileCollection()
 
-    @Incremental
-    @InputFiles
+    @get:Incremental
+    @get:InputFiles
     val formsDirs = objectFactory.fileCollection()
 
-    @Internal
+    @get:Internal
     val sourceDirs = objectFactory.fileCollection()
 
-    @OutputDirectory
+    @get:OutputDirectory
     val outputDir = objectFactory.directoryProperty()
 
-    @Input
+    @get:Input
     val compilerClassPathFromMaven = objectFactory.listProperty<File>()
 
     private val context = logCategory()
