@@ -192,11 +192,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         classpath += when {
-//            buildNumber > build223 -> loadInfoPlist(ideDirFile)
-//                .getDictionary("JVMOptions")
-//                .getValue("ClassPath")
-//                .split(':')
-//                .map { it.replace("\$APP_PACKAGE/Contents", ideDirFile.canonicalPath) }
+            buildNumber > build223 -> loadInfoPlist(ideDirFile)
+                .getDictionary("JVMOptions")
+                .getValue("ClassPath")
+                .split(':')
+                .map { it.replace("\$APP_PACKAGE/Contents", ideDirFile.canonicalPath) }
 
             buildNumber > build221 -> listOf(
                 "$ideDirFile/lib/3rd-party-rt.jar",
@@ -324,9 +324,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     /**
      * Configures JVM arguments based on the current IDE version.
      */
-    protected open fun configureJvmArgs() {
-        jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get()) + OpenedPackages
+    private fun configureJvmArgs() {
+        jvmArgs = collectJvmArgs()
     }
+
+    protected open fun collectJvmArgs() = getIdeJvmArgs(this, jvmArgs, ideDir.get()) + OpenedPackages
 
     /**
      * Resolves the path to the `tools.jar` library.
@@ -345,5 +347,4 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     private fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
 
     private fun NSDictionary.getValue(key: String) = this[key].toString()
-
 }

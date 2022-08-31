@@ -8,7 +8,6 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.error
-import org.jetbrains.intellij.getIdeJvmArgs
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.PerformanceTestResult
@@ -97,24 +96,19 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
     /**
      * Configures arguments passed to JVM.
      */
-    override fun configureJvmArgs() {
-        jvmArgs = getIdeJvmArgs(this, jvmArgs, ideDir.get())
-        jvmArgs(
-            mutableListOf(
-                "-Djdk.attach.allowAttachSelf=true",
-                "-Didea.is.integration.test=true",
-                "-Djb.privacy.policy.text=<!--999.999-->",
-                "-Djb.consents.confirmation.enabled=false",
-                "-Didea.local.statistics.without.report=true",
-                "-Dlinux.native.menu.force.disable=true",
-                "-Didea.fatal.error.notification=true",
-                "-Dtestscript.filename=${scriptPath}",
-                "-DintegrationTests.profiler=${profilerName.get().name.toLowerCase()}",
-                "-Dide.performance.screenshot.before.kill=$testArtifactsDirPath",
-                "-Didea.log.path=$testArtifactsDirPath",
-                "-Dsnapshots.path=$testArtifactsDirPath",
-                "-Dmemory.snapshots.path=$testArtifactsDirPath"
-            )
-        )
-    }
+    override fun collectJvmArgs() = super.collectJvmArgs() + mutableListOf(
+        "-Djdk.attach.allowAttachSelf=true",
+        "-Didea.is.integration.test=true",
+        "-Djb.privacy.policy.text=<!--999.999-->",
+        "-Djb.consents.confirmation.enabled=false",
+        "-Didea.local.statistics.without.report=true",
+        "-Dlinux.native.menu.force.disable=true",
+        "-Didea.fatal.error.notification=true",
+        "-Dtestscript.filename=${scriptPath}",
+        "-DintegrationTests.profiler=${profilerName.get().name.toLowerCase()}",
+        "-Dide.performance.screenshot.before.kill=$testArtifactsDirPath",
+        "-Didea.log.path=$testArtifactsDirPath",
+        "-Dsnapshots.path=$testArtifactsDirPath",
+        "-Dmemory.snapshots.path=$testArtifactsDirPath"
+    )
 }
