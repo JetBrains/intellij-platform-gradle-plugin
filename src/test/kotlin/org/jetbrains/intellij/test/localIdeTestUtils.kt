@@ -1,5 +1,6 @@
 package org.jetbrains.intellij.test
 
+import com.jetbrains.plugin.structure.base.utils.createDir
 import org.jetbrains.intellij.IntelliJPluginConstants
 import java.io.File
 import java.net.URL
@@ -23,7 +24,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
         return localIdeDirPathString
     }
     if (!Files.exists(localIdesPath)) {
-        Files.createDirectories(localIdesPath)
+        localIdesPath.createDir()
     }
     URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY}/releases/$releasePath")
         .openStream().use { Files.copy(it, localIdeZipPath) }

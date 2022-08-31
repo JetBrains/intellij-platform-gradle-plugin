@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.createDir
 import org.apache.commons.io.FileUtils
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
@@ -39,7 +40,6 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.EnumSet
@@ -547,9 +547,7 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return directory for downloaded IDEs
      */
-    internal fun ideDownloadDir(): Path = verifierHomeDir().resolve("ides").also {
-        Files.createDirectories(it)
-    }
+    internal fun ideDownloadDir() = verifierHomeDir().resolve("ides").createDir()
 
     enum class FailureLevel(val sectionHeading: String, val message: String) {
         COMPATIBILITY_WARNINGS(
