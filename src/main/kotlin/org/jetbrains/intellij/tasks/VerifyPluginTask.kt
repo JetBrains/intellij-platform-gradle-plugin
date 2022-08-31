@@ -29,7 +29,7 @@ open class VerifyPluginTask @Inject constructor(
      *
      * Default value: `false`
      */
-    @Input
+    @get:Input
     val ignoreFailures = objectFactory.property<Boolean>()
 
     /**
@@ -37,7 +37,7 @@ open class VerifyPluginTask @Inject constructor(
      *
      * Default value: `false`
      */
-    @Input
+    @get:Input
     val ignoreUnacceptableWarnings = objectFactory.property<Boolean>()
 
     /**
@@ -45,7 +45,7 @@ open class VerifyPluginTask @Inject constructor(
      *
      * Default value: `true`
      */
-    @Input
+    @get:Input
     val ignoreWarnings = objectFactory.property<Boolean>()
 
     /**
@@ -53,7 +53,7 @@ open class VerifyPluginTask @Inject constructor(
      *
      * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
      */
-    @InputDirectory
+    @get:InputDirectory
     val pluginDir: DirectoryProperty = objectFactory.directoryProperty()
 
     private val context = logCategory()

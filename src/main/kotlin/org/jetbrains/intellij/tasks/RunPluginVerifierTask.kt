@@ -64,15 +64,15 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
      */
-    @Input
+    @get:Input
     val failureLevel = objectFactory.listProperty<FailureLevel>()
 
     /**
      * A fallback file with a list of the releases generated with [ListProductsReleasesTask].
      * Used if [ideVersions] is not provided.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val productsReleasesFile = objectFactory.property<File>()
 
     /**
@@ -81,22 +81,22 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * Default value: output of the [org.jetbrains.intellij.tasks.ListProductsReleasesTask] task
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val ideVersions = objectFactory.listProperty<String>()
 
     /**
      * List of the paths to the specified IDE versions in [ideVersions] used for the verification.
      * By default, it resolves paths to the downloaded [ideVersions] IDEs.
      */
-    @Input
+    @get:Input
     val ides = objectFactory.listProperty<File>()
 
     /**
      * A list of the paths to locally installed IDE distributions that should be used for verification
      * in addition to those specified in [ideVersions].
      */
-    @Input
+    @get:Input
     val localPaths = objectFactory.listProperty<File>()
 
     /**
@@ -104,8 +104,8 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * Default value: `latest`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val verifierVersion = objectFactory.property<String>()
 
     /**
@@ -114,8 +114,8 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * Default value: path to the JAR file resolved using the [verifierVersion] property
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val verifierPath = objectFactory.property<String>()
 
     /**
@@ -124,8 +124,8 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * Default value: output of the `buildPlugin` task
      */
-    @InputFile
-    @SkipWhenEmpty
+    @get:InputFile
+    @get:SkipWhenEmpty
     val distributionFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
@@ -133,8 +133,8 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * Default value: `${project.buildDir}/reports/pluginVerifier`
      */
-    @OutputDirectory
-    @Optional
+    @get:OutputDirectory
+    @get:Optional
     val verificationReportsDir = objectFactory.property<String>()
 
     /**
@@ -143,8 +143,8 @@ open class RunPluginVerifierTask @Inject constructor(
      * Default value: `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides`
      * or system temporary directory.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val downloadDir = objectFactory.property<String>()
 
     /**
@@ -157,8 +157,8 @@ open class RunPluginVerifierTask @Inject constructor(
      * - `8u202b1483.24`
      * - `11_0_2b159`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val jbrVersion = objectFactory.property<String>()
 
     /**
@@ -184,30 +184,30 @@ open class RunPluginVerifierTask @Inject constructor(
      * All JetBrains Java versions are available at JetBrains Space Packages,
      * and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val jbrVariant = objectFactory.property<String>()
 
     /**
      * URL of repository for downloading JetBrains Runtime.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val jreRepository = objectFactory.property<String>()
 
     /**
      * The path to directory containing JVM runtime, overrides [jbrVersion].
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val runtimeDir = objectFactory.property<String>()
 
     /**
      * The list of classes prefixes from the external libraries.
      * The Plugin Verifier will not report `No such class` for classes of these packages.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val externalPrefixes = objectFactory.listProperty<String>()
 
     /**
@@ -216,8 +216,8 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * Default value: `false`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val teamCityOutputFormat = objectFactory.property<Boolean>()
 
     /**
@@ -230,14 +230,14 @@ open class RunPluginVerifierTask @Inject constructor(
      * - `android-only`
      * - `without-android`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val subsystemsToCheck = objectFactory.property<String>()
 
-    @Internal
+    @get:Internal
     val ideDir = objectFactory.property<File>()
 
-    @Internal
+    @get:Internal
     val offline = objectFactory.property<Boolean>()
 
     private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
@@ -572,7 +572,7 @@ open class RunPluginVerifierTask @Inject constructor(
         ),
         INTERNAL_API_USAGES(
             "Internal API usages",
-            "Plugin uses API marked as internal (ApiStatus.@Internal)."
+            "Plugin uses API marked as internal (ApiStatus.@get:Internal)."
         ),
         OVERRIDE_ONLY_API_USAGES(
             "Override-only API usages",

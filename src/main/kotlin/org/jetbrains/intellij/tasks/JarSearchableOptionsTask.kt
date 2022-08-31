@@ -25,8 +25,8 @@ open class JarSearchableOptionsTask @Inject constructor(
      *
      * Default value: `build/searchableOptions`
      */
-    @OutputDirectory
-    @Optional
+    @get:OutputDirectory
+    @get:Optional
     val outputDir = objectFactory.directoryProperty()
 
     /**
@@ -34,8 +34,8 @@ open class JarSearchableOptionsTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.pluginName]
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val pluginName = objectFactory.property<String>()
 
     /**
@@ -43,15 +43,15 @@ open class JarSearchableOptionsTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.getDestinationDir]
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val sandboxDir = objectFactory.property<String>()
 
     /**
      * Emit warning if no searchable options are found.
      * Can be disabled with [org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING].
      */
-    @Internal
+    @get:Internal
     val noSearchableOptionsWarning = objectFactory.property<Boolean>()
 
     private val context = logCategory()

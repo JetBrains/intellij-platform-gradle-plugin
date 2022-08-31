@@ -20,7 +20,7 @@ open class ClasspathIndexCleanupTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : ConventionTask() {
 
-    @InputFiles
+    @get:InputFiles
     val classpathIndexFiles = objectFactory.fileCollection()
 
     private val context = logCategory()

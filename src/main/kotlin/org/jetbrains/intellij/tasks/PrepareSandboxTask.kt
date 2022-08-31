@@ -37,7 +37,7 @@ open class PrepareSandboxTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.pluginName]
      */
-    @Input
+    @get:Input
     val pluginName = objectFactory.property<String>()
 
     /**
@@ -45,7 +45,7 @@ open class PrepareSandboxTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.sandboxDir]/config
      */
-    @Input
+    @get:Input
     val configDir = objectFactory.property<String>()
 
     /**
@@ -53,7 +53,7 @@ open class PrepareSandboxTask @Inject constructor(
      *
      * Default value: `jar` task output
      */
-    @InputFile
+    @get:InputFile
     val pluginJar: RegularFileProperty = objectFactory.fileProperty()
 
     /**
@@ -62,8 +62,8 @@ open class PrepareSandboxTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea.get().jarFiles]
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val librariesToIgnore = objectFactory.listProperty<File>()
 
     /**
@@ -71,14 +71,14 @@ open class PrepareSandboxTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.getPluginDependenciesList]
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val pluginDependencies = objectFactory.listProperty<PluginDependency>()
 
     /**
      * Default sandbox destination directory.
      */
-    @Internal
+    @get:Internal
     val defaultDestinationDir = objectFactory.property<File>()
 
     private val context = logCategory()

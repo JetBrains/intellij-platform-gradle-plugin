@@ -36,7 +36,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
      *
      * Default value: `LATEST`
      */
-    @Input
+    @get:Input
     val version = objectFactory.property<String>()
 
     /**
@@ -44,7 +44,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
      *
      * Default value: Maven cache
      */
-    @Input
+    @get:Input
     val pluginArchive = objectFactory.property<File>()
 
     /**
@@ -52,7 +52,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
      *
      * Default value: `build/robotServerPlugin`
      */
-    @OutputDirectory
+    @get:OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
     private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)

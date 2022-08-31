@@ -29,8 +29,8 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: _Maven cache_
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val updatePaths = objectFactory.listProperty<String>()
 
     /**
@@ -38,8 +38,8 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: `https://raw.githubusercontent.com/JetBrains/intellij-sdk-docs/main/topics/_generated/android_studio_releases.xml`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val androidStudioUpdatePath = objectFactory.property<String>()
 
     /**
@@ -47,11 +47,11 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: `File("${project.buildDir}/listProductsReleases.txt")`
      */
-    @OutputFile
+    @get:OutputFile
     val outputFile: RegularFileProperty = objectFactory.fileProperty()
 
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val types = objectFactory.listProperty<String>()
 
     /**
@@ -60,8 +60,8 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.version]
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val sinceVersion = objectFactory.property<String>()
 
     /**
@@ -70,8 +70,8 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: `null`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val untilVersion = objectFactory.property<String>()
 
     /**
@@ -79,8 +79,8 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.version]
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val sinceBuild = objectFactory.property<String>()
 
     /**
@@ -88,8 +88,8 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: `null`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val untilBuild = objectFactory.property<String>()
 
     /**
@@ -97,8 +97,8 @@ open class ListProductsReleasesTask @Inject constructor(
      *
      * Default value: `EnumSet.allOf(ListProductsReleasesTask.Channel)`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val releaseChannels = objectFactory.setProperty<Channel>()
 
     private val context = logCategory()

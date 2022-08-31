@@ -49,8 +49,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *     - `project(":projectName")`
      *     - `project(":plugin-subproject")`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val plugins = objectFactory.listProperty<Any>()
 
     /**
@@ -63,8 +63,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Warning: [version] and [localPath] must not be specified at the same time.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val localPath = objectFactory.property<String>()
 
     /**
@@ -72,8 +72,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `null`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val localSourcesPath = objectFactory.property<String>()
 
     /**
@@ -88,7 +88,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://plugins.jetbrains.com/docs/intellij/intellij-artifacts.html) page.
      */
-    @Input
+    @get:Input
     val version = objectFactory.property<String>()
 
     /**
@@ -109,8 +109,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * - `JPS` - JPS-only
      * - `GW` - Gateway
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val type = objectFactory.property<String>()
 
     /**
@@ -118,8 +118,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `${project.name}`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val pluginName = objectFactory.property<String>()
 
     /**
@@ -128,8 +128,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `true`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val updateSinceUntilBuild = objectFactory.property<Boolean>()
 
     /**
@@ -142,8 +142,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `false`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val sameSinceUntilBuild = objectFactory.property<Boolean>()
 
     /**
@@ -151,8 +151,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `true`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val instrumentCode = objectFactory.property<Boolean>()
 
     /**
@@ -160,8 +160,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `${project.buildDir}/idea-sandbox`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val sandboxDir = objectFactory.property<String>()
 
     /**
@@ -169,8 +169,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val intellijRepository = objectFactory.property<String>()
 
     /**
@@ -184,8 +184,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * - `maven { repositoryUrl }` - use custom Maven repository with plugins where you can configure additional parameters (credentials, authentication and etc.)
      * - `custom(pluginsXmlUrl)` - use custom plugin repository
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     @Nested
     val pluginsRepositories: PluginsRepositoryConfiguration = objectFactory.newInstance(PluginsRepositoryConfiguration::class.java)
 
@@ -211,8 +211,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `null`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val jreRepository = objectFactory.property<String>()
 
     /**
@@ -221,8 +221,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `null`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val ideaDependencyCachePath = objectFactory.property<String>()
 
     /**
@@ -231,8 +231,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `!System.getenv().containsKey("CI")`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val downloadSources = objectFactory.property<Boolean>()
 
     /**
@@ -241,16 +241,16 @@ abstract class IntelliJPluginExtension @Inject constructor(
      *
      * Default value: `true`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val configureDefaultDependencies = objectFactory.property<Boolean>()
 
     /**
      * Configure extra dependency artifacts from the IntelliJ repository.
      * The dependencies on them could be configured only explicitly using the [intellijExtra] function in the `dependencies` block.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val extraDependencies = objectFactory.listProperty<String>()
 
     @Internal

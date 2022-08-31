@@ -32,13 +32,13 @@ open class PatchPluginXmlTask @Inject constructor(
      *
      * Default value: `${project.buildDir}/patchedPluginXmlFiles`
      */
-    @OutputDirectory
+    @get:OutputDirectory
     val destinationDir = objectFactory.directoryProperty()
 
     /**
      * The list of output `plugin.xml` files.
      */
-    @OutputFiles
+    @get:OutputFiles
     val outputFiles = objectFactory.listProperty<File>()
 
     /**
@@ -46,15 +46,15 @@ open class PatchPluginXmlTask @Inject constructor(
      *
      * Default value: auto-discovered from the project
      */
-    @SkipWhenEmpty
-    @InputFiles
+    @get:SkipWhenEmpty
+    @get:InputFiles
     val pluginXmlFiles = objectFactory.listProperty<File>()
 
     /**
      * The description of the plugin – will be set to the `<description>` tag.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val pluginDescription = objectFactory.property<String>()
 
     /**
@@ -62,8 +62,8 @@ open class PatchPluginXmlTask @Inject constructor(
      *
      * Default value: `intellij.version` in `Branch.Build.Fix` format
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val sinceBuild = objectFactory.property<String>()
 
     /**
@@ -71,8 +71,8 @@ open class PatchPluginXmlTask @Inject constructor(
      *
      * Default value: `intellij.version` in `Branch.Build.*` format
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val untilBuild = objectFactory.property<String>()
 
     /**
@@ -80,22 +80,22 @@ open class PatchPluginXmlTask @Inject constructor(
      *
      * Default value: `${project.version}`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val version = objectFactory.property<String>()
 
     /**
      * The change notes of the plugin – will be set for the `<change-notes>` tag.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val changeNotes = objectFactory.property<String>()
 
     /**
      * The ID of the plugin – will be set for the `<id>` tag.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val pluginId = objectFactory.property<String>()
 
     private val context = logCategory()

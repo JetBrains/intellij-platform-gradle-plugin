@@ -46,8 +46,8 @@ open class SignPluginTask @Inject constructor(
      * Input, unsigned ZIP archive file.
      * Refers to `in` CLI option.
      */
-    @InputFile
-    @SkipWhenEmpty
+    @get:InputFile
+    @get:SkipWhenEmpty
     val inputArchiveFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
@@ -56,7 +56,7 @@ open class SignPluginTask @Inject constructor(
      * 
      * Predefined with the name of the ZIP archive file with `-signed` name suffix attached.
      */
-    @OutputFile
+    @get:OutputFile
     val outputArchiveFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
@@ -64,80 +64,80 @@ open class SignPluginTask @Inject constructor(
      * 
      * Default value: `LATEST`
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val cliVersion = objectFactory.property<String>()
 
     /**
      * Local path to the Marketplace ZIP Signer CLI that will be used.
      * If provided, [cliVersion] is ignored.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val cliPath = objectFactory.property<String>()
 
     /**
      * KeyStore file path.
      * Refers to `ks` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val keyStore = objectFactory.property<String>()
 
     /**
      * KeyStore password.
      * Refers to `ks-pass` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val keyStorePassword = objectFactory.property<String>()
 
     /**
      * KeyStore key alias.
      * Refers to `ks-key-alias` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val keyStoreKeyAlias = objectFactory.property<String>()
 
     /**
      * KeyStore type.
      * Refers to `ks-type` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val keyStoreType = objectFactory.property<String>()
 
     /**
      * JCA KeyStore Provider name.
      * Refers to `ks-provider-name` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val keyStoreProviderName = objectFactory.property<String>()
 
     /**
      * Encoded private key in PEM format.
      * Refers to `key` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val privateKey = objectFactory.property<String>()
 
     /**
      * A file with encoded private key in PEM format.
      * Refers to `key-file` CLI option.
      */
-    @InputFile
-    @Optional
+    @get:InputFile
+    @get:Optional
     val privateKeyFile: RegularFileProperty = objectFactory.fileProperty()
 
     /**
      * Password required to decrypt the private key.
      * Refers to `key-pass` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val password = objectFactory.property<String>()
 
     /**
@@ -145,8 +145,8 @@ open class SignPluginTask @Inject constructor(
      * The first certificate from the chain will be used as a certificate authority (CA).
      * Refers to `cert` CLI option.
      */
-    @Input
-    @Optional
+    @get:Input
+    @get:Optional
     val certificateChain = objectFactory.property<String>()
 
     /**
@@ -154,8 +154,8 @@ open class SignPluginTask @Inject constructor(
      * The first certificate from the chain will be used as a certificate authority (CA).
      * Refers to `cert-file` CLI option.
      */
-    @InputFile
-    @Optional
+    @get:InputFile
+    @get:Optional
     val certificateChainFile: RegularFileProperty = objectFactory.fileProperty()
 
     private val context = logCategory()
