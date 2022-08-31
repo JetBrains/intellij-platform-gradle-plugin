@@ -76,6 +76,15 @@ open class PrepareSandboxTask @Inject constructor(
     val pluginDependencies = objectFactory.listProperty<PluginDependency>()
 
     /**
+     * If resulting artifact should contain files taken from [org.gradle.api.plugins.JavaPlugin.JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME].
+     *
+     * Default value: `true`
+     */
+    @Input
+    @Optional
+    val includeRuntimeConfigurationLibraries = objectFactory.property<Boolean>()
+
+    /**
      * Default sandbox destination directory.
      */
     @get:Internal
@@ -106,13 +115,20 @@ open class PrepareSandboxTask @Inject constructor(
         val pluginDirectories = pluginDependencies.get().map { it.artifact.canonicalPath }
 
         plugin.from(project.provider {
-            listOf(pluginJar.get().asFile) + runtimeConfiguration.allDependencies.map {
-                runtimeConfiguration.fileCollection(it).filter { file ->
+            val runtimeConfigurationProvider = {
+              if (includeRuntimeConfigurationLibraries.getOrElse(true)) {
+                runtimeConfiguration.allDependencies.map {
+                  runtimeConfiguration.fileCollection(it).filter { file ->
                     !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-                        file.canonicalPath == p || file.canonicalPath.startsWith("$p${File.separator}")
+                      file.canonicalPath == p || file.canonicalPath.startsWith("$p${File.separator}")
                     })
-                }
-            }.flatten()
+                  }
+                }.flatten()
+              } else {
+                listOf()
+              }
+            }
+            listOf(pluginJar.get().asFile) + runtimeConfigurationProvider()
         }).eachFile {
             val dotIndex = name.lastIndexOf('.')
             val originalName = when {

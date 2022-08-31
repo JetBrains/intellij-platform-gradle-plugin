@@ -254,6 +254,11 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @get:Optional
     val extraDependencies = objectFactory.listProperty<String>()
 
+    /**
+     * Name of [org.gradle.api.tasks.bundling.Jar] task that creates plugin artifact.
+     *
+     * Default value: [org.gradle.api.plugins.JavaPlugin.JAR_TASK_NAME]
+     */
     @Input
     @Optional
     val jarTaskName = objectFactory.property<String>()
