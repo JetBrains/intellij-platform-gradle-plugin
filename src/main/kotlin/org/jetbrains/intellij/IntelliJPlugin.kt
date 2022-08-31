@@ -704,7 +704,10 @@ open class IntelliJPlugin : Plugin<Project> {
                             val resolvedPlugin = resolveLatestPluginUpdate(
                                 IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID,
                                 ideaDependency.buildNumber,
-                            ) ?: throw BuildException("No suitable plugin update found for ${IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID}:${ideaDependency.buildNumber}", null)
+                            ) ?: throw BuildException(
+                                "No suitable plugin update found for ${IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID}:${ideaDependency.buildNumber}",
+                                null
+                            )
 
                             val plugin = resolver.resolve(project, resolvedPlugin)
                                 ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" }, null)
@@ -869,6 +872,9 @@ open class IntelliJPlugin : Plugin<Project> {
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
+            if (name != IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME && name != IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME) {
+                warn(context, "Unexpected instrumentation task name: $name")
+            }
 
             val instrumentTaskProvider =
                 project.tasks.register(name, IntelliJInstrumentCodeTask::class.java) {
@@ -1052,7 +1058,11 @@ open class IntelliJPlugin : Plugin<Project> {
 
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
-            val updateTask = project.tasks.register("post${name.capitalize()}") {
+            val postInstrumentName = "post${name.capitalize()}"
+            if (postInstrumentName != IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME && postInstrumentName != IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME) {
+                warn(context, "Unexpected instrumentation task name: $postInstrumentName")
+            }
+            val updateTask = project.tasks.register(postInstrumentName) {
                 description = "Code post-instrumentation task."
                 group = IntelliJPluginConstants.GROUP_NAME
 
