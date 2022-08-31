@@ -25,7 +25,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
     if (Path.of(localIdeDirPathString).exists()) {
         return localIdeDirPathString
     }
-    if (!Files.exists(localIdesPath)) {
+    if (!localIdesPath.exists()) {
         localIdesPath.createDir()
     }
 
