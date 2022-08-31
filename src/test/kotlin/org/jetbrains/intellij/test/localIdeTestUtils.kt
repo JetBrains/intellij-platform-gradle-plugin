@@ -1,6 +1,8 @@
 package org.jetbrains.intellij.test
 
 import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.jetbrains.intellij.IntelliJPluginConstants
 import java.io.File
 import java.net.URL
@@ -20,16 +22,19 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
     val fileName = releasePath.substringAfterLast('/')
     val localIdeZipPath = localIdesPath.resolve(fileName)
     val localIdeDirPathString = localIdeZipPath.toString().removeSuffix(".zip")
-    if (Files.exists(Path.of(localIdeDirPathString))) {
+    if (Path.of(localIdeDirPathString).exists()) {
         return localIdeDirPathString
     }
     if (!Files.exists(localIdesPath)) {
         localIdesPath.createDir()
     }
-    URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY}/releases/$releasePath")
-        .openStream().use { Files.copy(it, localIdeZipPath) }
+
+    URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY}/releases/$releasePath").openStream().use {
+        Files.copy(it, localIdeZipPath)
+    }
     localIdeZipPath.toFile().unzip()
-    Files.delete(localIdeZipPath)
+    localIdeZipPath.forceDeleteIfExists()
+
     return localIdeDirPathString
 }
 
