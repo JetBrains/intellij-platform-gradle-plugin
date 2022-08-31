@@ -2,9 +2,9 @@
 
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.jetbrains.intellij.collectJars
-import org.jetbrains.intellij.isJar
 import java.io.File
 
 class PluginDependencyImpl(
@@ -26,7 +26,7 @@ class PluginDependencyImpl(
     var untilBuild: String? = null
 
     init {
-        if (artifact.isJar()) {
+        if (artifact.toPath().isJar()) {
             jarFiles = listOf(artifact)
         }
         if (artifact.isDirectory) {

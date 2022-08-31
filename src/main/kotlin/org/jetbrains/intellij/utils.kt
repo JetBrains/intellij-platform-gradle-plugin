@@ -137,15 +137,11 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun File.isJar() = toPath().isJar()
-
-fun File.isZip() = toPath().isZip()
-
 fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
-    collectFiles(directory) { it.isJar() && filter.test(it) }
+    collectFiles(directory) { it.toPath().isJar() && filter.test(it) }
 
 fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
-    collectFiles(directory) { it.isZip() && filter.test(it) }
+    collectFiles(directory) { it.toPath().isZip() && filter.test(it) }
 
 private fun collectFiles(directory: File, filter: Predicate<File>): Collection<File> = when {
     !directory.isDirectory -> emptyList()

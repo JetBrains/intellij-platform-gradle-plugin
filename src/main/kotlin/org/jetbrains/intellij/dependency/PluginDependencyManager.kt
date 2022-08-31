@@ -2,6 +2,9 @@
 
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.base.utils.isJar
+import com.jetbrains.plugin.structure.base.utils.isZip
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
@@ -13,8 +16,6 @@ import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isDependencyOnPyCharm
-import org.jetbrains.intellij.isJar
-import org.jetbrains.intellij.isZip
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.warn
 import java.io.File
@@ -50,10 +51,11 @@ open class PluginDependencyManager @Inject constructor(
         }
         pluginsRepositories.forEach { repository ->
             repository.resolve(project, dependency, context)?.let {
+                val file = it.toPath() // TODO: migrate to Path
                 return when {
-                    it.isZip() -> zippedPluginDependency(it, dependency)
-                    it.isJar() -> externalPluginDependency(it, dependency.channel, true)
-                    else -> throw BuildException("Invalid type of downloaded plugin: ${it.name}", null)
+                    file.isZip() -> zippedPluginDependency(it, dependency)
+                    file.isJar() -> externalPluginDependency(it, dependency.channel, true)
+                    else -> throw BuildException("Invalid type of downloaded plugin: ${file.simpleName}", null)
                 }
             }
         }
@@ -65,7 +67,7 @@ open class PluginDependencyManager @Inject constructor(
     }
 
     fun register(project: Project, plugin: PluginDependency, dependencies: DependencySet) {
-        if (plugin.maven && plugin.artifact.isJar()) {
+        if (plugin.maven && plugin.artifact.toPath().isJar()) {
             dependencies.add(plugin.notation.toDependency(project))
             return
         }
@@ -185,7 +187,7 @@ open class PluginDependencyManager @Inject constructor(
     }
 
     private fun externalPluginDependency(artifact: File, channel: String? = null, maven: Boolean = false): PluginDependency? {
-        if (!artifact.isJar() && !artifact.isDirectory) {
+        if (!artifact.toPath().isJar() && !artifact.isDirectory) {
             warn(context, "Cannot create plugin from file '$artifact' - only directories or jars are supported")
         }
         return createPlugin(artifact, true, context)?.let {
