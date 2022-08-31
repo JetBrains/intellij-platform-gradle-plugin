@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginsRepositoryConfiguration
@@ -106,7 +107,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * - `PS` - PhpStorm
      * - `RD` - Rider
      * - `GO` - GoLand
-     * - `JPS` - JPS-only
      * - `GW` - Gateway
      */
     @get:Input
@@ -265,7 +265,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     }
 
     fun getVersionType(): String = version.get().run {
-        versionTypeRegex.matchEntire(this)?.groupValues?.getOrNull(1) ?: type.getOrElse("IC")
+        versionTypeRegex.matchEntire(this)?.groupValues?.getOrNull(1) ?: type.getOrElse(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
     }
 
     fun addPluginDependency(pluginDependency: PluginDependency) {

@@ -74,4 +74,28 @@ object IntelliJPluginConstants {
     const val VERSION_LATEST = "latest"
     const val ANDROID_STUDIO_TYPE = "AI"
     const val PERFORMANCE_PLUGIN_ID = "com.jetbrains.performancePlugin"
+
+    const val PLATFORM_TYPE_ANDROID_STUDIO = "AI"
+    const val PLATFORM_TYPE_CLION = "CL"
+    const val PLATFORM_TYPE_GATEWAY = "GW"
+    const val PLATFORM_TYPE_GOLAND = "GO"
+    const val PLATFORM_TYPE_INTELLIJ_COMMUNITY = "IC"
+    const val PLATFORM_TYPE_INTELLIJ_ULTIMATE = "IU"
+    const val PLATFORM_TYPE_PHPSTORM = "PS"
+    const val PLATFORM_TYPE_PYCHARM = "PY"
+    const val PLATFORM_TYPE_PYCHARM_COMMUNITY = "PC"
+    const val PLATFORM_TYPE_RIDER = "RD"
+
+    val PLATFORM_TYPES = listOf(
+        PLATFORM_TYPE_ANDROID_STUDIO,
+        PLATFORM_TYPE_CLION,
+        PLATFORM_TYPE_GATEWAY,
+        PLATFORM_TYPE_GOLAND,
+        PLATFORM_TYPE_INTELLIJ_COMMUNITY,
+        PLATFORM_TYPE_INTELLIJ_ULTIMATE,
+        PLATFORM_TYPE_PHPSTORM,
+        PLATFORM_TYPE_PYCHARM,
+        PLATFORM_TYPE_PYCHARM_COMMUNITY,
+        PLATFORM_TYPE_RIDER,
+    )
 }

@@ -23,6 +23,7 @@ import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
@@ -447,9 +448,9 @@ open class RunPluginVerifierTask @Inject constructor(
         var (type, version) = ideVersion.trim().split('-', limit = 2) + null
 
         if (version == null) {
-            debug(context, "IDE type not specified, setting type to IC")
+            debug(context, "IDE type not specified, setting type to $PLATFORM_TYPE_INTELLIJ_COMMUNITY")
             version = type
-            type = "IC"
+            type = PLATFORM_TYPE_INTELLIJ_COMMUNITY
         }
 
         val name = "$type-$version"

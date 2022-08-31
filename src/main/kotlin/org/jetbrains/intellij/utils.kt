@@ -32,6 +32,8 @@ import org.jdom2.Document
 import org.jdom2.JDOMException
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_CUSTOM_SNAPSHOT
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
@@ -206,13 +208,9 @@ fun isKotlinRuntime(name: String) =
         name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
         name == "kotlin-test" || name.startsWith("kotlin-test-")
 
-fun isDependencyOnPyCharm(dependency: IdeaDependency): Boolean {
-    return dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
-}
+fun isDependencyOnPyCharm(dependency: IdeaDependency) = dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
 
-fun isPyCharmType(type: String): Boolean {
-    return type == "PY" || type == "PC"
-}
+fun isPyCharmType(type: String) = type == PLATFORM_TYPE_PYCHARM || type == PLATFORM_TYPE_PYCHARM_COMMUNITY
 
 fun <T> T?.ifNull(block: () -> Unit): T? {
     if (this == null) {

@@ -14,6 +14,14 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPES
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_GATEWAY
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_GOLAND
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.debug
@@ -56,12 +64,14 @@ open class IdeaDependencyManager @Inject constructor(
             }
         }
 
-        dependencies.add(project.dependencies.create(
-            group = "com.jetbrains",
-            name = dependency.name,
-            version = dependency.version,
-            configuration = "compile",
-        ))
+        dependencies.add(
+            project.dependencies.create(
+                group = "com.jetbrains",
+                name = dependency.name,
+                version = dependency.version,
+                configuration = "compile",
+            )
+        )
     }
 
     private fun createDependency(
@@ -82,6 +92,7 @@ open class IdeaDependencyManager @Inject constructor(
             !hasKotlinDependency(project),
             context,
         )
+
         else -> {
             val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), context)
             when (type) {
@@ -95,6 +106,7 @@ open class IdeaDependencyManager @Inject constructor(
                     pluginsRegistry,
                     extraDependencies,
                 )
+
                 else -> IdeaDependency(
                     name,
                     version,
@@ -177,20 +189,20 @@ open class IdeaDependencyManager @Inject constructor(
     }
 
     private fun resetExecutablePermissions(cacheDirectory: File, type: String) {
-        if (type == "RD" && !OperatingSystem.current().isWindows) {
+        if (type == PLATFORM_TYPE_RIDER && !OperatingSystem.current().isWindows) {
             for (f in cacheDirectory.walkTopDown()) {
                 if (f.isFile
                     && (f.extension == "dylib"
-                            || f.extension == "py"
-                            || f.extension == "sh"
-                            || f.extension.startsWith("so")
-                            || f.name == "dotnet"
-                            || f.name == "env-wrapper"
-                            || f.name == "mono-sgen"
-                            || f.name == "BridgeService"
-                            || f.name == "JetBrains.Profiler.PdbServer"
-                            || f.name == "JBDeviceService"
-                            || f.name == "Rider.Backend")
+                        || f.extension == "py"
+                        || f.extension == "sh"
+                        || f.extension.startsWith("so")
+                        || f.name == "dotnet"
+                        || f.name == "env-wrapper"
+                        || f.name == "mono-sgen"
+                        || f.name == "BridgeService"
+                        || f.name == "JetBrains.Profiler.PdbServer"
+                        || f.name == "JBDeviceService"
+                        || f.name == "Rider.Backend")
                 ) {
                     setExecutable(cacheDirectory, f.relativeTo(cacheDirectory).toString(), context)
                 }
@@ -249,37 +261,45 @@ open class IdeaDependencyManager @Inject constructor(
         debug(context, "Adding IDE dependency")
         var hasSources = sources
         val (dependencyGroup, dependencyName) = when {
-            type == "IU" -> {
+            type == PLATFORM_TYPE_INTELLIJ_ULTIMATE -> {
                 "com.jetbrains.intellij.idea" to "ideaIU"
             }
-            type == "IC" -> {
+
+            type == PLATFORM_TYPE_INTELLIJ_COMMUNITY -> {
                 "com.jetbrains.intellij.idea" to "ideaIC"
             }
-            type == "CL" -> {
+
+            type == PLATFORM_TYPE_CLION -> {
                 "com.jetbrains.intellij.clion" to "clion"
             }
+
             isPyCharmType(type) -> {
                 "com.jetbrains.intellij.pycharm" to "pycharm$type"
             }
-            type == "GO" -> {
+
+            type == PLATFORM_TYPE_GOLAND -> {
                 "com.jetbrains.intellij.goland" to "goland"
             }
-            type == "PS" -> {
+
+            type == PLATFORM_TYPE_PHPSTORM -> {
                 "com.jetbrains.intellij.phpstorm" to "phpstorm"
             }
-            type == "RD" -> {
+
+            type == PLATFORM_TYPE_RIDER -> {
                 if (sources && releaseType == RELEASE_TYPE_SNAPSHOTS) {
                     warn(context, "IDE sources are not available for Rider SNAPSHOTS")
                     hasSources = false
                 }
                 "com.jetbrains.intellij.rider" to "riderRD"
             }
-            type == "GW" -> {
+
+            type == PLATFORM_TYPE_GATEWAY -> {
                 hasSources = false
                 "com.jetbrains.gateway" to "JetBrainsGateway"
             }
+
             else -> {
-                throw BuildException("Specified type '$type' is unknown. Supported values: IC, IU, CL, PY, PS, PC, GO, RD, GW", null)
+                throw BuildException("Specified type '$type' is unknown. Supported values: ${PLATFORM_TYPES.joinToString()}", null)
             }
         }
 
@@ -334,7 +354,7 @@ open class IdeaDependencyManager @Inject constructor(
             return File(ideaDependencyCachePath).apply {
                 mkdirs()
             }
-        } else if (type == "RD" && OperatingSystem.current().isWindows) {
+        } else if (type == PLATFORM_TYPE_RIDER && OperatingSystem.current().isWindows) {
             return project.buildDir
         }
         return zipFile.parentFile
@@ -383,10 +403,16 @@ open class IdeaDependencyManager @Inject constructor(
 
                 return when {
                     dependency.isZip() -> {
-                        val cacheDirectory = getZipCacheDirectory(dependencyFile, project, "IC")
+                        val cacheDirectory = getZipCacheDirectory(dependencyFile, project, PLATFORM_TYPE_INTELLIJ_COMMUNITY)
                         debug(context, "IDE extra dependency '$name': " + cacheDirectory.path)
-                        unzipDependencyFile(cacheDirectory, dependencyFile, "IC", version.endsWith(RELEASE_SUFFIX_SNAPSHOT))
+                        unzipDependencyFile(
+                            cacheDirectory,
+                            dependencyFile,
+                            PLATFORM_TYPE_INTELLIJ_COMMUNITY,
+                            version.endsWith(RELEASE_SUFFIX_SNAPSHOT)
+                        )
                     }
+
                     else -> {
                         debug(context, "IDE extra dependency '$name': " + dependencyFile.path)
                         dependencyFile

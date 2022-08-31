@@ -13,6 +13,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.AndroidStudioReleases
@@ -152,7 +153,7 @@ open class ListProductsReleasesTask @Inject constructor(
             .distinct()
             .toList()
 
-        val androidStudioResult = when (types.contains("AI")) {
+        val androidStudioResult = when (types.contains(PLATFORM_TYPE_ANDROID_STUDIO)) {
             true -> androidStudioReleases.items
                 .asSequence()
                 .filter { item ->

@@ -41,6 +41,11 @@ import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.SELF_UPDATE_CHECK
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.dependency.IdeaDependency
@@ -124,7 +129,7 @@ open class IntelliJPlugin : Plugin<Project> {
             intellijRepository.convention(IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY)
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
-            type.convention("IC")
+            type.convention(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
         }
 
         configureTasks(project, intellijExtension)
@@ -910,18 +915,24 @@ open class IntelliJPlugin : Plugin<Project> {
 
                         if (localPath.isNullOrBlank() && version.endsWith(RELEASE_SUFFIX_SNAPSHOT)) {
                             val type = extension.getVersionType()
-                            if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && listOf("CL", "RD", "PY", "PS").contains(type)) {
+                            val types = listOf(
+                                PLATFORM_TYPE_CLION,
+                                PLATFORM_TYPE_RIDER,
+                                PLATFORM_TYPE_PYCHARM,
+                                PLATFORM_TYPE_PHPSTORM,
+                            )
+                            if (version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && types.contains(type)) {
                                 ideProductInfo(ideaDependency.classes)?.buildNumber?.let { buildNumber ->
                                     Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                                 } ?: version
                             } else {
                                 when (type) {
-                                    "CL" -> "CLION-$version"
-                                    "RD" -> "RIDER-$version"
-                                    "PY" -> "PYCHARM-$version"
-                                    "PS" -> "PHPSTORM-$version"
-                                    else -> version
-                                }
+                                    PLATFORM_TYPE_CLION -> "CLION-"
+                                    PLATFORM_TYPE_RIDER -> "RIDER-"
+                                    PLATFORM_TYPE_PYCHARM -> "PYCHARM-"
+                                    PLATFORM_TYPE_PHPSTORM -> "PHPSTORM-"
+                                    else -> ""
+                                } + version
                             }
                         } else {
                             val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
