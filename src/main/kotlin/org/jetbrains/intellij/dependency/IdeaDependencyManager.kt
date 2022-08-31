@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.base.utils.isZip
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
@@ -377,16 +378,18 @@ open class IdeaDependencyManager @Inject constructor(
                 mavenRepository("$repositoryUrl/$releaseType")
             })
             if (files.size == 1) {
-                val depFile = files.first()
+                val dependencyFile = files.first() // TODO: remove when migrated to Path
+                val dependency = dependencyFile.toPath()
+
                 return when {
-                    depFile.name.endsWith(".zip") -> {
-                        val cacheDirectory = getZipCacheDirectory(depFile, project, "IC")
+                    dependency.isZip() -> {
+                        val cacheDirectory = getZipCacheDirectory(dependencyFile, project, "IC")
                         debug(context, "IDE extra dependency '$name': " + cacheDirectory.path)
-                        unzipDependencyFile(cacheDirectory, depFile, "IC", version.endsWith(RELEASE_SUFFIX_SNAPSHOT))
+                        unzipDependencyFile(cacheDirectory, dependencyFile, "IC", version.endsWith(RELEASE_SUFFIX_SNAPSHOT))
                     }
                     else -> {
-                        debug(context, "IDE extra dependency '$name': " + depFile.path)
-                        depFile
+                        debug(context, "IDE extra dependency '$name': " + dependencyFile.path)
+                        dependencyFile
                     }
                 }
             } else {

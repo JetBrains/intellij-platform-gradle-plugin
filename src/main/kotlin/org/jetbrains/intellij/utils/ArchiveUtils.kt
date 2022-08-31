@@ -2,6 +2,9 @@
 
 package org.jetbrains.intellij.utils
 
+import com.jetbrains.plugin.structure.base.utils.hasExtension
+import com.jetbrains.plugin.structure.base.utils.isZip
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.jetbrains.intellij.debug
@@ -22,7 +25,8 @@ open class ArchiveUtils @Inject constructor(
         isUpToDate: Predicate<File>? = null,
         markUpToDate: BiConsumer<File, File>? = null,
     ): File {
-        val name = archiveFile.name
+        val archive = archiveFile.toPath() // TODO: migrate archiveFile to Path
+        val name = archive.simpleName
         val markerFile = File(targetDirectory, "markerFile")
         if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
             return targetDirectory
@@ -34,15 +38,15 @@ open class ArchiveUtils @Inject constructor(
         debug(context, "Extracting: $name")
 
         when {
-            name.endsWith(".zip") || name.endsWith(".sit") -> {
+            archive.isZip() || archive.hasExtension("sit") -> {
                 fileSystemOperations.copy {
                     from(archiveOperations.zipTree(archiveFile))
                     into(targetDirectory)
                 }
             }
-            name.endsWith(".tar.gz") -> {
+            archive.hasExtension("tar.gz") -> {
                 fileSystemOperations.copy {
-                    from(archiveOperations.tarTree(archiveFile))
+                    from(archiveOperations.tarTree(archive))
                     into(targetDirectory)
                 }
             }

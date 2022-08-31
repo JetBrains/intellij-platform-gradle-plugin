@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.hasExtension
+import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -683,6 +685,8 @@ open class IntelliJPlugin : Plugin<Project> {
                         val ideaDependency = setupDependenciesTaskProvider.get().idea.get()
                         val plugins = extension.plugins.get()
 
+                        println("plugins='${plugins}'")
+
                         // Check that `runIdePerformanceTest` task was launched
                         // Check that `performanceTesting.jar` is absent (that means it's community version)
                         // Check that user didn't pass custom version of the performance plugin
@@ -882,7 +886,10 @@ open class IntelliJPlugin : Plugin<Project> {
                         sourceSet.allJava.srcDirs
                     })
                     formsDirs.from(project.provider {
-                        sourceDirs.asFileTree.filter { it.name.endsWith(".form") }
+                        sourceDirs.asFileTree.filter {
+                            // TODO: migrate to Path
+                            it.toPath().hasExtension("form")
+                        }
                     })
                     classesDirs.from(project.provider {
                         (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
@@ -1143,7 +1150,7 @@ open class IntelliJPlugin : Plugin<Project> {
             task.doFirst {
                 task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get()) + OpenedPackages
                 task.classpath += ideaDependencyLibrariesProvider.get()
-                task.classpath -= task.classpath.filter { !it.isDirectory && !it.name.endsWith("jar") }
+                task.classpath -= task.classpath.filter { !it.toPath().isJar() }
 
                 // Rearrange classpath to put idea and plugins in the right order.
                 task.classpath -= ideaConfigurationFiles.get()

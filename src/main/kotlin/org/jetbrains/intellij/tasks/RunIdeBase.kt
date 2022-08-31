@@ -4,6 +4,7 @@ package org.jetbrains.intellij.tasks
 
 import com.dd.plist.NSDictionary
 import com.dd.plist.PropertyListParser
+import com.jetbrains.plugin.structure.base.utils.hasExtension
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.Input
@@ -191,11 +192,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
 
         classpath += when {
-            buildNumber > build223 -> loadInfoPlist(ideDirFile)
-                .getDictionary("JVMOptions")
-                .getValue("ClassPath")
-                .split(':')
-                .map { it.replace("\$APP_PACKAGE/Contents", ideDirFile.canonicalPath) }
+//            buildNumber > build223 -> loadInfoPlist(ideDirFile)
+//                .getDictionary("JVMOptions")
+//                .getValue("ClassPath")
+//                .split(':')
+//                .map { it.replace("\$APP_PACKAGE/Contents", ideDirFile.canonicalPath) }
 
             buildNumber > build221 -> listOf(
                 "$ideDirFile/lib/3rd-party-rt.jar",
@@ -280,7 +281,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         val ideDirFile = ideDir.get()
         val prefix = Files.list(ideDirFile.toPath().resolve("bin"))
             .asSequence()
-            .filter { file -> file.fileName.toString().endsWith(".sh") || file.fileName.toString().endsWith(".bat") }
+            .filter { file -> file.hasExtension("sh") || file.hasExtension("bat") }
             .flatMap { file -> Files.lines(file).asSequence() }
             .mapNotNull { line -> platformPrefixSystemPropertyRegex.find(line)?.groupValues?.getOrNull(1) }
             .firstOrNull()
