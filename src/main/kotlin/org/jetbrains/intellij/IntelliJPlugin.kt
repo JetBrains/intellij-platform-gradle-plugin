@@ -685,8 +685,6 @@ open class IntelliJPlugin : Plugin<Project> {
                         val ideaDependency = setupDependenciesTaskProvider.get().idea.get()
                         val plugins = extension.plugins.get()
 
-                        println("plugins='${plugins}'")
-
                         // Check that `runIdePerformanceTest` task was launched
                         // Check that `performanceTesting.jar` is absent (that means it's community version)
                         // Check that user didn't pass custom version of the performance plugin
@@ -706,7 +704,7 @@ open class IntelliJPlugin : Plugin<Project> {
                             val resolvedPlugin = resolveLatestPluginUpdate(
                                 IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID,
                                 ideaDependency.buildNumber,
-                            )
+                            ) ?: throw BuildException("No suitable plugin update found for ${IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID}:${ideaDependency.buildNumber}", null)
 
                             val plugin = resolver.resolve(project, resolvedPlugin)
                                 ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" }, null)
@@ -729,8 +727,8 @@ open class IntelliJPlugin : Plugin<Project> {
             .create(IntelliJPluginConstants.MARKETPLACE_HOST)
             .pluginManager
             .searchCompatibleUpdates(listOf(pluginId), buildNumber, channel)
-            .first()
-            .let { PluginDependencyNotation(it.pluginXmlId, it.version, it.channel) }
+            .firstOrNull()
+            ?.let { PluginDependencyNotation(it.pluginXmlId, it.version, it.channel) }
 
     private fun configureRunIdeForUiTestsTask(project: Project) {
         info(context, "Configuring run IDE for UI tests task")
