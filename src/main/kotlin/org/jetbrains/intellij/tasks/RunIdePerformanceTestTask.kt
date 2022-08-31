@@ -104,7 +104,7 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
         "-Didea.local.statistics.without.report=true",
         "-Dlinux.native.menu.force.disable=true",
         "-Didea.fatal.error.notification=true",
-        "-Dtestscript.filename=${scriptPath}",
+        "-Dtestscript.filename=$scriptPath",
         "-DintegrationTests.profiler=${profilerName.get().name.toLowerCase()}",
         "-Dide.performance.screenshot.before.kill=$testArtifactsDirPath",
         "-Didea.log.path=$testArtifactsDirPath",

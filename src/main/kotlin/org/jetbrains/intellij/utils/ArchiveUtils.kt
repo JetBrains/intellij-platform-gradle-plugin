@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.utils
 
-import com.jetbrains.plugin.structure.base.utils.hasExtension
-import com.jetbrains.plugin.structure.base.utils.isZip
 import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
@@ -38,13 +36,13 @@ open class ArchiveUtils @Inject constructor(
         debug(context, "Extracting: $name")
 
         when {
-            archive.isZip() || archive.hasExtension("sit") -> {
+            name.endsWith(".zip") || name.endsWith(".sit") -> {
                 fileSystemOperations.copy {
                     from(archiveOperations.zipTree(archiveFile))
                     into(targetDirectory)
                 }
             }
-            archive.hasExtension("tar.gz") -> {
+            name.endsWith(".tar.gz") -> {
                 fileSystemOperations.copy {
                     from(archiveOperations.tarTree(archive))
                     into(targetDirectory)

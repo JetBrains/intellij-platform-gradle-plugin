@@ -15,14 +15,14 @@ open class BuildSearchableOptionsTask : RunIdeBase(false) {
     /**
      * The directory where the searchable options will be generated.
      */
-    @OutputDirectory
+    @get:OutputDirectory
     val outputDir = objectFactory.directoryProperty()
 
     /**
      * Emit warning if the task is executed by a paid plugin.
      * Can be disabled with [org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING].
      */
-    @Internal
+    @get:Internal
     val showPaidPluginWarning = objectFactory.property<Boolean>()
 
     private val traverseUIArgs = listOf("traverseUI")
