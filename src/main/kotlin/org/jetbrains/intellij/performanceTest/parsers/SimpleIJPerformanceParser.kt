@@ -2,15 +2,16 @@
 
 package org.jetbrains.intellij.performanceTest.parsers
 
+import com.jetbrains.plugin.structure.base.utils.forEachLine
 import org.jetbrains.intellij.model.PerformanceTestScript
-import java.io.File
+import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 class SimpleIJPerformanceParser(private val filePath: String) {
 
     fun parse() = PerformanceTestScript.Builder().apply {
-        File(filePath).forEachLine {
+        Path.of(filePath).forEachLine {
             with(it) {
                 when {
                     contains(Keywords.PROJECT) -> projectName(substringAfter("${Keywords.PROJECT} "))
