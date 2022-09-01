@@ -39,4 +39,19 @@ data class Item(
 
     @set:XmlElement
     var date: String = "",
+
+    @set:XmlElement(name = "download")
+    var downloads: List<Download> = mutableListOf(),
+) : Serializable
+
+data class Download(
+
+    @set:XmlElement
+    var link: String = "",
+
+    @set:XmlElement
+    var size: Long = 0,
+
+    @set:XmlElement
+    var checksum: String = "",
 ) : Serializable

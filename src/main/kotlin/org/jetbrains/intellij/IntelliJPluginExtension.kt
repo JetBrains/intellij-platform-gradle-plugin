@@ -99,6 +99,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * Default value: `IC`
      *
      * Acceptable values:
+     * - `AI` - Android Studio
      * - `IC` - IntelliJ IDEA Community Edition
      * - `IU` - IntelliJ IDEA Ultimate Edition
      * - `CL` - CLion

@@ -11,7 +11,10 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
+import org.gradle.kotlin.dsl.create
+import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.repositoryVersion
 import java.io.File
 import java.net.URI
 import javax.inject.Inject
@@ -80,7 +83,11 @@ open class DependenciesDownloader @Inject constructor(
     }
 }
 
-internal fun RepositoryHandler.ivyRepository(repositoryUrl: String, pattern: String = "", block: (IvyArtifactRepository.() -> Unit)? = null) =
+internal fun RepositoryHandler.ivyRepository(
+    repositoryUrl: String,
+    pattern: String = "",
+    block: (IvyArtifactRepository.() -> Unit)? = null
+) =
     ivy {
         url = URI(repositoryUrl)
         patternLayout { artifact(pattern) }
@@ -93,3 +100,14 @@ internal fun RepositoryHandler.mavenRepository(repositoryUrl: String, block: (Ma
         url = URI(repositoryUrl)
         block?.invoke(this)
     }
+
+internal fun DependenciesDownloader.getAndroidStudioReleases(context: String?) = downloadFromRepository(context, {
+    create(
+        group = "org.jetbrains",
+        name = "android-studio-products-releases",
+        version = repositoryVersion,
+        ext = "xml",
+    )
+}, {
+    ivyRepository(IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
+}).first().canonicalPath

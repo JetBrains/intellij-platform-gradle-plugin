@@ -41,6 +41,7 @@ import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.BuildFeature.SELF_UPDATE_CHECK
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
@@ -64,6 +65,7 @@ import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.LatestVersionResolver
 import org.jetbrains.intellij.utils.OpenedPackages
+import org.jetbrains.intellij.utils.getAndroidStudioReleases
 import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -71,8 +73,6 @@ import java.io.File
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatterBuilder
-import java.time.temporal.ChronoField
 import java.util.EnumSet
 import java.util.jar.Manifest
 
@@ -521,7 +521,7 @@ open class IntelliJPlugin : Plugin<Project> {
                         val url = resolveIdeUrl(type, version, buildType, context)
                         val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
                         val group = when (type) {
-                            IntelliJPluginConstants.ANDROID_STUDIO_TYPE -> "com.android"
+                            PLATFORM_TYPE_ANDROID_STUDIO -> "com.android"
                             else -> "com.jetbrains"
                         }
                         debug(context, "Downloading IDE from $url")
@@ -1070,7 +1070,7 @@ open class IntelliJPlugin : Plugin<Project> {
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
             val postInstrumentName = "post${name.capitalize()}"
-            if (postInstrumentName != IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME && postInstrumentName != IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME) {
+            if (postInstrumentName != IntelliJPluginConstants.POST_INSTRUMENT_CODE_TASK_NAME && postInstrumentName != IntelliJPluginConstants.POST_INSTRUMENT_TEST_CODE_TASK_NAME) {
                 warn(context, "Unexpected instrumentation task name: $postInstrumentName")
             }
             val updateTask = project.tasks.register(postInstrumentName) {
@@ -1314,13 +1314,6 @@ open class IntelliJPlugin : Plugin<Project> {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "List all available IntelliJ-based IDE releases with their updates."
 
-            val repositoryVersion = LocalDateTime.now().format(
-                DateTimeFormatterBuilder()
-                    .append(DateTimeFormatter.BASIC_ISO_DATE)
-                    .appendValue(ChronoField.HOUR_OF_DAY, 2)
-                    .toFormatter()
-            )
-
             updatePaths.convention(project.provider {
                 mapOf("idea-releases" to IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL).entries.map { (name, repository) ->
                     dependenciesDownloader.downloadFromRepository(logCategory(), {
@@ -1334,14 +1327,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 }
             })
             androidStudioUpdatePath.convention(project.provider {
-                dependenciesDownloader.downloadFromRepository(logCategory(), {
-                    create(
-                        group = "org.jetbrains",
-                        name = "android-studio-products-releases",
-                        version = repositoryVersion,
-                        ext = "xml",
-                    )
-                }, { ivyRepository(IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL) }).first().canonicalPath
+                dependenciesDownloader.getAndroidStudioReleases(logCategory())
             })
             outputFile.convention {
                 File(project.buildDir, "${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}.txt")

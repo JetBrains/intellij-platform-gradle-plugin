@@ -48,6 +48,10 @@ import java.io.File
 import java.io.IOException
 import java.io.StringWriter
 import java.nio.file.Files.createTempDirectory
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
 import java.util.function.Predicate
 
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
@@ -211,6 +215,15 @@ fun isKotlinRuntime(name: String) =
 fun isDependencyOnPyCharm(dependency: IdeaDependency) = dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
 
 fun isPyCharmType(type: String) = type == PLATFORM_TYPE_PYCHARM || type == PLATFORM_TYPE_PYCHARM_COMMUNITY
+
+val repositoryVersion: String by lazy {
+    LocalDateTime.now().format(
+        DateTimeFormatterBuilder()
+            .append(DateTimeFormatter.BASIC_ISO_DATE)
+            .appendValue(ChronoField.HOUR_OF_DAY, 2)
+            .toFormatter()
+    )
+}
 
 fun <T> T?.ifNull(block: () -> Unit): T? {
     if (this == null) {

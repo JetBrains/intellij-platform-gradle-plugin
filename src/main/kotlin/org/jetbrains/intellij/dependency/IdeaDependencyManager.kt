@@ -15,6 +15,7 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPES
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_GATEWAY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_GOLAND
@@ -31,12 +32,18 @@ import org.jetbrains.intellij.info
 import org.jetbrains.intellij.isDependencyOnPyCharm
 import org.jetbrains.intellij.isKotlinRuntime
 import org.jetbrains.intellij.isPyCharmType
+import org.jetbrains.intellij.model.AndroidStudioReleases
+import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.releaseType
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.getAndroidStudioReleases
+import org.jetbrains.intellij.utils.ivyRepository
 import org.jetbrains.intellij.utils.mavenRepository
 import org.jetbrains.intellij.warn
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 import javax.inject.Inject
 
@@ -157,7 +164,7 @@ open class IdeaDependencyManager @Inject constructor(
         checkVersionChange: Boolean,
     ) = archiveUtils.extract(
         zipFile,
-        cacheDirectory.resolve(zipFile.name.removeSuffix(".zip")),
+        cacheDirectory.resolve(zipFile.name.removeSuffix(".zip").removeSuffix(".tar.gz")),
         context,
         { markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange) },
         { unzippedDirectory, markerFile ->
@@ -259,43 +266,50 @@ open class IdeaDependencyManager @Inject constructor(
         debug(context, "Adding IDE repository: $repositoryUrl/$releaseType")
 
         debug(context, "Adding IDE dependency")
-        var hasSources = sources
-        val (dependencyGroup, dependencyName) = when {
-            type == PLATFORM_TYPE_INTELLIJ_ULTIMATE -> {
-                "com.jetbrains.intellij.idea" to "ideaIU"
-            }
 
-            type == PLATFORM_TYPE_INTELLIJ_COMMUNITY -> {
-                "com.jetbrains.intellij.idea" to "ideaIC"
-            }
+        val remoteIdeaDependency = when {
+            type == PLATFORM_TYPE_INTELLIJ_ULTIMATE -> RemoteIdeaDependency(
+                "com.jetbrains.intellij.idea",
+                "ideaIU"
+            )
 
-            type == PLATFORM_TYPE_CLION -> {
-                "com.jetbrains.intellij.clion" to "clion"
-            }
+            type == PLATFORM_TYPE_INTELLIJ_COMMUNITY -> RemoteIdeaDependency(
+                "com.jetbrains.intellij.idea",
+                "ideaIC"
+            )
 
-            isPyCharmType(type) -> {
-                "com.jetbrains.intellij.pycharm" to "pycharm$type"
-            }
+            type == PLATFORM_TYPE_CLION -> RemoteIdeaDependency("com.jetbrains.intellij.clion", "clion")
 
-            type == PLATFORM_TYPE_GOLAND -> {
-                "com.jetbrains.intellij.goland" to "goland"
-            }
+            isPyCharmType(type) -> RemoteIdeaDependency("com.jetbrains.intellij.pycharm", "pycharm$type")
 
-            type == PLATFORM_TYPE_PHPSTORM -> {
-                "com.jetbrains.intellij.phpstorm" to "phpstorm"
-            }
+            type == PLATFORM_TYPE_GOLAND -> RemoteIdeaDependency("com.jetbrains.intellij.goland", "goland")
 
-            type == PLATFORM_TYPE_RIDER -> {
-                if (sources && releaseType == RELEASE_TYPE_SNAPSHOTS) {
-                    warn(context, "IDE sources are not available for Rider SNAPSHOTS")
-                    hasSources = false
-                }
-                "com.jetbrains.intellij.rider" to "riderRD"
-            }
+            type == PLATFORM_TYPE_PHPSTORM -> RemoteIdeaDependency("com.jetbrains.intellij.phpstorm", "phpstorm")
 
-            type == PLATFORM_TYPE_GATEWAY -> {
+            type == PLATFORM_TYPE_RIDER ->
+                RemoteIdeaDependency("com.jetbrains.intellij.rider", "riderRD", hasSources = run {
+                    false.takeIf { sources && releaseType == RELEASE_TYPE_SNAPSHOTS }?.also {
+                        warn(context, "IDE sources are not available for Rider SNAPSHOTS")
+                    }
+                })
+
+            type == PLATFORM_TYPE_GATEWAY -> RemoteIdeaDependency(
+                "com.jetbrains.gateway",
+                "JetBrainsGateway",
                 hasSources = false
-                "com.jetbrains.gateway" to "JetBrainsGateway"
+            )
+
+            type == PLATFORM_TYPE_ANDROID_STUDIO -> RemoteIdeaDependency(
+                "com.google.android.studio",
+                "android-studio",
+                hasSources = false,
+                artifactExtension = "tar.gz"
+            ) {
+                with(it.toPath()) {
+                    Files.list(resolve("android-studio")).forEach { entry ->
+                        Files.move(entry, resolve(entry.fileName), StandardCopyOption.REPLACE_EXISTING)
+                    }
+                }
             }
 
             else -> {
@@ -305,26 +319,48 @@ open class IdeaDependencyManager @Inject constructor(
 
         val classesDirectory = dependenciesDownloader.downloadFromRepository(context, {
             create(
-                group = dependencyGroup,
-                name = dependencyName,
+                group = remoteIdeaDependency.group,
+                name = remoteIdeaDependency.name,
                 version = version,
+                ext = remoteIdeaDependency.artifactExtension,
             )
         }, {
-            mavenRepository("$repositoryUrl/$releaseType")
+            when (type) {
+                PLATFORM_TYPE_ANDROID_STUDIO -> {
+                    val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context)
+                        .fetch(dependenciesDownloader.getAndroidStudioReleases(context))
+                        ?: throw GradleException("Cannot resolve Android Studio Releases list")
+
+                    val release = androidStudioReleases.items.find {
+                        it.version == version || it.build == "$PLATFORM_TYPE_ANDROID_STUDIO-$version"
+                    } ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
+
+                    val url = release.downloads.find {
+                        it.link.endsWith("-linux.tar.gz")
+                    }?.link ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
+
+                    ivyRepository(url)
+                }
+
+                else -> {
+                    mavenRepository("$repositoryUrl/$releaseType")
+                }
+            }
         }).first().let {
             debug(context, "IDE zip: " + it.path)
             unzipDependencyFile(getZipCacheDirectory(it, project, type), it, type, version.endsWith(RELEASE_SUFFIX_SNAPSHOT))
+                .also(remoteIdeaDependency.postProcess)
         }
 
         info(context, "IDE dependency cache directory: $classesDirectory")
         val buildNumber = ideBuildNumber(classesDirectory)
         val sourcesDirectory = when {
-            hasSources -> resolveSources(version, type)
+            remoteIdeaDependency.hasSources ?: sources -> resolveSources(version, type)
             else -> null
         }
         val resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
         return createDependency(
-            dependencyName,
+            remoteIdeaDependency.name,
             type,
             version,
             buildNumber,
@@ -426,4 +462,12 @@ open class IdeaDependencyManager @Inject constructor(
         }
         return null
     }
+
+    private data class RemoteIdeaDependency(
+        val group: String,
+        val name: String,
+        val hasSources: Boolean? = null,
+        val artifactExtension: String = "zip",
+        val postProcess: (File) -> Unit = {},
+    )
 }

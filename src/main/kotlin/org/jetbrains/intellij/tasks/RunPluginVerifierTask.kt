@@ -23,6 +23,7 @@ import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
@@ -462,7 +463,7 @@ open class RunPluginVerifierTask @Inject constructor(
         }
 
         val buildTypes = when (type) {
-            IntelliJPluginConstants.ANDROID_STUDIO_TYPE -> listOf("")
+            PLATFORM_TYPE_ANDROID_STUDIO -> listOf("")
             else -> listOf("release", "rc", "eap", "beta")
         }
 
@@ -491,7 +492,7 @@ open class RunPluginVerifierTask @Inject constructor(
      * @return direct download URL prepended with [CACHE_REDIRECTOR] host
      */
     internal fun resolveIdeUrl(type: String, version: String, buildType: String, context: String?): String {
-        val isAndroidStudio = type == IntelliJPluginConstants.ANDROID_STUDIO_TYPE
+        val isAndroidStudio = type == PLATFORM_TYPE_ANDROID_STUDIO
         val url = when {
             isAndroidStudio -> "$ANDROID_STUDIO_DOWNLOAD_URL/$version/android-studio-$version-linux.tar.gz"
             else -> "$IDEA_DOWNLOAD_URL?code=$type&platform=linux&type=$buildType&${versionParameterName(version)}=$version"
