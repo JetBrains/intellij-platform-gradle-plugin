@@ -1,0 +1,7 @@
+<idea-plugin>
+    <id>org.jetbrains.plugins.integration-tests.test-task-build-cache</id>
+    <name>Test Task Cache-ability</name>
+    <vendor>JetBrains</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+</idea-plugin>

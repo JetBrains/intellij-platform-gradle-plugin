@@ -1,9 +1,13 @@
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.FileVisitResult
 import java.nio.file.Path
+import java.nio.file.SimpleFileVisitor
+import java.nio.file.attribute.BasicFileAttributes
 import java.util.zip.ZipFile
 
 /**
@@ -38,6 +42,13 @@ val Path.testsRootDirectory
  */
 val Path.rootDirectory
     get() = testsRootDirectory.parent
+
+/**
+ * Path to the Gradle Build Cache directory,
+ * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build-cache/`.
+ */
+val Path.buildCacheDirectory
+    get() = projectDirectory.resolve("build-cache")
 
 /**
  * Path to the build directory of the integration tests single project,
@@ -112,7 +123,7 @@ val Path.pluginsCacheDirectory
  * Runs the given Gradle task(s) within the current integration test.
  * Provides logs to STDOUT and as a returned value for further assertions.
  */
-fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any> = emptyMap()) =
+fun Path.runGradleTask(vararg tasks: String, additionalSwitches: List<String> = emptyList(), projectProperties: Map<String, Any> = emptyMap()) =
     ProcessBuilder()
         .command(
             gradleWrapper.toString(),
@@ -124,10 +135,16 @@ fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any>
                 }
                 .map { "-P${it.key}=${it.value}" }.toTypedArray(),
             *tasks.map { ":$projectName:$it" }.toTypedArray(),
+            *additionalSwitches.toTypedArray(),
             "--info",
             "--stacktrace",
         )
-        .apply { environment().put("INTEGRATION_TEST", projectName) }
+        .apply {
+            environment().apply {
+                put("INTEGRATION_TEST", projectName)
+                put("BUILD_CACHE_DIR", buildCacheDirectory.toString())
+            }
+        }
         .directory(projectDirectory.toFile())
         .start()
         .run {
@@ -165,7 +182,7 @@ infix fun String.matchesRegex(regex: Regex) {
 }
 
 infix fun Path.containsFile(path: String) {
-    assert(resolve(path).let(Files::exists))
+    assert(resolve(path).let(Files::exists)) { "'$path' does not exist" }
 }
 
 infix fun Path.containsFileInArchive(path: String) {
@@ -176,6 +193,20 @@ infix fun Path.containsFileInArchive(path: String) {
 infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
     val entry = zip.getEntry(path)
     zip.getInputStream(entry).bufferedReader().use { it.readText() }
+}
+
+fun Path.deleteRecursively() {
+    Files.walkFileTree(this, object : SimpleFileVisitor<Path>() {
+        override fun postVisitDirectory(dir: Path, exc: IOException?): FileVisitResult {
+            Files.delete(dir)
+            return FileVisitResult.CONTINUE
+        }
+
+        override fun visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult {
+            Files.delete(file)
+            return FileVisitResult.CONTINUE
+        }
+    })
 }
 
 class TeeOutputStream(vararg targets: OutputStream) : OutputStream() {

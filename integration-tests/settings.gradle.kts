@@ -29,3 +29,10 @@ if (!System.getenv().containsKey("INTEGRATION_TEST")) {
     throw GradleException("INTEGRATION_TEST environment variable has to be provided with the integration test subroject name specified.")
 }
 include(System.getenv().get("INTEGRATION_TEST"))
+
+buildCache {
+    local {
+        directory = File(System.getenv("BUILD_CACHE_DIR"))
+        removeUnusedEntriesAfterDays = 1
+    }
+}
