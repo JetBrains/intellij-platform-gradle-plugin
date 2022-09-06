@@ -5,7 +5,7 @@ on:
     inputs:
       platformVersion:
         required: false
-        default: 2022.1.1
+        default: 2022.1.4
         type: string
 
 jobs:
