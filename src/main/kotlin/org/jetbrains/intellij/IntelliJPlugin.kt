@@ -3,6 +3,7 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.base.utils.hasExtension
+import com.jetbrains.plugin.structure.base.utils.isDirectory
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
@@ -1169,7 +1170,7 @@ open class IntelliJPlugin : Plugin<Project> {
             task.doFirst {
                 task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get()) + OpenedPackages
                 task.classpath += ideaDependencyLibrariesProvider.get()
-                task.classpath -= task.classpath.filter { !it.toPath().isJar() }
+                task.classpath -= task.classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
 
                 // Rearrange classpath to put idea and plugins in the right order.
                 task.classpath -= ideaConfigurationFiles.get()
