@@ -1,6 +1,10 @@
 # Changelog
 
 ## next
+### Fixed
+- Invalidate instrumented classes bound to forms if GUI changed [IDEA-298989](https://youtrack.jetbrains.com/issue/IDEA-298989/Duplicate-method-name-getFont)
+
+## [1.9.0]
 ### Added
 - Configure classpath for run-based tasks using `package-info.json` provided with IntelliJ SDK 2022.3+
 - The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#tasks-verifypluginconfiguration) task for validating the plugin project configuration.

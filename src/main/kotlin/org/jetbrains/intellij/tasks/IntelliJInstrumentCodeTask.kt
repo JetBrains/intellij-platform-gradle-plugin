@@ -6,7 +6,6 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createParentDirs
 import com.jetbrains.plugin.structure.base.utils.deleteLogged
-import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.isDirectory
 import groovy.lang.Closure
 import org.gradle.api.file.FileType
@@ -104,7 +103,9 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             val relativePath = sourceDir.relativize(path)
 
             val compiledClassRelativePath = relativePath.toString().replace(".form", ".class")
-            val compiledClassPath = outputDirPath.resolve(compiledClassRelativePath).takeIf { it.exists() } ?: return@forEach
+            val compiledClassPath = classesDirs.asFileTree.find {
+                it.endsWith(compiledClassRelativePath)
+            }?.takeIf { it.exists() }?.toPath() ?: return@forEach
             val instrumentedClassPath = temporaryDirPath.resolve(compiledClassRelativePath)
             Files.copy(compiledClassPath, instrumentedClassPath, StandardCopyOption.REPLACE_EXISTING)
         }
