@@ -113,8 +113,10 @@ Alternatively, set this environment variable in [Preferences | Tools | Terminal]
 | attaching-plugin-bundled-sources       | Verifies if plugin bundled source JARs are attached in the Ivy file as source artefacts.     |
 | attaching-plugin-sources-from-ide-dist | Verifies if sources provided in the IDE distribution are attached to plugin dependency.      |
 | build-features                         | Tests enabling/disabling build features. See: `org.jetbrains.intellij.BuildFeature`.         |
+| classpath                              | Verifies if custom dependency is added to configurations classpath in proper order.          |
 | instrumentation-task                   | Process only Java and Swing form files during the code instrumentation.                      |
 | instrumentation-task-disabled          | Check if plugin is correctly assembled with the instrumentation task manually disabled.      |
 | jar-manifest-file                      | Verifies the `MANIFEST.MF` file generated and bundled within the produced JAR.               |
 | plugin-xml-patching                    | Verifies if the content of the generated `plugin.xml` file has properties correctly updated. |
 | throwing-exceptions                    | Forces plugin to throw exceptions due to misconfigurations or other unexpected behaviours.   |
+| verify-plugin-configuration            | Forces plugin to show warnings about improper Java/Kotlin configurations.                    |
