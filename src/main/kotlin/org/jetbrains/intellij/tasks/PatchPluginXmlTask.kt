@@ -51,6 +51,13 @@ open class PatchPluginXmlTask @Inject constructor(
     val pluginXmlFiles = objectFactory.listProperty<File>()
 
     /**
+     * The name of the plugin – will be set to the `<name>` tag.
+     */
+    @get:Input
+    @get:Optional
+    val pluginName = objectFactory.property<String>()
+
+    /**
      * The description of the plugin – will be set to the `<description>` tag.
      */
     @get:Input
@@ -111,6 +118,9 @@ open class PatchPluginXmlTask @Inject constructor(
                 }
                 untilBuild.orNull?.let {
                     patchAttribute(document, "idea-version", "until-build", it)
+                }
+                pluginName.orNull?.let {
+                    patchTag(document, "name", it)
                 }
                 pluginDescription.orNull?.let {
                     patchTag(document, "description", it)

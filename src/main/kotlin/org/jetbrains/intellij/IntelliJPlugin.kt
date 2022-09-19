@@ -320,6 +320,7 @@ open class IntelliJPlugin : Plugin<Project> {
             version.convention(project.provider {
                 project.version.toString()
             })
+            pluginName.convention(extension.pluginName)
             pluginXmlFiles.convention(project.provider {
                 sourcePluginXmlFiles(project)
             })

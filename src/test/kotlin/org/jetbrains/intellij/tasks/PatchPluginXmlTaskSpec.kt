@@ -72,6 +72,35 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `patch name`() {
+        pluginXml.xml("""
+            <idea-plugin>
+              <name>Foo</name>
+            </idea-plugin>
+        """)
+
+        buildFile.groovy("""
+            version = '0.42.123'
+            intellij {
+                version = '14.1.4'
+                pluginName = 'Bar'
+            }
+        """)
+
+        val output = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).output
+
+        assertFileContent(patchedPluginXml.value, """
+            <idea-plugin>
+              <version>0.42.123</version>
+              <idea-version since-build="141.1532" until-build="141.*" />
+              <name>Bar</name>
+            </idea-plugin>
+        """)
+
+        assertFalse(output.contains("will be overwritten"))
+    }
+
+    @Test
     fun `patch patching preserves UTF-8 characters`() {
         pluginXml.xml("""
            <idea-plugin someattr="\u2202" /> 

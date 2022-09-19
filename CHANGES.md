@@ -1,6 +1,10 @@
 # Changelog
 
 ## next
+### Fixed
+- Use the `intellij.pluginName` in `patchPluginXml` task to patch the `plugin.xml` file with the given value
+
+## [1.9.0]
 ### Added
 - Configure classpath for run-based tasks using `package-info.json` provided with IntelliJ SDK 2022.3+
 - The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#tasks-verifypluginconfiguration) task for validating the plugin project configuration.
