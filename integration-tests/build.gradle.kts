@@ -27,8 +27,8 @@ subprojects {
         mavenCentral()
     }
 
-    java {
-        toolchain {
+    kotlin {
+        jvmToolchain {
             languageVersion.set(JavaLanguageVersion.of(11))
         }
     }
