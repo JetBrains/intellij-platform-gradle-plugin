@@ -2,6 +2,8 @@
 
 @file:Import("../verify.utils.kts")
 
+import java.nio.file.Files
+
 __FILE__.init {
     runGradleTask("dependencies").let { logs ->
         val safeLogs = logs.lineSequence().filterNot { it.startsWith("[gradle-intellij-plugin") }.joinToString("\n")
@@ -31,5 +33,26 @@ __FILE__.init {
             z90_intellij
             \--- com.jetbrains:ideaIC:2022.1
         """.trimIndent()
+    }
+
+    runGradleTask("clean", "build").let { logs ->
+        logs containsText "[ant:jacocoReport] Writing bundle 'classpath' with 1 classes"
+
+        buildDirectory.resolve("jacoco/test.exec").run {
+            assert(Files.exists(this))
+        }
+
+        buildDirectory.resolve("reports/jacoco.xml").run {
+            assert(Files.exists(this))
+
+            this containsText """
+                <method name="getRandomNumber" desc="()I" line="7">
+                    <counter type="INSTRUCTION" missed="0" covered="2"/>
+                    <counter type="LINE" missed="0" covered="1"/>
+                    <counter type="COMPLEXITY" missed="0" covered="1"/>
+                    <counter type="METHOD" missed="0" covered="1"/>
+                </method>
+            """.lines().joinToString("", transform = String::trim)
+        }
     }
 }
