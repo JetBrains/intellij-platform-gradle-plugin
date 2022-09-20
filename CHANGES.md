@@ -9,6 +9,9 @@
 ### Changed
 - Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
 
+### Fixed
+- Revert pushing project resource directories to the end of classpath in the test task context. ([#1101](../../../1161)) 
+
 ## [1.8.1]
 ### Added
 - Configure classpath for run-based tasks using `Info.plist` provided with IntelliJ SDK 2022.3+
