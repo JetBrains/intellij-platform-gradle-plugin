@@ -1,0 +1,7 @@
+<idea-plugin>
+    <id>org.jetbrains.plugins.integration-tests.test-classpath-project-resources</id>
+    <name>Any</name>
+    <vendor>Any</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+</idea-plugin>
