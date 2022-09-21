@@ -1137,8 +1137,8 @@ open class IntelliJPlugin : Plugin<Project> {
             project.files(project.configurations.getByName(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).resolve())
         }
 
-        testTasks.forEach { task ->
-            task.enableAssertions = true
+        testTasks.configureEach {
+            enableAssertions = true
 
             // appClassLoader should be used for user's plugins. Otherwise, classes it won't be possible to use
             // its classes of application components or services in tests: class loaders will be different for
@@ -1146,39 +1146,39 @@ open class IntelliJPlugin : Plugin<Project> {
             //
             // The proper way to handle that is to substitute Gradle's test class-loader and teach it
             // to understand PluginClassLoaders. Unfortunately, I couldn't find a way to do that.
-            task.systemProperty("idea.use.core.classloader.for.plugin.path", "true")
-            task.systemProperty("idea.force.use.core.classloader", "true")
+            systemProperty("idea.use.core.classloader.for.plugin.path", "true")
+            systemProperty("idea.force.use.core.classloader", "true")
             // the same as previous – setting appClassLoader but outdated. Works for part of 203 builds.
-            task.systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
+            systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            task.outputs.dir(systemDirectoryProvider)
+            outputs.dir(systemDirectoryProvider)
                 .withPropertyName("System directory")
-            task.inputs.dir(configDirectoryProvider)
+            inputs.dir(configDirectoryProvider)
                 .withPropertyName("Config Directory")
                 .withPathSensitivity(PathSensitivity.RELATIVE)
-            task.inputs.files(pluginsDirectoryProvider)
+            inputs.files(pluginsDirectoryProvider)
                 .withPropertyName("Plugins directory")
                 .withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class.java)
 
-            task.dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
-            task.dependsOn(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
-            task.finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+            dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+            dependsOn(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME)
+            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
-            task.doFirst {
-                task.jvmArgs = getIdeJvmArgs(task, task.jvmArgs, ideDirProvider.get()) + OpenedPackages
-                task.classpath += ideaDependencyLibrariesProvider.get()
-                task.classpath -= task.classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
+            doFirst {
+                jvmArgs = getIdeJvmArgs((this as Test), jvmArgs, ideDirProvider.get()) + OpenedPackages
+                classpath += ideaDependencyLibrariesProvider.get()
+                classpath -= classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
 
                 // Rearrange classpath to put idea and plugins in the right order.
-                task.classpath -= ideaConfigurationFiles.get()
-                task.classpath -= ideaPluginsConfigurationFiles.get()
-                task.classpath += ideaConfigurationFiles.get() + ideaPluginsConfigurationFiles.get()
+                classpath -= ideaConfigurationFiles.get()
+                classpath -= ideaPluginsConfigurationFiles.get()
+                classpath += ideaConfigurationFiles.get() + ideaPluginsConfigurationFiles.get()
 
                 // Add source roots to the classpath.
-                task.classpath += sourceSetsOutputs.get()
+                classpath += sourceSetsOutputs.get()
 
-                task.systemProperties(
+                systemProperties(
                     getIdeaSystemProperties(
                         configDirectoryProvider.get(),
                         systemDirectoryProvider.get(),
@@ -1192,7 +1192,7 @@ open class IntelliJPlugin : Plugin<Project> {
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
                 val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                 if (ideVersion.baselineVersion >= 193) {
-                    task.systemProperty(
+                    systemProperty(
                         IntelliJPluginConstants.PLUGIN_PATH,
                         pluginsDirectoryProvider.get().listFiles()?.joinToString("${File.pathSeparator},") { it.path }.orEmpty(),
                     )
