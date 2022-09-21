@@ -3,8 +3,9 @@
 ## next
 ### Fixed
 - Invalidate instrumented classes bound to forms if GUI changed [IDEA-298989](https://youtrack.jetbrains.com/issue/IDEA-298989/Duplicate-method-name-getFont)
-- Revert pushing project resource directories to the end of classpath in the test task context. ([#1101](../../../1161))
-- replace internal Gradle ConventionTask with DefaultTask 
+- Revert pushing project resource directories to the end of classpath in the test task context. ([#1101](../../issues/1101))
+- Avoid unnecessary task configuration during Gradle configuration phase [#1110](../../issues/1110) by @3flex
+- Replace internal Gradle ConventionTask with DefaultTask [#1115](../../issues/1115) by @aSemy
 
 ## [1.9.0]
 ### Added
