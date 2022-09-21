@@ -16,6 +16,13 @@ plugins {
     id("org.jetbrains.dokka") version "1.7.10"
 }
 
+version = when (properties("snapshot")?.toBoolean() ?: false) {
+    true -> "${properties("snapshotVersion")}-SNAPSHOT"
+    false -> properties("version")
+}.orEmpty()
+group = properties("group")!!
+description = properties("description")!!
+
 repositories {
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
     maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
@@ -50,30 +57,20 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
-version = when (properties("snapshot")?.toBoolean() ?: false) {
-    true -> "${properties("snapshotVersion")}-SNAPSHOT"
-    false -> properties("version")
-}.orEmpty()
-group = "org.jetbrains.intellij.plugins"
-description = """
-The Gradle IntelliJ Plugin is a plugin for the Gradle build system to help configuring your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
-
-For more information, see [Gradle IntelliJ Plugin documentation](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html).
-"""
-
 gradlePlugin {
     plugins.create("intellijPlugin") {
-        id = "org.jetbrains.intellij"
-        displayName = "Gradle IntelliJ Plugin"
-        implementationClass = "org.jetbrains.intellij.IntelliJPlugin"
+        id = properties("pluginId")
+        displayName = properties("pluginDisplayName")
+        implementationClass = properties("pluginImplementationClass")
+        description = project.description
     }
 }
 
 pluginBundle {
-    website = "https://github.com/JetBrains/gradle-intellij-plugin"
-    vcsUrl = "https://github.com/JetBrains/gradle-intellij-plugin"
+    website = properties("website")
+    vcsUrl = properties("vcsUrl")
+    tags = properties("tags")?.split(',')
     description = project.description
-    tags = listOf("intellij", "jetbrains", "idea")
 }
 
 tasks {
@@ -133,7 +130,7 @@ publishing {
     repositories {
         maven {
             name = "snapshot"
-            url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+            url = uri(properties("snapshotUrl")!!)
             credentials {
                 username = properties("ossrhUsername")
                 password = properties("ossrhPassword")
@@ -142,23 +139,23 @@ publishing {
     }
     publications {
         create<MavenPublication>("snapshot") {
-            groupId = "org.jetbrains.intellij"
-            artifactId = "org.jetbrains.intellij.gradle.plugin"
+            groupId = properties("pluginId")
+            artifactId = properties("artifactId")
             version = version.toString()
 
             from(components["java"])
 
             pom {
-                name.set("Gradle IntelliJ Plugin")
+                name.set(properties("pluginDisplayName"))
                 description.set(project.description)
-                url.set("https://github.com/JetBrains/gradle-intellij-plugin")
+                url.set(properties("website"))
 
                 packaging = "jar"
 
                 scm {
-                    connection.set("scm:git:https://github.com/JetBrains/gradle-intellij-plugin/")
-                    developerConnection.set("scm:git:https://github.com/JetBrains/gradle-intellij-plugin/")
-                    url.set("https://github.com/JetBrains/gradle-intellij-plugin/")
+                    connection.set(properties("scmUrl"))
+                    developerConnection.set(properties("scmUrl"))
+                    url.set(properties("vcsUrl"))
                 }
 
                 licenses {
