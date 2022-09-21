@@ -165,18 +165,16 @@ open class IntelliJPlugin : Plugin<Project> {
 
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring plugin")
-        project.tasks.whenTaskAdded {
-            if (this is RunIdeBase) {
-                prepareConventionMappingsForRunIdeTask(project, extension, this, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
-            }
-            if (this is RunIdeForUiTestTask) {
-                prepareConventionMappingsForRunIdeTask(
-                    project,
-                    extension,
-                    this,
-                    IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
-                )
-            }
+        project.tasks.withType(RunIdeBase::class.java).configureEach {
+            prepareConventionMappingsForRunIdeTask(project, extension, this, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+        }
+        project.tasks.withType(RunIdeForUiTestTask::class.java).configureEach {
+            prepareConventionMappingsForRunIdeTask(
+                project,
+                extension,
+                this,
+                IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+            )
         }
         configureSetupDependenciesTask(project, extension)
         configureClassPathIndexCleanupTask(project)
