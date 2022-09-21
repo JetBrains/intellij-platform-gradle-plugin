@@ -859,7 +859,7 @@ open class IntelliJPlugin : Plugin<Project> {
         val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
 
         if (extension.instrumentCode.get()) {
-            jarTaskProvider.get().duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+            jarTaskProvider.configure { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
         }
 
         val setupInstrumentCodeTaskProvider =
