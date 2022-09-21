@@ -4,19 +4,12 @@
 
 package org.jetbrains.intellij.tasks
 
-import com.jetbrains.plugin.structure.base.utils.createParentDirs
-import com.jetbrains.plugin.structure.base.utils.deleteLogged
-import com.jetbrains.plugin.structure.base.utils.isDirectory
+import com.jetbrains.plugin.structure.base.utils.*
 import groovy.lang.Closure
 import org.gradle.api.file.FileType
 import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.property
 import org.gradle.tooling.BuildException
@@ -24,6 +17,7 @@ import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.ifFalse
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 import java.io.File
@@ -106,7 +100,10 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
             val compiledClassPath = classesDirs.asFileTree.find {
                 it.endsWith(compiledClassRelativePath)
             }?.takeIf { it.exists() }?.toPath() ?: return@forEach
-            val instrumentedClassPath = temporaryDirPath.resolve(compiledClassRelativePath)
+            val instrumentedClassPath = temporaryDirPath.resolve(compiledClassRelativePath).also {
+                it.exists().ifFalse(it::create)
+            }
+
             Files.copy(compiledClassPath, instrumentedClassPath, StandardCopyOption.REPLACE_EXISTING)
         }
 
