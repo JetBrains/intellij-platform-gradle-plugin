@@ -9,6 +9,19 @@ __FILE__.init {
         val safeLogs = logs.lineSequence().filterNot { it.startsWith("[gradle-intellij-plugin") }.joinToString("\n")
 
         safeLogs containsText """
+            \--- org.jetbrains:markdown:0.3.1
+                 \--- org.jetbrains:markdown-jvm:0.3.1
+                      +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
+                      |    +--- org.jetbrains:annotations:13.0
+                      |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
+                      \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
+        """.trimIndent()
+    }
+
+    runGradleTask("setupDependencies", "dependencies").let { logs ->
+        val safeLogs = logs.lineSequence().filterNot { it.startsWith("[gradle-intellij-plugin") }.joinToString("\n")
+
+        safeLogs containsText """
             +--- org.jetbrains:markdown:0.3.1
             |    \--- org.jetbrains:markdown-jvm:0.3.1
             |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
