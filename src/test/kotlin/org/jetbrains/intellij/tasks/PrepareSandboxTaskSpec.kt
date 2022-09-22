@@ -68,7 +68,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
-        build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -155,7 +155,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
-        build(":${IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME}")
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
 
         assertEquals(
             setOf(
