@@ -39,9 +39,7 @@ import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
-import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
-import org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
-import org.jetbrains.intellij.BuildFeature.SELF_UPDATE_CHECK
+import org.jetbrains.intellij.BuildFeature.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
@@ -50,31 +48,20 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
-import org.jetbrains.intellij.dependency.IdeaDependency
-import org.jetbrains.intellij.dependency.IdeaDependencyManager
-import org.jetbrains.intellij.dependency.PluginDependency
-import org.jetbrains.intellij.dependency.PluginDependencyManager
-import org.jetbrains.intellij.dependency.PluginDependencyNotation
-import org.jetbrains.intellij.dependency.PluginProjectDependency
+import org.jetbrains.intellij.dependency.*
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.MavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.performanceTest.ProfilerName
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.tasks.*
-import org.jetbrains.intellij.utils.ArchiveUtils
-import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.utils.LatestVersionResolver
-import org.jetbrains.intellij.utils.OpenedPackages
-import org.jetbrains.intellij.utils.getAndroidStudioReleases
-import org.jetbrains.intellij.utils.ivyRepository
-import org.jetbrains.intellij.utils.mavenRepository
+import org.jetbrains.intellij.utils.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.EnumSet
+import java.util.*
 import java.util.jar.Manifest
 
 @Suppress("UnstableApiUsage")
@@ -166,13 +153,16 @@ open class IntelliJPlugin : Plugin<Project> {
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring plugin")
         project.tasks.withType(RunIdeBase::class.java).configureEach {
-            prepareConventionMappingsForRunIdeTask(project, extension, this, IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME)
+            prepareConventionMappingsForRunIdeTask(
+                project,
+                extension,
+                IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
+            )
         }
         project.tasks.withType(RunIdeForUiTestTask::class.java).configureEach {
             prepareConventionMappingsForRunIdeTask(
                 project,
                 extension,
-                this,
                 IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
             )
         }
@@ -776,38 +766,37 @@ open class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun prepareConventionMappingsForRunIdeTask(
+    private fun RunIdeBase.prepareConventionMappingsForRunIdeTask(
         project: Project,
         extension: IntelliJPluginExtension,
-        task: RunIdeBase,
         prepareSandBoxTaskName: String,
     ) {
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
         val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
 
-        val taskContext = task.logCategory()
+        val taskContext = logCategory()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
-        task.ideDir.convention(setupDependenciesTaskProvider.get().idea.map { project.file(it.classes.path) })
-        task.requiredPluginIds.convention(project.provider {
+        ideDir.convention(setupDependenciesTaskProvider.get().idea.map { project.file(it.classes.path) })
+        requiredPluginIds.convention(project.provider {
             pluginIds
         })
-        task.configDir.convention(prepareSandboxTaskProvider.get().configDir.map { project.file(it) })
-        task.pluginsDir.convention(project.provider {
+        configDir.convention(prepareSandboxTaskProvider.get().configDir.map { project.file(it) })
+        pluginsDir.convention(project.provider {
             val path = prepareSandboxTaskProvider.get().destinationDir.path
             project.layout.projectDirectory.dir(path)
         })
-        task.systemDir.convention(project.provider {
+        systemDir.convention(project.provider {
             project.file("${extension.sandboxDir.get()}/system")
         })
-        task.autoReloadPlugins.convention(project.provider {
-            val number = ideBuildNumber(task.ideDir.get())
+        autoReloadPlugins.convention(project.provider {
+            val number = ideBuildNumber(ideDir.get())
             Version.parse(number.split('-').last()) >= Version.parse("202.0")
         })
-        task.projectWorkingDir.convention(project.provider {
-            project.file("${task.ideDir.get()}/bin/")
+        projectWorkingDir.convention(project.provider {
+            project.file("${ideDir.get()}/bin/")
         })
-        task.projectExecutable.convention(project.provider {
+        projectExecutable.convention(project.provider {
             val jbrResolver = project.objects.newInstance(
                 JbrResolver::class.java,
                 extension.jreRepository.orNull.orEmpty(),
@@ -818,13 +807,13 @@ open class IntelliJPlugin : Plugin<Project> {
             )
 
             jbrResolver.resolveRuntime(
-                jbrVersion = task.jbrVersion.orNull,
-                jbrVariant = task.jbrVariant.orNull,
-                ideDir = task.ideDir.orNull,
+                jbrVersion = jbrVersion.orNull,
+                jbrVariant = jbrVariant.orNull,
+                ideDir = ideDir.orNull,
             )
         })
 
-        task.dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+        dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
     }
 
     private fun configureJarSearchableOptionsTask(project: Project) {
