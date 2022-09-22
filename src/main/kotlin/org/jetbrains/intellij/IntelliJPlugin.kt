@@ -396,39 +396,36 @@ open class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring $taskName task")
 
         val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+
+        jarTaskProvider.configure {
+            exclude("**/classpath.index")
+            manifest.attributes(
+                "Created-By" to "Gradle ${project.gradle.gradleVersion}",
+                "Build-JVM" to Jvm.current(),
+                "Version" to project.version,
+                "Build-Plugin" to IntelliJPluginConstants.NAME,
+                "Build-Plugin-Version" to (getCurrentVersion() ?: "0.0.0"),
+                "Build-OS" to OperatingSystem.current(),
+                "Build-SDK" to when (extension.localPath.orNull) {
+                    null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
+                    else -> setupDependenciesTaskProvider.get().idea.get().classes.let { ideaClasses ->
+                        ideProductInfo(ideaClasses)
+                            ?.run { "$productCode-$version" }
+                        // Fall back on build number if product-info.json is not present, this is the case
+                        // for recent versions of Android Studio.
+                            ?: ideBuildNumber(ideaClasses)
+                    }
+                },
+            )
+        }
 
         project.tasks.register(taskName, PrepareSandboxTask::class.java) {
             group = IntelliJPluginConstants.GROUP_NAME
             description = "Prepares sandbox directory with installed plugin and its dependencies."
 
             pluginName.convention(extension.pluginName)
-            pluginJar.convention(project.layout.file(project.provider {
-                val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
-                val jarTask = jarTaskProvider.get()
-
-                jarTask.run {
-                    exclude("**/classpath.index")
-                    manifest.attributes(
-                        "Created-By" to "Gradle ${project.gradle.gradleVersion}",
-                        "Build-JVM" to Jvm.current(),
-                        "Version" to project.version,
-                        "Build-Plugin" to IntelliJPluginConstants.NAME,
-                        "Build-Plugin-Version" to (getCurrentVersion() ?: "0.0.0"),
-                        "Build-OS" to OperatingSystem.current(),
-                        "Build-SDK" to when (extension.localPath.orNull) {
-                            null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
-                            else -> setupDependenciesTaskProvider.get().idea.get().classes.let { ideaClasses ->
-                                ideProductInfo(ideaClasses)
-                                    ?.run { "$productCode-$version" }
-                                // Fall back on build number if product-info.json is not present, this is the case
-                                // for recent versions of Android Studio.
-                                    ?: ideBuildNumber(ideaClasses)
-                            }
-                        },
-                    )
-                    archiveFile.orNull?.asFile
-                }
-            }))
+            pluginJar.convention(jarTaskProvider.get().archiveFile)
             defaultDestinationDir.convention(project.provider {
                 project.file("${extension.sandboxDir.get()}/plugins$testSuffix")
             })
