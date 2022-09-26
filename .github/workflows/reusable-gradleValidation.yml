@@ -2,9 +2,6 @@ name: Reusable Gradle Wrapper Test
 
 on: [ workflow_call ]
 
-env:
-  XDG_CACHE_HOME: "~/.config/"
-
 jobs:
   gradleValidation:
     name: Gradle Wrapper
