@@ -170,7 +170,7 @@ infix fun Path.containsFile(path: String) {
 
 infix fun Path.containsFileInArchive(path: String) {
     val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
-    assert(fs.getPath(path).let(Files::exists)) { "expect '$this' contains file in archive '$string'" }
+    assert(fs.getPath(path).let(Files::exists)) { "expect '$this' contains file in archive '$path'" }
 }
 
 infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
