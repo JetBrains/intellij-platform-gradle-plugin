@@ -1,6 +1,9 @@
 name: Reusable test workflow
 
-on: [workflow_call]
+on: [ workflow_call ]
+
+env:
+  XDG_CACHE_HOME: "~/.config/"
 
 jobs:
   codeInspection:

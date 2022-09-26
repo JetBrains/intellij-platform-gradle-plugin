@@ -8,6 +8,9 @@ on:
         default: 2022.1.4
         type: string
 
+env:
+  XDG_CACHE_HOME: "~/.config/"
+
 jobs:
   subtasksList:
     name: Prepare Environment
@@ -31,11 +34,11 @@ jobs:
         with:
           cache-read-only: false
 
-      - name: Cache pluginVerifier
+      - name: Cache XDG_CACHE_HOME
         uses: actions/cache@v3
         with:
-          path: ~/.pluginVerifier
-          key: ${{ runner.os }}-pluginVerifier
+          path: ~/$XDG_CACHE_HOME
+          key: ${{ runner.os }}-XDG_CACHE_HOME
 
       - name: Collect Available Modules
         id: set-modules
@@ -79,6 +82,12 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
+
+      - name: Cache XDG_CACHE_HOME
+        uses: actions/cache@v3
+        with:
+          path: ~/$XDG_CACHE_HOME
+          key: ${{ runner.os }}-XDG_CACHE_HOME
 
       - uses: actions/download-artifact@v3
         with:
