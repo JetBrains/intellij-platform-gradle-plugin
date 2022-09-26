@@ -28,6 +28,12 @@ jobs:
         with:
           cache-read-only: false
 
+      - name: Cache pluginVerifier
+        uses: actions/cache@v3
+        with:
+          path: ~/.pluginVerifier
+          key: ${{ runner.os }}-pluginVerifier
+
       # Set environment variables
       - name: Export Properties
         id: properties

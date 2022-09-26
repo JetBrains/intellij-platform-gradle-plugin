@@ -44,6 +44,12 @@ jobs:
         with:
           cache-read-only: false
 
+      - name: Cache pluginVerifier
+        uses: actions/cache@v3
+        with:
+          path: ~/.pluginVerifier
+          key: ${{ runner.os }}-pluginVerifier
+
       - name: Run Tests
         run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
 
