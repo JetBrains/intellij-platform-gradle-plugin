@@ -75,6 +75,12 @@ jobs:
         with:
           cache-read-only: false
 
+      - name: Cache pluginVerifier
+        uses: actions/cache@v3
+        with:
+          path: ~/.pluginVerifier
+          key: ${{ runner.os }}-pluginVerifier
+
       # Publish the plugin to the Gradle Plugins
       - name: Publish Plugin
         env:
