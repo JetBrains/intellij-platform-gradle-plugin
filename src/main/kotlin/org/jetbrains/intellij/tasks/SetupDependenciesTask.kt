@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 open class SetupDependenciesTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask() {
+) : DefaultTask() {
 
     /**
      * Reference to the resolved `idea` dependency.

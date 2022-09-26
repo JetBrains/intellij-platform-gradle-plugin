@@ -4,7 +4,7 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.Project
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
@@ -25,7 +25,7 @@ import javax.inject.Inject
 
 open class PatchPluginXmlTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask() {
+) : DefaultTask() {
 
     /**
      * The directory where the patched plugin.xml will be written.

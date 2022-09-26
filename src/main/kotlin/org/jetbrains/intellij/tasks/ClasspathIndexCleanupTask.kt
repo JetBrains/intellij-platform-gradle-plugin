@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.deleteQuietly
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
@@ -18,7 +18,7 @@ import javax.inject.Inject
  */
 open class ClasspathIndexCleanupTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask() {
+) : DefaultTask() {
 
     @get:InputFiles
     val classpathIndexFiles = objectFactory.fileCollection()

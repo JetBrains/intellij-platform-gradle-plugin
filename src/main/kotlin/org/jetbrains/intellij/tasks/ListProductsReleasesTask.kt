@@ -4,7 +4,7 @@ package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 open class ListProductsReleasesTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask() {
+) : DefaultTask() {
 
     /**
      * Path to the products releases update file. By default, falls back to the Maven cache.

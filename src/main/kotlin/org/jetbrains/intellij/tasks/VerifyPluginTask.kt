@@ -8,7 +8,7 @@ import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
@@ -22,7 +22,7 @@ import javax.inject.Inject
 
 open class VerifyPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask(), VerificationTask {
+) : DefaultTask(), VerificationTask {
 
     /**
      * Specifies whether the build should fail when the verifications performed by this task fail.

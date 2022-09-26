@@ -7,7 +7,7 @@ package org.jetbrains.intellij.tasks
 import com.jetbrains.plugin.structure.base.utils.*
 import groovy.lang.Closure
 import org.gradle.api.file.FileType
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.listProperty
@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 open class IntelliJInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask() {
+) : DefaultTask() {
 
     companion object {
         const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"

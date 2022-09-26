@@ -4,7 +4,7 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.deleteQuietly
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
@@ -14,7 +14,7 @@ import javax.inject.Inject
 
 open class SetupInstrumentCodeTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask() {
+) : DefaultTask() {
 
     @get:Input
     val instrumentationEnabled = objectFactory.property<Boolean>()

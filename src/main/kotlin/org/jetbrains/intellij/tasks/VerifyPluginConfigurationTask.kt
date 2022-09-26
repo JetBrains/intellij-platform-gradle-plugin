@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.api.JavaVersion
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 open class VerifyPluginConfigurationTask @Inject constructor(
     objectFactory: ObjectFactory,
-) : ConventionTask() {
+) : DefaultTask() {
 
     /**
      * The location of the built plugin file which will be used for verification.

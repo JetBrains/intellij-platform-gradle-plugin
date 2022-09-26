@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.internal.ConventionTask
+import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
@@ -20,7 +20,7 @@ import javax.inject.Inject
 
 open class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory
-) : ConventionTask() {
+) : DefaultTask() {
 
     companion object {
         private const val METADATA_URL = "$INTELLIJ_DEPENDENCIES/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"
