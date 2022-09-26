@@ -4,13 +4,13 @@
 ### Fixed
 - Invalidate instrumented classes bound to forms if GUI changed [IDEA-298989](https://youtrack.jetbrains.com/issue/IDEA-298989/Duplicate-method-name-getFont)
 - Revert pushing project resource directories to the end of classpath in the test task context. ([#1101](../../../1161))
+- replace internal Gradle ConventionTask with DefaultTask 
 
 ## [1.9.0]
 ### Added
 - Configure classpath for run-based tasks using `package-info.json` provided with IntelliJ SDK 2022.3+
 - The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#tasks-verifypluginconfiguration) task for validating the plugin project configuration.
 - Make Android Studio (`AI` type) available for resolving as SDK.
-- replace internal Gradle ConventionTask with DefaultTask 
 
 ### Changed
 - Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
