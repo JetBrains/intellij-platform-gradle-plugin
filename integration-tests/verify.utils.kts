@@ -149,28 +149,28 @@ fun <T> T.exitIf(block: T.() -> Boolean, message: T.() -> String = { "" }): T {
 }
 
 infix fun String.containsText(string: String) {
-    assert(contains(string))
+    assert(contains(string)) { "expect '$this' contains '$string'" }
 }
 
 infix fun Path.containsText(string: String) {
-    Files.readString(this).containsText(string)
+    Files.readString(this).containsText(string) { "expect '$this' contains '$string'" }
 }
 
 infix fun String.matchesRegex(regex: String) {
-    matchesRegex(regex.toRegex())
+    matchesRegex(regex.toRegex()) { "expect '$this' matches regex '$regex'" }
 }
 
 infix fun String.matchesRegex(regex: Regex) {
-    assert(regex.containsMatchIn(this))
+    assert(regex.containsMatchIn(this)) { "expect '$this' matches '$string'" }
 }
 
 infix fun Path.containsFile(path: String) {
-    assert(resolve(path).let(Files::exists))
+    assert(resolve(path).let(Files::exists)) { "expect '$this' contains file '$path'" }
 }
 
 infix fun Path.containsFileInArchive(path: String) {
     val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
-    assert(fs.getPath(path).let(Files::exists))
+    assert(fs.getPath(path).let(Files::exists)) { "expect '$this' contains file in archive '$string'" }
 }
 
 infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
