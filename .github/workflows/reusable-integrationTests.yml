@@ -38,7 +38,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/$XDG_CACHE_HOME
-          key: ${{ runner.os }}-XDG_CACHE_HOME
+          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*'}}
+          restore-keys: |
+            ${{ runner.os }}-XDG_CACHE_HOME-
 
       - name: Collect Available Modules
         id: set-modules
@@ -87,7 +89,9 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/$XDG_CACHE_HOME
-          key: ${{ runner.os }}-XDG_CACHE_HOME
+          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*'}}
+          restore-keys: |
+            ${{ runner.os }}-XDG_CACHE_HOME-
 
       - uses: actions/download-artifact@v3
         with:
