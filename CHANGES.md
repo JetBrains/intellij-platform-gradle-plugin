@@ -4,6 +4,7 @@
 ### Fixed
 - Invalidate instrumented classes bound to forms if GUI changed [IDEA-298989](https://youtrack.jetbrains.com/issue/IDEA-298989/Duplicate-method-name-getFont)
 - Revert pushing project resource directories to the end of classpath in the test task context. ([#1101](../../../1161))
+- Plugin verification cache directory now follows XDG cache standards.
 
 ## [1.9.0]
 ### Added
