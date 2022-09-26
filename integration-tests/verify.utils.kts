@@ -153,11 +153,11 @@ infix fun String.containsText(string: String) {
 }
 
 infix fun Path.containsText(string: String) {
-    Files.readString(this).containsText(string)
+    Files.readString(this).containsText(string) { "expect '$this' contains '$string'" }
 }
 
 infix fun String.matchesRegex(regex: String) {
-    matchesRegex(regex.toRegex())
+    matchesRegex(regex.toRegex()) { "expect '$this' matches regex '$regex'" }
 }
 
 infix fun String.matchesRegex(regex: Regex) {
