@@ -38,7 +38,7 @@ jobs:
           echo "::set-output name=modules::$MODULES_LIST"
 
       - name: Build the Plugin
-        run: ./gradlew build
+        run: ./gradlew build -x check
 
   integrationTests:
     name: ${{ matrix.module }} / Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
