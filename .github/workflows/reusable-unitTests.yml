@@ -51,7 +51,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/$XDG_CACHE_HOME
-          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*'}}
+          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-XDG_CACHE_HOME-
 
