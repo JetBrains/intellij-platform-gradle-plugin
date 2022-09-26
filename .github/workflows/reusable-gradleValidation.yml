@@ -11,8 +11,5 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v3
 
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
-
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.0.4
+      - name: Init Java + Gradle
+        uses: ./github/actions/init-jvm-gradle
