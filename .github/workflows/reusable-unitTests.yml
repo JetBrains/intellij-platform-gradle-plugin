@@ -1,6 +1,9 @@
 name: Reusable test workflow
 
-on: [workflow_call]
+on: [ workflow_call ]
+
+env:
+  XDG_CACHE_HOME: "~/.config/"
 
 jobs:
   unitTests:
@@ -44,11 +47,11 @@ jobs:
         with:
           cache-read-only: false
 
-      - name: Cache pluginVerifier
+      - name: Cache XDG_CACHE_HOME
         uses: actions/cache@v3
         with:
-          path: ~/.pluginVerifier
-          key: ${{ runner.os }}-pluginVerifier
+          path: ~/$XDG_CACHE_HOME
+          key: ${{ runner.os }}-XDG_CACHE_HOME
 
       - name: Run Tests
         run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
