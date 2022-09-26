@@ -18,7 +18,7 @@ jobs:
           ref: ${{ github.event.release.tag_name }}
 
       - name: Init Java + Gradle
-        uses: ./github/actions/init-jvm-gradle
+        uses: ./github/actions/init-jvm-gradle.yml
 
       # Set environment variables
       - name: Export Properties
