@@ -37,14 +37,8 @@ jobs:
           MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
           echo "::set-output name=modules::$MODULES_LIST"
 
-      - name: Build and Publish Plugin to MavenLocal
-        run: ./gradlew -Pversion="0.0.0" :publishToMavenLocal
-
-      - name: Store Built Plugin
-        uses: actions/upload-artifact@v3
-        with:
-          name: m2-repository
-          path: ~/.m2/repository
+      - name: Build the Plugin
+        run: ./gradlew build
 
   integrationTests:
     name: ${{ matrix.module }} / Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
@@ -74,15 +68,10 @@ jobs:
           distribution: zulu
           java-version: 11
 
-      - uses: actions/download-artifact@v3
-        with:
-          name: m2-repository
-          path: ~/.m2/repository
-
       - uses: gradle/gradle-build-action@v2
         with:
-          cache-disabled: true
           gradle-version: ${{ matrix.gradleVersion }}
+          cache-read-only: false
 
       - name: Run Verification
         working-directory: ${{ github.workspace }}/integration-tests
