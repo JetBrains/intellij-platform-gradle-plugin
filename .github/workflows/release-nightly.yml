@@ -64,8 +64,16 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
-      - name: Init Java + Gradle
-        uses: ./.github/actions/init-jvm-gradle
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: zulu
+          java-version: 11
+
+      - name: Setup Gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: false
 
       # Publish the plugin to the Gradle Plugins
       - name: Publish Plugin
