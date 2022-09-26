@@ -493,9 +493,7 @@ open class IntelliJPlugin : Plugin<Project> {
             verificationReportsDir.convention(project.provider {
                 "${project.buildDir}/reports/pluginVerifier"
             })
-            downloadDir.convention(project.provider {
-                ideDownloadDir().toString()
-            })
+            downloadDir.convention(ideDownloadDir().map { it.toFile().invariantSeparatorsPath })
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
             ideDir.convention(runIdeTaskProvider.get().ideDir)

@@ -3,13 +3,14 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
-import org.apache.commons.io.FileUtils
 import org.apache.tools.ant.util.TeeOutputStream
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Internal
@@ -47,10 +48,11 @@ import java.nio.file.Paths
 import java.util.EnumSet
 import javax.inject.Inject
 
-open class RunPluginVerifierTask @Inject constructor(
+abstract class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
-) : ConventionTask() {
+    private val providers: ProviderFactory,
+) : DefaultTask() {
 
     companion object {
         private const val METADATA_URL = "$PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
@@ -411,18 +413,19 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return Plugin Verifier home directory
      */
-    private fun verifierHomeDir(): Path {
-        System.getProperty("plugin.verifier.home.dir")?.let {
-            return Paths.get(it)
-        }
-
-        System.getProperty("user.home")?.let {
-            return Paths.get(it, ".pluginVerifier")
-        }
-
-        return FileUtils.getTempDirectory().toPath().resolve(".pluginVerifier")
+    private fun verifierHomeDir(): Provider<Path> {
+        return providers.systemProperty("plugin.verifier.home.dir")
+            .orElse(
+                providers.environmentVariable("XDG_CACHE_HOME").map { "$it/pluginVerifier" }
+            )
+            .orElse(
+                providers.systemProperty("user.home").map { "$it/.cache/pluginVerifier" }
+            ).map {
+                Paths.get(it)
+            }.orElse(
+                temporaryDir.resolve("pluginVerifier").toPath()
+            )
     }
-
 
     /**
      * Resolves the Plugin Verifier version.
@@ -549,7 +552,8 @@ open class RunPluginVerifierTask @Inject constructor(
      *
      * @return directory for downloaded IDEs
      */
-    internal fun ideDownloadDir() = verifierHomeDir().resolve("ides").createDir()
+    internal fun ideDownloadDir(): Provider<Path> =
+        verifierHomeDir().map { it.resolve("ides").createDir() }
 
     enum class FailureLevel(val sectionHeading: String, val message: String) {
         COMPATIBILITY_WARNINGS(
