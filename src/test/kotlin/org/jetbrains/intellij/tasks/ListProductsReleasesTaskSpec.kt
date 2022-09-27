@@ -9,7 +9,6 @@ import org.jetbrains.intellij.Version
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
@@ -242,8 +241,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 
     private fun BuildResult.taskOutput() = output.lines().run {

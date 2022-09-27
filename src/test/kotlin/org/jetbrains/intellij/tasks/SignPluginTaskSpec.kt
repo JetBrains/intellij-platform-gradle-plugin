@@ -25,8 +25,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
         val version = SignPluginTask.resolveLatestVersion()
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
-
-        assertTrue(result.output.contains("marketplace-zip-signer-cli-$version.jar"))
+        assertContains("marketplace-zip-signer-cli-$version.jar", result.output)
     }
 
     @Test
@@ -42,8 +41,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
-
-        assertTrue(result.output.contains("marketplace-zip-signer-cli-0.1.7.jar"))
+        assertContains("marketplace-zip-signer-cli-0.1.7.jar", result.output)
     }
 
     @Test
@@ -53,8 +51,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Task :${IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME} SKIPPED"))
+        assertContains("Task :${IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME} SKIPPED", result.output)
     }
 
     @Test
@@ -68,8 +65,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1."))
+        assertContains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1.", result.output)
     }
 
     @Test
@@ -94,8 +90,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 
     @Test

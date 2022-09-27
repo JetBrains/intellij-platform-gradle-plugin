@@ -39,7 +39,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        assertFalse(result.output.contains("will be overwritten"))
+        assertNotContains("will be overwritten", result.output)
     }
 
     @Test
@@ -394,7 +394,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
         build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 }
