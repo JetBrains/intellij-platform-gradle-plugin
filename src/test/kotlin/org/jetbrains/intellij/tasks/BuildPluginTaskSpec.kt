@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
+@Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
 class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -427,18 +427,17 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
         val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
 
-        val content = fileText(ZipFile(artifact), "META-INF/MANIFEST.MF")
-        val attributes = content.byteInputStream().use { Manifest(it).mainAttributes }
+        fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
+            assertNotNull(it)
 
-        assertNotNull(attributes)
-
-        assertEquals("1.0", attributes.getValue("Manifest-Version"))
-        assertEquals("Gradle $gradleVersion", attributes.getValue("Created-By"))
-        assertEquals(Jvm.current().toString(), attributes.getValue("Build-JVM"))
-        assertEquals("0.42.123", attributes.getValue("Version"))
-        assertEquals(IntelliJPluginConstants.NAME, attributes.getValue("Build-Plugin"))
-        assertEquals("0.0.0", attributes.getValue("Build-Plugin-Version"))
-        assertEquals(OperatingSystem.current().toString(), attributes.getValue("Build-OS"))
+            assertEquals("1.0", it.getValue("Manifest-Version"))
+            assertEquals("Gradle $gradleVersion", it.getValue("Created-By"))
+            assertEquals(Jvm.current().toString(), it.getValue("Build-JVM"))
+            assertEquals("0.42.123", it.getValue("Version"))
+            assertEquals(IntelliJPluginConstants.NAME, it.getValue("Build-Plugin"))
+            assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
+            assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
+        }
     }
 
     @Test
@@ -459,8 +458,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
-        val result = build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }

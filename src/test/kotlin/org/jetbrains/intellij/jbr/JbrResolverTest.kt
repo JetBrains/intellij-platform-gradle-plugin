@@ -5,8 +5,6 @@ package org.jetbrains.intellij.jbr
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 const val TASK_NAME = "testJbrResolver"
 
@@ -47,14 +45,9 @@ open class JbrResolverTest : IntelliJPluginSpecBase() {
             }
         """)
 
-        val output = build(TASK_NAME).output
-        output.apply {
-            assertTrue(this) {
-                contains(expected)
-            }
-            assertFalse(this) {
-                contains("Error when resolving dependency")
-            }
+        build(TASK_NAME).let {
+            assertContains(expected, it.output)
+            assertNotContains("Error when resolving dependency", it.output)
         }
     }
 }

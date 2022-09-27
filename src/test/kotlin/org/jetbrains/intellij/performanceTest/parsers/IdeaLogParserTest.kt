@@ -2,26 +2,27 @@
 
 package org.jetbrains.intellij.performanceTest.parsers
 
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class IdeaLogParserTest {
 
     @Test
     fun `simple parser test`() {
-
-        val parsed = IdeaLogParser("src/test/resources/performanceTest/idea-log/idea.log").getTestStatistic()
-        assertEquals(1_573, parsed.totalTime)
-        assertEquals(3, parsed.responsive)
-        assertEquals(777, parsed.averageResponsive)
+        IdeaLogParser("src/test/resources/performanceTest/idea-log/idea.log").getTestStatistic().let {
+            assertEquals(1_573, it.totalTime)
+            assertEquals(3, it.responsive)
+            assertEquals(777, it.averageResponsive)
+        }
     }
 
     @Test
     fun `total time absent test`() {
-        val parsed = IdeaLogParser("src/test/resources/performanceTest/idea-log/idea-no-total-time.log").getTestStatistic()
-        assertNull(parsed.totalTime)
-        assertEquals(3, parsed.responsive)
-        assertEquals(999, parsed.averageResponsive)
+        IdeaLogParser("src/test/resources/performanceTest/idea-log/idea-no-total-time.log").getTestStatistic().let {
+            assertNull(it.totalTime)
+            assertEquals(3, it.responsive)
+            assertEquals(999, it.averageResponsive)
+        }
     }
-
 }
-
