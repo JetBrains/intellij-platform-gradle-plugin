@@ -7,6 +7,7 @@
 - Avoid unnecessary task configuration during Gradle configuration phase [#1110](../../issues/1110) by @3flex
 - Replace internal Gradle ConventionTask with DefaultTask [#1115](../../issues/1115) by @aSemy
 - Plugin Verifier cache directory now follows XDG cache standards [#1119](../../issues/1119) by @aSemy
+- Migrate most of the Gradle API in `IntelliJPlugin.kt` to use the Gradle Kotlin DSL extensions [#1117](../../issues/1117) by @aSemy
 
 ## [1.9.0]
 ### Added
