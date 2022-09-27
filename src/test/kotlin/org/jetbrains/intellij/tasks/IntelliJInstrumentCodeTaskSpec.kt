@@ -8,6 +8,7 @@ import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("ComplexRedundantLet")
 class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -22,8 +23,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        val result = build("buildSourceSet", "--info")
-        assertContains("Added @NotNull assertions to 1 files", result.output)
+        build("buildSourceSet", "--info").let {
+            assertContains("Added @NotNull assertions to 1 files", it.output)
+        }
     }
 
     @Test
@@ -37,8 +39,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         """)
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        val result = build("buildTestSourceSet", "--info")
-        assertContains("Added @NotNull assertions to 1 files", result.output)
+        build("buildTestSourceSet", "--info").let {
+            assertContains("Added @NotNull assertions to 1 files", it.output)
+        }
     }
 
     @Test
@@ -51,14 +54,16 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         writeJavaFile()
 
-        val result = build("buildSourceSet", "--info")
-        assertNotContains("Added @NotNull", result.output)
+        build("buildSourceSet", "--info").let {
+            assertNotContains("Added @NotNull", it.output)
+        }
     }
 
     @Test
     fun `do not instrument code on empty source sets`() {
-        val result = build("buildSourceSet", "--info")
-        assertNotContains("Compiling forms and instrumenting code", result.output)
+        build("buildSourceSet", "--info").let {
+            assertNotContains("Compiling forms and instrumenting code", it.output)
+        }
     }
 
     @Test
@@ -87,8 +92,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        val result = build("buildSourceSet", "--info")
-        assertContains("Compiling forms and instrumenting code", result.output)
+        build("buildSourceSet", "--info").let {
+            assertContains("Compiling forms and instrumenting code", it.output)
+        }
     }
 
     @Test
@@ -98,8 +104,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         build("buildSourceSet")
 
-        val result = build("buildSourceSet")
-        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
+        build("buildSourceSet").let {
+            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
+        }
     }
 
     @Test
@@ -115,7 +122,8 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
         build("buildSourceSet", "--configuration-cache")
-        val result = build("buildSourceSet", "--configuration-cache")
-        assertContains("Reusing configuration cache.", result.output)
+        build("buildSourceSet", "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }

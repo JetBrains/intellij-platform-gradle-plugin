@@ -6,7 +6,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@Suppress("GroovyAssignabilityCheck")
+@Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
 class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -211,11 +211,12 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        val result = buildAndFail("tasks")
-        assertContains(
-            "intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block",
-            result.output
-        )
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
@@ -232,11 +233,12 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        val result = buildAndFail("tasks")
-        assertContains(
-            "intellij plugin 'junit' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
-            result.output
-        )
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij plugin 'junit' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
@@ -258,11 +260,12 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        val result = buildAndFail("tasks")
-        assertContains(
-            "intellij plugin 'junit' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
-            result.output
-        )
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij plugin 'junit' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
@@ -284,11 +287,12 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        val result = buildAndFail("tasks")
-        assertContains(
-            "The following plugins: [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
-            result.output
-        )
+        buildAndFail("tasks").let {
+            assertContains(
+                "The following plugins: [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
@@ -308,11 +312,12 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        val result = buildAndFail("tasks")
-        assertContains(
-            "intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block",
-            result.output
-        )
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
@@ -334,10 +339,11 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         """
         )
 
-        val result = buildAndFail("tasks")
-        assertContains(
-            "intellij extra artifact 'intellij-core' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block",
-            result.output
-        )
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij extra artifact 'intellij-core' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 }

@@ -7,6 +7,7 @@ import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+@Suppress("ComplexRedundantLet")
 class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
@@ -32,8 +33,9 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME)
-        assertContains("token property must be specified for plugin publishing", result.output)
+        buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME).let {
+            assertContains("token property must be specified for plugin publishing", it.output)
+        }
     }
 
     @Test
@@ -46,7 +48,8 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
-        val result = buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
-        assertContains("Reusing configuration cache.", result.output)
+        buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }
