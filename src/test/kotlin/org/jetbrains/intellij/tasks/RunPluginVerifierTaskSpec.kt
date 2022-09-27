@@ -27,7 +27,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier 1.255"))
+        assertContains( "Starting the IntelliJ Plugin Verifier 1.255", result.output)
     }
 
     @Test
@@ -44,7 +44,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254"))
+        assertContains( "Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254", result.output)
     }
 
     @Test
@@ -60,7 +60,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
         val version = RunPluginVerifierTask.resolveLatestVersion()
-        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier $version"))
+        assertContains( "Starting the IntelliJ Plugin Verifier $version", result.output)
     }
 
     @Test
@@ -77,8 +77,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Plugin MyName:1.0.0 against IC-202.7660.26: Compatible"))
-        assertTrue(result.output.contains("Plugin MyName:1.0.0 against PS-201.8538.41: Compatible"))
+        assertContains( "Plugin MyName:1.0.0 against IC-202.7660.26: Compatible", result.output)
+        assertContains( "Plugin MyName:1.0.0 against PS-201.8538.41: Compatible", result.output)
     }
 
     @Test
@@ -95,7 +95,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Plugin MyName:1.0.0 against AI-211.7628.21.2111.7824002: Compatible"))
+        assertContains( "Plugin MyName:1.0.0 against AI-211.7628.21.2111.7824002: Compatible", result.output)
     }
 
     @Test
@@ -114,7 +114,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
         val directory = file("build/foo").canonicalPath
-        assertTrue(result.output.contains("Verification reports directory: $directory"))
+        assertContains( "Verification reports directory: $directory", result.output)
     }
 
     @Test
@@ -138,8 +138,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("> Task :listProductsReleases"))
-        assertTrue(result.output.contains("Starting the IntelliJ Plugin Verifier"))
+        assertContains( "> Task :listProductsReleases", result.output)
+        assertContains( "Starting the IntelliJ Plugin Verifier", result.output)
     }
 
     @Test
@@ -158,7 +158,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("> Task :listProductsReleases SKIPPED"))
+        assertContains( "> Task :listProductsReleases SKIPPED", result.output)
     }
 
     @Test
@@ -171,8 +171,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Plugin descriptor 'plugin.xml' is not found"))
-        assertTrue(result.output.contains("Task :verifyPlugin FAILED"))
+        assertContains( "Plugin descriptor 'plugin.xml' is not found", result.output)
+        assertContains( "Task :verifyPlugin FAILED", result.output)
     }
 
     @Test
@@ -192,8 +192,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Deprecated API usages"))
-        assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
+        assertContains( "Deprecated API usages", result.output)
+        assertContains( "org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
 
     @Test
@@ -210,8 +210,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Deprecated API usages"))
-        assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
+        assertContains( "Deprecated API usages", result.output)
+        assertNotContains( "org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
 
     @Test
@@ -230,7 +230,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("IDE 'foo' cannot be downloaded."))
+        assertContains( "IDE 'foo' cannot be downloaded.", result.output)
     }
 
     @Test
@@ -250,8 +250,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Deprecated API usages"))
-        assertTrue(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
+        assertContains( "Deprecated API usages", result.output)
+        assertContains( "org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
 
     @Test
@@ -271,8 +271,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
 
-        assertTrue(result.output.contains("Deprecated API usages"))
-        assertFalse(result.output.contains("org.gradle.api.GradleException: DEPRECATED_API_USAGES"))
+        assertContains( "Deprecated API usages", result.output)
+        assertNotContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
 
     @Test
@@ -295,7 +295,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline")
-        assertTrue(result.output.contains("Gradle runs in offline mode."))
+        assertContains( "Gradle runs in offline mode.", result.output)
     }
 
     @Test
@@ -312,7 +312,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
 
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains( "Reusing configuration cache.", result.output)
     }
 
     private fun warmupGradle() {
@@ -350,5 +350,32 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 <depends>com.intellij.modules.platform</depends>
             </idea-plugin>
         """)
+    }
+
+    companion object {
+        private fun assertContains(
+                expected: String,
+                actual: String,
+        ) {
+            // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
+            assertTrue(
+                actual.contains(expected),
+                """
+                    expected:<$expected> but was:<$actual>
+                """.trimIndent()
+            )
+        }
+        private fun assertNotContains(
+                expected: String,
+                actual: String,
+        ) {
+            // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
+            assertFalse(
+                actual.contains(expected),
+                """
+                    expected:<$expected> but was:<$actual>
+                """.trimIndent()
+            )
+        }
     }
 }
