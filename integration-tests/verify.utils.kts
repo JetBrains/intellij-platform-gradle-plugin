@@ -161,7 +161,7 @@ infix fun String.matchesRegex(regex: String) {
 }
 
 infix fun String.matchesRegex(regex: Regex) {
-    assert(regex.containsMatchIn(this)) { "expect '$this' matches '$string'" }
+    assert(regex.containsMatchIn(this)) { "expect '$this' matches '$regex'" }
 }
 
 infix fun Path.containsFile(path: String) {
