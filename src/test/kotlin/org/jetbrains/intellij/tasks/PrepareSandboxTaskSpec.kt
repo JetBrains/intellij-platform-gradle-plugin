@@ -11,7 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
+@Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     private val sandbox = File(buildDirectory, IntelliJPluginConstants.DEFAULT_SANDBOX)
@@ -411,24 +411,24 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun createPlugin(): File {
-        val plugin = createTempDirectory("tmp").toFile()
-        File(plugin, "classes/").mkdir()
-        File(plugin, "META-INF/").mkdir()
-        File(plugin, "classes/A.class").createNewFile()
-        File(plugin, "classes/someResources.properties").createNewFile()
-        File(plugin, "META-INF/plugin.xml").xml("""
-            <idea-plugin>
-              <id>${plugin.name}</id>
-              <name>Test</name>
-              <version>1.0</version>
-              <idea-version since-build="212.5712" until-build="212.*" />
-              <vendor url="https://jetbrains.com">JetBrains</vendor>
-              <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-              <change-notes/>
-            </idea-plugin>
-        """)
-        return plugin
+    private fun createPlugin() = createTempDirectory("tmp").toFile().also {
+        File(it, "classes/").mkdir()
+        File(it, "META-INF/").mkdir()
+        File(it, "classes/A.class").createNewFile()
+        File(it, "classes/someResources.properties").createNewFile()
+        File(it, "META-INF/plugin.xml").xml(
+            """
+                <idea-plugin>
+                  <id>${it.name}</id>
+                  <name>Test</name>
+                  <version>1.0</version>
+                  <idea-version since-build="212.5712" until-build="212.*" />
+                  <vendor url="https://jetbrains.com">JetBrains</vendor>
+                  <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                  <change-notes/>
+                </idea-plugin>
+            """
+        )
     }
 
     @Test
@@ -825,9 +825,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
-        val result = build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 
     @Test
@@ -846,9 +846,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
-        val result = build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 
     @Test
@@ -882,8 +882,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
-        val result = build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }

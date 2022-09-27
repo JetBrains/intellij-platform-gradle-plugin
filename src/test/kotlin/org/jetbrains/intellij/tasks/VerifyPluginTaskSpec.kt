@@ -5,10 +5,8 @@ package org.jetbrains.intellij.tasks
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
-@Suppress("PluginXmlCapitalization", "PluginXmlValidity")
+@Suppress("PluginXmlCapitalization", "PluginXmlValidity", "ComplexRedundantLet")
 class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -25,9 +23,9 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Plugin name specified in plugin.xml should not contain the word 'plugin'"))
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("Plugin name specified in plugin.xml should not contain the word 'plugin'", it.output)
+        }
     }
 
     @Test
@@ -48,9 +46,9 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'"))
+        buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'", it.output)
+        }
     }
 
     @Test
@@ -67,9 +65,9 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Description is too short"))
+        buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("Description is too short", it.output)
+        }
     }
 
     @Test
@@ -90,16 +88,17 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Description is too short"))
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("Description is too short", it.output)
+        }
     }
 
     @Test
     fun `fail on errors by default`() {
-        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        result.output.contains("Plugin descriptor 'plugin.xml' is not found")
+        pluginXml.delete()
+        buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
+        }
     }
 
     @Test
@@ -110,9 +109,10 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        result.output.contains("Plugin descriptor 'plugin.xml' is not found")
+        pluginXml.delete()
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
+        }
     }
 
     @Test
@@ -133,9 +133,9 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        result.output.contains("<name> must not be equal to default value:")
+        buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("<name> must not be equal to default value:", it.output)
+        }
     }
 
     @Test
@@ -156,9 +156,9 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        result.output.contains("Description is too short")
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("Description is too short", it.output)
+        }
     }
 
     @Test
@@ -180,16 +180,16 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME)
-
-        assertFalse(result.output.contains("Plugin verification"))
+        build(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME).let {
+            assertNotContains("Plugin verification", it.output)
+        }
     }
 
     @Test
     fun `reuse configuration cache`() {
         buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, "--configuration-cache")
-        val result = buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        buildAndFail(IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }

@@ -10,7 +10,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
+@Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
 class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     private val outputPluginXml = lazy { File(buildDirectory, "resources/main/META-INF/").listFiles()?.first() }
@@ -38,12 +38,12 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        val result = build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
-
-        assertEquals(
-            TaskOutcome.UP_TO_DATE,
-            result.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
-        )
+        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).let {
+            assertEquals(
+                TaskOutcome.UP_TO_DATE,
+                it.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
+            )
+        }
     }
 
     @Test
@@ -62,18 +62,21 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
             patchPluginXml { sinceBuild = 'Oh' }
         """)
 
-        val result = build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).let {
+            assertNotEquals(
+                TaskOutcome.UP_TO_DATE,
+                it.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
+            )
 
-        assertNotEquals(
-            TaskOutcome.UP_TO_DATE,
-            result.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
-        )
-
-        assertFileContent(outputPluginXml.value, """
-            <idea-plugin>
-              <version>0.42.123</version>
-              <idea-version since-build="Oh" until-build="212.*" />
-            </idea-plugin>
-        """)
+            assertFileContent(
+                outputPluginXml.value,
+                """
+                    <idea-plugin>
+                      <version>0.42.123</version>
+                      <idea-version since-build="Oh" until-build="212.*" />
+                    </idea-plugin>
+                """
+            )
+        }
     }
 }
