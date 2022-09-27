@@ -826,8 +826,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
         val result = build(IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 
     @Test
@@ -847,8 +846,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
         val result = build(IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 
     @Test
@@ -883,7 +881,6 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
         val result = build(IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 }

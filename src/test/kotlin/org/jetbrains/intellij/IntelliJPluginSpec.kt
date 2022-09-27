@@ -210,7 +210,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO")
-
         assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
@@ -231,7 +230,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO")
-
         assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-goland-GO-212.5457.54-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
@@ -250,7 +248,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
-
         assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
@@ -268,7 +265,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
-
         assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
@@ -295,7 +291,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO")
-
         assertContainsOnlySourceArtifacts(result,
             "lib/src/go-openapi-src-ideaLocal-GO-221.5080.224-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
@@ -324,7 +319,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
-
         assertContainsOnlySourceArtifacts(result,
             "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
                     "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
@@ -344,7 +338,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources")
-
         assertContainsOnlySourceArtifacts(result,
             "lib/src/src_css-api-ideaIU-IU-212.5712.43-withSources.zip (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)",
             "ideaIC-ideaIU-IU-212.5712.43-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)"
@@ -363,7 +356,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43")
-
         assertContainsOnlySourceArtifacts(result,
             "lib/src/src_tomcat-ideaIU-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43)"
         )
@@ -389,7 +381,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43")
-
         assertContainsOnlySourceArtifacts(result,
             "lib/src/src_spring-openapi-ideaLocal-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43)"
         )
@@ -408,7 +399,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources")
-
         assertContainsOnlySourceArtifacts(result,
             /* no CSS plugin source artifacts in Go distribution */
             "ideaIC-goland-GO-212.5457.54-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources)"

@@ -5,8 +5,6 @@ package org.jetbrains.intellij.tasks
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @Suppress("PluginXmlCapitalization", "PluginXmlValidity")
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
@@ -27,8 +25,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-
-        assertFalse(result.output.contains(HEADER))
+        assertNotContains(HEADER, result.output)
     }
 
     @Test
@@ -49,9 +46,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-
-        assertTrue(result.output.contains(HEADER))
-        assertTrue(result.output.contains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 212."))
+        assertContains(HEADER, result.output)
+        assertContains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 212.", result.output)
     }
 
     @Test
@@ -61,9 +57,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-
-        assertTrue(result.output.contains(HEADER))
-        assertTrue(result.output.contains("- The Java configuration specifies sourceCompatibility=1.8 but IntelliJ Platform 2021.2.4 requires sourceCompatibility=11."))
+        assertContains(HEADER, result.output)
+        assertContains("- The Java configuration specifies sourceCompatibility=1.8 but IntelliJ Platform 2021.2.4 requires sourceCompatibility=11.", result.output)
     }
 
     @Test
@@ -73,9 +68,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-
-        assertTrue(result.output.contains(HEADER))
-        assertTrue(result.output.contains("- The Java configuration specifies targetCompatibility=17 but IntelliJ Platform 2021.2.4 requires targetCompatibility=11."))
+        assertContains(HEADER, result.output)
+        assertContains("- The Java configuration specifies targetCompatibility=17 but IntelliJ Platform 2021.2.4 requires targetCompatibility=11.", result.output)
     }
 
     @Test
@@ -89,9 +83,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-
-        assertTrue(result.output.contains(HEADER))
-        assertTrue(result.output.contains("- The Kotlin configuration specifies jvmTarget=17 but IntelliJ Platform 2021.2.4 requires jvmTarget=11."))
+        assertContains(HEADER, result.output)
+        assertContains("- The Kotlin configuration specifies jvmTarget=17 but IntelliJ Platform 2021.2.4 requires jvmTarget=11.", result.output)
     }
 
     @Test
@@ -114,9 +107,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-
-        assertTrue(result.output.contains(HEADER))
-        assertTrue(result.output.contains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='212.5712' property requires apiVersion=1.5.10."))
+        assertContains(HEADER, result.output)
+        assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='212.5712' property requires apiVersion=1.5.10.", result.output)
     }
 
     @Test
@@ -130,9 +122,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-
-        assertTrue(result.output.contains(HEADER))
-        assertTrue(result.output.contains("- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2021.2.4 requires languageVersion=1.5.10."))
+        assertContains(HEADER, result.output)
+        assertContains("- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2021.2.4 requires languageVersion=1.5.10.", result.output)
     }
 
     @Test
@@ -141,8 +132,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         gradleProperties.writeText("")
 
         build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
-            assertTrue(result.output.contains(HEADER))
-            assertTrue(result.output.contains("- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib"))
+            assertContains(HEADER, result.output)
+            assertContains("- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib", result.output)
         }
 
         gradleProperties.properties(
@@ -152,7 +143,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build("clean", IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
-            assertFalse(result.output.contains(HEADER))
+            assertNotContains(HEADER, result.output)
         }
 
         gradleProperties.properties(
@@ -162,7 +153,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build("clean", IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
-            assertFalse(result.output.contains(HEADER))
+            assertNotContains(HEADER, result.output)
         }
     }
 
@@ -170,7 +161,6 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 }

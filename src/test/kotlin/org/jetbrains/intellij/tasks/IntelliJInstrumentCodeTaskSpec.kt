@@ -7,8 +7,6 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
@@ -25,7 +23,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
         val result = build("buildSourceSet", "--info")
-        assertTrue(result.output.contains("Added @NotNull assertions to 1 files"))
+        assertContains("Added @NotNull assertions to 1 files", result.output)
     }
 
     @Test
@@ -40,7 +38,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
         val result = build("buildTestSourceSet", "--info")
-        assertTrue(result.output.contains("Added @NotNull assertions to 1 files"))
+        assertContains("Added @NotNull assertions to 1 files", result.output)
     }
 
     @Test
@@ -54,13 +52,13 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
 
         val result = build("buildSourceSet", "--info")
-        assertFalse(result.output.contains("Added @NotNull"))
+        assertNotContains("Added @NotNull", result.output)
     }
 
     @Test
     fun `do not instrument code on empty source sets`() {
         val result = build("buildSourceSet", "--info")
-        assertFalse(result.output.contains("Compiling forms and instrumenting code"))
+        assertNotContains("Compiling forms and instrumenting code", result.output)
     }
 
     @Test
@@ -90,7 +88,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
         val result = build("buildSourceSet", "--info")
-        result.output.contains("Compiling forms and instrumenting code")
+        assertContains("Compiling forms and instrumenting code", result.output)
     }
 
     @Test
@@ -118,7 +116,6 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         build("buildSourceSet", "--configuration-cache")
         val result = build("buildSourceSet", "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 }

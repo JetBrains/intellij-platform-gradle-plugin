@@ -5,7 +5,6 @@ package org.jetbrains.intellij.tasks
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.SearchableOptionsSpecBase
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
 class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
@@ -18,8 +17,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-
-        assertTrue(result.output.contains("${IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
+        assertContains("${IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED", result.output)
     }
 
     @Test
@@ -38,19 +36,18 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
         val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-        assertTrue(result.output.contains("Starting searchable options index builder"))
-        assertTrue(result.output.contains("Searchable options index builder completed"))
+        assertContains("Starting searchable options index builder", result.output)
+        assertContains("Searchable options index builder completed", result.output)
 
         val text = getSearchableOptionsXml("projectName").readText()
-        assertTrue(text.contains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">"))
-        assertTrue(text.contains("hit=\"Label for Test Searchable Configurable\""))
+        assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", text)
+        assertContains("hit=\"Label for Test Searchable Configurable\"", text)
     }
 
     @Test
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 }

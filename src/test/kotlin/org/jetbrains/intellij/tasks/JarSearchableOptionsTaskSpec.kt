@@ -20,7 +20,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
-        assertTrue(result.output.contains("${IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED"))
+        assertContains("${IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED", result.output)
     }
 
     @Test
@@ -55,7 +55,6 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
         build(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        assertContains("Reusing configuration cache.", result.output)
     }
 }

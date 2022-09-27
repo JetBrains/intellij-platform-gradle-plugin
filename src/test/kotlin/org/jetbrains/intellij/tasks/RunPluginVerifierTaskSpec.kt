@@ -7,8 +7,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.net.URL
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
@@ -26,8 +24,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
-        assertContains( "Starting the IntelliJ Plugin Verifier 1.255", result.output)
+        assertContains( "Starting the IntelliJ Plugin Verifier 1.2551", result.output)
     }
 
     @Test
@@ -43,7 +40,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254", result.output)
     }
 
@@ -76,7 +72,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Plugin MyName:1.0.0 against IC-202.7660.26: Compatible", result.output)
         assertContains( "Plugin MyName:1.0.0 against PS-201.8538.41: Compatible", result.output)
     }
@@ -94,7 +89,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Plugin MyName:1.0.0 against AI-211.7628.21.2111.7824002: Compatible", result.output)
     }
 
@@ -112,7 +106,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         val directory = file("build/foo").canonicalPath
         assertContains( "Verification reports directory: $directory", result.output)
     }
@@ -137,7 +130,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "> Task :listProductsReleases", result.output)
         assertContains( "Starting the IntelliJ Plugin Verifier", result.output)
     }
@@ -157,7 +149,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "> Task :listProductsReleases SKIPPED", result.output)
     }
 
@@ -170,7 +161,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Plugin descriptor 'plugin.xml' is not found", result.output)
         assertContains( "Task :verifyPlugin FAILED", result.output)
     }
@@ -191,7 +181,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Deprecated API usages", result.output)
         assertContains( "org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
@@ -209,7 +198,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Deprecated API usages", result.output)
         assertNotContains( "org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
@@ -229,7 +217,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "IDE 'foo' cannot be downloaded.", result.output)
     }
 
@@ -249,7 +236,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = buildAndFail(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Deprecated API usages", result.output)
         assertContains( "org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
@@ -270,7 +256,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
-
         assertContains( "Deprecated API usages", result.output)
         assertNotContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", result.output)
     }
@@ -311,7 +296,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
         val result = build(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
-
         assertContains( "Reusing configuration cache.", result.output)
     }
 
@@ -350,32 +334,5 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 <depends>com.intellij.modules.platform</depends>
             </idea-plugin>
         """)
-    }
-
-    companion object {
-        private fun assertContains(
-                expected: String,
-                actual: String,
-        ) {
-            // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
-            assertTrue(
-                actual.contains(expected),
-                """
-                    expected:<$expected> but was:<$actual>
-                """.trimIndent()
-            )
-        }
-        private fun assertNotContains(
-                expected: String,
-                actual: String,
-        ) {
-            // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
-            assertFalse(
-                actual.contains(expected),
-                """
-                    expected:<$expected> but was:<$actual>
-                """.trimIndent()
-            )
-        }
     }
 }
