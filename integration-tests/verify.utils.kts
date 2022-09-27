@@ -153,15 +153,15 @@ infix fun String.containsText(string: String) {
 }
 
 infix fun Path.containsText(string: String) {
-    Files.readString(this).containsText(string) { "expect '$this' contains '$string'" }
+    Files.readString(this).containsText(string)
 }
 
 infix fun String.matchesRegex(regex: String) {
-    matchesRegex(regex.toRegex()) { "expect '$this' matches regex '$regex'" }
+    matchesRegex(regex.toRegex())
 }
 
 infix fun String.matchesRegex(regex: Regex) {
-    assert(regex.containsMatchIn(this)) { "expect '$this' matches '$string'" }
+    assert(regex.containsMatchIn(this)) { "expect '$this' matches '$regex'" }
 }
 
 infix fun Path.containsFile(path: String) {
@@ -170,7 +170,7 @@ infix fun Path.containsFile(path: String) {
 
 infix fun Path.containsFileInArchive(path: String) {
     val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
-    assert(fs.getPath(path).let(Files::exists)) { "expect '$this' contains file in archive '$string'" }
+    assert(fs.getPath(path).let(Files::exists)) { "expect archive '$this' contains file '$path'" }
 }
 
 infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
