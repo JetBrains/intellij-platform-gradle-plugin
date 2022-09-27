@@ -109,11 +109,11 @@ abstract class IntelliJPluginSpecBase {
         debugEnabled = false
     }
 
-    protected fun buildAndFail(vararg tasks: String): BuildResult = build(true, *tasks)
+    protected fun buildAndFail(vararg tasks: String) = build(true, *tasks)
 
-    protected fun build(vararg tasks: String): BuildResult = build(false, *tasks)
+    protected fun build(vararg tasks: String) = build(false, *tasks)
 
-    protected fun build(fail: Boolean, vararg tasks: String): BuildResult = build(gradleVersion, fail, *tasks)
+    protected fun build(fail: Boolean, vararg tasks: String) = build(gradleVersion, fail, *tasks)
 
     protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String): BuildResult =
         builder(gradleVersion, *tasks).run {

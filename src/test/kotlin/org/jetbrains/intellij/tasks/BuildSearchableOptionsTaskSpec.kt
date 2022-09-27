@@ -6,48 +6,57 @@ import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.SearchableOptionsSpecBase
 import kotlin.test.Test
 
+@Suppress("ComplexRedundantLet")
 class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `skip building searchable options using IDEA prior 2019_1`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = '14.1.4'
             } 
-        """)
+        """
+        )
 
-        val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-        assertContains("${IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED", result.output)
+        build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME).let {
+            assertContains("${IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME} SKIPPED", it.output)
+        }
     }
 
     @Test
     fun `build searchable options produces XML`() {
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = '$intellijVersion'
             }
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+        """
+        )
 
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-        assertContains("Starting searchable options index builder", result.output)
-        assertContains("Searchable options index builder completed", result.output)
+        build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME).let {
+            assertContains("Starting searchable options index builder", it.output)
+            assertContains("Searchable options index builder completed", it.output)
+        }
 
-        val text = getSearchableOptionsXml("projectName").readText()
-        assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", text)
-        assertContains("hit=\"Label for Test Searchable Configurable\"", text)
+        getSearchableOptionsXml("projectName").readText().let {
+            assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", it)
+            assertContains("hit=\"Label for Test Searchable Configurable\"", it)
+        }
     }
 
     @Test
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
-        val result = build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
-        assertContains("Reusing configuration cache.", result.output)
+        build(IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }

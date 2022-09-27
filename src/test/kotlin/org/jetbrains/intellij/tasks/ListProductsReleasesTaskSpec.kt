@@ -10,6 +10,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("ComplexRedundantLet")
 class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
@@ -36,12 +37,9 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list for the current platformType, sinceBuild and untilBuild`() {
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf("IC-2020.1.4"),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(listOf("IC-2020.1.4"), it.taskOutput())
+        }
     }
 
     @Test
@@ -52,18 +50,18 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf(
-                "IC-2021.2.2",
-                "IC-2021.1.3",
-                "IC-2020.3.4",
-                "IC-2020.2.4",
-                "IC-2020.1.4",
-            ),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    "IC-2021.2.2",
+                    "IC-2021.1.3",
+                    "IC-2020.3.4",
+                    "IC-2020.2.4",
+                    "IC-2020.1.4",
+                ),
+                it.taskOutput()
+            )
+        }
     }
 
     @Test
@@ -75,16 +73,16 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf(
-                "IC-2021.2.1",
-                "IC-2021.1.3",
-                "IC-2020.3.4"
-            ),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    "IC-2021.2.1",
+                    "IC-2021.1.3",
+                    "IC-2020.3.4"
+                ),
+                it.taskOutput()
+            )
+        }
     }
 
     @Test
@@ -96,16 +94,16 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf(
-                "IC-2021.2.2",
-                "IC-2021.1.3",
-                "IC-2020.3.4",
-            ),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    "IC-2021.2.2",
+                    "IC-2021.1.3",
+                    "IC-2020.3.4",
+                ),
+                it.taskOutput()
+            )
+        }
     }
 
     @Test
@@ -120,16 +118,16 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf(
-                "IC-2021.2.2",
-                "IC-2021.1.3",
-                "IC-2020.3.4",
-            ),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    "IC-2021.2.2",
+                    "IC-2021.1.3",
+                    "IC-2020.3.4",
+                ),
+                it.taskOutput()
+            )
+        }
     }
 
     @Test
@@ -141,12 +139,12 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf("PY-2021.1.3"),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf("PY-2021.1.3"),
+                it.taskOutput()
+            )
+        }
     }
 
     @Test
@@ -160,18 +158,17 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf(
-                // "IC-2021.2.2" - available only in the EAP channel and shouldn't be listed here
-                "IC-2021.2.1",
-                "IC-2021.1.3"
-            ),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    // "IC-2021.2.2" - available only in the EAP channel and shouldn't be listed here
+                    "IC-2021.2.1",
+                    "IC-2021.1.3"
+                ),
+                it.taskOutput()
+            )
+        }
     }
-
     @Test
     fun `get IDEs list for the multiple platformTypes`() {
         buildFile.groovy("""
@@ -181,19 +178,19 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf(
-                "IU-2021.2.2",
-                "IU-2021.1.3",
-                "PS-2021.2.2",
-                "PS-2021.1.4",
-                "PY-2021.2.2",
-                "PY-2021.1.3",
-            ),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    "IU-2021.2.2",
+                    "IU-2021.1.3",
+                    "PS-2021.2.2",
+                    "PS-2021.1.4",
+                    "PY-2021.2.2",
+                    "PY-2021.1.3",
+                ),
+                it.taskOutput()
+            )
+        }
     }
 
     @Test
@@ -205,16 +202,16 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf(
-                "AI-2021.3.1.7",
-                "AI-2021.2.1.11",
-                "AI-2021.1.1.22",
-            ),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    "AI-2021.3.1.7",
+                    "AI-2021.2.1.11",
+                    "AI-2021.1.1.22",
+                ),
+                it.taskOutput()
+            )
+        }
     }
 
     @Test
@@ -229,19 +226,19 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        assertEquals(
-            listOf("AI-2021.1.1.20"),
-            result.taskOutput()
-        )
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf("AI-2021.1.1.20"),
+                it.taskOutput()
+            )
+        }
     }
-
     @Test
     fun `reuse configuration cache`() {
         build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")
-        val result = build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")
-        assertContains("Reusing configuration cache.", result.output)
+        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 
     private fun BuildResult.taskOutput() = output.lines().run {

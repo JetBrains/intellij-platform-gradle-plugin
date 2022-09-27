@@ -20,7 +20,8 @@ class SimpleIJPerfParserTest {
                     %stopProfile traces=999,flamegraph
                     %exitApp
                     
-                """.trimIndent(), it.scriptContent
+                """.trimIndent(),
+                it.scriptContent
             )
         }
     }
@@ -37,7 +38,8 @@ class SimpleIJPerfParserTest {
                     %stopProfile traces=999,flamegraph
                     %exitApp
                     
-                """.trimIndent(), it.scriptContent
+                """.trimIndent(),
+                it.scriptContent
             )
         }
     }

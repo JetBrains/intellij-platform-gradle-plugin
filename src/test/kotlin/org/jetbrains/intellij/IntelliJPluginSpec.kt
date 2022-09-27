@@ -12,7 +12,7 @@ import java.io.*
 import java.nio.file.Path
 import kotlin.test.*
 
-@Suppress("GroovyAssignabilityCheck")
+@Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
 class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -59,17 +59,18 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         writeTestFile()
 
-        val result = build(JavaPlugin.TEST_TASK_NAME, "--info")
-        val sandboxPath = adjustWindowsPath("${buildDirectory.canonicalPath}/idea-sandbox")
-        val testCommand = parseCommand(result.output)
+        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+            val sandboxPath = adjustWindowsPath("${buildDirectory.canonicalPath}/idea-sandbox")
+            val testCommand = parseCommand(it.output)
 
-        assertPathParameters(testCommand, sandboxPath)
-        assertFalse(testCommand.properties.containsKey("idea.required.plugins.id"))
+            assertPathParameters(testCommand, sandboxPath)
+            assertFalse(testCommand.properties.containsKey("idea.required.plugins.id"))
 
-        assertEquals("boot.jar", File(testCommand.xclasspath).name)
-        assertEquals("lib", File(testCommand.xclasspath).parentFile.name)
-        assertEquals("256m", testCommand.xms)
-        assertEquals("512m", testCommand.xmx)
+            assertEquals("boot.jar", File(testCommand.xclasspath).name)
+            assertEquals("lib", File(testCommand.xclasspath).parentFile.name)
+            assertEquals("256m", testCommand.xms)
+            assertEquals("512m", testCommand.xmx)
+        }
     }
 
     @Test
@@ -209,13 +210,15 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO")
-        assertContainsOnlySourceArtifacts(result,
-            "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-unzipped.com.jetbrains.plugins.jar " +
-                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
-            "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
-                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
+                "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
+                        "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)"
+            )
+        }
     }
 
     @Test
@@ -229,11 +232,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO")
-        assertContainsOnlySourceArtifacts(result,
-            "lib/src/go-openapi-src-goland-GO-212.5457.54-unzipped.com.jetbrains.plugins.jar " +
-                    "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "lib/src/go-openapi-src-goland-GO-212.5457.54-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
+            )
+        }
     }
 
     @Test
@@ -247,11 +252,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
-        assertContainsOnlySourceArtifacts(result,
-            "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
-                    "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+            )
+        }
     }
 
     @Test
@@ -264,11 +271,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
               downloadSources = false
             }
         """)
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
-        assertContainsOnlySourceArtifacts(result,
-            "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
-                    "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+            )
+        }
     }
 
     @Test
@@ -290,11 +299,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO")
-        assertContainsOnlySourceArtifacts(result,
-            "lib/src/go-openapi-src-ideaLocal-GO-221.5080.224-unzipped.com.jetbrains.plugins.jar " +
-                    "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "lib/src/go-openapi-src-ideaLocal-GO-221.5080.224-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
+            )
+        }
         Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
@@ -318,11 +329,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go")
-        assertContainsOnlySourceArtifacts(result,
-            "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
-                    "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+            )
+        }
         Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
@@ -337,11 +350,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources")
-        assertContainsOnlySourceArtifacts(result,
-            "lib/src/src_css-api-ideaIU-IU-212.5712.43-withSources.zip (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)",
-            "ideaIC-ideaIU-IU-212.5712.43-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "lib/src/src_css-api-ideaIU-IU-212.5712.43-withSources.zip (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)",
+                "ideaIC-ideaIU-IU-212.5712.43-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)"
+            )
+        }
     }
 
     @Test
@@ -355,10 +370,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43")
-        assertContainsOnlySourceArtifacts(result,
-            "lib/src/src_tomcat-ideaIU-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "lib/src/src_tomcat-ideaIU-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43)"
+            )
+        }
     }
 
     @Test
@@ -380,10 +397,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43")
-        assertContainsOnlySourceArtifacts(result,
-            "lib/src/src_spring-openapi-ideaLocal-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                "lib/src/src_spring-openapi-ideaLocal-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43)"
+            )
+        }
         Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
@@ -398,11 +417,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources")
-        assertContainsOnlySourceArtifacts(result,
-            /* no CSS plugin source artifacts in Go distribution */
-            "ideaIC-goland-GO-212.5457.54-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources)"
-        )
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources").let {
+            assertContainsOnlySourceArtifacts(
+                it,
+                /* no CSS plugin source artifacts in Go distribution */
+                "ideaIC-goland-GO-212.5457.54-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources)"
+            )
+        }
     }
 
     @Test
@@ -417,11 +438,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        val result = build(JavaPlugin.TEST_TASK_NAME, "--info")
-        assertEquals(
-            "com.intellij.mytestid",
-            parseCommand(result.output).properties["idea.required.plugins.id"],
-        )
+        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+            assertEquals(
+                "com.intellij.mytestid",
+                parseCommand(it.output).properties["idea.required.plugins.id"],
+            )
+        }
     }
 
     @Test
@@ -435,10 +457,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        val result = build(JavaPlugin.TEST_TASK_NAME, "--info")
-        parseCommand(result.output).let {
-            assertEquals("200m", it.xms)
-            assertEquals("500m", it.xmx)
+        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+            parseCommand(it.output).let { properties ->
+                assertEquals("200m", properties.xms)
+                assertEquals("500m", properties.xmx)
+            }
         }
     }
 
@@ -452,8 +475,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 sandboxDir = '$sandboxPath'    
             }
         """)
-        val result = build(JavaPlugin.TEST_TASK_NAME, "--info")
-        assertPathParameters(parseCommand(result.output), sandboxPath)
+        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+            assertPathParameters(parseCommand(it.output), sandboxPath)
+        }
     }
 
     @Test
@@ -520,11 +544,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun buildAndGetClassPaths(vararg tasks: String): Pair<String, String> {
-        val result = build(*tasks)
-        val compileClasspath = result.output.lines().find { it.startsWith("implementation:") }.orEmpty()
-        val runtimeClasspath = result.output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()
-        return Pair(compileClasspath, runtimeClasspath)
+    private fun buildAndGetClassPaths(vararg tasks: String) = build(*tasks).run {
+        val compileClasspath = output.lines().find { it.startsWith("implementation:") }.orEmpty()
+        val runtimeClasspath = output.lines().find { it.startsWith("runtimeOnly:") }.orEmpty()
+        compileClasspath to runtimeClasspath
     }
 
     private fun assertAddedToCompileClassPathOnly(compileClasspath: String, runtimeClasspath: String, jarName: String) {
