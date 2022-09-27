@@ -129,7 +129,7 @@ abstract class IntelliJPluginSpecBase {
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
-            .withDebug(debugEnabled)
+//            .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
             .withArguments(
                 *tasks,
@@ -267,9 +267,6 @@ abstract class IntelliJPluginSpecBase {
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun File.xml(@Language("XML") content: String) = append(content)
 
-    /**
-     * Appends the passed content to this file. Overwrites existing content if the `overwrite` parameter is true.
-     */
     fun File.groovy(@Language("Groovy") content: String) = append(content)
 
     fun File.java(@Language("Java") content: String) = append(content)

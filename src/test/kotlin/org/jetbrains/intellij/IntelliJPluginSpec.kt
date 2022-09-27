@@ -585,8 +585,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         this.groovy(
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
+                import org.jetbrains.intellij.IntelliJPluginConstants
 
                 task printPluginSourceArtifacts {
+                  dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+
                   doLast {
                     def pluginComponentId = configurations.compileClasspath
                       .resolvedConfiguration.lenientConfiguration
