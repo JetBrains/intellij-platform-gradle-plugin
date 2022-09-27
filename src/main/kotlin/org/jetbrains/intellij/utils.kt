@@ -27,6 +27,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.JDOMException
@@ -58,7 +59,7 @@ val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPa
 
 @Suppress("DEPRECATION")
 fun mainSourceSet(project: Project): SourceSet = project
-    .convention.getPlugin(JavaPluginConvention::class.java)
+    .convention.getPlugin<JavaPluginConvention>()
 //    .extensions.getByType(JavaPluginExtension::class.java) // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 

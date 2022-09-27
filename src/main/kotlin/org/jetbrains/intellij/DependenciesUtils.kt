@@ -12,6 +12,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.util.PatternFilterable
+import org.gradle.kotlin.dsl.getByType
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.tasks.SetupDependenciesTask
 
@@ -37,7 +38,7 @@ fun Project.intellijPlugin(plugin: String, filter: Action<PatternFilterable>): F
 fun Project.intellijPlugin(plugin: String, filter: PatternFilterable): FileCollection = intellijPluginBase(plugin).matching(filter)
 
 private fun Project.intellijPluginBase(plugin: String): FileTree {
-    val extension = extensions.getByType(IntelliJPluginExtension::class.java)
+    val extension = extensions.getByType<IntelliJPluginExtension>()
 
     if (!state.executed) {
         throw GradleException("intellij plugin '$plugin' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
@@ -52,7 +53,7 @@ private fun Project.intellijPluginBase(plugin: String): FileTree {
 }
 
 fun Project.intellijPlugins(vararg plugins: String): FileCollection {
-    val extension = extensions.getByType(IntelliJPluginExtension::class.java)
+    val extension = extensions.getByType<IntelliJPluginExtension>()
     val selectedPlugins = mutableSetOf<PluginDependency>()
     val nonValidPlugins = mutableListOf<String>()
     plugins.forEach { pluginName ->

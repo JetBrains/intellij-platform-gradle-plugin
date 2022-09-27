@@ -10,30 +10,20 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.SkipWhenEmpty
-import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.error
-import org.jetbrains.intellij.ifFalse
-import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.LatestVersionResolver
@@ -43,7 +33,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Paths
-import java.util.EnumSet
+import java.util.*
 import javax.inject.Inject
 
 abstract class RunPluginVerifierTask @Inject constructor(
@@ -242,7 +232,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:Internal
     val offline = objectFactory.property<Boolean>()
 
-    private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
+    private val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
 
     private val context = logCategory()
 
@@ -323,9 +313,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @return path to the Java Runtime directory
      */
     private fun resolveRuntimeDir(): String {
-        val dependenciesDownloader = objectFactory.newInstance(DependenciesDownloader::class.java)
-        val jbrResolver = objectFactory.newInstance(
-            JbrResolver::class.java,
+        val dependenciesDownloader = objectFactory.newInstance<DependenciesDownloader>()
+        val jbrResolver = objectFactory.newInstance<JbrResolver>(
             jreRepository.orNull.orEmpty(),
             offline.get(),
             archiveUtils,

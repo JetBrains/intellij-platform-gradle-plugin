@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.dependency.IdeaDependency
@@ -188,7 +189,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @get:Input
     @get:Optional
     @Nested
-    val pluginsRepositories: PluginsRepositoryConfiguration = objectFactory.newInstance(PluginsRepositoryConfiguration::class.java)
+    val pluginsRepositories = objectFactory.newInstance<PluginsRepositoryConfiguration>()
 
     private var pluginDependenciesConfigured = false
 

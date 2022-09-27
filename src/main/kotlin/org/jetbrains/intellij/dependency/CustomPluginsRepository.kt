@@ -6,6 +6,7 @@ import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepository
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
@@ -46,7 +47,7 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
             ?.downloadUrl
 
     private fun downloadZipArtifact(project: Project, url: URL, plugin: PluginDependencyNotation, context: String?) =
-        project.objects.newInstance(DependenciesDownloader::class.java)
+        project.objects.newInstance<DependenciesDownloader>()
             .downloadFromRepository(context, {
                 create(
                     group = "com.jetbrains.plugins",

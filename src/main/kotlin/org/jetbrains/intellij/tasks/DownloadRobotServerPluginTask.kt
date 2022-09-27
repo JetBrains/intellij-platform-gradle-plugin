@@ -2,12 +2,13 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
@@ -55,7 +56,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
     @get:OutputDirectory
     val outputDir: DirectoryProperty = objectFactory.directoryProperty()
 
-    private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
+    private val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
 
     private val context = logCategory()
 
