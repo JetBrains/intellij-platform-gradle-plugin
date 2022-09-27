@@ -426,8 +426,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
         val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
-
-        fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
+         fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
             assertNotNull(it)
 
             assertEquals("1.0", it.getValue("Manifest-Version"))
