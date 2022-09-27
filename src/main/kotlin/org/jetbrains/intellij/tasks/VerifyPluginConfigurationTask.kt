@@ -2,15 +2,14 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.JavaVersion
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.JavaVersion
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.parsePluginXml
@@ -19,11 +18,8 @@ import org.jetbrains.intellij.utils.PlatformKotlinVersions
 import org.jetbrains.intellij.warn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
-import javax.inject.Inject
 
-open class VerifyPluginConfigurationTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : DefaultTask() {
+abstract class VerifyPluginConfigurationTask : DefaultTask() {
 
     /**
      * The location of the built plugin file which will be used for verification.
@@ -31,61 +27,61 @@ open class VerifyPluginConfigurationTask @Inject constructor(
      * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
      */
     @get:InputFiles
-    val pluginXmlFiles = objectFactory.listProperty<File>()
+    abstract val pluginXmlFiles: ListProperty<File>
 
     /**
      * IntelliJ SDK platform version.
      */
     @get:Internal
-    val platformVersion = objectFactory.property<String>()
+    abstract val platformVersion: Property<String>
 
     /**
      * IntelliJ SDK platform build number.
      */
     @get:Internal
-    val platformBuild = objectFactory.property<String>()
+    abstract val platformBuild: Property<String>
 
     /**
      * [JavaCompile.sourceCompatibility] property defined in the build script.
      */
     @get:Internal
-    val sourceCompatibility = objectFactory.property<String>()
+    abstract val sourceCompatibility: Property<String>
 
     /**
      * [JavaCompile.targetCompatibility] property defined in the build script.
      */
     @get:Internal
-    val targetCompatibility = objectFactory.property<String>()
+    abstract val targetCompatibility: Property<String>
 
     /**
      * The Gradle Kotlin plugin is loaded.
      */
     @get:Internal
-    val kotlinPluginAvailable = objectFactory.property<Boolean>()
+    abstract val kotlinPluginAvailable: Property<Boolean>
 
     /**
      * [KotlinCompile.kotlinOptions.apiVersion] property defined in the build script
      */
     @get:Internal
-    val kotlinApiVersion = objectFactory.property<String?>()
+    abstract val kotlinApiVersion: Property<String?>
 
     /**
      * [KotlinCompile.kotlinOptions.languageVersion] property defined in the build script
      */
     @get:Internal
-    val kotlinLanguageVersion = objectFactory.property<String?>()
+    abstract val kotlinLanguageVersion: Property<String?>
 
     /**
      * [KotlinCompile.kotlinOptions.jvmTarget] property defined in the build script.
      */
     @get:Internal
-    val kotlinJvmTarget = objectFactory.property<String?>()
+    abstract val kotlinJvmTarget: Property<String?>
 
     /**
      * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
      */
     @get:Internal
-    val kotlinStdlibDefaultDependency = objectFactory.property<Boolean>()
+    abstract val kotlinStdlibDefaultDependency: Property<Boolean>
 
     private val context = logCategory()
 
@@ -142,10 +138,10 @@ open class VerifyPluginConfigurationTask @Inject constructor(
             warn(
                 context,
                 "The following plugin configuration issues were found:" +
-                    "\n" +
-                    issues.joinToString("\n") { "- $it" } +
-                    "\n" +
-                    "See: https://jb.gg/intellij-platform-versions"
+                        "\n" +
+                        issues.joinToString("\n") { "- $it" } +
+                        "\n" +
+                        "See: https://jb.gg/intellij-platform-versions"
             )
         }
     }

@@ -5,13 +5,13 @@ package org.jetbrains.intellij
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.listProperty
 import org.gradle.kotlin.dsl.newInstance
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -53,7 +53,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val plugins = objectFactory.listProperty<Any>()
+    abstract val plugins: ListProperty<Any>
 
     /**
      * The path to the locally installed IDE distribution that should be used to build the plugin.
@@ -67,7 +67,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val localPath = objectFactory.property<String>()
+    abstract val localPath: Property<String>
 
     /**
      * The path to local archive with IDE sources.
@@ -76,7 +76,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val localSourcesPath = objectFactory.property<String>()
+    abstract val localSourcesPath: Property<String>
 
     /**
      * Required.
@@ -91,7 +91,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * All available JetBrains IDEs versions can be found at [IntelliJ Artifacts](https://plugins.jetbrains.com/docs/intellij/intellij-artifacts.html) page.
      */
     @get:Input
-    val version = objectFactory.property<String>()
+    abstract val version: Property<String>
 
     /**
      * The type of the IntelliJ-based IDE distribution.
@@ -113,7 +113,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val type = objectFactory.property<String>()
+    abstract val type: Property<String>
 
     /**
      * The name of the generated ZIP archive distribution, e.g. `/build/distributions/PluginName-1.0.0.zip`.
@@ -122,7 +122,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val pluginName = objectFactory.property<String>()
+    abstract val pluginName: Property<String>
 
     /**
      * Defines if the `plugin.xml` should be patched with the values of [org.jetbrains.intellij.tasks.PatchPluginXmlTask.sinceBuild]
@@ -132,7 +132,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val updateSinceUntilBuild = objectFactory.property<Boolean>()
+    abstract val updateSinceUntilBuild: Property<Boolean>
 
     /**
      * Patches `plugin.xml` with the `patchPluginXml.untilBuild` with the value
@@ -146,7 +146,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val sameSinceUntilBuild = objectFactory.property<Boolean>()
+    abstract val sameSinceUntilBuild: Property<Boolean>
 
     /**
      * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
@@ -155,7 +155,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val instrumentCode = objectFactory.property<Boolean>()
+    abstract val instrumentCode: Property<Boolean>
 
     /**
      * The path of sandbox directory that is used for running IDE with developed plugin.
@@ -164,7 +164,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val sandboxDir = objectFactory.property<String>()
+    abstract val sandboxDir: Property<String>
 
     /**
      * The IntelliJ-based IDE distributions repository URL.
@@ -173,7 +173,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val intellijRepository = objectFactory.property<String>()
+    abstract val intellijRepository: Property<String>
 
     /**
      * Configures repositories for downloading plugin dependencies.
@@ -188,7 +188,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    @Nested
+    @get:Nested
     val pluginsRepositories = objectFactory.newInstance<PluginsRepositoryConfiguration>()
 
     private var pluginDependenciesConfigured = false
@@ -215,7 +215,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val jreRepository = objectFactory.property<String>()
+    abstract val jreRepository: Property<String>
 
     /**
      * Path to the directory where IntelliJ IDEA dependency cache is stored.
@@ -225,7 +225,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val ideaDependencyCachePath = objectFactory.property<String>()
+    abstract val ideaDependencyCachePath: Property<String>
 
     /**
      * Download IntelliJ Platform sources.
@@ -235,7 +235,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val downloadSources = objectFactory.property<Boolean>()
+    abstract val downloadSources: Property<Boolean>
 
     /**
      * If enabled, automatically configures the default IntelliJ Platform dependencies in the current project.
@@ -245,7 +245,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val configureDefaultDependencies = objectFactory.property<Boolean>()
+    abstract val configureDefaultDependencies: Property<Boolean>
 
     /**
      * Configure extra dependency artifacts from the IntelliJ repository.
@@ -253,14 +253,14 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val extraDependencies = objectFactory.listProperty<String>()
+    abstract val extraDependencies: ListProperty<String>
 
-    @Internal
-    val pluginDependencies = objectFactory.listProperty<PluginDependency>()
+    @get:Internal
+    abstract val pluginDependencies: ListProperty<PluginDependency>
 
-    @Internal
-    @Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
-    val ideaDependency = objectFactory.property<IdeaDependency>()
+    @get:Internal
+    @get:Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
+    abstract val ideaDependency: Property<IdeaDependency>
 
     fun getVersionNumber(): String = version.get().run {
         versionTypeRegex.matchEntire(this)?.groupValues?.getOrNull(2) ?: this

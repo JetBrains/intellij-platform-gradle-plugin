@@ -8,17 +8,11 @@ import org.gradle.api.GradleException
 import org.gradle.api.Task
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.Sync
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
 import org.jdom2.Element
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
@@ -26,11 +20,8 @@ import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.transformXml
 import java.io.File
-import javax.inject.Inject
 
-open class PrepareSandboxTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : Sync() {
+abstract class PrepareSandboxTask : Sync() {
 
     /**
      * The name of the plugin.
@@ -38,7 +29,7 @@ open class PrepareSandboxTask @Inject constructor(
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.pluginName]
      */
     @get:Input
-    val pluginName = objectFactory.property<String>()
+    abstract val pluginName: Property<String>
 
     /**
      * The directory with the plugin configuration.
@@ -46,7 +37,7 @@ open class PrepareSandboxTask @Inject constructor(
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.sandboxDir]/config
      */
     @get:Input
-    val configDir = objectFactory.property<String>()
+    abstract val configDir: Property<String>
 
     /**
      * The input plugin JAR file used to prepare the sandbox.
@@ -54,7 +45,7 @@ open class PrepareSandboxTask @Inject constructor(
      * Default value: `jar` task output
      */
     @get:InputFile
-    val pluginJar: RegularFileProperty = objectFactory.fileProperty()
+    abstract val pluginJar: RegularFileProperty
 
     /**
      * Libraries that will be ignored when preparing the sandbox. By default, excludes all libraries that are a part
@@ -64,7 +55,7 @@ open class PrepareSandboxTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val librariesToIgnore = objectFactory.listProperty<File>()
+    abstract val librariesToIgnore: ListProperty<File>
 
     /**
      * List of dependencies of the current plugin.
@@ -73,13 +64,13 @@ open class PrepareSandboxTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val pluginDependencies = objectFactory.listProperty<PluginDependency>()
+    abstract val pluginDependencies: ListProperty<PluginDependency>
 
     /**
      * Default sandbox destination directory.
      */
     @get:Internal
-    val defaultDestinationDir = objectFactory.property<File>()
+    abstract val defaultDestinationDir: Property<File>
 
     private val context = logCategory()
 

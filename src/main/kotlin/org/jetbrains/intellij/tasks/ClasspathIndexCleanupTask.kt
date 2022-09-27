@@ -4,24 +4,21 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.TaskAction
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
-import javax.inject.Inject
 
 /**
  * Remove `classpath.index` files that are created by the `PathClassLoader`.
  * This loader, due to the implementation bug, ignores the `idea.classpath.index.enabled=false` flag and as a workaround,
  * files have to be removed manually.
  */
-open class ClasspathIndexCleanupTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : DefaultTask() {
+abstract class ClasspathIndexCleanupTask : DefaultTask() {
 
     @get:InputFiles
-    val classpathIndexFiles = objectFactory.fileCollection()
+    abstract val classpathIndexFiles: ConfigurableFileCollection
 
     private val context = logCategory()
 

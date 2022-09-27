@@ -3,17 +3,12 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.util.TeeOutputStream
+import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.DefaultTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.SkipWhenEmpty
-import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.property
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants
@@ -25,7 +20,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 
-open class SignPluginTask @Inject constructor(
+abstract class SignPluginTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
 ) : DefaultTask() {
@@ -48,7 +43,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:SkipWhenEmpty
-    val inputArchiveFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val inputArchiveFile: RegularFileProperty
 
     /**
      * Output, signed ZIP archive file.
@@ -57,7 +52,7 @@ open class SignPluginTask @Inject constructor(
      * Predefined with the name of the ZIP archive file with `-signed` name suffix attached.
      */
     @get:OutputFile
-    val outputArchiveFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val outputArchiveFile: RegularFileProperty
 
     /**
      * Returns the version of the Marketplace ZIP Signer CLI that will be used.
@@ -66,7 +61,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val cliVersion = objectFactory.property<String>()
+    abstract val cliVersion: Property<String>
 
     /**
      * Local path to the Marketplace ZIP Signer CLI that will be used.
@@ -74,7 +69,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val cliPath = objectFactory.property<String>()
+    abstract val cliPath: Property<String>
 
     /**
      * KeyStore file path.
@@ -82,7 +77,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStore = objectFactory.property<String>()
+    abstract val keyStore: Property<String>
 
     /**
      * KeyStore password.
@@ -90,7 +85,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStorePassword = objectFactory.property<String>()
+    abstract val keyStorePassword: Property<String>
 
     /**
      * KeyStore key alias.
@@ -98,7 +93,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStoreKeyAlias = objectFactory.property<String>()
+    abstract val keyStoreKeyAlias: Property<String>
 
     /**
      * KeyStore type.
@@ -106,7 +101,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStoreType = objectFactory.property<String>()
+    abstract val keyStoreType: Property<String>
 
     /**
      * JCA KeyStore Provider name.
@@ -114,7 +109,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStoreProviderName = objectFactory.property<String>()
+    abstract val keyStoreProviderName: Property<String>
 
     /**
      * Encoded private key in PEM format.
@@ -122,7 +117,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val privateKey = objectFactory.property<String>()
+    abstract val privateKey: Property<String>
 
     /**
      * A file with encoded private key in PEM format.
@@ -130,7 +125,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:Optional
-    val privateKeyFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val privateKeyFile: RegularFileProperty
 
     /**
      * Password required to decrypt the private key.
@@ -138,7 +133,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val password = objectFactory.property<String>()
+    abstract val password: Property<String>
 
     /**
      * A string containing X509 certificates.
@@ -147,7 +142,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val certificateChain = objectFactory.property<String>()
+    abstract val certificateChain: Property<String>
 
     /**
      * Path to the file containing X509 certificates.
@@ -156,7 +151,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:Optional
-    val certificateChainFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val certificateChainFile: RegularFileProperty
 
     private val context = logCategory()
 

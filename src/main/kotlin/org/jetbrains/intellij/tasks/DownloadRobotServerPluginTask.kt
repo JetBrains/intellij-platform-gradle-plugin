@@ -5,11 +5,11 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.newInstance
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.Version
@@ -19,7 +19,7 @@ import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.File
 import javax.inject.Inject
 
-open class DownloadRobotServerPluginTask @Inject constructor(
+abstract class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory
 ) : DefaultTask() {
 
@@ -38,7 +38,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
      * Default value: `LATEST`
      */
     @get:Input
-    val version = objectFactory.property<String>()
+    abstract val version: Property<String>
 
     /**
      * The archive with the Robot Server Plugin, by default downloaded by to the Maven cache.
@@ -46,7 +46,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
      * Default value: Maven cache
      */
     @get:Input
-    val pluginArchive = objectFactory.property<File>()
+    abstract val pluginArchive: Property<File>
 
     /**
      * Location of the extracted archive.
@@ -54,7 +54,7 @@ open class DownloadRobotServerPluginTask @Inject constructor(
      * Default value: `build/robotServerPlugin`
      */
     @get:OutputDirectory
-    val outputDir: DirectoryProperty = objectFactory.directoryProperty()
+    abstract val outputDir: DirectoryProperty
 
     private val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
 

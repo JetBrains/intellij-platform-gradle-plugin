@@ -4,9 +4,9 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
 import org.gradle.api.Incubating
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
@@ -19,7 +19,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 @Incubating
-open class RunIdePerformanceTestTask : RunIdeBase(true) {
+abstract class RunIdePerformanceTestTask : RunIdeBase(true) {
 
     private val context = logCategory()
 
@@ -27,14 +27,14 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
      * Path to directory with test projects and '.ijperf' files.
      */
     @get:Input
-    val testDataDir = objectFactory.property<String>()
+    abstract val testDataDir: Property<String>
 
     /**
      * Path to directory where performance test artifacts (IDE logs, snapshots, screenshots, etc.) will be stored.
      * If the directory doesn't exist, it will be created.
      */
     @get:Input
-    val artifactsDir = objectFactory.property<String>()
+    abstract val artifactsDir: Property<String>
 
     /**
      * Name of the profiler which will be used during execution.
@@ -46,7 +46,7 @@ open class RunIdePerformanceTestTask : RunIdeBase(true) {
      * - [ProfilerName.YOURKIT]
      */
     @get:Input
-    val profilerName = objectFactory.property<ProfilerName>()
+    abstract val profilerName: Property<ProfilerName>
 
     private lateinit var scriptPath: String
 

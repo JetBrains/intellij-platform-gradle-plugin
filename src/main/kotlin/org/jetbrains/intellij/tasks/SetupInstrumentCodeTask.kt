@@ -5,22 +5,19 @@ package org.jetbrains.intellij.tasks
 import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.property
-import javax.inject.Inject
 
-open class SetupInstrumentCodeTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : DefaultTask() {
+abstract class SetupInstrumentCodeTask : DefaultTask() {
 
     @get:Input
-    val instrumentationEnabled = objectFactory.property<Boolean>()
+    abstract val instrumentationEnabled: Property<Boolean>
 
     @get:Internal
-    val instrumentedDir = objectFactory.directoryProperty()
+    abstract val instrumentedDir: DirectoryProperty
 
     @TaskAction
     fun setupInstrumentCode() {

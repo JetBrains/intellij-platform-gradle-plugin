@@ -3,22 +3,18 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.dependency.IdeaDependency
-import javax.inject.Inject
 
-open class SetupDependenciesTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : DefaultTask() {
+abstract class SetupDependenciesTask : DefaultTask() {
 
     /**
      * Reference to the resolved `idea` dependency.
      */
     @get:Internal
-    val idea = objectFactory.property<IdeaDependency>()
+    abstract val idea: Property<IdeaDependency>
 
     @TaskAction
     fun setupDependencies() {

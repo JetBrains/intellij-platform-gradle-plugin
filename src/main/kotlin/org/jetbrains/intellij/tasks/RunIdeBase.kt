@@ -7,27 +7,12 @@ import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.utils.hasExtension
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.error
-import org.jetbrains.intellij.getIdeJvmArgs
-import org.jetbrains.intellij.getIdeaSystemProperties
-import org.jetbrains.intellij.ideBuildNumber
-import org.jetbrains.intellij.ideProductInfo
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.model.OS
 import org.jetbrains.intellij.utils.OpenedPackages
 import java.io.File
@@ -36,6 +21,7 @@ import java.nio.file.Files
 import kotlin.streams.asSequence
 
 abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
+
     companion object {
         private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
     }
@@ -51,7 +37,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * TODO: Should be @Internal
      */
     @get:Input
-    val ideDir = objectFactory.property<File>()
+    abstract val ideDir: Property<File>
 
     /**
      * Custom JBR version to use for running the IDE.
@@ -64,8 +50,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * - `11_0_2b159`
      */
     @get:Input
-    @Optional
-    val jbrVersion = objectFactory.property<String>()
+    @get:Optional
+    abstract val jbrVersion: Property<String>
 
     /**
      * JetBrains Runtime variant to use when running the IDE with the plugin.
@@ -91,8 +77,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
     @get:Input
-    @Optional
-    val jbrVariant = objectFactory.property<String>()
+    @get:Optional
+    abstract val jbrVariant: Property<String>
 
     /**
      * Path to the `plugins` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
@@ -103,8 +89,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * TODO: Should be @Internal
      */
     @get:InputDirectory
-    @PathSensitive(PathSensitivity.NONE)
-    val pluginsDir: DirectoryProperty = objectFactory.directoryProperty()
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val pluginsDir: DirectoryProperty
 
     /**
      * Enables auto-reload of dynamic plugins.
@@ -113,15 +99,15 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * Enabled by default in 2020.2 and higher.
      */
     @get:Input
-    @Optional
-    val autoReloadPlugins = objectFactory.property<Boolean>()
+    @get:Optional
+    abstract val autoReloadPlugins: Property<Boolean>
 
     /**
      * List of plugins required to be present when running the IDE.
      * Provided to the `idea.required.plugins.id` system property.
      */
-    @Internal
-    val requiredPluginIds = objectFactory.listProperty<String>()
+    @get:Internal
+    abstract val requiredPluginIds: ListProperty<String>
 
     /**
      * Path to the `config` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
@@ -129,8 +115,8 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      *
      * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.configDir]
      */
-    @Internal
-    val configDir = objectFactory.property<File>()
+    @get:Internal
+    abstract val configDir: Property<File>
 
     /**
      * Path to the `system` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
@@ -138,22 +124,22 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      *
      * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.sandboxDir]/system
      */
-    @Internal
-    val systemDir = objectFactory.property<File>()
+    @get:Internal
+    abstract val systemDir: Property<File>
 
     /**
      * The IDEA binary working directory.
      *
      * Default value: [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea]/bin
      */
-    @Internal
-    val projectWorkingDir = objectFactory.property<File>()
+    @get:Internal
+    abstract val projectWorkingDir: Property<File>
 
     /**
      * Path to the resolved JBR executable.
      */
-    @Internal
-    val projectExecutable = objectFactory.property<String>()
+    @get:Internal
+    abstract val projectExecutable: Property<String>
 
     private val buildNumber by lazy { ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse) }
     private val build203 by lazy { Version.parse("203.0") }
@@ -274,7 +260,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                     this,
                     GradleException(
                         "Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
-                            "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."
+                                "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."
                     )
                 )
             }

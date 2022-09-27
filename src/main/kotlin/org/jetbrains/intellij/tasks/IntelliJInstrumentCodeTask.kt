@@ -6,12 +6,13 @@ package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.*
 import groovy.lang.Closure
-import org.gradle.api.file.FileType
 import org.gradle.api.DefaultTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileType
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
 import org.gradle.tooling.BuildException
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -23,11 +24,8 @@ import org.jetbrains.intellij.logCategory
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import javax.inject.Inject
 
-open class IntelliJInstrumentCodeTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : DefaultTask() {
+abstract class IntelliJInstrumentCodeTask : DefaultTask() {
 
     companion object {
         const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
@@ -35,35 +33,35 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
     }
 
     @get:Internal
-    val sourceSetCompileClasspath = objectFactory.fileCollection()
+    abstract val sourceSetCompileClasspath: ConfigurableFileCollection
 
     @get:Input
     @get:Optional
-    val ideaDependency = objectFactory.property<IdeaDependency>()
+    abstract val ideaDependency: Property<IdeaDependency>
 
     @get:Input
     @get:Optional
-    val javac2 = objectFactory.property<File>()
+    abstract val javac2: Property<File>
 
     @get:Input
-    val compilerVersion = objectFactory.property<String>()
+    abstract val compilerVersion: Property<String>
 
     @get:Incremental
     @get:InputFiles
-    val classesDirs = objectFactory.fileCollection()
+    abstract val classesDirs: ConfigurableFileCollection
 
     @get:Incremental
     @get:InputFiles
-    val formsDirs = objectFactory.fileCollection()
+    abstract val formsDirs: ConfigurableFileCollection
 
     @get:Internal
-    val sourceDirs = objectFactory.fileCollection()
+    abstract val sourceDirs: ConfigurableFileCollection
 
     @get:OutputDirectory
-    val outputDir = objectFactory.directoryProperty()
+    abstract val outputDir: DirectoryProperty
 
     @get:Input
-    val compilerClassPathFromMaven = objectFactory.listProperty<File>()
+    abstract val compilerClassPathFromMaven: ListProperty<File>
 
     private val context = logCategory()
 
@@ -177,7 +175,7 @@ open class IntelliJInstrumentCodeTask @Inject constructor(
                 info(
                     context,
                     "Old version of Javac2 is used, instrumenting code with nullability will be skipped. " +
-                        "Use IDEA >14 SDK (139.*) to fix this",
+                            "Use IDEA >14 SDK (139.*) to fix this",
                 )
                 return false
             } else {
