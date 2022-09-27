@@ -6,6 +6,7 @@
 - Revert pushing project resource directories to the end of classpath in the test task context. ([#1101](../../issues/1101))
 - Avoid unnecessary task configuration during Gradle configuration phase [#1110](../../issues/1110) by @3flex
 - Replace internal Gradle ConventionTask with DefaultTask [#1115](../../issues/1115) by @aSemy
+- Plugin Verifier cache directory now follows XDG cache standards [#1119](../../issues/1119) by @aSemy
 
 ## [1.9.0]
 ### Added
@@ -15,9 +16,6 @@
 
 ### Changed
 - Change `IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL` to `https://jb.gg/android-studio-releases-list.xml`
-
-### Fixed
-- Revert pushing project resource directories to the end of classpath in the test task context. ([#1101](../../../1161)) 
 
 ## [1.8.1]
 ### Added
@@ -38,7 +36,7 @@
 
 ### Removed
 - Remove the `DEPENDENCY_FIRST` resolution strategy set by default along with its `BuildFeature.USE_DEPENDENCY_FIRST_RESOLUTION_STRATEGY` flag.
-- Remove setting of the `java.system.class.loader` property from tests configuration. 
+- Remove setting of the `java.system.class.loader` property from tests configuration.
 
 ### Fixed
 - Exclude non-jar files from the classpath [#1009](../../issues/1009)
@@ -294,7 +292,7 @@
 
 ## 0.4.20
 - fixed caching builtin plugins data
-- add annotations-19.0.0 to compile classpath by default 
+- add annotations-19.0.0 to compile classpath by default
 - fix setting plugin name for Gradle 5.1-5.3 [#481](../../issues/481)
 
 ## 0.4.19
@@ -336,7 +334,7 @@
 - Introduced `intellij.useProductionClassLoaderInTests` option to control how plugin is going to be loaded in tests
 
 ## 0.4.11
-- Fix setting archive name for Gradle 5.1 and higher [#436](../../issues/436)  
+- Fix setting archive name for Gradle 5.1 and higher [#436](../../issues/436)
 - Fix forms compilation for Rider and Python snapshot builds. Works for Rider-2019.3-SNAPSHOT and higher [#403](../../issues/403)
 
 ## 0.4.10
@@ -576,4 +574,3 @@
 
 ## 0.0.10
 - Support for attaching IntelliJ sources in IDEA
-
