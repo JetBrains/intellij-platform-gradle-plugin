@@ -8,9 +8,7 @@ import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
 import kotlin.test.assertNotEquals
-import kotlin.test.assertTrue
 
 @Suppress("PluginXmlValidity", "ComplexRedundantLet")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
