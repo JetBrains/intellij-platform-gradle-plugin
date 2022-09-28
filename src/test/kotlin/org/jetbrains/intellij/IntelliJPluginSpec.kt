@@ -637,7 +637,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun assertAddedToCompileAndRuntimeClassPaths(
         compileClasspath: String,
         runtimeClasspath: String,
-        jarName: String
+        jarName: String,
     ) {
         assertTrue(
             compileClasspath.contains(jarName),

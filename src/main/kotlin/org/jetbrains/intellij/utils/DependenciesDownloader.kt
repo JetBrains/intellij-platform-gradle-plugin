@@ -86,7 +86,7 @@ abstract class DependenciesDownloader @Inject constructor(
 internal fun RepositoryHandler.ivyRepository(
     repositoryUrl: String,
     pattern: String = "",
-    block: (IvyArtifactRepository.() -> Unit)? = null
+    block: (IvyArtifactRepository.() -> Unit)? = null,
 ) =
     ivy {
         url = URI(repositoryUrl)

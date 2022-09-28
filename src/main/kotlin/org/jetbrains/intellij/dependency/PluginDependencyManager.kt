@@ -142,7 +142,7 @@ abstract class PluginDependencyManager @Inject constructor(
     private fun IntelliJIvyDescriptorFileGenerator.addCompileArtifacts(
         plugin: PluginDependency,
         baseDir: File,
-        groupId: String
+        groupId: String,
     ) {
         val compileConfiguration = DefaultIvyConfiguration("compile")
         addConfiguration(compileConfiguration)
@@ -160,7 +160,7 @@ abstract class PluginDependencyManager @Inject constructor(
     private fun IntelliJIvyDescriptorFileGenerator.addSourceArtifacts(
         plugin: PluginDependency,
         baseDir: File,
-        groupId: String
+        groupId: String,
     ) {
         val sourcesConfiguration = DefaultIvyConfiguration("sources")
         addConfiguration(sourcesConfiguration)

@@ -20,7 +20,7 @@ import java.io.File
 import javax.inject.Inject
 
 abstract class DownloadRobotServerPluginTask @Inject constructor(
-    objectFactory: ObjectFactory
+    objectFactory: ObjectFactory,
 ) : DefaultTask() {
 
     companion object {
