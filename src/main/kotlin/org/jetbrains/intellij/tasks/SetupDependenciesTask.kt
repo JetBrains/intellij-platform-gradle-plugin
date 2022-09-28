@@ -5,7 +5,6 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.TaskAction
 import org.jetbrains.intellij.dependency.IdeaDependency
 
 abstract class SetupDependenciesTask : DefaultTask() {
@@ -15,8 +14,4 @@ abstract class SetupDependenciesTask : DefaultTask() {
      */
     @get:Internal
     abstract val idea: Property<IdeaDependency>
-
-    @TaskAction
-    fun setupDependencies() {
-    }
 }
