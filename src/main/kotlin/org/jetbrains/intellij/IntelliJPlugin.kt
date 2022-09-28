@@ -473,8 +473,8 @@ open class IntelliJPlugin : Plugin<Project> {
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
             ideDir.convention(runIdeTaskProvider.get().ideDir)
-            productsReleasesFile.convention(listProductsReleasesTaskProvider.get().outputFile.map {
-                it.asFile
+            productsReleasesFile.convention(project.provider {
+                listProductsReleasesTaskProvider.get().outputFile.get().asFile
             })
             ides.convention(project.provider {
                 val ideVersions = ideVersions.get().takeIf(List<String>::isNotEmpty) ?: run {
@@ -557,7 +557,7 @@ open class IntelliJPlugin : Plugin<Project> {
             dependsOn(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
 
             val isIdeVersionsEmpty = project.provider {
-                ideVersions.get().isEmpty() && localPaths.get().isEmpty()
+                localPaths.get().isEmpty() && ideVersions.get().isEmpty()
             }
             listProductsReleasesTaskProvider.get().onlyIf { isIdeVersionsEmpty.get() }
 

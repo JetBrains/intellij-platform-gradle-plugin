@@ -13,12 +13,11 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.VerificationTask
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 
-abstract class VerifyPluginTask : DefaultTask(), VerificationTask {
+abstract class VerifyPluginTask : DefaultTask() {
 
     /**
      * Specifies whether the build should fail when the verifications performed by this task fail.
@@ -53,12 +52,6 @@ abstract class VerifyPluginTask : DefaultTask(), VerificationTask {
     abstract val pluginDir: DirectoryProperty
 
     private val context = logCategory()
-
-    override fun getIgnoreFailures(): Boolean = ignoreFailures.get()
-
-    override fun setIgnoreFailures(ignoreFailures: Boolean) {
-        this.ignoreFailures.set(ignoreFailures)
-    }
 
     @TaskAction
     fun verifyPlugin() {
