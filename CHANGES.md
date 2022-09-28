@@ -9,6 +9,9 @@
 - Plugin Verifier cache directory now follows XDG cache standards [#1119](../../issues/1119) by @aSemy
 - Migrate most of the Gradle API in `IntelliJPlugin.kt` to use the Gradle Kotlin DSL extensions [#1117](../../issues/1117) by @aSemy
 
+### Changed
+- Set minimum supported Gradle version from `6.7.1` to `6.8`
+
 ## [1.9.0]
 ### Added
 - Configure classpath for run-based tasks using `package-info.json` provided with IntelliJ SDK 2022.3+
