@@ -5,6 +5,7 @@ package org.jetbrains.intellij
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.BuildResult
+import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.test.createLocalIdeIfNotExists
 import org.junit.Assume.assumeFalse
@@ -482,7 +483,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `throws exception if Gradle is lt 6_8`() {
-        val message = "Gradle IntelliJ Plugin requires Gradle 6.8 and higher"
+        val message = "Gradle IntelliJ Plugin requires Gradle $MINIMAL_SUPPORTED_GRADLE_VERSION and higher"
 
         build("6.4", true, "help").output.let {
             assertTrue(it.contains("FAILURE: Build failed with an exception."))
@@ -492,7 +493,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             assertTrue(it.contains("FAILURE: Build failed with an exception."))
         }
 
-        build("6.8", false, "help").output.let {
+        build(MINIMAL_SUPPORTED_GRADLE_VERSION, false, "help").output.let {
             assertTrue(it.contains("BUILD SUCCESSFUL"))
             assertFalse(it.contains(message))
         }
