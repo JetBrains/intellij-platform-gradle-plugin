@@ -960,9 +960,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 val closestCompilerVersion = URL(IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA).openStream()
                                     .use { inputStream ->
                                         val version = Version.parse(compilerVersion)
-                                        XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.versions?.let { versions ->
-                                            versions.map(Version::parse).filter { it <= version }.maxOf { it }.version
-                                        }
+                                        XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.versions
+                                            ?.map(Version::parse)?.filter { it <= version }
+                                            ?.maxOf { it }
+                                            ?.version
                                     }
 
                                 if (closestCompilerVersion == null) {
