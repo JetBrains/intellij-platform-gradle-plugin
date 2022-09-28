@@ -60,19 +60,19 @@ abstract class VerifyPluginConfigurationTask : DefaultTask() {
     abstract val kotlinPluginAvailable: Property<Boolean>
 
     /**
-     * [KotlinCompile.kotlinOptions.apiVersion] property defined in the build script
+     * The `apiVersion` property of [KotlinCompile.kotlinOptions] defined in the build script
      */
     @get:Internal
     abstract val kotlinApiVersion: Property<String?>
 
     /**
-     * [KotlinCompile.kotlinOptions.languageVersion] property defined in the build script
+     * The `languageVersion` property of [KotlinCompile.kotlinOptions] defined in the build script
      */
     @get:Internal
     abstract val kotlinLanguageVersion: Property<String?>
 
     /**
-     * [KotlinCompile.kotlinOptions.jvmTarget] property defined in the build script.
+     * The `jvmTarget` property of [KotlinCompile.kotlinOptions] defined in the build script.
      */
     @get:Internal
     abstract val kotlinJvmTarget: Property<String?>
