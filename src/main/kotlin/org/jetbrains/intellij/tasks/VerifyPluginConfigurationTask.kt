@@ -136,9 +136,9 @@ abstract class VerifyPluginConfigurationTask : DefaultTask() {
             warn(
                 context,
                 """
-                    The following plugin configuration issues were found:
-                    $issues
-                    See: https://jb.gg/intellij-platform-versions
+                The following plugin configuration issues were found:
+                $issues
+                See: https://jb.gg/intellij-platform-versions
                 """.trimIndent()
             )
         }

@@ -16,14 +16,16 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier in specified version`() {
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
                 verifierVersion = "1.255"
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Starting the IntelliJ Plugin Verifier 1.255", it.output)
@@ -33,14 +35,16 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier fails on old version lower than 1_255`() {
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
                 verifierVersion = "1.254"
             }
-        """)
+            """
+        )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254", it.output)
@@ -50,13 +54,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             val version = RunPluginVerifierTask.resolveLatestVersion()
@@ -68,13 +74,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `test plugin against two IDEs`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = ["IC-2020.2.3", "PS-2020.1.3"]
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Plugin MyName:1.0.0 against IC-202.7660.26: Compatible", it.output)
@@ -86,13 +94,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `test plugin against Android Studio`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = ["AI-2021.1.1.15"]
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Plugin MyName:1.0.0 against AI-211.7628.21.2111.7824002: Compatible", it.output)
@@ -103,14 +113,16 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports directory`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             runPluginVerifier {
                 verificationReportsDir = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             val directory = file("build/foo").canonicalPath
@@ -124,7 +136,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginXmlFile()
 
         val resource = javaClass.classLoader.getResource("products-releases/idea-releases.xml")?.path
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
 
             version = "1.0.0"
@@ -135,7 +148,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 untilVersion = "2020.2.3"
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("> Task :listProductsReleases", it.output)
@@ -148,14 +162,16 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
         writePluginXmlFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = []
                 localPaths = [new File('/tmp')]
             }
-        """)
+            """
+        )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("> Task :listProductsReleases SKIPPED", it.output)
@@ -166,9 +182,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on verifyPlugin task`() {
         writeJavaFile()
         pluginXml.delete()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
-        """)
+            """
+        )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
@@ -180,7 +198,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -189,7 +208,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 failureLevel = [FailureLevel.DEPRECATED_API_USAGES]
                 ideVersions = ["2020.2.3"]
             }
-        """)
+            """
+        )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Deprecated API usages", it.output)
@@ -201,13 +221,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Deprecated API usages", it.output)
@@ -219,7 +241,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on incorrect ideVersion`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -227,7 +250,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 ideVersions = ["foo", "foo", "", "foo"]
             }
-        """)
+            """
+        )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("IDE 'foo' cannot be downloaded.", it.output)
@@ -238,7 +262,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -247,7 +272,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.ALL
             }
-        """)
+            """
+        )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Deprecated API usages", it.output)
@@ -259,7 +285,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.FailureLevel
             
             version = "1.0.0"
@@ -268,7 +295,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.NONE
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Deprecated API usages", it.output)
@@ -280,14 +308,16 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `run plugin verifier in offline mode`() {
         writePluginXmlFile()
         warmupGradle()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = ["2020.1.3"]
                 verifierPath = "${'$'}{project.buildDir}/pluginVerifier.jar"
             }
-        """)
+            """
+        )
 
         val version = RunPluginVerifierTask.resolveLatestVersion()
         URL("$PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar")
@@ -303,13 +333,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `reuse configuration cache`() {
         writePluginXmlFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-        """)
+            """
+        )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
         build(RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache").let {
@@ -318,18 +350,21 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun warmupGradle() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
 
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-        """)
+            """
+        )
         build(BUILD_PLUGIN_TASK_NAME)
     }
 
     private fun writeJavaFileWithDeprecation() {
-        file("src/main/java/App.java").java("""  
+        file("src/main/java/App.java").java(
+            """  
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import com.intellij.openapi.util.text.StringUtil;
@@ -340,17 +375,20 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                     StringUtil.firstLetterToUpperCase("foo");
                 }
             }
-        """)
+            """
+        )
     }
 
     private fun writePluginXmlFile() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyName</name>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
                 <depends>com.intellij.modules.platform</depends>
             </idea-plugin>
-        """)
+            """
+        )
     }
 }

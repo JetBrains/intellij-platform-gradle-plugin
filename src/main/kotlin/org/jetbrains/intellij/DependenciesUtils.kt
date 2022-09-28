@@ -79,13 +79,13 @@ fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>): Fil
 fun Project.intellijExtra(extra: String, filter: PatternFilterable): FileCollection = intellijExtraBase(extra).matching(filter)
 
 private fun Project.intellijExtraBase(extra: String): FileTree {
-    val setupDependenciesTaskProvider = project.tasks.named(SETUP_DEPENDENCIES_TASK_NAME)
-    val setupDependenciesTask = setupDependenciesTaskProvider.get() as SetupDependenciesTask
+    val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
 
     if (!state.executed) {
         throw GradleException("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
     }
 
+    val setupDependenciesTask = setupDependenciesTaskProvider.get()
     val dependency = setupDependenciesTask.idea.get()
     val extraDependency = dependency.extraDependencies.find { it.name == extra }
     if (extraDependency?.jarFiles == null || extraDependency.jarFiles.isEmpty()) {

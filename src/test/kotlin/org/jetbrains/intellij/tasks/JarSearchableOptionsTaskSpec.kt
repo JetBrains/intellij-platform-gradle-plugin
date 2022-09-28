@@ -14,11 +14,13 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `skip jarring searchable options using IDEA prior 2019_1`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = '14.1.4'
             }
-        """)
+            """
+        )
 
         build(JAR_SEARCHABLE_OPTIONS_TASK_NAME).let {
             assertContains("$JAR_SEARCHABLE_OPTIONS_TASK_NAME SKIPPED", it.output)
@@ -28,14 +30,16 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
     @Test
     fun `jar searchable options produces archive`() {
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = '$intellijVersion'
             }
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+            """
+        )
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
         build(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
@@ -49,11 +53,13 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
     @Test
     fun `reuse configuration cache`() {
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = '$intellijVersion'
             }
-        """)
+            """
+        )
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
         build(JAR_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")

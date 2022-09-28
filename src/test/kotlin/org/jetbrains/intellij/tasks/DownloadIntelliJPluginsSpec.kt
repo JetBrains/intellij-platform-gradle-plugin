@@ -30,7 +30,8 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download plugin through maven block`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ["com.intellij.lang.jsgraphql:3.1.3"]
                 pluginsRepositories {
@@ -39,7 +40,8 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                       }
                 } 
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.intellij.lang.jsgraphql/3.1.3")
@@ -60,11 +62,13 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download zip plugin from non-default channel`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ["io.flutter:67.0.2-dev.1@dev"]
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsNightlyRepositoryCacheDir, "dev.com.jetbrains.plugins/io.flutter/67.0.2-dev.1")
@@ -84,11 +88,13 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download zip plugin`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ["org.intellij.plugins.markdown:$testMarkdownPluginVersion"]
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.intellij.plugins.markdown/$testMarkdownPluginVersion")
@@ -108,11 +114,13 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download jar plugin`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ["org.jetbrains.postfixCompletion:0.8-beta"]
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.jetbrains.postfixCompletion/0.8-beta")
@@ -130,14 +138,16 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     fun `download plugin from custom repository`() {
         val resource = javaClass.classLoader.getResource("custom-repo/updatePlugins.xml")
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 pluginsRepositories {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
@@ -150,14 +160,16 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     fun `download plugin from custom repository 2`() {
         val resource = javaClass.classLoader.getResource("custom-repo-2/plugins.xml")
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 pluginsRepositories {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             } 
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
@@ -171,14 +183,16 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         assumeFalse(OperatingSystem.current().isWindows)
         val resource = javaClass.classLoader.getResource("custom-repo-2/plugins.xml")
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 pluginsRepositories {
                     custom('${resource}?query=1')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
@@ -191,14 +205,16 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     fun `download plugin from custom repository without xml`() {
         val resource = javaClass.classLoader.getResource("custom-repo")
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 pluginsRepositories {
                     custom('${resource}')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
@@ -211,14 +227,16 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     fun `download plugin from custom repository without xml with query`() {
         val resource = javaClass.classLoader.getResource("custom-repo")
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 pluginsRepositories {
                     custom('${resource}?query=1')
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-        """)
+            """
+        )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 

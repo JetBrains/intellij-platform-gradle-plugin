@@ -14,24 +14,28 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
     override fun setUp() {
         super.setUp()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>PluginName</name>
                 <version>0.0.1</version>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
     }
 
     @Test
     fun `skip publishing if token is missing`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             publishPlugin { }
             verifyPlugin {
                 ignoreFailures = true
             }
-        """)
+            """
+        )
 
         buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
             assertContains("token property must be specified for plugin publishing", it.output)
@@ -40,12 +44,14 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             publishPlugin { }
             verifyPlugin {
                 ignoreFailures = true
             }
-        """)
+            """
+        )
 
         buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
         buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache").let {

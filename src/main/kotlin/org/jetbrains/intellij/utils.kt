@@ -128,15 +128,15 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirector
 }
 
 fun ideBuildNumber(ideDirectory: File) = (
-    File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-        ?: File(ideDirectory, "build.txt")
-    ).readText().trim()
+        File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+            ?: File(ideDirectory, "build.txt")
+        ).readText().trim()
 
 private val json = Json { ignoreUnknownKeys = true }
 fun ideProductInfo(ideDirectory: File) = (
-    File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-        ?: File(ideDirectory, "product-info.json")
-    )
+        File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+            ?: File(ideDirectory, "product-info.json")
+        )
     .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
 
@@ -159,9 +159,9 @@ private fun collectFiles(directory: File, filter: Predicate<File>): Collection<F
 
 fun releaseType(version: String) = when {
     version.endsWith(RELEASE_SUFFIX_EAP) ||
-        version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
-        version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
-        version.matches(MAJOR_VERSION_PATTERN.toRegex())
+            version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
+            version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
+            version.matches(MAJOR_VERSION_PATTERN.toRegex())
     -> RELEASE_TYPE_SNAPSHOTS
 
     version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> RELEASE_TYPE_NIGHTLY
@@ -209,9 +209,9 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): 
 
 fun isKotlinRuntime(name: String) =
     name == "kotlin-runtime" ||
-        name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
-        name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
-        name == "kotlin-test" || name.startsWith("kotlin-test-")
+            name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
+            name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
+            name == "kotlin-test" || name.startsWith("kotlin-test-")
 
 fun isDependencyOnPyCharm(dependency: IdeaDependency) = dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
 

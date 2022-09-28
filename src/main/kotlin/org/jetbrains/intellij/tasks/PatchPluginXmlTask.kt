@@ -157,8 +157,10 @@ abstract class PatchPluginXmlTask : DefaultTask() {
         if (tag != null) {
             val existingValue = tag.getAttribute(attributeName)?.value
             if (!existingValue.isNullOrEmpty()) {
-                warn(context,
-                    "Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$attributeValue'")
+                warn(
+                    context,
+                    "Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$attributeValue'"
+                )
             }
             tag.setAttribute(attributeName, attributeValue)
         } else {

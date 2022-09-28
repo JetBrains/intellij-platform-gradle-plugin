@@ -15,11 +15,11 @@ class SimpleIJPerfParserTest {
             assertEquals("project1", it.projectName)
             assertEquals(
                 """
-                    %startProfile test_alloc event=alloc
-                    %openFile wi63254/alias.php
-                    %stopProfile traces=999,flamegraph
-                    %exitApp
-                    
+                %startProfile test_alloc event=alloc
+                %openFile wi63254/alias.php
+                %stopProfile traces=999,flamegraph
+                %exitApp
+                
                 """.trimIndent(),
                 it.scriptContent
             )
@@ -33,11 +33,11 @@ class SimpleIJPerfParserTest {
             assertEquals("project1", it.projectName)
             assertEquals(
                 """
-                    %startProfile test_alloc event=alloc
-                    %openFile wi63254/alias.php
-                    %stopProfile traces=999,flamegraph
-                    %exitApp
-                    
+                %startProfile test_alloc event=alloc
+                %openFile wi63254/alias.php
+                %stopProfile traces=999,flamegraph
+                %exitApp
+                
                 """.trimIndent(),
                 it.scriptContent
             )

@@ -35,7 +35,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
-        """
+            """
         )
 
         build(
@@ -96,7 +96,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
-        """
+            """
         )
 
         build(
@@ -160,7 +160,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
-        """
+            """
         )
 
         build(
@@ -208,7 +208,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             dependencies {
                 compile DependenciesUtils.intellij(project) { include('asm-all.jar') }
             } 
-        """
+            """
         )
 
         buildAndFail("tasks").let {
@@ -230,7 +230,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             dependencies {
                 compile DependenciesUtils.intellijPlugin(project, 'junit')
             } 
-        """
+            """
         )
 
         buildAndFail("tasks").let {
@@ -257,7 +257,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     compile DependenciesUtils.intellijPlugin(project, 'junit')
                 }
             } 
-        """
+            """
         )
 
         buildAndFail("tasks").let {
@@ -284,7 +284,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     compile DependenciesUtils.intellijPlugins(project, 'testng', 'junit', 'copyright')
                 }
             } 
-        """
+            """
         )
 
         buildAndFail("tasks").let {
@@ -309,7 +309,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             dependencies {
                 compile DependenciesUtils.intellijExtra(project, 'intellij-core')
             }
-        """
+            """
         )
 
         buildAndFail("tasks").let {
@@ -336,7 +336,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     compile DependenciesUtils.intellijExtra(project, 'intellij-core')
                 }
             }
-        """
+            """
         )
 
         buildAndFail("tasks").let {

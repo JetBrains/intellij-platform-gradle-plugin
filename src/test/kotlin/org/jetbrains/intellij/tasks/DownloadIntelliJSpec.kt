@@ -36,7 +36,8 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 type = 'IC'
                 version = '$testedVersion'
                 downloadSources = false
-            }"""
+            }
+            """
         )
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
@@ -63,7 +64,8 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 type = 'IC'
                 version = '$testedVersion'
                 downloadSources = true
-            }"""
+            }
+            """
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -90,7 +92,8 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 type = 'IU'
                 version = '$testedVersion'
                 downloadSources = false
-            }"""
+            }
+            """
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -119,7 +122,8 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 type = 'IU'
                 version = '$testedVersion'
                 downloadSources = true
-            }"""
+            }
+            """
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)

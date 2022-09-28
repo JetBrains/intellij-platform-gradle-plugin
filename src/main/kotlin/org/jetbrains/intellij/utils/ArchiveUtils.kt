@@ -42,12 +42,14 @@ abstract class ArchiveUtils @Inject constructor(
                     into(targetDirectory)
                 }
             }
+
             name.endsWith(".tar.gz") -> {
                 fileSystemOperations.copy {
                     from(archiveOperations.tarTree(archive))
                     into(targetDirectory)
                 }
             }
+
             else -> throw IllegalArgumentException("Unknown type archive type: $name")
         }
 

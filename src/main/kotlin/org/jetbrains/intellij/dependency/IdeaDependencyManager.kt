@@ -13,7 +13,7 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
-import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPES
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
@@ -25,22 +25,9 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
-import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.ideBuildNumber
-import org.jetbrains.intellij.ideaDir
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.isDependencyOnPyCharm
-import org.jetbrains.intellij.isKotlinRuntime
-import org.jetbrains.intellij.isPyCharmType
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.XmlExtractor
-import org.jetbrains.intellij.releaseType
-import org.jetbrains.intellij.utils.ArchiveUtils
-import org.jetbrains.intellij.utils.DependenciesDownloader
-import org.jetbrains.intellij.utils.getAndroidStudioReleases
-import org.jetbrains.intellij.utils.ivyRepository
-import org.jetbrains.intellij.utils.mavenRepository
-import org.jetbrains.intellij.warn
+import org.jetbrains.intellij.utils.*
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -200,16 +187,16 @@ abstract class IdeaDependencyManager @Inject constructor(
             for (f in cacheDirectory.walkTopDown()) {
                 if (f.isFile
                     && (f.extension == "dylib"
-                        || f.extension == "py"
-                        || f.extension == "sh"
-                        || f.extension.startsWith("so")
-                        || f.name == "dotnet"
-                        || f.name == "env-wrapper"
-                        || f.name == "mono-sgen"
-                        || f.name == "BridgeService"
-                        || f.name == "JetBrains.Profiler.PdbServer"
-                        || f.name == "JBDeviceService"
-                        || f.name == "Rider.Backend")
+                            || f.extension == "py"
+                            || f.extension == "sh"
+                            || f.extension.startsWith("so")
+                            || f.name == "dotnet"
+                            || f.name == "env-wrapper"
+                            || f.name == "mono-sgen"
+                            || f.name == "BridgeService"
+                            || f.name == "JetBrains.Profiler.PdbServer"
+                            || f.name == "JBDeviceService"
+                            || f.name == "Rider.Backend")
                 ) {
                     setExecutable(cacheDirectory, f.relativeTo(cacheDirectory).toString(), context)
                 }

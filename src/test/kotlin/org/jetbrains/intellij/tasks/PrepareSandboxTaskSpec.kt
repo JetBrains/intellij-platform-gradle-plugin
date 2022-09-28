@@ -23,7 +23,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox for two plugins`() {
         writeJavaFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
               <id>org.intellij.test.plugin</id>
               <name>Test</name>
@@ -32,22 +33,28 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij {
                 pluginName = 'myPluginName'
                 plugins = [project('nestedProject')]
             }
-        """)
+            """
+        )
 
-        file("settings.gradle").groovy("""
+        file("settings.gradle").groovy(
+            """
             include 'nestedProject'
-        """)
+            """
+        )
 
-        file("nestedProject/build.gradle").groovy("""
+        file("nestedProject/build.gradle").groovy(
+            """
             repositories { mavenCentral() }
             apply plugin: 'org.jetbrains.intellij'
             version = '0.42.123'
@@ -63,11 +70,14 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myNestedPluginName'
                 instrumentCode = false
             }
-        """)
+            """
+        )
 
-        file("nestedProject/src/main/java/NestedAppFile.java").groovy("""
+        file("nestedProject/src/main/java/NestedAppFile.java").groovy(
+            """
             class NestedAppFile {}
-        """)
+            """
+        )
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
@@ -109,7 +119,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox for two plugins with evaluated project`() {
         writeJavaFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
               <id>org.intellij.test.plugin</id>
               <name>Test</name>
@@ -118,9 +129,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             allprojects {
                 repositories { mavenCentral() }
                 version = '0.42.123'
@@ -146,15 +159,20 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     instrumentCode = false
                 }
             }
-        """)
+            """
+        )
 
-        file("settings.gradle").groovy("""
+        file("settings.gradle").groovy(
+            """
             include 'nestedProject'            
-        """)
+            """
+        )
 
-        file("nestedProject/src/main/java/NestedAppFile.java").java("""
+        file("nestedProject/src/main/java/NestedAppFile.java").java(
+            """
             class NestedAppFile {}
-        """)
+            """
+        )
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
@@ -196,7 +214,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox task without plugin_xml`() {
         writeJavaFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -205,7 +224,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -223,21 +243,28 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        file("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        file("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
               <depends config-file="other.xml" />
             </idea-plugin>    
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -246,7 +273,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -272,34 +300,45 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(jar),
         )
 
-        assertZipContent(jar, "META-INF/plugin.xml", """
+        assertZipContent(
+            jar,
+            "META-INF/plugin.xml",
+            """
             <idea-plugin>
               <version>0.42.123</version>
               <idea-version since-build="212.5712" until-build="212.*" />
               <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+            """
+        )
     }
 
     @Test
     fun `prepare ui tests sandbox task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        file("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        file("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -309,17 +348,20 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+            """
+        )
 
         build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
 
         assertTrue(
-            collectPaths(sandbox).containsAll(setOf(
-                "/plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar",
-                "/config-uiTest/options/updates.xml",
-                "/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
-            ))
+            collectPaths(sandbox).containsAll(
+                setOf(
+                    "/plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar",
+                    "/plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar",
+                    "/config-uiTest/options/updates.xml",
+                    "/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
+                )
+            )
         )
     }
 
@@ -327,16 +369,20 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox with external jar-type plugin`() {
         writeJavaFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
                 pluginName = 'myPluginName'
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -354,16 +400,20 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox with external zip-type plugin`() {
         writeJavaFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
                 pluginName = 'myPluginName'
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -389,16 +439,20 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         writeJavaFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ['${adjustWindowsPath(plugin.canonicalPath)}']
                 pluginName = 'myPluginName'
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -421,15 +475,15 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         File(it, "classes/someResources.properties").createNewFile()
         File(it, "META-INF/plugin.xml").xml(
             """
-                <idea-plugin>
-                  <id>${it.name}</id>
-                  <name>Test</name>
-                  <version>1.0</version>
-                  <idea-version since-build="212.5712" until-build="212.*" />
-                  <vendor url="https://jetbrains.com">JetBrains</vendor>
-                  <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-                  <change-notes/>
-                </idea-plugin>
+            <idea-plugin>
+              <id>${it.name}</id>
+              <name>Test</name>
+              <version>1.0</version>
+              <idea-version since-build="212.5712" until-build="212.*" />
+              <vendor url="https://jetbrains.com">JetBrains</vendor>
+              <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+              <change-notes/>
+            </idea-plugin>
             """
         )
     }
@@ -438,22 +492,29 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare custom sandbox task`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        file("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        file("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+            """
+        )
 
         val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -463,7 +524,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -480,9 +542,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `use gradle project name if plugin name is not defined`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -497,151 +561,171 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `disable ide update without updates_xml`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
             File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
             """
-                <application>
-                  <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false" />
-                  </component>
-                </application>
+            <application>
+              <component name="UpdatesConfigurable">
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
             """,
         )
     }
 
     @Test
     fun `disable ide update without updates component`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
-        updatesFile.xml("""
+        updatesFile.xml(
+            """
             <application>
                 <component name="SomeOtherComponent">
                     <option name="SomeOption" value="false" />
                 </component>
             </application>
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
             File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
             """
-                <application>
-                  <component name="SomeOtherComponent">
-                    <option name="SomeOption" value="false" />
-                  </component>
-                  <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false" />
-                  </component>
-                </application>
+            <application>
+              <component name="SomeOtherComponent">
+                <option name="SomeOption" value="false" />
+              </component>
+              <component name="UpdatesConfigurable">
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
             """,
         )
     }
 
     @Test
     fun `disable ide update without check_needed option`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
-        updatesFile.xml("""
+        updatesFile.xml(
+            """
             <application>
                 <component name="UpdatesConfigurable">
                     <option name="SomeOption" value="false" />
                 </component>
             </application>
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
             File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
             """
-                <application>
-                  <component name="UpdatesConfigurable">
-                    <option name="SomeOption" value="false" />
-                    <option name="CHECK_NEEDED" value="false" />
-                  </component>
-                </application>
+            <application>
+              <component name="UpdatesConfigurable">
+                <option name="SomeOption" value="false" />
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
             """,
         )
     }
 
     @Test
     fun `disable ide update without value attribute`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
 
-        updatesFile.xml("""
+        updatesFile.xml(
+            """
             <application>
                 <component name="UpdatesConfigurable">
                     <option name="CHECK_NEEDED" />
                 </component>
             </application>
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
             File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
             """
-                <application>
-                  <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false" />
-                  </component>
-                </application>
+            <application>
+              <component name="UpdatesConfigurable">
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
             """,
         )
     }
 
     @Test
     fun `disable ide update`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
 
-        updatesFile.xml("""
+        updatesFile.xml(
+            """
             <application>
                 <component name="UpdatesConfigurable">
                     <option name="CHECK_NEEDED" value="true" />
                 </component>
             </application>
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
             File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
             """
-                <application>
-                  <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false" />
-                  </component>
-                </application>
+            <application>
+              <component name="UpdatesConfigurable">
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
             """,
         )
     }
 
     @Test
     fun `disable ide update with updates_xml empty`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
 
@@ -652,24 +736,27 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         assertFileContent(
             File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
             """
-                <application>
-                  <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="false" />
-                  </component>
-                </application>
+            <application>
+              <component name="UpdatesConfigurable">
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
             """,
         )
     }
 
     @Test
     fun `disable ide update with complex updates_xml`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
 
-        updatesFile.xml("""
+        updatesFile.xml(
+            """
             <application>
                 <component name="UpdatesConfigurable">
                     <enabledExternalComponentSources>
@@ -688,50 +775,57 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     <option name="CHECK_NEEDED" value="false" />
                 </component>
             </application>
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
         assertFileContent(
             File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
             """
-                <application>
-                  <component name="UpdatesConfigurable">
-                    <enabledExternalComponentSources>
-                      <item value="Android SDK" />
-                    </enabledExternalComponentSources>
-                    <option name="externalUpdateChannels">
-                      <map>
-                        <entry key="Android SDK" value="Stable Channel" />
-                      </map>
-                    </option>
-                    <knownExternalComponentSources>
-                      <item value="Android SDK" />
-                    </knownExternalComponentSources>
-                    <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
-                    <option name="LAST_TIME_CHECKED" value="1622537478550" />
-                    <option name="CHECK_NEEDED" value="false" />
-                  </component>
-                </application>
+            <application>
+              <component name="UpdatesConfigurable">
+                <enabledExternalComponentSources>
+                  <item value="Android SDK" />
+                </enabledExternalComponentSources>
+                <option name="externalUpdateChannels">
+                  <map>
+                    <entry key="Android SDK" value="Stable Channel" />
+                  </map>
+                </option>
+                <knownExternalComponentSources>
+                  <item value="Android SDK" />
+                </knownExternalComponentSources>
+                <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
+                <option name="LAST_TIME_CHECKED" value="1622537478550" />
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
             """,
         )
     }
 
     @Test
     fun `replace jar on version changing`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.124'
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -751,7 +845,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         emptyZipFile("three/core.jar")
         writeJavaFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij { 
@@ -764,7 +859,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 implementation fileTree('two')
                 implementation fileTree('three')
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME)
 
@@ -786,11 +882,14 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
         file("additional/some-file")
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 pluginName = 'myPluginName'
             }
@@ -798,7 +897,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             $PREPARE_TESTING_SANDBOX_TASK_NAME {
                 from("additional")
             }
-        """)
+            """
+        )
 
         build("test")
 
@@ -816,16 +916,20 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `reuse configuration cache for prepareSandbox`() {
         writeJavaFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
                 pluginName = 'myPluginName'
             }
-        """)
+            """
+        )
 
         build(PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
         build(PREPARE_SANDBOX_TASK_NAME, "--configuration-cache").let {
@@ -837,16 +941,20 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `reuse configuration cache for prepareTestingSandbox`() {
         writeJavaFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
                 pluginName = 'myPluginName'
             }
-        """)
+            """
+        )
 
         build(PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
         build(PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache").let {
@@ -858,21 +966,28 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `reuse configuration cache for prepareUiTestingSandbox`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        file("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        file("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             intellij {
                 pluginName = 'myPluginName'
@@ -882,7 +997,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-        """)
+            """
+        )
 
         build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
         build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache").let {

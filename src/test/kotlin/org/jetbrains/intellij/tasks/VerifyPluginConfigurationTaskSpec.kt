@@ -23,7 +23,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
                 <vendor>JetBrains</vendor>
                 <idea-version since-build="212" until-build='212.*' />
             </idea-plugin>
-        """
+            """
         )
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
@@ -38,7 +38,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             patchPluginXml {
                 sinceBuild = "211"
             }
-        """
+            """
         )
 
         pluginXml.xml(
@@ -49,7 +49,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
                 <vendor>JetBrains</vendor>
                 <idea-version since-build="211" until-build='212.*' />
             </idea-plugin>
-        """
+            """
         )
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
@@ -63,7 +63,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             sourceCompatibility = 1.8
-        """
+            """
         )
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
@@ -80,7 +80,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             targetCompatibility = 17
-        """
+            """
         )
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
@@ -101,7 +101,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
                     jvmTarget = "17"
                 }
             }
-        """
+            """
         )
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
@@ -120,7 +120,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
                 <vendor>JetBrains</vendor>
                 <idea-version since-build="211" until-build='212.*' />
             </idea-plugin>
-        """
+            """
         )
 
         buildFile.groovy(
@@ -130,7 +130,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
                     apiVersion = "1.9"
                 }
             }
-        """
+            """
         )
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
@@ -148,7 +148,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
                     languageVersion = "1.3"
                 }
             }
-        """
+            """
         )
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
@@ -176,7 +176,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = true
-        """
+            """
         )
 
         build("clean", VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->
@@ -186,7 +186,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
-        """
+            """
         )
 
         build("clean", VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let { result ->

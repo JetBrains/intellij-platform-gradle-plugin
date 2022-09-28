@@ -24,7 +24,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             "'${javaClass.classLoader.getResource(it)?.path}'"
         }
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = "2020.1"
             }
@@ -32,7 +33,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 updatePaths = [${ideaReleasesPath}]
                 androidStudioUpdatePath = $asReleasesPath
             }
-        """)
+            """
+        )
     }
 
     @Test
@@ -44,11 +46,13 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list for the current platformType`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             listProductsReleases {
                 sinceVersion = "201"
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -66,12 +70,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list for the current platformType and limited versions scope`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             listProductsReleases {
                 sinceVersion = "2020.3"
                 untilVersion = "2021.2.1"
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -87,12 +93,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list using sinceBuild and untilBuild`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             patchPluginXml {
                 sinceBuild = "203"
                 untilBuild = "212.*"
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -108,7 +116,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list using sinceBuild despite it is lower than intellij_version`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = "2021.1"
             }
@@ -116,7 +125,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceBuild = "203"
                 untilBuild = "212.*"
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -132,12 +142,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list for the custom platformType and platformVersion defined in intellij`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 type = "PY"
                 version = "2021.1"
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -149,14 +161,16 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list without EAP releases`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
 
             listProductsReleases {
                 sinceVersion = "2021.1"
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -169,14 +183,17 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             )
         }
     }
+
     @Test
     fun `get IDEs list for the multiple platformTypes`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             listProductsReleases {
                 sinceVersion = "2021.1"
                 types = ["IU", "PS", "PY"]
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -195,12 +212,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get Android Studio releases`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             listProductsReleases {
                 sinceVersion = "2021.1"
                 types = ["AI"]
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -216,7 +235,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get Android Studio releases for Release channel`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
 
             listProductsReleases {
@@ -224,7 +244,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 types = ["AI"]
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-        """)
+            """
+        )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
@@ -233,6 +254,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             )
         }
     }
+
     @Test
     fun `reuse configuration cache`() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")

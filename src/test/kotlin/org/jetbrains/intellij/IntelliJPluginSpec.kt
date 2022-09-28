@@ -78,11 +78,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `patch test tasks`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 version = '14.1.4' 
             }
-        """)
+            """
+        )
 
         writeTestFile()
 
@@ -104,9 +106,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `use compile only classpath for non-builtin plugins if Gradle lte 2_12`() {
         writeTestFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
@@ -118,9 +122,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `add external zip-plugins to compile only classpath`() {
         writeTestFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
@@ -137,9 +143,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val repositoryInstance = PluginRepositoryFactory.create(MARKETPLACE_HOST, null)
         val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
@@ -148,9 +156,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add builtin plugin dependencies to classpath`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['com.jetbrains.changeReminder']
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths()
 
@@ -168,9 +178,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `use test compile classpath for non-builtin plugins if Gradle lte 2_12`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths()
 
@@ -183,15 +195,19 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
         val originalBuildFile = buildFile.readText()
         buildFile.writeText("")
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             plugins {
-              id "java-test-fixtures"
+                id "java-test-fixtures"
             }
-        """)
+            """
+        )
         buildFile.groovy(originalBuildFile)
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths("testFixtures")
 
@@ -203,9 +219,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `resolve plugins in Gradle lte 4_3`() {
         writeTestFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
@@ -217,9 +235,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `resolve bundled plugin by its id`() {
         writeTestFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij.plugins = ['com.intellij.copyright']
-        """)
+            """
+        )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
@@ -228,14 +248,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled zip plugin source artifacts from src directory when downloadSources = true`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
-              type = 'GO'
-              version = '2021.2.4'
-              plugins = ['org.jetbrains.plugins.go']
-              downloadSources = true
+                type = 'GO'
+                version = '2021.2.4'
+                plugins = ['org.jetbrains.plugins.go']
+                downloadSources = true
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
             assertContainsOnlySourceArtifacts(
@@ -250,14 +272,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled zip plugin source artifacts from src directory when downloadSources = false`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
-              type = 'GO'
-              version = '2021.2.4'
-              plugins = ['org.jetbrains.plugins.go']
-              downloadSources = false
+                type = 'GO'
+                version = '2021.2.4'
+                plugins = ['org.jetbrains.plugins.go']
+                downloadSources = false
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
             assertContainsOnlySourceArtifacts(
@@ -270,14 +294,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add external zip plugin source artifacts from src directory when downloadSources = true`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
-              type = 'IC'
-              version = '2021.2.4'
-              plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
-              downloadSources = true
+                type = 'IC'
+                version = '2021.2.4'
+                plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
+                downloadSources = true
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
             assertContainsOnlySourceArtifacts(
@@ -290,14 +316,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add external zip plugin source artifacts from src directory when downloadSources = false`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
-              type = 'IC'
-              version = '2021.2.4'
-              plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
-              downloadSources = false
+                type = 'IC'
+                version = '2021.2.4'
+                plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
+                downloadSources = false
             }
-        """)
+            """
+        )
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
             assertContainsOnlySourceArtifacts(
                 it,
@@ -314,17 +342,19 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             "com/jetbrains/intellij/goland/goland/2022.1/goland-2022.1.zip"
         )
         buildFile.writeText("")
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             plugins {
-              id 'java'
-              id 'org.jetbrains.intellij'
-              id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
+                id 'java'
+                id 'org.jetbrains.intellij'
+                id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-              localPath = '${adjustWindowsPath(localPath)}'
-              plugins = ['org.jetbrains.plugins.go']
+                localPath = '${adjustWindowsPath(localPath)}'
+                plugins = ['org.jetbrains.plugins.go']
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO").let {
             assertContainsOnlySourceArtifacts(
@@ -344,17 +374,19 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
 
         buildFile.writeText("")
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             plugins {
-              id 'java'
-              id 'org.jetbrains.intellij'
-              id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
+                id 'java'
+                id 'org.jetbrains.intellij'
+                id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-              localPath = '${adjustWindowsPath(localPath)}'
-              plugins = ['org.jetbrains.plugins.go:212.5712.14']
+                localPath = '${adjustWindowsPath(localPath)}'
+                plugins = ['org.jetbrains.plugins.go:212.5712.14']
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
             assertContainsOnlySourceArtifacts(
@@ -368,14 +400,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled plugin source artifacts from IDE_ROOT-lib-src directory when downloadSources = true`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
-              type = 'IU'
-              version = '2021.2.4'
-              plugins = ['com.intellij.css']
-              downloadSources = true
+                type = 'IU'
+                version = '2021.2.4'
+                plugins = ['com.intellij.css']
+                downloadSources = true
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources").let {
             assertContainsOnlySourceArtifacts(
@@ -388,14 +422,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled plugin source artifacts from IDE_ROOT-lib-src directory when downloadSources = false`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
-              type = 'IU'
-              version = '2021.2.4'
-              plugins = ['Tomcat']
-              downloadSources = false
+                type = 'IU'
+                version = '2021.2.4'
+                plugins = ['Tomcat']
+                downloadSources = false
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43").let {
             assertContainsOnlySourceArtifacts(
@@ -412,17 +448,19 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             "com/jetbrains/intellij/idea/ideaIU/2021.2.4/ideaIU-2021.2.4.zip"
         )
         buildFile.writeText("")
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             plugins {
-              id 'java'
-              id 'org.jetbrains.intellij'
-              id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
+                id 'java'
+                id 'org.jetbrains.intellij'
+                id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-              localPath = '${adjustWindowsPath(localPath)}'
-              plugins = ['com.intellij.spring']
+                localPath = '${adjustWindowsPath(localPath)}'
+                plugins = ['com.intellij.spring']
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43").let {
             assertContainsOnlySourceArtifacts(
@@ -435,14 +473,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `does not add zip plugin source artifacts from IDE_ROOT-lib-src directory when sources not provided`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
-              type = 'GO'
-              version = '2021.2.4'
-              plugins = ['com.intellij.css']
-              downloadSources = true
+                type = 'GO'
+                version = '2021.2.4'
+                plugins = ['com.intellij.css']
+                downloadSources = true
             }
-        """)
+            """
+        )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources").let {
             assertContainsOnlySourceArtifacts(
@@ -457,13 +497,15 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `add require plugin id parameter in test tasks`() {
         writeTestFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>Name</name>
                 <id>com.intellij.mytestid</id>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
         build(JavaPlugin.TEST_TASK_NAME, "--info").let {
             assertEquals(
@@ -477,12 +519,14 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `do not update existing jvm arguments in test tasks`() {
         writeTestFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             test {
                 minHeapSize = "200m"
                 maxHeapSize = "500m"
             }
-        """)
+            """
+        )
 
         build(JavaPlugin.TEST_TASK_NAME, "--info").let {
             parseCommand(it.output).let { properties ->
@@ -497,11 +541,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
 
         val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
-        buildFile.xml("""
+        buildFile.xml(
+            """
             intellij {
                 sandboxDir = '$sandboxPath'    
             }
-        """)
+            """
+        )
         build(JavaPlugin.TEST_TASK_NAME, "--info").let {
             assertPathParameters(parseCommand(it.output), sandboxPath)
         }
@@ -612,39 +658,39 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         this.groovy(
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
-                import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
+                import org.jetbrains.intellij.IntelliJPluginConstants
 
                 task printPluginSourceArtifacts {
-                  dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
+                    dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
 
-                  doLast {
-                    def pluginComponentId = configurations.compileClasspath
-                      .resolvedConfiguration.lenientConfiguration
-                      .allModuleDependencies
-                      .collect { it.moduleArtifacts }
-                      .flatten()
-                      .collect { it.id.componentIdentifier }
-                      .find { it.displayName.startsWith("$pluginComponentId") }
+                    doLast {
+                        def pluginComponentId = configurations.compileClasspath
+                            .resolvedConfiguration.lenientConfiguration
+                            .allModuleDependencies
+                            .collect { it.moduleArtifacts }
+                            .flatten()
+                            .collect { it.id.componentIdentifier }
+                            .find { it.displayName.startsWith("$pluginComponentId") }
         
                     dependencies.createArtifactResolutionQuery()
-                      .forComponents([pluginComponentId])
-                      .withArtifacts(JvmLibrary.class, SourcesArtifact.class)
-                      .execute()
-                      .resolvedComponents
-                      .collect { it.getArtifacts(SourcesArtifact.class) }
-                      .flatten()
-                      .findAll {
-                         if (it instanceof UnresolvedArtifactResult) {
-                           println "WARNING:"
-                           it.failure.printStackTrace()
-                           return false
+                        .forComponents([pluginComponentId])
+                        .withArtifacts(JvmLibrary.class, SourcesArtifact.class)
+                        .execute()
+                        .resolvedComponents
+                        .collect { it.getArtifacts(SourcesArtifact.class) }
+                        .flatten()
+                        .findAll {
+                            if (it instanceof UnresolvedArtifactResult) {
+                                println "WARNING:"
+                                it.failure.printStackTrace()
+                                return false
+                            }
+                            return true
                         }
-                        return true
-                      }
-                      .each { println("source artifact:" + it.id.displayName) }
-                  }
+                        .each { println("source artifact:" + it.id.displayName) }
+                    }
                 }
-            """
+                """
         )
     }
 
@@ -686,6 +732,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                             properties[key] = value
                         }
                     }
+
                     it.startsWith("-Xms") -> xms = it.substring(4)
                     it.startsWith("-Xmx") -> xmx = it.substring(4)
                     it.startsWith("-Xbootclasspath") -> xclasspath = it.substring(15)

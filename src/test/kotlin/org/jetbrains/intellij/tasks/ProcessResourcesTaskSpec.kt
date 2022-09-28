@@ -17,24 +17,31 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `use patched plugin xml files`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        assertFileContent(outputPluginXml.value, """
+        assertFileContent(
+            outputPluginXml.value,
+            """
             <idea-plugin>
               <idea-version since-build="212.5712" until-build="212.*" />
             </idea-plugin>
-        """)
+            """
+        )
     }
 
     @Test
     fun `do not break incremental processing`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
@@ -48,19 +55,25 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `update resources on updated patched xml files`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
-        """)
+            """
+        )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             patchPluginXml { sinceBuild = 'Oh' }
-        """)
+            """
+        )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).let {
             assertNotEquals(
@@ -71,10 +84,10 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
             assertFileContent(
                 outputPluginXml.value,
                 """
-                    <idea-plugin>
-                      <version>0.42.123</version>
-                      <idea-version since-build="Oh" until-build="212.*" />
-                    </idea-plugin>
+                <idea-plugin>
+                  <version>0.42.123</version>
+                  <idea-version since-build="Oh" until-build="212.*" />
+                </idea-plugin>
                 """
             )
         }

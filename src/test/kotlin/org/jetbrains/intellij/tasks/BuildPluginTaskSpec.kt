@@ -22,23 +22,30 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `build plugin distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        file("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        file("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
               <name>MyPluginName</name>
               <vendor>JetBrains</vendor>
               <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij { 
@@ -51,7 +58,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -85,13 +93,13 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             """
-                <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="212.5712" until-build="212.*" />
-                  <name>MyPluginName</name>
-                  <vendor>JetBrains</vendor>
-                  <depends config-file="other.xml" />
-                </idea-plugin>
+            <idea-plugin>
+              <version>0.42.123</version>
+              <idea-version since-build="212.5712" until-build="212.*" />
+              <name>MyPluginName</name>
+              <vendor>JetBrains</vendor>
+              <depends config-file="other.xml" />
+            </idea-plugin>
             """.trimIndent(),
             fileText(jar, "META-INF/plugin.xml"),
         )
@@ -102,14 +110,17 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
         writeKotlinUIFile()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123' 
 
             intellij {
@@ -118,7 +129,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -155,24 +167,31 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `use custom sandbox for distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("""
+        file("src/main/resources/META-INF/other.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("""
+        file("src/main/resources/META-INF/nonIncluded.xml").xml(
+            """
             <idea-plugin />
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin >
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
                 <depends config-file="other.xml" />
             </idea-plugin>
-        """)
+            """
+        )
 
         val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             dependencies { 
@@ -187,7 +206,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -208,16 +228,20 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `use gradle project name for distribution if plugin name is not defined`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -231,32 +255,39 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `can compile classes that depends on external plugins`() {
-        file("src/main/java/App.java").java("""
+        file("src/main/java/App.java").java(
+            """
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import org.intellij.plugins.markdown.lang.MarkdownLanguage;
+            
             class App {
                 public static void main(@NotNull String[] strings) {
                     System.out.println(MarkdownLanguage.INSTANCE.getDisplayName());
                 }
             }
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
 
             intellij {
                 pluginName = 'myPluginName'
                 plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -269,7 +300,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `can compile classes that depend on external plugin with classes directory`() {
-        file("src/main/java/App.java").java("""
+        file("src/main/java/App.java").java(
+            """
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import org.asciidoc.intellij.AsciiDoc;
@@ -279,23 +311,28 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                     System.out.println(AsciiDoc.class.getName());
                 }
             }
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij {
                 pluginName = 'myPluginName'
                 plugins = ['org.asciidoctor.intellij.asciidoc:0.20.6']
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -308,14 +345,17 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `build plugin without sources`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
 
             intellij {
@@ -324,7 +364,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -355,24 +396,29 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `include only relevant searchableOptions_jar`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.321'
             
             intellij {
                 pluginName = 'myPluginName'
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
             
             intellij {
@@ -381,7 +427,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
@@ -412,22 +459,26 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `provide MANIFEST_MF with build details`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.123'
-        """)
+            """
+        )
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME)
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
         val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
-         fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
+        fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
             assertNotNull(it)
 
             assertEquals("1.0", it.getValue("Manifest-Version"))
@@ -442,20 +493,24 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = '0.42.321'
             
             intellij {
                 pluginName = 'myPluginName'
             }
-        """)
+            """
+        )
 
         build(BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
         build(BUILD_PLUGIN_TASK_NAME, "--configuration-cache").let {

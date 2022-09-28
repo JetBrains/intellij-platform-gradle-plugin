@@ -48,7 +48,7 @@ class PluginDependencyImpl(
 
     override fun isCompatible(ideVersion: IdeVersion) =
         sinceBuild?.let { IdeVersion.createIdeVersion(it) <= ideVersion } ?: true &&
-            untilBuild?.let { ideVersion <= IdeVersion.createIdeVersion(it) } ?: true
+                untilBuild?.let { ideVersion <= IdeVersion.createIdeVersion(it) } ?: true
 
     @Suppress("DuplicatedCode")
     override fun equals(other: Any?): Boolean {

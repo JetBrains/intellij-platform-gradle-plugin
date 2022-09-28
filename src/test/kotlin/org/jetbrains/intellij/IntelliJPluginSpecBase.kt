@@ -75,13 +75,13 @@ abstract class IntelliJPluginSpecBase {
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
-        """
+            """
         )
 
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
-        """
+            """
         )
     }
 
@@ -97,7 +97,7 @@ abstract class IntelliJPluginSpecBase {
         
             private void print(@NotNull String s) { System.out.println(s); }
         }
-    """
+        """
     )
 
     @Suppress("SameParameterValue")
@@ -176,7 +176,7 @@ abstract class IntelliJPluginSpecBase {
                 System.out.println(Arrays.toString(strings));
             }
         }
-    """
+        """
     )
 
     protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin(
@@ -187,7 +187,7 @@ abstract class IntelliJPluginSpecBase {
                 println(args.joinToString())
             }
         }
-    """
+        """
     )
 
     protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin(
@@ -202,7 +202,7 @@ abstract class IntelliJPluginSpecBase {
                 panel.toString()
             }
         }
-    """
+        """
     )
 
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
@@ -212,7 +212,7 @@ abstract class IntelliJPluginSpecBase {
         assertTrue(
             actual.contains(expected),
             """
-                expected:<$expected> but was:<$actual>
+            expected:<$expected> but was:<$actual>
             """.trimIndent()
         )
     }
@@ -222,7 +222,7 @@ abstract class IntelliJPluginSpecBase {
         assertFalse(
             actual.contains(expected),
             """
-                expected:<$expected> but was:<$actual>
+            expected:<$expected> but was:<$actual>
             """.trimIndent()
         )
     }

@@ -38,9 +38,9 @@ abstract class BuildSearchableOptionsTask : RunIdeBase(false) {
             warn(
                 context,
                 "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for " +
-                    "a paid plugin. As paid plugins require providing a valid license and presenting a UI dialog, it is impossible " +
-                    "to handle such a case, and the task will fail. Please consider disabling the task in the Gradle configuration. " +
-                    "See: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-option"
+                        "a paid plugin. As paid plugins require providing a valid license and presenting a UI dialog, it is impossible " +
+                        "to handle such a case, and the task will fail. Please consider disabling the task in the Gradle configuration. " +
+                        "See: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-option"
             )
         }
 

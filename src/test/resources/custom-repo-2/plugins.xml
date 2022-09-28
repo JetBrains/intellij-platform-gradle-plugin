@@ -11,7 +11,8 @@
             <description><![CDATA[
     Emacs keymap for all IntelliJ-based IDEs.
     Use this plugin if Emacs keymap is not pre-installed in your IDE.
-  ]]></description><depends>com.intellij.modules.lang</depends>
+  ]]></description>
+            <depends>com.intellij.modules.lang</depends>
         </idea-plugin>
     </category>
 </plugin-repository>
