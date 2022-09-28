@@ -15,6 +15,7 @@ class PerformanceTestScript private constructor(
     ) {
         fun projectName(value: String?) = apply { projectName = value }
 
+        @Suppress("unused")
         fun scriptContent(value: String?) = apply { scriptContent = value }
 
         fun appendScriptContent(value: String) = apply {
