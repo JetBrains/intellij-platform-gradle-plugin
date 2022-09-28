@@ -5,23 +5,18 @@ package org.jetbrains.intellij.jbr
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
-import org.jetbrains.intellij.IntelliJPluginConstants
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.ifNull
-import org.jetbrains.intellij.info
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
-import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.FileReader
 import java.io.IOException
 import java.nio.file.Path
-import java.util.Properties
+import java.util.*
 import javax.inject.Inject
 
-open class JbrResolver @Inject constructor(
+abstract class JbrResolver @Inject constructor(
     private val jreRepository: String,
     private val isOffline: Boolean,
     private val archiveUtils: ArchiveUtils,

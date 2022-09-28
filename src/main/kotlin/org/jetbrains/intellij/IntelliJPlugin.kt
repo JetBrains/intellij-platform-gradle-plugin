@@ -63,8 +63,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.jar.Manifest
 
-@Suppress("UnstableApiUsage")
-open class IntelliJPlugin : Plugin<Project> {
+abstract class IntelliJPlugin : Plugin<Project> {
 
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader

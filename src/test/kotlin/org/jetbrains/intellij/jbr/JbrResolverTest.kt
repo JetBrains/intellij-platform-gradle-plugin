@@ -8,7 +8,7 @@ import kotlin.test.Test
 
 const val TASK_NAME = "testJbrResolver"
 
-open class JbrResolverTest : IntelliJPluginSpecBase() {
+class JbrResolverTest : IntelliJPluginSpecBase() {
 
     private val operatingSystem = OperatingSystem.current()
     private val platform = JbrResolver.JbrArtifact.platform(operatingSystem)

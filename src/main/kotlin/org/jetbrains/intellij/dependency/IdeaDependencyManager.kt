@@ -48,7 +48,7 @@ import java.util.zip.ZipFile
 import javax.inject.Inject
 
 @Suppress("BooleanMethodIsAlwaysInverted")
-open class IdeaDependencyManager @Inject constructor(
+abstract class IdeaDependencyManager @Inject constructor(
     private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
     private val archiveUtils: ArchiveUtils,
