@@ -34,7 +34,6 @@ abstract class PluginsRepositoryConfiguration {
     /**
      * Use custom plugin repository. The URL should point to the `plugins.xml` or `updatePlugins.xml` file.
      */
-    @Suppress("unused")
     fun custom(url: String) {
         pluginsRepositories.add(CustomPluginsRepository(url))
     }

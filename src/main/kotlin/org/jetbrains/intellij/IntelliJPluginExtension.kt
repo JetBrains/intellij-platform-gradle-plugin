@@ -203,7 +203,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     /**
      * Configure multiple repositories for downloading plugins.
      */
-    @Suppress("unused")
+    @Suppress("MemberVisibilityCanBePrivate")
     fun pluginsRepositories(block: Action<PluginsRepositoryConfiguration>) {
         block.execute(pluginsRepositories)
     }

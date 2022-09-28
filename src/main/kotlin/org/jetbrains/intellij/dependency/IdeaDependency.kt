@@ -78,6 +78,7 @@ open class IdeaDependency(
         return true
     }
 
+    @Suppress("DuplicatedCode")
     override fun hashCode(): Int {
         var result = name.hashCode()
         result = 31 * result + version.hashCode()

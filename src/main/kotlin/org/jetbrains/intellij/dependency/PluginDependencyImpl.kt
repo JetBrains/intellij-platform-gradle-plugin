@@ -75,6 +75,7 @@ class PluginDependencyImpl(
         return true
     }
 
+    @Suppress("DuplicatedCode")
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + platformPluginId.hashCode()
