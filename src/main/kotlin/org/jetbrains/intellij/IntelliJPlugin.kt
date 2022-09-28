@@ -14,11 +14,13 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
@@ -340,9 +342,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             pluginXmlFiles.convention(project.provider {
                 sourcePluginXmlFiles(project)
             })
-            destinationDir.convention(project.layout.dir(project.provider {
-                File(project.buildDir, PLUGIN_XML_DIR_NAME)
-            }))
+            destinationDir.convention(project.layout.buildDirectory.dir(PLUGIN_XML_DIR_NAME))
             outputFiles.convention(pluginXmlFiles.map {
                 it.map { file ->
                     destinationDir.get().asFile.resolve(file.name)
@@ -392,9 +392,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             description = "Download `robot-server` plugin."
 
             version.convention(VERSION_LATEST)
-            outputDir.convention(project.provider {
-                project.layout.projectDirectory.dir("${project.buildDir}/robotServerPlugin")
-            })
+            outputDir.convention(project.layout.buildDirectory.dir("robotServerPlugin"))
             pluginArchive.convention(project.provider {
                 val resolvedVersion = resolveRobotServerPluginVersion(version.orNull)
                 val (group, name) = getDependency(resolvedVersion).split(':')
@@ -505,12 +503,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
             verifierVersion.convention(VERSION_LATEST)
-            distributionFile.convention(project.layout.file(project.provider {
-                resolveBuildTaskOutput(project)
-            }))
-            verificationReportsDir.convention(project.provider {
-                "${project.buildDir}/reports/pluginVerifier"
-            })
+            distributionFile.convention(resolveBuildTaskOutput(project))
+            verificationReportsDir.convention(
+                project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath }
+            )
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
             })
@@ -621,11 +617,16 @@ abstract class IntelliJPlugin : Plugin<Project> {
             ignoreFailures.convention(false)
             ignoreUnacceptableWarnings.convention(false)
             ignoreWarnings.convention(true)
-            pluginDir.convention(project.provider {
-                val prepareSandboxTask = prepareSandboxTaskProvider.get()
-                val path = File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get()).path
-                project.layout.projectDirectory.dir(path)
-            })
+
+            pluginDir.convention(
+                project.layout.dir(
+                    prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+                        prepareSandboxTask.pluginName.map { pluginName ->
+                            prepareSandboxTask.destinationDir.resolve(pluginName)
+                        }
+                    }
+                )
+            )
 
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
         }
@@ -773,9 +774,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             group = PLUGIN_GROUP_NAME
             description = "Builds an index of UI components (searchable options) for the plugin."
 
-            outputDir.convention(project.provider {
-                project.layout.projectDirectory.dir("${project.buildDir}/$SEARCHABLE_OPTIONS_DIR_NAME")
-            })
+            outputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
             showPaidPluginWarning.convention(project.provider {
                 project.isBuildFeatureEnabled(PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING) && run {
                     sourcePluginXmlFiles(project).any {
@@ -847,9 +846,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             group = PLUGIN_GROUP_NAME
             description = "Creates a JAR file with searchable options to be distributed with the plugin."
 
-            outputDir.convention(project.provider {
-                project.layout.projectDirectory.dir(project.buildDir.resolve(SEARCHABLE_OPTIONS_DIR_NAME).canonicalPath)
-            })
+            outputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
             pluginName.convention(prepareSandboxTaskProvider.get().pluginName)
             sandboxDir.convention(project.provider {
                 prepareSandboxTaskProvider.get().destinationDir.canonicalPath
@@ -1222,9 +1219,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             group = PLUGIN_GROUP_NAME
             description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
 
-            inputArchiveFile.convention(project.layout.file(project.provider {
-                resolveBuildTaskOutput(project)
-            }))
+            inputArchiveFile.convention(resolveBuildTaskOutput(project))
             outputArchiveFile.convention(project.layout.file(project.provider {
                 val inputFile = buildPluginTaskProvider.get().archiveFile.get().asFile
                 val inputFileExtension = inputFile.path.substring(inputFile.path.lastIndexOf('.'))
@@ -1269,10 +1264,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
             host.convention(MARKETPLACE_HOST)
             toolboxEnterprise.convention(false)
             channels.convention(listOf("default"))
-            distributionFile.convention(project.layout.file(project.provider {
-                val signPluginTask = signPluginTaskProvider.get()
-                signPluginTask.outputArchiveFile.orNull?.asFile.takeIf { signPluginTask.didWork } ?: resolveBuildTaskOutput(project)
-            }))
+
+            distributionFile.convention(
+                signPluginTaskProvider.flatMap { signPluginTask ->
+                    signPluginTask.outputArchiveFile
+                }.orElse(resolveBuildTaskOutput(project))
+            )
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)
             dependsOn(VERIFY_PLUGIN_TASK_NAME)
@@ -1493,10 +1490,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun resolveBuildTaskOutput(project: Project): File? {
-        val buildPluginTaskProvider = project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME)
-        val buildPluginTask = buildPluginTaskProvider.get()
-        return buildPluginTask.archiveFile.orNull?.asFile?.takeIf { it.exists() }
+    private fun resolveBuildTaskOutput(project: Project): Provider<RegularFile> {
+        return project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME)
+            .flatMap { it.archiveFile }
     }
 
     private fun getCurrentVersion() = IntelliJPlugin::class.java
