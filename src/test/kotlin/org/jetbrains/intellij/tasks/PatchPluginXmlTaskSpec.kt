@@ -4,6 +4,8 @@ package org.jetbrains.intellij.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
@@ -13,7 +15,7 @@ import kotlin.test.assertNotEquals
 @Suppress("PluginXmlValidity", "ComplexRedundantLet")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
-    private val patchedPluginXml = lazy { File(buildDirectory, IntelliJPluginConstants.PLUGIN_XML_DIR_NAME).listFiles()?.first() }
+    private val patchedPluginXml = lazy { File(buildDirectory, PLUGIN_XML_DIR_NAME).listFiles()?.first() }
 
     @Test
     fun `patch version and since until builds`() {
@@ -28,7 +30,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -58,7 +60,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -87,7 +89,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -118,7 +120,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -150,7 +152,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -182,7 +184,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -213,7 +215,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -244,7 +246,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -278,7 +280,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -313,7 +315,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -342,7 +344,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -370,9 +372,9 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
-            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":${IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME}")?.outcome)
+        build(PATCH_PLUGIN_XML_TASK_NAME)
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":$PATCH_PLUGIN_XML_TASK_NAME")?.outcome)
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -398,7 +400,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME)
+        build(PATCH_PLUGIN_XML_TASK_NAME)
 
         buildFile.groovy("""
             intellij {
@@ -406,8 +408,8 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME).let {
-            assertNotEquals(TaskOutcome.UP_TO_DATE, it.task(":${IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME}")?.outcome)
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+            assertNotEquals(TaskOutcome.UP_TO_DATE, it.task(":$PATCH_PLUGIN_XML_TASK_NAME")?.outcome)
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -434,8 +436,8 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")
-        build(IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache").let {
+        build(PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")
+        build(PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache").let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

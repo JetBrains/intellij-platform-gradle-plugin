@@ -284,8 +284,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Resolves the path to the IntelliJ Plugin Verifier file.
      * At first, checks if it was provided with [verifierPath].
-     * Fetches IntelliJ Plugin Verifier artifact from the [IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY]
-     * repository and resolves the path to `verifier-cli` jar file.
+     * Fetches IntelliJ Plugin Verifier artifact from the [PLUGIN_VERIFIER_REPOSITORY] repository and resolves the path to `verifier-cli` jar file.
      *
      * @return path to `verifier-cli` jar
      */
@@ -409,8 +408,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
 
     /**
      * Resolves the Plugin Verifier version.
-     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [METADATA_URL]
-     * performed for the latest available version.
+     * If set to [VERSION_LATEST], there's request to [METADATA_URL] performed for the latest available version.
      *
      * @return Plugin Verifier version
      */

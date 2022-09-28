@@ -11,7 +11,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
@@ -277,13 +277,12 @@ abstract class SignPluginTask @Inject constructor(
 
     /**
      * Resolves the Marketplace ZIP Signer CLI version.
-     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [MARKETPLACE_ZIP_SIGNER_URL]
+     * If set to [VERSION_LATEST], there's request to [MARKETPLACE_ZIP_SIGNER_URL]
      * performed for the latest available version.
      *
      * @return Marketplace ZIP Signer CLI version
      */
-    internal fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST }
-        ?: resolveLatestVersion()
+    internal fun resolveCliVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
 
     /**
      * Resolves Marketplace ZIP Signer CLI download URL.

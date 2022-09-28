@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.testkit.runner.BuildResult
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import org.jetbrains.intellij.Version
 import kotlin.test.BeforeTest
@@ -37,7 +37,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list for the current platformType, sinceBuild and untilBuild`() {
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(listOf("IC-2020.1.4"), it.taskOutput())
         }
     }
@@ -50,7 +50,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf(
                     "IC-2021.2.2",
@@ -73,7 +73,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf(
                     "IC-2021.2.1",
@@ -94,7 +94,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf(
                     "IC-2021.2.2",
@@ -118,7 +118,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf(
                     "IC-2021.2.2",
@@ -139,7 +139,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf("PY-2021.1.3"),
                 it.taskOutput()
@@ -158,7 +158,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf(
                     // "IC-2021.2.2" - available only in the EAP channel and shouldn't be listed here
@@ -178,7 +178,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf(
                     "IU-2021.2.2",
@@ -202,7 +202,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf(
                     "AI-2021.3.1.7",
@@ -226,7 +226,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(
                 listOf("AI-2021.1.1.20"),
                 it.taskOutput()
@@ -235,14 +235,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     }
     @Test
     fun `reuse configuration cache`() {
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")
-        build(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache").let {
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache")
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME, "--configuration-cache").let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }
 
     private fun BuildResult.taskOutput() = output.lines().run {
-        val from = indexOf("> Task :${IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME}") + 1
+        val from = indexOf("> Task :$LIST_PRODUCTS_RELEASES_TASK_NAME") + 1
         val to = indexOfFirst { it.startsWith("BUILD SUCCESSFUL") } - when {
             Version.parse(gradleVersion) >= Version.parse("7.4") -> 4
             else -> 0

@@ -4,7 +4,8 @@ package org.jetbrains.intellij.tasks
 
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import java.util.jar.Manifest
@@ -52,7 +53,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -119,7 +120,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -188,7 +189,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -218,7 +219,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         assertEquals(
             setOf(
@@ -257,7 +258,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -296,7 +297,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -325,7 +326,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -369,7 +370,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         buildFile.groovy("""
             version = '0.42.123'
@@ -382,7 +383,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
@@ -422,7 +423,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             </idea-plugin>
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME)
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
         val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
@@ -433,7 +434,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             assertEquals("Gradle $gradleVersion", it.getValue("Created-By"))
             assertEquals(Jvm.current().toString(), it.getValue("Build-JVM"))
             assertEquals("0.42.123", it.getValue("Version"))
-            assertEquals(IntelliJPluginConstants.NAME, it.getValue("Build-Plugin"))
+            assertEquals(PLUGIN_NAME, it.getValue("Build-Plugin"))
             assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
             assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
         }
@@ -456,8 +457,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
+        build(BUILD_PLUGIN_TASK_NAME, "--configuration-cache").let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

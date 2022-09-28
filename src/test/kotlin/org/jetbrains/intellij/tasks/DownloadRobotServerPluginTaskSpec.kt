@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
@@ -41,7 +41,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
             collectPaths(File(buildDirectory, "robotServerPlugin"))
@@ -79,7 +79,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
             collectPaths(File(buildDirectory, "robotServerPlugin"))
@@ -116,7 +116,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         val resolvedVersion = DownloadRobotServerPluginTask.resolveLatestVersion()
         assertTrue(
@@ -127,8 +127,8 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache")
+        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache").let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

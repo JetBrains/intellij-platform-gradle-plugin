@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -33,7 +33,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME).let {
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
             assertContains("token property must be specified for plugin publishing", it.output)
         }
     }
@@ -47,8 +47,8 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
-        buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache").let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

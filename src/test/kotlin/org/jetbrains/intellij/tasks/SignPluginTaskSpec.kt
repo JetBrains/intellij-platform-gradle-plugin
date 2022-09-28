@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
@@ -23,7 +23,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         """)
 
         val version = SignPluginTask.resolveLatestVersion()
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info").let {
+        build(SIGN_PLUGIN_TASK_NAME, "--info").let {
             assertContains("marketplace-zip-signer-cli-$version.jar", it.output)
         }
     }
@@ -40,7 +40,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info").let {
+        build(SIGN_PLUGIN_TASK_NAME, "--info").let {
             assertContains("marketplace-zip-signer-cli-0.1.7.jar", it.output)
         }
     }
@@ -51,8 +51,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
         """)
 
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME).let {
-            assertContains("Task :${IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME} SKIPPED", it.output)
+        build(SIGN_PLUGIN_TASK_NAME).let {
+            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", it.output)
         }
     }
 
@@ -66,7 +66,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        buildAndFail(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME).let {
+        buildAndFail(SIGN_PLUGIN_TASK_NAME).let {
             assertContains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1.", it.output)
         }
     }
@@ -81,7 +81,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
         """)
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+        build(SIGN_PLUGIN_TASK_NAME)
 
         val distributionFolder = File(buildDirectory, "distributions")
         assertTrue(distributionFolder.listFiles()?.asList()?.any {
@@ -91,16 +91,16 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }
 
     @Test
     fun `ignore cache when optional parameter changes`() {
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
             assertContains("Reusing configuration cache.", it.output)
         }
 
@@ -112,7 +112,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             }
         """)
 
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
             assertNotContains("Reusing configuration cache.", it.output)
         }
     }

@@ -8,6 +8,7 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
+import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -24,21 +25,17 @@ abstract class IntelliJPluginSpecBase {
 
     private var debugEnabled = true
     private val gradleDefault = System.getProperty("test.gradle.default")
-    private val gradleArguments = System.getProperty("test.gradle.arguments", "")
-        .split(' ').filter(String::isNotEmpty).toTypedArray()
+    private val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toTypedArray()
     protected val kotlinPluginVersion: String = System.getProperty("test.kotlin.version")
-    protected val gradleVersion: String =
-        System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
+    protected val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
 
     val gradleHome: String = System.getProperty("test.gradle.home")
 
-    val pluginsRepository: String =
-        System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val intellijVersion: String = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() }
+    val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
+    val intellijVersion = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellij.version' isn't provided")
-    val testMarkdownPluginVersion: String =
-        System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
-            ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
+    val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
     val dir: File by lazy { createTempDirectory("tmp").toFile() }
 
     val gradleProperties = file("gradle.properties")

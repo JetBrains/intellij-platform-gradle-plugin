@@ -6,6 +6,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
@@ -221,7 +222,7 @@ abstract class JbrResolver @Inject constructor(
                 if (oldFormat) {
                     return JbrArtifact(
                         "jbrex${majorVersion}b${buildNumberString}_${platform(operatingSystem)}_${arch(false)}",
-                        IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY,
+                        DEFAULT_JBR_REPOSITORY,
                     )
                 }
 
@@ -238,7 +239,7 @@ abstract class JbrResolver @Inject constructor(
 
                 return JbrArtifact(
                     "$prefix$majorVersion-${platform(operatingSystem)}-$arch-b$buildNumberString",
-                    IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY,
+                    DEFAULT_JBR_REPOSITORY,
                 )
             }
 

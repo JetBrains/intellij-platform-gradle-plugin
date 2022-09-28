@@ -3,7 +3,7 @@
 package org.jetbrains.intellij
 
 import org.gradle.api.Project
-import org.jetbrains.intellij.IntelliJPluginConstants.ID as prefix
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_ID as prefix
 
 enum class BuildFeature(private val defaultValue: Boolean) {
     NO_SEARCHABLE_OPTIONS_WARNING(true),

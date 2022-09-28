@@ -12,6 +12,8 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileTree
 import org.gradle.api.tasks.util.PatternFilterable
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.tasks.SetupDependenciesTask
 
@@ -21,8 +23,8 @@ fun Project.intellij(filter: Action<PatternFilterable>): FileCollection = intell
 fun Project.intellij(filter: PatternFilterable): FileCollection = intellijBase().matching(filter)
 
 private fun Project.intellijBase(): FileTree {
-    val setupDependenciesTaskProvider = project.tasks.named(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
-    val setupDependenciesTask = setupDependenciesTaskProvider.get() as SetupDependenciesTask
+    val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
+    val setupDependenciesTask = setupDependenciesTaskProvider.get()
 
     if (!state.executed) {
         throw GradleException("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
@@ -77,7 +79,7 @@ fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>): Fil
 fun Project.intellijExtra(extra: String, filter: PatternFilterable): FileCollection = intellijExtraBase(extra).matching(filter)
 
 private fun Project.intellijExtraBase(extra: String): FileTree {
-    val setupDependenciesTaskProvider = project.tasks.named(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+    val setupDependenciesTaskProvider = project.tasks.named(SETUP_DEPENDENCIES_TASK_NAME)
     val setupDependenciesTask = setupDependenciesTaskProvider.get() as SetupDependenciesTask
 
     if (!state.executed) {

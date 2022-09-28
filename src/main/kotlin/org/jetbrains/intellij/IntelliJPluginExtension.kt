@@ -12,6 +12,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.newInstance
+import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
@@ -284,7 +285,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     fun getPluginDependenciesList(project: Project): Set<PluginDependency> {
         if (!pluginDependenciesConfigured) {
             debug(project.logCategory(), "Plugin dependencies are resolved")
-            project.configurations.getByName(IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
+            project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
             pluginDependenciesConfigured = true
         }
         return pluginDependencies.orNull?.toSet() ?: emptySet()

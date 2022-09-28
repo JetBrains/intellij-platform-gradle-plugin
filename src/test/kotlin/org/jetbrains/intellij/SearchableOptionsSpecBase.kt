@@ -3,6 +3,8 @@
 package org.jetbrains.intellij
 
 import org.intellij.lang.annotations.Language
+import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import java.io.File
 
 abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
@@ -63,7 +65,7 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
     """.trimIndent()
 
     fun getSearchableOptionsXml(jar: String) =
-        File(getSearchableOptions(), "/$jar.jar/search/$jar.jar${IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX}")
+        File(getSearchableOptions(), "/$jar.jar/search/$jar.jar$SEARCHABLE_OPTIONS_SUFFIX")
 
-    private fun getSearchableOptions() = File(buildDirectory, IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME)
+    private fun getSearchableOptions() = File(buildDirectory, SEARCHABLE_OPTIONS_DIR_NAME)
 }

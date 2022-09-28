@@ -10,8 +10,8 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.newInstance
-import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
+import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.utils.ArchiveUtils
@@ -68,13 +68,13 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
 
     /**
      * Resolves the Robot Server version.
-     * If set to [org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST], there's request to [METADATA_URL]
+     * If set to [VERSION_LATEST], there's request to [METADATA_URL]
      * performed for the latest available version.
      *
      * @return Robot Server version
      */
     internal fun resolveRobotServerPluginVersion(version: String?) =
-        version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST } ?: resolveLatestVersion()
+        version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
 
     internal fun getDependency(version: String) = when {
         Version.parse(version) >= Version.parse(NEW_ROBOT_SERVER_VERSION) -> NEW_ROBOT_SERVER_DEPENDENCY
