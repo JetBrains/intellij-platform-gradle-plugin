@@ -77,7 +77,7 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "11"
-            apiVersion = "1.3"
+            apiVersion = "1.4"
         }
     }
 
