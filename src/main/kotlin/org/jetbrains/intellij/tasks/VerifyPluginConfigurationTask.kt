@@ -97,51 +97,49 @@ abstract class VerifyPluginConfigurationTask : DefaultTask() {
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
         val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)
 
-        (pluginXmlFiles.get().flatMap {
-            parsePluginXml(it, context)?.let { plugin ->
+        sequence {
+            pluginXmlFiles.get().mapNotNull { parsePluginXml(it, context) }.forEach { plugin ->
                 val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
                 val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
                 val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)
 
-                listOfNotNull(
-                    "The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.".takeIf {
-                        sinceBuild.major < platformBuildVersion.major
-                    },
-                    "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.".takeIf {
-                        sinceBuildJavaVersion < targetCompatibilityJavaVersion
-                    },
-                    "The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.".takeIf {
-                        sinceBuildJavaVersion < jvmTargetJavaVersion
-                    },
-                    "The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.".takeIf {
-                        sinceBuildKotlinApiVersion < kotlinApiVersion
-                    },
-                )
-            } ?: emptyList()
-        } + listOfNotNull(
-            "The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.".takeIf {
-                platformJavaVersion > sourceCompatibilityJavaVersion
-            },
-            "The Kotlin configuration specifies languageVersion=$kotlinLanguageVersion but IntelliJ Platform $platformVersion requires languageVersion=$platformKotlinLanguageVersion.".takeIf {
-                platformKotlinLanguageVersion > kotlinLanguageVersion
-            },
-            "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires targetCompatibility=$platformJavaVersion.".takeIf {
-                platformJavaVersion < targetCompatibilityJavaVersion
-            },
-            "The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but IntelliJ Platform $platformVersion requires jvmTarget=$platformJavaVersion.".takeIf {
-                platformJavaVersion < jvmTargetJavaVersion
-            },
-            "The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib".takeIf {
-                kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null
+                if (sinceBuild.major < platformBuildVersion.major) {
+                    yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.")
+                }
+                if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
+                    yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
+                }
+                if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
+                    yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
+                }
+                if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
+                    yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
+                }
             }
-        )).takeIf(List<String>::isNotEmpty)?.let { issues ->
+
+            if (platformJavaVersion > sourceCompatibilityJavaVersion) {
+                yield("The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.")
+            }
+            if (platformKotlinLanguageVersion > kotlinLanguageVersion) {
+                yield("The Kotlin configuration specifies languageVersion=$kotlinLanguageVersion but IntelliJ Platform $platformVersion requires languageVersion=$platformKotlinLanguageVersion.")
+            }
+            if (platformJavaVersion < targetCompatibilityJavaVersion) {
+                yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires targetCompatibility=$platformJavaVersion.")
+            }
+            if (platformJavaVersion < jvmTargetJavaVersion) {
+                yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but IntelliJ Platform $platformVersion requires jvmTarget=$platformJavaVersion.")
+            }
+            if (kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null) {
+                yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
+            }
+        }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let { issues ->
             warn(
                 context,
-                "The following plugin configuration issues were found:" +
-                        "\n" +
-                        issues.joinToString("\n") { "- $it" } +
-                        "\n" +
-                        "See: https://jb.gg/intellij-platform-versions"
+                """
+                    The following plugin configuration issues were found:
+                    $issues
+                    See: https://jb.gg/intellij-platform-versions
+                """.trimIndent()
             )
         }
     }
