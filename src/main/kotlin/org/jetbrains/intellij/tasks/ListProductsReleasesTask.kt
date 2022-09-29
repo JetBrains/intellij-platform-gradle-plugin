@@ -164,7 +164,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
                         it.version.split('.').last().toInt()
                     }
                 }
-                .map { "AI-${it.version}" }
+                .map { "$PLATFORM_TYPE_ANDROID_STUDIO-${it.version}" }
                 .toList()
 
             false -> emptyList()

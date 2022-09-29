@@ -13,6 +13,8 @@ import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
 import org.jetbrains.intellij.model.OS
 import org.jetbrains.intellij.utils.OpenedPackages
 import java.io.File
@@ -255,11 +257,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = findIdePrefix()
-            if (prefix == null && !ideBuildNumber(ideDir.get()).startsWith("IU-")) {
+            if (prefix == null && !ideBuildNumber(ideDir.get()).startsWith("$PLATFORM_TYPE_INTELLIJ_ULTIMATE-")) {
                 throw TaskExecutionException(
                     this,
                     GradleException(
-                        "Cannot find IDE platform prefix. Please create a bug report at https://github.com/jetbrains/gradle-intellij-plugin. " +
+                        "Cannot find IDE platform prefix. Please create a bug report at $GITHUB_REPOSITORY. " +
                                 "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."
                     )
                 )

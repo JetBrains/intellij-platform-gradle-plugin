@@ -14,13 +14,11 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.PluginInstantiationException
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
@@ -851,7 +849,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sandboxDir.convention(project.provider {
                 prepareSandboxTaskProvider.get().destinationDir.canonicalPath
             })
-            archiveBaseName.convention("lib/searchableOptions")
+            archiveBaseName.convention("lib/$SEARCHABLE_OPTIONS_DIR_NAME")
             destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
             noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(NO_SEARCHABLE_OPTIONS_WARNING))
 
@@ -1490,10 +1488,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun resolveBuildTaskOutput(project: Project): Provider<RegularFile> {
-        return project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME)
-            .flatMap { it.archiveFile }
-    }
+    private fun resolveBuildTaskOutput(project: Project) = project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME).flatMap { it.archiveFile }
 
     private fun getCurrentVersion() = IntelliJPlugin::class.java
         .run { getResource("$simpleName.class") }
