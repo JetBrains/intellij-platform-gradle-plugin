@@ -114,17 +114,17 @@ fun getIdeaSystemProperties(
     return result
 }
 
-fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirectory: File?): List<String> {
-    options.maxHeapSize = options.maxHeapSize ?: "512m"
-    options.minHeapSize = options.minHeapSize ?: "256m"
-
-    ideDirectory?.let {
-        val bootJar = File(it, "lib/boot.jar")
-        if (bootJar.exists()) {
-            return arguments + "-Xbootclasspath/a:${bootJar.canonicalPath}"
-        }
+fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
+    with(options) {
+        maxHeapSize = maxHeapSize ?: "512m"
+        minHeapSize = minHeapSize ?: "256m"
     }
-    return arguments
+
+    return arguments.orEmpty() + ideDirectory
+        ?.resolve("lib/boot.jar")
+        ?.takeIf { it.exists() }
+        ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
+        .orEmpty()
 }
 
 fun ideBuildNumber(ideDirectory: File) = (
