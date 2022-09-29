@@ -1331,7 +1331,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             SETUP_DEPENDENCIES_TASK_NAME
         ) {
             group = PLUGIN_GROUP_NAME
-            description = "Setups required dependencies for building and running project."
+            description = "Sets up required dependencies for building and running project."
 
             var defaultDependenciesResolved = false
 
