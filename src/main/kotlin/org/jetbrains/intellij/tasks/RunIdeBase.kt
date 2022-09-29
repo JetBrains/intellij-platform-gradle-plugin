@@ -275,6 +275,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
         systemProperty("idea.vendor.name", "JetBrains")
+        systemPropertyIfNotDefined("idea.plugin.in.sandbox.mode", true, userDefinedSystemProperties)
     }
 
     /**
