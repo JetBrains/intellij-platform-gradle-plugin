@@ -5,12 +5,10 @@ package org.jetbrains.intellij.jbr
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 const val TASK_NAME = "testJbrResolver"
 
-open class JbrResolverTest : IntelliJPluginSpecBase() {
+class JbrResolverTest : IntelliJPluginSpecBase() {
 
     private val operatingSystem = OperatingSystem.current()
     private val platform = JbrResolver.JbrArtifact.platform(operatingSystem)
@@ -35,7 +33,8 @@ open class JbrResolverTest : IntelliJPluginSpecBase() {
     fun `resolve 11_0_13b1751_16 in fd variant`() = testJbrResolving("11_0_13b1751.16", "jbr_fd-11_0_13-$platform-$arch-b1751.16", "fd")
 
     private fun testJbrResolving(version: String, expected: String, variant: String? = null) {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             runIde {
                 jbrVersion = "$version"
                 ${"jbrVariant = \"$variant\"".takeIf { variant != null }}
@@ -45,16 +44,12 @@ open class JbrResolverTest : IntelliJPluginSpecBase() {
                     println(runIde.projectExecutable.get())
                 }
             }
-        """)
+            """
+        )
 
-        val output = build(TASK_NAME).output
-        output.apply {
-            assertTrue(this) {
-                contains(expected)
-            }
-            assertFalse(this) {
-                contains("Error when resolving dependency")
-            }
+        build(TASK_NAME).let {
+            assertContains(expected, it.output)
+            assertNotContains("Error when resolving dependency", it.output)
         }
     }
 }

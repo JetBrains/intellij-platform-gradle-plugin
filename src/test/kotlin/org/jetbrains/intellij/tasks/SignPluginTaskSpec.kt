@@ -2,36 +2,38 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
-import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@Suppress("GroovyUnusedAssignment")
+@Suppress("GroovyUnusedAssignment", "ComplexRedundantLet")
 class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `run Marketplace ZIP Signer in the latest version`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-        """)
+            """
+        )
 
         val version = SignPluginTask.resolveLatestVersion()
-        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
-
-        assertTrue(result.output.contains("marketplace-zip-signer-cli-$version.jar"))
+        build(SIGN_PLUGIN_TASK_NAME, "--info").let {
+            assertContains("marketplace-zip-signer-cli-$version.jar", it.output)
+        }
     }
 
     @Test
     fun `run Marketplace ZIP Signer in specified version`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
@@ -39,50 +41,57 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-        """)
+            """
+        )
 
-        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--info")
-
-        assertTrue(result.output.contains("marketplace-zip-signer-cli-0.1.7.jar"))
+        build(SIGN_PLUGIN_TASK_NAME, "--info").let {
+            assertContains("marketplace-zip-signer-cli-0.1.7.jar", it.output)
+        }
     }
 
     @Test
     fun `skip Marketplace ZIP Signer task if no key and certificateChain were provided`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
-        """)
+            """
+        )
 
-        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Task :${IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME} SKIPPED"))
+        build(SIGN_PLUGIN_TASK_NAME).let {
+            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", it.output)
+        }
     }
 
     @Test
     fun `run Marketplace ZIP Signer and fail on invalid version`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 cliVersion = "0.0.1"
             }
-        """)
+            """
+        )
 
-        val result = buildAndFail(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1."))
+        buildAndFail(SIGN_PLUGIN_TASK_NAME).let {
+            assertContains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1.", it.output)
+        }
     }
 
     @Test
     fun `output file contains version when specified in build file`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-        """)
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME)
+            """
+        )
+        build(SIGN_PLUGIN_TASK_NAME)
 
         val distributionFolder = File(buildDirectory, "distributions")
         assertTrue(distributionFolder.listFiles()?.asList()?.any {
@@ -92,31 +101,32 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-        val result = build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 
     @Test
     fun `ignore cache when optional parameter changes`() {
-        build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-        assertTrue(
-            build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-                .output.contains("Reusing configuration cache.")
-        )
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             version = "1.0.0"
             
             signPlugin {
                 password = "foo"
             }
-        """)
-        assertFalse(
-            build(IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-                .output.contains("Reusing configuration cache.")
+            """
         )
+
+        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+            assertNotContains("Reusing configuration cache.", it.output)
+        }
     }
 
     private fun loadCertFile(name: String) = javaClass.classLoader.getResource(name)?.path

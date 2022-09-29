@@ -6,14 +6,15 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-@Suppress("GroovyAssignabilityCheck")
+@Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
 class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `configure sdk manually test`() {
         writeTestFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
@@ -34,7 +35,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
-        """)
+            """
+        )
 
         build(
             "printMainCompileClassPath",
@@ -72,7 +74,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     @Test
     fun `configure plugins manually test`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
@@ -93,7 +96,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
-        """)
+            """
+        )
 
         build(
             "printMainCompileClassPath",
@@ -135,7 +139,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     @Test
     fun `configure extra dependencies manually test`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
@@ -155,7 +160,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
             task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
             task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
-        """)
+            """
+        )
 
         build(
             "printMainCompileClassPath",
@@ -192,7 +198,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     @Test
     fun `configure sdk manually fail without afterEvaluate`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
@@ -201,36 +208,44 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             dependencies {
                 compile DependenciesUtils.intellij(project) { include('asm-all.jar') }
             } 
-        """)
-
-        val result = buildAndFail("tasks")
-        assertTrue(
-            result.output.contains("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
+            """
         )
+
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
     fun `configure plugins manually fail without afterEvaluate`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij.configureDefaultDependencies = false
             dependencies {
                 compile DependenciesUtils.intellijPlugin(project, 'junit')
             } 
-        """)
-
-        val result = buildAndFail("tasks")
-        assertTrue(
-            result.output.contains("intellij plugin 'junit' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+            """
         )
+
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij plugin 'junit' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
     fun `configure plugins manually fail on unconfigured plugin`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
 
             intellij {
@@ -242,18 +257,22 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     compile DependenciesUtils.intellijPlugin(project, 'junit')
                 }
             } 
-        """)
-
-        val result = buildAndFail("tasks")
-        assertTrue(
-            result.output.contains("intellij plugin 'junit' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+            """
         )
+
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij plugin 'junit' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
     fun `configure plugins manually fail on some unconfigured plugins`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
 
             intellij {
@@ -265,18 +284,22 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     compile DependenciesUtils.intellijPlugins(project, 'testng', 'junit', 'copyright')
                 }
             } 
-        """)
-
-        val result = buildAndFail("tasks")
-        assertTrue(
-            result.output.contains("The following plugins: [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
+            """
         )
+
+        buildAndFail("tasks").let {
+            assertContains(
+                "The following plugins: [testng, copyright] are not (yet) configured or not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
     fun `configure extra manually fail without afterEvaluate`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
@@ -286,18 +309,22 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             dependencies {
                 compile DependenciesUtils.intellijExtra(project, 'intellij-core')
             }
-        """)
-
-        val result = buildAndFail("tasks")
-        assertTrue(
-            result.output.contains("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
+            """
         )
+
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 
     @Test
     fun `configure extra manually fail on unconfigured extra dependency`() {
         writeTestFile()
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
@@ -309,11 +336,14 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     compile DependenciesUtils.intellijExtra(project, 'intellij-core')
                 }
             }
-        """)
-
-        val result = buildAndFail("tasks")
-        assertTrue(
-            result.output.contains("intellij extra artifact 'intellij-core' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
+            """
         )
+
+        buildAndFail("tasks").let {
+            assertContains(
+                "intellij extra artifact 'intellij-core' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block",
+                it.output
+            )
+        }
     }
 }

@@ -1,7 +1,8 @@
 <products>
     <product name="AppCode">
         <code>OC</code>
-        <channel id="OC-RELEASE-licensing-RELEASE" name="AppCode RELEASE" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="OC-RELEASE-licensing-RELEASE" name="AppCode RELEASE" status="release" url="https://www.jetbrains.com/objc/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210812" fullNumber="212.5080.60">
                 <message><![CDATA[<p>AppCode 2021.2.1 is here!</p>
 <p><strong>Bug fixes</strong></p>
@@ -10,7 +11,8 @@
  <li>CocoaPods product references are resolved to a wrong file (<a href="https://youtrack.jetbrains.com/issue/OC-21837">OC-21837</a>)</li>
 </ul>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/objc/download" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=Fix%20versions:%20%7BAppCode+2021.2.1%7D%20sort%20by:%20project,%20type,%20votes&amp;title=AppCode+2021.2.1"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=Fix%20versions:%20%7BAppCode+2021.2.1%7D%20sort%20by:%20project,%20type,%20votes&amp;title=AppCode+2021.2.1"/>
                 <patch from="212.4746" size="56" fullFrom="212.4746.137"/>
             </build>
             <build number="212.4746" version="2021.2" releaseDate="20210812" fullNumber="212.4746.137">
@@ -44,7 +46,8 @@
  <li>Test does not complete when <code>XCTSkip</code> is thrown (<a href="https://youtrack.jetbrains.com/issue/OC-20532">OC-20532</a>)</li>
 </ul>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/objc/download/previous.html#version20203" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=Fix%20versions:%20%7BAppCode%202020.3.5%7D%20sort%20by:%20project,%20type,%20votes&amp;title=AppCode%202020.3.5"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=Fix%20versions:%20%7BAppCode%202020.3.5%7D%20sort%20by:%20project,%20type,%20votes&amp;title=AppCode%202020.3.5"/>
                 <patch from="203.7717" size="129" fullFrom="203.7717.57"/>
             </build>
             <build number="203.7717" version="2020.3.4" releaseDate="20201210" fullNumber="203.7717.57">
@@ -71,7 +74,8 @@
  <li>IntelliJ Platform fixes</li>
 </ul>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/objc/download/previous.html#version20202" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=Fix%20versions:%20%7BAppCode%202020.2.8%7D%20sort%20by:%20project,%20type,%20votes&amp;title=AppCode%202020.2.8"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=Fix%20versions:%20%7BAppCode%202020.2.8%7D%20sort%20by:%20project,%20type,%20votes&amp;title=AppCode%202020.2.8"/>
                 <patch from="202.7660" size="83" fullFrom="202.7660.63"/>
             </build>
             <build number="202.7660" version="2020.2.7" releaseDate="20200805" fullNumber="202.7660.63">
@@ -305,7 +309,8 @@
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/OBJC/AppCode+2016.1.4/"/>
             </build>
         </channel>
-        <channel id="OC-EAP-licensing-RELEASE" name="AppCode EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/objc/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="OC-EAP-licensing-RELEASE" name="AppCode EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/objc/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.4746" version="2021.2 RC" fullNumber="212.4746.117">
                 <patch from="212.4746" size="110" fullFrom="212.4746.104"/>
             </build>
@@ -322,7 +327,8 @@
                 <patch from="201.6668" size="8" fullFrom="201.6668.124"/>
             </build>
         </channel>
-        <channel id="OC-EAP-licensing-EAP" name="AppCode EAP" status="eap" url="https://www.jetbrains.com/objc/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="OC-EAP-licensing-EAP" name="AppCode EAP" status="eap" url="https://www.jetbrains.com/objc/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 Beta" fullNumber="212.4746.104">
                 <patch from="212.4746" size="42" fullFrom="212.4746.85"/>
             </build>
@@ -424,7 +430,8 @@
                 <patch from="201.4515" size="28" fullFrom="201.4515.28"/>
             </build>
         </channel>
-        <channel id="appcode_33" name="AppCode 3.3" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="appcode_33" name="AppCode 3.3" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="143.2370" version="3.3.4" releaseDate="20151102">
                 <message><![CDATA[<p>AppCode 3.3.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -432,7 +439,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/objc/2016/05/appcode-2016-1-2-bug-fix-update/"/>
             </build>
         </channel>
-        <channel id="appcode_32" name="AppCode 3.2" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="appcode_32" name="AppCode 3.2" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="141.3058" version="3.2.1" releaseDate="20150826">
                 <message><![CDATA[<p>AppCode 3.2.1, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -440,7 +448,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/objc/2016/05/appcode-2016-1-2-bug-fix-update/"/>
             </build>
         </channel>
-        <channel id="appcode_31" name="AppCode 3.1" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="appcode_31" name="AppCode 3.1" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="139.1803" version="3.1.8" releaseDate="20141210">
                 <message><![CDATA[<p>AppCode 3.1.8, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -448,7 +457,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/objc/2016/05/appcode-2016-1-2-bug-fix-update/"/>
             </build>
         </channel>
-        <channel id="appcode_3" name="AppCode 3.0" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="appcode_3" name="AppCode 3.0" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="137.253" version="3.0.7" releaseDate="20140520">
                 <message><![CDATA[<p>AppCode 3.0.7, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -456,7 +466,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/objc/2016/05/appcode-2016-1-2-bug-fix-update/"/>
             </build>
         </channel>
-        <channel id="appcode_25" name="AppCode 2.5" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com" majorVersion="2" licensing="release">
+        <channel id="appcode_25" name="AppCode 2.5" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="2" licensing="release">
             <build number="131.848" version="2.5.6" releaseDate="20131014">
                 <message><![CDATA[<p>AppCode 2.5.6, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -464,7 +475,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/objc/2016/05/appcode-2016-1-2-bug-fix-update/"/>
             </build>
         </channel>
-        <channel id="appcode_20" name="AppCode 2.0" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com" majorVersion="2" licensing="release">
+        <channel id="appcode_20" name="AppCode 2.0" status="release" url="https://www.jetbrains.com/objc/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="2" licensing="release">
             <build number="129.1564" version="2.1.3" releaseDate="20130617">
                 <message><![CDATA[<p>AppCode 2.1.3, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -475,7 +487,8 @@
     </product>
     <product name="CLion">
         <code>CL</code>
-        <channel id="CL-RELEASE-licensing-RELEASE" name="CLion RELEASE" status="release" url="https://www.jetbrains.com/clion/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="CL-RELEASE-licensing-RELEASE" name="CLion RELEASE" status="release" url="https://www.jetbrains.com/clion/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210728" fullNumber="212.5080.54">
                 <blogPost url="https://blog.jetbrains.com/clion/2021/08/clion-2021-2-1-bug-fix-update/"/>
                 <message><![CDATA[<p>A bug-fix update, CLion 2021.2.1, is available for download!</p>
@@ -804,31 +817,36 @@
                 <patch from="182.5107" size="from 6 to 7" fullFrom="182.5107.21"/>
             </build>
             <build number="181.5540" version="2018.1.7" releaseDate="20180328" fullNumber="181.5540.25">
-                <message><![CDATA[<p>CLion 2018.1.7 is now available for download with a new JDK version, which includes<br> a fix for the input freezes on macOS Mojave: <a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>.</p>]]></message>
+                <message>
+                    <![CDATA[<p>CLion 2018.1.7 is now available for download with a new JDK version, which includes<br> a fix for the input freezes on macOS Mojave: <a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version20181" download="true"/>
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/CLION/CLion+2018.1.7%2C+build+181.5540.25"/>
                 <patch from="181.5540" size="from 22 to 25" fullFrom="181.5540.8"/>
             </build>
             <build number="173.4674" version="2017.3.5" releaseDate="20171130" fullNumber="173.4674.66">
-                <message><![CDATA[<p>CLion 2017.3.5 is now available for download with a new JDK version, which includes<br> a fix for the input freezes on macOS Mojave: <a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>.</p>]]></message>
+                <message>
+                    <![CDATA[<p>CLion 2017.3.5 is now available for download with a new JDK version, which includes<br> a fix for the input freezes on macOS Mojave: <a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version20173" download="true"/>
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/CLION/CLion+2017.3.5%2C+build+173.4674.66"/>
                 <patch from="173.4674" size="from 29 to 33" fullFrom="173.4674.29"/>
             </build>
             <build number="172.4574" version="2017.2.4" releaseDate="20170719" fullNumber="172.4574.23">
-                <message><![CDATA[<p>A new CLion 2017.2.4 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>A new CLion 2017.2.4 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version20172" download="true"/>
                 <button name="Release Notes" url="https://blog.jetbrains.com/clion/2018/03/clion-update-fix-for-ssh-access-to-github"/>
                 <patch from="172.4343" size="from 3 to 4" fullFrom="172.4343.16"/>
             </build>
             <build number="171.4694" version="2017.1.4" releaseDate="20170329" fullNumber="171.4694.76">
-                <message><![CDATA[<p>A new CLion 2017.1.4 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>A new CLion 2017.1.4 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version20171" download="true"/>
                 <button name="Release Notes" url="https://blog.jetbrains.com/clion/2018/03/clion-update-fix-for-ssh-access-to-github"/>
                 <patch from="171.4694" size="3" fullFrom="171.4694.31"/>
             </build>
             <build number="163.15529" version="2016.3.6" releaseDate="20161122" fullNumber="163.15529.9">
-                <message><![CDATA[<p>A new CLion 2016.3.6 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>A new CLion 2016.3.6 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version20163" download="true"/>
                 <button name="Release Notes" url="https://blog.jetbrains.com/clion/2018/03/clion-update-fix-for-ssh-access-to-github"/>
                 <patch from="163.15188" size="from 2 to 3" fullFrom="163.15188.10"/>
@@ -842,7 +860,8 @@
 </ul>
 <p>To learn more, please see the <a href="https://blog.jetbrains.com/clion/2016/10/clion-2016-2-3-update-with-new-cmake-bundled-and-fix-for-sensitive-scrolling-on-macos-sierra">release notes</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version20162" download="true"/>
-                <button name="Release Notes" url="https://blog.jetbrains.com/clion/2016/10/clion-2016-2-3-update-with-new-cmake-bundled-and-fix-for-sensitive-scrolling-on-macos-sierra"/>
+                <button name="Release Notes"
+                        url="https://blog.jetbrains.com/clion/2016/10/clion-2016-2-3-update-with-new-cmake-bundled-and-fix-for-sensitive-scrolling-on-macos-sierra"/>
             </build>
             <build number="145.2073" version="2016.1.4" releaseDate="20160317" fullNumber="145.2073.2">
                 <message><![CDATA[<p><b>CLion 2016.1.4</b> bug-fix update is now available! </p>
@@ -852,7 +871,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/clion/2016/09/clion-2016-2-2-update-is-available/"/>
             </build>
         </channel>
-        <channel id="CL-EAP-licensing-EAP" name="CLion EAP" status="eap" url="https://www.jetbrains.com/clion/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="CL-EAP-licensing-EAP" name="CLion EAP" status="eap" url="https://www.jetbrains.com/clion/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 Beta" fullNumber="212.4746.15">
                 <blogPost url="https://blog.jetbrains.com/clion/2021/07/clion-2021-2-goes-beta/"/>
                 <patch from="212.4638" size="from 91 to 93" fullFrom="212.4638.8"/>
@@ -974,26 +994,31 @@
                 <patch from="201.4515" size="from 29 to 46" fullFrom="201.4515.29"/>
             </build>
         </channel>
-        <channel id="clion_12" name="CLion 1.2" status="release" url="https://www.jetbrains.com/clion/download" feedback="https://youtrack.jetbrains.com" majorVersion="1" licensing="release">
+        <channel id="clion_12" name="CLion 1.2" status="release" url="https://www.jetbrains.com/clion/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="1" licensing="release">
             <build number="143.2370" version="1.2.5" releaseDate="20151102">
                 <message><![CDATA[<p>CLion 1.2.5, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version12" download="true"/>
-                <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/11/security-update-for-intellij-based-ides-v2016-1-and-older-versions/"/>
+                <button name="Release Notes"
+                        url="https://blog.jetbrains.com/blog/2016/05/11/security-update-for-intellij-based-ides-v2016-1-and-older-versions/"/>
             </build>
         </channel>
-        <channel id="clion_11" name="CLion 1.1" status="release" url="https://www.jetbrains.com/clion/download" feedback="https://youtrack.jetbrains.com" majorVersion="1" licensing="release">
+        <channel id="clion_11" name="CLion 1.1" status="release" url="https://www.jetbrains.com/clion/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="1" licensing="release">
             <build number="141.3058" version="1.1.2" releaseDate="20150818">
                 <message><![CDATA[<p>CLion 1.1.2, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/clion/download/previous.html#version11" download="true"/>
-                <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/11/security-update-for-intellij-based-ides-v2016-1-and-older-versions/"/>
+                <button name="Release Notes"
+                        url="https://blog.jetbrains.com/blog/2016/05/11/security-update-for-intellij-based-ides-v2016-1-and-older-versions/"/>
             </build>
         </channel>
     </product>
     <product name="DataGrip">
         <code>DB</code>
-        <channel id="DB-RELEASE-licensing-RELEASE" name="DataGrip RELEASE" status="release" url="https://www.jetbrains.com/datagrip/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="DB-RELEASE-licensing-RELEASE" name="DataGrip RELEASE" status="release" url="https://www.jetbrains.com/datagrip/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5284" version="2021.2.2" releaseDate="20210727" fullNumber="212.5284.17">
                 <blogPost url="https://blog.jetbrains.com/datagrip/2021/09/02/datagrip-2021-2-2/"/>
                 <message><![CDATA[<p>DataGrip 2021.2.2 is Out!</p>
@@ -1360,7 +1385,8 @@
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/DBE/DataGrip+2016.1.2+Release+Notes"/>
             </build>
         </channel>
-        <channel id="datagrip_1" name="DataGrip 1.0" status="release" url="https://www.jetbrains.com/datagrip/download" feedback="https://youtrack.jetbrains.com" majorVersion="1" licensing="release">
+        <channel id="datagrip_1" name="DataGrip 1.0" status="release" url="https://www.jetbrains.com/datagrip/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="1" licensing="release">
             <build number="143.2372" version="1.0.5" releaseDate="20151216">
                 <message><![CDATA[<p>In DataGrip 1.0.5 we've fixed the problem with information about the perpetual fallback license.</p>]]></message>
                 <button name="Download" url="https://confluence.jetbrains.com/display/DBE/DataGrip+previous+releases#version10" download="true"/>
@@ -1370,7 +1396,8 @@
     </product>
     <product name="GoLand">
         <code>GO</code>
-        <channel id="GO-RELEASE-licensing-RELEASE" name="GoLand RELEASE" status="release" url="https://www.jetbrains.com/go/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="GO-RELEASE-licensing-RELEASE" name="GoLand RELEASE" status="release" url="https://www.jetbrains.com/go/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.2" releaseDate="20210729" fullNumber="212.5080.74">
                 <message><![CDATA[<p><b>GoLand 2021.2.2 is out!</b></p>
 <p>The main highlights:</p>
@@ -1622,7 +1649,8 @@
                 <patch from="182.4505" size="from 27 to 31" fullFrom="182.4505.32"/>
             </build>
             <build number="181.5540" version="2018.1.8" releaseDate="20180329" fullNumber="181.5540.46">
-                <message><![CDATA[<p> <strong>GoLand 2018.1.8</strong> is out. This update consists several improvements and a pinch of bug-fixes.<br> See release notes to learn more. </p>]]></message>
+                <message>
+                    <![CDATA[<p> <strong>GoLand 2018.1.8</strong> is out. This update consists several improvements and a pinch of bug-fixes.<br> See release notes to learn more. </p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/go/download/previous.html#version20181" download="true"/>
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/GOLAND/GoLand+181.5540.46+Release+Notes"/>
                 <patch from="181.5540" size="from 3 to 5" fullFrom="181.5540.31"/>
@@ -1633,7 +1661,8 @@
                 <patch from="173.4674" size="from 22 to 26" fullFrom="173.4674.50"/>
             </build>
         </channel>
-        <channel id="GO-EAP-licensing-RELEASE" name="GoLand EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/go/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="GO-EAP-licensing-RELEASE" name="GoLand EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/go/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.4746" version="2021.2 RC" fullNumber="212.4746.57">
                 <blogPost url="https://blog.jetbrains.com/go/2021/07/22/the-goland-2021-2-release-candidate-is-out/"/>
                 <patch from="211.7442" size="from 334 to 380" fullFrom="211.7442.57"/>
@@ -1644,7 +1673,8 @@
                 <patch from="202.8194" size="from 217 to 236" fullFrom="202.8194.19"/>
             </build>
         </channel>
-        <channel id="GO-EAP-licensing-EAP" name="GoLand EAP" status="eap" url="https://www.jetbrains.com/go/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="GO-EAP-licensing-EAP" name="GoLand EAP" status="eap" url="https://www.jetbrains.com/go/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 Beta 2" fullNumber="212.4746.12">
                 <patch from="211.7442" size="from 338 to 384" fullFrom="211.7442.57"/>
                 <patch from="212.4638" size="from 90 to 91" fullFrom="212.4638.10"/>
@@ -1655,12 +1685,14 @@
                 <patch from="212.4535" size="from 81 to 82" fullFrom="212.4535.15"/>
             </build>
             <build number="212.4535" version="2021.2 EAP" fullNumber="212.4535.15">
-                <blogPost url="https://blog.jetbrains.com/go/2021/06/25/goland-2021-2-eap-build-5-is-out-with-new-button-for-updating-go-mod-and-completion-for-mongodb-fields-and-operators/"/>
+                <blogPost
+                        url="https://blog.jetbrains.com/go/2021/06/25/goland-2021-2-eap-build-5-is-out-with-new-button-for-updating-go-mod-and-completion-for-mongodb-fields-and-operators/"/>
                 <patch from="211.7442" size="from 327 to 362" fullFrom="211.7442.57"/>
                 <patch from="212.4416" size="from 70 to 87" fullFrom="212.4416.11"/>
             </build>
             <build number="212.4416" version="2021.2 EAP" fullNumber="212.4416.11">
-                <blogPost url="https://blog.jetbrains.com/go/2021/06/25/goland-2021-2-eap-build-5-is-out-with-new-button-for-updating-go-mod-and-completion-for-mongodb-fields-and-operators/"/>
+                <blogPost
+                        url="https://blog.jetbrains.com/go/2021/06/25/goland-2021-2-eap-build-5-is-out-with-new-button-for-updating-go-mod-and-completion-for-mongodb-fields-and-operators/"/>
                 <patch from="211.7442" size="from 322 to 354" fullFrom="211.7442.57"/>
                 <patch from="212.4321" size="from 70 to 71" fullFrom="212.4321.4"/>
             </build>
@@ -1670,7 +1702,8 @@
                 <patch from="212.4037" size="from 118 to 137" fullFrom="212.4037.52"/>
             </build>
             <build number="212.4037" version="2021.2 EAP" fullNumber="212.4037.52">
-                <blogPost url="https://blog.jetbrains.com/go/2021/06/10/goland-2021-2-eap-build-3-is-out-with-a-preview-tab-in-the-debugger-and-other-improvements/"/>
+                <blogPost
+                        url="https://blog.jetbrains.com/go/2021/06/10/goland-2021-2-eap-build-3-is-out-with-a-preview-tab-in-the-debugger-and-other-improvements/"/>
                 <patch from="211.7442" size="from 297 to 329" fullFrom="211.7442.57"/>
                 <patch from="212.3724" size="from 70 to 71" fullFrom="212.3724.17"/>
             </build>
@@ -1814,7 +1847,8 @@
     <product name="IntelliJ IDEA">
         <code>IC</code>
         <code>IU</code>
-        <channel id="IC-IU-EAP-licensing-RELEASE" name="IntelliJ IDEA EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/idea/nextversion" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2021" licensing="release">
+        <channel id="IC-IU-EAP-licensing-RELEASE" name="IntelliJ IDEA EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/idea/nextversion"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2021" licensing="release">
             <build number="212.5284" version="2021.2.2 RC" releaseDate="20210727" fullNumber="212.5284.31">
                 <message><![CDATA[<p>IntelliJ IDEA 2021.2.2 Release Candidate is available with minor fixes and the following significant fix and update:</p>
 <ul>
@@ -1823,7 +1857,8 @@
 </ul>
 <p>You can find a full list of all the resolved issues in the <a href="https://youtrack.jetbrains.com/articles/IDEA-A-44/IntelliJ-IDEA-2021.2.2-RC-(212.5284.31-build)-Release-Notes">release notes</a>. </p>]]></message>
                 <button name="Download" url="https://confluence.jetbrains.com/display/IDEADEV/IDEA+2021.2+latest+builds" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-44/IntelliJ-IDEA-2021.2.2-RC-(212.5284.31-build)-Release-Notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/articles/IDEA-A-44/IntelliJ-IDEA-2021.2.2-RC-(212.5284.31-build)-Release-Notes"/>
                 <patch from="212.5284" size="from 34 to 43" fullFrom="212.5284.19"/>
             </build>
             <build number="212.5284" version="2021.2.2 Preview" releaseDate="20210727" fullNumber="212.5284.19">
@@ -1893,7 +1928,8 @@
                 <patch from="183.4139" size="from 2 to 10" fullFrom="183.4139.22"/>
             </build>
         </channel>
-        <channel id="IC-IU-RELEASE-licensing-RELEASE" name="IntelliJ IDEA RELEASE" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2021" licensing="release">
+        <channel id="IC-IU-RELEASE-licensing-RELEASE" name="IntelliJ IDEA RELEASE" status="release" url="https://www.jetbrains.com/idea/download"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210727" fullNumber="212.5080.55">
                 <message><![CDATA[<p>IntelliJ IDEA 2021.2.1 is available with the following fixes:</p>
 <ul>
@@ -2127,7 +2163,8 @@
                 <patch from="192.5728" size="from 38 to 55" fullFrom="192.5728.98"/>
             </build>
             <build number="192.5728" version="2019.2" releaseDate="20190724" fullNumber="192.5728.98">
-                <blogPost url="https://blog.jetbrains.com/idea/2019/07/intellij-idea-2019-2-java-13-preview-features-profiling-tools-services-tool-window-and-more"/>
+                <blogPost
+                        url="https://blog.jetbrains.com/idea/2019/07/intellij-idea-2019-2-java-13-preview-features-profiling-tools-services-tool-window-and-more"/>
                 <patch from="192.5728" size="from 1 to 4" fullFrom="192.5728.74"/>
             </build>
             <build number="191.8026" version="2019.1.4" releaseDate="20190327" fullNumber="191.8026.42">
@@ -2146,7 +2183,8 @@
 </ul>
 <p>For more details, please refer to the <a href="https://blog.jetbrains.com/idea/2019/07/intellij-idea-2019-1-4-is-released">blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/idea/download/previous.html#version20191" download="true"/>
-                <button name="Release Notes" url="https://confluence.jetbrains.com/display/IDEADEV/IntelliJ%2BIDEA%2B2019.1.4%2B%28191.8026.42%2Bbuild%29%2BRelease%2BNotes"/>
+                <button name="Release Notes"
+                        url="https://confluence.jetbrains.com/display/IDEADEV/IntelliJ%2BIDEA%2B2019.1.4%2B%28191.8026.42%2Bbuild%29%2BRelease%2BNotes"/>
                 <button name="More Information" url="https://blog.jetbrains.com/idea/2019/07/intellij-idea-2019-1-4-is-released"/>
             </build>
             <build number="183.6156" version="2018.3.6" releaseDate="20181121" fullNumber="183.6156.11">
@@ -2208,19 +2246,22 @@
                 <patch from="173.3727" size="from 29 to 64" fullFrom="173.3727.127"/>
             </build>
             <build number="172.4574" version="2017.2.7" releaseDate="20170718" fullNumber="172.4574.19">
-                <message><![CDATA[<p>A new IntelliJ IDEA 2017.2.7 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>A new IntelliJ IDEA 2017.2.7 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/idea/download/previous.html#version20172" download="true"/>
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/IDEADEV/IntelliJ+IDEA+2017.2.7+Release+Notes"/>
                 <patch from="172.4574" size="from 1 to 19" fullFrom="172.4574.11"/>
             </build>
             <build number="171.4694" version="2017.1.6" releaseDate="20170322" fullNumber="171.4694.73">
-                <message><![CDATA[<p>A new IntelliJ IDEA 2017.1.6 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>A new IntelliJ IDEA 2017.1.6 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/idea/download/previous.html#version20171" download="true"/>
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/IDEADEV/IntelliJ+IDEA+2017.1.6+Release+Notes"/>
                 <patch from="171.4694" size="from 1 to 16" fullFrom="171.4694.70"/>
             </build>
             <build number="163.15529" version="2016.3.8" releaseDate="20161122" fullNumber="163.15529.8">
-                <message><![CDATA[<p>A new IntelliJ IDEA 2016.3.8 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>A new IntelliJ IDEA 2016.3.8 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/idea/download/previous.html#version20163" download="true"/>
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/IDEADEV/IntelliJ+IDEA+2016.3.8+Release+Notes"/>
                 <patch from="163.15529" size="from 1 to 25" fullFrom="163.15529.5"/>
@@ -2235,7 +2276,8 @@
                 <button name="Download" url="https://www.jetbrains.com/idea/download/previous.html#version20161" download="true"/>
             </build>
         </channel>
-        <channel id="IC-IU-EAP-licensing-EAP" name="IntelliJ IDEA EAP" status="eap" url="https://www.jetbrains.com/idea/nextversion" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2021" licensing="eap">
+        <channel id="IC-IU-EAP-licensing-EAP" name="IntelliJ IDEA EAP" status="eap" url="https://www.jetbrains.com/idea/nextversion"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 Beta" fullNumber="212.4746.2">
                 <patch from="212.4638" size="from 77 to 92" fullFrom="212.4638.7"/>
             </build>
@@ -2315,22 +2357,27 @@
                 <patch from="192.4787" size="from 28 to 84" fullFrom="192.4787.16"/>
             </build>
             <build number="192.4787" version="2019.2 EAP" fullNumber="192.4787.16">
-                <blogPost url="https://blog.jetbrains.com/idea/2019/06/intellij-idea-2019-2-eap3-code-style-per-scope-refreshed-code-completion-popup-and-more"/>
+                <blogPost
+                        url="https://blog.jetbrains.com/idea/2019/06/intellij-idea-2019-2-eap3-code-style-per-scope-refreshed-code-completion-popup-and-more"/>
                 <patch from="192.4488" size="from 88 to 93" fullFrom="192.4488.21"/>
             </build>
             <build number="192.4488" version="2019.2 EAP" fullNumber="192.4488.21">
-                <blogPost url="https://blog.jetbrains.com/idea/2019/06/intellij-idea-2019-2-eap2-shell-script-support-improved-code-duplicates-detection-services-tool-window-and-more"/>
+                <blogPost
+                        url="https://blog.jetbrains.com/idea/2019/06/intellij-idea-2019-2-eap2-shell-script-support-improved-code-duplicates-detection-services-tool-window-and-more"/>
                 <patch from="192.4205" size="from 11 to 24" fullFrom="192.4205.45"/>
             </build>
         </channel>
-        <channel id="IDEA15_Release" name="IntelliJ IDEA Release" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="15" licensing="release">
+        <channel id="IDEA15_Release" name="IntelliJ IDEA Release" status="release" url="https://www.jetbrains.com/idea/download"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="15" licensing="release">
             <build number="143.2370" version="15.0.6" releaseDate="20151102" fullNumber="143.2370.31">
-                <message><![CDATA[<p>A new IntelliJ IDEA 2016.3.8 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>A new IntelliJ IDEA 2016.3.8 bug-fix update is here! The update brings an important fix to the built-in<br> SSH client and makes it compatible with the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/idea/download/previous.html#version150" download="true"/>
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/IDEADEV/IntelliJ+IDEA+2016.1.3+Release+Notes"/>
             </build>
         </channel>
-        <channel id="IDEA14.1" name="IntelliJ IDEA 14.1" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="14" licensing="release">
+        <channel id="IDEA14.1" name="IntelliJ IDEA 14.1" status="release" url="https://www.jetbrains.com/idea/download"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="14" licensing="release">
             <build number="141.3058" version="14.1.7" releaseDate="20150303">
                 <blogPost url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
                 <message><![CDATA[<p>IntelliJ IDEA 14.1.7, a security update, is now available.</p>
@@ -2339,7 +2386,8 @@
                 <button name="More Information" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="IDEA14.0" name="IntelliJ IDEA 14.0" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="14" licensing="release">
+        <channel id="IDEA14.0" name="IntelliJ IDEA 14.0" status="release" url="https://www.jetbrains.com/idea/download"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="14" licensing="release">
             <build number="139.1803" version="14.0.5" releaseDate="20141105">
                 <blogPost url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
                 <message><![CDATA[<p>IntelliJ IDEA 14.1.7, a security update, is now available.</p>
@@ -2348,7 +2396,8 @@
                 <button name="More Information" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="IDEA13.1" name="IntelliJ IDEA 13.1" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="13" licensing="release">
+        <channel id="IDEA13.1" name="IntelliJ IDEA 13.1" status="release" url="https://www.jetbrains.com/idea/download"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="13" licensing="release">
             <build number="135.1356" version="13.1.7" releaseDate="20140318">
                 <blogPost url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
                 <message><![CDATA[<p>IntelliJ IDEA 13.0.5, a security update, is now available.</p>
@@ -2357,7 +2406,8 @@
                 <button name="More Information" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="IDEA13" name="IntelliJ IDEA 13" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="13" licensing="release">
+        <channel id="IDEA13" name="IntelliJ IDEA 13" status="release" url="https://www.jetbrains.com/idea/download"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="13" licensing="release">
             <build number="133.1885" version="13.0.5" releaseDate="20131203">
                 <blogPost url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
                 <message><![CDATA[<p>IntelliJ IDEA 13.0.5, a security update, is now available.</p>
@@ -2367,7 +2417,8 @@
                 <patch from="133.1711" size="1"/>
             </build>
         </channel>
-        <channel id="IDEA12" name="IntelliJ IDEA 12" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="12" licensing="release">
+        <channel id="IDEA12" name="IntelliJ IDEA 12" status="release" url="https://www.jetbrains.com/idea/download"
+                 feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="12" licensing="release">
             <build number="129.1561" version="12.1.8" releaseDate="20130403">
                 <blogPost url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
                 <message><![CDATA[<p>IntelliJ IDEA 12.1.8, a security update, is now available.</p>
@@ -2380,7 +2431,8 @@
     </product>
     <product name="IntelliJ IDEA Edu">
         <code>IE</code>
-        <channel id="IE-RELEASE-licensing-RELEASE" name="IntelliJ IDEA Edu RELEASE" status="release" url="https://www.jetbrains.com/edu-products/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="IE-RELEASE-licensing-RELEASE" name="IntelliJ IDEA Edu RELEASE" status="release" url="https://www.jetbrains.com/edu-products/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.4746" version="2021.2" releaseDate="20210819" fullNumber="212.4746.137">
                 <blogPost url="https://blog.jetbrains.com/education/2021/08/19/edutools-plugin-2021-8-is-now-out/"/>
                 <message><![CDATA[<p><strong>Idea Edu 2021.2</strong> is now available.</p>
@@ -2686,7 +2738,8 @@
     </product>
     <product name="JetBrains DS">
         <code>PD</code>
-        <channel id="PD-EAP-licensing-EAP" name="JetBrains DS EAP" status="eap" url="https://www.jetbrains.com/pycharm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="PD-EAP-licensing-EAP" name="JetBrains DS EAP" status="eap" url="https://www.jetbrains.com/pycharm/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="213.2094" version="EAP 18" fullNumber="213.2094.9">
                 <message><![CDATA[<p><strong>JetBrains DataSpell EAP 18</strong> is now available.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/nextversion" download="true"/>
@@ -2713,16 +2766,21 @@
     </product>
     <product name="MPS">
         <code>MPS</code>
-        <channel id="MPS-EAP-licensing-EAP" name="MPS EAP" status="eap" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="MPS-EAP-licensing-EAP" name="MPS EAP" status="eap" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2-EAP2 EAP" fullNumber="212.4746.950">
-                <message><![CDATA[<p>If you want to learn more, please check our <a href="https://blog.jetbrains.com/mps/2021/08/try-the-mps-2021-2-eap-build/">blog post</a>.</p>]]></message>
+                <message>
+                    <![CDATA[<p>If you want to learn more, please check our <a href="https://blog.jetbrains.com/mps/2021/08/try-the-mps-2021-2-eap-build/">blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20%20project:%20MPS%20version:%20%7B2021.2%20EAP2%20(Beta)%7D&amp;_ga=2.191772527.415000799.1630397135-543588415.1611832557&amp;_gl=1*4gbb23*_ga*NTQzNTg4NDE1LjE2MTE4MzI1NTc.*_ga_0WQ2ZF5VGT*MTYzMDQwNjQ5My4xNS4xLjE2MzA0MDc0MzkuNTg."/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20%20project:%20MPS%20version:%20%7B2021.2%20EAP2%20(Beta)%7D&amp;_ga=2.191772527.415000799.1630397135-543588415.1611832557&amp;_gl=1*4gbb23*_ga*NTQzNTg4NDE1LjE2MTE4MzI1NTc.*_ga_0WQ2ZF5VGT*MTYzMDQwNjQ5My4xNS4xLjE2MzA0MDc0MzkuNTg."/>
             </build>
         </channel>
-        <channel id="MPS-RELEASE-licensing-RELEASE" name="MPS RELEASE" status="release" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="MPS-RELEASE-licensing-RELEASE" name="MPS RELEASE" status="release" url="https://www.jetbrains.com/mps/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="211.7628" version="2021.1.3" releaseDate="20210517" fullNumber="211.7628.1405">
-                <message><![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20%20project:%20MPS%20version:%202021.1.3">issue tracker</a>.</p>]]></message>
+                <message>
+                    <![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20%20project:%20MPS%20version:%202021.1.3">issue tracker</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download" download="true"/>
                 <button name="Release Notes" url="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20%20project:%20MPS%20version:%202021.1.3"/>
             </build>
@@ -2768,62 +2826,75 @@
 </ul>
 <p>If you want to learn more, please see the <a href="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2019.1.6&amp;title=Release%20Notes">blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20191" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2019.1.6&amp;title=Release%20Notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2019.1.6&amp;title=Release%20Notes"/>
             </build>
             <build number="183.1868" version="2018.3.7" releaseDate="20181204">
                 <message><![CDATA[JetBrains MPS 2018.3.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20183" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+%7B2018.3.7%7D+State%3A+Fixed&amp;title=MPS+2018.3.7+release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+%7B2018.3.7%7D+State%3A+Fixed&amp;title=MPS+2018.3.7+release+notes"/>
             </build>
             <build number="182.1603" version="2018.2.6" releaseDate="20180806">
                 <message><![CDATA[JetBrains MPS 2018.2.6 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20182" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2018.2.6%7D%20State:%20Fixed&amp;&amp;title=MPS+2018.2.6+release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2018.2.6%7D%20State:%20Fixed&amp;&amp;title=MPS+2018.2.6+release+notes"/>
             </build>
             <build number="181.1469" version="2018.1.5" releaseDate="20180405">
                 <message><![CDATA[JetBrains MPS 2018.1.5 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20181" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2018.1.5%7D%20State:%20Fixed&amp;&amp;title=MPS+2018.1.5+release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2018.1.5%7D%20State:%20Fixed&amp;&amp;title=MPS+2018.1.5+release+notes"/>
             </build>
             <build number="173.1812" version="2017.3.6" releaseDate="20171205">
                 <message><![CDATA[JetBrains MPS 2017.3.6 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20173" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2017.3.6%7D%20State:%20Fixed&amp;&amp;title=MPS+2017.3.6+release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2017.3.6%7D%20State:%20Fixed&amp;&amp;title=MPS+2017.3.6+release+notes"/>
             </build>
             <build number="172.1493" version="2017.2.3" releaseDate="20170804">
                 <message><![CDATA[JetBrains MPS 2017.2.3 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20172" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2017.2.3%7D%20State:%20Fixed&amp;&amp;title=MPS+2017.2.3+release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS%20Fix%20versions:%20%7B2017.2.3%7D%20State:%20Fixed&amp;&amp;title=MPS+2017.2.3+release+notes"/>
             </build>
             <build number="171.1448" version="2017.1.3" releaseDate="20170403">
                 <message><![CDATA[JetBrains MPS 2017.1.3 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20171" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+2017.1.3+++++State%3A+Fixed&amp;title=MPS+2017.1.3+Release+notes&amp;showDescription=false&amp;showComments=false"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+2017.1.3+++++State%3A+Fixed&amp;title=MPS+2017.1.3+Release+notes&amp;showDescription=false&amp;showComments=false"/>
             </build>
             <build number="162.2317" version="3.4.4" releaseDate="20160929">
                 <message><![CDATA[JetBrains MPS 3.4.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version34" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+3.4.4+State%3A+Fixed+&amp;title=MPS+3.4.4+Release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+3.4.4+State%3A+Fixed+&amp;title=MPS+3.4.4+Release+notes"/>
             </build>
         </channel>
-        <channel id="MPS33" name="MPS 3.3" status="release" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="MPS33" name="MPS 3.3" status="release" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="143.1301" version="3.3.5" releaseDate="20161223">
                 <message><![CDATA[JetBrains MPS 3.3.5 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version33" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+3.3+State%3A+Fixed+&amp;title=MPS+3.3+Release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+3.3+State%3A+Fixed+&amp;title=MPS+3.3+Release+notes"/>
             </build>
         </channel>
-        <channel id="MPS32" name="MPS 3.2" status="release" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="MPS32" name="MPS 3.2" status="release" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="139.2747" version="3.2.4" releaseDate="20150314">
                 <message><![CDATA[JetBrains MPS 3.2.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version32" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+3.2.4+State%3A+Fixed&amp;title=MPS+3.2.4+Release+notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+3.2.4+State%3A+Fixed&amp;title=MPS+3.2.4+Release+notes"/>
             </build>
         </channel>
     </product>
     <product name="PhpStorm">
         <code>PS</code>
-        <channel id="PS-EAP-licensing-RELEASE" name="PhpStorm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/phpstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="PS-EAP-licensing-RELEASE" name="PhpStorm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/phpstorm/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5284" version="2021.2.2 Preview" releaseDate="20210729" fullNumber="212.5284.22">
                 <blogPost url="https://blog.jetbrains.com/phpstorm/2021/09/phpstorm-2021-2-2-preview/"/>
                 <message><![CDATA[<h3>PhpStorm 2021.2.2 Preview</h3>
@@ -2870,7 +2941,8 @@
                 <patch from="211.6693" size="from 30 to 32" fullFrom="211.6693.25"/>
             </build>
         </channel>
-        <channel id="PS-RELEASE-licensing-RELEASE" name="PhpStorm RELEASE" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="PS-RELEASE-licensing-RELEASE" name="PhpStorm RELEASE" status="release" url="https://www.jetbrains.com/phpstorm/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210729" fullNumber="212.5080.71">
                 <blogPost url="https://blog.jetbrains.com/phpstorm/2021/08/phpstorm-2021-2-1-is-released/"/>
                 <message><![CDATA[<h3>PhpStorm 2021.2.1 is available</h3>
@@ -3262,7 +3334,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/phpstorm/2016/05/phpstorm-2016-1-2/"/>
             </build>
         </channel>
-        <channel id="PS-EAP-licensing-EAP" name="PhpStorm EAP" status="eap" url="https://www.jetbrains.com/phpstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="PS-EAP-licensing-EAP" name="PhpStorm EAP" status="eap" url="https://www.jetbrains.com/phpstorm/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 Beta" fullNumber="212.4746.20">
                 <patch from="212.4638" size="from 48 to 49" fullFrom="212.4638.20"/>
             </build>
@@ -3284,7 +3357,8 @@
                 <patch from="212.3724" size="from 50 to 51" fullFrom="212.3724.24"/>
             </build>
         </channel>
-        <channel id="WI10" name="PhpStorm 10" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="10" licensing="release">
+        <channel id="WI10" name="PhpStorm 10" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="10" licensing="release">
             <build number="143.2370" version="10.0.4" releaseDate="20151102">
                 <message><![CDATA[<p>PhpStorm 10.0.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -3292,7 +3366,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WI9" name="PhpStorm 9" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="9" licensing="release">
+        <channel id="WI9" name="PhpStorm 9" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="9" licensing="release">
             <build number="141.3058" version="9.0.3" releaseDate="20150709">
                 <message><![CDATA[<p>PhpStorm 9.0.3, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -3300,7 +3375,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WI8" name="PhpStorm 8" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="8" licensing="release">
+        <channel id="WI8" name="PhpStorm 8" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="8" licensing="release">
             <build number="139.1803" version="8.0.4" releaseDate="20140916">
                 <message><![CDATA[<p>PhpStorm 8.0.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -3308,7 +3384,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WI7" name="PhpStorm 7" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="7" licensing="release">
+        <channel id="WI7" name="PhpStorm 7" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="7" licensing="release">
             <build number="133.1886" version="7.1.5" releaseDate="20131217">
                 <message><![CDATA[<p>PhpStorm 7.1.5, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -3316,7 +3393,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WI6" name="PhpStorm 6" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="6" licensing="release">
+        <channel id="WI6" name="PhpStorm 6" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="6" licensing="release">
             <build number="129.1560" version="6.0.4" releaseDate="20130312">
                 <message><![CDATA[<p>PhpStorm 6.0.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
@@ -3330,7 +3408,8 @@
         <code>PCA</code>
         <code>PY</code>
         <code>PYA</code>
-        <channel id="PC-PY-EAP-licensing-RELEASE" name="PyCharm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/pycharm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="PC-PY-EAP-licensing-RELEASE" name="PyCharm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/pycharm/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5284" version="2021.2.2 RC" releaseDate="20210728" fullNumber="212.5284.18">
                 <message><![CDATA[<h1>PyCharm 2021.2.2 Release Candidate is out! </h1>
 <p>PyCharm 2021.2.2 Release Candidate is available with the following fixes:</p>
@@ -3394,7 +3473,8 @@
                 <patch from="201.8538" size="from 1 to 6" fullFrom="201.8538.36"/>
             </build>
         </channel>
-        <channel id="PC-PY-RELEASE-licensing-RELEASE" name="PyCharm RELEASE" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="PC-PY-RELEASE-licensing-RELEASE" name="PyCharm RELEASE" status="release" url="https://www.jetbrains.com/pycharm/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210728" fullNumber="212.5080.64">
                 <blogPost url="https://blog.jetbrains.com/pycharm/2021/08/2021-2-1/"/>
                 <message><![CDATA[<h1>PyCharm 2021.2.1 is out!</h1>
@@ -3751,7 +3831,8 @@
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version20161" download="true"/>
             </build>
         </channel>
-        <channel id="PC-PY-EAP-licensing-EAP" name="PyCharm EAP" status="eap" url="https://www.jetbrains.com/pycharm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="PC-PY-EAP-licensing-EAP" name="PyCharm EAP" status="eap" url="https://www.jetbrains.com/pycharm/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 EAP" fullNumber="212.4746.13">
                 <blogPost url="https://blog.jetbrains.com/pycharm/2021/07/2021-2-eap-4/"/>
                 <patch from="212.4535" size="from 99 to 134" fullFrom="212.4535.11"/>
@@ -3801,7 +3882,8 @@
                 <patch from="202.5103" size="from 10 to 35" fullFrom="202.5103.19"/>
             </build>
         </channel>
-        <channel id="pycharm5" name="PyCharm 5" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="5" licensing="release">
+        <channel id="pycharm5" name="PyCharm 5" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="5" licensing="release">
             <build number="143.2371" version="5.0.6" releaseDate="20151102">
                 <message><![CDATA[<p>PyCharm 5.0.6 is now available.</p>
 <p>In this update we've switched to a more modern API of the Python Package Index repository.</p>
@@ -3810,48 +3892,55 @@
                 <button name="Release Notes" url="https://confluence.jetbrains.com/display/PYH/PyCharm+143.2371.1+Release+Notes"/>
             </build>
         </channel>
-        <channel id="pycharm4" name="PyCharm 4" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="4" licensing="release">
+        <channel id="pycharm4" name="PyCharm 4" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="4" licensing="release">
             <build number="141.3058" version="4.5.5" releaseDate="20150515">
                 <message><![CDATA[<p>PyCharm 4.5.5, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version45" download="true"/>
             </build>
         </channel>
-        <channel id="pycharm40" name="PyCharm 4.0" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="4" licensing="release">
+        <channel id="pycharm40" name="PyCharm 4.0" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="4" licensing="release">
             <build number="139.1803" version="4.0.7" releaseDate="20141119">
                 <message><![CDATA[<p>PyCharm 4.0.7, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version40" download="true"/>
             </build>
         </channel>
-        <channel id="pycharm3.4" name="PyCharm 3.4" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="pycharm3.4" name="PyCharm 3.4" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="135.1357" version="3.4.4" releaseDate="20140530">
                 <message><![CDATA[<p>PyCharm 3.4.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version34" download="true"/>
             </build>
         </channel>
-        <channel id="pycharm3.1" name="PyCharm 3.1" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="pycharm3.1" name="PyCharm 3.1" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="133.1884" version="3.1.4" releaseDate="20140204">
                 <message><![CDATA[<p>PyCharm 3.1.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version31" download="true"/>
             </build>
         </channel>
-        <channel id="pycharm3.0" name="PyCharm 3.0" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
+        <channel id="pycharm3.0" name="PyCharm 3.0" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="3" licensing="release">
             <build number="131.849" version="3.0.3" releaseDate="20130925">
                 <message><![CDATA[<p>PyCharm 3.0.3, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> The update contains important security fixes and is strongly recommended for all users.<br> For more details please read <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">this blog post</a>.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version30" download="true"/>
             </build>
         </channel>
-        <channel id="pycharm2.7" name="PyCharm 2.7" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2" licensing="release">
+        <channel id="pycharm2.7" name="PyCharm 2.7" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="2" licensing="release">
             <build number="129.1566" version="2.7.4" releaseDate="20130207">
                 <message><![CDATA[JetBrains PyCharm 2.7.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version27" download="true"/>
             </build>
         </channel>
-        <channel id="pycharm10" name="PyCharm 1.0" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="1" licensing="release">
+        <channel id="pycharm10" name="PyCharm 1.0" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="1" licensing="release">
             <build number="107.756" version="1.5.4">
                 <message><![CDATA[JetBrains PyCharm 1.5.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/pycharm/download/previous.html#version15" download="true"/>
@@ -3860,7 +3949,8 @@
     </product>
     <product name="PyCharm Edu">
         <code>PE</code>
-        <channel id="PE-RELEASE-licensing-RELEASE" name="PyCharm Edu RELEASE" status="release" url="https://www.jetbrains.com/edu-products/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="PE-RELEASE-licensing-RELEASE" name="PyCharm Edu RELEASE" status="release" url="https://www.jetbrains.com/edu-products/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.4746" version="2021.2" releaseDate="20210819" fullNumber="212.4746.137">
                 <blogPost url="https://blog.jetbrains.com/education/2021/08/19/edutools-plugin-2021-8-is-now-out/"/>
                 <message><![CDATA[<p><strong>PyCharm Edu 2021.2</strong> is now available.</p>
@@ -4194,7 +4284,8 @@
                 <button name="Download" url="https://www.jetbrains.com/edu-products/download#version30" download="true"/>
             </build>
         </channel>
-        <channel id="pycharmEdu2" name="PyCharm Edu 2.0" status="release" url="https://www.jetbrains.com/edu-products/download" feedback="https://youtrack.jetbrains.com" majorVersion="2" licensing="release">
+        <channel id="pycharmEdu2" name="PyCharm Edu 2.0" status="release" url="https://www.jetbrains.com/edu-products/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2" licensing="release">
             <build number="143.237" version="2.0.4" releaseDate="20150928">
                 <message><![CDATA[JetBrains PyCharm Edu 2.0.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/edu-products/download#version20" download="true"/>
@@ -4203,7 +4294,8 @@
     </product>
     <product name="Rider">
         <code>RD</code>
-        <channel id="RD-RELEASE-licensing-RELEASE" name="Rider RELEASE" status="release" url="https://www.jetbrains.com/rider/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="RD-RELEASE-licensing-RELEASE" name="Rider RELEASE" status="release" url="https://www.jetbrains.com/rider/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210803" fullNumber="212.5080.71">
                 <message><![CDATA[<div style="max-width: 600px">
  <h3>Please welcome Rider 2021.2.1!</h3>
@@ -4431,7 +4523,8 @@
                 <button name="Download" url="https://www.jetbrains.com/rider/download/previous.html#version20171" download="true"/>
             </build>
         </channel>
-        <channel id="RD-EAP-licensing-EAP" name="Rider EAP" status="eap" url="https://www.jetbrains.com/rider/eap" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="RD-EAP-licensing-EAP" name="Rider EAP" status="eap" url="https://www.jetbrains.com/rider/eap" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2-EAP9 EAP" fullNumber="212.4746.97">
                 <patch from="212.4746" size="from 47 to 48" fullFrom="212.4746.59"/>
             </build>
@@ -4538,7 +4631,8 @@
     </product>
     <product name="Rider for Unreal Engine">
         <code>RDCPPP</code>
-        <channel id="RDCPPP-RELEASE-licensing-RELEASE" name="Rider for Unreal Engine RELEASE" status="release" url="https://www.jetbrains.com/lp/rider-unreal/" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="RDCPPP-RELEASE-licensing-RELEASE" name="Rider for Unreal Engine RELEASE" status="release" url="https://www.jetbrains.com/lp/rider-unreal/"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.4746" version="2021.2" releaseDate="20210811" fullNumber="212.4746.131">
                 <message><![CDATA[<p><strong>Rider for Unreal Engine Public Preview 2021.2 update</strong> is here!</p>
 <p>Rider for Unreal Engine 2021.2 brings all of the goodies delivered recently in <a href="https://www.jetbrains.com/rider/whatsnew/">Rider</a> and <a href="https://www.jetbrains.com/resharper-cpp/whatsnew/">ReSharper C++ 2021.2</a> releases:</p>
@@ -4674,7 +4768,8 @@
     </product>
     <product name="RubyMine">
         <code>RM</code>
-        <channel id="RM-EAP-licensing-RELEASE" name="RubyMine EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/ruby/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="RM-EAP-licensing-RELEASE" name="RubyMine EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/ruby/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5284" version="2021.2.2 Preview" releaseDate="20210727" fullNumber="212.5284.21">
                 <message><![CDATA[<h3>RubyMine 2021.2.2 Preview is now available!</h3>
 <p>Fixes and improvements:</p>
@@ -4684,7 +4779,8 @@
  <li>Fixed an issue related to RSpec matchers: <a href="https://youtrack.jetbrains.com/issue/RUBY-28230">RUBY-28230</a></li>
 </ul>]]></message>
                 <button name="Download" url="https://confluence.jetbrains.com/display/RUBYDEV/Early+Access+Program" download="true"/>
-                <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220364874/RubyMine-2021.2.2-Preview-(212.5284.21-build)-Release-Notes"/>
+                <button name="Release Notes"
+                        url="https://youtrack.jetbrains.com/articles/RUBY-A-220364874/RubyMine-2021.2.2-Preview-(212.5284.21-build)-Release-Notes"/>
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
                 <patch from="212.5080" size="from 47 to 52" fullFrom="212.5080.58"/>
             </build>
@@ -4800,7 +4896,8 @@
                 <patch from="193.6015" size="from 22 to 23" fullFrom="193.6015.43"/>
             </build>
         </channel>
-        <channel id="RM-RELEASE-licensing-RELEASE" name="RubyMine RELEASE" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="RM-RELEASE-licensing-RELEASE" name="RubyMine RELEASE" status="release" url="https://www.jetbrains.com/ruby/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210727" fullNumber="212.5080.58">
                 <blogPost url="https://blog.jetbrains.com/ruby/2021/08/rubymine-2021-2-1-is-available/"/>
                 <message><![CDATA[<h3>RubyMine 2021.2.1 is available!</h3>
@@ -4913,7 +5010,8 @@
  <li>Fixed a couple of issues causing IDE crashes: <a href="https://youtrack.jetbrains.com/issue/JBR-2746">JBR-2746</a>, <a href="https://youtrack.jetbrains.com/issue/JBR-2562">JBR-2562</a></li>
 </ul>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/ruby/download/previous.html#version20202" download="true"/>
-                <button name="Release Notes" url="https://confluence.jetbrains.com/display/RUBYDEV/RubyMine+2020.2#RubyMine2020.2-RubyMine2020.2.4(202.8194.9build)ReleaseNotes"/>
+                <button name="Release Notes"
+                        url="https://confluence.jetbrains.com/display/RUBYDEV/RubyMine+2020.2#RubyMine2020.2-RubyMine2020.2.4(202.8194.9build)ReleaseNotes"/>
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
                 <patch from="202.7660" size="from 20 to 21" fullFrom="202.7660.39"/>
                 <patch from="201.8743" size="from 168 to 171" fullFrom="201.8743.13"/>
@@ -5167,7 +5265,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="RM-EAP-licensing-EAP" name="RubyMine EAP" status="eap" url="https://www.jetbrains.com/ruby/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="RM-EAP-licensing-EAP" name="RubyMine EAP" status="eap" url="https://www.jetbrains.com/ruby/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 RC" fullNumber="212.4746.79">
                 <patch from="212.4746" size="from 42 to 43" fullFrom="212.4746.3"/>
             </build>
@@ -5328,7 +5427,8 @@
                 <patch from="201.3803" size="from 26 to 28" fullFrom="201.3803.68"/>
             </build>
         </channel>
-        <channel id="rm8" name="RubyMine 8 Release" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="8" licensing="release">
+        <channel id="rm8" name="RubyMine 8 Release" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="8" licensing="release">
             <build number="143.2370" version="8.0.4" releaseDate="20151102" fullNumber="143.2370.43">
                 <message><![CDATA[JetBrains RubyMine 8.0.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/ruby/download/previous.html#version80" download="true"/>
@@ -5336,7 +5436,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm71" name="RubyMine 7.1" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="7" licensing="release">
+        <channel id="rm71" name="RubyMine 7.1" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="7" licensing="release">
             <build number="141.3058" version="7.1.5" releaseDate="20150415" fullNumber="141.3058.29">
                 <message><![CDATA[JetBrains RubyMine 7.1.5 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/ruby/download/previous.html#version71" download="true"/>
@@ -5344,7 +5445,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm70" name="RubyMine 7.0" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="7" licensing="release">
+        <channel id="rm70" name="RubyMine 7.0" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="7" licensing="release">
             <build number="139.1803" version="7.0.5" releaseDate="20141112" fullNumber="139.1803.18">
                 <message><![CDATA[JetBrains RubyMine 7.0.5 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/ruby/download/previous.html#version70" download="true"/>
@@ -5352,7 +5454,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm63" name="RubyMine 6.3" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="6" licensing="release">
+        <channel id="rm63" name="RubyMine 6.3" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="6" licensing="release">
             <build number="135.1355" version="6.3.4" releaseDate="20140403">
                 <message><![CDATA[<p>RubyMine 6.3.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5361,7 +5464,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm60" name="RubyMine 6.0" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="6" licensing="release">
+        <channel id="rm60" name="RubyMine 6.0" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="6" licensing="release">
             <build number="133.1883" version="6.0.4" releaseDate="20131126">
                 <message><![CDATA[<p>RubyMine 6.0.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5370,7 +5474,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm54" name="RubyMine 5.4" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="5" licensing="release">
+        <channel id="rm54" name="RubyMine 5.4" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="5" licensing="release">
             <build number="129.1565" version="5.4.4" releaseDate="20130410">
                 <message><![CDATA[<p>RubyMine 5.4.4, a security update, is now available.</p>
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5379,7 +5484,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm50" name="RubyMine 5.0" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="5" licensing="release">
+        <channel id="rm50" name="RubyMine 5.0" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="5" licensing="release">
             <build number="125.94" version="5.0.2" releaseDate="20130206">
                 <message><![CDATA[RubyMine 5.0.2 is available]]></message>
                 <button name="Download" url="https://www.jetbrains.com/ruby/download/previous.html#version50" download="true"/>
@@ -5387,7 +5493,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm45" name="RubyMine 4.5" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="4" licensing="release">
+        <channel id="rm45" name="RubyMine 4.5" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="4" licensing="release">
             <build number="119.71" version="4.5.4" releaseDate="20120717">
                 <message><![CDATA[RubyMine 4.5.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/ruby/download/previous.html#version45" download="true"/>
@@ -5395,7 +5502,8 @@
                 <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
             </build>
         </channel>
-        <channel id="rm20" name="RubyMine 2" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="4" licensing="release">
+        <channel id="rm20" name="RubyMine 2" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="4" licensing="release">
             <build number="117.230" version="4.0.3" releaseDate="20120215">
                 <message><![CDATA[RubyMine 4.0.3 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/ruby/download/previous.html#version40" download="true"/>
@@ -5406,7 +5514,8 @@
     </product>
     <product name="WebStorm">
         <code>WS</code>
-        <channel id="WS-EAP-licensing-RELEASE" name="WebStorm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/webstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="WS-EAP-licensing-RELEASE" name="WebStorm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/webstorm/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5284" version="2021.2.2 RC" releaseDate="20210726" fullNumber="212.5284.34">
                 <message><![CDATA[<p><b>WebStorm 2021.2.2 Release Candidate</b> is now available!</p>
 <p>What's fixed:</p>
@@ -5443,7 +5552,8 @@
                 <patch from="211.6693" size="from 22 to 23" fullFrom="211.6693.17"/>
             </build>
         </channel>
-        <channel id="WS-RELEASE-licensing-RELEASE" name="WebStorm RELEASE" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
+        <channel id="WS-RELEASE-licensing-RELEASE" name="WebStorm RELEASE" status="release" url="https://www.jetbrains.com/webstorm/download"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="release">
             <build number="212.5080" version="2021.2.1" releaseDate="20210726" fullNumber="212.5080.54">
                 <blogPost url="https://www.jetbrains.com/webstorm/whatsnew/"/>
                 <message><![CDATA[<p><b>WebStorm 2021.2.1</b> is now available!</p>
@@ -5773,27 +5883,32 @@
                 <patch from="182.5107" size="from 7 to 8" fullFrom="182.5107.43"/>
             </build>
             <build number="181.5540" version="2018.1.7" releaseDate="20180326" fullNumber="181.5540.36">
-                <message><![CDATA[<p><strong>WebStorm 2018.1.7</strong> fixes the freeze after typing the accented characters<br> using the popup on macOS Mojave (<a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>).</p>]]></message>
+                <message>
+                    <![CDATA[<p><strong>WebStorm 2018.1.7</strong> fixes the freeze after typing the accented characters<br> using the popup on macOS Mojave (<a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>).</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version20181" download="true"/>
                 <patch from="181.5540" size="from 24 to 38" fullFrom="181.5540.11"/>
             </build>
             <build number="173.4674" version="2017.3.6" releaseDate="20171128" fullNumber="173.4674.64">
-                <message><![CDATA[<p><strong>WebStorm 2017.3.6</strong> fixes the freeze after typing the accented characters<br> using the popup on macOS Mojave (<a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>).</p>]]></message>
+                <message>
+                    <![CDATA[<p><strong>WebStorm 2017.3.6</strong> fixes the freeze after typing the accented characters<br> using the popup on macOS Mojave (<a href="https://youtrack.jetbrains.com/issue/JRE-998">JRE-998</a>).</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version20173" download="true"/>
                 <patch from="173.4674" size="from 23 to 37" fullFrom="173.4674.32"/>
             </build>
             <build number="172.4574" version="2017.2.6" releaseDate="20170717" fullNumber="172.4574.25">
-                <message><![CDATA[<p>This update brings an important fix to the built-in SSH client to make it compatible with <br> the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>This update brings an important fix to the built-in SSH client to make it compatible with <br> the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version20172" download="true"/>
                 <patch from="172.4343" size="from 5 to 7" fullFrom="172.4343.25"/>
             </build>
             <build number="171.4694" version="2017.1.5" releaseDate="20170320" fullNumber="171.4694.80">
-                <message><![CDATA[<p>This update brings an important fix to the built-in SSH client to make it compatible with <br> the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>This update brings an important fix to the built-in SSH client to make it compatible with <br> the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version20171" download="true"/>
                 <patch from="171.4694" size="from 4 to 5" fullFrom="171.4694.29"/>
             </build>
             <build number="163.15529" version="2016.3.7" releaseDate="20161114" fullNumber="163.15529.11">
-                <message><![CDATA[<p>This update brings an important fix to the built-in SSH client to make it compatible with <br> the new GitHub cryptographic standards.</p>]]></message>
+                <message>
+                    <![CDATA[<p>This update brings an important fix to the built-in SSH client to make it compatible with <br> the new GitHub cryptographic standards.</p>]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version20163" download="true"/>
                 <patch from="163.15188" size="from 3 to 5" fullFrom="163.15188.15"/>
             </build>
@@ -5814,7 +5929,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WS-EAP-licensing-EAP" name="WebStorm EAP" status="eap" url="https://www.jetbrains.com/webstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
+        <channel id="WS-EAP-licensing-EAP" name="WebStorm EAP" status="eap" url="https://www.jetbrains.com/webstorm/nextversion"
+                 feedback="https://youtrack.jetbrains.com" majorVersion="2021" licensing="eap">
             <build number="212.4746" version="2021.2 Beta" fullNumber="212.4746.3">
                 <blogPost url="https://blog.jetbrains.com/webstorm/2021/07/webstorm-2021-2-beta-2/"/>
                 <patch from="212.4638" size="from 44 to 45" fullFrom="212.4638.10"/>
@@ -5874,7 +5990,8 @@
                 <patch from="211.4961" size="from 33 to 34" fullFrom="211.4961.31"/>
             </build>
         </channel>
-        <channel id="WS11" name="WebStorm 11" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="11" licensing="release">
+        <channel id="WS11" name="WebStorm 11" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="11" licensing="release">
             <build number="143.2370" version="11.0.4" releaseDate="20151102">
                 <message><![CDATA[WebStorm 11.0.4, a security update, is now available.
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5882,7 +5999,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WS10" name="WebStorm 10" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="10" licensing="release">
+        <channel id="WS10" name="WebStorm 10" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="10" licensing="release">
             <build number="141.3058" version="10.0.5" releaseDate="20150331">
                 <message><![CDATA[WebStorm 10.0.5, a security update, is now available.
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5890,7 +6008,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WS9" name="WebStorm 9" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="9" licensing="release">
+        <channel id="WS9" name="WebStorm 9" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="9" licensing="release">
             <build number="139.1803" version="9.0.4" releaseDate="20141022">
                 <message><![CDATA[WebStorm 9.0.4, a security update, is now available.
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5898,7 +6017,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WS8" name="WebStorm 8" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="8" licensing="release">
+        <channel id="WS8" name="WebStorm 8" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="8" licensing="release">
             <build number="135.1358" version="8.0.6" releaseDate="20140326">
                 <message><![CDATA[WebStorm 8.0.6, a security update, is now available.
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5906,7 +6026,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WS7" name="WebStorm 7" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="7" licensing="release">
+        <channel id="WS7" name="WebStorm 7" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="7" licensing="release">
             <build number="133.1882" version="7.0.5" releaseDate="20130926">
                 <message><![CDATA[WebStorm 7.0.5, a security update, is now available.
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5914,7 +6035,8 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WS6" name="WebStorm 6" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="6" licensing="release">
+        <channel id="WS6" name="WebStorm 6" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="6" licensing="release">
             <build number="129.1557" version="6.0.3" releaseDate="20130306">
                 <message><![CDATA[WebStorm 6.0.3, a security update, is now available.
 <p><b>IMPORTANT:</b> This free update contains important security fixes and is strongly recommended for all users.<br> For more details please read this <a href="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides">blog post</a>.</p>]]></message>
@@ -5922,27 +6044,31 @@
                 <button name="Release Notes" url="https://blog.jetbrains.com/blog/2016/05/security-update-for-intellij-based-ides"/>
             </build>
         </channel>
-        <channel id="WI5" name="WebStorm 5" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="5" licensing="release">
+        <channel id="WI5" name="WebStorm 5" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="5" licensing="release">
             <build number="121.390" version="5.0.4" releaseDate="20120906">
                 <message><![CDATA[JetBrains WebStorm 5.0.4 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version50" download="true"/>
                 <button name="Release Notes" url="https://blog.jetbrains.com/phpstorm/2012/11/phpstorm-webstorm-5-0-4-released"/>
             </build>
         </channel>
-        <channel id="WI3" name="WebStorm 3" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="4" licensing="release">
+        <channel id="WI3" name="WebStorm 3" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="4" licensing="release">
             <build number="117.746" version="4.0.3" releaseDate="20120417">
                 <message><![CDATA[JetBrains WebStorm 4.0.3 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version40" download="true"/>
                 <button name="Release Notes" url="https://blog.jetbrains.com/webide/2012/07/phpstorm-webstorm-4-0-3/"/>
             </build>
         </channel>
-        <channel id="WI2" name="WebStorm 2" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2" licensing="release">
+        <channel id="WI2" name="WebStorm 2" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="2" licensing="release">
             <build number="107.658" version="2.1.5">
                 <message><![CDATA[JetBrains WebStorm 2.1.5 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version21" download="true"/>
             </build>
         </channel>
-        <channel id="WI1" name="WebStorm 1" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="1" licensing="release">
+        <channel id="WI1" name="WebStorm 1" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com"
+                 majorVersion="1" licensing="release">
             <build number="95.503" version="1.0.2">
                 <message><![CDATA[JetBrains WebStorm 1.0.2 is available.]]></message>
                 <button name="Download" url="https://www.jetbrains.com/webstorm/download/previous.html#version10" download="true"/>

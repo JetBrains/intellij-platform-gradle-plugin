@@ -6,27 +6,19 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.ConventionTask
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 import org.jetbrains.intellij.utils.ToolboxEnterprisePluginRepositoryService
-import javax.inject.Inject
 
-open class PublishPluginTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : ConventionTask() {
+abstract class PublishPluginTask : DefaultTask() {
 
     /**
      * Jar or Zip file of plugin to upload.
@@ -35,7 +27,7 @@ open class PublishPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:Optional
-    val distributionFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val distributionFile: RegularFileProperty
 
     /**
      * URL host of a plugin repository.
@@ -44,7 +36,7 @@ open class PublishPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val host = objectFactory.property<String>()
+    abstract val host: Property<String>
 
     /**
      * Required.
@@ -52,7 +44,7 @@ open class PublishPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val token = objectFactory.property<String>()
+    abstract val token: Property<String>
 
     /**
      * List of channel names to upload plugin to.
@@ -61,7 +53,7 @@ open class PublishPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val channels = objectFactory.listProperty<String>()
+    abstract val channels: ListProperty<String>
 
     /**
      * Specifies if the Toolbox Enterprise plugin repository service should be used.
@@ -70,7 +62,7 @@ open class PublishPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val toolboxEnterprise = objectFactory.property<Boolean>()
+    abstract val toolboxEnterprise: Property<Boolean>
 
     private val context = logCategory()
 
@@ -96,6 +88,7 @@ open class PublishPluginTask @Inject constructor(
                                 "Automation",
                                 ToolboxEnterprisePluginRepositoryService::class.java,
                             )
+
                             false -> PluginRepositoryFactory.create(host.get(), token.get())
                         }
                         repositoryClient.uploader.upload(pluginId as StringPluginId, file, channel.takeIf { it != "default" }, null)

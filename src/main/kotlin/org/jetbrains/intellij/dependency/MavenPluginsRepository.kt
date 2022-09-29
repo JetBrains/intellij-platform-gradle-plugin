@@ -6,6 +6,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.mavenRepository
@@ -17,7 +18,7 @@ interface MavenRepository : PluginsRepository {
 
     fun getPluginFile(project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String, context: String?): File? =
         runCatching {
-            project.objects.newInstance(DependenciesDownloader::class.java)
+            project.objects.newInstance<DependenciesDownloader>()
                 .downloadFromRepository(context, { dependency }, { repository })
                 .first().also {
                     resolvedDependency = true

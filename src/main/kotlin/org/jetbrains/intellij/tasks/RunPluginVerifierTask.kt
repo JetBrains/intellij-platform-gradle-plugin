@@ -9,32 +9,21 @@ import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.SkipWhenEmpty
-import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.error
-import org.jetbrains.intellij.ifFalse
-import org.jetbrains.intellij.info
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.LatestVersionResolver
@@ -43,9 +32,8 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.nio.file.Path
 import java.nio.file.Paths
-import java.util.EnumSet
+import java.util.*
 import javax.inject.Inject
 
 abstract class RunPluginVerifierTask @Inject constructor(
@@ -69,7 +57,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
      */
     @get:Input
-    val failureLevel = objectFactory.listProperty<FailureLevel>()
+    abstract val failureLevel: ListProperty<FailureLevel>
 
     /**
      * A fallback file with a list of the releases generated with [ListProductsReleasesTask].
@@ -77,7 +65,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val productsReleasesFile = objectFactory.property<File>()
+    abstract val productsReleasesFile: Property<File>
 
     /**
      * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
@@ -87,21 +75,21 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val ideVersions = objectFactory.listProperty<String>()
+    abstract val ideVersions: ListProperty<String>
 
     /**
      * List of the paths to the specified IDE versions in [ideVersions] used for the verification.
      * By default, it resolves paths to the downloaded [ideVersions] IDEs.
      */
     @get:Input
-    val ides = objectFactory.listProperty<File>()
+    abstract val ides: ListProperty<File>
 
     /**
      * A list of the paths to locally installed IDE distributions that should be used for verification
      * in addition to those specified in [ideVersions].
      */
     @get:Input
-    val localPaths = objectFactory.listProperty<File>()
+    abstract val localPaths: ListProperty<File>
 
     /**
      * Returns the version of the IntelliJ Plugin Verifier that will be used.
@@ -110,7 +98,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val verifierVersion = objectFactory.property<String>()
+    abstract val verifierVersion: Property<String>
 
     /**
      * Local path to the IntelliJ Plugin Verifier that will be used.
@@ -120,7 +108,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val verifierPath = objectFactory.property<String>()
+    abstract val verifierPath: Property<String>
 
     /**
      * JAR or ZIP file of the plugin to verify.
@@ -130,7 +118,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:InputFile
     @get:SkipWhenEmpty
-    val distributionFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val distributionFile: RegularFileProperty
 
     /**
      * The path to the directory where verification reports will be saved.
@@ -139,17 +127,17 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:OutputDirectory
     @get:Optional
-    val verificationReportsDir = objectFactory.property<String>()
+    abstract val verificationReportsDir: Property<String>
 
     /**
      * The path to the directory where IDEs used for the verification will be downloaded.
      *
-     * Default value: `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides`
-     * or system temporary directory.
+     * Default value: `System.getProperty("plugin.verifier.home.dir")/ides`, `System.getenv("XDG_CACHE_HOME")/pluginVerifier/ides`,
+     * `System.getProperty("user.home")/.cache/pluginVerifier/ides` or system temporary directory.
      */
     @get:Input
     @get:Optional
-    val downloadDir = objectFactory.property<String>()
+    abstract val downloadDir: Property<String>
 
     /**
      * Custom JBR version to use for running the IDE.
@@ -163,7 +151,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val jbrVersion = objectFactory.property<String>()
+    abstract val jbrVersion: Property<String>
 
     /**
      * JetBrains Runtime variant to use when running the IDE with the plugin.
@@ -190,21 +178,21 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val jbrVariant = objectFactory.property<String>()
+    abstract val jbrVariant: Property<String>
 
     /**
      * URL of repository for downloading JetBrains Runtime.
      */
     @get:Input
     @get:Optional
-    val jreRepository = objectFactory.property<String>()
+    abstract val jreRepository: Property<String>
 
     /**
      * The path to directory containing JVM runtime, overrides [jbrVersion].
      */
     @get:Input
     @get:Optional
-    val runtimeDir = objectFactory.property<String>()
+    abstract val runtimeDir: Property<String>
 
     /**
      * The list of classes prefixes from the external libraries.
@@ -212,7 +200,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val externalPrefixes = objectFactory.listProperty<String>()
+    abstract val externalPrefixes: ListProperty<String>
 
     /**
      * A flag that controls the output format - if set to `true`, the TeamCity compatible output
@@ -222,7 +210,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val teamCityOutputFormat = objectFactory.property<Boolean>()
+    abstract val teamCityOutputFormat: Property<Boolean>
 
     /**
      * Specifies which subsystems of IDE should be checked.
@@ -236,15 +224,13 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val subsystemsToCheck = objectFactory.property<String>()
+    abstract val subsystemsToCheck: Property<String>
 
     @get:Internal
-    val ideDir = objectFactory.property<File>()
+    abstract val ideDir: Property<File>
 
     @get:Internal
-    val offline = objectFactory.property<Boolean>()
-
-    private val archiveUtils = objectFactory.newInstance(ArchiveUtils::class.java)
+    abstract val offline: Property<Boolean>
 
     private val context = logCategory()
 
@@ -288,7 +274,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
                     debug(context, "Failing task on '$failureLevel' failure level")
                     throw GradleException(
                         "$level: ${level.message} Check Plugin Verifier report for more details.\n" +
-                            "Incompatible API Changes: https://jb.gg/intellij-api-changes"
+                                "Incompatible API Changes: https://jb.gg/intellij-api-changes"
                     )
                 }
             }
@@ -298,8 +284,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Resolves the path to the IntelliJ Plugin Verifier file.
      * At first, checks if it was provided with [verifierPath].
-     * Fetches IntelliJ Plugin Verifier artifact from the [IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY]
-     * repository and resolves the path to `verifier-cli` jar file.
+     * Fetches IntelliJ Plugin Verifier artifact from the [PLUGIN_VERIFIER_REPOSITORY] repository and resolves the path to `verifier-cli` jar file.
      *
      * @return path to `verifier-cli` jar
      */
@@ -325,9 +310,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @return path to the Java Runtime directory
      */
     private fun resolveRuntimeDir(): String {
-        val dependenciesDownloader = objectFactory.newInstance(DependenciesDownloader::class.java)
-        val jbrResolver = objectFactory.newInstance(
-            JbrResolver::class.java,
+        val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
+        val dependenciesDownloader = objectFactory.newInstance<DependenciesDownloader>()
+        val jbrResolver = objectFactory.newInstance<JbrResolver>(
             jreRepository.orNull.orEmpty(),
             offline.get(),
             archiveUtils,
@@ -342,10 +327,12 @@ abstract class RunPluginVerifierTask @Inject constructor(
             ideDir = ideDir.orNull,
         ) {
             validateRuntimeDir(it)
-        } ?: throw InvalidUserDataException(when {
-            requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
-            else -> "Java Runtime directory couldn't be resolved"
-        })
+        } ?: throw InvalidUserDataException(
+            when {
+                requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
+                else -> "Java Runtime directory couldn't be resolved"
+            }
+        )
     }
 
     /**
@@ -413,24 +400,15 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return Plugin Verifier home directory
      */
-    private fun verifierHomeDir(): Provider<Path> {
-        return providers.systemProperty("plugin.verifier.home.dir")
-            .orElse(
-                providers.environmentVariable("XDG_CACHE_HOME").map { "$it/pluginVerifier" }
-            )
-            .orElse(
-                providers.systemProperty("user.home").map { "$it/.cache/pluginVerifier" }
-            ).map {
-                Paths.get(it)
-            }.orElse(
-                temporaryDir.resolve("pluginVerifier").toPath()
-            )
-    }
+    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir")
+        .orElse(providers.environmentVariable("XDG_CACHE_HOME").map { "$it/pluginVerifier" })
+        .orElse(providers.systemProperty("user.home").map { "$it/.cache/pluginVerifier" })
+        .map { Paths.get(it) }
+        .orElse(temporaryDir.resolve("pluginVerifier").toPath())
 
     /**
      * Resolves the Plugin Verifier version.
-     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [METADATA_URL]
-     * performed for the latest available version.
+     * If set to [VERSION_LATEST], there's request to [METADATA_URL] performed for the latest available version.
      *
      * @return Plugin Verifier version
      */
@@ -552,8 +530,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return directory for downloaded IDEs
      */
-    internal fun ideDownloadDir(): Provider<Path> =
-        verifierHomeDir().map { it.resolve("ides").createDir() }
+    internal fun ideDownloadDir() = verifierHomeDir().map { it.resolve("ides").createDir() }
 
     enum class FailureLevel(val sectionHeading: String, val message: String) {
         COMPATIBILITY_WARNINGS(

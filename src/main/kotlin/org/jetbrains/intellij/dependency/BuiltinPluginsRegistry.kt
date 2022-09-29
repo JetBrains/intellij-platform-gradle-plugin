@@ -18,15 +18,14 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     companion object {
         const val version = 1
 
-        fun fromDirectory(pluginsDirectory: File, context: String?) =
-            BuiltinPluginsRegistry(pluginsDirectory, context).apply {
-                val extractor = XmlExtractor<PluginsCache>(context)
-                if (!fillFromCache(extractor)) {
-                    debug(context, "Builtin registry cache is missing")
-                    fillFromDirectory()
-                    dumpToCache(extractor)
-                }
+        fun fromDirectory(pluginsDirectory: File, context: String?) = BuiltinPluginsRegistry(pluginsDirectory, context).apply {
+            val extractor = XmlExtractor<PluginsCache>(context)
+            if (!fillFromCache(extractor)) {
+                debug(context, "Builtin registry cache is missing")
+                fillFromDirectory()
+                dumpToCache(extractor)
             }
+        }
     }
 
     private fun fillFromCache(extractor: XmlExtractor<PluginsCache>): Boolean {
@@ -47,9 +46,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
 
     private fun fillFromDirectory() {
         pluginsDirectory.listFiles()?.apply {
-            asSequence()
-                .filter { it.isDirectory }
-                .forEach { add(it) }
+            asSequence().filter { it.isDirectory }.forEach(::add)
         }
         debug(context, "Builtin registry populated with ${plugins.size} plugins")
     }

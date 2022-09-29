@@ -2,54 +2,60 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertTrue
 
+@Suppress("ComplexRedundantLet")
 class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
     override fun setUp() {
         super.setUp()
 
-        pluginXml.xml("""
+        pluginXml.xml(
+            """
             <idea-plugin>
                 <name>PluginName</name>
                 <version>0.0.1</version>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-        """)
+            """
+        )
     }
 
     @Test
     fun `skip publishing if token is missing`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             publishPlugin { }
             verifyPlugin {
                 ignoreFailures = true
             }
-        """)
+            """
+        )
 
-        val result = buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME)
-
-        assertTrue(result.output.contains("token property must be specified for plugin publishing"))
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
+            assertContains("token property must be specified for plugin publishing", it.output)
+        }
     }
 
     @Test
     fun `reuse configuration cache`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             publishPlugin { }
             verifyPlugin {
                 ignoreFailures = true
             }
-        """)
+            """
+        )
 
-        buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
-        val result = buildAndFail(IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }

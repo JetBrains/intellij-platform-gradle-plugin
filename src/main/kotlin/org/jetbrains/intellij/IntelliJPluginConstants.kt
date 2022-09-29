@@ -3,9 +3,9 @@
 package org.jetbrains.intellij
 
 object IntelliJPluginConstants {
-    const val NAME = "Gradle IntelliJ Plugin"
-    const val ID = "org.jetbrains.intellij"
-    const val GROUP_NAME = "intellij"
+    const val PLUGIN_NAME = "Gradle IntelliJ Plugin"
+    const val PLUGIN_ID = "org.jetbrains.intellij"
+    const val PLUGIN_GROUP_NAME = "intellij"
     const val EXTENSION_NAME = "intellij"
     const val DEFAULT_SANDBOX = "idea-sandbox"
 
@@ -46,6 +46,7 @@ object IntelliJPluginConstants {
 
     const val ANNOTATIONS_DEPENDENCY_VERSION = "23.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
+    const val MINIMAL_SUPPORTED_GRADLE_VERSION = "6.8"
 
     const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"
     const val RELEASE_SUFFIX_EAP_CANDIDATE = "-EAP-CANDIDATE-SNAPSHOT"
@@ -64,8 +65,7 @@ object IntelliJPluginConstants {
     const val DEFAULT_INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository"
     const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "$CACHE_REDIRECTOR/plugins.jetbrains.com/maven"
     const val DEFAULT_JBR_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
-    const val PLUGIN_VERIFIER_REPOSITORY =
-        "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
+    const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
     const val JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA =
         "$DEFAULT_INTELLIJ_REPOSITORY/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml"
     const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"

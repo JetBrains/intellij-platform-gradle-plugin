@@ -3,27 +3,23 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.util.TeeOutputStream
+import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.ConventionTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
-import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
-import javax.inject.Inject
 
-open class ListProductsReleasesTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : ConventionTask() {
+abstract class ListProductsReleasesTask : DefaultTask() {
 
     /**
      * Path to the products releases update file. By default, falls back to the Maven cache.
@@ -32,7 +28,7 @@ open class ListProductsReleasesTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val updatePaths = objectFactory.listProperty<String>()
+    abstract val updatePaths: ListProperty<String>
 
     /**
      * For Android Studio releases, a separated storage for the updates is used.
@@ -41,7 +37,7 @@ open class ListProductsReleasesTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val androidStudioUpdatePath = objectFactory.property<String>()
+    abstract val androidStudioUpdatePath: Property<String>
 
     /**
      * Path to the file, where the output list will be stored.
@@ -49,11 +45,11 @@ open class ListProductsReleasesTask @Inject constructor(
      * Default value: `File("${project.buildDir}/listProductsReleases.txt")`
      */
     @get:OutputFile
-    val outputFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val outputFile: RegularFileProperty
 
     @get:Input
     @get:Optional
-    val types = objectFactory.listProperty<String>()
+    abstract val types: ListProperty<String>
 
     /**
      * Lower boundary of the listed results in marketing product version format, like `2020.2.1`.
@@ -63,7 +59,7 @@ open class ListProductsReleasesTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val sinceVersion = objectFactory.property<String>()
+    abstract val sinceVersion: Property<String>
 
     /**
      * Upper boundary of the listed results in product marketing version format, like `2020.2.1`.
@@ -73,7 +69,7 @@ open class ListProductsReleasesTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val untilVersion = objectFactory.property<String>()
+    abstract val untilVersion: Property<String>
 
     /**
      * Lower boundary of the listed results in build number format, like `192`.
@@ -82,7 +78,7 @@ open class ListProductsReleasesTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val sinceBuild = objectFactory.property<String>()
+    abstract val sinceBuild: Property<String>
 
     /**
      * Upper boundary of the listed results in build number format, like `192`.
@@ -91,7 +87,7 @@ open class ListProductsReleasesTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val untilBuild = objectFactory.property<String>()
+    abstract val untilBuild: Property<String>
 
     /**
      * Channels that product updates will be filtered with.
@@ -100,7 +96,7 @@ open class ListProductsReleasesTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val releaseChannels = objectFactory.setProperty<Channel>()
+    abstract val releaseChannels: SetProperty<Channel>
 
     private val context = logCategory()
 
@@ -168,7 +164,7 @@ open class ListProductsReleasesTask @Inject constructor(
                         it.version.split('.').last().toInt()
                     }
                 }
-                .map { "AI-${it.version}" }
+                .map { "$PLATFORM_TYPE_ANDROID_STUDIO-${it.version}" }
                 .toList()
 
             false -> emptyList()

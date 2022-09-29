@@ -3,20 +3,15 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.util.TeeOutputStream
+import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.internal.ConventionTask
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.SkipWhenEmpty
-import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.property
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
@@ -25,10 +20,10 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 
-open class SignPluginTask @Inject constructor(
+abstract class SignPluginTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
-) : ConventionTask() {
+) : DefaultTask() {
 
     companion object {
         private const val MARKETPLACE_ZIP_SIGNER_URL = "https://github.com/JetBrains/marketplace-zip-signer"
@@ -48,25 +43,25 @@ open class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:SkipWhenEmpty
-    val inputArchiveFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val inputArchiveFile: RegularFileProperty
 
     /**
      * Output, signed ZIP archive file.
      * Refers to `out` CLI option.
-     * 
+     *
      * Predefined with the name of the ZIP archive file with `-signed` name suffix attached.
      */
     @get:OutputFile
-    val outputArchiveFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val outputArchiveFile: RegularFileProperty
 
     /**
      * Returns the version of the Marketplace ZIP Signer CLI that will be used.
-     * 
+     *
      * Default value: `LATEST`
      */
     @get:Input
     @get:Optional
-    val cliVersion = objectFactory.property<String>()
+    abstract val cliVersion: Property<String>
 
     /**
      * Local path to the Marketplace ZIP Signer CLI that will be used.
@@ -74,7 +69,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val cliPath = objectFactory.property<String>()
+    abstract val cliPath: Property<String>
 
     /**
      * KeyStore file path.
@@ -82,7 +77,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStore = objectFactory.property<String>()
+    abstract val keyStore: Property<String>
 
     /**
      * KeyStore password.
@@ -90,7 +85,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStorePassword = objectFactory.property<String>()
+    abstract val keyStorePassword: Property<String>
 
     /**
      * KeyStore key alias.
@@ -98,7 +93,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStoreKeyAlias = objectFactory.property<String>()
+    abstract val keyStoreKeyAlias: Property<String>
 
     /**
      * KeyStore type.
@@ -106,7 +101,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStoreType = objectFactory.property<String>()
+    abstract val keyStoreType: Property<String>
 
     /**
      * JCA KeyStore Provider name.
@@ -114,7 +109,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val keyStoreProviderName = objectFactory.property<String>()
+    abstract val keyStoreProviderName: Property<String>
 
     /**
      * Encoded private key in PEM format.
@@ -122,7 +117,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val privateKey = objectFactory.property<String>()
+    abstract val privateKey: Property<String>
 
     /**
      * A file with encoded private key in PEM format.
@@ -130,7 +125,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:Optional
-    val privateKeyFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val privateKeyFile: RegularFileProperty
 
     /**
      * Password required to decrypt the private key.
@@ -138,7 +133,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val password = objectFactory.property<String>()
+    abstract val password: Property<String>
 
     /**
      * A string containing X509 certificates.
@@ -147,7 +142,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val certificateChain = objectFactory.property<String>()
+    abstract val certificateChain: Property<String>
 
     /**
      * Path to the file containing X509 certificates.
@@ -156,7 +151,7 @@ open class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:Optional
-    val certificateChainFile: RegularFileProperty = objectFactory.fileProperty()
+    abstract val certificateChainFile: RegularFileProperty
 
     private val context = logCategory()
 
@@ -170,13 +165,13 @@ open class SignPluginTask @Inject constructor(
         if (privateKey.orNull == null && privateKeyFile.orNull == null) {
             throw InvalidUserDataException(
                 "Private key not found. " +
-                    "One of the 'signPlugin.privateKey' or 'signPlugin.privateKeyFile' properties has to be provided."
+                        "One of the 'signPlugin.privateKey' or 'signPlugin.privateKeyFile' properties has to be provided."
             )
         }
         if (certificateChain.orNull == null && certificateChainFile.orNull == null) {
             throw InvalidUserDataException(
                 "Certificate chain not found. " +
-                    "One of the 'signPlugin.certificateChain' or 'signPlugin.certificateChainFile' properties has to be provided."
+                        "One of the 'signPlugin.certificateChain' or 'signPlugin.certificateChainFile' properties has to be provided."
             )
         }
 
@@ -282,13 +277,12 @@ open class SignPluginTask @Inject constructor(
 
     /**
      * Resolves the Marketplace ZIP Signer CLI version.
-     * If set to [IntelliJPluginConstants.VERSION_LATEST], there's request to [MARKETPLACE_ZIP_SIGNER_URL]
+     * If set to [VERSION_LATEST], there's request to [MARKETPLACE_ZIP_SIGNER_URL]
      * performed for the latest available version.
      *
      * @return Marketplace ZIP Signer CLI version
      */
-    internal fun resolveCliVersion(version: String?) = version?.takeIf { it != IntelliJPluginConstants.VERSION_LATEST }
-        ?: resolveLatestVersion()
+    internal fun resolveCliVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
 
     /**
      * Resolves Marketplace ZIP Signer CLI download URL.

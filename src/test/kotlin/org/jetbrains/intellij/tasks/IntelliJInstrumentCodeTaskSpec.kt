@@ -7,73 +7,85 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
+@Suppress("ComplexRedundantLet")
 class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `instrument code with nullability annotations`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 instrumentCode = true
             }
-        """)
+            """
+        )
 
         writeJavaFile()
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        val result = build("buildSourceSet", "--info")
-        assertTrue(result.output.contains("Added @NotNull assertions to 1 files"))
+        build("buildSourceSet", "--info").let {
+            assertContains("Added @NotNull assertions to 1 files", it.output)
+        }
     }
 
     @Test
     fun `instrument tests with nullability annotations`() {
         writeTestFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 instrumentCode = true
             }
-        """)
+            """
+        )
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        val result = build("buildTestSourceSet", "--info")
-        assertTrue(result.output.contains("Added @NotNull assertions to 1 files"))
+        build("buildTestSourceSet", "--info").let {
+            assertContains("Added @NotNull assertions to 1 files", it.output)
+        }
     }
 
     @Test
     fun `do not instrument code if option is set to false`() {
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 instrumentCode = false
             }
-        """)
+            """
+        )
 
         writeJavaFile()
 
-        val result = build("buildSourceSet", "--info")
-        assertFalse(result.output.contains("Added @NotNull"))
+        build("buildSourceSet", "--info").let {
+            assertNotContains("Added @NotNull", it.output)
+        }
     }
 
     @Test
     fun `do not instrument code on empty source sets`() {
-        val result = build("buildSourceSet", "--info")
-        assertFalse(result.output.contains("Compiling forms and instrumenting code"))
+        build("buildSourceSet", "--info").let {
+            assertNotContains("Compiling forms and instrumenting code", it.output)
+        }
     }
 
     @Test
     fun `instrument kotlin forms`() {
         writeKotlinUIFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 instrumentCode = true
             }
-        """)
+            """
+        )
 
-        file("src/main/kotlin/pack/AppKt.form").xml("""<?xml version="1.0" encoding="UTF-8"?>
+        file("src/main/kotlin/pack/AppKt.form").xml(
+            """<?xml version="1.0" encoding="UTF-8"?>
             <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="pack.AppKt">
                 <grid id="27dc6" binding="panel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
@@ -85,12 +97,14 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
                     <children/>
                 </grid>
             </form>
-        """)
+            """
+        )
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        val result = build("buildSourceSet", "--info")
-        result.output.contains("Compiling forms and instrumenting code")
+        build("buildSourceSet", "--info").let {
+            assertContains("Compiling forms and instrumenting code", it.output)
+        }
     }
 
     @Test
@@ -100,25 +114,28 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         build("buildSourceSet")
 
-        val result = build("buildSourceSet")
-        assertEquals(TaskOutcome.UP_TO_DATE, result.task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
+        build("buildSourceSet").let {
+            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
+        }
     }
 
     @Test
     fun `reuse configuration cache`() {
         writeJavaFile()
 
-        buildFile.groovy("""
+        buildFile.groovy(
+            """
             intellij {
                 instrumentCode = true
             }
-        """)
+            """
+        )
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
         build("buildSourceSet", "--configuration-cache")
-        val result = build("buildSourceSet", "--configuration-cache")
-
-        assertTrue(result.output.contains("Reusing configuration cache."))
+        build("buildSourceSet", "--configuration-cache").let {
+            assertContains("Reusing configuration cache.", it.output)
+        }
     }
 }

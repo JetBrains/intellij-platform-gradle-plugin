@@ -3,7 +3,7 @@ package org.jetbrains.intellij.test
 import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
 import java.io.File
 import java.net.URL
 import java.nio.file.Files
@@ -11,12 +11,10 @@ import java.nio.file.Path
 import java.util.zip.ZipFile
 
 /**
- * Downloads and extracts IDE for the tests using local IDE installation. IDEs are downloaded from
- * [IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY].
+ * Downloads and extracts IDE for the tests using local IDE installation. IDEs are downloaded from [DEFAULT_INTELLIJ_REPOSITORY].
  *
  * @param localIdesPath directory to store local IDE
- * @param releasePath IDE path relative to [IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY]/releases, e.g.
- * `"com/jetbrains/intellij/idea/ideaIC/2021.2.4/ideaIC-2021.2.4.zip"`
+ * @param releasePath IDE path relative to [DEFAULT_INTELLIJ_REPOSITORY]/releases, e.g. `"com/jetbrains/intellij/idea/ideaIC/2021.2.4/ideaIC-2021.2.4.zip"`
  */
 fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String {
     val fileName = releasePath.substringAfterLast('/')
@@ -29,7 +27,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
         localIdesPath.createDir()
     }
 
-    URL("${IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY}/releases/$releasePath").openStream().use {
+    URL("$DEFAULT_INTELLIJ_REPOSITORY/releases/$releasePath").openStream().use {
         Files.copy(it, localIdeZipPath)
     }
     localIdeZipPath.toFile().unzip()

@@ -12,17 +12,13 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
-import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
-import org.jetbrains.intellij.createPlugin
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.isDependencyOnPyCharm
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.utils.ArchiveUtils
-import org.jetbrains.intellij.warn
 import java.io.File
 import java.nio.file.Paths
 import javax.inject.Inject
 
-open class PluginDependencyManager @Inject constructor(
+abstract class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
     private val ideaDependency: IdeaDependency?,
     private val pluginsRepositories: List<PluginsRepository>,
@@ -43,7 +39,7 @@ open class PluginDependencyManager @Inject constructor(
                 info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.canonicalPath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
-                        "-withSources".takeIf { ideaDependency.sources != null }.orEmpty()
+                            "-withSources".takeIf { ideaDependency.sources != null }.orEmpty()
                     return PluginDependencyImpl(it.name, dependency.id, builtinPluginVersion, it, true)
                 }
             }
@@ -61,7 +57,7 @@ open class PluginDependencyManager @Inject constructor(
         }
         throw BuildException(
             "Cannot resolve plugin '${dependency.id}' in version '${dependency.version}'" +
-                " from channel '${dependency.channel}'".takeIf { dependency.channel != null }.orEmpty(),
+                    " from channel '${dependency.channel}'".takeIf { dependency.channel != null }.orEmpty(),
             null
         )
     }
@@ -73,20 +69,24 @@ open class PluginDependencyManager @Inject constructor(
         }
         registerRepositoryIfNeeded(project, plugin)
         generateIvyFile(plugin)
-        dependencies.add(project.dependencies.create(
-            group = groupId(plugin.channel),
-            name = plugin.id,
-            version = plugin.version,
-            configuration = "compile",
-        ))
+        dependencies.add(
+            project.dependencies.create(
+                group = groupId(plugin.channel),
+                name = plugin.id,
+                version = plugin.version,
+                configuration = "compile",
+            )
+        )
     }
 
     private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {
-        val pluginDir = findSingleDirectory(archiveUtils.extract(
-            pluginFile,
-            File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}"),
-            context,
-        ))
+        val pluginDir = findSingleDirectory(
+            archiveUtils.extract(
+                pluginFile,
+                File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}"),
+                context,
+            )
+        )
         return externalPluginDependency(pluginDir, dependency.channel, true)
     }
 
@@ -133,7 +133,7 @@ open class PluginDependencyManager @Inject constructor(
         val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
         IntelliJIvyDescriptorFileGenerator(identity).apply {
             addConfiguration(DefaultIvyConfiguration("default"))
-            addCompileArtifacts(plugin,  baseDir, groupId)
+            addCompileArtifacts(plugin, baseDir, groupId)
             addSourceArtifacts(plugin, baseDir, groupId)
             writeTo(ivyFile)
         }
@@ -142,7 +142,7 @@ open class PluginDependencyManager @Inject constructor(
     private fun IntelliJIvyDescriptorFileGenerator.addCompileArtifacts(
         plugin: PluginDependency,
         baseDir: File,
-        groupId: String
+        groupId: String,
     ) {
         val compileConfiguration = DefaultIvyConfiguration("compile")
         addConfiguration(compileConfiguration)
@@ -160,7 +160,7 @@ open class PluginDependencyManager @Inject constructor(
     private fun IntelliJIvyDescriptorFileGenerator.addSourceArtifacts(
         plugin: PluginDependency,
         baseDir: File,
-        groupId: String
+        groupId: String,
     ) {
         val sourcesConfiguration = DefaultIvyConfiguration("sources")
         addConfiguration(sourcesConfiguration)

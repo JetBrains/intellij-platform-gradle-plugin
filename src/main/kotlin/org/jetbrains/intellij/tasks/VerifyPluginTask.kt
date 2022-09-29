@@ -6,23 +6,18 @@ import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.internal.ConventionTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.VerificationTask
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
-import javax.inject.Inject
 
-open class VerifyPluginTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : ConventionTask(), VerificationTask {
+abstract class VerifyPluginTask : DefaultTask() {
 
     /**
      * Specifies whether the build should fail when the verifications performed by this task fail.
@@ -30,7 +25,7 @@ open class VerifyPluginTask @Inject constructor(
      * Default value: `false`
      */
     @get:Input
-    val ignoreFailures = objectFactory.property<Boolean>()
+    abstract val ignoreFailures: Property<Boolean>
 
     /**
      * Specifies whether the build should fail when the verifications performed by this task emit unacceptable warnings.
@@ -38,7 +33,7 @@ open class VerifyPluginTask @Inject constructor(
      * Default value: `false`
      */
     @get:Input
-    val ignoreUnacceptableWarnings = objectFactory.property<Boolean>()
+    abstract val ignoreUnacceptableWarnings: Property<Boolean>
 
     /**
      * Specifies whether the build should fail when the verifications performed by this task emit warnings.
@@ -46,7 +41,7 @@ open class VerifyPluginTask @Inject constructor(
      * Default value: `true`
      */
     @get:Input
-    val ignoreWarnings = objectFactory.property<Boolean>()
+    abstract val ignoreWarnings: Property<Boolean>
 
     /**
      * The location of the built plugin file which will be used for verification.
@@ -54,15 +49,9 @@ open class VerifyPluginTask @Inject constructor(
      * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
      */
     @get:InputDirectory
-    val pluginDir: DirectoryProperty = objectFactory.directoryProperty()
+    abstract val pluginDir: DirectoryProperty
 
     private val context = logCategory()
-
-    override fun getIgnoreFailures(): Boolean = ignoreFailures.get()
-
-    override fun setIgnoreFailures(ignoreFailures: Boolean) {
-        this.ignoreFailures.set(ignoreFailures)
-    }
 
     @TaskAction
     fun verifyPlugin() {
@@ -76,6 +65,7 @@ open class VerifyPluginTask @Inject constructor(
                     error(context, it.message)
                 }
             }
+
             is PluginCreationFail -> creationResult.errorsAndWarnings.forEach {
                 if (it.level == PluginProblem.Level.ERROR) {
                     error(context, it.message)
@@ -83,6 +73,7 @@ open class VerifyPluginTask @Inject constructor(
                     warn(context, it.message)
                 }
             }
+
             else -> error(context, creationResult.toString())
         }
         val failBuild = creationResult !is PluginCreationSuccess

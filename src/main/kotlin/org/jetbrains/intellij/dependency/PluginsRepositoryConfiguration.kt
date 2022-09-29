@@ -4,7 +4,7 @@ package org.jetbrains.intellij.dependency
 
 import org.gradle.api.Action
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 
 abstract class PluginsRepositoryConfiguration {
 
@@ -14,7 +14,7 @@ abstract class PluginsRepositoryConfiguration {
      * Use default marketplace repository
      */
     fun marketplace() {
-        pluginsRepositories.add(MavenRepositoryPlugin(IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY))
+        pluginsRepositories.add(MavenRepositoryPlugin(DEFAULT_INTELLIJ_PLUGINS_REPOSITORY))
     }
 
     /**
@@ -34,7 +34,6 @@ abstract class PluginsRepositoryConfiguration {
     /**
      * Use custom plugin repository. The URL should point to the `plugins.xml` or `updatePlugins.xml` file.
      */
-    @Suppress("unused")
     fun custom(url: String) {
         pluginsRepositories.add(CustomPluginsRepository(url))
     }

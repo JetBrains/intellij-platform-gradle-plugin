@@ -8,6 +8,7 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
+import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -16,23 +17,24 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment")
 abstract class IntelliJPluginSpecBase {
 
     private var debugEnabled = true
     private val gradleDefault = System.getProperty("test.gradle.default")
-    private val gradleArguments = System.getProperty("test.gradle.arguments", "")
-        .split(' ').filter(String::isNotEmpty).toTypedArray()
+    protected val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     protected val kotlinPluginVersion: String = System.getProperty("test.kotlin.version")
     protected val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
 
     val gradleHome: String = System.getProperty("test.gradle.home")
 
-    val pluginsRepository: String = System.getProperty("plugins.repository", IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val intellijVersion: String = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() }
+    val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
+    val intellijVersion = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellij.version' isn't provided")
-    val testMarkdownPluginVersion: String = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
+    val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
     val dir: File by lazy { createTempDirectory("tmp").toFile() }
 
@@ -73,13 +75,13 @@ abstract class IntelliJPluginSpecBase {
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
-        """
+            """
         )
 
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
-        """
+            """
         )
     }
 
@@ -95,7 +97,7 @@ abstract class IntelliJPluginSpecBase {
         
             private void print(@NotNull String s) { System.out.println(s); }
         }
-    """
+        """
     )
 
     @Suppress("SameParameterValue")
@@ -104,11 +106,11 @@ abstract class IntelliJPluginSpecBase {
         debugEnabled = false
     }
 
-    protected fun buildAndFail(vararg tasks: String): BuildResult = build(true, *tasks)
+    protected fun buildAndFail(vararg tasks: String) = build(true, *tasks)
 
-    protected fun build(vararg tasks: String): BuildResult = build(false, *tasks)
+    protected fun build(vararg tasks: String) = build(false, *tasks)
 
-    protected fun build(fail: Boolean, vararg tasks: String): BuildResult = build(gradleVersion, fail, *tasks)
+    protected fun build(fail: Boolean, vararg tasks: String) = build(gradleVersion, fail, *tasks)
 
     protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String): BuildResult =
         builder(gradleVersion, *tasks).run {
@@ -124,13 +126,19 @@ abstract class IntelliJPluginSpecBase {
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
-            .withDebug(debugEnabled)
+//            .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
-            .withArguments(*tasks, "--stacktrace", "--configuration-cache", *gradleArguments)//, "-Dorg.gradle.debug=true")
+            .withArguments(
+                *tasks,
+                "--stacktrace",
+                "--configuration-cache",
+                *gradleArguments.toTypedArray()
+            )//, "-Dorg.gradle.debug=true")
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
-        drop(start).takeWhile { !it.startsWith('-') }.dropLast(1).map { it.substringBefore(' ') }.filterNot { it.isEmpty() }
+        drop(start).takeWhile { !it.startsWith('-') }.dropLast(1).map { it.substringBefore(' ') }
+            .filterNot { it.isEmpty() }
     }
 
     protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
@@ -168,7 +176,7 @@ abstract class IntelliJPluginSpecBase {
                 System.out.println(Arrays.toString(strings));
             }
         }
-    """
+        """
     )
 
     protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin(
@@ -179,7 +187,7 @@ abstract class IntelliJPluginSpecBase {
                 println(args.joinToString())
             }
         }
-    """
+        """
     )
 
     protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin(
@@ -194,10 +202,30 @@ abstract class IntelliJPluginSpecBase {
                 panel.toString()
             }
         }
-    """
+        """
     )
 
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
+
+    protected fun assertContains(expected: String, actual: String) {
+        // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
+        assertTrue(
+            actual.contains(expected),
+            """
+            expected:<$expected> but was:<$actual>
+            """.trimIndent()
+        )
+    }
+
+    protected fun assertNotContains(expected: String, actual: String) {
+        // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
+        assertFalse(
+            actual.contains(expected),
+            """
+            expected:<$expected> but was:<$actual>
+            """.trimIndent()
+        )
+    }
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
         assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.replace("\r", "")?.trim())
@@ -236,9 +264,6 @@ abstract class IntelliJPluginSpecBase {
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun File.xml(@Language("XML") content: String) = append(content)
 
-    /**
-     * Appends the passed content to this file. Overwrites existing content if the `overwrite` parameter is true.
-     */
     fun File.groovy(@Language("Groovy") content: String) = append(content)
 
     fun File.java(@Language("Java") content: String) = append(content)

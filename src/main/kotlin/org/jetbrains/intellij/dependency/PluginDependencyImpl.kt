@@ -48,7 +48,7 @@ class PluginDependencyImpl(
 
     override fun isCompatible(ideVersion: IdeVersion) =
         sinceBuild?.let { IdeVersion.createIdeVersion(it) <= ideVersion } ?: true &&
-            untilBuild?.let { ideVersion <= IdeVersion.createIdeVersion(it) } ?: true
+                untilBuild?.let { ideVersion <= IdeVersion.createIdeVersion(it) } ?: true
 
     @Suppress("DuplicatedCode")
     override fun equals(other: Any?): Boolean {
@@ -75,6 +75,7 @@ class PluginDependencyImpl(
         return true
     }
 
+    @Suppress("DuplicatedCode")
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + platformPluginId.hashCode()

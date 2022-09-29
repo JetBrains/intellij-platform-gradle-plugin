@@ -3,29 +3,20 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
+import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.internal.ConventionTask
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.OutputFiles
-import org.gradle.api.tasks.SkipWhenEmpty
-import org.gradle.api.tasks.TaskAction
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
 import java.io.File
-import javax.inject.Inject
 
-open class PatchPluginXmlTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : ConventionTask() {
+abstract class PatchPluginXmlTask : DefaultTask() {
 
     /**
      * The directory where the patched plugin.xml will be written.
@@ -33,13 +24,13 @@ open class PatchPluginXmlTask @Inject constructor(
      * Default value: `${project.buildDir}/patchedPluginXmlFiles`
      */
     @get:OutputDirectory
-    val destinationDir = objectFactory.directoryProperty()
+    abstract val destinationDir: DirectoryProperty
 
     /**
      * The list of output `plugin.xml` files.
      */
     @get:OutputFiles
-    val outputFiles = objectFactory.listProperty<File>()
+    abstract val outputFiles: ListProperty<File>
 
     /**
      * The list of `plugin.xml` files to patch.
@@ -48,14 +39,14 @@ open class PatchPluginXmlTask @Inject constructor(
      */
     @get:SkipWhenEmpty
     @get:InputFiles
-    val pluginXmlFiles = objectFactory.listProperty<File>()
+    abstract val pluginXmlFiles: ListProperty<File>
 
     /**
      * The description of the plugin – will be set to the `<description>` tag.
      */
     @get:Input
     @get:Optional
-    val pluginDescription = objectFactory.property<String>()
+    abstract val pluginDescription: Property<String>
 
     /**
      * The lower bound of the version range to be patched – will be set for the `since-build` attribute of the `<idea-version>` tag.
@@ -64,7 +55,7 @@ open class PatchPluginXmlTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val sinceBuild = objectFactory.property<String>()
+    abstract val sinceBuild: Property<String>
 
     /**
      * The upper bound of the version range to be patched – will be set for the `until-build` attribute of the `<idea-version>` tag.
@@ -73,7 +64,7 @@ open class PatchPluginXmlTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val untilBuild = objectFactory.property<String>()
+    abstract val untilBuild: Property<String>
 
     /**
      * The version of the plugin – will be set for the `<version>` tag.
@@ -82,21 +73,21 @@ open class PatchPluginXmlTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    val version = objectFactory.property<String>()
+    abstract val version: Property<String>
 
     /**
      * The change notes of the plugin – will be set for the `<change-notes>` tag.
      */
     @get:Input
     @get:Optional
-    val changeNotes = objectFactory.property<String>()
+    abstract val changeNotes: Property<String>
 
     /**
      * The ID of the plugin – will be set for the `<id>` tag.
      */
     @get:Input
     @get:Optional
-    val pluginId = objectFactory.property<String>()
+    abstract val pluginId: Property<String>
 
     private val context = logCategory()
 
@@ -166,8 +157,10 @@ open class PatchPluginXmlTask @Inject constructor(
         if (tag != null) {
             val existingValue = tag.getAttribute(attributeName)?.value
             if (!existingValue.isNullOrEmpty()) {
-                warn(context,
-                    "Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$attributeValue'")
+                warn(
+                    context,
+                    "Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$attributeValue'"
+                )
             }
             tag.setAttribute(attributeName, attributeValue)
         } else {

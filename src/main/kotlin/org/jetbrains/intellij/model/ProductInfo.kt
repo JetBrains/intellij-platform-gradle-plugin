@@ -29,7 +29,7 @@ data class Launch(
 @Serializable
 data class CustomProperty(
     var key: String? = null,
-    var value: String? = null
+    var value: String? = null,
 )
 
 @Suppress("EnumEntryName")

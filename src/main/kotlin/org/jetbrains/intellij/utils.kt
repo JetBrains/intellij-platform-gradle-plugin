@@ -27,6 +27,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.JDOMException
@@ -58,7 +59,7 @@ val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPa
 
 @Suppress("DEPRECATION")
 fun mainSourceSet(project: Project): SourceSet = project
-    .convention.getPlugin(JavaPluginConvention::class.java)
+    .convention.getPlugin<JavaPluginConvention>()
 //    .extensions.getByType(JavaPluginExtension::class.java) // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
@@ -113,29 +114,29 @@ fun getIdeaSystemProperties(
     return result
 }
 
-fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>, ideDirectory: File?): List<String> {
-    options.maxHeapSize = options.maxHeapSize ?: "512m"
-    options.minHeapSize = options.minHeapSize ?: "256m"
-
-    ideDirectory?.let {
-        val bootJar = File(it, "lib/boot.jar")
-        if (bootJar.exists()) {
-            return arguments + "-Xbootclasspath/a:${bootJar.canonicalPath}"
-        }
+fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
+    with(options) {
+        maxHeapSize = maxHeapSize ?: "512m"
+        minHeapSize = minHeapSize ?: "256m"
     }
-    return arguments
+
+    return arguments.orEmpty() + ideDirectory
+        ?.resolve("lib/boot.jar")
+        ?.takeIf { it.exists() }
+        ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
+        .orEmpty()
 }
 
 fun ideBuildNumber(ideDirectory: File) = (
-    File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-        ?: File(ideDirectory, "build.txt")
-    ).readText().trim()
+        File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+            ?: File(ideDirectory, "build.txt")
+        ).readText().trim()
 
 private val json = Json { ignoreUnknownKeys = true }
 fun ideProductInfo(ideDirectory: File) = (
-    File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-        ?: File(ideDirectory, "product-info.json")
-    )
+        File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+            ?: File(ideDirectory, "product-info.json")
+        )
     .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
 
@@ -158,9 +159,9 @@ private fun collectFiles(directory: File, filter: Predicate<File>): Collection<F
 
 fun releaseType(version: String) = when {
     version.endsWith(RELEASE_SUFFIX_EAP) ||
-        version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
-        version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
-        version.matches(MAJOR_VERSION_PATTERN.toRegex())
+            version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
+            version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
+            version.matches(MAJOR_VERSION_PATTERN.toRegex())
     -> RELEASE_TYPE_SNAPSHOTS
 
     version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> RELEASE_TYPE_NIGHTLY
@@ -208,9 +209,9 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): 
 
 fun isKotlinRuntime(name: String) =
     name == "kotlin-runtime" ||
-        name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
-        name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
-        name == "kotlin-test" || name.startsWith("kotlin-test-")
+            name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
+            name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
+            name == "kotlin-test" || name.startsWith("kotlin-test-")
 
 fun isDependencyOnPyCharm(dependency: IdeaDependency) = dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
 

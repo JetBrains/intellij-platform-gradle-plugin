@@ -2,15 +2,17 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.listFiles
+import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
-import org.gradle.api.internal.ConventionTask
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.parsePluginXml
@@ -19,11 +21,12 @@ import org.jetbrains.intellij.utils.PlatformKotlinVersions
 import org.jetbrains.intellij.warn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
+import java.nio.file.Path
 import javax.inject.Inject
 
-open class VerifyPluginConfigurationTask @Inject constructor(
-    objectFactory: ObjectFactory,
-) : ConventionTask() {
+abstract class VerifyPluginConfigurationTask @Inject constructor(
+    private val providers: ProviderFactory,
+) : DefaultTask() {
 
     /**
      * The location of the built plugin file which will be used for verification.
@@ -31,61 +34,68 @@ open class VerifyPluginConfigurationTask @Inject constructor(
      * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
      */
     @get:InputFiles
-    val pluginXmlFiles = objectFactory.listProperty<File>()
+    abstract val pluginXmlFiles: ListProperty<File>
 
     /**
      * IntelliJ SDK platform version.
      */
     @get:Internal
-    val platformVersion = objectFactory.property<String>()
+    abstract val platformVersion: Property<String>
 
     /**
      * IntelliJ SDK platform build number.
      */
     @get:Internal
-    val platformBuild = objectFactory.property<String>()
+    abstract val platformBuild: Property<String>
 
     /**
      * [JavaCompile.sourceCompatibility] property defined in the build script.
      */
     @get:Internal
-    val sourceCompatibility = objectFactory.property<String>()
+    abstract val sourceCompatibility: Property<String>
 
     /**
      * [JavaCompile.targetCompatibility] property defined in the build script.
      */
     @get:Internal
-    val targetCompatibility = objectFactory.property<String>()
+    abstract val targetCompatibility: Property<String>
 
     /**
      * The Gradle Kotlin plugin is loaded.
      */
     @get:Internal
-    val kotlinPluginAvailable = objectFactory.property<Boolean>()
+    abstract val kotlinPluginAvailable: Property<Boolean>
 
     /**
-     * [KotlinCompile.kotlinOptions.apiVersion] property defined in the build script
+     * The `apiVersion` property of [KotlinCompile.kotlinOptions] defined in the build script
      */
     @get:Internal
-    val kotlinApiVersion = objectFactory.property<String?>()
+    abstract val kotlinApiVersion: Property<String?>
 
     /**
-     * [KotlinCompile.kotlinOptions.languageVersion] property defined in the build script
+     * The `languageVersion` property of [KotlinCompile.kotlinOptions] defined in the build script
      */
     @get:Internal
-    val kotlinLanguageVersion = objectFactory.property<String?>()
+    abstract val kotlinLanguageVersion: Property<String?>
 
     /**
-     * [KotlinCompile.kotlinOptions.jvmTarget] property defined in the build script.
+     * The path to the directory where IDEs used for the verification will be downloaded.
+     * Value propagated with [RunPluginVerifierTask.downloadDir].
      */
     @get:Internal
-    val kotlinJvmTarget = objectFactory.property<String?>()
+    abstract val pluginVerifierDownloadDir: Property<String>
+
+    /**
+     * The `jvmTarget` property of [KotlinCompile.kotlinOptions] defined in the build script.
+     */
+    @get:Internal
+    abstract val kotlinJvmTarget: Property<String?>
 
     /**
      * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
      */
     @get:Internal
-    val kotlinStdlibDefaultDependency = objectFactory.property<Boolean>()
+    abstract val kotlinStdlibDefaultDependency: Property<Boolean>
 
     private val context = logCategory()
 
@@ -100,52 +110,53 @@ open class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
         val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)
+        val pluginVerifierDownloadDir = pluginVerifierDownloadDir.get()
+        val oldPluginVerifierDownloadDir = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get()
 
-        (pluginXmlFiles.get().flatMap {
-            parsePluginXml(it, context)?.let { plugin ->
+        sequence {
+            pluginXmlFiles.get().mapNotNull { parsePluginXml(it, context) }.forEach { plugin ->
                 val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
                 val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
                 val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)
 
-                listOfNotNull(
-                    "The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.".takeIf {
-                        sinceBuild.major < platformBuildVersion.major
-                    },
-                    "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.".takeIf {
-                        sinceBuildJavaVersion < targetCompatibilityJavaVersion
-                    },
-                    "The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.".takeIf {
-                        sinceBuildJavaVersion < jvmTargetJavaVersion
-                    },
-                    "The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.".takeIf {
-                        sinceBuildKotlinApiVersion < kotlinApiVersion
-                    },
-                )
-            } ?: emptyList()
-        } + listOfNotNull(
-            "The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.".takeIf {
-                platformJavaVersion > sourceCompatibilityJavaVersion
-            },
-            "The Kotlin configuration specifies languageVersion=$kotlinLanguageVersion but IntelliJ Platform $platformVersion requires languageVersion=$platformKotlinLanguageVersion.".takeIf {
-                platformKotlinLanguageVersion > kotlinLanguageVersion
-            },
-            "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires targetCompatibility=$platformJavaVersion.".takeIf {
-                platformJavaVersion < targetCompatibilityJavaVersion
-            },
-            "The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but IntelliJ Platform $platformVersion requires jvmTarget=$platformJavaVersion.".takeIf {
-                platformJavaVersion < jvmTargetJavaVersion
-            },
-            "The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib".takeIf {
-                kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null
+                if (sinceBuild.major < platformBuildVersion.major) {
+                    yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.")
+                }
+                if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
+                    yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
+                }
+                if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
+                    yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
+                }
+                if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
+                    yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
+                }
             }
-        )).takeIf(List<String>::isNotEmpty)?.let { issues ->
+
+            if (platformJavaVersion > sourceCompatibilityJavaVersion) {
+                yield("The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.")
+            }
+            if (platformKotlinLanguageVersion > kotlinLanguageVersion) {
+                yield("The Kotlin configuration specifies languageVersion=$kotlinLanguageVersion but IntelliJ Platform $platformVersion requires languageVersion=$platformKotlinLanguageVersion.")
+            }
+            if (platformJavaVersion < targetCompatibilityJavaVersion) {
+                yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires targetCompatibility=$platformJavaVersion.")
+            }
+            if (platformJavaVersion < jvmTargetJavaVersion) {
+                yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but IntelliJ Platform $platformVersion requires jvmTarget=$platformJavaVersion.")
+            }
+            if (kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null) {
+                yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
+            }
+            if (Path.of(oldPluginVerifierDownloadDir).run {
+                    toString() != pluginVerifierDownloadDir && exists() && listFiles().isNotEmpty()
+            }) {
+                yield("The Plugin Verifier download directory is set to $pluginVerifierDownloadDir, but downloaded IDEs were also found in $oldPluginVerifierDownloadDir, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir")
+            }
+        }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
             warn(
                 context,
-                "The following plugin configuration issues were found:" +
-                    "\n" +
-                    issues.joinToString("\n") { "- $it" } +
-                    "\n" +
-                    "See: https://jb.gg/intellij-platform-versions"
+                listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
             )
         }
     }

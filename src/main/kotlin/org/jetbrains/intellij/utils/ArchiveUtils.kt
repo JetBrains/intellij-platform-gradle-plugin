@@ -11,7 +11,7 @@ import java.util.function.BiConsumer
 import java.util.function.Predicate
 import javax.inject.Inject
 
-open class ArchiveUtils @Inject constructor(
+abstract class ArchiveUtils @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
 ) {
@@ -42,12 +42,14 @@ open class ArchiveUtils @Inject constructor(
                     into(targetDirectory)
                 }
             }
+
             name.endsWith(".tar.gz") -> {
                 fileSystemOperations.copy {
                     from(archiveOperations.tarTree(archive))
                     into(targetDirectory)
                 }
             }
+
             else -> throw IllegalArgumentException("Unknown type archive type: $name")
         }
 
