@@ -25,7 +25,7 @@ abstract class IntelliJPluginSpecBase {
 
     private var debugEnabled = true
     private val gradleDefault = System.getProperty("test.gradle.default")
-    private val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toTypedArray()
+    protected val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     protected val kotlinPluginVersion: String = System.getProperty("test.kotlin.version")
     protected val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
 
@@ -132,7 +132,7 @@ abstract class IntelliJPluginSpecBase {
                 *tasks,
                 "--stacktrace",
                 "--configuration-cache",
-                *gradleArguments
+                *gradleArguments.toTypedArray()
             )//, "-Dorg.gradle.debug=true")
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {

@@ -112,18 +112,20 @@ val Path.pluginsCacheDirectory
  * Runs the given Gradle task(s) within the current integration test.
  * Provides logs to STDOUT and as a returned value for further assertions.
  */
-fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any> = emptyMap()) =
+fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any> = emptyMap(), systemProperties: Map<String, Any> = emptyMap()) =
     ProcessBuilder()
         .command(
             gradleWrapper.toString(),
             *projectProperties
-                .run {
-                    this + mapOf(
-                        "platformVersion" to System.getenv("PLATFORM_VERSION"),
-                    ).filterNot { it.value == null }
-                }
-                .map { "-P${it.key}=${it.value}" }.toTypedArray(),
-            *tasks.map { ":$projectName:$it" }.toTypedArray(),
+                .run { this + mapOf("platformVersion" to System.getenv("PLATFORM_VERSION")).filterNot { it.value == null } }
+                .map { "-P${it.key}=${it.value}" }
+                .toTypedArray(),
+            *systemProperties
+                .map { "-D${it.key}=${it.value}" }
+                .toTypedArray(),
+            *tasks
+                .map { ":$projectName:$it" }
+                .toTypedArray(),
             "--info",
             "--stacktrace",
         )
@@ -150,6 +152,10 @@ fun <T> T.exitIf(block: T.() -> Boolean, message: T.() -> String = { "" }): T {
 
 infix fun String.containsText(string: String) {
     assert(contains(string)) { "expect '$this' contains '$string'" }
+}
+
+infix fun String.notContainsText(string: String) {
+    assert(!contains(string)) { "expect '$this' does not contain '$string'" }
 }
 
 infix fun Path.containsText(string: String) {

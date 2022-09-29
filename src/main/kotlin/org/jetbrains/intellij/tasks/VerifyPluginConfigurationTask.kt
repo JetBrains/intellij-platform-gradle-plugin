@@ -2,10 +2,13 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -18,8 +21,12 @@ import org.jetbrains.intellij.utils.PlatformKotlinVersions
 import org.jetbrains.intellij.warn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
+import java.nio.file.Path
+import javax.inject.Inject
 
-abstract class VerifyPluginConfigurationTask : DefaultTask() {
+abstract class VerifyPluginConfigurationTask @Inject constructor(
+    private val providers: ProviderFactory,
+) : DefaultTask() {
 
     /**
      * The location of the built plugin file which will be used for verification.
@@ -72,6 +79,13 @@ abstract class VerifyPluginConfigurationTask : DefaultTask() {
     abstract val kotlinLanguageVersion: Property<String?>
 
     /**
+     * The path to the directory where IDEs used for the verification will be downloaded.
+     * Value propagated with [RunPluginVerifierTask.downloadDir].
+     */
+    @get:Internal
+    abstract val pluginVerifierDownloadDir: Property<String>
+
+    /**
      * The `jvmTarget` property of [KotlinCompile.kotlinOptions] defined in the build script.
      */
     @get:Internal
@@ -96,6 +110,8 @@ abstract class VerifyPluginConfigurationTask : DefaultTask() {
         val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
         val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)
+        val pluginVerifierDownloadDir = pluginVerifierDownloadDir.get()
+        val oldPluginVerifierDownloadDir = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get()
 
         sequence {
             pluginXmlFiles.get().mapNotNull { parsePluginXml(it, context) }.forEach { plugin ->
@@ -132,14 +148,15 @@ abstract class VerifyPluginConfigurationTask : DefaultTask() {
             if (kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null) {
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
             }
-        }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let { issues ->
+            if (Path.of(oldPluginVerifierDownloadDir).run {
+                    toString() != pluginVerifierDownloadDir && exists() && listFiles().isNotEmpty()
+            }) {
+                yield("The Plugin Verifier download directory is set to $pluginVerifierDownloadDir, but downloaded IDEs were also found in $oldPluginVerifierDownloadDir, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir")
+            }
+        }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
             warn(
                 context,
-                """
-                The following plugin configuration issues were found:
-                $issues
-                See: https://jb.gg/intellij-platform-versions
-                """.trimIndent()
+                listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
             )
         }
     }

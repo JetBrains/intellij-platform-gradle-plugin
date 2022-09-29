@@ -132,8 +132,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * The path to the directory where IDEs used for the verification will be downloaded.
      *
-     * Default value: `System.getProperty("plugin.verifier.home.dir")/ides` or `System.getProperty("user.home")/.pluginVerifier/ides`
-     * or system temporary directory.
+     * Default value: `System.getProperty("plugin.verifier.home.dir")/ides`, `System.getenv("XDG_CACHE_HOME")/pluginVerifier/ides`,
+     * `System.getProperty("user.home")/.cache/pluginVerifier/ides` or system temporary directory.
      */
     @get:Input
     @get:Optional

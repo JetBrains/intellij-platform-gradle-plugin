@@ -205,7 +205,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configurePrepareSandboxTasks(project, extension)
         configureListProductsReleasesTask(project, extension)
         configurePluginVerificationTask(project)
-        val verifyPluginConfigurationTask = configureVerifyPluginConfigurationTask(project)
         configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
@@ -217,6 +216,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
+        configureVerifyPluginConfigurationTask(project)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
 
@@ -224,12 +224,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
             project.tasks.withType<KotlinCompile>().configureEach {
-                dependsOn(verifyPluginConfigurationTask)
+                dependsOn(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
             }
         }
 
         project.tasks.withType<JavaCompile>().configureEach {
-            dependsOn(verifyPluginConfigurationTask)
+            dependsOn(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
         }
 
         project.afterEvaluate {
@@ -636,6 +636,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
+        val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME)
         val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
         val compileKotlinTaskProvider by lazy { project.tasks.named<KotlinCompile>("compileKotlin") }
 
@@ -648,6 +649,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
             pluginXmlFiles.convention(patchPluginXmlTaskProvider.get().outputFiles)
             sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
             targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
+            pluginVerifierDownloadDir.convention(runPluginVerifierTaskProvider.get().downloadDir)
+
             kotlinPluginAvailable.convention(project.provider {
                 project.pluginManager.hasPlugin("org.jetbrains.kotlin.jvm")
             })
