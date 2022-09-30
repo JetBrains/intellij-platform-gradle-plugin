@@ -14,7 +14,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version '1.0'
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -24,7 +24,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {
@@ -41,7 +41,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin {
                 ignoreWarnings = false
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -51,7 +51,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>Zolotov</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
@@ -64,7 +64,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version '1.0'
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -74,7 +74,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                 <description>Lorem ipsum.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
@@ -91,7 +91,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin {
                 ignoreUnacceptableWarnings = true
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -101,7 +101,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                 <description>Привет, Мир!</description>
                 <vendor>Zolotov</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {
@@ -124,7 +124,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin {
                 ignoreFailures = true
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.delete()
@@ -142,7 +142,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin {
                 ignoreUnacceptableWarnings = true
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -152,7 +152,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                 <description>Привет, Мир!</description>
                 <vendor>Zolotov</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
@@ -169,7 +169,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin {
                 ignoreFailures = true
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -179,7 +179,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                 <description>Привет, Мир!</description>
                 <vendor>Zolotov</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {
@@ -196,7 +196,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin { 
                 ignoreWarnings = false 
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -207,7 +207,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                 <vendor>JetBrains</vendor>
                 <depends>com.intellij.modules.lang</depends>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {

@@ -44,7 +44,7 @@ class JbrResolverTest : IntelliJPluginSpecBase() {
                     println(runIde.projectExecutable.get())
                 }
             }
-            """
+            """.trimIndent()
         )
 
         build(TASK_NAME).let {

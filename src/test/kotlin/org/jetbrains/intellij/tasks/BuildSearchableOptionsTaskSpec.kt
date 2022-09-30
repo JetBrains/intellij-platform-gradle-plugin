@@ -16,7 +16,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             intellij {
                 version = '14.1.4'
             } 
-            """
+            """.trimIndent()
         )
 
         build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME).let {
@@ -36,7 +36,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-            """
+            """.trimIndent()
         )
 
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())

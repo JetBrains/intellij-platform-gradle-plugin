@@ -24,7 +24,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.2.3"]
                 verifierVersion = "1.255"
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -43,7 +43,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.2.3"]
                 verifierVersion = "1.254"
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -57,11 +57,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = "1.0.0"
-
+            
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -81,7 +81,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 ideVersions = ["IC-2020.2.3", "PS-2020.1.3"]
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -101,7 +101,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 ideVersions = ["AI-2021.1.1.15"]
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -121,7 +121,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 verificationReportsDir = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -148,7 +148,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 untilVersion = "2020.2.3"
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -170,7 +170,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = []
                 localPaths = [new File('/tmp')]
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -185,7 +185,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = "1.0.0"
-            """
+            """.trimIndent()
         )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -208,7 +208,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 failureLevel = [FailureLevel.DEPRECATED_API_USAGES]
                 ideVersions = ["2020.2.3"]
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -228,7 +228,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -250,7 +250,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 ideVersions = ["foo", "foo", "", "foo"]
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -272,7 +272,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.ALL
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -295,7 +295,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.2.3"]
                 failureLevel = FailureLevel.NONE
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
@@ -316,7 +316,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 ideVersions = ["2020.1.3"]
                 verifierPath = "${'$'}{project.buildDir}/pluginVerifier.jar"
             }
-            """
+            """.trimIndent()
         )
 
         val version = RunPluginVerifierTask.resolveLatestVersion()
@@ -340,7 +340,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-            """
+            """.trimIndent()
         )
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
@@ -357,7 +357,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
-            """
+            """.trimIndent()
         )
         build(BUILD_PLUGIN_TASK_NAME)
     }
@@ -375,7 +375,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                     StringUtil.firstLetterToUpperCase("foo");
                 }
             }
-            """
+            """.trimIndent()
         )
     }
 
@@ -388,7 +388,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 <vendor>JetBrains</vendor>
                 <depends>com.intellij.modules.platform</depends>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
     }
 }
