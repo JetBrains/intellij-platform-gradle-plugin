@@ -60,7 +60,7 @@ val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPa
 @Suppress("DEPRECATION")
 fun mainSourceSet(project: Project): SourceSet = project
     .convention.getPlugin<JavaPluginConvention>()
-//    .extensions.getByType(JavaPluginExtension::class.java) // available since Gradle 7.1
+//    .extensions.getByType<JavaPluginConvention>() // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
 fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {

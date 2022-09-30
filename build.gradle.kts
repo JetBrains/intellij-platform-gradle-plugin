@@ -9,8 +9,8 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.7.20"
-    kotlin("plugin.serialization") version "1.7.20"
+    kotlin("jvm") version "1.7.10"
+    kotlin("plugin.serialization") version "1.7.10"
     id("com.gradle.plugin-publish") version "1.0.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.7.10"
@@ -49,7 +49,7 @@ dependencies {
     implementation("com.googlecode.plist:dd-plist:1.25")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6")
-    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.20")
+    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation(gradleTestKit())
