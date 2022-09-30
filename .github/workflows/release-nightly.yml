@@ -7,8 +7,6 @@ on:
         required: false
         default: false
         type: boolean
-  schedule:
-    - cron: "0 0 * * *"
 
 env:
   XDG_CACHE_HOME: "~/.config/"
