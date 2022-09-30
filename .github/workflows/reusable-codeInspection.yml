@@ -16,8 +16,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        with:
-          cache-read-only: false
 
       - name: Qodana - Code Inspection
         uses: JetBrains/qodana-action@v2022.2.2
