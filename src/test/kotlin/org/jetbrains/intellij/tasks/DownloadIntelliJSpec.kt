@@ -37,7 +37,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 version = '$testedVersion'
                 downloadSources = false
             }
-            """
+            """.trimIndent()
         )
         build(BasePlugin.ASSEMBLE_TASK_NAME)
 
@@ -65,7 +65,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 version = '$testedVersion'
                 downloadSources = true
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -93,7 +93,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 version = '$testedVersion'
                 downloadSources = false
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -123,7 +123,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
                 version = '$testedVersion'
                 downloadSources = true
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)

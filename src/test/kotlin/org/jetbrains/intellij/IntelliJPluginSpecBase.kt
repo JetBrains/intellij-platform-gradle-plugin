@@ -75,13 +75,13 @@ abstract class IntelliJPluginSpecBase {
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
-            """
+            """.trimIndent()
         )
 
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
-            """
+            """.trimIndent()
         )
     }
 
