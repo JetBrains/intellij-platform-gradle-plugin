@@ -165,7 +165,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = "1.0.0"
-
+            
             runPluginVerifier {
                 ideVersions = []
                 localPaths = [new File('/tmp')]
@@ -311,7 +311,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = "1.0.0"
-
+            
             runPluginVerifier {
                 ideVersions = ["2020.1.3"]
                 verifierPath = "${'$'}{project.buildDir}/pluginVerifier.jar"
@@ -336,7 +336,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = "1.0.0"
-
+            
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
@@ -353,7 +353,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = "1.0.0"
-
+            
             runPluginVerifier {
                 ideVersions = ["2020.2.3"]
             }
@@ -368,9 +368,9 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import com.intellij.openapi.util.text.StringUtil;
-
+            
             class App {
-
+            
                 public static void main(@NotNull String[] strings) {
                     StringUtil.firstLetterToUpperCase("foo");
                 }
