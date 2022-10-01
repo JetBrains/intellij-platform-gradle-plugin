@@ -1293,16 +1293,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             description = "List all available IntelliJ-based IDE releases with their updates."
 
             updatePaths.convention(project.provider {
-                mapOf("idea-releases" to IDEA_PRODUCTS_RELEASES_URL).entries.map { (name, repository) ->
-                    dependenciesDownloader.downloadFromRepository(logCategory(), {
-                        create(
-                            group = "org.jetbrains",
-                            name = name,
-                            version = repositoryVersion,
-                            ext = "xml",
-                        )
-                    }, { ivyRepository(repository) }).first().canonicalPath
-                }
+                listOf(
+                    project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL).asString(),
+                )
             })
             androidStudioUpdatePath.convention(project.provider {
                 dependenciesDownloader.getAndroidStudioReleases(logCategory())
