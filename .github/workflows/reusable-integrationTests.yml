@@ -99,7 +99,6 @@ jobs:
       - uses: gradle/gradle-build-action@v2
         with:
           gradle-version: ${{ matrix.gradleVersion }}
-          cache-read-only: false
 
       - name: Run Verification
         working-directory: ${{ github.workspace }}/integration-tests
