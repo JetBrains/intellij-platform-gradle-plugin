@@ -49,8 +49,6 @@ __FILE__.init {
     }
 
     runGradleTask("clean", "build").let { logs ->
-        logs containsText "[ant:jacocoReport] Writing bundle 'classpath' with 1 classes"
-
         buildDirectory.resolve("jacoco/test.exec").run {
             assert(Files.exists(this))
         }
