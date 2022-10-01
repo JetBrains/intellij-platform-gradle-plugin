@@ -36,15 +36,17 @@ abstract class IntelliJPluginSpecBase {
         ?: throw GradleException("'test.intellij.version' isn't provided")
     val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
-    val dir: File by lazy { createTempDirectory("tmp").toFile() }
+    var dir: File = createTempDirectory("tmp").toFile()
 
-    val gradleProperties = file("gradle.properties")
-    val buildFile = file("build.gradle")
-    val pluginXml = file("src/main/resources/META-INF/plugin.xml")
-    val buildDirectory = File(dir, "build")
+    val gradleProperties get() = file("gradle.properties")
+    val buildFile get() = file("build.gradle")
+    val pluginXml get() = file("src/main/resources/META-INF/plugin.xml")
+    val buildDirectory get() = File(dir, "build")
 
     @BeforeTest
     open fun setUp() {
+        dir = createTempDirectory("tmp").toFile()
+
         file("settings.gradle").groovy("rootProject.name = 'projectName'")
 
         buildFile.groovy(
