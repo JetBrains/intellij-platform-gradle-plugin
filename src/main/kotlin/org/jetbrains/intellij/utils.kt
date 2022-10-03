@@ -207,9 +207,10 @@ fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = l
 fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
 fun debug(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, logCategory, message, e)
 
+private val logger = Logging.getLogger(IntelliJPlugin::class.java)
+
 private fun log(level: LogLevel, logCategory: String?, message: String, e: Throwable?) {
     val category = "gradle-intellij-plugin ${logCategory.orEmpty()}".trim()
-    val logger = Logging.getLogger(IntelliJPlugin::class.java)
     if (e != null && level != LogLevel.ERROR && !logger.isDebugEnabled) {
         logger.log(level, "[$category] $message. Run with --debug option to get more log output.")
     } else {
