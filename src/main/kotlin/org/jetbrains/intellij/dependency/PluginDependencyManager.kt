@@ -18,7 +18,7 @@ import java.io.File
 import java.nio.file.Paths
 import javax.inject.Inject
 
-abstract class PluginDependencyManager @Inject constructor(
+internal abstract class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
     private val ideaDependency: IdeaDependency?,
     private val pluginsRepositories: List<PluginsRepository>,

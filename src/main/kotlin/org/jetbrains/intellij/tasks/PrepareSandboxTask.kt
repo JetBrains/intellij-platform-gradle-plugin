@@ -123,11 +123,11 @@ abstract class PrepareSandboxTask : Sync() {
         }
     }
 
-    fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
+    internal fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
         from(pluginDependency.artifact) { into(pluginDependency.artifact.name) }
     }
 
-    fun configureExternalPlugin(pluginDependency: PluginDependency) {
+    internal fun configureExternalPlugin(pluginDependency: PluginDependency) {
         if (pluginDependency.builtin) {
             return
         }

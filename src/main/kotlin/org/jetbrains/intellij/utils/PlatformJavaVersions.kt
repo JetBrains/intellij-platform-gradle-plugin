@@ -7,7 +7,7 @@ import org.jetbrains.intellij.Version
 
 // Java versions list used in IntelliJ Platform synchronized with:
 // https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html#intellij-platform-based-products-of-recent-ide-versions
-val PlatformJavaVersions = mapOf(
+internal val PlatformJavaVersions = mapOf(
     Version(222) to JavaVersion.VERSION_17,
     Version(203) to JavaVersion.VERSION_11,
     Version(0) to JavaVersion.VERSION_1_8,

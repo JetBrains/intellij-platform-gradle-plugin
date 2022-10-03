@@ -7,7 +7,7 @@ import javax.xml.bind.annotation.XmlElementWrapper
 import javax.xml.bind.annotation.XmlRootElement
 
 @XmlRootElement(name = "metadata")
-data class MavenMetadata(
+internal data class MavenMetadata(
 
     @set:XmlElement
     var groupId: String? = null,
@@ -19,7 +19,7 @@ data class MavenMetadata(
     var versioning: MavenMetadataVersioning? = null,
 )
 
-data class MavenMetadataVersioning(
+internal data class MavenMetadataVersioning(
 
     @set:XmlElement
     var latest: String? = null,

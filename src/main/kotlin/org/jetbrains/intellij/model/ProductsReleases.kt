@@ -8,13 +8,13 @@ import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlRootElement
 
 @XmlRootElement(name = "products")
-data class ProductsReleases(
+internal data class ProductsReleases(
 
     @set:XmlElement(name = "product")
     var products: List<Product> = mutableListOf(),
 ) : Serializable
 
-data class Product(
+internal data class Product(
 
     @set:XmlAttribute
     var name: String = "",
@@ -26,7 +26,7 @@ data class Product(
     var channels: List<Channel> = mutableListOf(),
 ) : Serializable
 
-data class Channel(
+internal data class Channel(
 
     @set:XmlAttribute
     var id: String = "",
@@ -53,7 +53,7 @@ data class Channel(
     var builds: List<Build> = mutableListOf(),
 ) : Serializable
 
-data class Build(
+internal data class Build(
 
     @set:XmlAttribute
     var number: String = "",
@@ -80,7 +80,7 @@ data class Build(
     var patches: List<Patch> = mutableListOf(),
 ) : Serializable
 
-data class Button(
+internal data class Button(
 
     @set:XmlAttribute
     var name: String = "",
@@ -92,7 +92,7 @@ data class Button(
     var download: Boolean = false,
 ) : Serializable
 
-data class Patch(
+internal data class Patch(
 
     @set:XmlAttribute
     var from: String = "",
@@ -104,7 +104,7 @@ data class Patch(
     var fullFrom: String = "",
 ) : Serializable
 
-data class BlogPost(
+internal data class BlogPost(
 
     @set:XmlAttribute
     var url: String = "",

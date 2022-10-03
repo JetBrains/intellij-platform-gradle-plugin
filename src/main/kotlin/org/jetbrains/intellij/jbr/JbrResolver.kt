@@ -17,7 +17,7 @@ import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
 
-abstract class JbrResolver @Inject constructor(
+internal abstract class JbrResolver @Inject constructor(
     private val jreRepository: String,
     private val isOffline: Boolean,
     private val archiveUtils: ArchiveUtils,

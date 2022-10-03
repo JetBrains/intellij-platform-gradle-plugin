@@ -4,7 +4,7 @@ package org.jetbrains.intellij.dependency
 
 import java.io.File
 
-class LocalIdeaDependency(
+internal class LocalIdeaDependency(
     name: String,
     version: String,
     buildNumber: String,

@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlRootElement
 
 @XmlRootElement(name = "content")
-data class AndroidStudioReleases(
+internal data class AndroidStudioReleases(
 
     @set:XmlAttribute
     var version: Int = 0,
@@ -17,7 +17,7 @@ data class AndroidStudioReleases(
     var items: List<Item> = mutableListOf(),
 ) : Serializable
 
-data class Item(
+internal data class Item(
 
     @set:XmlElement
     var name: String = "",
@@ -44,7 +44,7 @@ data class Item(
     var downloads: List<Download> = mutableListOf(),
 ) : Serializable
 
-data class Download(
+internal data class Download(
 
     @set:XmlElement
     var link: String = "",

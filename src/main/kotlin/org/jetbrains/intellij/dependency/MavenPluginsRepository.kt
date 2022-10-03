@@ -12,7 +12,7 @@ import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.mavenRepository
 import java.io.File
 
-interface MavenRepository : PluginsRepository {
+internal interface MavenRepository : PluginsRepository {
 
     var resolvedDependency: Boolean
 

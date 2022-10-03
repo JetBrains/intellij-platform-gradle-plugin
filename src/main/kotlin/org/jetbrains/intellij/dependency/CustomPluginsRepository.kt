@@ -14,7 +14,7 @@ import java.io.File
 import java.net.URI
 import java.net.URL
 
-class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
+internal class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
 
     private val pluginsXmlUri: URI
     private val repositoryUrl: String

@@ -6,7 +6,7 @@ import com.jetbrains.plugin.structure.base.utils.forEachLine
 import org.jetbrains.intellij.model.PerformanceTestStatistic
 import java.nio.file.Path
 
-class IdeaLogParser(private val logPath: String) {
+internal class IdeaLogParser(private val logPath: String) {
 
     fun getTestStatistic() = PerformanceTestStatistic.Builder().apply {
         Path.of(logPath).forEachLine {

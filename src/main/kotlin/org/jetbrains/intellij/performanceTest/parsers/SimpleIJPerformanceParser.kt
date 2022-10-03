@@ -8,7 +8,7 @@ import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-class SimpleIJPerformanceParser(private val filePath: String) {
+internal class SimpleIJPerformanceParser(private val filePath: String) {
 
     fun parse() = PerformanceTestScript.Builder().apply {
         Path.of(filePath).forEachLine {

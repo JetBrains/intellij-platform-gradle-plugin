@@ -9,13 +9,13 @@ import javax.xml.bind.annotation.XmlElementWrapper
 import javax.xml.bind.annotation.XmlRootElement
 
 @XmlRootElement(name = "plugins")
-data class PluginsCache(
+internal data class PluginsCache(
 
     @set:XmlElement(name = "plugin")
     var plugins: List<PluginsCachePlugin> = mutableListOf(),
 ) : Serializable
 
-data class PluginsCachePlugin(
+internal data class PluginsCachePlugin(
 
     @set:XmlAttribute
     var id: String = "",

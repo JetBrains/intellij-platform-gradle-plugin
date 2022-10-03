@@ -9,7 +9,7 @@ import org.jetbrains.intellij.model.XmlExtractor
 import java.net.HttpURLConnection
 import java.net.URL
 
-class LatestVersionResolver {
+internal class LatestVersionResolver {
 
     companion object {
         fun fromMaven(subject: String, url: String): String {

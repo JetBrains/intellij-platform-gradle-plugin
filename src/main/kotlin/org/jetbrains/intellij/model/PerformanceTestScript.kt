@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.model
 
-class PerformanceTestScript private constructor(
+internal class PerformanceTestScript private constructor(
     val projectName: String?,
     val scriptContent: String?,
     val assertionTimeout: Long?,

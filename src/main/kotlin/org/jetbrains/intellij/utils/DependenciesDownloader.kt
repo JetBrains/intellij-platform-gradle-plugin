@@ -19,7 +19,7 @@ import java.io.File
 import java.net.URI
 import javax.inject.Inject
 
-abstract class DependenciesDownloader @Inject constructor(
+internal abstract class DependenciesDownloader @Inject constructor(
     private val configurationContainer: ConfigurationContainer,
     private val dependencyHandler: DependencyHandler,
     private val repositoryHandler: RepositoryHandler,

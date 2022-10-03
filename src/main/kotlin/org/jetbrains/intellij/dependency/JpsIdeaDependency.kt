@@ -4,7 +4,7 @@ package org.jetbrains.intellij.dependency
 
 import java.io.File
 
-class JpsIdeaDependency(
+internal class JpsIdeaDependency(
     version: String,
     buildNumber: String,
     classes: File,

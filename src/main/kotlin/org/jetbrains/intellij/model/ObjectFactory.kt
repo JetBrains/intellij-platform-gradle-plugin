@@ -6,7 +6,7 @@ import javax.xml.bind.annotation.XmlRegistry
 
 @Suppress("unused")
 @XmlRegistry
-class ObjectFactory {
+internal class ObjectFactory {
 
     fun createPluginsCache() = PluginsCache()
 

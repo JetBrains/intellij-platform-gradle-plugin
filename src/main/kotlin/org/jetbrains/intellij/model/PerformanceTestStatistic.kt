@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.model
 
-class PerformanceTestStatistic private constructor(
+internal class PerformanceTestStatistic private constructor(
     val totalTime: Long?,
     val responsive: Long?,
     val averageResponsive: Long?,

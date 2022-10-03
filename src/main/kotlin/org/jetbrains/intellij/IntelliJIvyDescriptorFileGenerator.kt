@@ -14,7 +14,7 @@ import java.io.Writer
 import java.text.SimpleDateFormat
 import java.util.*
 
-class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublicationIdentity) {
+internal class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublicationIdentity) {
 
     private val ivyFileEncoding = "UTF-8"
     private val ivyDatePattern = "yyyyMMddHHmmss"

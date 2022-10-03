@@ -7,7 +7,7 @@ import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.jetbrains.intellij.collectJars
 import java.io.File
 
-class PluginDependencyImpl(
+internal class PluginDependencyImpl(
     override val id: String,
     override val platformPluginId: String?,
     override val version: String,

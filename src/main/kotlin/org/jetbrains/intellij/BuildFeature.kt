@@ -21,7 +21,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
         .let { "$prefix.buildFeature.$it" }
 }
 
-fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
+internal fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
     feature.getValue(this).apply {
         when (this) {
             true -> "Build feature is enabled: $feature"

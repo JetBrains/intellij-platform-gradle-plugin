@@ -17,10 +17,10 @@ import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NA
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.tasks.SetupDependenciesTask
 
-fun Project.intellij(): FileCollection = intellijBase()
-fun Project.intellij(filter: Closure<*>): FileCollection = intellijBase().matching(filter)
-fun Project.intellij(filter: Action<PatternFilterable>): FileCollection = intellijBase().matching(filter)
-fun Project.intellij(filter: PatternFilterable): FileCollection = intellijBase().matching(filter)
+internal fun Project.intellij(): FileCollection = intellijBase()
+internal fun Project.intellij(filter: Closure<*>): FileCollection = intellijBase().matching(filter)
+internal fun Project.intellij(filter: Action<PatternFilterable>): FileCollection = intellijBase().matching(filter)
+internal fun Project.intellij(filter: PatternFilterable): FileCollection = intellijBase().matching(filter)
 
 private fun Project.intellijBase(): FileTree {
     val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
@@ -33,10 +33,10 @@ private fun Project.intellijBase(): FileTree {
     return files(setupDependenciesTask.idea.get().jarFiles).asFileTree
 }
 
-fun Project.intellijPlugin(plugin: String): FileCollection = intellijPluginBase(plugin)
-fun Project.intellijPlugin(plugin: String, filter: Closure<*>): FileCollection = intellijPluginBase(plugin).matching(filter)
-fun Project.intellijPlugin(plugin: String, filter: Action<PatternFilterable>): FileCollection = intellijPluginBase(plugin).matching(filter)
-fun Project.intellijPlugin(plugin: String, filter: PatternFilterable): FileCollection = intellijPluginBase(plugin).matching(filter)
+internal fun Project.intellijPlugin(plugin: String): FileCollection = intellijPluginBase(plugin)
+internal fun Project.intellijPlugin(plugin: String, filter: Closure<*>): FileCollection = intellijPluginBase(plugin).matching(filter)
+internal fun Project.intellijPlugin(plugin: String, filter: Action<PatternFilterable>): FileCollection = intellijPluginBase(plugin).matching(filter)
+internal fun Project.intellijPlugin(plugin: String, filter: PatternFilterable): FileCollection = intellijPluginBase(plugin).matching(filter)
 
 private fun Project.intellijPluginBase(plugin: String): FileTree {
     val extension = extensions.getByType<IntelliJPluginExtension>()
@@ -53,7 +53,7 @@ private fun Project.intellijPluginBase(plugin: String): FileTree {
     return files(jarFiles).asFileTree
 }
 
-fun Project.intellijPlugins(vararg plugins: String): FileCollection {
+internal fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     val extension = extensions.getByType<IntelliJPluginExtension>()
     val selectedPlugins = mutableSetOf<PluginDependency>()
     val nonValidPlugins = mutableListOf<String>()
@@ -73,10 +73,10 @@ fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     return files(selectedPlugins.map { it.jarFiles })
 }
 
-fun Project.intellijExtra(extra: String): FileCollection = intellijExtraBase(extra)
-fun Project.intellijExtra(extra: String, filter: Closure<*>): FileCollection = intellijExtraBase(extra).matching(filter)
-fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>): FileCollection = intellijExtraBase(extra).matching(filter)
-fun Project.intellijExtra(extra: String, filter: PatternFilterable): FileCollection = intellijExtraBase(extra).matching(filter)
+internal fun Project.intellijExtra(extra: String): FileCollection = intellijExtraBase(extra)
+internal fun Project.intellijExtra(extra: String, filter: Closure<*>): FileCollection = intellijExtraBase(extra).matching(filter)
+internal fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>): FileCollection = intellijExtraBase(extra).matching(filter)
+internal fun Project.intellijExtra(extra: String, filter: PatternFilterable): FileCollection = intellijExtraBase(extra).matching(filter)
 
 private fun Project.intellijExtraBase(extra: String): FileTree {
     val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)

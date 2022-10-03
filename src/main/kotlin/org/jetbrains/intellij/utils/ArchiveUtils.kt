@@ -11,7 +11,7 @@ import java.util.function.BiConsumer
 import java.util.function.Predicate
 import javax.inject.Inject
 
-abstract class ArchiveUtils @Inject constructor(
+internal abstract class ArchiveUtils @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
 ) {

@@ -56,19 +56,19 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
 
-val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
+private val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
 @Suppress("DEPRECATION")
-fun mainSourceSet(project: Project): SourceSet = project
+internal fun mainSourceSet(project: Project): SourceSet = project
     .convention.getPlugin<JavaPluginConvention>()
 //    .extensions.getByType<JavaPluginConvention>() // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
-fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
+internal fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
     File(it, "META-INF/plugin.xml").takeIf { file -> file.exists() && file.length() > 0 }
 }
 
-fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
+internal fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
     try {
         pluginXml.inputStream().use {
             val document = JDOMUtil.loadDocument(it)
@@ -84,7 +84,7 @@ fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
     return null
 }
 
-fun transformXml(document: Document, file: File) {
+internal fun transformXml(document: Document, file: File) {
     val xmlOutput = XMLOutputter()
     xmlOutput.format.apply {
         indent = "  "
@@ -98,7 +98,7 @@ fun transformXml(document: Document, file: File) {
     }
 }
 
-fun getIdeaSystemProperties(
+internal fun getIdeaSystemProperties(
     ideDirFile: File,
     configDirectory: File,
     systemDirectory: File,
@@ -138,7 +138,7 @@ fun getIdeaSystemProperties(
     return result + currentLaunchProperties + requirePluginProperties
 }
 
-fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
+internal fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
     with(options) {
         maxHeapSize = maxHeapSize ?: "512m"
         minHeapSize = minHeapSize ?: "256m"
@@ -161,27 +161,28 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirecto
     return arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments
 }
 
-fun ideBuildNumber(ideDirectory: File) = (
+internal fun ideBuildNumber(ideDirectory: File) = (
         File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
             ?: File(ideDirectory, "build.txt")
         ).readText().trim()
 
 private val json = Json { ignoreUnknownKeys = true }
-fun ideProductInfo(ideDirectory: File) = (
+
+internal fun ideProductInfo(ideDirectory: File) = (
         File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
             ?: File(ideDirectory, "product-info.json")
         )
     .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
 
-fun ideaDir(path: String) = File(path).let {
+internal fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
+internal fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
     collectFiles(directory) { it.toPath().isJar() && filter.test(it) }
 
-fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
+internal fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
     collectFiles(directory) { it.toPath().isZip() && filter.test(it) }
 
 private fun collectFiles(directory: File, filter: Predicate<File>): Collection<File> = when {
@@ -191,7 +192,7 @@ private fun collectFiles(directory: File, filter: Predicate<File>): Collection<F
     }, FalseFileFilter.FALSE)
 }
 
-fun releaseType(version: String) = when {
+internal fun releaseType(version: String) = when {
     version.endsWith(RELEASE_SUFFIX_EAP) ||
             version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
             version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
@@ -202,10 +203,10 @@ fun releaseType(version: String) = when {
     else -> RELEASE_TYPE_RELEASES
 }
 
-fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
-fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, logCategory, message, e)
-fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
-fun debug(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, logCategory, message, e)
+internal fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
+internal fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, logCategory, message, e)
+internal fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
+internal fun debug(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, logCategory, message, e)
 
 private fun log(level: LogLevel, logCategory: String?, message: String, e: Throwable?) {
     val category = "gradle-intellij-plugin ${logCategory.orEmpty()}".trim()
@@ -217,11 +218,11 @@ private fun log(level: LogLevel, logCategory: String?, message: String, e: Throw
     }
 }
 
-fun Project.logCategory(): String = path + name.takeIf { ":$it" != path }.orEmpty()
+internal fun Project.logCategory(): String = path + name.takeIf { ":$it" != path }.orEmpty()
 
-fun Task.logCategory(): String = project.logCategory() + path.removePrefix(project.logCategory())
+internal fun Task.logCategory(): String = project.logCategory() + path.removePrefix(project.logCategory())
 
-fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): IdePlugin? {
+internal fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): IdePlugin? {
     val extractDirectory = createTempDirectory("tmp")
     val creationResult = IdePluginManager.createManager(extractDirectory)
         .createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
@@ -241,17 +242,17 @@ fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): 
     }
 }
 
-fun isKotlinRuntime(name: String) =
+internal fun isKotlinRuntime(name: String) =
     name == "kotlin-runtime" ||
             name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
             name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
             name == "kotlin-test" || name.startsWith("kotlin-test-")
 
-fun isDependencyOnPyCharm(dependency: IdeaDependency) = dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
+internal fun isDependencyOnPyCharm(dependency: IdeaDependency) = dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
 
-fun isPyCharmType(type: String) = type == PLATFORM_TYPE_PYCHARM || type == PLATFORM_TYPE_PYCHARM_COMMUNITY
+internal fun isPyCharmType(type: String) = type == PLATFORM_TYPE_PYCHARM || type == PLATFORM_TYPE_PYCHARM_COMMUNITY
 
-val repositoryVersion: String by lazy {
+internal val repositoryVersion: String by lazy {
     LocalDateTime.now().format(
         DateTimeFormatterBuilder()
             .append(DateTimeFormatter.BASIC_ISO_DATE)
@@ -260,14 +261,14 @@ val repositoryVersion: String by lazy {
     )
 }
 
-fun <T> T?.ifNull(block: () -> Unit): T? {
+internal fun <T> T?.ifNull(block: () -> Unit): T? {
     if (this == null) {
         block()
     }
     return this
 }
 
-fun Boolean.ifFalse(block: () -> Unit): Boolean {
+internal fun Boolean.ifFalse(block: () -> Unit): Boolean {
     if (!this) {
         block()
     }

@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij
 
-class Version(
+internal class Version(
     val major: Int = 0,
     val minor: Int = 0,
     val patch: Int = 0,

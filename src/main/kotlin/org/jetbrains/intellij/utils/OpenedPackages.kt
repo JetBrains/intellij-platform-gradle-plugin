@@ -7,7 +7,7 @@ import org.gradle.internal.os.OperatingSystem
 // OpenedPackages list synchronized with:
 // https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt
 // last version: bc3f330f28b552bcc1fb3fd98212aee68e7e3280
-val OpenedPackages = listOf(
+internal val OpenedPackages = listOf(
     "--add-opens=java.base/java.io=ALL-UNNAMED",
     "--add-opens=java.base/java.lang=ALL-UNNAMED",
     "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",

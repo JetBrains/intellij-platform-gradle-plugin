@@ -6,7 +6,7 @@ import org.gradle.api.internal.tasks.DefaultTaskDependency
 import org.gradle.api.publish.ivy.IvyArtifact
 import java.io.File
 
-class IntellijIvyArtifact(
+internal class IntellijIvyArtifact(
     internal val file: File,
     internal var name: String,
     private var extension: String,

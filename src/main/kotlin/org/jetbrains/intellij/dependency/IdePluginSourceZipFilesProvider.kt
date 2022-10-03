@@ -4,7 +4,7 @@ package org.jetbrains.intellij.dependency
 
 import java.io.File
 
-object IdePluginSourceZipFilesProvider {
+internal object IdePluginSourceZipFilesProvider {
 
     private val pluginIdToSourceZipFileName = mapOf(
         "com.intellij.css" to "src_css-api.zip",

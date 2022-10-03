@@ -7,7 +7,7 @@ import org.gradle.api.GradleException
 import org.gradle.internal.os.OperatingSystem
 
 @Serializable
-data class ProductInfo(
+internal data class ProductInfo(
     var name: String? = null,
     var version: String? = null,
     var versionSuffix: String? = null,
@@ -36,7 +36,7 @@ data class ProductInfo(
 }
 
 @Serializable
-data class Launch(
+internal data class Launch(
     var os: OS? = null,
     var launcherPath: String? = null,
     var javaExecutablePath: String? = null,
@@ -47,12 +47,12 @@ data class Launch(
 )
 
 @Serializable
-data class CustomProperty(
+internal data class CustomProperty(
     var key: String? = null,
     var value: String? = null,
 )
 
 @Suppress("EnumEntryName")
-enum class OS {
+internal enum class OS {
     Linux, Windows, macOS
 }
