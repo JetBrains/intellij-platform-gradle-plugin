@@ -16,6 +16,7 @@ import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
@@ -23,8 +24,12 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.tasks.ClasspathNormalizer
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.JavaCompile
@@ -48,6 +53,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_SANDBOX
+import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.EXTENSION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
@@ -1108,7 +1114,7 @@ abstract class IntelliJPlugin @Inject constructor(
             finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
             doFirst {
-                jvmArgs = getIdeJvmArgs((this as Test), jvmArgs, ideDirProvider.get()) + OpenedPackages
+                jvmArgs = getIdeJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
                 classpath += ideaDependencyLibrariesProvider.get()
                 classpath -= classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
 
@@ -1122,6 +1128,7 @@ abstract class IntelliJPlugin @Inject constructor(
 
                 systemProperties(
                     getIdeaSystemProperties(
+                        ideDirProvider.get(),
                         configDirectoryProvider.get(),
                         systemDirectoryProvider.get(),
                         pluginsDirectoryProvider.get(),
@@ -1235,8 +1242,8 @@ abstract class IntelliJPlugin @Inject constructor(
 
             distributionFile.convention(
                 signPluginTaskProvider.flatMap { signPluginTask ->
-                    signPluginTask.outputArchiveFile.takeIf { signPluginTask.didWork } ?: resolveBuildTaskOutput(project)
-                }
+                    signPluginTask.outputArchiveFile
+                }.orElse(resolveBuildTaskOutput(project))
             )
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)
@@ -1251,7 +1258,8 @@ abstract class IntelliJPlugin @Inject constructor(
 
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
 
-        val downloadIdeaProductReleasesXml by project.tasks.registering(Sync::class) {
+        val downloadIdeaProductReleasesXml = project.tasks.register<Sync>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME) {
+            group = PLUGIN_GROUP_NAME
             from(project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL)) {
                 rename { "idea_product_releases.xml" }
             }
@@ -1262,14 +1270,11 @@ abstract class IntelliJPlugin @Inject constructor(
             group = PLUGIN_GROUP_NAME
             description = "List all available IntelliJ-based IDE releases with their updates."
 
-            updatePaths.convention(
-                downloadIdeaProductReleasesXml.map { task ->
-                    task.outputs.files.asFileTree
-                        .matching { include("**/*.xml") }
-                        .files
-                        .map { file -> file.absolutePath }
-                }
-            )
+            productsReleasesUpdateFiles
+                .from(updatePaths)
+                .from(downloadIdeaProductReleasesXml.map {
+                    it.outputs.files.asFileTree
+                })
             androidStudioUpdatePath.convention(project.provider {
                 dependenciesDownloader.getAndroidStudioReleases(logCategory())
             })

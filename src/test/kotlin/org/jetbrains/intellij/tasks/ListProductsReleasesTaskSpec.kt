@@ -13,16 +13,17 @@ import kotlin.test.assertEquals
 @Suppress("ComplexRedundantLet")
 class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
+    private val ideaReleasesPath = "products-releases/idea-releases.xml".let {
+        "'${javaClass.classLoader.getResource(it)?.path}'"
+    }
+
+    private val androidStudioReleasesPath = "products-releases/android-studio-products-releases.xml".let {
+        "'${javaClass.classLoader.getResource(it)?.path}'"
+    }
+
     @BeforeTest
     override fun setUp() {
         super.setUp()
-
-        val ideaReleasesPath = "products-releases/idea-releases.xml".let {
-            "'${javaClass.classLoader.getResource(it)?.path}'"
-        }
-        val asReleasesPath = "products-releases/android-studio-products-releases.xml".let {
-            "'${javaClass.classLoader.getResource(it)?.path}'"
-        }
 
         buildFile.groovy(
             """
@@ -30,10 +31,10 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 version = "2020.1"
             }
             listProductsReleases {
-                updatePaths = [${ideaReleasesPath}]
-                androidStudioUpdatePath = $asReleasesPath
+                productsReleasesUpdateFiles.setFrom([${ideaReleasesPath}])
+                androidStudioUpdatePath = $androidStudioReleasesPath
             }
-            """
+            """.trimIndent()
         )
     }
 
@@ -51,7 +52,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             listProductsReleases {
                 sinceVersion = "201"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -76,7 +77,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2020.3"
                 untilVersion = "2021.2.1"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -99,7 +100,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceBuild = "203"
                 untilBuild = "212.*"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -125,7 +126,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceBuild = "203"
                 untilBuild = "212.*"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -148,7 +149,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 type = "PY"
                 version = "2021.1"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -169,7 +170,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -192,7 +193,41 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 types = ["IU", "PS", "PY"]
             }
+            """.trimIndent()
+        )
+
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
+            assertEquals(
+                listOf(
+                    "IU-2021.2.2",
+                    "IU-2021.1.3",
+                    "PS-2021.2.2",
+                    "PS-2021.1.4",
+                    "PY-2021.2.2",
+                    "PY-2021.1.3",
+                ),
+                it.taskOutput()
+            )
+        }
+    }
+
+    @Test
+    fun `productsReleasesUpdateFiles uses values from updatePaths`() {
+        buildFile.groovy(
             """
+            
+            // disable the download task, so it doesn't contribute
+            tasks.downloadIdeaProductReleasesXml.configure { enabled = false }
+            
+            listProductsReleases {
+                sinceVersion = "2021.1"
+                types = ["IU", "PS", "PY"]
+                
+                updatePaths = [${ideaReleasesPath}]
+                
+                // no values set for productsReleasesUpdateFiles
+            }
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -218,7 +253,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 types = ["AI"]
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -238,13 +273,13 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
-
+            
             listProductsReleases {
                 sinceVersion = "2021.1"
                 types = ["AI"]
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {

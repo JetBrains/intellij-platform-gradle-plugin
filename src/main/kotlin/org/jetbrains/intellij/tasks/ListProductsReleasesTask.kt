@@ -4,14 +4,12 @@ package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.logCategory
@@ -22,12 +20,15 @@ import org.jetbrains.intellij.model.XmlExtractor
 abstract class ListProductsReleasesTask : DefaultTask() {
 
     /**
-     * Path to the products releases update file. By default, falls back to the Maven cache.
-     *
-     * Default value: _Maven cache_
+     * Path to the products releases update files. By default, one is downloaded from
+     * [org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
      */
-    @get:Input
+    @get:InputFiles
     @get:Optional
+    abstract val productsReleasesUpdateFiles: ConfigurableFileCollection
+
+    @get:Internal
+    @Deprecated("replaced with `productsReleasesUpdateFiles`, to improve compatibility with the Gradle API")
     abstract val updatePaths: ListProperty<String>
 
     /**
@@ -102,8 +103,10 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
     @TaskAction
     fun list() {
+        val updatePaths = productsReleasesUpdateFiles.files.map { it.canonicalPath }
+
         val releases = XmlExtractor<ProductsReleases>(context).let {
-            updatePaths.get().mapNotNull(it::fetch)
+            updatePaths.mapNotNull(it::fetch)
         }
         val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let {
             androidStudioUpdatePath.get().let(it::fetch)

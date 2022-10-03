@@ -145,6 +145,7 @@ fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any>
 fun <T> T.exitIf(block: T.() -> Boolean, message: T.() -> String = { "" }): T {
     if (block()) {
         println(message())
+        Thread.dumpStack()
         System.exit(-1)
     }
     return this

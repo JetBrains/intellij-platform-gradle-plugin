@@ -33,7 +33,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -44,13 +44,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myPluginName'
                 plugins = [project('nestedProject')]
             }
-            """
+            """.trimIndent()
         )
 
         file("settings.gradle").groovy(
             """
             include 'nestedProject'
-            """
+            """.trimIndent()
         )
 
         file("nestedProject/build.gradle").groovy(
@@ -70,13 +70,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myNestedPluginName'
                 instrumentCode = false
             }
-            """
+            """.trimIndent()
         )
 
         file("nestedProject/src/main/java/NestedAppFile.java").groovy(
             """
             class NestedAppFile {}
-            """
+            """.trimIndent()
         )
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
@@ -129,7 +129,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -159,19 +159,19 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     instrumentCode = false
                 }
             }
-            """
+            """.trimIndent()
         )
 
         file("settings.gradle").groovy(
             """
             include 'nestedProject'            
-            """
+            """.trimIndent()
         )
 
         file("nestedProject/src/main/java/NestedAppFile.java").java(
             """
             class NestedAppFile {}
-            """
+            """.trimIndent()
         )
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
@@ -224,7 +224,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -246,13 +246,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -260,7 +260,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
               <depends config-file="other.xml" />
             </idea-plugin>    
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -273,7 +273,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -309,7 +309,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <idea-version since-build="212.5712" until-build="212.*" />
               <depends config-file="other.xml" />
             </idea-plugin>
-            """
+            """.trimIndent()
         )
     }
 
@@ -320,13 +320,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -334,7 +334,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
                 <depends config-file="other.xml" />
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -348,7 +348,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
@@ -372,7 +372,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -381,7 +381,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
                 pluginName = 'myPluginName'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -403,7 +403,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -412,7 +412,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
                 pluginName = 'myPluginName'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -442,7 +442,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -451,7 +451,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['${adjustWindowsPath(plugin.canonicalPath)}']
                 pluginName = 'myPluginName'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -484,7 +484,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
     }
 
@@ -495,13 +495,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -509,7 +509,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
                 <depends config-file="other.xml" />
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
@@ -524,7 +524,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -545,7 +545,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -564,7 +564,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -586,7 +586,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
@@ -597,7 +597,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     <option name="SomeOption" value="false" />
                 </component>
             </application>
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -622,7 +622,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
@@ -633,7 +633,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     <option name="SomeOption" value="false" />
                 </component>
             </application>
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -656,7 +656,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
@@ -668,7 +668,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     <option name="CHECK_NEEDED" />
                 </component>
             </application>
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -690,7 +690,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
@@ -702,7 +702,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     <option name="CHECK_NEEDED" value="true" />
                 </component>
             </application>
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -724,7 +724,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
@@ -750,7 +750,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
@@ -775,7 +775,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                     <option name="CHECK_NEEDED" value="false" />
                 </component>
             </application>
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -810,13 +810,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
             """
             version = '0.42.123'
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -824,7 +824,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.124'
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -859,7 +859,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 implementation fileTree('two')
                 implementation fileTree('three')
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME)
@@ -885,7 +885,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -897,7 +897,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             $PREPARE_TESTING_SANDBOX_TASK_NAME {
                 from("additional")
             }
-            """
+            """.trimIndent()
         )
 
         build("test")
@@ -919,7 +919,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -928,7 +928,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
                 pluginName = 'myPluginName'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
@@ -944,7 +944,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -953,7 +953,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.jetbrains.postfixCompletion:0.8-beta']
                 pluginName = 'myPluginName'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
@@ -969,13 +969,13 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -983,7 +983,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
                 <depends config-file="other.xml" />
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -997,7 +997,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
