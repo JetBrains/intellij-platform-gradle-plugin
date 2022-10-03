@@ -41,7 +41,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
             assertNotContains("will be overwritten", it.output)
         }
@@ -76,7 +76,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <description>Plugin pluginDescription</description>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -108,7 +108,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -144,7 +144,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <change-notes>change notes</change-notes>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -180,7 +180,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -217,7 +217,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <id>my.plugin.id</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -250,7 +250,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.1532.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -287,7 +287,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <id>org.jetbrains.erlang</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -324,7 +324,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <idea-version since-build="141.1532" until-build="141.*">my_version</idea-version>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertContains("attribute 'since-build=[1]' of 'idea-version' tag will be set to '141.1532'", it.output)
@@ -362,7 +362,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="1" until-build="2">my_version</idea-version>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -395,7 +395,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <idea-version since-build="141.1532" until-build="141.*" />
                   <version>0.10.0</version>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -429,7 +429,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
         }
     }
@@ -470,7 +470,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
         }
     }

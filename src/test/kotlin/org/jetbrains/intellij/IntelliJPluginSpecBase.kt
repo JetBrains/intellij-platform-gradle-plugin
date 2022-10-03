@@ -228,11 +228,11 @@ abstract class IntelliJPluginSpecBase {
     }
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.replace("\r", "")?.trim())
+        assertEquals(expectedContent.trim(), file?.readText()?.replace("\r", "")?.trim())
 
     @Suppress("SameParameterValue")
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
-        assertEquals(expectedContent.trimIndent(), fileText(zip, path))
+        assertEquals(expectedContent, fileText(zip, path))
 
     @Suppress("SameParameterValue")
     protected fun extractFile(zipFile: ZipFile, path: String): File =

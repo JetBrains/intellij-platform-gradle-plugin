@@ -88,7 +88,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="Oh" until-build="212.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
         }
     }
