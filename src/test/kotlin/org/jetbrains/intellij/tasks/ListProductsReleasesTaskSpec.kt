@@ -273,7 +273,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
-
+            
             listProductsReleases {
                 sinceVersion = "2021.1"
                 types = ["AI"]
