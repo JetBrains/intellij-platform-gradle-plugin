@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.hasExtension
 import com.jetbrains.plugin.structure.base.utils.isDirectory
 import com.jetbrains.plugin.structure.base.utils.isJar
@@ -14,16 +15,16 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
 import org.gradle.api.plugins.PluginInstantiationException
-import org.gradle.api.tasks.ClasspathNormalizer
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.api.tasks.TaskProvider
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.JavaCompile
@@ -65,7 +66,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_V
 import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
@@ -108,12 +108,18 @@ import org.jetbrains.intellij.utils.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 import java.util.jar.Manifest
+import javax.inject.Inject
 
-abstract class IntelliJPlugin : Plugin<Project> {
+abstract class IntelliJPlugin @Inject constructor(
+    private val providers: ProviderFactory,
+    private val layout: ProjectLayout,
+) : Plugin<Project> {
 
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader
@@ -497,6 +503,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME)
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(RUN_IDE_TASK_NAME)
 
+        val ideDownloadTask = project.tasks.register<VerificationIdesDownloadTask>("downloadVerificationIDEs") {
+            group = PLUGIN_GROUP_NAME
+            description = "Downloads IntelliJ IDE instances for use by the Plugin Verifier tool"
+            downloadDir.convention(layout.dir(project.ideDownloadDir().map { it.toFile() }))
+            productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
+                listProductsReleasesTask.outputFile.asFile
+            })
+        }
+
         project.tasks.register<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds."
@@ -507,71 +522,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
             verificationReportsDir.convention(
                 project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath }
             )
-            downloadDir.convention(ideDownloadDir().map {
-                it.toFile().invariantSeparatorsPath
-            })
+            downloadDir.convention(ideDownloadTask.flatMap { it.downloadDir })
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
             ideDir.convention(runIdeTaskProvider.get().ideDir)
-            productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
-                listProductsReleasesTask.outputFile.asFile
-            })
-            ides.convention(project.provider {
-                val ideVersions = ideVersions.get().takeIf(List<String>::isNotEmpty) ?: run {
-                    when {
-                        localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
-                        else -> null
-                    }
-                } ?: emptyList()
 
-                ideVersions.map { ideVersion ->
-                    val downloadDir = File(downloadDir.get())
-                    val context = logCategory()
-
-                    resolveIdePath(ideVersion, downloadDir, context) { type, version, buildType ->
-                        val name = "$type-$version"
-                        val ideDir = downloadDir.resolve(name)
-                        info(context, "Downloading IDE '$name' to: $ideDir")
-
-                        val url = resolveIdeUrl(type, version, buildType, context)
-                        val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
-                        val group = when (type) {
-                            PLATFORM_TYPE_ANDROID_STUDIO -> "com.android"
-                            else -> "com.jetbrains"
-                        }
-                        debug(context, "Downloading IDE from $url")
-
-                        try {
-                            val ideArchive = dependenciesDownloader.downloadFromRepository(context, {
-                                create(
-                                    group = group,
-                                    name = "ides",
-                                    version = dependencyVersion,
-                                    ext = "tar.gz",
-                                )
-                            }, {
-                                ivyRepository(url)
-                            }).first()
-
-                            debug(context, "IDE downloaded, extracting...")
-                            archiveUtils.extract(ideArchive, ideDir, context)
-                            ideDir.listFiles()?.let { files ->
-                                files.filter(File::isDirectory).forEach { container ->
-                                    container.listFiles()?.forEach { file ->
-                                        file.renameTo(ideDir.resolve(file.name))
-                                    }
-                                    container.deleteRecursively()
-                                }
-                            }
-                        } catch (e: Exception) {
-                            warn(context, "Cannot download '$type-$version' from '$buildType' channel: $url", e)
-                        }
-
-                        debug(context, "IDE extracted to: $ideDir")
-                        ideDir
-                    }
-
-                }.let { files -> project.files(files) }
+            ides.from(ideDownloadTask.flatMap { task ->
+                task.downloadDir.asFile
+            }.map { downloadDir ->
+                downloadDir.walk().maxDepth(1).toList().filter { it != downloadDir }
             })
             verifierPath.convention(project.provider {
                 val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
@@ -590,20 +549,22 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }).first().canonicalPath
             })
             jreRepository.convention(extension.jreRepository)
-            offline.set(project.gradle.startParameter.isOffline)
+            offline.convention(project.gradle.startParameter.isOffline)
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)
             dependsOn(VERIFY_PLUGIN_TASK_NAME)
             dependsOn(LIST_PRODUCTS_RELEASES_TASK_NAME)
 
-            val isIdeVersionsEmpty = localPaths.flatMap { localPaths ->
-                ideVersions.map { ideVersions ->
-                    localPaths.isEmpty() && ideVersions.isEmpty()
-                }
-            }
-            listProductsReleasesTaskProvider.get().onlyIf { isIdeVersionsEmpty.get() }
+            // not sure what this is supposed to do...
+//            val isIdeVersionsEmpty = localPaths.flatMap { localPaths ->
+//                ideVersions.map { ideVersions ->
+//                    localPaths.isEmpty() && ideVersions.isEmpty()
+//                }
+//            }
+//            listProductsReleasesTaskProvider.get().onlyIf { isIdeVersionsEmpty.get() }
 
-            outputs.upToDateWhen { false }
+            // don't forcibly disable caching
+//            outputs.upToDateWhen { false }
         }
     }
 
@@ -651,7 +612,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             pluginXmlFiles.convention(patchPluginXmlTaskProvider.get().outputFiles)
             sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
             targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
-            pluginVerifierDownloadDir.convention(runPluginVerifierTaskProvider.get().downloadDir)
+            pluginVerifierDownloadDir.convention(runPluginVerifierTaskProvider.map { it.downloadDir.asFile.get().absolutePath })
 
             kotlinPluginAvailable.convention(project.provider {
                 project.pluginManager.hasPlugin("org.jetbrains.kotlin.jvm")
@@ -954,7 +915,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     it.classes.resolve("lib/javac2.jar")
                 })
                 compilerClassPathFromMaven.convention(compilerVersion.map { compilerVersion ->
-                    if (compilerVersion == DEFAULT_IDEA_VERSION || Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
+                    if (compilerVersion == DEFAULT_IDEA_VERSION ||
+                        Version.parse(compilerVersion) >= Version(183, 3795, 13)
+                    ) {
                         val downloadCompiler = { version: String ->
                             dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
                                 create(
@@ -1288,15 +1251,25 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
 
+        val downloadIdeaProductReleasesXml by project.tasks.registering(Sync::class) {
+            from(project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL)) {
+                rename { "idea_product_releases.xml" }
+            }
+            into(temporaryDir)
+        }
+
         project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "List all available IntelliJ-based IDE releases with their updates."
 
-            updatePaths.convention(project.provider {
-                listOf(
-                    project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL).asString(),
-                )
-            })
+            updatePaths.convention(
+                downloadIdeaProductReleasesXml.map { task ->
+                    task.outputs.files.asFileTree
+                        .matching { include("**/*.xml") }
+                        .files
+                        .map { file -> file.absolutePath }
+                }
+            )
             androidStudioUpdatePath.convention(project.provider {
                 dependenciesDownloader.getAndroidStudioReleases(logCategory())
             })
@@ -1533,4 +1506,27 @@ abstract class IntelliJPlugin : Plugin<Project> {
         .filterIndexed { index, component -> index < 3 || component == "SNAPSHOT" || component == "*" }
         .joinToString(prefix = "$productCode-", separator = ".")
         .let(IdeVersion::createIdeVersion)
+
+    /**
+     * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
+     * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
+     *
+     * @return Plugin Verifier home directory
+     */
+    private fun Project.verifierHomeDir(): Provider<Path> = providers.systemProperty("plugin.verifier.home.dir")
+        .orElse(providers.environmentVariable("XDG_CACHE_HOME").map { "$it/pluginVerifier" })
+        .orElse(providers.systemProperty("user.home").map { "$it/.cache/pluginVerifier" })
+        .orElse(
+            rootProject.layout.buildDirectory.dir("gradle-intellij-plugin/pluginVerifier")
+                .map { it.asFile.absolutePath })
+        .map { Paths.get(it) }
+
+    /**
+     * Provides target directory used for storing downloaded IDEs.
+     * Path is compatible with the Plugin Verifier approach.
+     *
+     * @return directory for downloaded IDEs
+     */
+    private fun Project.ideDownloadDir() = verifierHomeDir().map { it.resolve("ides").createDir() }
+
 }

@@ -131,7 +131,8 @@ abstract class IntelliJPluginSpecBase {
             .withArguments(
                 *tasks,
                 "--stacktrace",
-                "--configuration-cache",
+                "--info",
+//                "--configuration-cache",
                 *gradleArguments.toTypedArray()
             )//, "-Dorg.gradle.debug=true")
 
