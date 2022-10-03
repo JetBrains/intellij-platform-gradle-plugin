@@ -577,7 +577,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 <option name="CHECK_NEEDED" value="false" />
               </component>
             </application>
-            """,
+            """.trimIndent(),
         )
     }
 
@@ -613,7 +613,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 <option name="CHECK_NEEDED" value="false" />
               </component>
             </application>
-            """,
+            """.trimIndent(),
         )
     }
 
@@ -647,7 +647,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 <option name="CHECK_NEEDED" value="false" />
               </component>
             </application>
-            """,
+            """.trimIndent(),
         )
     }
 
@@ -681,7 +681,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 <option name="CHECK_NEEDED" value="false" />
               </component>
             </application>
-            """,
+            """.trimIndent(),
         )
     }
 
@@ -715,7 +715,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 <option name="CHECK_NEEDED" value="false" />
               </component>
             </application>
-            """,
+            """.trimIndent(),
         )
     }
 
@@ -741,7 +741,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 <option name="CHECK_NEEDED" value="false" />
               </component>
             </application>
-            """,
+            """.trimIndent(),
         )
     }
 
@@ -801,7 +801,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 <option name="CHECK_NEEDED" value="false" />
               </component>
             </application>
-            """,
+            """.trimIndent(),
         )
     }
 
