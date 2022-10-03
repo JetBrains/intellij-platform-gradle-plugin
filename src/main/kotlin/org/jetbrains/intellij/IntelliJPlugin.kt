@@ -14,12 +14,14 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
 import org.gradle.api.plugins.PluginInstantiationException
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
@@ -1273,8 +1275,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             distributionFile.convention(
                 signPluginTaskProvider.flatMap { signPluginTask ->
-                    signPluginTask.outputArchiveFile.takeIf { signPluginTask.didWork } ?: resolveBuildTaskOutput(project)
-                }
+                    signPluginTask.outputArchiveFile
+                }.orElse(resolveBuildTaskOutput(project))
             )
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)
