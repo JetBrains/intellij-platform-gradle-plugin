@@ -22,7 +22,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
     }
 
@@ -34,7 +34,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin {
                 ignoreFailures = true
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
@@ -50,7 +50,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
             verifyPlugin {
                 ignoreFailures = true
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")

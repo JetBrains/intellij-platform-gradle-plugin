@@ -18,7 +18,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 instrumentCode = true
             }
-            """
+            """.trimIndent()
         )
 
         writeJavaFile()
@@ -39,7 +39,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 instrumentCode = true
             }
-            """
+            """.trimIndent()
         )
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
@@ -55,7 +55,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 instrumentCode = false
             }
-            """
+            """.trimIndent()
         )
 
         writeJavaFile()
@@ -81,7 +81,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 instrumentCode = true
             }
-            """
+            """.trimIndent()
         )
 
         file("src/main/kotlin/pack/AppKt.form").xml(
@@ -97,7 +97,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
                     <children/>
                 </grid>
             </form>
-            """
+            """.trimIndent()
         )
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
@@ -128,7 +128,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 instrumentCode = true
             }
-            """
+            """.trimIndent()
         )
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")

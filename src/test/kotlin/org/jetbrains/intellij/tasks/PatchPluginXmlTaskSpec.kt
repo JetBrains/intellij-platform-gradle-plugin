@@ -21,7 +21,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -30,7 +30,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -41,7 +41,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
             assertNotContains("will be overwritten", it.output)
         }
@@ -52,7 +52,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -64,7 +64,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             patchPluginXml {
                 pluginDescription = 'Plugin pluginDescription'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -76,7 +76,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <description>Plugin pluginDescription</description>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -88,7 +88,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin someattr="\u2202" /> 
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -97,7 +97,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -108,7 +108,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -120,7 +120,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -132,7 +132,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             patchPluginXml {
                 changeNotes = 'change notes'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -144,7 +144,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <change-notes>change notes</change-notes>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -156,7 +156,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -168,7 +168,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             patchPluginXml {
                 pluginId = 'my.plugin.id'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -180,7 +180,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -195,7 +195,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
               <id>my.plugin.id</id>
               <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -204,7 +204,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -217,7 +217,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <id>my.plugin.id</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -229,7 +229,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -239,7 +239,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 version = '14.1.4'
                 sameSinceUntilBuild = true
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -250,7 +250,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.1532.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -265,7 +265,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
               <id>org.jetbrains.erlang</id>
               <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -274,7 +274,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -287,7 +287,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <id>org.jetbrains.erlang</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -303,7 +303,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
               <idea-version since-build='1' until-build='2'>my_version</idea-version>
               <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -312,7 +312,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -324,7 +324,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <idea-version since-build="141.1532" until-build="141.*">my_version</idea-version>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertContains("attribute 'since-build=[1]' of 'idea-version' tag will be set to '141.1532'", it.output)
@@ -341,7 +341,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
               <version>my_version</version>
               <idea-version since-build='1' until-build='2'>my_version</idea-version>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -351,7 +351,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 version = '14.1.4'
                 updateSinceUntilBuild = false 
             }
-        """
+        """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -362,7 +362,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="1" until-build="2">my_version</idea-version>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -376,7 +376,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
               <version>0.10.0</version>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -384,7 +384,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-        """
+        """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -395,7 +395,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <idea-version since-build="141.1532" until-build="141.*" />
                   <version>0.10.0</version>
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
 
             assertNotContains("will be overwritten", it.output)
@@ -407,7 +407,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -416,7 +416,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME)
@@ -429,7 +429,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
         }
     }
@@ -439,7 +439,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -448,7 +448,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '$intellijVersion'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME)
@@ -458,7 +458,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME).let {
@@ -470,7 +470,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
         }
     }
@@ -481,7 +481,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -490,7 +490,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '$intellijVersion'
             }
-            """
+            """.trimIndent()
         )
 
         build(PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")

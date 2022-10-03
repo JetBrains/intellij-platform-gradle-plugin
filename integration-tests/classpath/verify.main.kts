@@ -49,16 +49,14 @@ __FILE__.init {
     }
 
     runGradleTask("clean", "build").let { logs ->
-        logs containsText "[ant:jacocoReport] Writing bundle 'classpath' with 1 classes"
-
-        buildDirectory.resolve("jacoco/test.exec").run {
-            assert(Files.exists(this))
+        buildDirectory.resolve("jacoco/test.exec").let { jacocoTestExec ->
+            assert(Files.exists(jacocoTestExec)) { "expect that ${jacocoTestExec} exists" }
         }
 
-        buildDirectory.resolve("reports/jacoco.xml").run {
-            assert(Files.exists(this))
+        buildDirectory.resolve("reports/jacoco.xml").let { jacocoXml ->
+            assert(Files.exists(jacocoXml))  { "expect that ${jacocoXml} exists" }
 
-            this containsText """
+            jacocoXml containsText """
                 <method name="getRandomNumber" desc="()I" line="7">
                     <counter type="INSTRUCTION" missed="0" covered="2"/>
                     <counter type="LINE" missed="0" covered="1"/>
