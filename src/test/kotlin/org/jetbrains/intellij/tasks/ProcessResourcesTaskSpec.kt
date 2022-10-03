@@ -20,7 +20,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
@@ -31,7 +31,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
               <idea-version since-build="212.5712" until-build="212.*" />
             </idea-plugin>
-            """
+            """.trimIndent()
         )
     }
 
@@ -40,7 +40,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
@@ -58,13 +58,13 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
             """
             version = '0.42.123'
-            """
+            """.trimIndent()
         )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
@@ -72,7 +72,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             patchPluginXml { sinceBuild = 'Oh' }
-            """
+            """.trimIndent()
         )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).let {
@@ -88,7 +88,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
                   <version>0.42.123</version>
                   <idea-version since-build="Oh" until-build="212.*" />
                 </idea-plugin>
-                """
+                """.trimIndent()
             )
         }
     }

@@ -15,10 +15,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
-import org.jetbrains.intellij.model.OS
-import org.jetbrains.intellij.utils.OpenedPackages
 import java.io.File
-import java.io.FileNotFoundException
 import java.nio.file.Files
 import kotlin.streams.asSequence
 
@@ -143,7 +140,17 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     @get:Internal
     abstract val projectExecutable: Property<String>
 
-    private val buildNumber by lazy { ideBuildNumber(ideDir.get()).split('-').last().let(Version::parse) }
+    private val ideDirFile by lazy { ideDir.get() }
+    private val currentLaunch by lazy {
+        ideProductInfo(ideDirFile)?.currentLaunch
+    }
+    private val infoPlist by lazy {
+        ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
+            PropertyListParser.parse(it) as NSDictionary
+        }
+    }
+
+    private val buildNumber by lazy { ideDirFile.let(::ideBuildNumber).split('-').last().let(Version::parse) }
     private val build203 by lazy { Version.parse("203.0") }
     private val build221 by lazy { Version.parse("221.0") }
     private val build223 by lazy { Version.parse("223.0") }
@@ -173,33 +180,25 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * Prepares the classpath for the IDE based on the IDEA version.
      */
     private fun configureClasspath() {
-        val ideDirFile = ideDir.get()
-
-        executable.takeUnless { it.isNullOrEmpty() }?.let {
-            resolveToolsJar(it).takeIf(File::exists) ?: Jvm.current().toolsJar
-        }?.let {
-            classpath += objectFactory.fileCollection().from(it)
-        }
+        executable
+            .takeUnless { it.isNullOrEmpty() }
+            ?.let {
+                resolveToolsJar(it).takeIf(File::exists) ?: Jvm.current().toolsJar
+            }
+            ?.let {
+                classpath += objectFactory.fileCollection().from(it)
+            }
 
         classpath += when {
             buildNumber > build223 ->
-                ideProductInfo(ideDirFile)?.let { productInfo ->
-                    productInfo.launch.find {
-                        with(OperatingSystem.current()) {
-                            when {
-                                isLinux -> OS.Linux
-                                isWindows -> OS.Windows
-                                isMacOsX -> OS.macOS
-                                else -> OS.Linux
-                            } == it.os
-                        }
-                    }?.bootClassPathJarNames
-                } ?: loadInfoPlist(ideDirFile)?.let { infoPlist ->
-                    infoPlist.getDictionary("JVMOptions")
-                        .getValue("ClassPath")
-                        .split(':')
-                        .map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
-                } ?: emptyList()
+                currentLaunch
+                    ?.bootClassPathJarNames
+                    ?: infoPlist
+                        ?.getDictionary("JVMOptions")
+                        ?.getValue("ClassPath")
+                        ?.split(':')
+                        ?.map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
+                    ?: emptyList()
 
             buildNumber > build221 -> listOf(
                 "3rd-party-rt.jar",
@@ -237,9 +236,19 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      */
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
-        systemProperties(getIdeaSystemProperties(configDir.get(), systemDir.get(), pluginsDir.get().asFile, requiredPluginIds.get()))
+        systemProperties(
+            getIdeaSystemProperties(
+                ideDirFile,
+                configDir.get(),
+                systemDir.get(),
+                pluginsDir.get().asFile,
+                requiredPluginIds.get()
+            )
+        )
+
         val operatingSystem = OperatingSystem.current()
         val userDefinedSystemProperties = systemProperties
+
         if (operatingSystem.isMacOsX) {
             systemPropertyIfNotDefined("idea.smooth.progress", false, userDefinedSystemProperties)
             systemPropertyIfNotDefined("apple.laf.useScreenMenuBar", true, userDefinedSystemProperties)
@@ -247,6 +256,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         } else if (operatingSystem.isUnix) {
             systemPropertyIfNotDefined("sun.awt.disablegrab", true, userDefinedSystemProperties)
         }
+
         systemPropertyIfNotDefined("idea.classpath.index.enabled", false, userDefinedSystemProperties)
         systemPropertyIfNotDefined("idea.is.internal", true, userDefinedSystemProperties)
         systemPropertyIfNotDefined("jdk.module.illegalAccess.silent", true, userDefinedSystemProperties)
@@ -276,7 +286,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         if (buildNumber >= build221) {
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         }
-        systemProperty("idea.vendor.name", "JetBrains")
+        systemPropertyIfNotDefined("idea.vendor.name", "JetBrains", userDefinedSystemProperties)
         systemPropertyIfNotDefined("idea.plugin.in.sandbox.mode", true, userDefinedSystemProperties)
     }
 
@@ -286,7 +296,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     private fun findIdePrefix(): String? {
         info(context, "Looking for platform prefix")
 
-        val ideDirFile = ideDir.get()
         val prefix = Files.list(ideDirFile.toPath().resolve("bin"))
             .asSequence()
             .filter { file -> file.hasExtension("sh") || file.hasExtension("bat") }
@@ -300,18 +309,13 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             }
 
             OperatingSystem.current().isMacOsX -> {
-                val infoPlist = loadInfoPlist(ideDirFile) ?: return null
-                try {
-                    infoPlist
-                        .getDictionary("JVMOptions")
-                        .getDictionary("Properties")
-                        .getValue("idea.platform.prefix")
-                } catch (e: FileNotFoundException) {
-                    null
-                } catch (t: Throwable) {
-                    error(context, "Cannot find prefix in $infoPlist", t)
-                    null
-                }
+                infoPlist
+                    ?.getDictionary("JVMOptions")
+                    ?.getDictionary("Properties")
+                    ?.getValue("idea.platform.prefix")
+                    .ifNull {
+                        error(context, "Cannot find prefix in $infoPlist")
+                    }
             }
 
             else -> {
@@ -336,7 +340,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         jvmArgs = collectJvmArgs()
     }
 
-    protected open fun collectJvmArgs() = getIdeJvmArgs(this, jvmArgs, ideDir.get()) + OpenedPackages
+    protected open fun collectJvmArgs() = getIdeJvmArgs(this, jvmArgs, ideDir.get())
 
     /**
      * Resolves the path to the `tools.jar` library.
@@ -348,10 +352,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             else -> "../lib/tools.jar"
         }
         return File(binDir, path)
-    }
-
-    private fun loadInfoPlist(ideDirFile: File) = ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
-        PropertyListParser.parse(it) as NSDictionary
     }
 
     private fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary

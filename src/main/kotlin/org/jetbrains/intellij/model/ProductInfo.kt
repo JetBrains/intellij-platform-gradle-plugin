@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.model
 
 import kotlinx.serialization.Serializable
+import org.gradle.api.GradleException
+import org.gradle.internal.os.OperatingSystem
 
 @Serializable
 data class ProductInfo(
@@ -13,17 +15,35 @@ data class ProductInfo(
     var productCode: String? = null,
     var dataDirectoryName: String? = null,
     var svgIconPath: String? = null,
+    var productVendor: String? = null,
     val launch: List<Launch> = mutableListOf(),
     val customProperties: List<CustomProperty> = mutableListOf(),
-)
+    val bundledPlugins: List<String> = mutableListOf(),
+    val fileExtensions: List<String> = mutableListOf(),
+    val modules: List<String> = mutableListOf(),
+) {
+    val currentLaunch: Launch
+        get() = with(OperatingSystem.current()) {
+            launch.find {
+                when {
+                    isLinux -> OS.Linux
+                    isWindows -> OS.Windows
+                    isMacOsX -> OS.macOS
+                    else -> OS.Linux
+                } == it.os
+            } ?: throw GradleException("Could not find launch information for the current OS: $name")
+        }
+}
 
 @Serializable
 data class Launch(
     var os: OS? = null,
     var launcherPath: String? = null,
+    var javaExecutablePath: String? = null,
     var vmOptionsFilePath: String? = null,
     var startupWmClass: String? = null,
-    var bootClassPathJarNames: List<String> = mutableListOf(),
+    val bootClassPathJarNames: List<String> = mutableListOf(),
+    val additionalJvmArguments: List<String> = mutableListOf(),
 )
 
 @Serializable
