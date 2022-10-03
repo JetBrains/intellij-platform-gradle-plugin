@@ -44,6 +44,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_RELEASES
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.model.ProductInfo
+import org.jetbrains.intellij.utils.OpenedPackages
 import org.xml.sax.SAXParseException
 import java.io.File
 import java.io.IOException
@@ -98,20 +99,43 @@ fun transformXml(document: Document, file: File) {
 }
 
 fun getIdeaSystemProperties(
+    ideDirFile: File,
     configDirectory: File,
     systemDirectory: File,
     pluginsDirectory: File,
     requirePluginIds: List<String>,
 ): Map<String, String> {
+    val currentLaunch = ideProductInfo(ideDirFile)?.currentLaunch
     val result = mapOf(
         "idea.config.path" to configDirectory.canonicalPath,
         "idea.system.path" to systemDirectory.canonicalPath,
         "idea.plugins.path" to pluginsDirectory.canonicalPath,
     )
-    if (requirePluginIds.isNotEmpty()) {
-        return result + mapOf("idea.required.plugins.id" to requirePluginIds.joinToString(","))
-    }
-    return result
+
+    val currentLaunchProperties = currentLaunch
+        ?.additionalJvmArguments
+        ?.filter {
+            it.startsWith("-D")
+        }
+        ?.associate {
+            it
+                .substring(2)
+                .split('=')
+                .let { (key, value) ->
+                    key to value
+                        .replace("\$APP_PACKAGE", ideDirFile.canonicalPath)
+                        .replace("\$IDE_HOME", ideDirFile.canonicalPath)
+                        .replace("%IDE_HOME%", ideDirFile.canonicalPath)
+                }
+        }
+        ?: emptyMap()
+
+    val requirePluginProperties = requirePluginIds
+        .takeIf(List<String>::isNotEmpty)
+        ?.let { mapOf("idea.required.plugins.id" to it.joinToString(",")) }
+        ?: emptyMap()
+
+    return result + currentLaunchProperties + requirePluginProperties
 }
 
 fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
@@ -120,11 +144,21 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirecto
         minHeapSize = minHeapSize ?: "256m"
     }
 
-    return arguments.orEmpty() + ideDirectory
-        ?.resolve("lib/boot.jar")
-        ?.takeIf { it.exists() }
+    val productInfo = ideProductInfo(ideDirectory!!)
+    val bootclasspath = ideDirectory
+        .resolve("lib/boot.jar")
+        .takeIf { it.exists() }
         ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
         .orEmpty()
+    val vmOptions = productInfo?.currentLaunch?.vmOptionsFilePath
+        ?.let { ideDirectory.resolve(it).readLines() }
+        .orEmpty()
+    val additionalJvmArguments = productInfo?.currentLaunch?.additionalJvmArguments
+        ?.filterNot { it.startsWith("-D") }
+        ?.takeIf { it.isNotEmpty() }
+        ?: OpenedPackages
+
+    return arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments
 }
 
 fun ideBuildNumber(ideDirectory: File) = (

@@ -1145,7 +1145,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
             doFirst {
-                jvmArgs = getIdeJvmArgs((this as Test), jvmArgs, ideDirProvider.get()) + OpenedPackages
+                jvmArgs = getIdeJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
                 classpath += ideaDependencyLibrariesProvider.get()
                 classpath -= classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
 
@@ -1159,6 +1159,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
                 systemProperties(
                     getIdeaSystemProperties(
+                        ideDirProvider.get(),
                         configDirectoryProvider.get(),
                         systemDirectoryProvider.get(),
                         pluginsDirectoryProvider.get(),
