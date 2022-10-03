@@ -14,6 +14,7 @@ plugins {
     id("com.gradle.plugin-publish") version "1.0.0"
     id("org.jetbrains.changelog") version "1.3.1"
     id("org.jetbrains.dokka") version "1.7.10"
+    id("org.jetbrains.kotlinx.binary-compatibility-validator") version "0.11.1"
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {

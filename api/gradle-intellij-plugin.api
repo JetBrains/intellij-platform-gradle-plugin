@@ -1,0 +1,1370 @@
+public final class org/jetbrains/intellij/BuildFeature : java/lang/Enum {
+	public static final field NO_SEARCHABLE_OPTIONS_WARNING Lorg/jetbrains/intellij/BuildFeature;
+	public static final field PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING Lorg/jetbrains/intellij/BuildFeature;
+	public static final field SELF_UPDATE_CHECK Lorg/jetbrains/intellij/BuildFeature;
+	public final fun getValue (Lorg/gradle/api/Project;)Z
+	public fun toString ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/BuildFeature;
+	public static fun values ()[Lorg/jetbrains/intellij/BuildFeature;
+}
+
+public final class org/jetbrains/intellij/BuildFeatureKt {
+	public static final fun isBuildFeatureEnabled (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/BuildFeature;)Z
+}
+
+public final class org/jetbrains/intellij/DependenciesUtils {
+	public static final fun intellij (Lorg/gradle/api/Project;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellij (Lorg/gradle/api/Project;Lgroovy/lang/Closure;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellij (Lorg/gradle/api/Project;Lorg/gradle/api/Action;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellij (Lorg/gradle/api/Project;Lorg/gradle/api/tasks/util/PatternFilterable;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijExtra (Lorg/gradle/api/Project;Ljava/lang/String;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijExtra (Lorg/gradle/api/Project;Ljava/lang/String;Lgroovy/lang/Closure;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijExtra (Lorg/gradle/api/Project;Ljava/lang/String;Lorg/gradle/api/Action;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijExtra (Lorg/gradle/api/Project;Ljava/lang/String;Lorg/gradle/api/tasks/util/PatternFilterable;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijPlugin (Lorg/gradle/api/Project;Ljava/lang/String;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijPlugin (Lorg/gradle/api/Project;Ljava/lang/String;Lgroovy/lang/Closure;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijPlugin (Lorg/gradle/api/Project;Ljava/lang/String;Lorg/gradle/api/Action;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijPlugin (Lorg/gradle/api/Project;Ljava/lang/String;Lorg/gradle/api/tasks/util/PatternFilterable;)Lorg/gradle/api/file/FileCollection;
+	public static final fun intellijPlugins (Lorg/gradle/api/Project;[Ljava/lang/String;)Lorg/gradle/api/file/FileCollection;
+}
+
+public final class org/jetbrains/intellij/IntelliJIvyDescriptorFileGenerator {
+	public fun <init> (Lorg/gradle/api/publish/ivy/internal/publisher/IvyPublicationIdentity;)V
+	public final fun addArtifact (Lorg/gradle/api/publish/ivy/IvyArtifact;)V
+	public final fun addConfiguration (Lorg/gradle/api/publish/ivy/IvyConfiguration;)V
+	public final fun writeTo (Ljava/io/File;)V
+}
+
+public final class org/jetbrains/intellij/IntelliJIvyDescriptorFileGenerator$OptionalAttributeXmlWriter : org/gradle/internal/xml/SimpleXmlWriter {
+	public fun <init> (Ljava/io/Writer;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun attribute (Ljava/lang/String;Ljava/lang/String;)Lorg/gradle/internal/xml/SimpleMarkupWriter;
+	public fun attribute (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/IntelliJIvyDescriptorFileGenerator$OptionalAttributeXmlWriter;
+	public synthetic fun startElement (Ljava/lang/String;)Lorg/gradle/internal/xml/SimpleMarkupWriter;
+	public fun startElement (Ljava/lang/String;)Lorg/jetbrains/intellij/IntelliJIvyDescriptorFileGenerator$OptionalAttributeXmlWriter;
+}
+
+public abstract class org/jetbrains/intellij/IntelliJPlugin : org/gradle/api/Plugin {
+	public fun <init> ()V
+	public synthetic fun apply (Ljava/lang/Object;)V
+	public fun apply (Lorg/gradle/api/Project;)V
+}
+
+public final class org/jetbrains/intellij/IntelliJPluginConstants {
+	public static final field ANDROID_STUDIO_PRODUCTS_RELEASES_URL Ljava/lang/String;
+	public static final field ANNOTATIONS_DEPENDENCY_VERSION Ljava/lang/String;
+	public static final field BUILD_PLUGIN_TASK_NAME Ljava/lang/String;
+	public static final field BUILD_SEARCHABLE_OPTIONS_TASK_NAME Ljava/lang/String;
+	public static final field CACHE_REDIRECTOR Ljava/lang/String;
+	public static final field CLASSPATH_INDEX_CLEANUP_TASK_NAME Ljava/lang/String;
+	public static final field COMPILE_KOTLIN_TASK_NAME Ljava/lang/String;
+	public static final field DEFAULT_IDEA_VERSION Ljava/lang/String;
+	public static final field DEFAULT_INTELLIJ_PLUGINS_REPOSITORY Ljava/lang/String;
+	public static final field DEFAULT_INTELLIJ_REPOSITORY Ljava/lang/String;
+	public static final field DEFAULT_JBR_REPOSITORY Ljava/lang/String;
+	public static final field DEFAULT_SANDBOX Ljava/lang/String;
+	public static final field DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME Ljava/lang/String;
+	public static final field EXTENSION_NAME Ljava/lang/String;
+	public static final field GITHUB_REPOSITORY Ljava/lang/String;
+	public static final field IDEA_CONFIGURATION_NAME Ljava/lang/String;
+	public static final field IDEA_PLUGINS_CONFIGURATION_NAME Ljava/lang/String;
+	public static final field IDEA_PRODUCTS_RELEASES_URL Ljava/lang/String;
+	public static final field INSTANCE Lorg/jetbrains/intellij/IntelliJPluginConstants;
+	public static final field INSTRUMENT_CODE_TASK_NAME Ljava/lang/String;
+	public static final field INSTRUMENT_TEST_CODE_TASK_NAME Ljava/lang/String;
+	public static final field INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME Ljava/lang/String;
+	public static final field INTELLIJ_DEPENDENCIES Ljava/lang/String;
+	public static final field JAR_SEARCHABLE_OPTIONS_TASK_NAME Ljava/lang/String;
+	public static final field JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA Ljava/lang/String;
+	public static final field LIST_PRODUCTS_RELEASES_TASK_NAME Ljava/lang/String;
+	public static final field MARKETPLACE_HOST Ljava/lang/String;
+	public static final field MINIMAL_SUPPORTED_GRADLE_VERSION Ljava/lang/String;
+	public static final field PATCH_PLUGIN_XML_TASK_NAME Ljava/lang/String;
+	public static final field PERFORMANCE_PLUGIN_ID Ljava/lang/String;
+	public static final field PERFORMANCE_TEST_CONFIGURATION_NAME Ljava/lang/String;
+	public static final field PLATFORM_TYPE_ANDROID_STUDIO Ljava/lang/String;
+	public static final field PLATFORM_TYPE_CLION Ljava/lang/String;
+	public static final field PLATFORM_TYPE_GATEWAY Ljava/lang/String;
+	public static final field PLATFORM_TYPE_GOLAND Ljava/lang/String;
+	public static final field PLATFORM_TYPE_INTELLIJ_COMMUNITY Ljava/lang/String;
+	public static final field PLATFORM_TYPE_INTELLIJ_ULTIMATE Ljava/lang/String;
+	public static final field PLATFORM_TYPE_PHPSTORM Ljava/lang/String;
+	public static final field PLATFORM_TYPE_PYCHARM Ljava/lang/String;
+	public static final field PLATFORM_TYPE_PYCHARM_COMMUNITY Ljava/lang/String;
+	public static final field PLATFORM_TYPE_RIDER Ljava/lang/String;
+	public static final field PLUGIN_GROUP_NAME Ljava/lang/String;
+	public static final field PLUGIN_ID Ljava/lang/String;
+	public static final field PLUGIN_NAME Ljava/lang/String;
+	public static final field PLUGIN_PATH Ljava/lang/String;
+	public static final field PLUGIN_VERIFIER_REPOSITORY Ljava/lang/String;
+	public static final field PLUGIN_XML_DIR_NAME Ljava/lang/String;
+	public static final field POST_INSTRUMENT_CODE_TASK_NAME Ljava/lang/String;
+	public static final field POST_INSTRUMENT_TEST_CODE_TASK_NAME Ljava/lang/String;
+	public static final field PREPARE_SANDBOX_TASK_NAME Ljava/lang/String;
+	public static final field PREPARE_TESTING_SANDBOX_TASK_NAME Ljava/lang/String;
+	public static final field PREPARE_UI_TESTING_SANDBOX_TASK_NAME Ljava/lang/String;
+	public static final field PUBLISH_PLUGIN_TASK_NAME Ljava/lang/String;
+	public static final field RELEASE_SUFFIX_CUSTOM_SNAPSHOT Ljava/lang/String;
+	public static final field RELEASE_SUFFIX_EAP Ljava/lang/String;
+	public static final field RELEASE_SUFFIX_EAP_CANDIDATE Ljava/lang/String;
+	public static final field RELEASE_SUFFIX_SNAPSHOT Ljava/lang/String;
+	public static final field RELEASE_TYPE_NIGHTLY Ljava/lang/String;
+	public static final field RELEASE_TYPE_RELEASES Ljava/lang/String;
+	public static final field RELEASE_TYPE_SNAPSHOTS Ljava/lang/String;
+	public static final field RUN_IDE_FOR_UI_TESTS_TASK_NAME Ljava/lang/String;
+	public static final field RUN_IDE_PERFORMANCE_TEST_TASK_NAME Ljava/lang/String;
+	public static final field RUN_IDE_TASK_NAME Ljava/lang/String;
+	public static final field RUN_PLUGIN_VERIFIER_TASK_NAME Ljava/lang/String;
+	public static final field SEARCHABLE_OPTIONS_DIR_NAME Ljava/lang/String;
+	public static final field SEARCHABLE_OPTIONS_SUFFIX Ljava/lang/String;
+	public static final field SETUP_DEPENDENCIES_TASK_NAME Ljava/lang/String;
+	public static final field SETUP_INSTRUMENT_CODE_TASK_NAME Ljava/lang/String;
+	public static final field SIGN_PLUGIN_TASK_NAME Ljava/lang/String;
+	public static final field VERIFY_PLUGIN_CONFIGURATION_TASK_NAME Ljava/lang/String;
+	public static final field VERIFY_PLUGIN_TASK_NAME Ljava/lang/String;
+	public static final field VERSION_LATEST Ljava/lang/String;
+	public final fun getPLATFORM_TYPES ()Ljava/util/List;
+}
+
+public abstract class org/jetbrains/intellij/IntelliJPluginExtension {
+	public static final field Companion Lorg/jetbrains/intellij/IntelliJPluginExtension$Companion;
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun addPluginDependency (Lorg/jetbrains/intellij/dependency/PluginDependency;)V
+	public abstract fun getConfigureDefaultDependencies ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDownloadSources ()Lorg/gradle/api/provider/Property;
+	public abstract fun getExtraDependencies ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getIdeaDependency ()Lorg/gradle/api/provider/Property;
+	public final fun getIdeaDependency (Lorg/gradle/api/Project;)Lorg/jetbrains/intellij/dependency/IdeaDependency;
+	public abstract fun getIdeaDependencyCachePath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getInstrumentCode ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIntellijRepository ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJreRepository ()Lorg/gradle/api/provider/Property;
+	public abstract fun getLocalPath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getLocalSourcesPath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPluginDependencies ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getPluginDependenciesList (Lorg/gradle/api/Project;)Ljava/util/Set;
+	public abstract fun getPluginName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlugins ()Lorg/gradle/api/provider/ListProperty;
+	public final fun getPluginsRepositories ()Ljava/util/List;
+	public final fun getPluginsRepositories ()Lorg/jetbrains/intellij/dependency/PluginsRepositoryConfiguration;
+	public abstract fun getSameSinceUntilBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSandboxDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getType ()Lorg/gradle/api/provider/Property;
+	public final fun getUnresolvedPluginDependencies ()Ljava/util/Set;
+	public abstract fun getUpdateSinceUntilBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
+	public final fun getVersionNumber ()Ljava/lang/String;
+	public final fun getVersionType ()Ljava/lang/String;
+	public final fun pluginsRepositories (Lorg/gradle/api/Action;)V
+}
+
+public final class org/jetbrains/intellij/IntelliJPluginExtension$Companion {
+}
+
+public final class org/jetbrains/intellij/IntelliJPluginLibrary : org/gradle/api/component/SoftwareComponent {
+	public fun <init> ()V
+	public fun getName ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/Utils {
+	public static final fun collectJars (Ljava/io/File;Ljava/util/function/Predicate;)Ljava/util/Collection;
+	public static synthetic fun collectJars$default (Ljava/io/File;Ljava/util/function/Predicate;ILjava/lang/Object;)Ljava/util/Collection;
+	public static final fun collectZips (Ljava/io/File;Ljava/util/function/Predicate;)Ljava/util/Collection;
+	public static synthetic fun collectZips$default (Ljava/io/File;Ljava/util/function/Predicate;ILjava/lang/Object;)Ljava/util/Collection;
+	public static final fun createPlugin (Ljava/io/File;ZLjava/lang/String;)Lcom/jetbrains/plugin/structure/intellij/plugin/IdePlugin;
+	public static final fun debug (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public static synthetic fun debug$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static final fun error (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public static synthetic fun error$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static final fun getIdeJvmArgs (Lorg/gradle/process/JavaForkOptions;Ljava/util/List;Ljava/io/File;)Ljava/util/List;
+	public static final fun getIdeaSystemProperties (Ljava/io/File;Ljava/io/File;Ljava/io/File;Ljava/io/File;Ljava/util/List;)Ljava/util/Map;
+	public static final fun getMAJOR_VERSION_PATTERN ()Ljava/util/regex/Pattern;
+	public static final fun getRepositoryVersion ()Ljava/lang/String;
+	public static final fun ideBuildNumber (Ljava/io/File;)Ljava/lang/String;
+	public static final fun ideProductInfo (Ljava/io/File;)Lorg/jetbrains/intellij/model/ProductInfo;
+	public static final fun ideaDir (Ljava/lang/String;)Ljava/io/File;
+	public static final fun ifFalse (ZLkotlin/jvm/functions/Function0;)Z
+	public static final fun ifNull (Ljava/lang/Object;Lkotlin/jvm/functions/Function0;)Ljava/lang/Object;
+	public static final fun info (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public static synthetic fun info$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+	public static final fun isDependencyOnPyCharm (Lorg/jetbrains/intellij/dependency/IdeaDependency;)Z
+	public static final fun isKotlinRuntime (Ljava/lang/String;)Z
+	public static final fun isPyCharmType (Ljava/lang/String;)Z
+	public static final fun logCategory (Lorg/gradle/api/Project;)Ljava/lang/String;
+	public static final fun logCategory (Lorg/gradle/api/Task;)Ljava/lang/String;
+	public static final fun mainSourceSet (Lorg/gradle/api/Project;)Lorg/gradle/api/tasks/SourceSet;
+	public static final fun parsePluginXml (Ljava/io/File;Ljava/lang/String;)Lcom/jetbrains/plugin/structure/intellij/beans/PluginBean;
+	public static final fun releaseType (Ljava/lang/String;)Ljava/lang/String;
+	public static final fun sourcePluginXmlFiles (Lorg/gradle/api/Project;)Ljava/util/List;
+	public static final fun transformXml (Lorg/jdom2/Document;Ljava/io/File;)V
+	public static final fun warn (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public static synthetic fun warn$default (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
+}
+
+public final class org/jetbrains/intellij/Version : java/lang/Comparable {
+	public static final field Companion Lorg/jetbrains/intellij/Version$Companion;
+	public fun <init> ()V
+	public fun <init> (IIILjava/lang/String;)V
+	public synthetic fun <init> (IIILjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public synthetic fun compareTo (Ljava/lang/Object;)I
+	public fun compareTo (Lorg/jetbrains/intellij/Version;)I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getMajor ()I
+	public final fun getMinor ()I
+	public final fun getPatch ()I
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/Version$Companion {
+	public final fun parse (Ljava/lang/String;)Lorg/jetbrains/intellij/Version;
+}
+
+public final class org/jetbrains/intellij/dependency/BuiltinPluginsRegistry : java/io/Serializable {
+	public static final field Companion Lorg/jetbrains/intellij/dependency/BuiltinPluginsRegistry$Companion;
+	public static final field version I
+	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
+	public final fun add (Ljava/io/File;)V
+	public final fun collectBuiltinDependencies (Ljava/util/Collection;)Ljava/util/Collection;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun findPlugin (Ljava/lang/String;)Ljava/io/File;
+	public fun hashCode ()I
+}
+
+public final class org/jetbrains/intellij/dependency/BuiltinPluginsRegistry$Companion {
+	public final fun fromDirectory (Ljava/io/File;Ljava/lang/String;)Lorg/jetbrains/intellij/dependency/BuiltinPluginsRegistry;
+}
+
+public final class org/jetbrains/intellij/dependency/CustomPluginsRepository : org/jetbrains/intellij/dependency/PluginsRepository {
+	public fun <init> (Ljava/lang/String;)V
+	public fun postResolve (Lorg/gradle/api/Project;Ljava/lang/String;)V
+	public fun resolve (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;Ljava/lang/String;)Ljava/io/File;
+}
+
+public final class org/jetbrains/intellij/dependency/IdePluginSourceZipFilesProvider {
+	public static final field INSTANCE Lorg/jetbrains/intellij/dependency/IdePluginSourceZipFilesProvider;
+	public final fun getSourceZips (Lorg/jetbrains/intellij/dependency/IdeaDependency;Ljava/lang/String;)Ljava/io/File;
+}
+
+public class org/jetbrains/intellij/dependency/IdeaDependency : java/io/Serializable {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;Ljava/io/File;ZLorg/jetbrains/intellij/dependency/BuiltinPluginsRegistry;Ljava/util/Collection;)V
+	protected fun collectJarFiles ()Ljava/util/Collection;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuildNumber ()Ljava/lang/String;
+	public final fun getClasses ()Ljava/io/File;
+	public final fun getExtraDependencies ()Ljava/util/Collection;
+	public final fun getFqn ()Ljava/lang/String;
+	public fun getIvyRepositoryDirectory ()Ljava/io/File;
+	public final fun getJarFiles ()Ljava/util/Collection;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPluginsRegistry ()Lorg/jetbrains/intellij/dependency/BuiltinPluginsRegistry;
+	public final fun getSourceZipFiles ()Ljava/util/Collection;
+	public final fun getSources ()Ljava/io/File;
+	public final fun getVersion ()Ljava/lang/String;
+	public final fun getWithKotlin ()Z
+	public fun hashCode ()I
+}
+
+public abstract class org/jetbrains/intellij/dependency/IdeaDependencyManager {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/utils/ArchiveUtils;Lorg/jetbrains/intellij/utils/DependenciesDownloader;Ljava/lang/String;)V
+	public final fun register (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/dependency/IdeaDependency;Lorg/gradle/api/artifacts/DependencySet;)V
+	public final fun resolveLocal (Lorg/gradle/api/Project;Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/dependency/IdeaDependency;
+	public final fun resolveRemote (Lorg/gradle/api/Project;Ljava/lang/String;Ljava/lang/String;ZLjava/util/List;)Lorg/jetbrains/intellij/dependency/IdeaDependency;
+}
+
+public final class org/jetbrains/intellij/dependency/IdeaExtraDependency {
+	public fun <init> (Ljava/lang/String;Ljava/io/File;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getClasses ()Ljava/io/File;
+	public final fun getJarFiles ()Ljava/util/Collection;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+}
+
+public final class org/jetbrains/intellij/dependency/IntellijIvyArtifact : org/gradle/api/publish/ivy/IvyArtifact {
+	public static final field Companion Lorg/jetbrains/intellij/dependency/IntellijIvyArtifact$Companion;
+	public fun <init> (Ljava/io/File;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun builtBy ([Ljava/lang/Object;)V
+	public fun getBuildDependencies ()Lorg/gradle/api/internal/tasks/DefaultTaskDependency;
+	public synthetic fun getBuildDependencies ()Lorg/gradle/api/tasks/TaskDependency;
+	public fun getClassifier ()Ljava/lang/String;
+	public fun getConf ()Ljava/lang/String;
+	public fun getExtension ()Ljava/lang/String;
+	public fun getFile ()Ljava/io/File;
+	public fun getName ()Ljava/lang/String;
+	public fun getType ()Ljava/lang/String;
+	public fun setClassifier (Ljava/lang/String;)V
+	public fun setConf (Ljava/lang/String;)V
+	public fun setExtension (Ljava/lang/String;)V
+	public fun setName (Ljava/lang/String;)V
+	public fun setType (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/dependency/IntellijIvyArtifact$Companion {
+	public final fun createDirectoryDependency (Ljava/io/File;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;)Lorg/gradle/api/publish/ivy/IvyArtifact;
+	public static synthetic fun createDirectoryDependency$default (Lorg/jetbrains/intellij/dependency/IntellijIvyArtifact$Companion;Ljava/io/File;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;ILjava/lang/Object;)Lorg/gradle/api/publish/ivy/IvyArtifact;
+	public final fun createJarDependency (Ljava/io/File;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;)Lorg/gradle/api/publish/ivy/IvyArtifact;
+	public static synthetic fun createJarDependency$default (Lorg/jetbrains/intellij/dependency/IntellijIvyArtifact$Companion;Ljava/io/File;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;ILjava/lang/Object;)Lorg/gradle/api/publish/ivy/IvyArtifact;
+	public final fun createZipDependency (Ljava/io/File;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;)Lorg/gradle/api/publish/ivy/IvyArtifact;
+	public static synthetic fun createZipDependency$default (Lorg/jetbrains/intellij/dependency/IntellijIvyArtifact$Companion;Ljava/io/File;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;ILjava/lang/Object;)Lorg/gradle/api/publish/ivy/IvyArtifact;
+}
+
+public final class org/jetbrains/intellij/dependency/JpsIdeaDependency : org/jetbrains/intellij/dependency/IdeaDependency {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/io/File;Ljava/io/File;ZLjava/lang/String;)V
+	public synthetic fun collectJarFiles ()Ljava/util/Collection;
+}
+
+public final class org/jetbrains/intellij/dependency/LocalIdeaDependency : org/jetbrains/intellij/dependency/IdeaDependency {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;Ljava/io/File;ZLorg/jetbrains/intellij/dependency/BuiltinPluginsRegistry;Ljava/util/Collection;)V
+	public fun getIvyRepositoryDirectory ()Ljava/io/File;
+}
+
+public abstract interface class org/jetbrains/intellij/dependency/MavenRepository : org/jetbrains/intellij/dependency/PluginsRepository {
+	public fun getPluginFile (Lorg/gradle/api/Project;Lorg/gradle/api/artifacts/Dependency;Lorg/gradle/api/artifacts/repositories/MavenArtifactRepository;Ljava/lang/String;Ljava/lang/String;)Ljava/io/File;
+	public abstract fun getResolvedDependency ()Z
+	public fun postResolve (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function0;)V
+	public abstract fun setResolvedDependency (Z)V
+}
+
+public final class org/jetbrains/intellij/dependency/MavenRepositoryPlugin : org/jetbrains/intellij/dependency/MavenRepository {
+	public fun <init> (Ljava/lang/String;)V
+	public fun getResolvedDependency ()Z
+	public fun postResolve (Lorg/gradle/api/Project;Ljava/lang/String;)V
+	public fun resolve (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;Ljava/lang/String;)Ljava/io/File;
+	public fun setResolvedDependency (Z)V
+}
+
+public final class org/jetbrains/intellij/dependency/MavenRepositoryPluginByAction : org/jetbrains/intellij/dependency/MavenRepository {
+	public fun <init> (Lorg/gradle/api/Action;)V
+	public fun getResolvedDependency ()Z
+	public fun postResolve (Lorg/gradle/api/Project;Ljava/lang/String;)V
+	public fun resolve (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;Ljava/lang/String;)Ljava/io/File;
+	public fun setResolvedDependency (Z)V
+}
+
+public abstract interface class org/jetbrains/intellij/dependency/PluginDependency : java/io/Serializable {
+	public static final field Companion Lorg/jetbrains/intellij/dependency/PluginDependency$Companion;
+	public abstract fun getArtifact ()Ljava/io/File;
+	public abstract fun getBuiltin ()Z
+	public abstract fun getChannel ()Ljava/lang/String;
+	public abstract fun getClassesDirectory ()Ljava/io/File;
+	public fun getFqn ()Ljava/lang/String;
+	public abstract fun getId ()Ljava/lang/String;
+	public abstract fun getJarFiles ()Ljava/util/Collection;
+	public abstract fun getMaven ()Z
+	public abstract fun getMetaInfDirectory ()Ljava/io/File;
+	public abstract fun getNotation ()Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;
+	public abstract fun getPlatformPluginId ()Ljava/lang/String;
+	public abstract fun getSourceJarFiles ()Ljava/util/Collection;
+	public abstract fun getVersion ()Ljava/lang/String;
+	public abstract fun isCompatible (Lcom/jetbrains/plugin/structure/intellij/version/IdeVersion;)Z
+}
+
+public final class org/jetbrains/intellij/dependency/PluginDependency$Companion {
+}
+
+public final class org/jetbrains/intellij/dependency/PluginDependencyImpl : org/jetbrains/intellij/dependency/PluginDependency {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;ZZ)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;ZZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public fun getArtifact ()Ljava/io/File;
+	public fun getBuiltin ()Z
+	public fun getChannel ()Ljava/lang/String;
+	public fun getClassesDirectory ()Ljava/io/File;
+	public fun getId ()Ljava/lang/String;
+	public fun getJarFiles ()Ljava/util/Collection;
+	public fun getMaven ()Z
+	public fun getMetaInfDirectory ()Ljava/io/File;
+	public fun getNotation ()Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;
+	public fun getPlatformPluginId ()Ljava/lang/String;
+	public final fun getSinceBuild ()Ljava/lang/String;
+	public fun getSourceJarFiles ()Ljava/util/Collection;
+	public final fun getUntilBuild ()Ljava/lang/String;
+	public fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun isCompatible (Lcom/jetbrains/plugin/structure/intellij/version/IdeVersion;)Z
+	public fun setChannel (Ljava/lang/String;)V
+	public fun setClassesDirectory (Ljava/io/File;)V
+	public fun setJarFiles (Ljava/util/Collection;)V
+	public fun setMetaInfDirectory (Ljava/io/File;)V
+	public final fun setSinceBuild (Ljava/lang/String;)V
+	public fun setSourceJarFiles (Ljava/util/Collection;)V
+	public final fun setUntilBuild (Ljava/lang/String;)V
+}
+
+public abstract class org/jetbrains/intellij/dependency/PluginDependencyManager {
+	public fun <init> (Ljava/lang/String;Lorg/jetbrains/intellij/dependency/IdeaDependency;Ljava/util/List;Lorg/jetbrains/intellij/utils/ArchiveUtils;Ljava/lang/String;)V
+	public final fun register (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/dependency/PluginDependency;Lorg/gradle/api/artifacts/DependencySet;)V
+	public final fun resolve (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;)Lorg/jetbrains/intellij/dependency/PluginDependency;
+}
+
+public final class org/jetbrains/intellij/dependency/PluginDependencyNotation : java/io/Serializable {
+	public static final field Companion Lorg/jetbrains/intellij/dependency/PluginDependencyNotation$Companion;
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChannel ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun toDependency (Lorg/gradle/api/Project;)Lorg/gradle/api/artifacts/Dependency;
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/dependency/PluginDependencyNotation$Companion {
+	public final fun parsePluginDependencyString (Ljava/lang/String;)Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;
+}
+
+public final class org/jetbrains/intellij/dependency/PluginProjectDependency : org/jetbrains/intellij/dependency/PluginDependency {
+	public fun <init> (Ljava/io/File;Ljava/lang/String;)V
+	public fun getArtifact ()Ljava/io/File;
+	public fun getBuiltin ()Z
+	public fun getChannel ()Ljava/lang/String;
+	public fun getClassesDirectory ()Ljava/io/File;
+	public final fun getContext ()Ljava/lang/String;
+	public fun getId ()Ljava/lang/String;
+	public fun getJarFiles ()Ljava/util/Collection;
+	public fun getMaven ()Z
+	public fun getMetaInfDirectory ()Ljava/io/File;
+	public fun getNotation ()Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;
+	public fun getPlatformPluginId ()Ljava/lang/String;
+	public fun getSourceJarFiles ()Ljava/util/Collection;
+	public fun getVersion ()Ljava/lang/String;
+	public fun isCompatible (Lcom/jetbrains/plugin/structure/intellij/version/IdeVersion;)Z
+}
+
+public abstract interface class org/jetbrains/intellij/dependency/PluginsRepository {
+	public abstract fun postResolve (Lorg/gradle/api/Project;Ljava/lang/String;)V
+	public abstract fun resolve (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/dependency/PluginDependencyNotation;Ljava/lang/String;)Ljava/io/File;
+}
+
+public abstract class org/jetbrains/intellij/dependency/PluginsRepositoryConfiguration {
+	public fun <init> ()V
+	public final fun custom (Ljava/lang/String;)V
+	public final fun getRepositories ()Ljava/util/List;
+	public final fun marketplace ()V
+	public final fun maven (Ljava/lang/String;)V
+	public final fun maven (Lorg/gradle/api/Action;)V
+}
+
+public final class org/jetbrains/intellij/jbr/Jbr {
+	public fun <init> (Ljava/lang/String;Ljava/io/File;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/io/File;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/io/File;Ljava/lang/String;)Lorg/jetbrains/intellij/jbr/Jbr;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/jbr/Jbr;Ljava/lang/String;Ljava/io/File;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/jbr/Jbr;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getJavaExecutable ()Ljava/lang/String;
+	public final fun getJavaHome ()Ljava/io/File;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract class org/jetbrains/intellij/jbr/JbrResolver {
+	public fun <init> (Ljava/lang/String;ZLorg/jetbrains/intellij/utils/ArchiveUtils;Lorg/jetbrains/intellij/utils/DependenciesDownloader;Ljava/lang/String;)V
+	public final fun resolve (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/jbr/Jbr;
+	public final fun resolveRuntime (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;ZLkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public static synthetic fun resolveRuntime$default (Lorg/jetbrains/intellij/jbr/JbrResolver;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;ZLkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/String;
+	public final fun resolveRuntimeDir (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;Lkotlin/jvm/functions/Function1;)Ljava/lang/String;
+	public static synthetic fun resolveRuntimeDir$default (Lorg/jetbrains/intellij/jbr/JbrResolver;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/io/File;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/AndroidStudioReleases : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (ILjava/util/List;)V
+	public synthetic fun <init> (ILjava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()I
+	public final fun component2 ()Ljava/util/List;
+	public final fun copy (ILjava/util/List;)Lorg/jetbrains/intellij/model/AndroidStudioReleases;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/AndroidStudioReleases;ILjava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/AndroidStudioReleases;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public final fun getVersion ()I
+	public fun hashCode ()I
+	public final fun setItems (Ljava/util/List;)V
+	public final fun setVersion (I)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/BlogPost : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/intellij/model/BlogPost;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/BlogPost;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/BlogPost;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setUrl (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/Build : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/BlogPost;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/BlogPost;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Lorg/jetbrains/intellij/model/BlogPost;
+	public final fun component7 ()Ljava/util/List;
+	public final fun component8 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/BlogPost;Ljava/util/List;Ljava/util/List;)Lorg/jetbrains/intellij/model/Build;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Build;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/BlogPost;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/Build;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBlogPost ()Lorg/jetbrains/intellij/model/BlogPost;
+	public final fun getButtons ()Ljava/util/List;
+	public final fun getFullNumber ()Ljava/lang/String;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getNumber ()Ljava/lang/String;
+	public final fun getPatches ()Ljava/util/List;
+	public final fun getReleaseDate ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setBlogPost (Lorg/jetbrains/intellij/model/BlogPost;)V
+	public final fun setButtons (Ljava/util/List;)V
+	public final fun setFullNumber (Ljava/lang/String;)V
+	public final fun setMessage (Ljava/lang/String;)V
+	public final fun setNumber (Ljava/lang/String;)V
+	public final fun setPatches (Ljava/util/List;)V
+	public final fun setReleaseDate (Ljava/lang/String;)V
+	public final fun setVersion (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/Button : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lorg/jetbrains/intellij/model/Button;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Button;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lorg/jetbrains/intellij/model/Button;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDownload ()Z
+	public final fun getName ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setDownload (Z)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setUrl (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/Channel : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()I
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/util/List;)Lorg/jetbrains/intellij/model/Channel;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Channel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/Channel;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuilds ()Ljava/util/List;
+	public final fun getFeedback ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public final fun getLicensing ()Ljava/lang/String;
+	public final fun getMajorVersion ()I
+	public final fun getName ()Ljava/lang/String;
+	public final fun getStatus ()Ljava/lang/String;
+	public final fun getUrl ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setBuilds (Ljava/util/List;)V
+	public final fun setFeedback (Ljava/lang/String;)V
+	public final fun setId (Ljava/lang/String;)V
+	public final fun setLicensing (Ljava/lang/String;)V
+	public final fun setMajorVersion (I)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setStatus (Ljava/lang/String;)V
+	public final fun setUrl (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/CustomProperty {
+	public static final field Companion Lorg/jetbrains/intellij/model/CustomProperty$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/model/CustomProperty;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/CustomProperty;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/CustomProperty;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getKey ()Ljava/lang/String;
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setKey (Ljava/lang/String;)V
+	public final fun setValue (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lorg/jetbrains/intellij/model/CustomProperty;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class org/jetbrains/intellij/model/CustomProperty$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/model/CustomProperty$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/model/CustomProperty;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/model/CustomProperty;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/model/CustomProperty$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/model/Download : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;JLjava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;JLjava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()J
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;JLjava/lang/String;)Lorg/jetbrains/intellij/model/Download;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Download;Ljava/lang/String;JLjava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/Download;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChecksum ()Ljava/lang/String;
+	public final fun getLink ()Ljava/lang/String;
+	public final fun getSize ()J
+	public fun hashCode ()I
+	public final fun setChecksum (Ljava/lang/String;)V
+	public final fun setLink (Ljava/lang/String;)V
+	public final fun setSize (J)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/Item : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/intellij/model/Item;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Item;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/Item;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuild ()Ljava/lang/String;
+	public final fun getChannel ()Ljava/lang/String;
+	public final fun getDate ()Ljava/lang/String;
+	public final fun getDownloads ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getPlatformBuild ()Ljava/lang/String;
+	public final fun getPlatformVersion ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setBuild (Ljava/lang/String;)V
+	public final fun setChannel (Ljava/lang/String;)V
+	public final fun setDate (Ljava/lang/String;)V
+	public final fun setDownloads (Ljava/util/List;)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setPlatformBuild (Ljava/lang/String;)V
+	public final fun setPlatformVersion (Ljava/lang/String;)V
+	public final fun setVersion (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/Launch {
+	public static final field Companion Lorg/jetbrains/intellij/model/Launch$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (ILorg/jetbrains/intellij/model/OS;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Lorg/jetbrains/intellij/model/OS;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Lorg/jetbrains/intellij/model/OS;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/jetbrains/intellij/model/OS;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/util/List;
+	public final fun component7 ()Ljava/util/List;
+	public final fun copy (Lorg/jetbrains/intellij/model/OS;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lorg/jetbrains/intellij/model/Launch;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Launch;Lorg/jetbrains/intellij/model/OS;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/Launch;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAdditionalJvmArguments ()Ljava/util/List;
+	public final fun getBootClassPathJarNames ()Ljava/util/List;
+	public final fun getJavaExecutablePath ()Ljava/lang/String;
+	public final fun getLauncherPath ()Ljava/lang/String;
+	public final fun getOs ()Lorg/jetbrains/intellij/model/OS;
+	public final fun getStartupWmClass ()Ljava/lang/String;
+	public final fun getVmOptionsFilePath ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setJavaExecutablePath (Ljava/lang/String;)V
+	public final fun setLauncherPath (Ljava/lang/String;)V
+	public final fun setOs (Lorg/jetbrains/intellij/model/OS;)V
+	public final fun setStartupWmClass (Ljava/lang/String;)V
+	public final fun setVmOptionsFilePath (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lorg/jetbrains/intellij/model/Launch;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class org/jetbrains/intellij/model/Launch$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/model/Launch$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/model/Launch;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/model/Launch;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/model/Launch$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/model/MavenMetadata {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/MavenMetadataVersioning;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/MavenMetadataVersioning;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Lorg/jetbrains/intellij/model/MavenMetadataVersioning;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/MavenMetadataVersioning;)Lorg/jetbrains/intellij/model/MavenMetadata;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/MavenMetadata;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/model/MavenMetadataVersioning;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/MavenMetadata;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getArtifactId ()Ljava/lang/String;
+	public final fun getGroupId ()Ljava/lang/String;
+	public final fun getVersioning ()Lorg/jetbrains/intellij/model/MavenMetadataVersioning;
+	public fun hashCode ()I
+	public final fun setArtifactId (Ljava/lang/String;)V
+	public final fun setGroupId (Ljava/lang/String;)V
+	public final fun setVersioning (Lorg/jetbrains/intellij/model/MavenMetadataVersioning;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/MavenMetadataVersioning {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/intellij/model/MavenMetadataVersioning;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/MavenMetadataVersioning;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/MavenMetadataVersioning;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getLastUpdated ()Ljava/lang/String;
+	public final fun getLatest ()Ljava/lang/String;
+	public final fun getRelease ()Ljava/lang/String;
+	public final fun getVersions ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun setLastUpdated (Ljava/lang/String;)V
+	public final fun setLatest (Ljava/lang/String;)V
+	public final fun setRelease (Ljava/lang/String;)V
+	public final fun setVersions (Ljava/util/List;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/OS : java/lang/Enum {
+	public static final field Linux Lorg/jetbrains/intellij/model/OS;
+	public static final field Windows Lorg/jetbrains/intellij/model/OS;
+	public static final field macOS Lorg/jetbrains/intellij/model/OS;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/model/OS;
+	public static fun values ()[Lorg/jetbrains/intellij/model/OS;
+}
+
+public final class org/jetbrains/intellij/model/ObjectFactory {
+	public fun <init> ()V
+	public final fun createAndroidStudioReleases ()Lorg/jetbrains/intellij/model/AndroidStudioReleases;
+	public final fun createPluginVerifierRepository ()Lorg/jetbrains/intellij/model/MavenMetadata;
+	public final fun createPluginsCache ()Lorg/jetbrains/intellij/model/PluginsCache;
+	public final fun createProductsReleases ()Lorg/jetbrains/intellij/model/ProductsReleases;
+}
+
+public final class org/jetbrains/intellij/model/Patch : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/model/Patch;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Patch;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/Patch;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFrom ()Ljava/lang/String;
+	public final fun getFullFrom ()Ljava/lang/String;
+	public final fun getSize ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setFrom (Ljava/lang/String;)V
+	public final fun setFullFrom (Ljava/lang/String;)V
+	public final fun setSize (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/PerformanceTestResult {
+	public fun <init> (Ljava/lang/String;Lorg/jetbrains/intellij/model/PerformanceTestStatistic;Lorg/jetbrains/intellij/model/PerformanceTestScript;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Lorg/jetbrains/intellij/model/PerformanceTestStatistic;
+	public final fun component3 ()Lorg/jetbrains/intellij/model/PerformanceTestScript;
+	public final fun copy (Ljava/lang/String;Lorg/jetbrains/intellij/model/PerformanceTestStatistic;Lorg/jetbrains/intellij/model/PerformanceTestScript;)Lorg/jetbrains/intellij/model/PerformanceTestResult;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/PerformanceTestResult;Ljava/lang/String;Lorg/jetbrains/intellij/model/PerformanceTestStatistic;Lorg/jetbrains/intellij/model/PerformanceTestScript;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/PerformanceTestResult;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getScript ()Lorg/jetbrains/intellij/model/PerformanceTestScript;
+	public final fun getStatistic ()Lorg/jetbrains/intellij/model/PerformanceTestStatistic;
+	public final fun getTestName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/PerformanceTestScript {
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAssertionTimeout ()Ljava/lang/Long;
+	public final fun getProjectName ()Ljava/lang/String;
+	public final fun getScriptContent ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/PerformanceTestScript$Builder {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun appendScriptContent (Ljava/lang/String;)Lorg/jetbrains/intellij/model/PerformanceTestScript$Builder;
+	public final fun assertionTimeout (Ljava/lang/Long;)Lorg/jetbrains/intellij/model/PerformanceTestScript$Builder;
+	public final fun build ()Lorg/jetbrains/intellij/model/PerformanceTestScript;
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;)Lorg/jetbrains/intellij/model/PerformanceTestScript$Builder;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/PerformanceTestScript$Builder;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Long;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/PerformanceTestScript$Builder;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAssertionTimeout ()Ljava/lang/Long;
+	public final fun getProjectName ()Ljava/lang/String;
+	public final fun getScriptContent ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun projectName (Ljava/lang/String;)Lorg/jetbrains/intellij/model/PerformanceTestScript$Builder;
+	public final fun scriptContent (Ljava/lang/String;)Lorg/jetbrains/intellij/model/PerformanceTestScript$Builder;
+	public final fun setAssertionTimeout (Ljava/lang/Long;)V
+	public final fun setProjectName (Ljava/lang/String;)V
+	public final fun setScriptContent (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/PerformanceTestStatistic {
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun getAverageResponsive ()Ljava/lang/Long;
+	public final fun getResponsive ()Ljava/lang/Long;
+	public final fun getTotalTime ()Ljava/lang/Long;
+}
+
+public final class org/jetbrains/intellij/model/PerformanceTestStatistic$Builder {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)V
+	public synthetic fun <init> (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun averageResponsive (Ljava/lang/Long;)Lorg/jetbrains/intellij/model/PerformanceTestStatistic$Builder;
+	public final fun build ()Lorg/jetbrains/intellij/model/PerformanceTestStatistic;
+	public final fun component1 ()Ljava/lang/Long;
+	public final fun component2 ()Ljava/lang/Long;
+	public final fun component3 ()Ljava/lang/Long;
+	public final fun copy (Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;)Lorg/jetbrains/intellij/model/PerformanceTestStatistic$Builder;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/PerformanceTestStatistic$Builder;Ljava/lang/Long;Ljava/lang/Long;Ljava/lang/Long;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/PerformanceTestStatistic$Builder;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAverageResponsive ()Ljava/lang/Long;
+	public final fun getResponsive ()Ljava/lang/Long;
+	public final fun getTotalTime ()Ljava/lang/Long;
+	public fun hashCode ()I
+	public final fun responsive (Ljava/lang/Long;)Lorg/jetbrains/intellij/model/PerformanceTestStatistic$Builder;
+	public final fun setAverageResponsive (Ljava/lang/Long;)V
+	public final fun setResponsive (Ljava/lang/Long;)V
+	public final fun setTotalTime (Ljava/lang/Long;)V
+	public fun toString ()Ljava/lang/String;
+	public final fun totalTime (Ljava/lang/Long;)Lorg/jetbrains/intellij/model/PerformanceTestStatistic$Builder;
+}
+
+public final class org/jetbrains/intellij/model/PluginsCache : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/intellij/model/PluginsCache;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/PluginsCache;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/PluginsCache;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPlugins ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun setPlugins (Ljava/util/List;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/PluginsCachePlugin : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/util/List;)Lorg/jetbrains/intellij/model/PluginsCachePlugin;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/PluginsCachePlugin;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/PluginsCachePlugin;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDependencies ()Ljava/util/List;
+	public final fun getDirectoryName ()Ljava/lang/String;
+	public final fun getId ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setDependencies (Ljava/util/List;)V
+	public final fun setDirectoryName (Ljava/lang/String;)V
+	public final fun setId (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/Product : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/util/List;
+	public final fun component3 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lorg/jetbrains/intellij/model/Product;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/Product;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/Product;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChannels ()Ljava/util/List;
+	public final fun getCodes ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setChannels (Ljava/util/List;)V
+	public final fun setCodes (Ljava/util/List;)V
+	public final fun setName (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/ProductInfo {
+	public static final field Companion Lorg/jetbrains/intellij/model/ProductInfo$Companion;
+	public fun <init> ()V
+	public synthetic fun <init> (ILjava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Lkotlinx/serialization/internal/SerializationConstructorMarker;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Ljava/util/List;
+	public final fun component11 ()Ljava/util/List;
+	public final fun component12 ()Ljava/util/List;
+	public final fun component13 ()Ljava/util/List;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;)Lorg/jetbrains/intellij/model/ProductInfo;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/ProductInfo;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/ProductInfo;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBuildNumber ()Ljava/lang/String;
+	public final fun getBundledPlugins ()Ljava/util/List;
+	public final fun getCurrentLaunch ()Lorg/jetbrains/intellij/model/Launch;
+	public final fun getCustomProperties ()Ljava/util/List;
+	public final fun getDataDirectoryName ()Ljava/lang/String;
+	public final fun getFileExtensions ()Ljava/util/List;
+	public final fun getLaunch ()Ljava/util/List;
+	public final fun getModules ()Ljava/util/List;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getProductCode ()Ljava/lang/String;
+	public final fun getProductVendor ()Ljava/lang/String;
+	public final fun getSvgIconPath ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public final fun getVersionSuffix ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun setBuildNumber (Ljava/lang/String;)V
+	public final fun setDataDirectoryName (Ljava/lang/String;)V
+	public final fun setName (Ljava/lang/String;)V
+	public final fun setProductCode (Ljava/lang/String;)V
+	public final fun setProductVendor (Ljava/lang/String;)V
+	public final fun setSvgIconPath (Ljava/lang/String;)V
+	public final fun setVersion (Ljava/lang/String;)V
+	public final fun setVersionSuffix (Ljava/lang/String;)V
+	public fun toString ()Ljava/lang/String;
+	public static final fun write$Self (Lorg/jetbrains/intellij/model/ProductInfo;Lkotlinx/serialization/encoding/CompositeEncoder;Lkotlinx/serialization/descriptors/SerialDescriptor;)V
+}
+
+public final class org/jetbrains/intellij/model/ProductInfo$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/model/ProductInfo$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/model/ProductInfo;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/model/ProductInfo;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/model/ProductInfo$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/model/ProductsReleases : java/io/Serializable {
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/intellij/model/ProductsReleases;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/model/ProductsReleases;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/model/ProductsReleases;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getProducts ()Ljava/util/List;
+	public fun hashCode ()I
+	public final fun setProducts (Ljava/util/List;)V
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/model/XmlExtractor {
+	public fun <init> ()V
+	public fun <init> (Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun fetch (Ljava/lang/String;)Ljava/lang/Object;
+	public final fun marshal (Ljava/lang/Object;Ljava/io/File;)V
+	public final fun unmarshal (Ljava/io/File;)Ljava/lang/Object;
+	public final fun unmarshal (Ljava/io/InputStream;)Ljava/lang/Object;
+}
+
+public final class org/jetbrains/intellij/performanceTest/ProfilerName : java/lang/Enum {
+	public static final field ASYNC Lorg/jetbrains/intellij/performanceTest/ProfilerName;
+	public static final field YOURKIT Lorg/jetbrains/intellij/performanceTest/ProfilerName;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/performanceTest/ProfilerName;
+	public static fun values ()[Lorg/jetbrains/intellij/performanceTest/ProfilerName;
+}
+
+public final class org/jetbrains/intellij/performanceTest/TestExecutionFailException : java/lang/RuntimeException {
+	public fun <init> (Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/intellij/performanceTest/parsers/IdeaLogParser {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun getTestStatistic ()Lorg/jetbrains/intellij/model/PerformanceTestStatistic;
+}
+
+public final class org/jetbrains/intellij/performanceTest/parsers/SimpleIJPerformanceParser {
+	public fun <init> (Ljava/lang/String;)V
+	public final fun parse ()Lorg/jetbrains/intellij/model/PerformanceTestScript;
+}
+
+public abstract class org/jetbrains/intellij/tasks/BuildSearchableOptionsTask : org/jetbrains/intellij/tasks/RunIdeBase {
+	public fun <init> ()V
+	public fun exec ()V
+	public abstract fun getOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getShowPaidPluginWarning ()Lorg/gradle/api/provider/Property;
+	public fun setArgs (Ljava/lang/Iterable;)Lorg/gradle/api/tasks/JavaExec;
+	public synthetic fun setArgs (Ljava/lang/Iterable;)Lorg/gradle/process/JavaExecSpec;
+	public fun setArgs (Ljava/util/List;)Lorg/gradle/api/tasks/JavaExec;
+	public synthetic fun setArgs (Ljava/util/List;)Lorg/gradle/process/JavaExecSpec;
+}
+
+public abstract class org/jetbrains/intellij/tasks/ClasspathIndexCleanupTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public final fun classpathIndexCleanup ()V
+	public abstract fun getClasspathIndexFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+}
+
+public abstract class org/jetbrains/intellij/tasks/DownloadRobotServerPluginTask : org/gradle/api/DefaultTask {
+	public static final field Companion Lorg/jetbrains/intellij/tasks/DownloadRobotServerPluginTask$Companion;
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun downloadPlugin ()V
+	public abstract fun getOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPluginArchive ()Lorg/gradle/api/provider/Property;
+	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
+}
+
+public final class org/jetbrains/intellij/tasks/DownloadRobotServerPluginTask$Companion {
+	public final fun resolveLatestVersion ()Ljava/lang/String;
+}
+
+public abstract class org/jetbrains/intellij/tasks/IntelliJInstrumentCodeTask : org/gradle/api/DefaultTask {
+	public static final field Companion Lorg/jetbrains/intellij/tasks/IntelliJInstrumentCodeTask$Companion;
+	public static final field FILTER_ANNOTATION_REGEXP_CLASS Ljava/lang/String;
+	public static final field LOADER_REF Ljava/lang/String;
+	public fun <init> ()V
+	public abstract fun getClassesDirs ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getCompilerClassPathFromMaven ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getCompilerVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getFormsDirs ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getIdeaDependency ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJavac2 ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getSourceDirs ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getSourceSetCompileClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public final fun instrumentClasses (Lorg/gradle/work/InputChanges;)V
+}
+
+public final class org/jetbrains/intellij/tasks/IntelliJInstrumentCodeTask$Companion {
+}
+
+public abstract class org/jetbrains/intellij/tasks/JarSearchableOptionsTask : org/gradle/jvm/tasks/Jar {
+	public fun <init> ()V
+	protected fun copy ()V
+	public abstract fun getNoSearchableOptionsWarning ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPluginName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSandboxDir ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class org/jetbrains/intellij/tasks/ListProductsReleasesTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public abstract fun getAndroidStudioUpdatePath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getReleaseChannels ()Lorg/gradle/api/provider/SetProperty;
+	public abstract fun getSinceBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSinceVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getTypes ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getUntilBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUntilVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUpdatePaths ()Lorg/gradle/api/provider/ListProperty;
+	public final fun list ()V
+}
+
+public final class org/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel : java/lang/Enum {
+	public static final field BETA Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static final field CANARY Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static final field EAP Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static final field MILESTONE Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static final field PATCH Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static final field RC Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static final field RELEASE Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+	public static fun values ()[Lorg/jetbrains/intellij/tasks/ListProductsReleasesTask$Channel;
+}
+
+public abstract class org/jetbrains/intellij/tasks/PatchPluginXmlTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public abstract fun getChangeNotes ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDestinationDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getOutputFiles ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getPluginDescription ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPluginId ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPluginXmlFiles ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getSinceBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUntilBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
+	public final fun patchPluginXmlFiles ()V
+}
+
+public abstract class org/jetbrains/intellij/tasks/PrepareSandboxTask : org/gradle/api/tasks/Sync {
+	public fun <init> ()V
+	public synthetic fun configure (Lgroovy/lang/Closure;)Ljava/lang/Object;
+	public fun configure (Lgroovy/lang/Closure;)Lorg/gradle/api/Task;
+	public final fun configureCompositePlugin (Lorg/jetbrains/intellij/dependency/PluginProjectDependency;)V
+	public final fun configureExternalPlugin (Lorg/jetbrains/intellij/dependency/PluginDependency;)V
+	protected fun copy ()V
+	public abstract fun getConfigDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDefaultDestinationDir ()Lorg/gradle/api/provider/Property;
+	public fun getDestinationDir ()Ljava/io/File;
+	public abstract fun getLibrariesToIgnore ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getPluginDependencies ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getPluginJar ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getPluginName ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class org/jetbrains/intellij/tasks/PublishPluginTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public abstract fun getChannels ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getDistributionFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getHost ()Lorg/gradle/api/provider/Property;
+	public abstract fun getToken ()Lorg/gradle/api/provider/Property;
+	public abstract fun getToolboxEnterprise ()Lorg/gradle/api/provider/Property;
+	public final fun publishPlugin ()V
+}
+
+public abstract class org/jetbrains/intellij/tasks/RunIdeBase : org/gradle/api/tasks/JavaExec {
+	public static final field Companion Lorg/jetbrains/intellij/tasks/RunIdeBase$Companion;
+	public fun <init> (Z)V
+	protected fun collectJvmArgs ()Ljava/util/List;
+	public fun exec ()V
+	public abstract fun getAutoReloadPlugins ()Lorg/gradle/api/provider/Property;
+	public abstract fun getConfigDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIdeDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJbrVariant ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJbrVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPluginsDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getProjectExecutable ()Lorg/gradle/api/provider/Property;
+	public abstract fun getProjectWorkingDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getRequiredPluginIds ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getSystemDir ()Lorg/gradle/api/provider/Property;
+}
+
+public final class org/jetbrains/intellij/tasks/RunIdeBase$Companion {
+}
+
+public abstract class org/jetbrains/intellij/tasks/RunIdeForUiTestTask : org/jetbrains/intellij/tasks/RunIdeBase {
+	public fun <init> ()V
+}
+
+public abstract class org/jetbrains/intellij/tasks/RunIdePerformanceTestTask : org/jetbrains/intellij/tasks/RunIdeBase {
+	public fun <init> ()V
+	protected fun collectJvmArgs ()Ljava/util/List;
+	public fun exec ()V
+	public abstract fun getArtifactsDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getProfilerName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getTestDataDir ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class org/jetbrains/intellij/tasks/RunIdeTask : org/jetbrains/intellij/tasks/RunIdeBase {
+	public fun <init> ()V
+}
+
+public abstract class org/jetbrains/intellij/tasks/RunPluginVerifierTask : org/gradle/api/DefaultTask {
+	public static final field Companion Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$Companion;
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/process/ExecOperations;Lorg/gradle/api/provider/ProviderFactory;)V
+	public abstract fun getDistributionFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getDownloadDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getExternalPrefixes ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getFailureLevel ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getIdeDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIdeVersions ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getIdes ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getJbrVariant ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJbrVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJreRepository ()Lorg/gradle/api/provider/Property;
+	public abstract fun getLocalPaths ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
+	public abstract fun getProductsReleasesFile ()Lorg/gradle/api/provider/Property;
+	public abstract fun getRuntimeDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
+	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
+	public abstract fun getVerificationReportsDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getVerifierPath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getVerifierVersion ()Lorg/gradle/api/provider/Property;
+	public final fun runPluginVerifier ()V
+}
+
+public final class org/jetbrains/intellij/tasks/RunPluginVerifierTask$Companion {
+	public final fun resolveLatestVersion ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel : java/lang/Enum {
+	public static final field COMPATIBILITY_PROBLEMS Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field COMPATIBILITY_WARNINGS Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field Companion Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel$Companion;
+	public static final field DEPRECATED_API_USAGES Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field EXPERIMENTAL_API_USAGES Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field INTERNAL_API_USAGES Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field INVALID_PLUGIN Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field MISSING_DEPENDENCIES Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field NON_EXTENDABLE_API_USAGES Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field NOT_DYNAMIC Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field OVERRIDE_ONLY_API_USAGES Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field PLUGIN_STRUCTURE_WARNINGS Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static final field SCHEDULED_FOR_REMOVAL_API_USAGES Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public final fun getMessage ()Ljava/lang/String;
+	public final fun getSectionHeading ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+	public static fun values ()[Lorg/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel;
+}
+
+public final class org/jetbrains/intellij/tasks/RunPluginVerifierTask$FailureLevel$Companion {
+	public final fun getALL ()Ljava/util/EnumSet;
+	public final fun getNONE ()Ljava/util/EnumSet;
+}
+
+public abstract class org/jetbrains/intellij/tasks/SetupDependenciesTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public abstract fun getIdea ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract class org/jetbrains/intellij/tasks/SetupInstrumentCodeTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public abstract fun getInstrumentationEnabled ()Lorg/gradle/api/provider/Property;
+	public abstract fun getInstrumentedDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun setupInstrumentCode ()V
+}
+
+public abstract class org/jetbrains/intellij/tasks/SignPluginTask : org/gradle/api/DefaultTask {
+	public static final field Companion Lorg/jetbrains/intellij/tasks/SignPluginTask$Companion;
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/process/ExecOperations;)V
+	public abstract fun getCertificateChain ()Lorg/gradle/api/provider/Property;
+	public abstract fun getCertificateChainFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getCliPath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getCliVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getInputArchiveFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getKeyStore ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKeyStoreKeyAlias ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKeyStorePassword ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKeyStoreProviderName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKeyStoreType ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOutputArchiveFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getPassword ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPrivateKey ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPrivateKeyFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public final fun signPlugin ()V
+}
+
+public final class org/jetbrains/intellij/tasks/SignPluginTask$Companion {
+	public final fun resolveLatestVersion ()Ljava/lang/String;
+}
+
+public abstract class org/jetbrains/intellij/tasks/VerifyPluginConfigurationTask : org/gradle/api/DefaultTask {
+	public fun <init> (Lorg/gradle/api/provider/ProviderFactory;)V
+	public abstract fun getKotlinApiVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKotlinJvmTarget ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKotlinLanguageVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKotlinPluginAvailable ()Lorg/gradle/api/provider/Property;
+	public abstract fun getKotlinStdlibDefaultDependency ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlatformBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlatformVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPluginVerifierDownloadDir ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPluginXmlFiles ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getSourceCompatibility ()Lorg/gradle/api/provider/Property;
+	public abstract fun getTargetCompatibility ()Lorg/gradle/api/provider/Property;
+	public final fun verifyPlugin ()V
+}
+
+public abstract class org/jetbrains/intellij/tasks/VerifyPluginTask : org/gradle/api/DefaultTask {
+	public fun <init> ()V
+	public abstract fun getIgnoreFailures ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIgnoreUnacceptableWarnings ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIgnoreWarnings ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPluginDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun verifyPlugin ()V
+}
+
+public abstract class org/jetbrains/intellij/utils/ArchiveUtils {
+	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/api/file/FileSystemOperations;)V
+	public final fun extract (Ljava/io/File;Ljava/io/File;Ljava/lang/String;Ljava/util/function/Predicate;Ljava/util/function/BiConsumer;)Ljava/io/File;
+	public static synthetic fun extract$default (Lorg/jetbrains/intellij/utils/ArchiveUtils;Ljava/io/File;Ljava/io/File;Ljava/lang/String;Ljava/util/function/Predicate;Ljava/util/function/BiConsumer;ILjava/lang/Object;)Ljava/io/File;
+}
+
+public abstract class org/jetbrains/intellij/utils/DependenciesDownloader {
+	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/artifacts/dsl/RepositoryHandler;)V
+	public final fun downloadFromMultipleRepositories (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Z)Ljava/util/List;
+	public static synthetic fun downloadFromMultipleRepositories$default (Lorg/jetbrains/intellij/utils/DependenciesDownloader;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ZILjava/lang/Object;)Ljava/util/List;
+	public final fun downloadFromRepository (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;Z)Ljava/util/List;
+	public static synthetic fun downloadFromRepository$default (Lorg/jetbrains/intellij/utils/DependenciesDownloader;Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lkotlin/jvm/functions/Function1;ZILjava/lang/Object;)Ljava/util/List;
+}
+
+public final class org/jetbrains/intellij/utils/LatestVersionResolver {
+	public static final field Companion Lorg/jetbrains/intellij/utils/LatestVersionResolver$Companion;
+	public fun <init> ()V
+}
+
+public final class org/jetbrains/intellij/utils/LatestVersionResolver$Companion {
+	public final fun fromGitHub (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+	public final fun fromMaven (Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/utils/OpenedPackagesKt {
+	public static final fun getOpenedPackages ()Ljava/util/List;
+}
+
+public final class org/jetbrains/intellij/utils/PlatformJavaVersionsKt {
+	public static final fun getPlatformJavaVersions ()Ljava/util/Map;
+}
+
+public final class org/jetbrains/intellij/utils/PlatformKotlinVersionsKt {
+	public static final fun getPlatformKotlinVersions ()Ljava/util/Map;
+}
+
+public abstract interface class org/jetbrains/intellij/utils/ToolboxEnterprisePluginRepositoryService : org/jetbrains/intellij/pluginRepository/internal/api/PluginRepositoryService {
+	public abstract fun uploadById (ILokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/MultipartBody$Part;)Lretrofit2/Call;
+	public abstract fun uploadByStringId (Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/MultipartBody$Part;)Lretrofit2/Call;
+}
+
