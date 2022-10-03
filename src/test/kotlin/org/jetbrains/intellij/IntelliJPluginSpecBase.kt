@@ -70,18 +70,18 @@ abstract class IntelliJPluginSpecBase {
             buildSearchableOptions {
                 enabled = false
             }
-
+            
             // Define tasks with a minimal set of tasks required to build a source set
             sourceSets.all {
                 task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
             }
-            """
+            """.trimIndent()
         )
 
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
-            """
+            """.trimIndent()
         )
     }
 
@@ -90,14 +90,14 @@ abstract class IntelliJPluginSpecBase {
         import java.lang.String;
         import org.junit.Test;
         import org.jetbrains.annotations.NotNull;
-
+        
         public class AppTest {
             @Test
             public void testSomething() {}
         
             private void print(@NotNull String s) { System.out.println(s); }
         }
-        """
+        """.trimIndent()
     )
 
     @Suppress("SameParameterValue")
@@ -170,13 +170,13 @@ abstract class IntelliJPluginSpecBase {
         import java.lang.String;
         import java.util.Arrays;
         import org.jetbrains.annotations.NotNull;
-
+        
         class App {
             public static void main(@NotNull String[] strings) {
                 System.out.println(Arrays.toString(strings));
             }
         }
-        """
+        """.trimIndent()
     )
 
     protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin(
@@ -187,22 +187,22 @@ abstract class IntelliJPluginSpecBase {
                 println(args.joinToString())
             }
         }
-        """
+        """.trimIndent()
     )
 
     protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin(
         """
         package pack
-
+        
         import javax.swing.JPanel
-
+        
         class AppKt {
             private lateinit var panel: JPanel
             init {
                 panel.toString()
             }
         }
-        """
+        """.trimIndent()
     )
 
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
@@ -228,11 +228,11 @@ abstract class IntelliJPluginSpecBase {
     }
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trimIndent().trim(), file?.readText()?.replace("\r", "")?.trim())
+        assertEquals(expectedContent.trim(), file?.readText()?.replace("\r", "")?.trim())
 
     @Suppress("SameParameterValue")
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
-        assertEquals(expectedContent.trimIndent(), fileText(zip, path))
+        assertEquals(expectedContent, fileText(zip, path))
 
     @Suppress("SameParameterValue")
     protected fun extractFile(zipFile: ZipFile, path: String): File =

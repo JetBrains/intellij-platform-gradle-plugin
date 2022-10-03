@@ -21,7 +21,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-            """
+            """.trimIndent()
         )
 
         val version = SignPluginTask.resolveLatestVersion()
@@ -41,7 +41,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-            """
+            """.trimIndent()
         )
 
         build(SIGN_PLUGIN_TASK_NAME, "--info").let {
@@ -54,7 +54,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = "1.0.0"
-            """
+            """.trimIndent()
         )
 
         build(SIGN_PLUGIN_TASK_NAME).let {
@@ -71,7 +71,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             signPlugin {
                 cliVersion = "0.0.1"
             }
-            """
+            """.trimIndent()
         )
 
         buildAndFail(SIGN_PLUGIN_TASK_NAME).let {
@@ -89,7 +89,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
-            """
+            """.trimIndent()
         )
         build(SIGN_PLUGIN_TASK_NAME)
 
@@ -121,7 +121,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             signPlugin {
                 password = "foo"
             }
-            """
+            """.trimIndent()
         )
 
         build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {

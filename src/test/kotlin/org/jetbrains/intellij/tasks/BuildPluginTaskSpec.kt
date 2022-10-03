@@ -25,13 +25,13 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -41,7 +41,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
               <vendor>JetBrains</vendor>
               <depends config-file="other.xml" />
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -58,7 +58,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -116,7 +116,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -129,7 +129,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -170,13 +170,13 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -186,7 +186,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <vendor>JetBrains</vendor>
                 <depends config-file="other.xml" />
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
@@ -206,7 +206,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -231,7 +231,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.123'
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -240,7 +240,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -266,7 +266,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                     System.out.println(MarkdownLanguage.INSTANCE.getDisplayName());
                 }
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -275,7 +275,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -286,7 +286,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myPluginName'
                 plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -311,7 +311,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                     System.out.println(AsciiDoc.class.getName());
                 }
             }
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -320,7 +320,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -331,7 +331,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myPluginName'
                 plugins = ['org.asciidoctor.intellij.asciidoc:0.20.6']
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -351,7 +351,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -364,7 +364,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -402,7 +402,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -412,7 +412,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 pluginName = 'myPluginName'
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -427,7 +427,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -462,7 +462,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.123'
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -471,7 +471,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME)
@@ -499,7 +499,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 <name>MyPluginName</name>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -509,7 +509,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             intellij {
                 pluginName = 'myPluginName'
             }
-            """
+            """.trimIndent()
         )
 
         build(BUILD_PLUGIN_TASK_NAME, "--configuration-cache")

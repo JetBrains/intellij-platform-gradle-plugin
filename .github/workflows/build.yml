@@ -69,13 +69,11 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-        with:
-          cache-read-only: false
 
       - name: Cache XDG_CACHE_HOME
         uses: actions/cache@v3
         with:
-          path: ~/$XDG_CACHE_HOME
+          path: ${{ env.XDG_CACHE_HOME }}
           key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
             ${{ runner.os }}-XDG_CACHE_HOME-

@@ -83,7 +83,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij {
                 version = '14.1.4' 
             }
-            """
+            """.trimIndent()
         )
 
         writeTestFile()
@@ -109,7 +109,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
@@ -125,7 +125,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
@@ -146,7 +146,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
@@ -159,7 +159,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij.plugins = ['com.jetbrains.changeReminder']
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths()
@@ -181,7 +181,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths()
@@ -200,13 +200,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             plugins {
                 id "java-test-fixtures"
             }
-            """
+            """.trimIndent()
         )
         buildFile.groovy(originalBuildFile)
         buildFile.groovy(
             """
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectSourceSetClassPaths("testFixtures")
@@ -222,7 +222,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
@@ -238,7 +238,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij.plugins = ['com.intellij.copyright']
-            """
+            """.trimIndent()
         )
 
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
@@ -256,7 +256,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.jetbrains.plugins.go']
                 downloadSources = true
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
@@ -280,7 +280,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.jetbrains.plugins.go']
                 downloadSources = false
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
@@ -302,7 +302,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
                 downloadSources = true
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
@@ -324,7 +324,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
                 downloadSources = false
             }
-            """
+            """.trimIndent()
         )
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
             assertContainsOnlySourceArtifacts(
@@ -353,7 +353,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 localPath = '${adjustWindowsPath(localPath)}'
                 plugins = ['org.jetbrains.plugins.go']
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO").let {
@@ -385,7 +385,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 localPath = '${adjustWindowsPath(localPath)}'
                 plugins = ['org.jetbrains.plugins.go:212.5712.14']
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
@@ -408,7 +408,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 plugins = ['com.intellij.css']
                 downloadSources = true
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources").let {
@@ -430,7 +430,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 plugins = ['Tomcat']
                 downloadSources = false
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43").let {
@@ -459,7 +459,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 localPath = '${adjustWindowsPath(localPath)}'
                 plugins = ['com.intellij.spring']
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43").let {
@@ -481,7 +481,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 plugins = ['com.intellij.css']
                 downloadSources = true
             }
-            """
+            """.trimIndent()
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources").let {
@@ -504,7 +504,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 <id>com.intellij.mytestid</id>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         build(JavaPlugin.TEST_TASK_NAME, "--info").let {
@@ -525,7 +525,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 minHeapSize = "200m"
                 maxHeapSize = "500m"
             }
-            """
+            """.trimIndent()
         )
 
         build(JavaPlugin.TEST_TASK_NAME, "--info").let {
@@ -546,7 +546,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             intellij {
                 sandboxDir = '$sandboxPath'    
             }
-            """
+            """.trimIndent()
         )
         build(JavaPlugin.TEST_TASK_NAME, "--info").let {
             assertPathParameters(parseCommand(it.output), sandboxPath)
@@ -592,7 +592,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             task printMainCompileClassPath { 
                 doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
             }
-            """
+            """.trimIndent()
         )
     }
 
@@ -613,7 +613,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             task print${sourceSetName.capitalize()}CompileClassPath { 
                 doLast { println 'implementation: ' + sourceSets.$sourceSetName.compileClasspath.asPath }
             }
-            """
+            """.trimIndent()
         )
     }
 
@@ -690,7 +690,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                         .each { println("source artifact:" + it.id.displayName) }
                     }
                 }
-                """
+                """.trimIndent()
         )
     }
 

@@ -13,13 +13,8 @@ jobs:
 
       - name: Fetch Sources
         uses: actions/checkout@v3
-
-      - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
         with:
-          cache-read-only: false
+          fetch-depth: 0 # only report issues that appeared in a PR
 
       - name: Qodana - Code Inspection
         uses: JetBrains/qodana-action@v2022.2.2
-        with:
-          fetch-depth: 0 # only report issues that appeared in a PR

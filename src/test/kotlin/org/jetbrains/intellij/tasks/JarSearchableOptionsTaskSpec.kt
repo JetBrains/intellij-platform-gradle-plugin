@@ -19,7 +19,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             intellij {
                 version = '14.1.4'
             }
-            """
+            """.trimIndent()
         )
 
         build(JAR_SEARCHABLE_OPTIONS_TASK_NAME).let {
@@ -38,7 +38,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
-            """
+            """.trimIndent()
         )
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
@@ -58,7 +58,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             intellij {
                 version = '$intellijVersion'
             }
-            """
+            """.trimIndent()
         )
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 

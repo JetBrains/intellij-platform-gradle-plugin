@@ -18,13 +18,13 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -32,7 +32,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
                 <depends config-file="other.xml"/>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -46,7 +46,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
@@ -64,13 +64,13 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -78,7 +78,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
                 <depends config-file="other.xml"/>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -92,7 +92,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
@@ -110,13 +110,13 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
         file("src/main/resources/META-INF/other.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         file("src/main/resources/META-INF/nonIncluded.xml").xml(
             """
             <idea-plugin />
-            """
+            """.trimIndent()
         )
 
         pluginXml.xml(
@@ -124,7 +124,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
                 <depends config-file="other.xml"/>
             </idea-plugin>
-            """
+            """.trimIndent()
         )
 
         buildFile.groovy(
@@ -137,7 +137,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
             }
-            """
+            """.trimIndent()
         )
 
         build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
