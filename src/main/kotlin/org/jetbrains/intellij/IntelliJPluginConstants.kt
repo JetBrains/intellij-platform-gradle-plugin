@@ -17,6 +17,7 @@ object IntelliJPluginConstants {
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
     const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
+    const val DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME = "downloadIdeaProductReleasesXml"
     const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
     const val POST_INSTRUMENT_CODE_TASK_NAME = "postInstrumentCode"
     const val POST_INSTRUMENT_TEST_CODE_TASK_NAME = "postInstrumentTestCode"

@@ -22,7 +22,7 @@ import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
@@ -47,6 +47,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_SANDBOX
+import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.EXTENSION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
@@ -1288,15 +1289,23 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
 
+        val downloadIdeaProductReleasesXml = project.tasks.register<Sync>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME) {
+            group = PLUGIN_GROUP_NAME
+            from(project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL)) {
+                rename { "idea_product_releases.xml" }
+            }
+            into(temporaryDir)
+        }
+
         project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "List all available IntelliJ-based IDE releases with their updates."
 
-            updatePaths.convention(project.provider {
-                listOf(
-                    project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL).asString(),
-                )
-            })
+            productsReleasesUpdateFiles
+                .from(updatePaths)
+                .from(downloadIdeaProductReleasesXml.map {
+                    it.outputs.files.asFileTree
+                })
             androidStudioUpdatePath.convention(project.provider {
                 dependenciesDownloader.getAndroidStudioReleases(logCategory())
             })
