@@ -17,7 +17,7 @@ import kotlin.test.assertTrue
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox = File(buildDirectory, DEFAULT_SANDBOX)
+    private val sandbox get() = File(buildDirectory, DEFAULT_SANDBOX)
 
     @Test
     fun `prepare sandbox for two plugins`() {
