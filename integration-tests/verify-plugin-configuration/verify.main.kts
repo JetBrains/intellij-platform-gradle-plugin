@@ -6,7 +6,6 @@ import java.nio.file.Files
 
 __FILE__.init {
     val userHome = projectDirectory.resolve("home")
-    val downloadDir = buildDirectory.resolve("home")
     val ides = userHome.resolve(".pluginVerifier/ides").also {
         Files.deleteIfExists(it.resolve("foo"))
     }
@@ -52,6 +51,7 @@ __FILE__.init {
             Files.createFile(it.resolve("foo"))
         }
     }
+    val downloadDir = buildDirectory.resolve("home")
     runGradleTask(
         "clean", "verifyPluginConfiguration", systemProperties = defaultSystemProperties, projectProperties = defaultProjectProperties + mapOf(
             "downloadDir" to downloadDir,

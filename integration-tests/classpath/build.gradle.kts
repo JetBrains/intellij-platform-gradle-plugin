@@ -12,6 +12,13 @@ tasks {
     }
 
     test {
+        // <workaround>
+        // apply JUnit compatibility workaround
+        // https://youtrack.jetbrains.com/issue/IDEA-278926#focus=Comments-27-5561012.0-0
+        isScanForTestClasses = false
+        include("**/*Test.class")
+        // </workaround>
+
         finalizedBy(jacocoTestReport)
     }
 

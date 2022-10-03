@@ -14,6 +14,7 @@
 
 ### Changed
 - Set minimum supported Gradle version from `6.7.1` to `6.8`
+- Use information from `product-info.json` for running `223+`
 
 ## [1.9.0]
 ### Added

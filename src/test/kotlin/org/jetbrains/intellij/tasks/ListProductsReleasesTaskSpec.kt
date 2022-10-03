@@ -52,7 +52,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             listProductsReleases {
                 sinceVersion = "201"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -77,7 +77,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2020.3"
                 untilVersion = "2021.2.1"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -100,7 +100,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceBuild = "203"
                 untilBuild = "212.*"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -126,7 +126,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceBuild = "203"
                 untilBuild = "212.*"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -149,7 +149,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 type = "PY"
                 version = "2021.1"
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -170,7 +170,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -253,7 +253,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 types = ["AI"]
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
@@ -279,7 +279,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 types = ["AI"]
                 releaseChannels = EnumSet.of(Channel.RELEASE)
             }
-            """
+            """.trimIndent()
         )
 
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {

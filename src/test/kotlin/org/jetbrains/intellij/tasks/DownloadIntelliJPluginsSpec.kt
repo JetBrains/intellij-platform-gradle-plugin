@@ -40,7 +40,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                       }
                 } 
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -67,7 +67,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             intellij {
                 plugins = ["io.flutter:67.0.2-dev.1@dev"]
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -93,7 +93,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             intellij {
                 plugins = ["org.intellij.plugins.markdown:$testMarkdownPluginVersion"]
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -119,7 +119,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             intellij {
                 plugins = ["org.jetbrains.postfixCompletion:0.8-beta"]
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -146,7 +146,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -168,7 +168,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             } 
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -191,7 +191,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -213,7 +213,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
@@ -235,7 +235,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
                 }
                 plugins = ["com.intellij.plugins.emacskeymap:201.6251.22"]
             }
-            """
+            """.trimIndent()
         )
 
         build(BasePlugin.ASSEMBLE_TASK_NAME)
