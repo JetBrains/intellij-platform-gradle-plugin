@@ -28,7 +28,7 @@ jobs:
   integrationTests:
     if: ${{ !inputs.skipTests }}
     name: Integration Tests
-    needs: gradleValidation
+    needs: [ gradleValidation, unitTests ]
     uses: ./.github/workflows/reusable-integrationTests.yml
 
   #  integrationTestsEAP:
