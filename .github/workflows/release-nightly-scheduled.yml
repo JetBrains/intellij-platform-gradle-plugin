@@ -11,5 +11,5 @@ on:
 jobs:
 
   release-nightly:
-    if: contains("JetBrains/gradle-intellij-plugin", github.repository)
+    if: contains('JetBrains/gradle-intellij-plugin', github.repository)
     uses: ./.github/workflows/release-nightly.yml
