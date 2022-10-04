@@ -1305,9 +1305,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
             channels.convention(listOf("default"))
 
             distributionFile.convention(
-                signPluginTaskProvider.flatMap { signPluginTask ->
-                    signPluginTask.outputArchiveFile
-                }.orElse(resolveBuildTaskOutput(project))
+                signPluginTaskProvider
+                    .flatMap { signPluginTask ->
+                        when (signPluginTask.didWork) {
+                            true -> signPluginTask.outputArchiveFile
+                            else -> resolveBuildTaskOutput(project)
+                        }
+                    }
             )
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)
