@@ -1,4 +1,4 @@
-name: Reusable test workflow
+name: Reusable Code Inspection
 
 on: [ workflow_call ]
 

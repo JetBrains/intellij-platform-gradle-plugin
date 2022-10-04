@@ -14,14 +14,12 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
 import org.gradle.api.plugins.PluginInstantiationException
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.*
@@ -425,20 +423,38 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
         val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+        val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
 
+        val ideaDependencyJarFiles = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+            setupDependenciesTask.idea.map {
+                project.files(it.jarFiles)
+            }
+        }
+        val jarArchiveFile = jarTaskProvider.flatMap { jarTask ->
+            jarTask.archiveFile
+        }
+        val runtimeConfigurationFiles = project.provider {
+            runtimeConfiguration.allDependencies.flatMap {
+                runtimeConfiguration.fileCollection(it)
+            }
+        }
         val gradleVersion = project.provider { project.gradle.gradleVersion }
         val projectVersion = project.provider { project.version }
-        val version = project.provider { project.version }
         val buildSdk = project.provider {
-            when (extension.localPath.orNull) {
-                null -> "${extension.getVersionType()}-${extension.getVersionNumber()}"
-                else -> setupDependenciesTaskProvider.get().idea.get().classes.let { ideaClasses ->
-                    ideProductInfo(ideaClasses)?.run { "$productCode-$version" }
-                    // Fall back on build number if product-info.json is not present, this is the case
-                    // for recent versions of Android Studio.
-                        ?: ideBuildNumber(ideaClasses)
+            extension.localPath.flatMap {
+                setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+                    setupDependenciesTask.idea.map { ideaDependency ->
+                        ideaDependency.classes.let {
+                            ideProductInfo(it)?.run { "$productCode-$projectVersion" }
+                            // Fall back on build number if product-info.json is not present, this is the case
+                            // for recent versions of Android Studio.
+                                ?: ideBuildNumber(it)
+                        }
+                    }
                 }
-            }
+            }.orElse(project.provider {
+                "${extension.getVersionType()}-${extension.getVersionNumber()}"
+            })
         }
 
         jarTaskProvider.configure {
@@ -458,24 +474,39 @@ abstract class IntelliJPlugin : Plugin<Project> {
         project.tasks.register<PrepareSandboxTask>(taskName) {
             group = PLUGIN_GROUP_NAME
             description = "Prepares sandbox directory with installed plugin and its dependencies."
+            duplicatesStrategy = DuplicatesStrategy.FAIL
 
             pluginName.convention(extension.pluginName)
-            pluginJar.convention(jarTaskProvider.get().archiveFile)
+            pluginJar.convention(jarArchiveFile)
             defaultDestinationDir.convention(extension.sandboxDir.map {
                 project.file("$it/plugins$testSuffix")
             })
             configDir.convention(extension.sandboxDir.map {
                 "$it/config$testSuffix"
             })
-            librariesToIgnore.convention(setupDependenciesTaskProvider.get().idea.map {
-                project.files(it.jarFiles)
-            })
+            librariesToIgnore.convention(ideaDependencyJarFiles)
             pluginDependencies.convention(project.provider {
                 extension.getPluginDependenciesList(project)
             })
 
+
+            intoChild(pluginName.map { "$it/lib" })
+                .from(runtimeConfigurationFiles.map { files ->
+                    val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
+                    val pluginDirectories = pluginDependencies.get().map { it.artifact.canonicalPath }
+
+                    listOf(pluginJar.get().asFile) + files.filter { file ->
+                        !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
+                            file.canonicalPath == p || file.canonicalPath.startsWith("$p${File.separator}")
+                        })
+                    }
+                })
+                .eachFile {
+                    name = ensureName(file.toPath())
+                }
+
             dependsOn(JavaPlugin.JAR_TASK_NAME)
-            dependsOn(project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME))
+            dependsOn(runtimeConfiguration)
             dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
 
             configure?.invoke(this)
@@ -1275,9 +1306,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
             channels.convention(listOf("default"))
 
             distributionFile.convention(
-                signPluginTaskProvider.flatMap { signPluginTask ->
-                    signPluginTask.outputArchiveFile
-                }.orElse(resolveBuildTaskOutput(project))
+                signPluginTaskProvider
+                    .flatMap { signPluginTask ->
+                        when (signPluginTask.didWork) {
+                            true -> signPluginTask.outputArchiveFile
+                            else -> resolveBuildTaskOutput(project)
+                        }
+                    }
             )
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)

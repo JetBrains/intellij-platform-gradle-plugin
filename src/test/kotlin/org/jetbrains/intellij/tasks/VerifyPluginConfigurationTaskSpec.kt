@@ -22,7 +22,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         super.setUp()
 
         gradleArguments.add("-Duser.home=$gradleHome")
-        File(gradleHome).run {
+        File(gradleHome).resolve(".pluginVerifier/ides").run {
             deleteRecursively()
             mkdirs()
         }

@@ -150,7 +150,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             }
 
             if (
-                pluginVerifierDownloadPath == oldPluginVerifierDownloadPath
+                pluginVerifierDownloadPath != oldPluginVerifierDownloadPath
                 && oldPluginVerifierDownloadPath.exists()
                 && oldPluginVerifierDownloadPath.listFiles().isNotEmpty()
             ) {
