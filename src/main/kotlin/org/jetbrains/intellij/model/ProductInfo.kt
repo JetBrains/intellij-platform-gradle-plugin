@@ -8,14 +8,14 @@ import org.gradle.internal.os.OperatingSystem
 
 @Serializable
 data class ProductInfo(
-    var name: String? = null,
-    var version: String? = null,
-    var versionSuffix: String? = null,
-    var buildNumber: String? = null,
-    var productCode: String? = null,
-    var dataDirectoryName: String? = null,
-    var svgIconPath: String? = null,
-    var productVendor: String? = null,
+    val name: String? = null,
+    val version: String? = null,
+    val versionSuffix: String? = null,
+    val buildNumber: String? = null,
+    val productCode: String? = null,
+    val dataDirectoryName: String? = null,
+    val svgIconPath: String? = null,
+    val productVendor: String? = null,
     val launch: List<Launch> = mutableListOf(),
     val customProperties: List<CustomProperty> = mutableListOf(),
     val bundledPlugins: List<String> = mutableListOf(),
@@ -37,19 +37,19 @@ data class ProductInfo(
 
 @Serializable
 data class Launch(
-    var os: OS? = null,
-    var launcherPath: String? = null,
-    var javaExecutablePath: String? = null,
-    var vmOptionsFilePath: String? = null,
-    var startupWmClass: String? = null,
+    val os: OS? = null,
+    val launcherPath: String? = null,
+    val javaExecutablePath: String? = null,
+    val vmOptionsFilePath: String? = null,
+    val startupWmClass: String? = null,
     val bootClassPathJarNames: List<String> = mutableListOf(),
     val additionalJvmArguments: List<String> = mutableListOf(),
 )
 
 @Serializable
 data class CustomProperty(
-    var key: String? = null,
-    var value: String? = null,
+    val key: String? = null,
+    val value: String? = null,
 )
 
 @Suppress("EnumEntryName")
