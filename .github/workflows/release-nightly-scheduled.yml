@@ -1,0 +1,15 @@
+name: Nightly Release (scheduled)
+
+# Automatically run the release-nightly job
+#
+# The scheduled release will be disabled on forks, preventing unnecessary work.
+
+on:
+  schedule:
+    - cron: "0 0 * * *"
+
+jobs:
+
+  release-nightly:
+    if: contains('JetBrains/gradle-intellij-plugin', github.repository)
+    uses: ./.github/workflows/release-nightly.yml
