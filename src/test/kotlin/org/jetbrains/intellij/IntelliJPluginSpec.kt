@@ -13,6 +13,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUG
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
@@ -56,6 +57,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 INSTRUMENT_CODE_TASK_NAME,
                 INSTRUMENT_TEST_CODE_TASK_NAME,
                 JAR_SEARCHABLE_OPTIONS_TASK_NAME,
+                LIST_BUNDLED_PLUGINS_TASK_NAME,
                 LIST_PRODUCTS_RELEASES_TASK_NAME,
                 PATCH_PLUGIN_XML_TASK_NAME,
                 POST_INSTRUMENT_CODE_TASK_NAME,

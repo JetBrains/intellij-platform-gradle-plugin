@@ -78,6 +78,7 @@ tasks {
         kotlinOptions {
             jvmTarget = "11"
             apiVersion = "1.4"
+            languageVersion = "1.4"
         }
     }
 

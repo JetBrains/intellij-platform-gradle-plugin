@@ -20,10 +20,7 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
 import org.gradle.api.plugins.PluginInstantiationException
-import org.gradle.api.tasks.ClasspathNormalizer
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.*
-import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.JavaCompile
@@ -60,6 +57,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENC
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
+import org.jetbrains.intellij.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
@@ -207,6 +205,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureRobotServerDownloadTask(project)
         configurePrepareSandboxTasks(project, extension)
         configureListProductsReleasesTask(project, extension)
+        configureListBundledPluginsTask(project)
         configurePluginVerificationTask(project)
         configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
@@ -1340,7 +1339,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             description = "List all available IntelliJ-based IDE releases with their updates."
 
             productsReleasesUpdateFiles
-                .from(updatePaths)
+                .from(productsReleasesUpdateFiles)
                 .from(downloadIdeaProductReleasesXml.map {
                     it.outputs.files.asFileTree
                 })
@@ -1354,6 +1353,26 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sinceBuild.convention(patchPluginXmlTaskProvider.flatMap { it.sinceBuild })
             untilBuild.convention(patchPluginXmlTaskProvider.flatMap { it.untilBuild })
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
+        }
+    }
+
+    private fun configureListBundledPluginsTask(project: Project) {
+        info(context, "Configuring list bundled plugins task")
+
+        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
+
+        project.tasks.register<ListBundledPluginsTask>(LIST_BUNDLED_PLUGINS_TASK_NAME) {
+            group = PLUGIN_GROUP_NAME
+            description = "List bundled plugins within the currently targeted IntelliJ-based IDE release."
+
+            ideDir.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+                setupDependenciesTask.idea.map { project.file(it.classes.path) }
+            })
+            outputFile.convention(
+                project.layout.buildDirectory.file("$LIST_BUNDLED_PLUGINS_TASK_NAME.txt")
+            )
+
+            dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
         }
     }
 
@@ -1373,9 +1392,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureSetupDependenciesTask(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring setup dependencies task")
 
-        project.tasks.register<SetupDependenciesTask>(
-            SETUP_DEPENDENCIES_TASK_NAME
-        ) {
+        project.tasks.register<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "Sets up required dependencies for building and running project."
 

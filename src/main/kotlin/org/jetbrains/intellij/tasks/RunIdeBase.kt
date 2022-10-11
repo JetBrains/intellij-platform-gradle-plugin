@@ -32,8 +32,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * Configured automatically with the [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea] dependency.
      *
      * Default value: `setupDependenciesTask.idea.get().classes.path`
-     *
-     * TODO: Should be @Internal
      */
     @get:Input
     abstract val ideDir: Property<File>
@@ -84,8 +82,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      * Provided to the `idea.plugins.path` system property.
      *
      * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.getDestinationDir]
-     *
-     * TODO: Should be @Internal
      */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.NONE)

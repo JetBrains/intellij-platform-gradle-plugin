@@ -100,6 +100,8 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
         }
     }
 
+    fun listPlugins() = plugins.keys
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
