@@ -13,7 +13,7 @@ plugins {
     kotlin("plugin.serialization") version "1.7.10"
     id("com.gradle.plugin-publish") version "1.0.0"
     id("org.jetbrains.changelog") version "1.3.1"
-    id("org.jetbrains.dokka") version "1.7.10"
+    id("org.jetbrains.dokka") version "1.7.20"
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {
