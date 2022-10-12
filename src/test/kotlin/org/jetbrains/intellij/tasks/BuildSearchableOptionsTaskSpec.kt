@@ -15,7 +15,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             """
             intellij {
                 version = '14.1.4'
-            } 
+            }
             """.trimIndent()
         )
 

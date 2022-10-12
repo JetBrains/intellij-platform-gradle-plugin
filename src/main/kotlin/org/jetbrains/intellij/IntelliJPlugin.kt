@@ -2,9 +2,7 @@
 
 package org.jetbrains.intellij
 
-import com.jetbrains.plugin.structure.base.utils.hasExtension
-import com.jetbrains.plugin.structure.base.utils.isDirectory
-import com.jetbrains.plugin.structure.base.utils.isJar
+import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -313,10 +311,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
         dependencies.add(project.dependencies.create(dependency))
 
         val prepareSandboxTaskProvider = dependency.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_TASK_NAME)
-        val prepareSandboxTask = prepareSandboxTaskProvider.get()
-        val dependencyDirectory = File(prepareSandboxTask.destinationDir, prepareSandboxTask.pluginName.get())
+        val dependencyDirectory = prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+            prepareSandboxTask.pluginName.map { pluginName ->
+                prepareSandboxTask.destinationDir.resolve(pluginName)
+            }
+        }
 
-        val pluginDependency = PluginProjectDependency(dependencyDirectory, context)
+        val pluginDependency = PluginProjectDependency(dependencyDirectory.get(), context)
         extension.addPluginDependency(pluginDependency)
         project.tasks.withType<PrepareSandboxTask>().configureEach {
             configureCompositePlugin(pluginDependency)
@@ -375,7 +376,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
         configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
         configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest") {
-            it.from(downloadPluginTaskProvider.get().outputDir.get())
+            it.from(downloadPluginTaskProvider.flatMap { downloadPluginTask ->
+                downloadPluginTask.outputDir
+            })
             it.dependsOn(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
         }
     }
@@ -433,8 +436,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 runtimeConfiguration.fileCollection(it)
             }
         }
-        val gradleVersion = project.provider { project.gradle.gradleVersion }
-        val projectVersion = project.provider { project.version }
+        val gradleVersion = project.provider {
+            project.gradle.gradleVersion
+        }
+        val projectVersion = project.provider {
+            project.version
+        }
         val buildSdk = project.provider {
             extension.localPath.flatMap {
                 setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
@@ -541,19 +548,22 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
-            ideDir.convention(runIdeTaskProvider.get().ideDir)
+            ideDir.convention(runIdeTaskProvider.flatMap { runIdeTask ->
+                runIdeTask.ideDir
+            })
             productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
                 listProductsReleasesTask.outputFile.asFile
             })
-            ides.convention(project.provider {
-                val ideVersions = ideVersions.get().takeIf(List<String>::isNotEmpty) ?: run {
+            ides.convention(ideVersions.map {
+                it
+                    .ifEmpty {
                     when {
                         localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
                         else -> null
                     }
-                } ?: emptyList()
-
-                ideVersions.map { ideVersion ->
+                    }
+                    .orEmpty()
+                    .map { ideVersion ->
                     val downloadDir = File(downloadDir.get())
                     val context = logCategory()
 
@@ -851,7 +861,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             description = "Creates a JAR file with searchable options to be distributed with the plugin."
 
             outputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
-            pluginName.convention(prepareSandboxTaskProvider.get().pluginName)
+            pluginName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+                prepareSandboxTask.pluginName
+            })
             sandboxDir.convention(prepareSandboxTaskProvider.map { prepareSandboxTask ->
                 prepareSandboxTask.destinationDir.canonicalPath
             })
@@ -947,9 +959,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         IdeVersion.createIdeVersion(ideaDependency.buildNumber).stripExcessComponents().asStringWithoutProductCode() + eapSuffix
                     }
                 })
-                ideaDependency.convention(setupDependenciesTask.idea)
-                javac2.convention(setupDependenciesTask.idea.map {
+                ideaDependency.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+                    setupDependenciesTask.idea
+                })
+                javac2.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+                    setupDependenciesTask.idea.map {
                     it.classes.resolve("lib/javac2.jar")
+                    }
                 })
                 compilerClassPathFromMaven.convention(compilerVersion.map { compilerVersion ->
                     if (compilerVersion == DEFAULT_IDEA_VERSION || Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
@@ -1080,15 +1096,23 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
-        val buildNumberProvider = project.provider { setupDependenciesTaskProvider.get().idea.get().buildNumber }
-        val ideDirProvider = project.provider { runIdeTaskProvider.get().ideDir.get() }
-        val ideaDependencyLibrariesProvider = project.provider {
-            val classes = setupDependenciesTaskProvider.get().idea.get().classes
-            project.files("$classes/lib/resources.jar", "$classes/lib/idea.jar", "$classes/lib/app.jar")
+        val buildNumberProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+            setupDependenciesTask.idea.map {
+                it.buildNumber
+            }
+        }
+        val ideDirProvider = runIdeTaskProvider.flatMap { runIdeTask ->
+            runIdeTask.ideDir
         }
 
-        val sandboxDirProvider = project.provider {
-            project.file(extension.sandboxDir.get())
+        val ideaDependencyLibrariesProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+            setupDependenciesTask.idea
+                .map { it.classes }
+                .map { project.files("$it/lib/resources.jar", "$it/lib/idea.jar", "$it/lib/app.jar") }
+        }
+
+        val sandboxDirProvider = extension.sandboxDir.map {
+            project.file(it)
         }
         val configDirectoryProvider = sandboxDirProvider.map {
             it.resolve("config-test").apply { mkdirs() }
@@ -1096,8 +1120,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val systemDirectoryProvider = sandboxDirProvider.map {
             it.resolve("system-test").apply { mkdirs() }
         }
-        val pluginsDirectoryProvider = sandboxDirProvider.map {
-            prepareTestingSandboxTaskProvider.get().destinationDir.apply { mkdirs() }
+        val pluginsDirectoryProvider = prepareTestingSandboxTaskProvider.map { prepareSandboxTask ->
+            prepareSandboxTask.destinationDir.apply { mkdirs() }
         }
 
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
@@ -1192,15 +1216,23 @@ abstract class IntelliJPlugin : Plugin<Project> {
             description = "Assembles plugin and prepares ZIP archive for deployment."
             group = PLUGIN_GROUP_NAME
 
-            val prepareSandboxTask = prepareSandboxTaskProvider.get()
-
-            archiveBaseName.convention(prepareSandboxTask.pluginName)
-
-            from(project.provider {
-                "${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName.get()}"
+            archiveBaseName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+                prepareSandboxTask.pluginName
             })
-            from(jarSearchableOptionsTaskProvider.get().archiveFile) { into("lib") }
-            into(prepareSandboxTask.pluginName)
+
+            from(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+                prepareSandboxTask.pluginName.map {
+                    "${prepareSandboxTask.destinationDir}/$it"
+                }
+            })
+            from(jarSearchableOptionsTaskProvider.flatMap { jarSearchableOptionsTask ->
+                jarSearchableOptionsTask.archiveFile
+            }) {
+                into("lib")
+            }
+            into(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+                prepareSandboxTask.pluginName
+            })
 
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
@@ -1224,13 +1256,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
             description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
 
             inputArchiveFile.convention(resolveBuildTaskOutput(project))
-            outputArchiveFile.convention(project.layout.file(project.provider {
-                val inputFile = buildPluginTaskProvider.get().archiveFile.get().asFile
-                val inputFileExtension = inputFile.path.substring(inputFile.path.lastIndexOf('.'))
-                val inputFileWithoutExtension = inputFile.path.substring(0, inputFile.path.lastIndexOf('.'))
-                val outputFilePath = "$inputFileWithoutExtension-signed$inputFileExtension"
-                File(outputFilePath)
-            }))
+            outputArchiveFile.convention(
+                project.layout.file(
+                    buildPluginTaskProvider.flatMap { buildPluginTask ->
+                        buildPluginTask.archiveFile
+                            .map { it.asFile.toPath() }
+                            .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
+                    })
+            )
             cliVersion.convention(VERSION_LATEST)
             cliPath.convention(project.provider {
                 val resolvedCliVersion = resolveCliVersion(cliVersion.orNull)
@@ -1537,11 +1570,17 @@ abstract class IntelliJPlugin : Plugin<Project> {
             description = "Removes classpath index files created by PathClassLoader"
 
             classpathIndexFiles.from(project.provider {
-                (project.extensions.findByName("sourceSets") as SourceSetContainer).flatMap {
+                (project.extensions.findByName("sourceSets") as SourceSetContainer)
+                    .flatMap {
                     it.output.classesDirs + it.output.generatedSourcesDirs + project.files(
                         it.output.resourcesDir
                     )
-                }.mapNotNull { dir -> dir.resolve("classpath.index").takeIf { it.exists() } }
+                    }
+                    .mapNotNull { dir ->
+                        dir
+                            .resolve("classpath.index")
+                            .takeIf { it.exists() }
+                    }
             })
 
             val buildNumberProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
