@@ -2,8 +2,10 @@
 
 package org.jetbrains.intellij.dependency
 
+import org.gradle.api.GradleException
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.ideProductInfo
 import org.jetbrains.intellij.model.PluginsCache
 import org.jetbrains.intellij.model.PluginsCachePlugin
 import org.jetbrains.intellij.model.XmlExtractor
@@ -26,6 +28,15 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
                 dumpToCache(extractor)
             }
         }
+
+        fun resolveBundledPlugins(ideDir: File, context: String?) = ideProductInfo(ideDir)
+            ?.bundledPlugins
+            ?.takeIf { it.isNotEmpty() }
+            ?: fromDirectory(ideDir.resolve("plugins"), context)
+                .plugins
+                .keys
+                .takeIf { it.isNotEmpty() }
+            ?: throw GradleException("Unable to resolve bundled plugins")
     }
 
     private fun fillFromCache(extractor: XmlExtractor<PluginsCache>): Boolean {
@@ -99,8 +110,6 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
             directoryNameMapping[plugin.directoryName] = id
         }
     }
-
-    fun listPlugins() = plugins.keys
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

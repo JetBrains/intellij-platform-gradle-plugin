@@ -21,8 +21,6 @@ import java.nio.file.Paths
 @Incubating
 abstract class RunIdePerformanceTestTask : RunIdeBase(true) {
 
-    private val context = logCategory()
-
     /**
      * Path to directory with test projects and '.ijperf' files.
      */
@@ -49,14 +47,14 @@ abstract class RunIdePerformanceTestTask : RunIdeBase(true) {
     abstract val profilerName: Property<ProfilerName>
 
     private lateinit var scriptPath: String
-
     private lateinit var testArtifactsDirPath: Path
+    private val context = logCategory()
 
     @TaskAction
     override fun exec() {
         val dir = Paths.get(artifactsDir.get()).createDir()
         val testData = Path.of(testDataDir.get()).toFile()
-        val testExecutionResults: MutableList<PerformanceTestResult> = mutableListOf()
+        val testExecutionResults = mutableListOf<PerformanceTestResult>()
 
         testData
             .walk()
@@ -83,7 +81,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase(true) {
                 }
             }
 
-        if (testExecutionResults.size > 0) {
+        if (testExecutionResults.isNotEmpty()) {
             testExecutionResults.forEach {
                 error(context, "TEST `${it.testName}` FAILED")
                 error(context, "Expected time of execution `${it.script.assertionTimeout}ms`, but was ${it.statistic.totalTime}ms")

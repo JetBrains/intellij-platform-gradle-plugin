@@ -4,16 +4,13 @@ package org.jetbrains.intellij.tasks
 
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.TaskExecutionException
 import org.jetbrains.intellij.dependency.BuiltinPluginsRegistry
-import org.jetbrains.intellij.ideProductInfo
 import org.jetbrains.intellij.logCategory
 import java.io.File
 
@@ -41,31 +38,13 @@ abstract class ListBundledPluginsTask : DefaultTask() {
 
     @TaskAction
     fun list() {
-        println("CALCULATE BUNDLED PLUGINS")
-        val bundledPlugins = resolveFromProductsInfo()
-            ?: resolveFromPluginsRegistry()
-            ?: throw TaskExecutionException(this, GradleException("Unable to resolve bundled plugins"))
-
         outputFile.get().asFile.outputStream().use { os ->
-            bundledPlugins.joinToString("\n").apply {
-                TeeOutputStream(System.out, os).write(toByteArray())
-            }
+            BuiltinPluginsRegistry
+                .resolveBundledPlugins(ideDir.get(), context)
+                .joinToString("\n")
+                .let {
+                    TeeOutputStream(System.out, os).write(it.toByteArray())
+                }
         }
     }
-
-    private fun resolveFromProductsInfo() =
-        ideProductInfo(ideDir.get())
-            ?.bundledPlugins
-            ?.takeIf { it.isNotEmpty() }
-
-    private fun resolveFromPluginsRegistry() =
-        BuiltinPluginsRegistry.fromDirectory(ideDir.get().resolve("plugins"), context)
-            .listPlugins()
-            .takeIf { it.isNotEmpty() }
 }
-
-
-
-
-
-
