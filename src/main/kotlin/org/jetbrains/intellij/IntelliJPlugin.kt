@@ -454,9 +454,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         }
                     }
                 }
-            }.orElse(project.provider {
-                "${extension.getVersionType()}-${extension.getVersionNumber()}"
-            })
+            }.orElse(
+                extension.getVersionNumber().zip(extension.getVersionType()) { version, type ->
+                    "$version-$type"
+                }
+            )
         }
 
         jarTaskProvider.configure {
@@ -557,60 +559,60 @@ abstract class IntelliJPlugin : Plugin<Project> {
             ides.convention(ideVersions.map {
                 it
                     .ifEmpty {
-                    when {
-                        localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
-                        else -> null
-                    }
+                        when {
+                            localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
+                            else -> null
+                        }
                     }
                     .orEmpty()
                     .map { ideVersion ->
-                    val downloadDir = File(downloadDir.get())
-                    val context = logCategory()
+                        val downloadDir = File(downloadDir.get())
+                        val context = logCategory()
 
-                    resolveIdePath(ideVersion, downloadDir, context) { type, version, buildType ->
-                        val name = "$type-$version"
-                        val ideDir = downloadDir.resolve(name)
-                        info(context, "Downloading IDE '$name' to: $ideDir")
+                        resolveIdePath(ideVersion, downloadDir, context) { type, version, buildType ->
+                            val name = "$type-$version"
+                            val ideDir = downloadDir.resolve(name)
+                            info(context, "Downloading IDE '$name' to: $ideDir")
 
-                        val url = resolveIdeUrl(type, version, buildType, context)
-                        val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
-                        val group = when (type) {
-                            PLATFORM_TYPE_ANDROID_STUDIO -> "com.android"
-                            else -> "com.jetbrains"
-                        }
-                        debug(context, "Downloading IDE from $url")
-
-                        try {
-                            val ideArchive = dependenciesDownloader.downloadFromRepository(context, {
-                                create(
-                                    group = group,
-                                    name = "ides",
-                                    version = dependencyVersion,
-                                    ext = "tar.gz",
-                                )
-                            }, {
-                                ivyRepository(url)
-                            }).first()
-
-                            debug(context, "IDE downloaded, extracting...")
-                            archiveUtils.extract(ideArchive, ideDir, context)
-                            ideDir.listFiles()?.let { files ->
-                                files.filter(File::isDirectory).forEach { container ->
-                                    container.listFiles()?.forEach { file ->
-                                        file.renameTo(ideDir.resolve(file.name))
-                                    }
-                                    container.deleteRecursively()
-                                }
+                            val url = resolveIdeUrl(type, version, buildType, context)
+                            val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
+                            val group = when (type) {
+                                PLATFORM_TYPE_ANDROID_STUDIO -> "com.android"
+                                else -> "com.jetbrains"
                             }
-                        } catch (e: Exception) {
-                            warn(context, "Cannot download '$type-$version' from '$buildType' channel: $url", e)
+                            debug(context, "Downloading IDE from $url")
+
+                            try {
+                                val ideArchive = dependenciesDownloader.downloadFromRepository(context, {
+                                    create(
+                                        group = group,
+                                        name = "ides",
+                                        version = dependencyVersion,
+                                        ext = "tar.gz",
+                                    )
+                                }, {
+                                    ivyRepository(url)
+                                }).first()
+
+                                debug(context, "IDE downloaded, extracting...")
+                                archiveUtils.extract(ideArchive, ideDir, context)
+                                ideDir.listFiles()?.let { files ->
+                                    files.filter(File::isDirectory).forEach { container ->
+                                        container.listFiles()?.forEach { file ->
+                                            file.renameTo(ideDir.resolve(file.name))
+                                        }
+                                        container.deleteRecursively()
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                warn(context, "Cannot download '$type-$version' from '$buildType' channel: $url", e)
+                            }
+
+                            debug(context, "IDE extracted to: $ideDir")
+                            ideDir
                         }
 
-                        debug(context, "IDE extracted to: $ideDir")
-                        ideDir
-                    }
-
-                }.let { files -> project.files(files) }
+                    }.let { files -> project.files(files) }
             })
             verifierPath.convention(project.provider {
                 val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
@@ -927,36 +929,40 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     sourceSet.compileClasspath
                 })
                 compilerVersion.convention(project.provider {
-                    val version = extension.getVersionNumber()
-                    val type = extension.getVersionType()
-                    val localPath = extension.localPath.orNull
                     val ideaDependency = setupDependenciesTask.idea.get()
+                    val productInfo = ideProductInfo(ideaDependency.classes)
 
-                    if (localPath.isNullOrBlank() && version.orEmpty().endsWith(RELEASE_SUFFIX_SNAPSHOT)) {
-                        val types = listOf(
-                            PLATFORM_TYPE_CLION,
-                            PLATFORM_TYPE_RIDER,
-                            PLATFORM_TYPE_PYCHARM,
-                            PLATFORM_TYPE_PHPSTORM,
-                        )
-                        if (version == DEFAULT_IDEA_VERSION && types.contains(type)) {
-                            ideProductInfo(ideaDependency.classes)?.buildNumber?.let { buildNumber ->
+                    val version = extension.getVersionNumber().orNull.orEmpty()
+                    val type = extension.getVersionType().orNull.orEmpty()
+                    val localPath = extension.localPath.orNull.orEmpty()
+                    val types = listOf(
+                        PLATFORM_TYPE_CLION,
+                        PLATFORM_TYPE_RIDER,
+                        PLATFORM_TYPE_PYCHARM,
+                        PLATFORM_TYPE_PHPSTORM,
+                    )
+
+                    when {
+                        localPath.isNotBlank() || !version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> {
+                            val eapSuffix = RELEASE_SUFFIX_EAP.takeIf { productInfo?.versionSuffix == "EAP" }.orEmpty()
+                            IdeVersion.createIdeVersion(ideaDependency.buildNumber).stripExcessComponents().asStringWithoutProductCode() + eapSuffix
+                        }
+
+                        version == DEFAULT_IDEA_VERSION && types.contains(type) -> {
+                            productInfo?.buildNumber?.let { buildNumber ->
                                 Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                             } ?: version
-                        } else {
-                            when (type) {
+                        }
+                        else -> {
+                            val prefix = when (type) {
                                 PLATFORM_TYPE_CLION -> "CLION-"
                                 PLATFORM_TYPE_RIDER -> "RIDER-"
                                 PLATFORM_TYPE_PYCHARM -> "PYCHARM-"
                                 PLATFORM_TYPE_PHPSTORM -> "PHPSTORM-"
                                 else -> ""
-                            } + version
+                            }
+                            prefix + version
                         }
-                    } else {
-                        val isEap = localPath?.let { ideProductInfo(ideaDependency.classes)?.versionSuffix == "EAP" } ?: false
-                        val eapSuffix = RELEASE_SUFFIX_EAP.takeIf { isEap }.orEmpty()
-
-                        IdeVersion.createIdeVersion(ideaDependency.buildNumber).stripExcessComponents().asStringWithoutProductCode() + eapSuffix
                     }
                 })
                 ideaDependency.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
@@ -964,7 +970,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 })
                 javac2.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
                     setupDependenciesTask.idea.map {
-                    it.classes.resolve("lib/javac2.jar")
+                        it.classes.resolve("lib/javac2.jar")
                     }
                 })
                 compilerClassPathFromMaven.convention(compilerVersion.map { compilerVersion ->
@@ -1470,20 +1476,21 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     context,
                 )
                 val localPath = extension.localPath.orNull
-                val version = extension.getVersionNumber()
+                val version = extension.getVersionNumber().orNull
+                val type = extension.getVersionType().orNull
 
                 val ideaDependency = when {
                     localPath != null && version != null -> {
                         throw GradleException("Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present.")
                     }
 
-                    version != null -> {
+                    version != null && type != null -> {
                         info(context, "Using IDE from remote repository")
                         val extraDependencies = extension.extraDependencies.get()
                         dependencyManager.resolveRemote(
                             project,
                             version,
-                            extension.getVersionType(),
+                            type,
                             extension.downloadSources.get(),
                             extraDependencies,
                         )
@@ -1579,9 +1586,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             classpathIndexFiles.from(project.provider {
                 (project.extensions.findByName("sourceSets") as SourceSetContainer)
                     .flatMap {
-                    it.output.classesDirs + it.output.generatedSourcesDirs + project.files(
-                        it.output.resourcesDir
-                    )
+                        it.output.classesDirs + it.output.generatedSourcesDirs + project.files(
+                            it.output.resourcesDir
+                        )
                     }
                     .mapNotNull { dir ->
                         dir
