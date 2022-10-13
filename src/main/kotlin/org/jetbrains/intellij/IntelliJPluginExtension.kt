@@ -263,7 +263,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @get:Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     abstract val ideaDependency: Property<IdeaDependency>
 
-    fun getVersionNumber(): String = version.get().run {
+    fun getVersionNumber(): String? = version.orNull?.run {
         versionTypeRegex.matchEntire(this)?.groupValues?.getOrNull(2) ?: this
     }
 

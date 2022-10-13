@@ -928,11 +928,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 })
                 compilerVersion.convention(project.provider {
                     val version = extension.getVersionNumber()
+                    val type = extension.getVersionType()
                     val localPath = extension.localPath.orNull
                     val ideaDependency = setupDependenciesTask.idea.get()
 
-                    if (localPath.isNullOrBlank() && version.endsWith(RELEASE_SUFFIX_SNAPSHOT)) {
-                        val type = extension.getVersionType()
+                    if (localPath.isNullOrBlank() && version.orEmpty().endsWith(RELEASE_SUFFIX_SNAPSHOT)) {
                         val types = listOf(
                             PLATFORM_TYPE_CLION,
                             PLATFORM_TYPE_RIDER,
@@ -1469,10 +1469,16 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     dependenciesDownloader,
                     context,
                 )
-                val ideaDependency = when (val localPath = extension.localPath.orNull) {
-                    null -> {
+                val localPath = extension.localPath.orNull
+                val version = extension.getVersionNumber()
+
+                val ideaDependency = when {
+                    localPath != null && version != null -> {
+                        throw GradleException("Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present.")
+                    }
+
+                    version != null -> {
                         info(context, "Using IDE from remote repository")
-                        val version = extension.getVersionNumber()
                         val extraDependencies = extension.extraDependencies.get()
                         dependencyManager.resolveRemote(
                             project,
@@ -1483,12 +1489,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         )
                     }
 
-                    else -> {
-                        if (extension.version.orNull != null) {
-                            throw GradleException("Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present.")
-                        }
+                    localPath != null -> {
                         info(context, "Using path to locally installed IDE: $localPath")
                         dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
+                    }
+
+                    else -> {
+                        throw GradleException("Either 'intellij.localPath' or 'intellij.version' must be specified")
                     }
                 }
                 if (extension.configureDefaultDependencies.get() && !defaultDependenciesResolved) {
