@@ -128,7 +128,7 @@ fun getIdeaSystemProperties(
                         .replace("%IDE_HOME%", ideDirFile.canonicalPath)
                 }
         }
-        ?: emptyMap()
+        .orEmpty()
 
     val requirePluginProperties = requirePluginIds
         .takeIf(List<String>::isNotEmpty)

@@ -203,6 +203,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 plugins = ['copyright'] 
                 sandboxDir = '$sandboxPath'
             }
+            
+            buildSearchableOptions {
+                enabled = true
+            }
             """.trimIndent()
         )
 
