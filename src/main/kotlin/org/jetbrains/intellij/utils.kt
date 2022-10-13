@@ -154,7 +154,7 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirecto
         ?.takeIf { it.isNotEmpty() }
         ?: OpenedPackages
 
-    return defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + options.allJvmArgs
+    return (defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + options.allJvmArgs).distinct()
 }
 
 fun ideBuildNumber(ideDirectory: File) = (
