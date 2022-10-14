@@ -60,7 +60,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: ${{ always() }}
         with:
-          name: Test Report/Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
+          name: "Unit Tests Report: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}"
           path: "**/build/test-results/*/TEST-*.xml"
           reporter: java-junit
 
