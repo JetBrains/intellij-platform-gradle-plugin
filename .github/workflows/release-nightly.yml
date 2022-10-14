@@ -10,7 +10,7 @@ on:
   workflow_call:
 
 env:
-  XDG_CACHE_HOME: "~/.config/"
+  XDG_CACHE_HOME: "/home/runner/.cache/"
 
 jobs:
 
