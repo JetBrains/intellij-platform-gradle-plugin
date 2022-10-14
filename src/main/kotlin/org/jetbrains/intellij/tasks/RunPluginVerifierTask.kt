@@ -32,7 +32,7 @@ import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
-import java.nio.file.Paths
+import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
 
@@ -400,11 +400,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return Plugin Verifier home directory
      */
-    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir")
-        .orElse(providers.environmentVariable("XDG_CACHE_HOME").map { "$it/pluginVerifier" })
-        .orElse(providers.systemProperty("user.home").map { "$it/.cache/pluginVerifier" })
-        .map { Paths.get(it) }
-        .orElse(temporaryDir.resolve("pluginVerifier").toPath())
+    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir").map { Path.of(it) }
+        .orElse(providers.environmentVariable("XDG_CACHE_HOME").map { Path.of(it).resolve("pluginVerifier") })
+        .orElse(providers.systemProperty("user.home").map { Path.of(it).resolve(".cache/pluginVerifier") })
+        .orElse(temporaryDir.toPath().resolve("pluginVerifier"))
 
     /**
      * Resolves the Plugin Verifier version.
