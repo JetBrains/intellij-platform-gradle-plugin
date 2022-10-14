@@ -53,8 +53,8 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache")
-        buildAndFail(PUBLISH_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME)
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

@@ -343,8 +343,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache")
-        build(RUN_PLUGIN_VERIFIER_TASK_NAME, "--configuration-cache").let {
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME)
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

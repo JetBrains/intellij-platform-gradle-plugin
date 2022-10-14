@@ -931,8 +931,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
-        build(PREPARE_SANDBOX_TASK_NAME, "--configuration-cache").let {
+        build(PREPARE_SANDBOX_TASK_NAME, "--info")
+        build(PREPARE_SANDBOX_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }
@@ -956,8 +956,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
-        build(PREPARE_TESTING_SANDBOX_TASK_NAME, "--configuration-cache").let {
+        build(PREPARE_TESTING_SANDBOX_TASK_NAME, "--info")
+        build(PREPARE_TESTING_SANDBOX_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }
@@ -1000,8 +1000,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache", "--info")
-        build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--configuration-cache").let {
+        build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "--info")
+        build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

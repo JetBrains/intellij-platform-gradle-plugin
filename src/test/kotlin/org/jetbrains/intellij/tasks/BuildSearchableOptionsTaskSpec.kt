@@ -54,8 +54,8 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
-        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache").let {
+        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
+        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

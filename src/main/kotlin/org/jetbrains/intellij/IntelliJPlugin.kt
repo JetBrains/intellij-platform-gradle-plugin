@@ -683,6 +683,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME)
         val compileJavaTaskProvider = project.tasks.named<JavaCompile>(COMPILE_JAVA_TASK_NAME)
 
+        // TODO: workaround required for Gradle <7.0 – remove `project.provider` when targeting 7+
+        val downloadDirProvider = project.provider {
+            runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
+                runPluginVerifierTask.downloadDir
+            }.get()
+        }
+
         project.tasks.register<VerifyPluginConfigurationTask>(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "Checks if Java and Kotlin compilers configuration meet IntelliJ SDK requirements"
@@ -702,9 +709,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             targetCompatibility.convention(compileJavaTaskProvider.map {
                 it.targetCompatibility
             })
-            pluginVerifierDownloadDir.convention(runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
-                runPluginVerifierTask.downloadDir
-            })
+            pluginVerifierDownloadDir.convention(downloadDirProvider)
 
             kotlinPluginAvailable.convention(project.provider {
                 project.pluginManager.hasPlugin("org.jetbrains.kotlin.jvm")

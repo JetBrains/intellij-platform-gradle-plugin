@@ -151,8 +151,8 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

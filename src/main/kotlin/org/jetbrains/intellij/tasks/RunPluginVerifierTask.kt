@@ -398,11 +398,13 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
      * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
      *
+     * @TODO: Remove `forUseAtConfigurationTime` when Gradle 7+ is used
      * @return Plugin Verifier home directory
      */
-    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir").map { Path.of(it) }
-        .orElse(providers.environmentVariable("XDG_CACHE_HOME").map { Path.of(it).resolve("pluginVerifier") })
-        .orElse(providers.systemProperty("user.home").map { Path.of(it).resolve(".cache/pluginVerifier") })
+    @Suppress("DEPRECATION")
+    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir").forUseAtConfigurationTime().map { Path.of(it) }
+        .orElse(providers.environmentVariable("XDG_CACHE_HOME").forUseAtConfigurationTime().map { Path.of(it).resolve("pluginVerifier") })
+        .orElse(providers.systemProperty("user.home").forUseAtConfigurationTime().map { Path.of(it).resolve(".cache/pluginVerifier") })
         .orElse(temporaryDir.toPath().resolve("pluginVerifier"))
 
     /**

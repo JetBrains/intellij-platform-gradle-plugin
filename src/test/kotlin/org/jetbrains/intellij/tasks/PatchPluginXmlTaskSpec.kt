@@ -493,8 +493,8 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache")
-        build(PATCH_PLUGIN_XML_TASK_NAME, "--configuration-cache").let {
+        build(PATCH_PLUGIN_XML_TASK_NAME)
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

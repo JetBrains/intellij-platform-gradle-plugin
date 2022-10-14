@@ -62,8 +62,8 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         )
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache")
-        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME, "--configuration-cache").let {
+        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

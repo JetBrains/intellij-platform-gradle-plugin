@@ -217,8 +217,8 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        buildAndFail(VERIFY_PLUGIN_TASK_NAME, "--configuration-cache")
-        buildAndFail(VERIFY_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        buildAndFail(VERIFY_PLUGIN_TASK_NAME)
+        buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

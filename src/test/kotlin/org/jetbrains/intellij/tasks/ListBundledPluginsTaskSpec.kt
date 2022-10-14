@@ -81,8 +81,8 @@ class ListBundledPluginsTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        build(LIST_BUNDLED_PLUGINS_TASK_NAME, "--configuration-cache")
-        build(LIST_BUNDLED_PLUGINS_TASK_NAME, "--configuration-cache").let {
+        build(LIST_BUNDLED_PLUGINS_TASK_NAME)
+        build(LIST_BUNDLED_PLUGINS_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

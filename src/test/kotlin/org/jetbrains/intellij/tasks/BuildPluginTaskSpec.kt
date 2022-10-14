@@ -513,8 +513,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BUILD_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(BUILD_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(BUILD_PLUGIN_TASK_NAME)
+        build(BUILD_PLUGIN_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

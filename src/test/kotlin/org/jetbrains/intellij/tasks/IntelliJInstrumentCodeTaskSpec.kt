@@ -133,8 +133,8 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        build("buildSourceSet", "--configuration-cache")
-        build("buildSourceSet", "--configuration-cache").let {
+        build("buildSourceSet")
+        build("buildSourceSet").let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }

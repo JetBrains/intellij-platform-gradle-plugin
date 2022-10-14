@@ -101,16 +101,16 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `reuse configuration cache`() {
-        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(SIGN_PLUGIN_TASK_NAME)
+        build(SIGN_PLUGIN_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
     }
 
     @Test
     fun `ignore cache when optional parameter changes`() {
-        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache")
-        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(SIGN_PLUGIN_TASK_NAME)
+        build(SIGN_PLUGIN_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
 
@@ -124,7 +124,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(SIGN_PLUGIN_TASK_NAME, "--configuration-cache").let {
+        build(SIGN_PLUGIN_TASK_NAME).let {
             assertNotContains("Reusing configuration cache.", it.output)
         }
     }
