@@ -13,25 +13,13 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - 6.8
-          - 6.9.2
           - 7.5.1
         os:
           - windows-latest
           - ubuntu-latest
           - macos-latest
-        include:
-          - os: ubuntu-latest
-            script: |
-              sudo rm -rf /usr/share/dotnet
-              sudo rm -rf /usr/local/lib/android
-              sudo rm -rf /opt/ghc
 
     steps:
-
-      - name: Run OS-dedicated script
-        if: ${{ matrix.script }}
-        run: ${{ matrix.script }}
 
       - name: Fetch Sources
         uses: actions/checkout@v3

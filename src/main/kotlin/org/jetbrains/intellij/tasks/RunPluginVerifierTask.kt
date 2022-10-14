@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.isDirectory
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -530,7 +532,16 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return directory for downloaded IDEs
      */
-    internal fun ideDownloadDir() = verifierHomeDir().map { it.resolve("ides").createDir() }
+    internal fun ideDownloadDir() = verifierHomeDir().map {
+        println("it = ${it}")
+        println("it.exists() = ${it.exists()}")
+        println("it.isDirectory = ${it.isDirectory}")
+        println("it.resolve(\"ides\") = ${it.resolve("ides")}")
+        println("it.resolve(\"ides\").exists() = ${it.resolve("ides").exists()}")
+        println("it.resolve(\"ides\").isDirectory = ${it.resolve("ides").isDirectory}")
+
+        it.resolve("ides").createDir()
+    }
 
     enum class FailureLevel(val sectionHeading: String, val message: String) {
         COMPATIBILITY_WARNINGS(
