@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.createParentDirs
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.isDirectory
 import org.apache.tools.ant.util.TeeOutputStream
@@ -535,11 +536,15 @@ abstract class RunPluginVerifierTask @Inject constructor(
     internal fun ideDownloadDir() = verifierHomeDir().map {
         println("it = ${it}")
         println("it.exists() = ${it.exists()}")
+        println("it.parent.exists() = ${it.parent.exists()}")
+        println("it.parent.parent.exists() = ${it.parent.parent.exists()}")
         println("it.isDirectory = ${it.isDirectory}")
         println("it.resolve(\"ides\") = ${it.resolve("ides")}")
         println("it.resolve(\"ides\").exists() = ${it.resolve("ides").exists()}")
         println("it.resolve(\"ides\").isDirectory = ${it.resolve("ides").isDirectory}")
 
+
+        it.createParentDirs()
         it.resolve("ides").createDir()
     }
 
