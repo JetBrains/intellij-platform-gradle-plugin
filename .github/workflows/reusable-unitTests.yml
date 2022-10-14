@@ -45,6 +45,7 @@ jobs:
         run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
 
       - name: Collect Test Results
+        if: ${{ failure() }}
         uses: actions/upload-artifact@v3
         with:
           name: test-results-${{ matrix.gradleVersion }}-${{ runner.os }}
@@ -55,5 +56,5 @@ jobs:
         if: success() || failure()
         with:
           name: Tests
-          path: ${{ github.workspace }}/build/reports/tests
+          path: ${{ github.workspace }}/build/test-results/test/*.xml
           reporter: java-junit
