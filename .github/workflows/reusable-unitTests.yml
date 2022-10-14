@@ -3,7 +3,7 @@ name: Reusable Unit Tests
 on: [ workflow_call ]
 
 env:
-  XDG_CACHE_HOME: "/home/runner/.cache/"
+  XDG_CACHE_HOME: "~/.cache/"
 
 jobs:
   unitTests:
@@ -44,17 +44,10 @@ jobs:
       - name: Run Tests
         run: ./gradlew check -PtestGradleVersion="${{ matrix.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
 
-      - name: Collect Test Results
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results-${{ matrix.gradleVersion }}-${{ runner.os }}
-          path: ${{ github.workspace }}/build/reports/tests
-
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: success() || failure()
         with:
-          name: Tests
+          name: Unit Tests / Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }} / Report
           path: ${{ github.workspace }}/build/test-results/test/*.xml
           reporter: java-junit
