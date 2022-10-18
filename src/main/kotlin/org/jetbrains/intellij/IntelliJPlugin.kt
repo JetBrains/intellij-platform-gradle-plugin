@@ -94,6 +94,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATIO
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.*
+import org.jetbrains.intellij.dsl.ProguardSettings
 import org.jetbrains.intellij.jbr.JbrResolver
 import org.jetbrains.intellij.model.MavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
@@ -103,6 +104,7 @@ import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
+import java.io.FileOutputStream
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -114,6 +116,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader
     private lateinit var context: String
+    private lateinit var proguardSettings: ProguardSettings
 
     override fun apply(project: Project) {
         context = project.logCategory()
@@ -123,6 +126,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         archiveUtils = project.objects.newInstance()
         dependenciesDownloader = project.objects.newInstance()
+        proguardSettings = project.objects.newInstance()
 
         project.plugins.apply(JavaPlugin::class)
         project.plugins.apply(IdeaExtPlugin::class)
@@ -212,6 +216,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
         configureSignPluginTask(project)
+        configureProguardTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
         configureInstrumentation(project, extension)
@@ -1215,6 +1220,48 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }
             }
         }
+    }
+
+    private fun configureProguardTask(project: Project) {
+        // TODO: how to enable? if block exists?
+        val runProguard = if (true) {
+            project.tasks.register<AbstractProguardTask>("proguard") {
+                proguardVersion.set(proguardSettings.version)
+
+                // TODO: a more standard way of loading resources?
+                val defaultConfig = AbstractProguardTask::class.java.getResourceAsStream("/proguard/default-config.pro")
+
+                if (defaultConfig != null) {
+                    val defaultRulesFile = File.createTempFile("default", "pro")
+                    val outputStream = FileOutputStream(defaultRulesFile)
+                    outputStream.write(defaultConfig.readAllBytes())
+                    outputStream.close()
+                    defaultComposeRulesFile.set(defaultRulesFile)
+                }
+
+                configurationFiles.from(proguardSettings.configurationFiles)
+                // ProGuard uses -dontobfuscate option to turn off obfuscation, which is enabled by default
+                // We want to disable obfuscation by default, because often
+                // it is not needed, but makes troubleshooting much harder.
+                // If obfuscation is turned off by default,
+                // enabling (`isObfuscationEnabled.set(true)`) seems much better,
+                // than disabling obfuscation disabling (`dontObfuscate.set(false)`).
+                // That's why a task property is follows ProGuard design,
+                // when our DSL does the opposite.
+                dontobfuscate.set(proguardSettings.obfuscate.map { !it })
+                maxHeapSize.set(proguardSettings.maxHeapSize)
+                javaHome.set(System.getProperty("java.home") ?: error("'java.home' system property is not set"))
+                // TODO: where should the destination dir be?
+                destinationDir.convention(project.layout.buildDirectory.dir("lib/proguard"))
+                mainJar.fileProvider(project.provider {
+                    project.tasks.getByPath("jar").outputs.files.singleFile
+                })
+
+                // TODO: need to shrink before building & use the shrunk version
+                //       in the build task
+                dependsOn(BUILD_PLUGIN_TASK_NAME)
+            }
+        } else null
     }
 
     private fun configureBuildPluginTask(project: Project) {
