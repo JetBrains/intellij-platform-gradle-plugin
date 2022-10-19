@@ -663,10 +663,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
                 import org.jetbrains.intellij.IntelliJPluginConstants
-
+                
                 task printPluginSourceArtifacts {
                     dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
-
+                
                     doLast {
                         def pluginComponentId = configurations.compileClasspath
                             .resolvedConfiguration.lenientConfiguration
@@ -675,7 +675,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                             .flatten()
                             .collect { it.id.componentIdentifier }
                             .find { it.displayName.startsWith("$pluginComponentId") }
-        
+                
                     dependencies.createArtifactResolutionQuery()
                         .forComponents([pluginComponentId])
                         .withArtifacts(JvmLibrary.class, SourcesArtifact.class)

@@ -139,9 +139,9 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
-
+            
             version = "1.0.0"
-
+            
             listProductsReleases {
                 updatePaths = ['${resource}']
                 sinceVersion = "2020.2"

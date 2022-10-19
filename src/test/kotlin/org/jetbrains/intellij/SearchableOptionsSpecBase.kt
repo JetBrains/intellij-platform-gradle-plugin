@@ -34,7 +34,7 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
         import javax.swing.*;
         
         public class TestSearchableConfigurable implements SearchableConfigurable {
-
+        
             @NotNull
             @Override
             public String getId() {
