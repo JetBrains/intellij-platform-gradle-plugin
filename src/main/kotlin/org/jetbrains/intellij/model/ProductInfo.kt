@@ -24,20 +24,30 @@ data class ProductInfo(
 ) {
     val currentLaunch: Launch
         get() = with(OperatingSystem.current()) {
+            val arch = with(launch.map { it.arch }.toSet()) {
+                System.getProperty("os.arch")
+                    .takeIf { contains(it) }
+                    ?: when {
+                        contains("amd64") -> "amd64"
+                        else -> (this - "aarch64").first()
+                    }
+            }
+
             launch.find {
                 when {
                     isLinux -> OS.Linux
                     isWindows -> OS.Windows
                     isMacOsX -> OS.macOS
                     else -> OS.Linux
-                } == it.os
-            } ?: throw GradleException("Could not find launch information for the current OS: $name")
+                } == it.os && arch == it.arch
+            } ?: throw GradleException("Could not find launch information for the current OS: $name ($arch)")
         }
 }
 
 @Serializable
 data class Launch(
     val os: OS? = null,
+    val arch: String? = null,
     val launcherPath: String? = null,
     val javaExecutablePath: String? = null,
     val vmOptionsFilePath: String? = null,
