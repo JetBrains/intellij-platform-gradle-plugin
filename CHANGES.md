@@ -12,6 +12,7 @@
 - Replace internal Gradle ConventionTask with DefaultTask [#1115](../../issues/1115) by @aSemy
 - Plugin Verifier cache directory now follows XDG cache standards [#1119](../../issues/1119) by @aSemy
 - Migrate most of the Gradle API in `IntelliJPlugin.kt` to use the Gradle Kotlin DSL extensions [#1117](../../issues/1117) by @aSemy
+- Support `runIde.jbrVersion` in `17.0.4.1-b653.1` format [#1172](../../issues/1172)
 
 ### Changed
 - Set minimum supported Gradle version from `6.7.1` to `6.8`

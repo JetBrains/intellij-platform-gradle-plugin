@@ -211,6 +211,7 @@ abstract class JbrResolver @Inject constructor(
                     false -> version.substring(lastIndexOfDash)
                 }
                 val buildNumberString = when (lastIndexOfB > -1) {
+                    lastIndexOfDash == lastIndexOfB -> version.substring(0, lastIndexOfDash - 1)
                     true -> version.substring(lastIndexOfB + 1)
                     else -> ""
                 }
@@ -244,7 +245,10 @@ abstract class JbrResolver @Inject constructor(
             }
 
             private fun getPrefix(version: String, variant: String?) = when {
-                !variant.isNullOrEmpty() -> "jbr_$variant-"
+                !variant.isNullOrEmpty() -> when(variant) {
+                    "sdk" -> "jbrsdk-"
+                    else -> "jbr_$variant-"
+                }
                 version.startsWith("jbrsdk-") -> "jbrsdk-"
                 version.startsWith("jbr_jcef-") -> "jbr_jcef-"
                 version.startsWith("jbr_dcevm-") -> "jbr_dcevm-"
