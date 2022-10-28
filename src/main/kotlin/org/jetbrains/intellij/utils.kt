@@ -147,6 +147,7 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirecto
         ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
         .orEmpty()
     val vmOptions = productInfo?.currentLaunch?.vmOptionsFilePath
+        ?.removePrefix("../")
         ?.let { ideDirectory.resolve(it).readLines() }
         .orEmpty()
     val additionalJvmArguments = productInfo?.currentLaunch?.additionalJvmArguments
