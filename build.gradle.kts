@@ -188,4 +188,5 @@ changelog {
     version.set("${project.version}")
     path.set("${project.projectDir}/CHANGES.md")
     groups.set(emptyList())
+    repositoryUrl.set("https://github.com/JetBrains/gradle-intellij-plugin")
 }
