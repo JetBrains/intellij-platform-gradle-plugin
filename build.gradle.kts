@@ -185,8 +185,6 @@ publishing {
 
 changelog {
     unreleasedTerm.set("next")
-    version.set(project.version.toString())
-    path.set(file("CHANGES.md").canonicalPath)
     groups.set(emptyList())
     repositoryUrl.set("https://github.com/JetBrains/gradle-intellij-plugin")
 }
