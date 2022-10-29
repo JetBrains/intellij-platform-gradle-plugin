@@ -7,5 +7,3 @@ pluginManagement {
 }
 
 rootProject.name = "Gradle IntelliJ Plugin"
-
-includeBuild("/Users/hsz/Projects/JetBrains/gradle-changelog-plugin")
