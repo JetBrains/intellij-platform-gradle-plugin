@@ -12,7 +12,7 @@ plugins {
     kotlin("jvm") version "1.7.10"
     kotlin("plugin.serialization") version "1.7.10"
     id("com.gradle.plugin-publish") version "1.0.0"
-    id("org.jetbrains.changelog") version "1.3.1"
+    id("org.jetbrains.changelog") version "2.0.0"
     id("org.jetbrains.dokka") version "1.7.10"
 }
 
@@ -185,8 +185,8 @@ publishing {
 
 changelog {
     unreleasedTerm.set("next")
-    version.set("${project.version}")
-    path.set("${project.projectDir}/CHANGES.md")
+    version.set(project.version.toString())
+    path.set(file("CHANGES.md").canonicalPath)
     groups.set(emptyList())
     repositoryUrl.set("https://github.com/JetBrains/gradle-intellij-plugin")
 }
