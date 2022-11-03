@@ -137,9 +137,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     abstract val projectExecutable: Property<String>
 
     private val ideDirFile by lazy { ideDir.get() }
-    private val currentLaunch by lazy {
-        ideProductInfo(ideDirFile)?.currentLaunch
-    }
     private val infoPlist by lazy {
         ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
             PropertyListParser.parse(it) as NSDictionary
@@ -147,9 +144,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     }
 
     private val buildNumber by lazy { ideDirFile.let(::ideBuildNumber).split('-').last().let(Version::parse) }
-    private val build203 by lazy { Version.parse("203.0") }
     private val build221 by lazy { Version.parse("221.0") }
-    private val build223 by lazy { Version.parse("223.0") }
 
     init {
         mainClass.set("com.intellij.idea.Main")
@@ -185,46 +180,11 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 classpath += objectFactory.fileCollection().from(it)
             }
 
-        classpath += when {
-            buildNumber > build223 ->
-                currentLaunch
-                    ?.bootClassPathJarNames
-                    ?: infoPlist
-                        ?.getDictionary("JVMOptions")
-                        ?.getValue("ClassPath")
-                        ?.split(':')
-                        ?.map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
-                    ?: emptyList()
-
-            buildNumber > build221 -> listOf(
-                "3rd-party-rt.jar",
-                "util.jar",
-                "util_rt.jar",
-                "jna.jar",
-            )
-
-            buildNumber > build203 -> listOf(
-                "bootstrap.jar",
-                "util.jar",
-                "jdom.jar",
-                "log4j.jar",
-                "jna.jar",
-            )
-
-            else -> listOf(
-                "bootstrap.jar",
-                "extensions.jar",
-                "util.jar",
-                "jdom.jar",
-                "log4j.jar",
-                "jna.jar",
-                "trove4j.jar",
-            )
-        }.map {
-            "${ideDirFile.canonicalPath}/lib/$it"
-        }.let {
+        classpath += getIdeaClasspath(ideDirFile).let {
             objectFactory.fileCollection().from(it)
         }
+
+        println("classpath.joinToString() = ${classpath.joinToString()}")
     }
 
     /**
@@ -300,23 +260,17 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
             .firstOrNull()
 
         return when {
-            prefix != null -> {
-                prefix
-            }
+            prefix != null -> prefix
 
-            OperatingSystem.current().isMacOsX -> {
-                infoPlist
-                    ?.getDictionary("JVMOptions")
-                    ?.getDictionary("Properties")
-                    ?.getValue("idea.platform.prefix")
-                    .ifNull {
-                        error(context, "Cannot find prefix in $infoPlist")
-                    }
-            }
+            OperatingSystem.current().isMacOsX -> infoPlist
+                ?.getDictionary("JVMOptions")
+                ?.getDictionary("Properties")
+                ?.getValue("idea.platform.prefix")
+                .ifNull {
+                    error(context, "Cannot find prefix in $infoPlist")
+                }
 
-            else -> {
-                null
-            }
+            else -> null
         }
     }
 
@@ -336,7 +290,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         jvmArgs = collectJvmArgs()
     }
 
-    protected open fun collectJvmArgs() = getIdeJvmArgs(this, jvmArgs, ideDir.get())
+    protected open fun collectJvmArgs() = getIdeaJvmArgs(this, jvmArgs, ideDir.get())
 
     /**
      * Resolves the path to the `tools.jar` library.
@@ -349,8 +303,4 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
         return File(binDir, path)
     }
-
-    private fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
-
-    private fun NSDictionary.getValue(key: String) = this[key].toString()
 }

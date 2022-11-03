@@ -958,6 +958,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                             } ?: version
                         }
+
                         else -> {
                             val prefix = when (type) {
                                 PLATFORM_TYPE_CLION -> "CLION-"
@@ -1148,6 +1149,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val ideaPluginsConfigurationFiles = project.provider {
             project.files(project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).resolve())
         }
+        val ideaClasspathFiles = ideDirProvider.map {
+            project.files(getIdeaClasspath(it))
+        }
 
         testTasks.configureEach {
             enableAssertions = true
@@ -1189,6 +1193,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
                 // Add source roots to the classpath.
                 classpath += sourceSetsOutputs.get()
+                classpath += ideaClasspathFiles.get()
+
 
                 systemProperties(
                     getIdeaSystemProperties(
