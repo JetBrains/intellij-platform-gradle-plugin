@@ -5,6 +5,8 @@
 
 package org.jetbrains.intellij
 
+import com.dd.plist.NSDictionary
+import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
@@ -138,7 +140,7 @@ fun getIdeaSystemProperties(
     return result + currentLaunchProperties + requirePluginProperties
 }
 
-fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
+fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
     val productInfo = ideProductInfo(ideDirectory!!)
     val defaults = listOf("-Xmx512m", "-Xms256m")
     val bootclasspath = ideDirectory
@@ -146,16 +148,71 @@ fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirecto
         .takeIf { it.exists() }
         ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
         .orEmpty()
-    val vmOptions = productInfo?.currentLaunch?.vmOptionsFilePath
+    val vmOptions = productInfo
+        ?.currentLaunch
+        ?.vmOptionsFilePath
         ?.removePrefix("../")
         ?.let { ideDirectory.resolve(it).readLines() }
         .orEmpty()
-    val additionalJvmArguments = productInfo?.currentLaunch?.additionalJvmArguments
+    val additionalJvmArguments = productInfo
+        ?.currentLaunch
+        ?.additionalJvmArguments
         ?.filterNot { it.startsWith("-D") }
         ?.takeIf { it.isNotEmpty() }
         ?: OpenedPackages
 
     return (defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + options.allJvmArgs).distinct()
+}
+
+fun getIdeaClasspath(ideDirFile: File): List<String> {
+    val buildNumber = ideBuildNumber(ideDirFile).split('-').last().let { Version.parse(it) }
+    val build203 = Version.parse("203.0")
+    val build221 = Version.parse("221.0")
+    val build223 = Version.parse("223.0")
+
+    val currentLaunch = ideProductInfo(ideDirFile)?.currentLaunch
+    val infoPlist = ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
+        PropertyListParser.parse(it) as NSDictionary
+    }
+
+    return when {
+        buildNumber > build223 ->
+            currentLaunch
+                ?.bootClassPathJarNames
+                ?: infoPlist
+                    ?.getDictionary("JVMOptions")
+                    ?.getValue("ClassPath")
+                    ?.split(':')
+                    ?.map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
+                ?: emptyList()
+
+        buildNumber > build221 -> listOf(
+            "3rd-party-rt.jar",
+            "util.jar",
+            "util_rt.jar",
+            "jna.jar",
+        )
+
+        buildNumber > build203 -> listOf(
+            "bootstrap.jar",
+            "util.jar",
+            "jdom.jar",
+            "log4j.jar",
+            "jna.jar",
+        )
+
+        else -> listOf(
+            "bootstrap.jar",
+            "extensions.jar",
+            "util.jar",
+            "jdom.jar",
+            "log4j.jar",
+            "jna.jar",
+            "trove4j.jar",
+        )
+    }.map {
+        "${ideDirFile.canonicalPath}/lib/$it"
+    }
 }
 
 fun ideBuildNumber(ideDirectory: File) = (
@@ -271,3 +328,7 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
     }
     return this
 }
+
+fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
+
+fun NSDictionary.getValue(key: String) = this[key].toString()
