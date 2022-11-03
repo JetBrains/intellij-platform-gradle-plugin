@@ -211,7 +211,7 @@ abstract class JbrResolver @Inject constructor(
                     false -> version.substring(lastIndexOfDash)
                 }
                 val buildNumberString = when (lastIndexOfB > -1) {
-                    lastIndexOfDash == lastIndexOfB -> version.substring(0, lastIndexOfDash - 1)
+                    (lastIndexOfDash == lastIndexOfB) -> version.substring(0, lastIndexOfDash - 1)
                     true -> version.substring(lastIndexOfB + 1)
                     else -> ""
                 }

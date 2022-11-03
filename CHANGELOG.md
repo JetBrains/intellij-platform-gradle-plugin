@@ -590,8 +590,7 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.10.0...HEAD
-[1.10.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.9.0...v1.10.0
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.9.0...HEAD
 [1.9.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.8.1...v1.9.0
 [1.8.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.8.0...v1.8.1
 [1.8.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.7.0...v1.8.0
