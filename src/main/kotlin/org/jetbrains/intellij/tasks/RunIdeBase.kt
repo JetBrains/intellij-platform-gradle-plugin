@@ -183,8 +183,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         classpath += getIdeaClasspath(ideDirFile).let {
             objectFactory.fileCollection().from(it)
         }
-
-        println("classpath.joinToString() = ${classpath.joinToString()}")
     }
 
     /**

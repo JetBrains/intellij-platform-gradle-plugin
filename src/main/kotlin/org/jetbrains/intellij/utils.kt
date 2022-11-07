@@ -100,14 +100,19 @@ fun transformXml(document: Document, file: File) {
     }
 }
 
+private fun String.resolveIdeHomeVariable(ideDirectory: File) = this
+    .replace("\$APP_PACKAGE", ideDirectory.canonicalPath)
+    .replace("\$IDE_HOME", ideDirectory.canonicalPath)
+    .replace("%IDE_HOME%", ideDirectory.canonicalPath)
+
 fun getIdeaSystemProperties(
-    ideDirFile: File,
+    ideDirectory: File,
     configDirectory: File,
     systemDirectory: File,
     pluginsDirectory: File,
     requirePluginIds: List<String>,
 ): Map<String, String> {
-    val currentLaunch = ideProductInfo(ideDirFile)?.currentLaunch
+    val currentLaunch = ideProductInfo(ideDirectory)?.currentLaunch
     val result = mapOf(
         "idea.config.path" to configDirectory.canonicalPath,
         "idea.system.path" to systemDirectory.canonicalPath,
@@ -121,14 +126,10 @@ fun getIdeaSystemProperties(
         }
         ?.associate {
             it
+                .resolveIdeHomeVariable(ideDirectory)
                 .substring(2)
                 .split('=')
-                .let { (key, value) ->
-                    key to value
-                        .replace("\$APP_PACKAGE", ideDirFile.canonicalPath)
-                        .replace("\$IDE_HOME", ideDirFile.canonicalPath)
-                        .replace("%IDE_HOME%", ideDirFile.canonicalPath)
-                }
+                .let { (key, value) -> key to value }
         }
         .orEmpty()
 
@@ -159,6 +160,7 @@ fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirect
         ?.additionalJvmArguments
         ?.filterNot { it.startsWith("-D") }
         ?.takeIf { it.isNotEmpty() }
+        ?.map { it.resolveIdeHomeVariable(ideDirectory) }
         ?: OpenedPackages
 
     return (defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + options.allJvmArgs).distinct()
