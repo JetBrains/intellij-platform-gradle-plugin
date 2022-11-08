@@ -41,6 +41,12 @@ data class ProductInfo(
                     else -> OS.Linux
                 } == it.os && arch == it.arch
             } ?: throw GradleException("Could not find launch information for the current OS: $name ($arch)")
+        }.run {
+            copy(
+                additionalJvmArguments = additionalJvmArguments.map {
+                    it.removePrefix("\"").removeSuffix("\"")
+                }
+            )
         }
 }
 
