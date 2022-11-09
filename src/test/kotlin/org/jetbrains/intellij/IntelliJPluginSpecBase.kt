@@ -144,12 +144,12 @@ abstract class IntelliJPluginSpecBase {
     protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
 
     protected fun emptyZipFile(path: String): File {
-        val splitted = path.split('/')
+        val split = path.split('/')
         val directory = when {
-            splitted.size > 1 -> directory(splitted.dropLast(1).joinToString("/"))
+            split.size > 1 -> directory(split.dropLast(1).joinToString("/"))
             else -> dir
         }
-        val file = File(directory, splitted.last())
+        val file = File(directory, split.last())
         val outputStream = FileOutputStream(file)
         val zipOutputStream = ZipOutputStream(outputStream)
         zipOutputStream.close()
