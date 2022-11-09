@@ -30,7 +30,6 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
-import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.JDOMException
 import org.jdom2.output.Format
@@ -141,7 +140,7 @@ fun getIdeaSystemProperties(
     return result + currentLaunchProperties + requirePluginProperties
 }
 
-fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
+fun getIdeaJvmArgs(arguments: List<String>?, ideDirectory: File?): List<String> {
     val productInfo = ideProductInfo(ideDirectory!!)
     val defaults = listOf("-Xmx512m", "-Xms256m")
     val bootclasspath = ideDirectory
@@ -163,7 +162,7 @@ fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirect
         ?.map { it.resolveIdeHomeVariable(ideDirectory) }
         ?: OpenedPackages
 
-    return (defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + options.allJvmArgs).distinct()
+    return (defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments).distinct()
 }
 
 fun getIdeaClasspath(ideDirFile: File): List<String> {

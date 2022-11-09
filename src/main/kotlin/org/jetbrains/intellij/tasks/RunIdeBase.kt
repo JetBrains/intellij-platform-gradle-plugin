@@ -288,7 +288,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         jvmArgs = collectJvmArgs()
     }
 
-    protected open fun collectJvmArgs() = getIdeaJvmArgs(this, jvmArgs, ideDir.get())
+    protected open fun collectJvmArgs() = getIdeaJvmArgs(jvmArgs, ideDir.get())
 
     /**
      * Resolves the path to the `tools.jar` library.
