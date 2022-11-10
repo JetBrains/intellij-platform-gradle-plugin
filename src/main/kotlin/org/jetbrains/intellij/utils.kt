@@ -30,6 +30,7 @@ import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
+import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.JDOMException
 import org.jdom2.output.Format
@@ -140,9 +141,8 @@ fun getIdeaSystemProperties(
     return result + currentLaunchProperties + requirePluginProperties
 }
 
-fun getIdeaJvmArgs(arguments: List<String>?, ideDirectory: File?): List<String> {
+fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
     val productInfo = ideProductInfo(ideDirectory!!)
-    val defaults = listOf("-Xmx512m", "-Xms256m")
     val bootclasspath = ideDirectory
         .resolve("lib/boot.jar")
         .takeIf { it.exists() }
@@ -162,7 +162,13 @@ fun getIdeaJvmArgs(arguments: List<String>?, ideDirectory: File?): List<String> 
         ?.map { it.resolveIdeHomeVariable(ideDirectory) }
         ?: OpenedPackages
 
-    return (defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments).distinct()
+    val defaultHeapSpace = listOf("-Xmx512m", "-Xms256m")
+    val heapSpace = listOfNotNull(
+        options.maxHeapSize?.let { "-Xmx${it}" },
+        options.minHeapSize?.let { "-Xms${it}" },
+    )
+
+    return (defaultHeapSpace + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + heapSpace).distinct()
 }
 
 fun getIdeaClasspath(ideDirFile: File): List<String> {
