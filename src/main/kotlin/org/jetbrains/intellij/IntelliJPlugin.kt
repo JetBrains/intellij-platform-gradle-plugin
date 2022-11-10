@@ -1219,6 +1219,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
                             .orEmpty(),
                     )
                 }
+
+                if (ideVersion.baselineVersion >= 221) {
+                    systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
+                }
             }
         }
     }
