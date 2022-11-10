@@ -13,12 +13,9 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.compile.JavaCompile
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.parsePluginXml
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.utils.PlatformJavaVersions
 import org.jetbrains.intellij.utils.PlatformKotlinVersions
-import org.jetbrains.intellij.warn
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.nio.file.Path
@@ -148,18 +145,21 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             if (kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null) {
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
             }
-
-            if (
-                pluginVerifierDownloadPath != oldPluginVerifierDownloadPath
-                && oldPluginVerifierDownloadPath.exists()
-                && oldPluginVerifierDownloadPath.listFiles().isNotEmpty()
-            ) {
-                yield("The Plugin Verifier download directory is set to $pluginVerifierDownloadPath, but downloaded IDEs were also found in $oldPluginVerifierDownloadPath, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir")
-            }
         }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
             warn(
                 context,
                 listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
+            )
+        }
+
+        if (
+            pluginVerifierDownloadPath != oldPluginVerifierDownloadPath
+            && oldPluginVerifierDownloadPath.exists()
+            && oldPluginVerifierDownloadPath.listFiles().isNotEmpty()
+        ) {
+            info(
+                context,
+                "The Plugin Verifier download directory is set to $pluginVerifierDownloadPath, but downloaded IDEs were also found in $oldPluginVerifierDownloadPath, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir",
             )
         }
     }

@@ -6,8 +6,6 @@ import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
 import kotlin.test.Test
 
 @Suppress("PluginXmlCapitalization", "PluginXmlValidity", "ComplexRedundantLet")
@@ -206,25 +204,6 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         build("clean", VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertNotContains(HEADER, it.output)
-        }
-    }
-
-    @Test
-    fun `report not-empty old Plugin Verifier download directory`() {
-        Path.of(gradleHome).resolve(".pluginVerifier/ides").let {
-            Files.createDirectories(it)
-            Files.createTempFile(it, null, null)
-        }
-
-        build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
-            val pluginVerifierDownloadDir = "$gradleHome/.cache/pluginVerifier/ides"
-            val oldPluginVerifierDownloadDir = "$gradleHome/.pluginVerifier/ides"
-
-            assertContains(HEADER, it.output)
-            assertContains(
-                "The Plugin Verifier download directory is set to $pluginVerifierDownloadDir, but downloaded IDEs were also found in $oldPluginVerifierDownloadDir, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir",
-                it.output
-            )
         }
     }
 
