@@ -5,7 +5,10 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.TaskAction
 import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.info
+import org.jetbrains.intellij.logCategory
 
 abstract class SetupDependenciesTask : DefaultTask() {
 
@@ -14,4 +17,11 @@ abstract class SetupDependenciesTask : DefaultTask() {
      */
     @get:Internal
     abstract val idea: Property<IdeaDependency>
+
+    private val context = logCategory()
+
+    @TaskAction
+    fun setupDependencies() {
+        info(context, "Setting up dependencies using: ${idea.get().classes}")
+    }
 }
