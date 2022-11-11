@@ -6,4 +6,4 @@ pluginManagement {
     }
 }
 
-rootProject.name = "Gradle IntelliJ Plugin"
+rootProject.name = "gradle-intellij-plugin"
