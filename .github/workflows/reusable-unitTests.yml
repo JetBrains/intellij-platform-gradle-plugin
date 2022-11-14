@@ -3,7 +3,7 @@ name: Reusable Unit Tests
 on: [ workflow_call ]
 
 env:
-  XDG_CACHE_HOME: "$HOME/.config/"
+  XDG_CACHE_HOME: "~/.config/"
 
 jobs:
   unitTests:
