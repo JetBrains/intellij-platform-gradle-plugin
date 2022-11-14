@@ -56,9 +56,13 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     }
 
     private fun fillFromDirectory() {
-        pluginsDirectory.listFiles()?.apply {
-            asSequence().filter { it.isDirectory }.forEach(::add)
-        }
+        pluginsDirectory
+            .listFiles()
+            ?.apply {
+                asSequence()
+                    .filter { it.isDirectory }
+                    .forEach(::add)
+            }
         debug(context, "Builtin registry populated with ${plugins.size} plugins")
     }
 

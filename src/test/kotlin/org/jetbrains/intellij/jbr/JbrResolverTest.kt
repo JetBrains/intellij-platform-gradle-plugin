@@ -15,7 +15,7 @@ class JbrResolverTest : IntelliJPluginSpecBase() {
     private val arch = JbrResolver.JbrArtifact.arch(true)
 
     @Test
-    fun `resolve 11_0_2b159`() = testJbrResolving("11_0_2b159", "jbr-11_0_2-$platform-$arch-b159")
+    fun `resolve 11_0_11b1536_2`() = testJbrResolving("11_0_11b1536.2", "jbr_jcef-11_0_11-$platform-$arch-b1536.2")
 
     @Test
     fun `resolve jbrsdk-11_0_13b1751_16`() = testJbrResolving("jbrsdk-11_0_13b1751.16", "jbrsdk-11_0_13-$platform-$arch-b1751.16")

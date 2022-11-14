@@ -169,5 +169,6 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
     private fun getPlatformKotlinVersion(buildNumber: Version) = PlatformKotlinVersions.entries.firstOrNull { buildNumber >= it.key }?.value
 
     private operator fun JavaVersion?.compareTo(other: JavaVersion?) = other?.let { this?.compareTo(it) } ?: 0
+
     private operator fun Version?.compareTo(other: Version?) = other?.let { this?.compareTo(it) } ?: 0
 }

@@ -136,7 +136,7 @@ fun getIdeaSystemProperties(
     val requirePluginProperties = requirePluginIds
         .takeIf(List<String>::isNotEmpty)
         ?.let { mapOf("idea.required.plugins.id" to it.joinToString(",")) }
-        ?: emptyMap()
+        .orEmpty()
 
     return result + currentLaunchProperties + requirePluginProperties
 }
@@ -191,7 +191,7 @@ fun getIdeaClasspath(ideDirFile: File): List<String> {
                     ?.getValue("ClassPath")
                     ?.split(':')
                     ?.map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
-                ?: emptyList()
+                    .orEmpty()
 
         buildNumber > build221 -> listOf(
             "3rd-party-rt.jar",
@@ -239,18 +239,20 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
+fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }) =
     collectFiles(directory) { it.toPath().isJar() && filter.test(it) }
 
-fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
+fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }) =
     collectFiles(directory) { it.toPath().isZip() && filter.test(it) }
 
-private fun collectFiles(directory: File, filter: Predicate<File>): Collection<File> = when {
-    !directory.isDirectory -> emptyList()
-    else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
-        override fun accept(file: File) = filter.test(file)
-    }, FalseFileFilter.FALSE)
-}
+private fun collectFiles(directory: File, filter: Predicate<File>) = directory
+    .takeIf { it.isDirectory }
+    ?.let {
+        FileUtils.listFiles(it, object : AbstractFileFilter() {
+            override fun accept(file: File) = filter.test(file)
+        }, FalseFileFilter.FALSE)
+    }
+    .orEmpty()
 
 fun releaseType(version: String) = when {
     version.endsWith(RELEASE_SUFFIX_EAP) ||
@@ -321,6 +323,10 @@ val repositoryVersion: String by lazy {
             .toFormatter()
     )
 }
+
+fun <T> T?.or(other: T): T = this ?: other
+
+fun <T> T?.or(block: () -> T): T = this ?: block()
 
 fun <T> T?.ifNull(block: () -> Unit): T? {
     if (this == null) {

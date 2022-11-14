@@ -25,6 +25,5 @@ class IdeaLogParser(private val logPath: String) {
         }
     }.build()
 
-    private fun String.parseValue() =
-        "value='(?<time>\\d*)'".toRegex().find(this)?.groups?.get("time")?.value?.toLong()
+    private fun String.parseValue() = "value='(?<time>\\d*)'".toRegex().find(this)?.groups?.get("time")?.value?.toLong()
 }

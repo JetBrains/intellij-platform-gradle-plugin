@@ -280,7 +280,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
         if (pluginDependenciesConfigured) {
             return emptySet()
         }
-        return pluginDependencies.orNull?.toSet() ?: emptySet()
+        return pluginDependencies.orNull?.toSet().orEmpty()
     }
 
     fun getPluginDependenciesList(project: Project): Set<PluginDependency> {
@@ -289,7 +289,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
             project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
             pluginDependenciesConfigured = true
         }
-        return pluginDependencies.orNull?.toSet() ?: emptySet()
+        return pluginDependencies.orNull?.toSet().orEmpty()
     }
 
     @Suppress("DEPRECATION")

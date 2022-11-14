@@ -20,9 +20,8 @@ object IdePluginSourceZipFilesProvider {
     /**
      * Provides source ZIP file for a given `platformPluginId` in the IDE directory specified by the `ideaDependency`.
      */
-    fun getSourceZips(ideaDependency: IdeaDependency, platformPluginId: String?): File? {
+    fun getSourceZips(sourceZipFiles: Collection<File>, platformPluginId: String?): File? {
         val sourceZipFileName = pluginIdToSourceZipFileName[platformPluginId]
-        return ideaDependency.sourceZipFiles.firstOrNull { it.name == sourceZipFileName }
+        return sourceZipFiles.firstOrNull { it.name == sourceZipFileName }
     }
-
 }

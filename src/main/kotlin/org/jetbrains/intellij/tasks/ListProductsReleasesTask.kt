@@ -16,6 +16,7 @@ import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
+import org.jetbrains.intellij.or
 
 abstract class ListProductsReleasesTask : DefaultTask() {
 
@@ -116,10 +117,19 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             androidStudioUpdatePath.get().let(it::fetch)
         } ?: AndroidStudioReleases()
 
-        val since = (sinceVersion.orNull ?: sinceBuild.get()).run(Version::parse)
-        val until = (untilVersion.orNull ?: untilBuild.orNull.takeUnless { it.isNullOrBlank() || sinceVersion.isPresent })?.run {
-            replace("*", "9999").run(Version::parse)
-        }
+
+        val since = sinceVersion.orNull
+            .or { sinceBuild.get() }
+            .run(Version::parse)
+
+        val until = untilVersion.orNull
+            .or {
+                untilBuild.orNull
+                    .takeUnless { it.isNullOrBlank() || sinceVersion.isPresent }
+            }
+            ?.replace("*", "9999")
+            ?.run(Version::parse)
+
         val types = types.get()
         val channels = releaseChannels.get()
 

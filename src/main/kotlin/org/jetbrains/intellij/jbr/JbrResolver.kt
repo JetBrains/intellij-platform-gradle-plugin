@@ -138,14 +138,10 @@ abstract class JbrResolver @Inject constructor(
         }
     }
 
-    private fun fromDir(javaDir: File, version: String): Jbr? {
-        val javaExecutable = findJavaExecutable(javaDir)
-        if (javaExecutable == null) {
-            warn(context, "Cannot find java executable in: $javaDir")
-            return null
-        }
-        return Jbr(version, javaDir, javaExecutable.toFile().canonicalPath)
-    }
+    private fun fromDir(javaDir: File, version: String) =
+        findJavaExecutable(javaDir)
+            ?.let { Jbr(version, javaDir, it.toFile().canonicalPath) }
+            .ifNull { warn(context, "Cannot find java executable in: $javaDir") }
 
     private fun getJavaArchive(jbrArtifact: JbrArtifact): File? {
         if (isOffline) {
@@ -153,7 +149,9 @@ abstract class JbrResolver @Inject constructor(
             return null
         }
 
-        val url = jreRepository.takeIf { it.isNotEmpty() } ?: jbrArtifact.repositoryUrl
+        val url = jreRepository
+            .takeIf(String::isNotEmpty)
+            .or(jbrArtifact.repositoryUrl)
 
         return try {
             dependenciesDownloader.downloadFromRepository(context, {
@@ -245,10 +243,11 @@ abstract class JbrResolver @Inject constructor(
             }
 
             private fun getPrefix(version: String, variant: String?) = when {
-                !variant.isNullOrEmpty() -> when(variant) {
+                !variant.isNullOrEmpty() -> when (variant) {
                     "sdk" -> "jbrsdk-"
                     else -> "jbr_$variant-"
                 }
+
                 version.startsWith("jbrsdk-") -> "jbrsdk-"
                 version.startsWith("jbr_jcef-") -> "jbr_jcef-"
                 version.startsWith("jbr_dcevm-") -> "jbr_dcevm-"

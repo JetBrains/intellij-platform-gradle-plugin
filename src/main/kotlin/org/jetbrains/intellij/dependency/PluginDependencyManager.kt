@@ -169,21 +169,22 @@ abstract class PluginDependencyManager @Inject constructor(
                 addArtifact(IntellijIvyArtifact.createJarDependency(it, sourcesConfiguration.name, baseDir, groupId))
             }
         } else {
-            ideaDependency?.sourceZipFiles?.let {
-                IdePluginSourceZipFilesProvider.getSourceZips(ideaDependency, plugin.platformPluginId)?.let {
-                    addArtifact(
-                        IntellijIvyArtifact.createZipDependency(it, sourcesConfiguration.name, ideaDependency.classes)
-                    )
-                }
-            }
+            ideaDependency
+                ?.sourceZipFiles
+                ?.let { IdePluginSourceZipFilesProvider.getSourceZips(it, plugin.platformPluginId) }
+                ?.let { IntellijIvyArtifact.createZipDependency(it, sourcesConfiguration.name, ideaDependency.classes) }
+                ?.let(::addArtifact)
         }
         // see: https://github.com/JetBrains/gradle-intellij-plugin/issues/153
-        ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
-            val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
-            val artifact = IntellijIvyArtifact(it, name, "jar", "sources", "sources")
-            artifact.conf = sourcesConfiguration.name
-            addArtifact(artifact)
-        }
+        ideaDependency
+            ?.sources
+            ?.takeIf { plugin.builtin }
+            ?.let {
+                val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
+                val artifact = IntellijIvyArtifact(it, name, "jar", "sources", "sources")
+                artifact.conf = sourcesConfiguration.name
+                addArtifact(artifact)
+            }
     }
 
     private fun externalPluginDependency(artifact: File, channel: String? = null, maven: Boolean = false): PluginDependency? {

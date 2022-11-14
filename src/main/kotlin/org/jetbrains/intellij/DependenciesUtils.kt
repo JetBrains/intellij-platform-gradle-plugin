@@ -17,10 +17,10 @@ import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NA
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.tasks.SetupDependenciesTask
 
-fun Project.intellij(): FileCollection = intellijBase()
-fun Project.intellij(filter: Closure<*>): FileCollection = intellijBase().matching(filter)
-fun Project.intellij(filter: Action<PatternFilterable>): FileCollection = intellijBase().matching(filter)
-fun Project.intellij(filter: PatternFilterable): FileCollection = intellijBase().matching(filter)
+fun Project.intellij() = intellijBase()
+fun Project.intellij(filter: Closure<*>) = intellijBase().matching(filter)
+fun Project.intellij(filter: Action<PatternFilterable>) = intellijBase().matching(filter)
+fun Project.intellij(filter: PatternFilterable) = intellijBase().matching(filter)
 
 private fun Project.intellijBase(): FileTree {
     val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
@@ -33,10 +33,10 @@ private fun Project.intellijBase(): FileTree {
     return files(setupDependenciesTask.idea.get().jarFiles).asFileTree
 }
 
-fun Project.intellijPlugin(plugin: String): FileCollection = intellijPluginBase(plugin)
-fun Project.intellijPlugin(plugin: String, filter: Closure<*>): FileCollection = intellijPluginBase(plugin).matching(filter)
-fun Project.intellijPlugin(plugin: String, filter: Action<PatternFilterable>): FileCollection = intellijPluginBase(plugin).matching(filter)
-fun Project.intellijPlugin(plugin: String, filter: PatternFilterable): FileCollection = intellijPluginBase(plugin).matching(filter)
+fun Project.intellijPlugin(plugin: String) = intellijPluginBase(plugin)
+fun Project.intellijPlugin(plugin: String, filter: Closure<*>) = intellijPluginBase(plugin).matching(filter)
+fun Project.intellijPlugin(plugin: String, filter: Action<PatternFilterable>) = intellijPluginBase(plugin).matching(filter)
+fun Project.intellijPlugin(plugin: String, filter: PatternFilterable) = intellijPluginBase(plugin).matching(filter)
 
 private fun Project.intellijPluginBase(plugin: String): FileTree {
     val extension = extensions.getByType<IntelliJPluginExtension>()
@@ -45,25 +45,23 @@ private fun Project.intellijPluginBase(plugin: String): FileTree {
         throw GradleException("intellij plugin '$plugin' is not (yet) configured. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
     }
 
-    val jarFiles = extension.getPluginDependenciesList(this).find { it.id == plugin }?.jarFiles
-    if (jarFiles.isNullOrEmpty()) {
-        throw GradleException("intellij plugin '$plugin' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
-    }
+    val dependency = extension.getPluginDependenciesList(this)
+        .find { it.id == plugin && it.jarFiles.isNotEmpty() }
+        ?: throw GradleException("intellij plugin '$plugin' is not found. Please note that you should specify plugins in the intellij.plugins property and configure dependencies on them in the afterEvaluate block")
 
-    return files(jarFiles).asFileTree
+    return files(dependency.jarFiles).asFileTree
 }
 
 fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     val extension = extensions.getByType<IntelliJPluginExtension>()
     val selectedPlugins = mutableSetOf<PluginDependency>()
     val nonValidPlugins = mutableListOf<String>()
+
     plugins.forEach { pluginName ->
-        val plugin = extension.getPluginDependenciesList(this).find { it.id == pluginName }
-        if (plugin?.jarFiles == null || plugin.jarFiles.isEmpty()) {
-            nonValidPlugins.add(pluginName)
-        } else {
-            selectedPlugins.add(plugin)
-        }
+        extension.getPluginDependenciesList(this)
+            .find { it.id == pluginName && it.jarFiles.isNotEmpty() }
+            .ifNull { nonValidPlugins.add(pluginName) }
+            ?.let { selectedPlugins.add(it) }
     }
 
     if (nonValidPlugins.isNotEmpty()) {
@@ -73,10 +71,10 @@ fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     return files(selectedPlugins.map { it.jarFiles })
 }
 
-fun Project.intellijExtra(extra: String): FileCollection = intellijExtraBase(extra)
-fun Project.intellijExtra(extra: String, filter: Closure<*>): FileCollection = intellijExtraBase(extra).matching(filter)
-fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>): FileCollection = intellijExtraBase(extra).matching(filter)
-fun Project.intellijExtra(extra: String, filter: PatternFilterable): FileCollection = intellijExtraBase(extra).matching(filter)
+fun Project.intellijExtra(extra: String) = intellijExtraBase(extra)
+fun Project.intellijExtra(extra: String, filter: Closure<*>) = intellijExtraBase(extra).matching(filter)
+fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>) = intellijExtraBase(extra).matching(filter)
+fun Project.intellijExtra(extra: String, filter: PatternFilterable) = intellijExtraBase(extra).matching(filter)
 
 private fun Project.intellijExtraBase(extra: String): FileTree {
     val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
@@ -87,10 +85,9 @@ private fun Project.intellijExtraBase(extra: String): FileTree {
 
     val setupDependenciesTask = setupDependenciesTaskProvider.get()
     val dependency = setupDependenciesTask.idea.get()
-    val extraDependency = dependency.extraDependencies.find { it.name == extra }
-    if (extraDependency?.jarFiles == null || extraDependency.jarFiles.isEmpty()) {
-        throw GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
-    }
+    val extraDependency = dependency.extraDependencies
+        .find { it.name == extra && it.jarFiles.isNotEmpty() }
+        ?: throw GradleException("intellij extra artifact '$extra' is not found. Please note that you should specify extra dependencies in the intellij.extraDependencies property and configure dependencies on them in the afterEvaluate block")
 
     return files(extraDependency.jarFiles).asFileTree
 }

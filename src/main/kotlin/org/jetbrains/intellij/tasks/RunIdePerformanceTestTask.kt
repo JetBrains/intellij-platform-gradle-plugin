@@ -72,13 +72,15 @@ abstract class RunIdePerformanceTestTask : RunIdeBase(true) {
 
                 super.exec()
 
-                val testResults = IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toString()).getTestStatistic()
+                IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toString())
+                    .getTestStatistic()
+                    .let { testResults ->
+                        info(context, "Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
 
-                info(context, "Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
-
-                if (testScript.assertionTimeout != null && testResults.totalTime!! > testScript.assertionTimeout) {
-                    testExecutionResults.add(PerformanceTestResult(testName, testResults, testScript))
-                }
+                        if (testScript.assertionTimeout != null && testResults.totalTime!! > testScript.assertionTimeout) {
+                            testExecutionResults.add(PerformanceTestResult(testName, testResults, testScript))
+                        }
+                    }
             }
 
         if (testExecutionResults.isNotEmpty()) {

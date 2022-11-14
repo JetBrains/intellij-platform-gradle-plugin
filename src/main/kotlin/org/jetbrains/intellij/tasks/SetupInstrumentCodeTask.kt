@@ -21,11 +21,14 @@ abstract class SetupInstrumentCodeTask : DefaultTask() {
 
     @TaskAction
     fun setupInstrumentCode() {
-        instrumentedDir.get().asFile.toPath().run {
-            if (!instrumentationEnabled.get()) {
-                deleteQuietly()
+        instrumentedDir.get()
+            .asFile
+            .toPath()
+            .run {
+                if (!instrumentationEnabled.get()) {
+                    deleteQuietly()
+                }
+                createDir()
             }
-            createDir()
-        }
     }
 }

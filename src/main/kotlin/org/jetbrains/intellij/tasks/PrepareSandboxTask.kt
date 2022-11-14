@@ -8,8 +8,6 @@ import com.jetbrains.plugin.structure.base.utils.simpleName
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
-import org.gradle.api.Task
-import org.gradle.api.file.CopySpec
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -18,6 +16,7 @@ import org.jdom2.Element
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.ifNull
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.transformXml
 import java.io.File
@@ -83,14 +82,16 @@ abstract class PrepareSandboxTask : Sync() {
         super.copy()
     }
 
-    fun intoChild(destinationDir: Any): CopySpec = mainSpec.addChild().into(destinationDir)
+    fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
 
-    override fun getDestinationDir(): File = defaultDestinationDir.get()
+    override fun getDestinationDir() = defaultDestinationDir.get()
 
-    override fun configure(closure: Closure<*>): Task = super.configure(closure)
+    override fun configure(closure: Closure<*>) = super.configure(closure)
 
     fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
-        from(pluginDependency.artifact) { into(pluginDependency.artifact.name) }
+        from(pluginDependency.artifact) {
+            into(pluginDependency.artifact.name)
+        }
     }
 
     fun configureExternalPlugin(pluginDependency: PluginDependency) {
@@ -99,7 +100,9 @@ abstract class PrepareSandboxTask : Sync() {
         }
         pluginDependency.artifact.run {
             if (isDirectory) {
-                from(this) { into(name) }
+                from(this) {
+                    into(name)
+                }
             } else {
                 from(this)
             }
@@ -107,19 +110,15 @@ abstract class PrepareSandboxTask : Sync() {
     }
 
     private fun disableIdeUpdate() {
-        val optionsDir = File(configDir.get(), "/options").apply {
-            if (!exists() && !mkdirs()) {
-                error(context, "Cannot disable update checking in host IDE")
-                return
-            }
-        }
+        val optionsDir = File(configDir.get(), "/options")
+            .takeIf { it.exists() || it.mkdirs() }
+            .ifNull { error(context, "Cannot disable update checking in host IDE") }
+            ?: return
 
-        val updatesConfig = File(optionsDir, "updates.xml").apply {
-            if (!exists() && !createNewFile()) {
-                error(context, "Cannot disable update checking in host IDE")
-                return
-            }
-        }
+        val updatesConfig = File(optionsDir, "updates.xml")
+            .takeIf { it.exists() || it.createNewFile() }
+            .ifNull { error(context, "Cannot disable update checking in host IDE") }
+            ?: return
 
         if (updatesConfig.readText().trim().isEmpty()) {
             updatesConfig.writeText("<application/>")
@@ -127,25 +126,29 @@ abstract class PrepareSandboxTask : Sync() {
 
         updatesConfig.inputStream().use { inputStream ->
             val document = JDOMUtil.loadDocument(inputStream)
-            val application = document.rootElement.takeIf { it.name == "application" }
+            val application = document.rootElement
+                .takeIf { it.name == "application" }
                 ?: throw GradleException("Invalid content of '$updatesConfig' – '<application>' root element was expected.")
 
-            val updatesConfigurable = application.getChildren("component").find {
-                it.getAttributeValue("name") == "UpdatesConfigurable"
-            } ?: Element("component").apply {
-                setAttribute("name", "UpdatesConfigurable")
-                application.addContent(this)
-            }
+            val updatesConfigurable = application
+                .getChildren("component")
+                .find { it.getAttributeValue("name") == "UpdatesConfigurable" }
+                ?: Element("component")
+                    .apply {
+                        setAttribute("name", "UpdatesConfigurable")
+                        application.addContent(this)
+                    }
 
-            val option = updatesConfigurable.getChildren("option").find {
-                it.getAttributeValue("name") == "CHECK_NEEDED"
-            } ?: Element("option").apply {
-                setAttribute("name", "CHECK_NEEDED")
-                updatesConfigurable.addContent(this)
-            }
+            val option = updatesConfigurable
+                .getChildren("option")
+                .find { it.getAttributeValue("name") == "CHECK_NEEDED" }
+                ?: Element("option")
+                    .apply {
+                        setAttribute("name", "CHECK_NEEDED")
+                        updatesConfigurable.addContent(this)
+                    }
 
             option.setAttribute("value", "false")
-
             transformXml(document, updatesConfig)
         }
     }

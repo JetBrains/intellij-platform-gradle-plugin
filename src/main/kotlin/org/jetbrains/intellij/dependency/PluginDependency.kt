@@ -8,32 +8,22 @@ import java.io.Serializable
 
 @Suppress("BooleanMethodIsAlwaysInverted")
 interface PluginDependency : Serializable {
+
     companion object {
         private const val formatVersion = 3
     }
 
     val id: String
-
     val platformPluginId: String?
-
     val version: String
-
     val channel: String?
-
     val artifact: File
-
     val jarFiles: Collection<File>
-
     val sourceJarFiles: Collection<File>
-
     val classesDirectory: File?
-
     val metaInfDirectory: File?
-
     val builtin: Boolean
-
     val maven: Boolean
-
     val notation: PluginDependencyNotation
 
     fun isCompatible(ideVersion: IdeVersion): Boolean

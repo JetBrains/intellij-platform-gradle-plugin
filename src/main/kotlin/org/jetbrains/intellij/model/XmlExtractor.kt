@@ -26,13 +26,15 @@ class XmlExtractor<T>(private val context: String? = null) {
     @Throws(JAXBException::class)
     fun marshal(bean: T, file: File) {
         jaxbContext.createMarshaller().marshal(bean, file)
-        val document = file.inputStream().use { JDOMUtil.loadDocument(it) }
-        transformXml(document, file)
+
+        file
+            .inputStream()
+            .use { JDOMUtil.loadDocument(it) }
+            .let { transformXml(it, file) }
     }
 
-    fun fetch(path: String) = runCatching {
-        unmarshal(File(path))
-    }.onFailure {
-        warn(context, "Failed to get products releases list: ${it.message}", it)
-    }.getOrNull()
+    fun fetch(path: String) =
+        runCatching { unmarshal(File(path)) }
+            .onFailure { warn(context, "Failed to get products releases list: ${it.message}", it) }
+            .getOrNull()
 }

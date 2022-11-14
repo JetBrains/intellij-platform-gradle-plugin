@@ -62,8 +62,9 @@ abstract class JarSearchableOptionsTask : Jar() {
                                 pluginJarFiles.addAll(files)
                             }
                         }
-                        val jarName = it.name.replace(SEARCHABLE_OPTIONS_SUFFIX, "")
-                        pluginJarFiles.contains(jarName)
+                        it.name
+                            .replace(SEARCHABLE_OPTIONS_SUFFIX, "")
+                            .let(pluginJarFiles::contains)
                     }
                 }
             }

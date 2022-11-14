@@ -136,15 +136,26 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     @get:Internal
     abstract val projectExecutable: Property<String>
 
-    private val ideDirFile by lazy { ideDir.get() }
+    private val ideDirFile by lazy {
+        ideDir.get()
+    }
     private val infoPlist by lazy {
-        ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
-            PropertyListParser.parse(it) as NSDictionary
-        }
+        ideDirFile
+            .resolve("Info.plist")
+            .takeIf(File::exists)
+            ?.let { PropertyListParser.parse(it) as NSDictionary }
     }
 
-    private val buildNumber by lazy { ideDirFile.let(::ideBuildNumber).split('-').last().let(Version::parse) }
-    private val build221 by lazy { Version.parse("221.0") }
+    private val buildNumber by lazy {
+        ideDirFile
+            .let(::ideBuildNumber)
+            .split('-')
+            .last()
+            .let(Version::parse)
+    }
+    private val build221 by lazy {
+        Version.parse("221.0")
+    }
 
     init {
         mainClass.set("com.intellij.idea.Main")
@@ -172,17 +183,18 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      */
     private fun configureClasspath() {
         executable
-            .takeUnless { it.isNullOrEmpty() }
+            .takeUnless(String?::isNullOrEmpty)
             ?.let {
-                resolveToolsJar(it).takeIf(File::exists) ?: Jvm.current().toolsJar
+                resolveToolsJar(it)
+                    .takeIf(File::exists)
+                    .or(Jvm.current().toolsJar)
             }
             ?.let {
                 classpath += objectFactory.fileCollection().from(it)
             }
 
-        classpath += getIdeaClasspath(ideDirFile).let {
-            objectFactory.fileCollection().from(it)
-        }
+        classpath += getIdeaClasspath(ideDirFile)
+            .let { objectFactory.fileCollection().from(it) }
     }
 
     /**
@@ -252,9 +264,9 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
         val prefix = Files.list(ideDirFile.toPath().resolve("bin"))
             .asSequence()
-            .filter { file -> file.hasExtension("sh") || file.hasExtension("bat") }
-            .flatMap { file -> Files.lines(file).asSequence() }
-            .mapNotNull { line -> platformPrefixSystemPropertyRegex.find(line)?.groupValues?.getOrNull(1) }
+            .filter { it.hasExtension("sh") || it.hasExtension("bat") }
+            .flatMap { Files.lines(it).asSequence() }
+            .mapNotNull { platformPrefixSystemPropertyRegex.find(it)?.groupValues?.getOrNull(1) }
             .firstOrNull()
 
         return when {
@@ -264,9 +276,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 ?.getDictionary("JVMOptions")
                 ?.getDictionary("Properties")
                 ?.getValue("idea.platform.prefix")
-                .ifNull {
-                    error(context, "Cannot find prefix in $infoPlist")
-                }
+                .ifNull { error(context, "Cannot find prefix in $infoPlist") }
 
             else -> null
         }

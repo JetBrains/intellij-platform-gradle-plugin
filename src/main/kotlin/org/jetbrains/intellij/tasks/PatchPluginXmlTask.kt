@@ -97,28 +97,24 @@ abstract class PatchPluginXmlTask : DefaultTask() {
             file.inputStream().use { inputStream ->
                 val document = JDOMUtil.loadDocument(inputStream)
 
-                sinceBuild.orNull?.let {
-                    patchAttribute(document, "idea-version", "since-build", it)
-                }
-                untilBuild.orNull?.let {
-                    patchAttribute(document, "idea-version", "until-build", it)
-                }
-                pluginDescription.orNull?.let {
-                    patchTag(document, "description", it)
-                }
-                changeNotes.orNull?.let {
-                    patchTag(document, "change-notes", it)
-                }
-                version.orNull.takeIf { it != Project.DEFAULT_VERSION }?.let {
-                    patchTag(document, "version", it)
-                }
-                pluginId.orNull?.let {
-                    patchTag(document, "id", it)
-                }
+                sinceBuild.orNull
+                    ?.let { patchAttribute(document, "idea-version", "since-build", it) }
+                untilBuild.orNull
+                    ?.let { patchAttribute(document, "idea-version", "until-build", it) }
+                pluginDescription.orNull
+                    ?.let { patchTag(document, "description", it) }
+                changeNotes.orNull
+                    ?.let { patchTag(document, "change-notes", it) }
+                version.orNull
+                    .takeIf { it != Project.DEFAULT_VERSION }
+                    ?.let { patchTag(document, "version", it) }
+                pluginId.orNull
+                    ?.let { patchTag(document, "id", it) }
 
-                destinationDir.get().asFile.resolve(file.name).let {
-                    transformXml(document, it)
-                }
+                destinationDir.get()
+                    .asFile
+                    .resolve(file.name)
+                    .let { transformXml(document, it) }
             }
         }
     }

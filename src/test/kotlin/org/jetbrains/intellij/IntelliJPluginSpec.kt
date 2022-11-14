@@ -4,6 +4,7 @@ package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
@@ -92,7 +93,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         writeTestFile()
 
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             val sandboxPath = adjustWindowsPath("${buildDirectory.canonicalPath}/idea-sandbox")
             val testCommand = parseCommand(it.output)
 
@@ -511,7 +512,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             assertEquals(
                 "com.intellij.mytestid",
                 parseCommand(it.output).properties["idea.required.plugins.id"],
@@ -532,7 +533,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             parseCommand(it.output).let { properties ->
                 assertEquals("200m", properties.xms)
                 assertEquals("500m", properties.xmx)
@@ -552,7 +553,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
             """.trimIndent()
         )
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             assertPathParameters(parseCommand(it.output), sandboxPath)
         }
     }

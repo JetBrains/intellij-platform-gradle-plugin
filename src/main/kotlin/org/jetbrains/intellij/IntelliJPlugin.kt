@@ -152,9 +152,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sameSinceUntilBuild.convention(false)
             instrumentCode.convention(true)
             sandboxDir.convention(
-                project.layout.buildDirectory.dir(DEFAULT_SANDBOX).map {
-                    it.asFile.canonicalPath
-                })
+                project.layout.buildDirectory
+                    .dir(DEFAULT_SANDBOX)
+                    .map { it.asFile.canonicalPath }
+            )
             intellijRepository.convention(DEFAULT_INTELLIJ_REPOSITORY)
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
@@ -178,7 +179,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             return
         }
         try {
-            val version = getCurrentVersion()?.let(Version::parse) ?: Version()
+            val version = getCurrentVersion()
+                ?.let(Version::parse)
+                .or { Version() }
             val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, GITHUB_REPOSITORY)
             if (version < Version.parse(latestVersion)) {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
@@ -328,6 +331,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring patch plugin.xml task")
 
         val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
+        val buildNumberProvider = setupDependenciesTaskProvider
+            .flatMap { it.idea }
+            .map { it.buildNumber }
 
         project.tasks.register<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
@@ -347,7 +353,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
             sinceBuild.convention(project.provider {
                 if (extension.updateSinceUntilBuild.get()) {
-                    val ideVersion = IdeVersion.createIdeVersion(setupDependenciesTaskProvider.get().idea.get().buildNumber)
+                    val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                     "${ideVersion.baselineVersion}.${ideVersion.build}"
                 } else {
                     null
@@ -358,7 +364,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     if (extension.sameSinceUntilBuild.get()) {
                         "${sinceBuild.get()}.*"
                     } else {
-                        val ideVersion = IdeVersion.createIdeVersion(setupDependenciesTaskProvider.get().idea.get().buildNumber)
+                        val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                         "${ideVersion.baselineVersion}.*"
                     }
                 } else {
@@ -469,7 +475,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 "Build-JVM" to Jvm.current(),
                 "Version" to projectVersion,
                 "Build-Plugin" to PLUGIN_NAME,
-                "Build-Plugin-Version" to (getCurrentVersion() ?: "0.0.0"),
+                "Build-Plugin-Version" to getCurrentVersion().or("0.0.0"),
                 "Build-OS" to OperatingSystem.current(),
                 "Build-SDK" to buildSdk.get(),
             )
@@ -1056,7 +1062,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                     )
                                 }
                             },
-                        ).asSequence().mapNotNull { it() }.firstOrNull() ?: emptyList()
+                        ).asSequence().mapNotNull { it() }.firstOrNull().orEmpty()
                     } else {
                         warn(
                             logCategory(),
