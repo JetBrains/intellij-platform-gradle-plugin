@@ -438,7 +438,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
 
         if (ideDir.exists()) {
             debug(context, "IDE already available in: $ideDir")
-            return ideDir.canonicalPath
+            return ideDir.absolutePath
         }
 
         val buildTypes = when (type) {
