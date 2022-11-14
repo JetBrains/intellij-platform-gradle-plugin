@@ -420,10 +420,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     internal fun resolveIdePath(
         ideVersion: String,
-        downloadDir: File,
+        downloadPath: Path,
         context: String?,
-        block: (type: String, version: String, buildType: String) -> File,
-    ): String {
+        block: (type: String, version: String, buildType: String) -> Path,
+    ): Path {
         debug(context, "Resolving IDE path for: $ideVersion")
         var (type, version) = ideVersion.trim().split('-', limit = 2) + null
 
@@ -434,11 +434,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         val name = "$type-$version"
-        val ideDir = downloadDir.resolve(name)
+        val ideDirPath = downloadPath.resolve(name)
 
-        if (ideDir.exists()) {
-            debug(context, "IDE already available in: $ideDir")
-            return ideDir.canonicalPath
+        if (ideDirPath.exists()) {
+            debug(context, "IDE already available in: $ideDirPath")
+            return ideDirPath
         }
 
         val buildTypes = when (type) {
@@ -447,9 +447,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         buildTypes.forEach { buildType ->
-            debug(context, "Downloading IDE '$type-$version' from '$buildType' channel to: $downloadDir")
+            debug(context, "Downloading IDE '$type-$version' from '$buildType' channel to: $downloadPath")
             try {
-                return block(type!!, version!!, buildType).canonicalPath.also {
+                return block(type!!, version!!, buildType).also {
                     debug(context, "Resolved IDE '$type-$version' path: $it")
                 }
             } catch (e: IOException) {

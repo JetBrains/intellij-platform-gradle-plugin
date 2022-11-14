@@ -104,6 +104,8 @@ import org.jetbrains.intellij.utils.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -562,8 +564,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
             productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
                 listProductsReleasesTask.outputFile.asFile
             })
-            ides.convention(ideVersions.map {
-                it
+            ides.convention(ideVersions.map { ideVersion ->
+                val downloadPath = downloadDir.get()
+                    .replaceFirst("^~".toRegex(), System.getProperty("user.home"))
+                    .let(Path::of)
+
+                ideVersion
                     .ifEmpty {
                         when {
                             localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
@@ -572,12 +578,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
                     .orEmpty()
                     .map { ideVersion ->
-                        val downloadDir = File(downloadDir.get())
                         val context = logCategory()
 
-                        resolveIdePath(ideVersion, downloadDir, context) { type, version, buildType ->
+                        resolveIdePath(ideVersion, downloadPath, context) { type, version, buildType ->
                             val name = "$type-$version"
-                            val ideDir = downloadDir.resolve(name)
+                            val ideDir = downloadPath.resolve(name)
                             info(context, "Downloading IDE '$name' to: $ideDir")
 
                             val url = resolveIdeUrl(type, version, buildType, context)
@@ -601,13 +606,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 }).first()
 
                                 debug(context, "IDE downloaded, extracting...")
-                                archiveUtils.extract(ideArchive, ideDir, context)
-                                ideDir.listFiles()?.let { files ->
-                                    files.filter(File::isDirectory).forEach { container ->
-                                        container.listFiles()?.forEach { file ->
-                                            file.renameTo(ideDir.resolve(file.name))
+                                archiveUtils.extract(ideArchive, ideDir.toFile(), context)
+                                ideDir.listFiles().let { files ->
+                                    files.filter { it.isDirectory }.forEach { container ->
+                                        container.listFiles().forEach { file ->
+                                            Files.move(file, ideDir.resolve(file.simpleName))
                                         }
-                                        container.deleteRecursively()
+                                        container.forceRemoveDirectory()
                                     }
                                 }
                             } catch (e: Exception) {
@@ -617,7 +622,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                             debug(context, "IDE extracted to: $ideDir")
                             ideDir
                         }
-
                     }.let { files -> project.files(files) }
             })
             verifierPath.convention(project.provider {
