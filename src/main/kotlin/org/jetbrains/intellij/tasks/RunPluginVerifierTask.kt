@@ -397,12 +397,60 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @return Plugin Verifier home directory
      */
     @Suppress("DEPRECATION")
-    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir")
-        .forUseAtConfigurationTime()
-        .map { Path.of(it) }
-        .orElse(providers.environmentVariable("XDG_CACHE_HOME").forUseAtConfigurationTime().map { Path.of(it).resolve("pluginVerifier") })
-        .orElse(providers.systemProperty("user.home").forUseAtConfigurationTime().map { Path.of(it).resolve(".cache/pluginVerifier") })
-        .orElse(temporaryDir.toPath().resolve("pluginVerifier"))
+    private fun verifierHomeDir() =
+        providers.systemProperty("plugin.verifier.home.dir")
+            .forUseAtConfigurationTime()
+            .map {
+                println("it1 = ${it}")
+                it
+            }
+            .map { Path.of(it) }
+            .map {
+                println("it2 = ${it}")
+                it
+            }
+            .orElse(
+                providers.environmentVariable("XDG_CACHE_HOME")
+                    .forUseAtConfigurationTime()
+                    .map {
+                        println("it3 = ${it}")
+                        it
+                    }
+                    .map { Path.of(it).resolve("pluginVerifier") }
+                    .map {
+                        println("it4 = ${it}")
+                        it
+                    }
+            )
+            .orElse(
+                providers.systemProperty("user.home")
+                    .forUseAtConfigurationTime()
+                    .map {
+                        println("it5 = ${it}")
+                        it
+                    }
+                    .map { Path.of(it).resolve(".cache/pluginVerifier") }
+                    .map {
+                        println("it6 = ${it}")
+                        it
+                    }
+            )
+            .orElse(
+                temporaryDir.toPath()
+                    .let {
+                        println("it7 = ${it}")
+                        it
+                    }
+                    .resolve("pluginVerifier")
+                    .let {
+                        println("it8 = ${it}")
+                        it
+                    }
+            )
+            .map {
+                println("it9 = ${it}")
+                it
+            }
 
     /**
      * Resolves the Plugin Verifier version.
