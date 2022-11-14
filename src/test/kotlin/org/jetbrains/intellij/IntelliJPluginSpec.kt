@@ -3,7 +3,6 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
@@ -340,6 +339,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    // FIXME: test takes too long
     @Test
     fun `add bundled zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
@@ -371,6 +371,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
+    // FIXME: test takes too long
     @Test
     fun `add external zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
@@ -446,6 +447,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    // FIXME: test takes too long
     @Test
     fun `add bundled zip plugin source artifacts from IDE_ROOT-lib-src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
