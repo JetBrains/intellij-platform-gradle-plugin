@@ -15,8 +15,8 @@ jobs:
         gradleVersion:
           - 7.5.1
         os:
-          - windows-latest
-          - ubuntu-latest
+#          - windows-latest
+#          - ubuntu-latest
           - macos-latest
         include:
           - os: ubuntu-latest
