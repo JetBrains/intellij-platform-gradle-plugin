@@ -18,12 +18,6 @@ jobs:
 #          - windows-latest
 #          - ubuntu-latest
           - macos-latest
-        include:
-          - os: ubuntu-latest
-            script: |
-              sudo rm -rf /usr/share/dotnet
-              sudo rm -rf /usr/local/lib/android
-              sudo rm -rf /opt/ghc
 
     steps:
 
