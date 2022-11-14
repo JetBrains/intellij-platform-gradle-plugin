@@ -4,14 +4,17 @@ on:
   workflow_call:
     inputs:
       gradleVersion:
+        type: string
+        required: true
         description: 'Gradle version – see: https://github.com/gradle/gradle/releases'
-        required: true
       os:
-        description: 'Operation system'
+        type: string
         required: true
+        description: 'Operation system'
       script:
-        description: 'Optional OS-dedicated script to run in the beginning'
+        type: string
         required: false
+        description: 'Optional OS-dedicated script to run in the beginning'
 
 env:
   XDG_CACHE_HOME: "~/.config/"
