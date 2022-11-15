@@ -245,7 +245,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
             throw IllegalStateException("Plugin file does not exist: $file")
         }
 
+        println("localPaths = ${localPaths}")
         val paths = (ides.get() + localPaths.get()).mapNotNull(File::getCanonicalPath)
+        println("paths = ${paths}")
         if (paths.isEmpty()) {
             throw GradleException("'ideVersions' and 'localPaths' properties should not be empty")
         }

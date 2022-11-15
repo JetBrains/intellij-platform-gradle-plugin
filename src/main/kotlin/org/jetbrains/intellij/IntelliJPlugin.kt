@@ -569,6 +569,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     .replaceFirst("^~".toRegex(), System.getProperty("user.home"))
                     .let(Path::of)
 
+                println("downloadDir = ${downloadDir.get()}")
+                println("downloadPath = ${downloadPath}")
+
                 ideVersion
                     .ifEmpty {
                         when {
@@ -620,9 +623,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
                             }
 
                             debug(context, "IDE extracted to: $ideDir")
+                            println("ideDir = ${ideDir}")
+
                             ideDir
                         }
-                    }.let { files -> project.files(files) }
+                    }.let { files -> project.files(files) }.also {
+                        println("project.files = ${it}")
+                    }
             })
             verifierPath.convention(project.provider {
                 val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
