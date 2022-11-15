@@ -555,17 +555,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             )
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
-            }).map {
-                println("MAP")
-                val userHome = Path.of(System.getProperty("user.home"))
-                when {
-                    it.startsWith("~/") -> userHome.resolve(it.removePrefix("~/")).toString()
-                    it == "~" -> userHome.toString()
-                    else -> it
-                }.also {
-                    println("map it = ${it}")
-                }
-            }
+            })
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
             ideDir.convention(runIdeTaskProvider.flatMap { runIdeTask ->
@@ -575,12 +565,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 listProductsReleasesTask.outputFile.asFile
             })
             ides.convention(ideVersions.map { ideVersion ->
-                val downloadPath = downloadDir.get()
-                    .replaceFirst("^~".toRegex(), System.getProperty("user.home"))
-                    .also {
-                        println("downloadPath after replacement = ${it}")
+                val userHome = Path.of(System.getProperty("user.home"))
+                val downloadPath = with(downloadDir.get()) {
+                    when {
+                        startsWith("~/") -> userHome.resolve(removePrefix("~/"))
+                        equals("~") -> userHome
+                        else -> Path.of(this)
                     }
-                    .let(Path::of)
+                }
 
                 println("System.getProperty(\"user.home\") = ${System.getProperty("user.home")}")
                 println("downloadDir = ${downloadDir.get()}")
