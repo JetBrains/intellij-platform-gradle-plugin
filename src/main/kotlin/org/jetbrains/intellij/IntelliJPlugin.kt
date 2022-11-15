@@ -556,11 +556,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
             }).map {
+                println("MAP")
                 val userHome = Path.of(System.getProperty("user.home"))
                 when {
                     it.startsWith("~/") -> userHome.resolve(it.removePrefix("~/")).toString()
                     it == "~" -> userHome.toString()
                     else -> it
+                }.also {
+                    println("map it = ${it}")
                 }
             }
             teamCityOutputFormat.convention(false)
