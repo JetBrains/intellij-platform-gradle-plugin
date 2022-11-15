@@ -555,7 +555,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
             )
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
-            })
+            }).map {
+                val userHome = Path.of(System.getProperty("user.home"))
+                when {
+                    it.startsWith("~/") -> userHome.resolve(it.removePrefix("~/")).toString()
+                    it == "~" -> userHome.toString()
+                    else -> it
+                }
+            }
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
             ideDir.convention(runIdeTaskProvider.flatMap { runIdeTask ->
