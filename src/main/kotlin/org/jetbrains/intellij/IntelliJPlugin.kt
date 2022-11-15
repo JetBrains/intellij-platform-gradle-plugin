@@ -564,12 +564,17 @@ abstract class IntelliJPlugin : Plugin<Project> {
             productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
                 listProductsReleasesTask.outputFile.asFile
             })
-            ides.convention(ideVersions.map { ideVersion ->
-                val downloadPath = downloadDir.get()
-                    .replaceFirst("^~".toRegex(), System.getProperty("user.home"))
-                    .let(Path::of)
+            ides.convention(ideVersions.map { ideVersions ->
+                val userHome = Path.of(System.getProperty("user.home"))
+                val downloadPath = with(downloadDir.get()) {
+                    when {
+                        startsWith("~/") -> userHome.resolve(removePrefix("~/"))
+                        equals("~") -> userHome
+                        else -> Path.of(this)
+                    }
+                }
 
-                ideVersion
+                ideVersions
                     .ifEmpty {
                         when {
                             localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
