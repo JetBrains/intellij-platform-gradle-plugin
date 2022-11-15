@@ -567,8 +567,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
             ides.convention(ideVersions.map { ideVersion ->
                 val downloadPath = downloadDir.get()
                     .replaceFirst("^~".toRegex(), System.getProperty("user.home"))
+                    .also {
+                        println("downloadPath after replacement = ${it}")
+                    }
                     .let(Path::of)
 
+                println("System.getProperty(\"user.home\") = ${System.getProperty("user.home")}")
                 println("downloadDir = ${downloadDir.get()}")
                 println("downloadPath = ${downloadPath}")
 

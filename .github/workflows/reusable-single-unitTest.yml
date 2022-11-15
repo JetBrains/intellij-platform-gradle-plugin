@@ -53,7 +53,7 @@ jobs:
             ${{ runner.os }}-XDG_CACHE_HOME-
 
       - name: Run Tests
-        run: ./gradlew test -PtestGradleVersion="${{ inputs.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} --tests "org.jetbrains.intellij.tasks.RunPluginVerifierTaskSpec"
+        run: ./gradlew test -PtestGradleVersion="${{ inputs.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} --tests "org.jetbrains.intellij.tasks.RunPluginVerifierTaskSpec.run plugin verifier in specified version"
 
       - name: Test Report
         uses: dorny/test-reporter@v1
