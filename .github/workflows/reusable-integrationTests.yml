@@ -15,8 +15,6 @@ jobs:
   subtasksList:
     name: Prepare Environment
     runs-on: ubuntu-latest
-    outputs:
-      modules: ${{ steps.set-modules.outputs.modules }}
 
     steps:
 
@@ -40,12 +38,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-XDG_CACHE_HOME-
 
-      - name: Collect Available Modules
-        id: set-modules
-        run: |
-          MODULES_LIST="$($GITHUB_WORKSPACE/.github/scripts/list_integration_test_modules.main.kts)"
-          echo "::set-output name=modules::$MODULES_LIST"
-
       - name: Build and Publish Plugin to MavenLocal
         run: ./gradlew -Pversion="0.0.0" :publishToMavenLocal
 
@@ -56,7 +48,7 @@ jobs:
           path: ~/.m2/repository
 
   integrationTests:
-    name: ${{ matrix.module }} / Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
+    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
     needs: subtasksList
     runs-on: ${{ matrix.os }}
     strategy:
@@ -71,7 +63,6 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
-        module: ${{fromJson(needs.subtasksList.outputs.modules)}}
 
     steps:
 
@@ -101,8 +92,69 @@ jobs:
         with:
           gradle-version: ${{ matrix.gradleVersion }}
 
-      - name: Run Verification
+      # INTEGRATION TESTS
+      - name: attaching-plugin-bundled-sources
         working-directory: ${{ github.workspace }}/integration-tests
         env:
           PLATFORM_VERSION: ${{ inputs.platformVersion }}
-        run: ./${{ matrix.module }}/verify.main.kts `which gradle`
+        run: ./attaching-plugin-bundled-sources/verify.main.kts `which gradle`
+
+      - name: attaching-plugin-sources-from-ide-dist
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./attaching-plugin-sources-from-ide-dist/verify.main.kts `which gradle`
+
+      - name: build-features
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./build-features/verify.main.kts `which gradle`
+
+      - name: classpath
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./classpath/verify.main.kts `which gradle`
+
+      - name: instrumentation-task
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./instrumentation-task/verify.main.kts `which gradle`
+
+      - name: instrumentation-task-disabled
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./instrumentation-task-disabled/verify.main.kts `which gradle`
+
+      - name: jar-manifest-file
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./jar-manifest-file/verify.main.kts `which gradle`
+
+      - name: plugin-xml-patching
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./plugin-xml-patching/verify.main.kts `which gradle`
+
+      - name: test-classpath-project-resources
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./test-classpath-project-resources/verify.main.kts `which gradle`
+
+      - name: throwing-exceptions
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./throwing-exceptions/verify.main.kts `which gradle`
+
+      - name: verify-plugin-configuration
+        working-directory: ${{ github.workspace }}/integration-tests
+        env:
+          PLATFORM_VERSION: ${{ inputs.platformVersion }}
+        run: ./verify-plugin-configuration/verify.main.kts `which gradle`
