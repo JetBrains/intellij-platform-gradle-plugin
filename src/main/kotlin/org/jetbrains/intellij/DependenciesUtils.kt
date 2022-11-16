@@ -24,13 +24,17 @@ fun Project.intellij(filter: PatternFilterable) = intellijBase().matching(filter
 
 private fun Project.intellijBase(): FileTree {
     val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
-    val setupDependenciesTask = setupDependenciesTaskProvider.get()
+    val ideaProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+        setupDependenciesTask.idea.map {
+            files(it.jarFiles).asFileTree
+        }
+    }
 
     if (!state.executed) {
         throw GradleException("intellij is not (yet) configured. Please note that you should configure intellij dependencies in the afterEvaluate block")
     }
 
-    return files(setupDependenciesTask.idea.get().jarFiles).asFileTree
+    return ideaProvider.get()
 }
 
 fun Project.intellijPlugin(plugin: String) = intellijPluginBase(plugin)
@@ -58,7 +62,8 @@ fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     val nonValidPlugins = mutableListOf<String>()
 
     plugins.forEach { pluginName ->
-        extension.getPluginDependenciesList(this)
+        extension
+            .getPluginDependenciesList(this)
             .find { it.id == pluginName && it.jarFiles.isNotEmpty() }
             .ifNull { nonValidPlugins.add(pluginName) }
             ?.let { selectedPlugins.add(it) }

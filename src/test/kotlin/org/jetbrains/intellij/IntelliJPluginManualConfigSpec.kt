@@ -84,6 +84,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 plugins = ['junit', 'testng', 'copyright']
             }
             afterEvaluate {
+                setupDependencies.idea.get() // warmup configurations
+            
                 dependencies {
                     compileOnly        DependenciesUtils.intellijPlugin(project, 'junit') { include('junit-rt.jar') }
                     implementation     DependenciesUtils.intellijPlugin(project, 'junit')  { include('idea-junit.jar') }
@@ -280,6 +282,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 plugins = ['junit']
             }
             afterEvaluate {
+                setupDependencies.idea.get() // warmup configurations
+                
                 dependencies {
                     compile DependenciesUtils.intellijPlugins(project, 'testng', 'junit', 'copyright')
                 }

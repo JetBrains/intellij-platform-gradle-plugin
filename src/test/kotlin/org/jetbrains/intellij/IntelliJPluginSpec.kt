@@ -593,10 +593,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun File.appendPrintMainClassPathsTasks() {
         this.groovy(
             """
-            task printMainRuntimeClassPath { 
+            task printMainRuntimeClassPath {
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
             }
-            task printMainCompileClassPath { 
+            task printMainCompileClassPath {
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
             }
             """.trimIndent()
@@ -614,10 +616,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun File.appendPrintClassPathsTasks(sourceSetName: String) {
         this.groovy(
             """
-            task print${sourceSetName.capitalize()}RuntimeClassPath { 
+            task print${sourceSetName.capitalize()}RuntimeClassPath {
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'runtimeOnly: ' + sourceSets.$sourceSetName.runtimeClasspath.asPath }
             }
             task print${sourceSetName.capitalize()}CompileClassPath { 
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'implementation: ' + sourceSets.$sourceSetName.compileClasspath.asPath }
             }
             """.trimIndent()

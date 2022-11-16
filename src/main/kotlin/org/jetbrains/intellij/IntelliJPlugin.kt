@@ -501,7 +501,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 extension.getPluginDependenciesList(project)
             })
 
-
             intoChild(pluginName.map { "$it/lib" })
                 .from(runtimeConfigurationFiles.map { files ->
                     val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
@@ -836,16 +835,20 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val taskContext = logCategory()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
-        ideDir.convention(setupDependenciesTaskProvider.get().idea.map { project.file(it.classes.path) })
+        ideDir.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
+            setupDependenciesTask.idea.map { project.file(it.classes.path) }
+        })
         requiredPluginIds.convention(project.provider {
             pluginIds
         })
-        configDir.convention(prepareSandboxTaskProvider.get().configDir.map { project.file(it) })
+        configDir.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+            prepareSandboxTask.configDir.map { project.file(it) }
+        })
         pluginsDir.convention(prepareSandboxTaskProvider.map { prepareSandboxTask ->
             project.layout.projectDirectory.dir(prepareSandboxTask.destinationDir.path)
         })
-        systemDir.convention(project.provider {
-            project.file("${extension.sandboxDir.get()}/system")
+        systemDir.convention(extension.sandboxDir.map {
+            project.file("$it/system")
         })
         autoReloadPlugins.convention(ideDir.map {
             val number = ideBuildNumber(it)
