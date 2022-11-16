@@ -23,6 +23,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             }
             
             afterEvaluate {
+                setupDependencies.idea.get() // warmup configurations
+            
                 dependencies {
                     compileOnly        DependenciesUtils.intellij(project) { include('openapi.jar') }
                     implementation     DependenciesUtils.intellij(project) { include('asm-all.jar') }
@@ -150,6 +152,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 extraDependencies = ['intellij-core', 'jps-build-test']
             }
             afterEvaluate {
+                setupDependencies.idea.get() // warmup configurations
+                
                 dependencies {
                     implementation     DependenciesUtils.intellijExtra(project, 'jps-build-test') { include('jps-build-test*.jar') }
                     runtimeOnly        DependenciesUtils.intellijExtra(project, 'intellij-core')  { exclude('intellij-core.jar') }
@@ -255,6 +259,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 plugins = []
             }
             afterEvaluate {
+                setupDependencies.idea.get() // warmup configurations
+                
                 dependencies {
                     compile DependenciesUtils.intellijPlugin(project, 'junit')
                 }
@@ -336,6 +342,8 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 extraDependencies = ['jps-build-test']
             }
             afterEvaluate {
+                setupDependencies.idea.get() // warmup configurations
+                
                 dependencies {
                     compile DependenciesUtils.intellijExtra(project, 'intellij-core')
                 }
