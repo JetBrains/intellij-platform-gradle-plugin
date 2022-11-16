@@ -1111,6 +1111,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 doLast { classesDirs.setFrom(outputDir.get()) }
 
                 dependsOn(instrumentTask)
+                finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
             }
 
             // Ensure that our task is invoked when the source set is built
