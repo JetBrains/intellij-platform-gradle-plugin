@@ -85,8 +85,11 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
 
         val outputDirPath = outputDir.get().asFile.toPath()
         val temporaryDirPath = temporaryDir
-            .also { it.mkdirs() }
             .toPath()
+            .also {
+                it.deleteQuietly()
+                it.createDir()
+            }
 
         inputChanges.getFileChanges(formsDirs).forEach { change ->
             val path = change.file.toPath()
