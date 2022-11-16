@@ -1,0 +1,24 @@
+name: Project Verification
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
+
+env:
+  XDG_CACHE_HOME: "~/.config/"
+
+jobs:
+
+  gradleValidation:
+    name: Gradle Validation
+    uses: ./.github/workflows/reusable-gradleValidation.yml
+
+  integrationTestsCheck:
+    name: Integration Tests Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify Modules
+        run: $GITHUB_WORKSPACE/.github/scripts/verify_integration_test_modules.main.kts
+
+  # TODO: add check for OpenedPackages
