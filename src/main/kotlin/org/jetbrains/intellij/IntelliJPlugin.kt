@@ -1555,7 +1555,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }
 
                 ideaDependency
-            }).finalizeValue()
+            })
 
             Jvm.current().toolsJar?.let { toolsJar ->
                 project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
