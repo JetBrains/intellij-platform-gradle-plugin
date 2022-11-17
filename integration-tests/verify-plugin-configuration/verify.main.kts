@@ -57,7 +57,6 @@ __FILE__.init {
             "downloadDir" to downloadDir,
         )
     ).let { logs ->
-        logs containsText "[gradle-intellij-plugin :verify-plugin-configuration:verifyPluginConfiguration] The following plugin configuration issues were found:"
-        logs containsText "- The Plugin Verifier download directory is set to $downloadDir, but downloaded IDEs were also found in $ides, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir"
+        logs containsText "The Plugin Verifier download directory is set to $downloadDir, but downloaded IDEs were also found in $ides, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir"
     }
 }
