@@ -28,9 +28,9 @@ class Version(
             .or { patch - other.patch }
             .or {
                 when {
-                    version.contains('-') -> -1
-                    other.version.contains('-') -> 1
-                    else -> 0
+                    version.contains('-') && !other.version.contains('-') -> -1
+                    !version.contains('-') && other.version.contains('-') -> 1
+                    else -> version.compareTo(other.version, ignoreCase = true)
                 }
             }
             .or { version.compareTo(other.version, ignoreCase = true) }
