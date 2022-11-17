@@ -167,7 +167,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2021.2.4 requires languageVersion=1.5.10.",
+                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2021.2.4 requires languageVersion=1.5.",
                 it.output
             )
         }

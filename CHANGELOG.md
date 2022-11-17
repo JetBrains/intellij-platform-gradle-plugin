@@ -16,6 +16,7 @@
 - Support `runIde.jbrVersion` in `17.0.4.1-b653.1` format [#1172](../../issues/1172)
 - Plugin dependencies not resolved in multi-module project [#1196](../../issues/1196)
 - Finalize instrumentation with `classpathIndexCleanup` run to remove `classpath.index` file which breaks incremental build
+- Misleading message about Kotlin language version [#1156](../../issues/1156)
 
 ### Changed
 - Set minimum supported Gradle version from `6.7.1` to `6.8`

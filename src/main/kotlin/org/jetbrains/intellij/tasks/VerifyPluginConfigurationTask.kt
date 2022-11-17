@@ -106,7 +106,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.let(JavaVersion::toVersion)
         val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
-        val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)
+        val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)?.run { Version(major, minor) }
         val pluginVerifierDownloadPath = pluginVerifierDownloadDir.get().let(Path::of).toAbsolutePath()
         val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
 
