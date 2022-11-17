@@ -5,8 +5,8 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat&logo=twitter)][jb:twitter]
 [![Slack](https://img.shields.io/badge/Slack-%23gradle--intellij--plugin-blue?style=flat-square&logo=Slack)][jb:slack]
 
-![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-dark.svg#gh-dark-mode-only|width=100)
-![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-light.svg#gh-light-mode-only|width=100)
+![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-dark.svg#gh-dark-mode-only)
+![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-light.svg#gh-light-mode-only)
 
 
 # Gradle IntelliJ Plugin
