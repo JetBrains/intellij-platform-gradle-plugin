@@ -5,11 +5,9 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/JBPlatform?style=flat&logo=twitter)][jb:twitter]
 [![Slack](https://img.shields.io/badge/Slack-%23gradle--intellij--plugin-blue?style=flat-square&logo=Slack)][jb:slack]
 
-![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-dark.svg#gh-dark-mode-only)
-![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-light.svg#gh-light-mode-only)
+![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-dark.svg#gh-dark-mode-only | width=100)
+![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-light.svg#gh-light-mode-only | width=100)
 
-
-![GitHub-Mark-Light](https://user-images.githubusercontent.com/3369400/139447912-e0f43f33-6d9f-45f8-be46-2df5bbc91289.png#gh-dark-mode-only)![GitHub-Mark-Dark](https://user-images.githubusercontent.com/3369400/139448065-39a229ba-4b06-434b-bc67-616e2ed80c8f.png#gh-light-mode-only)
 
 # Gradle IntelliJ Plugin
 The Gradle IntelliJ Plugin is a plugin for the Gradle build system to help configuring your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
