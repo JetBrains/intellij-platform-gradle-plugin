@@ -154,6 +154,7 @@ jobs:
         run: ./throwing-exceptions/verify.main.kts `which gradle`
 
       - name: verify-plugin-configuration
+        if: false
         working-directory: ${{ github.workspace }}/integration-tests
         env:
           PLATFORM_VERSION: ${{ inputs.platformVersion }}
