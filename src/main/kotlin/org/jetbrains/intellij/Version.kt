@@ -26,6 +26,13 @@ class Version(
         (major - other.major)
             .or { minor - other.minor }
             .or { patch - other.patch }
+            .or {
+                when {
+                    version.contains('-') -> -1
+                    other.version.contains('-') -> 1
+                    else -> 0
+                }
+            }
             .or { version.compareTo(other.version, ignoreCase = true) }
 
     override fun toString() = version.takeIf(String::isNotEmpty) ?: "$major.$minor.$patch"

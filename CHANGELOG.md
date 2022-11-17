@@ -5,6 +5,7 @@
 ### Added
 - Set `IDEA_PLUGIN_SANDBOX_MODE` to `true` for `runIde`-based tasks
 - The `listBundledPlugins` task for listing IDs of plugins bundled within the currently targeted IDE
+- Make sure `1.10.0` is higher than `1.10.0-SNAPSHOT` in version check [#1155](../../issues/1155)
 
 ### Fixed
 - Invalidate instrumented classes bound to forms if GUI changed [IDEA-298989](https://youtrack.jetbrains.com/issue/IDEA-298989/Duplicate-method-name-getFont)
