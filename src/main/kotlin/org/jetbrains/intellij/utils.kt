@@ -168,7 +168,9 @@ fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirect
         options.minHeapSize?.let { "-Xms${it}" },
     )
 
-    return (defaultHeapSpace + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + heapSpace).distinct()
+    return (defaultHeapSpace + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + heapSpace)
+        .filter { it.isNotBlank() }
+        .distinct()
 }
 
 fun getIdeaClasspath(ideDirFile: File): List<String> {

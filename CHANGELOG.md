@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Fixed
+- Fixed "Error: Could not find or load main class" when using older SDK versions
+
 ## [1.10.0] - 2022-11-17
 
 ### Added
