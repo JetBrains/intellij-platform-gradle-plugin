@@ -283,7 +283,7 @@ private fun log(level: LogLevel, logCategory: String?, message: String, e: Throw
     }
 }
 
-fun Project.logCategory(): String = path + name.takeIf { ":$it" != path }.orEmpty()
+fun Project.logCategory(): String = path + if (path.subString(1) != name) " $name" else ""
 
 fun Task.logCategory(): String = project.logCategory() + path.removePrefix(project.logCategory())
 
