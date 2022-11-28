@@ -320,6 +320,21 @@ abstract class IdeaDependencyManager @Inject constructor(
                     else -> "zip"
                 },
             ) {
+
+                fun getAndroidStudioPath(parentPath: Path): Path {
+                    val androidStudioPath = if (OperatingSystem.current().isMacOsX) {
+                        // such as Android Studio.app/Contents
+                        Files.list(parentPath).filter { child ->
+                            child.extension == "app"
+                        }.findFirst().get().resolve("Contents")
+                    } else {
+                        parentPath.resolve("android-studio")
+                    }
+                    info(context, "Current system is ${OperatingSystem.current().name} " +
+                            "and AndroidStudio path is $androidStudioPath")
+                    return androidStudioPath
+                }
+
                 with(it.toPath()) {
                     Files.list(resolveAndroidStudioPath(this))
                         .forEach { entry -> Files.move(entry, resolve(entry.fileName), StandardCopyOption.REPLACE_EXISTING) }
