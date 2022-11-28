@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.base.utils.extension
 import com.jetbrains.plugin.structure.base.utils.isZip
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -30,6 +31,7 @@ import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.*
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 import javax.inject.Inject
@@ -312,10 +314,25 @@ abstract class IdeaDependencyManager @Inject constructor(
                 "com.google.android.studio",
                 "android-studio",
                 hasSources = false,
-                artifactExtension = "tar.gz",
+                artifactExtension = if (OperatingSystem.current().isLinux) "tar.gz" else "zip",
             ) {
+
+                fun getAndroidStudioPath(parentPath: Path): Path {
+                    val androidStudioPath = if (OperatingSystem.current().isMacOsX) {
+                        // such as Android Studio.app/Contents
+                        Files.list(parentPath).filter { child ->
+                            child.extension == "app"
+                        }.findFirst().get().resolve("Contents")
+                    } else {
+                        parentPath.resolve("android-studio")
+                    }
+                    info(context, "Current system is ${OperatingSystem.current().name} " +
+                            "and AndroidStudio path is $androidStudioPath")
+                    return androidStudioPath
+                }
+
                 with(it.toPath()) {
-                    Files.list(resolve("android-studio")).forEach { entry ->
+                    Files.list(getAndroidStudioPath(this)).forEach { entry ->
                         Files.move(entry, resolve(entry.fileName), StandardCopyOption.REPLACE_EXISTING)
                     }
                 }
@@ -343,7 +360,13 @@ abstract class IdeaDependencyManager @Inject constructor(
                     } ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
                     val url = release.downloads.find {
-                        it.link.endsWith("-linux.tar.gz")
+                        if (OperatingSystem.current().isMacOsX) {
+                            it.link.endsWith("mac.zip")
+                        } else if (OperatingSystem.current().isLinux) {
+                            it.link.endsWith("-linux.tar.gz")
+                        } else {
+                            it.link.endsWith("-windows.zip")
+                        }
                     }?.link ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
                     ivyRepository(url)
