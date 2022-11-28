@@ -2,7 +2,9 @@
 
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.isZip
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
@@ -12,7 +14,6 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
-import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPES
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
@@ -30,6 +31,7 @@ import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.utils.*
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 import javax.inject.Inject
@@ -47,7 +49,7 @@ abstract class IdeaDependencyManager @Inject constructor(
 
     fun register(project: Project, dependency: IdeaDependency, dependencies: DependencySet) {
         val ivyFile = getOrCreateIvyXml(dependency)
-        val ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
+        val ivyFileSuffix = ivyFile.simpleName.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
 
         project.repositories.ivy {
             url = dependency.classes.toURI()
@@ -217,11 +219,11 @@ abstract class IdeaDependencyManager @Inject constructor(
         }
     }
 
-    private fun getOrCreateIvyXml(dependency: IdeaDependency): File {
-        val directory = dependency.getIvyRepositoryDirectory()
+    private fun getOrCreateIvyXml(dependency: IdeaDependency): Path {
+        val directory = dependency.getIvyRepositoryDirectory()?.toPath()
         val ivyFile = when {
-            directory != null -> File(directory, "${dependency.getFqn()}.xml")
-            else -> File.createTempFile(dependency.getFqn(), ".xml")
+            directory != null -> directory.resolve("${dependency.getFqn()}.xml")
+            else -> Files.createTempFile(dependency.getFqn(), ".xml")
         }
 
         if (directory == null || !ivyFile.exists()) {

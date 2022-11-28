@@ -4,13 +4,19 @@ package org.jetbrains.intellij
 
 import org.gradle.api.publish.ivy.IvyArtifact
 import org.gradle.api.publish.ivy.IvyConfiguration
+import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publisher.IvyPublicationIdentity
 import org.gradle.internal.xml.SimpleXmlWriter
 import org.gradle.internal.xml.XmlTransformer
+import org.jetbrains.intellij.dependency.IdePluginSourceZipFilesProvider
+import org.jetbrains.intellij.dependency.IdeaDependency
+import org.jetbrains.intellij.dependency.IntellijIvyArtifact
+import org.jetbrains.intellij.dependency.PluginDependency
 import java.io.File
 import java.io.IOException
 import java.io.UncheckedIOException
 import java.io.Writer
+import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -23,14 +29,63 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
     private val configurations = mutableListOf<IvyConfiguration>()
     private val artifacts = mutableListOf<IvyArtifact>()
 
-    fun addConfiguration(ivyConfiguration: IvyConfiguration) {
+    fun addConfiguration(ivyConfiguration: IvyConfiguration): IntelliJIvyDescriptorFileGenerator {
         configurations.add(ivyConfiguration)
+        return this
     }
 
-    fun addArtifact(ivyArtifact: IvyArtifact) {
+    fun addArtifact(ivyArtifact: IvyArtifact): IntelliJIvyDescriptorFileGenerator {
         artifacts.add(ivyArtifact)
+        return this
     }
 
+    fun addCompileArtifacts(plugin: PluginDependency, baseDir: File, groupId: String): IntelliJIvyDescriptorFileGenerator {
+        val compileConfiguration = DefaultIvyConfiguration("compile")
+
+        addConfiguration(compileConfiguration)
+
+        plugin.jarFiles.forEach {
+            addArtifact(IntellijIvyArtifact.createJarDependency(it, compileConfiguration.name, baseDir, groupId))
+        }
+        plugin.classesDirectory?.let {
+            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, compileConfiguration.name, baseDir, groupId))
+        }
+        plugin.metaInfDirectory?.let {
+            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, compileConfiguration.name, baseDir, groupId))
+        }
+
+        return this
+    }
+
+    fun addSourceArtifacts(ideaDependency: IdeaDependency?, plugin: PluginDependency, baseDir: File, groupId: String): IntelliJIvyDescriptorFileGenerator {
+        val sourcesConfiguration = DefaultIvyConfiguration("sources")
+        addConfiguration(sourcesConfiguration)
+        if (plugin.sourceJarFiles.isNotEmpty()) {
+            plugin.sourceJarFiles.forEach {
+                addArtifact(IntellijIvyArtifact.createJarDependency(it, sourcesConfiguration.name, baseDir, groupId))
+            }
+        } else {
+            ideaDependency
+                ?.sourceZipFiles
+                ?.let { IdePluginSourceZipFilesProvider.getSourceZips(it, plugin.platformPluginId) }
+                ?.let { IntellijIvyArtifact.createZipDependency(it, sourcesConfiguration.name, ideaDependency.classes) }
+                ?.let(::addArtifact)
+        }
+        // see: https://github.com/JetBrains/gradle-intellij-plugin/issues/153
+        ideaDependency
+            ?.sources
+            ?.takeIf { plugin.builtin }
+            ?.let {
+                val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
+                val artifact = IntellijIvyArtifact(it, name, "jar", "sources", "sources")
+                artifact.conf = sourcesConfiguration.name
+                addArtifact(artifact)
+            }
+
+        return this
+    }
+
+    @Deprecated("Use writeTo(path: Path) instead")
     fun writeTo(file: File) {
         xmlTransformer.transform(file, ivyFileEncoding) {
             try {
@@ -38,6 +93,14 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
             } catch (e: IOException) {
                 throw UncheckedIOException(e)
             }
+        }
+    }
+
+    fun writeTo(path: Path) = xmlTransformer.transform(path.toFile(), ivyFileEncoding) {
+        try {
+            writeDescriptor(this)
+        } catch (e: IOException) {
+            throw UncheckedIOException(e)
         }
     }
 
