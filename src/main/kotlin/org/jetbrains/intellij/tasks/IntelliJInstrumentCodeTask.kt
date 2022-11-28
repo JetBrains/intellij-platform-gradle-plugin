@@ -13,15 +13,11 @@ import org.gradle.api.file.FileType
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.tooling.BuildException
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.dependency.IdeaDependency
-import org.jetbrains.intellij.ifFalse
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.or
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption

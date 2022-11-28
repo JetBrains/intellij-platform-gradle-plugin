@@ -29,7 +29,6 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.plugins.ide.idea.model.IdeaProject
-import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
@@ -301,7 +300,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectPluginTasksDependency(dependency: Project, taskProvider: TaskProvider<PrepareSandboxTask>) {
         // invoke before tasks graph is ready
         if (dependency.plugins.findPlugin(IntelliJPlugin::class) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}", null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}")
         }
         dependency.tasks.named(PREPARE_SANDBOX_TASK_NAME) {
             taskProvider.get().dependsOn(this)
@@ -311,7 +310,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectPluginDependency(project: Project, dependency: Project, dependencies: DependencySet, extension: IntelliJPluginExtension) {
         // invoke on demand, when plugins artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin::class) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}", null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}")
         }
         dependencies.add(project.dependencies.create(dependency))
 
@@ -1481,10 +1480,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
                                 val buildNumber = ideaDependency.buildNumber
                                 val resolvedPlugin = resolveLatestPluginUpdate(PERFORMANCE_PLUGIN_ID, buildNumber)
-                                    ?: throw BuildException("No suitable plugin update found for $PERFORMANCE_PLUGIN_ID:$buildNumber", null)
+                                    ?: throw BuildException("No suitable plugin update found for $PERFORMANCE_PLUGIN_ID:$buildNumber")
 
                                 val plugin = resolver.resolve(project, resolvedPlugin)
-                                    ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" }, null)
+                                    ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" })
 
                                 configurePluginDependency(project, plugin, extension, this, resolver)
                             }
@@ -1588,12 +1587,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 } else {
                     val pluginDependency = PluginDependencyNotation.parsePluginDependencyString(it.toString())
                     if (pluginDependency.id.isEmpty()) {
-                        throw BuildException("Failed to resolve plugin: $it", null)
+                        throw BuildException("Failed to resolve plugin: $it")
                     }
                     val plugin = resolver.resolve(project, pluginDependency)
-                        ?: throw BuildException("Failed to resolve plugin $it", null)
+                        ?: throw BuildException("Failed to resolve plugin $it")
                     if (!plugin.isCompatible(ideVersion)) {
-                        throw BuildException("Plugin '$it' is not compatible to: ${ideVersion.asString()}", null)
+                        throw BuildException("Plugin '$it' is not compatible to: ${ideVersion.asString()}")
                     }
                     configurePluginDependency(project, plugin, extension, this, resolver)
                 }
