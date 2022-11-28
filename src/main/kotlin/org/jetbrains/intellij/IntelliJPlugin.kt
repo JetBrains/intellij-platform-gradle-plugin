@@ -534,9 +534,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
                 }
             }.orElse(
-                extension.getVersionNumber().zip(extension.getVersionType()) { version, type ->
-                    "$version-$type"
-                }
+                pairProvider(extension.getVersionNumber(), extension.getVersionType())
+                    .map { (version, type) -> "$version-$type" }
             )
         }
 

@@ -27,6 +27,7 @@ import org.gradle.api.Task
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
@@ -347,3 +348,9 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
 fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
 
 fun NSDictionary.getValue(key: String) = this[key].toString()
+
+fun <A, B> pairProvider(a: Provider<A>, b: Provider<B>) =
+    a.zip(b) { aValue, bValue -> aValue to bValue }
+
+fun <A, B, C> tripleProvider(a: Provider<A>, b: Provider<B>, c: Provider<C>) =
+    pairProvider(a, b).zip(c) { (aValue, bValue): Pair<A?, B?>, cValue: C? -> Triple(aValue, bValue, cValue) }
