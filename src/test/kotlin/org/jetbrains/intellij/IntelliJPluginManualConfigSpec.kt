@@ -23,7 +23,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             }
             
             afterEvaluate {
-                setupDependencies.idea.get() // warmup configurations
+                setupDependencies.idea.get() // warmup configurations TODO: remove
             
                 dependencies {
                     compileOnly        DependenciesUtils.intellij(project) { include('openapi.jar') }
@@ -86,7 +86,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 plugins = ['junit', 'testng', 'copyright']
             }
             afterEvaluate {
-                setupDependencies.idea.get() // warmup configurations
+                setupDependencies.idea.get() // warmup configurations TODO: remove
             
                 dependencies {
                     compileOnly        DependenciesUtils.intellijPlugin(project, 'junit') { include('junit-rt.jar') }
@@ -152,7 +152,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 extraDependencies = ['intellij-core', 'jps-build-test']
             }
             afterEvaluate {
-                setupDependencies.idea.get() // warmup configurations
+                setupDependencies.idea.get() // warmup configurations TODO: remove
                 
                 dependencies {
                     implementation     DependenciesUtils.intellijExtra(project, 'jps-build-test') { include('jps-build-test*.jar') }
@@ -259,7 +259,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 plugins = []
             }
             afterEvaluate {
-                setupDependencies.idea.get() // warmup configurations
+                setupDependencies.idea.get() // warmup configurations TODO: remove
                 
                 dependencies {
                     compile DependenciesUtils.intellijPlugin(project, 'junit')
@@ -288,7 +288,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 plugins = ['junit']
             }
             afterEvaluate {
-                setupDependencies.idea.get() // warmup configurations
+                setupDependencies.idea.get() // warmup configurations TODO: remove
                 
                 dependencies {
                     compile DependenciesUtils.intellijPlugins(project, 'testng', 'junit', 'copyright')
@@ -342,7 +342,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                 extraDependencies = ['jps-build-test']
             }
             afterEvaluate {
-                setupDependencies.idea.get() // warmup configurations
+                setupDependencies.idea.get() // warmup configurations TODO: remove
                 
                 dependencies {
                     compile DependenciesUtils.intellijExtra(project, 'intellij-core')
