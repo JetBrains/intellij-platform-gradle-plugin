@@ -349,8 +349,8 @@ fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
 
 fun NSDictionary.getValue(key: String) = this[key].toString()
 
-fun <A, B> pairProvider(a: Provider<A>, b: Provider<B>) =
-    a.zip(b) { aValue, bValue -> aValue to bValue }
+fun <A, B> Project.pairProvider(a: Provider<A>, b: Provider<B>) = provider { a.orNull to b.orNull }
 
-fun <A, B, C> tripleProvider(a: Provider<A>, b: Provider<B>, c: Provider<C>) =
-    pairProvider(a, b).zip(c) { (aValue, bValue): Pair<A?, B?>, cValue: C? -> Triple(aValue, bValue, cValue) }
+fun <A, B, C> Project.tripleProvider(a: Provider<A>, b: Provider<B>, c: Provider<C>) =
+    pairProvider(a, b).map { (aValue, bValue) -> Triple(aValue, bValue, c.orNull) }
+

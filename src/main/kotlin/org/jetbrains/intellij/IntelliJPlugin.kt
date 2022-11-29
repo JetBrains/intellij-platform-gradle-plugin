@@ -16,7 +16,7 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
+import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
@@ -60,6 +60,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID
+import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
@@ -274,7 +275,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 )
             }
 
-        val performanceTest = project.configurations.create(IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME)
+        val performanceTest = project.configurations.create(PERFORMANCE_TEST_CONFIGURATION_NAME)
             .setVisible(false)
             .withDependencies {
                 // Check that `runIdePerformanceTest` task was launched
@@ -301,8 +302,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         fun Configuration.extend() = extendsFrom(defaultDependencies, idea, ideaPlugins, performanceTest)
 
         with(project.configurations) {
-            getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extend()
-            getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extend()
+            getByName(COMPILE_ONLY_CONFIGURATION_NAME).extend()
+            getByName(TEST_IMPLEMENTATION_CONFIGURATION_NAME).extend()
             project.pluginManager.withPlugin("java-test-fixtures") {
                 getByName("testFixturesCompileOnly").extend()
             }
@@ -499,8 +500,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring $taskName task")
 
         val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
-        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
-        val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+        val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
+        val runtimeConfiguration = project.configurations.getByName(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
 
         val ideaDependencyJarFiles = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
             setupDependenciesTask.idea.map {
@@ -534,7 +535,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
                 }
             }.orElse(
-                pairProvider(extension.getVersionNumber(), extension.getVersionType())
+                project.pairProvider(extension.getVersionNumber(), extension.getVersionType())
                     .map { (version, type) -> "$version-$type" }
             )
         }
@@ -586,7 +587,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     name = ensureName(file.toPath())
                 }
 
-            dependsOn(JavaPlugin.JAR_TASK_NAME)
+            dependsOn(JAR_TASK_NAME)
             dependsOn(runtimeConfiguration)
             dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
 
@@ -981,7 +982,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
 
         val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
-        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+        val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
 
         if (extension.instrumentCode.get()) {
             jarTaskProvider.configure { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
@@ -1487,7 +1488,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring resources task")
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
 
-        project.tasks.named<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
+        project.tasks.named<ProcessResources>(PROCESS_RESOURCES_TASK_NAME) {
             from(patchPluginXmlTaskProvider) {
                 duplicatesStrategy = DuplicatesStrategy.INCLUDE
                 into("META-INF")
@@ -1565,7 +1566,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
 
             Jvm.current().toolsJar?.let { toolsJar ->
-                project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
+                project.dependencies.add(RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
             }
         }
     }
