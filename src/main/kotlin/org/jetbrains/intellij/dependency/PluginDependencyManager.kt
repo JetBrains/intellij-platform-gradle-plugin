@@ -9,6 +9,7 @@ import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.kotlin.dsl.create
@@ -25,7 +26,7 @@ import javax.inject.Inject
 
 abstract class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
-    private val ideaDependency: IdeaDependency?,
+    private val ideaDependencyProvider: Provider<IdeaDependency>,
     private val pluginsRepositories: List<PluginsRepository>,
     private val archiveUtils: ArchiveUtils,
     private val context: String?,
@@ -37,6 +38,8 @@ abstract class PluginDependencyManager @Inject constructor(
     private var ivyArtifactRepository: IvyArtifactRepository? = null
 
     fun resolve(project: Project, dependency: PluginDependencyNotation): PluginDependency? {
+        val ideaDependency = ideaDependencyProvider.get() // TODO fix
+
         if (dependency.version.isNullOrEmpty() && dependency.channel.isNullOrEmpty()) {
             if (Paths.get(dependency.id).isAbsolute) {
                 return externalPluginDependency(File(dependency.id))
@@ -104,6 +107,8 @@ abstract class PluginDependencyManager @Inject constructor(
         dir.listFiles()?.singleOrNull { it.isDirectory } ?: throw BuildException("Single directory expected in: $dir", null)
 
     private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
+        val ideaDependency = ideaDependencyProvider.get() // TODO fix
+
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy {
                 val ivyFileSuffix = plugin.getFqn().substring("${plugin.id}-${plugin.version}".length)
@@ -128,6 +133,8 @@ abstract class PluginDependencyManager @Inject constructor(
     }
 
     private fun generateIvyFile(plugin: PluginDependency) {
+        val ideaDependency = ideaDependencyProvider.get() // TODO fix
+
         val baseDir = when {
             plugin.builtin -> plugin.artifact
             else -> plugin.artifact.parentFile
