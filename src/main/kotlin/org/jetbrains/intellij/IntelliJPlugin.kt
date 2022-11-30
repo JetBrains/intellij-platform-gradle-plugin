@@ -1460,6 +1460,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sinceBuild.convention(patchPluginXmlTaskProvider.flatMap { it.sinceBuild })
             untilBuild.convention(patchPluginXmlTaskProvider.flatMap { it.untilBuild })
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
+
+            dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
         }
     }
 
