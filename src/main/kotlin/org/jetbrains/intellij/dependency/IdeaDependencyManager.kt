@@ -347,13 +347,17 @@ abstract class IdeaDependencyManager @Inject constructor(
                     } ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
                     val url = release.downloads.find {
-                        if (OperatingSystem.current().isMacOsX) {
-                            it.link.endsWith("mac.zip")
-                        } else if (OperatingSystem.current().isLinux) {
-                            it.link.endsWith("-linux.tar.gz")
-                        } else {
-                            it.link.endsWith("-windows.zip")
-                        }
+                        with(OperatingSystem.current()) {
+                            when {
+                                isMacOsX -> when (System.getProperty("os.arch")) {
+                                    "aarch64" -> "-mac_arm.zip"
+                                    else -> "-mac.zip"
+                                }
+
+                                isLinux -> "-linux.tar.gz"
+                                else -> "-windows.zip"
+                            }
+                        }.let { suffix -> it.link.endsWith(suffix) }
                     }?.link ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
                     ivyRepository(url)
