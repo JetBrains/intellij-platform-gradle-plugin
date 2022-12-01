@@ -330,8 +330,10 @@ abstract class IdeaDependencyManager @Inject constructor(
                     } else {
                         parentPath.resolve("android-studio")
                     }
-                    info(context, "Current system is ${OperatingSystem.current().name} " +
-                            "and AndroidStudio path is $androidStudioPath")
+                    info(
+                        context, "Current system is ${OperatingSystem.current().name} " +
+                                "and AndroidStudio path is $androidStudioPath"
+                    )
                     return androidStudioPath
                 }
 
@@ -362,19 +364,23 @@ abstract class IdeaDependencyManager @Inject constructor(
                         it.version == version || it.build == "$PLATFORM_TYPE_ANDROID_STUDIO-$version"
                     } ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
-                    val url = release.downloads.find {
-                        with(OperatingSystem.current()) {
-                            when {
-                                isMacOsX -> when (System.getProperty("os.arch")) {
-                                    "aarch64" -> "-mac_arm.zip"
-                                    else -> "-mac.zip"
-                                }
-
-                                isLinux -> "-linux.tar.gz"
-                                else -> "-windows.zip"
+                    val arch = System.getProperty("os.arch")
+                    val hasAppleM1Link by lazy { release.downloads.any { it.link.contains("-mac_arm.zip") } }
+                    val suffix = with(OperatingSystem.current()) {
+                        when {
+                            isMacOsX -> when {
+                                arch == "aarch64" && hasAppleM1Link -> "-mac_arm.zip"
+                                else -> "-mac.zip"
                             }
-                        }.let { suffix -> it.link.endsWith(suffix) }
-                    }?.link ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
+
+                            isLinux -> "-linux.tar.gz"
+                            else -> "-windows.zip"
+                        }
+                    }
+                    val url = release.downloads
+                        .find { it.link.endsWith(suffix) }
+                        ?.link
+                        ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
                     ivyRepository(url)
                 }
