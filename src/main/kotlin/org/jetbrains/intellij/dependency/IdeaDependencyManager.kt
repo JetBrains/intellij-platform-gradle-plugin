@@ -300,7 +300,7 @@ abstract class IdeaDependencyManager @Inject constructor(
             type == PLATFORM_TYPE_RIDER -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.rider",
                 name = "riderRD",
-                hasSources = !(sources && releaseType == RELEASE_TYPE_SNAPSHOTS).ifFalse {
+                hasSources = (sources && releaseType != RELEASE_TYPE_SNAPSHOTS).ifFalse {
                     warn(context, "IDE sources are not available for Rider SNAPSHOTS")
                 },
             )
