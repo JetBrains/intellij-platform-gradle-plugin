@@ -48,6 +48,7 @@ private fun String.convertToMillis() = when {
 } ?: throw RuntimeException("Value $this can't be converted to milliseconds")
 
 private class Keywords {
+
     companion object {
         const val PROJECT = "%%project"
         const val ASSERT_TIMEOUT = "%%assertTimeout"

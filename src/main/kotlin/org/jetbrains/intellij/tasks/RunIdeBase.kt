@@ -136,20 +136,26 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     @get:Internal
     abstract val projectExecutable: Property<String>
 
-    private val ideDirFile by lazy { ideDir.get() }
-    private val currentLaunch by lazy {
-        ideProductInfo(ideDirFile)?.currentLaunch
+    private val ideDirFile by lazy {
+        ideDir.get()
     }
     private val infoPlist by lazy {
-        ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
-            PropertyListParser.parse(it) as NSDictionary
-        }
+        ideDirFile
+            .resolve("Info.plist")
+            .takeIf(File::exists)
+            ?.let { PropertyListParser.parse(it) as NSDictionary }
     }
 
-    private val buildNumber by lazy { ideDirFile.let(::ideBuildNumber).split('-').last().let(Version::parse) }
-    private val build203 by lazy { Version.parse("203.0") }
-    private val build221 by lazy { Version.parse("221.0") }
-    private val build223 by lazy { Version.parse("223.0") }
+    private val buildNumber by lazy {
+        ideDirFile
+            .let(::ideBuildNumber)
+            .split('-')
+            .last()
+            .let(Version::parse)
+    }
+    private val build221 by lazy {
+        Version.parse("221.0")
+    }
 
     init {
         mainClass.set("com.intellij.idea.Main")
@@ -177,54 +183,18 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
      */
     private fun configureClasspath() {
         executable
-            .takeUnless { it.isNullOrEmpty() }
+            .takeUnless(String?::isNullOrEmpty)
             ?.let {
-                resolveToolsJar(it).takeIf(File::exists) ?: Jvm.current().toolsJar
+                resolveToolsJar(it)
+                    .takeIf(File::exists)
+                    .or(Jvm.current().toolsJar)
             }
             ?.let {
                 classpath += objectFactory.fileCollection().from(it)
             }
 
-        classpath += when {
-            buildNumber > build223 ->
-                currentLaunch
-                    ?.bootClassPathJarNames
-                    ?: infoPlist
-                        ?.getDictionary("JVMOptions")
-                        ?.getValue("ClassPath")
-                        ?.split(':')
-                        ?.map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
-                    ?: emptyList()
-
-            buildNumber > build221 -> listOf(
-                "3rd-party-rt.jar",
-                "util.jar",
-                "util_rt.jar",
-                "jna.jar",
-            )
-
-            buildNumber > build203 -> listOf(
-                "bootstrap.jar",
-                "util.jar",
-                "jdom.jar",
-                "log4j.jar",
-                "jna.jar",
-            )
-
-            else -> listOf(
-                "bootstrap.jar",
-                "extensions.jar",
-                "util.jar",
-                "jdom.jar",
-                "log4j.jar",
-                "jna.jar",
-                "trove4j.jar",
-            )
-        }.map {
-            "${ideDirFile.canonicalPath}/lib/$it"
-        }.let {
-            objectFactory.fileCollection().from(it)
-        }
+        classpath += getIdeaClasspath(ideDirFile)
+            .let { objectFactory.fileCollection().from(it) }
     }
 
     /**
@@ -294,29 +264,21 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
         val prefix = Files.list(ideDirFile.toPath().resolve("bin"))
             .asSequence()
-            .filter { file -> file.hasExtension("sh") || file.hasExtension("bat") }
-            .flatMap { file -> Files.lines(file).asSequence() }
-            .mapNotNull { line -> platformPrefixSystemPropertyRegex.find(line)?.groupValues?.getOrNull(1) }
+            .filter { it.hasExtension("sh") || it.hasExtension("bat") }
+            .flatMap { Files.lines(it).asSequence() }
+            .mapNotNull { platformPrefixSystemPropertyRegex.find(it)?.groupValues?.getOrNull(1) }
             .firstOrNull()
 
         return when {
-            prefix != null -> {
-                prefix
-            }
+            prefix != null -> prefix
 
-            OperatingSystem.current().isMacOsX -> {
-                infoPlist
-                    ?.getDictionary("JVMOptions")
-                    ?.getDictionary("Properties")
-                    ?.getValue("idea.platform.prefix")
-                    .ifNull {
-                        error(context, "Cannot find prefix in $infoPlist")
-                    }
-            }
+            OperatingSystem.current().isMacOsX -> infoPlist
+                ?.getDictionary("JVMOptions")
+                ?.getDictionary("Properties")
+                ?.getValue("idea.platform.prefix")
+                .ifNull { error(context, "Cannot find prefix in $infoPlist") }
 
-            else -> {
-                null
-            }
+            else -> null
         }
     }
 
@@ -336,7 +298,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         jvmArgs = collectJvmArgs()
     }
 
-    protected open fun collectJvmArgs() = getIdeJvmArgs(this, jvmArgs, ideDir.get())
+    protected open fun collectJvmArgs() = getIdeaJvmArgs(this, jvmArgs, ideDir.get())
 
     /**
      * Resolves the path to the `tools.jar` library.
@@ -349,8 +311,4 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         }
         return File(binDir, path)
     }
-
-    private fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
-
-    private fun NSDictionary.getValue(key: String) = this[key].toString()
 }

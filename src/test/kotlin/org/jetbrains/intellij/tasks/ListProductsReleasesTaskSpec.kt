@@ -165,7 +165,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel
-
+            
             listProductsReleases {
                 sinceVersion = "2021.1"
                 releaseChannels = EnumSet.of(Channel.RELEASE)

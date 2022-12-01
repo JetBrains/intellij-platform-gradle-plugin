@@ -16,13 +16,12 @@ interface MavenRepository : PluginsRepository {
 
     var resolvedDependency: Boolean
 
-    fun getPluginFile(project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String, context: String?): File? =
+    fun getPluginFile(project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String, context: String?) =
         runCatching {
             project.objects.newInstance<DependenciesDownloader>()
                 .downloadFromRepository(context, { dependency }, { repository })
-                .first().also {
-                    resolvedDependency = true
-                }
+                .first()
+                .also { resolvedDependency = true }
         }.getOrNull()
 
     fun postResolve(project: Project, func: () -> Unit) {

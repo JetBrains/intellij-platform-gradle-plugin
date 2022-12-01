@@ -122,7 +122,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.123' 
-
+            
             intellij {
                 pluginName = 'myPluginName'
             }
@@ -197,7 +197,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             dependencies { 
                 implementation 'joda-time:joda-time:2.8.1'
             }
-
+            
             intellij { 
                 pluginName = 'myPluginName' 
                 plugins = ['copyright'] 
@@ -282,7 +282,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.123'
-
+            
             intellij {
                 pluginName = 'myPluginName'
                 plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
@@ -306,7 +306,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
             import org.asciidoc.intellij.AsciiDoc;
-
+            
             class App {
                 public static void main(@NotNull String[] strings) {
                     System.out.println(AsciiDoc.class.getName());
@@ -358,7 +358,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.123'
-
+            
             intellij {
                 pluginName = 'myPluginName'
             } 

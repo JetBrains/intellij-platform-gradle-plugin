@@ -2,25 +2,31 @@
 
 package org.jetbrains.intellij.dependency
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.base.utils.isZip
 import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
+import org.gradle.api.provider.Provider
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
-import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJIvyDescriptorFileGenerator
+import org.jetbrains.intellij.createPlugin
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.warn
 import java.io.File
+import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Inject
 
 abstract class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
-    private val ideaDependency: IdeaDependency?,
+    private val ideaDependencyProvider: Provider<IdeaDependency>,
     private val pluginsRepositories: List<PluginsRepository>,
     private val archiveUtils: ArchiveUtils,
     private val context: String?,
@@ -32,6 +38,8 @@ abstract class PluginDependencyManager @Inject constructor(
     private var ivyArtifactRepository: IvyArtifactRepository? = null
 
     fun resolve(project: Project, dependency: PluginDependencyNotation): PluginDependency? {
+        val ideaDependency = ideaDependencyProvider.get() // TODO fix
+
         if (dependency.version.isNullOrEmpty() && dependency.channel.isNullOrEmpty()) {
             if (Paths.get(dependency.id).isAbsolute) {
                 return externalPluginDependency(File(dependency.id))
@@ -99,6 +107,8 @@ abstract class PluginDependencyManager @Inject constructor(
         dir.listFiles()?.singleOrNull { it.isDirectory } ?: throw BuildException("Single directory expected in: $dir", null)
 
     private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
+        val ideaDependency = ideaDependencyProvider.get() // TODO fix
+
         if (ivyArtifactRepository == null) {
             ivyArtifactRepository = project.repositories.ivy {
                 val ivyFileSuffix = plugin.getFqn().substring("${plugin.id}-${plugin.version}".length)
@@ -123,67 +133,21 @@ abstract class PluginDependencyManager @Inject constructor(
     }
 
     private fun generateIvyFile(plugin: PluginDependency) {
+        val ideaDependency = ideaDependencyProvider.get() // TODO fix
+
         val baseDir = when {
             plugin.builtin -> plugin.artifact
             else -> plugin.artifact.parentFile
         }
         val pluginFqn = plugin.getFqn()
         val groupId = groupId(plugin.channel)
-        val ivyFile = File(File(cacheDirectoryPath, groupId), "$pluginFqn.xml").takeUnless { it.exists() } ?: return
+        val ivyFile = Path.of(cacheDirectoryPath).resolve(groupId).resolve("$pluginFqn.xml").takeUnless { it.exists() } ?: return
         val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
-        IntelliJIvyDescriptorFileGenerator(identity).apply {
-            addConfiguration(DefaultIvyConfiguration("default"))
-            addCompileArtifacts(plugin, baseDir, groupId)
-            addSourceArtifacts(plugin, baseDir, groupId)
-            writeTo(ivyFile)
-        }
-    }
-
-    private fun IntelliJIvyDescriptorFileGenerator.addCompileArtifacts(
-        plugin: PluginDependency,
-        baseDir: File,
-        groupId: String,
-    ) {
-        val compileConfiguration = DefaultIvyConfiguration("compile")
-        addConfiguration(compileConfiguration)
-        plugin.jarFiles.forEach {
-            addArtifact(IntellijIvyArtifact.createJarDependency(it, compileConfiguration.name, baseDir, groupId))
-        }
-        plugin.classesDirectory?.let {
-            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, compileConfiguration.name, baseDir, groupId))
-        }
-        plugin.metaInfDirectory?.let {
-            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, compileConfiguration.name, baseDir, groupId))
-        }
-    }
-
-    private fun IntelliJIvyDescriptorFileGenerator.addSourceArtifacts(
-        plugin: PluginDependency,
-        baseDir: File,
-        groupId: String,
-    ) {
-        val sourcesConfiguration = DefaultIvyConfiguration("sources")
-        addConfiguration(sourcesConfiguration)
-        if (plugin.sourceJarFiles.isNotEmpty()) {
-            plugin.sourceJarFiles.forEach {
-                addArtifact(IntellijIvyArtifact.createJarDependency(it, sourcesConfiguration.name, baseDir, groupId))
-            }
-        } else {
-            ideaDependency?.sourceZipFiles?.let {
-                IdePluginSourceZipFilesProvider.getSourceZips(ideaDependency, plugin.platformPluginId)?.let {
-                    addArtifact(
-                        IntellijIvyArtifact.createZipDependency(it, sourcesConfiguration.name, ideaDependency.classes)
-                    )
-                }
-            }
-        }
-        // see: https://github.com/JetBrains/gradle-intellij-plugin/issues/153
-        ideaDependency?.sources?.takeIf { plugin.builtin }?.let {
-            val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
-            val artifact = IntellijIvyArtifact(it, name, "jar", "sources", "sources")
-            artifact.conf = sourcesConfiguration.name
-            addArtifact(artifact)
-        }
+        IntelliJIvyDescriptorFileGenerator(identity)
+            .addConfiguration(DefaultIvyConfiguration("default"))
+            .addCompileArtifacts(plugin, baseDir, groupId)
+            .addSourceArtifacts(ideaDependency, plugin, baseDir, groupId)
+            .writeTo(ivyFile)
     }
 
     private fun externalPluginDependency(artifact: File, channel: String? = null, maven: Boolean = false): PluginDependency? {

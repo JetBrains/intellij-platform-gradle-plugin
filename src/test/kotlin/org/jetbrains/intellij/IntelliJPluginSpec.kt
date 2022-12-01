@@ -3,7 +3,7 @@
 package org.jetbrains.intellij
 
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
-import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
@@ -92,7 +92,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         writeTestFile()
 
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             val sandboxPath = adjustWindowsPath("${buildDirectory.canonicalPath}/idea-sandbox")
             val testCommand = parseCommand(it.output)
 
@@ -339,6 +339,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    // FIXME: test takes too long
     @Test
     fun `add bundled zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
@@ -370,6 +371,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
+    // FIXME: test takes too long
     @Test
     fun `add external zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
@@ -445,6 +447,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    // FIXME: test takes too long
     @Test
     fun `add bundled zip plugin source artifacts from IDE_ROOT-lib-src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
@@ -511,7 +514,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             assertEquals(
                 "com.intellij.mytestid",
                 parseCommand(it.output).properties["idea.required.plugins.id"],
@@ -532,7 +535,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             parseCommand(it.output).let { properties ->
                 assertEquals("200m", properties.xms)
                 assertEquals("500m", properties.xmx)
@@ -552,7 +555,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
             """.trimIndent()
         )
-        build(JavaPlugin.TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info").let {
             assertPathParameters(parseCommand(it.output), sandboxPath)
         }
     }
@@ -590,10 +593,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun File.appendPrintMainClassPathsTasks() {
         this.groovy(
             """
-            task printMainRuntimeClassPath { 
+            task printMainRuntimeClassPath {
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
             }
-            task printMainCompileClassPath { 
+            task printMainCompileClassPath {
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
             }
             """.trimIndent()
@@ -611,10 +616,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun File.appendPrintClassPathsTasks(sourceSetName: String) {
         this.groovy(
             """
-            task print${sourceSetName.capitalize()}RuntimeClassPath { 
+            task print${sourceSetName.capitalize()}RuntimeClassPath {
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'runtimeOnly: ' + sourceSets.$sourceSetName.runtimeClasspath.asPath }
             }
             task print${sourceSetName.capitalize()}CompileClassPath { 
+                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'implementation: ' + sourceSets.$sourceSetName.compileClasspath.asPath }
             }
             """.trimIndent()
@@ -663,10 +670,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
                 import org.jetbrains.intellij.IntelliJPluginConstants
-
+                
                 task printPluginSourceArtifacts {
                     dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
-
+                
                     doLast {
                         def pluginComponentId = configurations.compileClasspath
                             .resolvedConfiguration.lenientConfiguration
@@ -675,7 +682,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                             .flatten()
                             .collect { it.id.componentIdentifier }
                             .find { it.displayName.startsWith("$pluginComponentId") }
-        
+                
                     dependencies.createArtifactResolutionQuery()
                         .forComponents([pluginComponentId])
                         .withArtifacts(JvmLibrary.class, SourcesArtifact.class)

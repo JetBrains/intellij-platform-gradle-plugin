@@ -16,8 +16,9 @@ import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPlugin.COMPILE_JAVA_TASK_NAME
+import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.api.plugins.PluginInstantiationException
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
@@ -29,7 +30,6 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.plugins.ide.idea.model.IdeaProject
-import org.gradle.tooling.BuildException
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
@@ -61,6 +61,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID
+import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
@@ -106,6 +107,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -142,7 +145,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             }
         }
 
-        val intellijExtension = project.extensions.create<IntelliJPluginExtension>(EXTENSION_NAME).apply {
+        val extension = project.extensions.create<IntelliJPluginExtension>(EXTENSION_NAME).apply {
             version.convention(project.provider {
                 if (!localPath.isPresent) {
                     throw GradleException("The value for the 'intellij.version' property was not specified, see: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#intellij-extension-version")
@@ -156,16 +159,19 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sameSinceUntilBuild.convention(false)
             instrumentCode.convention(true)
             sandboxDir.convention(
-                project.layout.buildDirectory.dir(DEFAULT_SANDBOX).map {
-                    it.asFile.canonicalPath
-                })
+                project.layout.buildDirectory
+                    .dir(DEFAULT_SANDBOX)
+                    .map { it.asFile.canonicalPath }
+            )
             intellijRepository.convention(DEFAULT_INTELLIJ_REPOSITORY)
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
             type.convention(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
         }
 
-        configureTasks(project, intellijExtension)
+        val ideaDependencyProvider = prepareIdeaDependencyProvider(project, extension)
+        configureDependencies(project, extension, ideaDependencyProvider)
+        configureTasks(project, extension, ideaDependencyProvider)
     }
 
     private fun checkGradleVersion(project: Project) {
@@ -182,7 +188,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             return
         }
         try {
-            val version = getCurrentVersion()?.let(Version::parse) ?: Version()
+            val version = getCurrentVersion()
+                ?.let(Version::parse)
+                .or { Version() }
             val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, GITHUB_REPOSITORY)
             if (version < Version.parse(latestVersion)) {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
@@ -192,35 +200,36 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureTasks(project: Project, extension: IntelliJPluginExtension) {
+    private fun configureTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring plugin")
         project.tasks.withType<RunIdeBase>().configureEach {
-            prepareConventionMappingsForRunIdeTask(project, extension, PREPARE_SANDBOX_TASK_NAME)
+            prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, PREPARE_SANDBOX_TASK_NAME)
         }
         project.tasks.withType<RunIdeForUiTestTask>().configureEach {
-            prepareConventionMappingsForRunIdeTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+            prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
         }
-        configureSetupDependenciesTask(project, extension)
-        configureClassPathIndexCleanupTask(project)
-        configurePatchPluginXmlTask(project, extension)
+
+        configureSetupDependenciesTask(project, ideaDependencyProvider)
+        configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
+        configurePatchPluginXmlTask(project, extension, ideaDependencyProvider)
         configureRobotServerDownloadTask(project)
-        configurePrepareSandboxTasks(project, extension)
+        configurePrepareSandboxTasks(project, extension, ideaDependencyProvider)
         configureListProductsReleasesTask(project, extension)
-        configureListBundledPluginsTask(project)
+        configureListBundledPluginsTask(project, ideaDependencyProvider)
         configurePluginVerificationTask(project)
         configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
-        configureRunPluginVerifierTask(project, extension)
         configureBuildSearchableOptionsTask(project)
         configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
+        configureRunPluginVerifierTask(project, extension)
         configureSignPluginTask(project)
         configureProguardTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
-        configureInstrumentation(project, extension)
-        configureVerifyPluginConfigurationTask(project)
+        configureInstrumentation(project, extension, ideaDependencyProvider)
+        configureVerifyPluginConfigurationTask(project, ideaDependencyProvider)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
         project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
@@ -234,20 +243,143 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
 
         project.afterEvaluate {
-            configureProjectAfterEvaluate(this, extension)
+            configureProjectAfterEvaluate(this, extension, ideaDependencyProvider)
         }
     }
 
-    private fun configureProjectAfterEvaluate(project: Project, extension: IntelliJPluginExtension) {
+    private fun prepareIdeaDependencyProvider(project: Project, extension: IntelliJPluginExtension) = project.provider {
+        val configureDefaultDependencies = extension.configureDefaultDependencies.get()
+        val downloadSources = extension.downloadSources.get()
+        val extraDependencies = extension.extraDependencies.get()
+        val ideaDependencyCachePath = extension.ideaDependencyCachePath.orNull.orEmpty()
+        val intellijRepository = extension.intellijRepository.get()
+        val localPath = extension.localPath.orNull
+        val localSourcesPath = extension.localSourcesPath.orNull
+        val type = extension.getVersionType().orNull
+        val version = extension.getVersionNumber().orNull
+
+        val ideaConfiguration = project.configurations.getByName(IDEA_CONFIGURATION_NAME)
+
+        val dependencyManager = project.objects.newInstance<IdeaDependencyManager>(
+            intellijRepository,
+            ideaDependencyCachePath,
+            archiveUtils,
+            dependenciesDownloader,
+            context,
+        )
+
+        val ideaDependency = when {
+            localPath != null && version != null -> {
+                throw GradleException("Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present.")
+            }
+
+            version != null && type != null -> {
+                info(context, "Using IDE from remote repository")
+                dependencyManager.resolveRemote(project, version, type, downloadSources, extraDependencies)
+            }
+
+            localPath != null -> {
+                info(context, "Using path to locally installed IDE: $localPath")
+                dependencyManager.resolveLocal(project, localPath, localSourcesPath)
+            }
+
+            else -> {
+                throw GradleException("Either 'intellij.localPath' or 'intellij.version' must be specified")
+            }
+        }
+
+        if (configureDefaultDependencies && ideaConfiguration.dependencies.isEmpty()) {
+            info(context, "${ideaDependency.buildNumber} is used for building")
+
+            dependencyManager.register(project, ideaDependency, ideaConfiguration.dependencies)
+            ideaConfiguration.resolve()
+
+            if (!ideaDependency.extraDependencies.isEmpty()) {
+                info(context, "Note: ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually")
+            }
+        } else {
+            info(context, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
+        }
+
+        ideaDependency
+    }
+
+    private fun configureDependencies(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
+        val idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
+            .setVisible(false)
+
+        val ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
+            .setVisible(false)
+            .withDependencies {
+                configurePluginDependencies(project, ideaDependencyProvider, extension, this)
+            }
+
+        val defaultDependencies = project.configurations.create(INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME)
+            .setVisible(false)
+            .withDependencies {
+                add(
+                    project.dependencies.create(
+                        group = "org.jetbrains",
+                        name = "annotations",
+                        version = ANNOTATIONS_DEPENDENCY_VERSION,
+                    )
+                )
+            }
+
+        val performanceTest = project.configurations.create(PERFORMANCE_TEST_CONFIGURATION_NAME)
+            .setVisible(false)
+            .withDependencies {
+                val resolver = project.objects.newInstance<PluginDependencyManager>(
+                    project.gradle.gradleUserHomeDir.canonicalPath,
+                    ideaDependencyProvider,
+                    extension.getPluginsRepositories(),
+                    archiveUtils,
+                    context,
+                )
+
+
+                // Check that `runIdePerformanceTest` task was launched
+                // Check that `performanceTesting.jar` is absent (that means it's community version)
+                // Check that user didn't pass custom version of the performance plugin
+                if (
+                    RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
+                    && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
+                ) {
+                    val bundledPlugins = BuiltinPluginsRegistry.resolveBundledPlugins(ideaDependencyProvider.get().classes, context)
+                    if (!bundledPlugins.contains(PERFORMANCE_PLUGIN_ID)) {
+                        val buildNumber = ideaDependencyProvider.get().buildNumber
+                        val resolvedPlugin = resolveLatestPluginUpdate(PERFORMANCE_PLUGIN_ID, buildNumber)
+                            ?: throw BuildException("No suitable plugin update found for $PERFORMANCE_PLUGIN_ID:$buildNumber")
+
+                        val plugin = resolver.resolve(project, resolvedPlugin)
+                            ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" })
+
+                        configurePluginDependency(project, plugin, extension, this, resolver)
+                    }
+                }
+            }
+
+        fun Configuration.extend() = extendsFrom(defaultDependencies, idea, ideaPlugins, performanceTest)
+
+        with(project.configurations) {
+            getByName(COMPILE_ONLY_CONFIGURATION_NAME).extend()
+            getByName(TEST_IMPLEMENTATION_CONFIGURATION_NAME).extend()
+            project.pluginManager.withPlugin("java-test-fixtures") {
+                getByName("testFixturesCompileOnly").extend()
+            }
+        }
+    }
+
+    private fun configureProjectAfterEvaluate(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         project.subprojects.forEach { subproject ->
             if (subproject.plugins.findPlugin(IntelliJPlugin::class) == null) {
                 subproject.extensions.findByType<IntelliJPluginExtension>()?.let {
-                    configureProjectAfterEvaluate(subproject, it)
+                    configureProjectAfterEvaluate(subproject, it, ideaDependencyProvider)
                 }
             }
         }
 
-        configureTestTasks(project, extension)
+        configureTestTasks(project, extension, ideaDependencyProvider)
     }
 
     private fun verifyJavaPluginDependency(project: Project, ideaDependency: IdeaDependency, plugins: List<Any>) {
@@ -301,7 +433,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectPluginTasksDependency(dependency: Project, taskProvider: TaskProvider<PrepareSandboxTask>) {
         // invoke before tasks graph is ready
         if (dependency.plugins.findPlugin(IntelliJPlugin::class) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}", null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}")
         }
         dependency.tasks.named(PREPARE_SANDBOX_TASK_NAME) {
             taskProvider.get().dependsOn(this)
@@ -311,7 +443,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureProjectPluginDependency(project: Project, dependency: Project, dependencies: DependencySet, extension: IntelliJPluginExtension) {
         // invoke on demand, when plugins artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin::class) == null) {
-            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}", null)
+            throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}")
         }
         dependencies.add(project.dependencies.create(dependency))
 
@@ -329,10 +461,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configurePatchPluginXmlTask(project: Project, extension: IntelliJPluginExtension) {
+    private fun configurePatchPluginXmlTask(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring patch plugin.xml task")
 
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
+        val buildNumberProvider = ideaDependencyProvider.map { it.buildNumber }
 
         project.tasks.register<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
@@ -352,7 +484,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
             sinceBuild.convention(project.provider {
                 if (extension.updateSinceUntilBuild.get()) {
-                    val ideVersion = IdeVersion.createIdeVersion(setupDependenciesTaskProvider.get().idea.get().buildNumber)
+                    val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                     "${ideVersion.baselineVersion}.${ideVersion.build}"
                 } else {
                     null
@@ -363,24 +495,22 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     if (extension.sameSinceUntilBuild.get()) {
                         "${sinceBuild.get()}.*"
                     } else {
-                        val ideVersion = IdeVersion.createIdeVersion(setupDependenciesTaskProvider.get().idea.get().buildNumber)
+                        val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                         "${ideVersion.baselineVersion}.*"
                     }
                 } else {
                     null
                 }
             })
-
-            dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
         }
     }
 
-    private fun configurePrepareSandboxTasks(project: Project, extension: IntelliJPluginExtension) {
+    private fun configurePrepareSandboxTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
-        configurePrepareSandboxTask(project, extension, PREPARE_SANDBOX_TASK_NAME, "")
-        configurePrepareSandboxTask(project, extension, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
-        configurePrepareSandboxTask(project, extension, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest") {
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_SANDBOX_TASK_NAME, "")
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest") {
             it.from(downloadPluginTaskProvider.flatMap { downloadPluginTask ->
                 downloadPluginTask.outputDir
             })
@@ -418,20 +548,18 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configurePrepareSandboxTask(
         project: Project,
         extension: IntelliJPluginExtension,
+        ideaDependencyProvider: Provider<IdeaDependency>,
         taskName: String,
         testSuffix: String,
         configure: ((it: PrepareSandboxTask) -> Unit)? = null,
     ) {
         info(context, "Configuring $taskName task")
 
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
-        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
-        val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+        val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
+        val runtimeConfiguration = project.configurations.getByName(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
 
-        val ideaDependencyJarFiles = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-            setupDependenciesTask.idea.map {
-                project.files(it.jarFiles)
-            }
+        val ideaDependencyJarFiles = ideaDependencyProvider.map {
+            project.files(it.jarFiles)
         }
         val jarArchiveFile = jarTaskProvider.flatMap { jarTask ->
             jarTask.archiveFile
@@ -449,21 +577,19 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
         val buildSdk = project.provider {
             extension.localPath.flatMap {
-                setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-                    setupDependenciesTask.idea.map { ideaDependency ->
-                        ideaDependency.classes.let {
-                            ideProductInfo(it)?.run { "$productCode-$projectVersion" }
-                            // Fall back on build number if product-info.json is not present, this is the case
-                            // for recent versions of Android Studio.
-                                ?: ideBuildNumber(it)
-                        }
+                ideaDependencyProvider.map { ideaDependency ->
+                    ideaDependency.classes.let {
+                        ideProductInfo(it)?.run { "$productCode-$projectVersion" }
+                        // Fall back on build number if product-info.json is not present, this is the case
+                        // for recent versions of Android Studio.
+                            ?: ideBuildNumber(it)
                     }
                 }
-            }.orElse(
-                extension.getVersionNumber().zip(extension.getVersionType()) { version, type ->
-                    "$version-$type"
-                }
-            )
+            }.orElse(project.provider {
+                val version = extension.getVersionNumber()
+                val type = extension.getVersionType()
+                "$version-$type"
+            })
         }
 
         jarTaskProvider.configure {
@@ -474,7 +600,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 "Build-JVM" to Jvm.current(),
                 "Version" to projectVersion,
                 "Build-Plugin" to PLUGIN_NAME,
-                "Build-Plugin-Version" to (getCurrentVersion() ?: "0.0.0"),
+                "Build-Plugin-Version" to getCurrentVersion().or("0.0.0"),
                 "Build-OS" to OperatingSystem.current(),
                 "Build-SDK" to buildSdk.get(),
             )
@@ -498,7 +624,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 extension.getPluginDependenciesList(project)
             })
 
-
             intoChild(pluginName.map { "$it/lib" })
                 .from(runtimeConfigurationFiles.map { files ->
                     val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
@@ -514,9 +639,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     name = ensureName(file.toPath())
                 }
 
-            dependsOn(JavaPlugin.JAR_TASK_NAME)
             dependsOn(runtimeConfiguration)
-            dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
+            dependsOn(JAR_TASK_NAME)
 
             configure?.invoke(this)
         }.let { taskProvider ->
@@ -561,8 +685,17 @@ abstract class IntelliJPlugin : Plugin<Project> {
             productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
                 listProductsReleasesTask.outputFile.asFile
             })
-            ides.convention(ideVersions.map {
-                it
+            ides.convention(ideVersions.map { ideVersions ->
+                val userHome = Path.of(System.getProperty("user.home"))
+                val downloadPath = with(downloadDir.get()) {
+                    when {
+                        startsWith("~/") -> userHome.resolve(removePrefix("~/"))
+                        equals("~") -> userHome
+                        else -> Path.of(this)
+                    }
+                }
+
+                ideVersions
                     .ifEmpty {
                         when {
                             localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
@@ -571,12 +704,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
                     .orEmpty()
                     .map { ideVersion ->
-                        val downloadDir = File(downloadDir.get())
                         val context = logCategory()
 
-                        resolveIdePath(ideVersion, downloadDir, context) { type, version, buildType ->
+                        resolveIdePath(ideVersion, downloadPath, context) { type, version, buildType ->
                             val name = "$type-$version"
-                            val ideDir = downloadDir.resolve(name)
+                            val ideDir = downloadPath.resolve(name)
                             info(context, "Downloading IDE '$name' to: $ideDir")
 
                             val url = resolveIdeUrl(type, version, buildType, context)
@@ -600,13 +732,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 }).first()
 
                                 debug(context, "IDE downloaded, extracting...")
-                                archiveUtils.extract(ideArchive, ideDir, context)
-                                ideDir.listFiles()?.let { files ->
-                                    files.filter(File::isDirectory).forEach { container ->
-                                        container.listFiles()?.forEach { file ->
-                                            file.renameTo(ideDir.resolve(file.name))
+                                archiveUtils.extract(ideArchive, ideDir.toFile(), context)
+                                ideDir.listFiles().let { files ->
+                                    files.filter { it.isDirectory }.forEach { container ->
+                                        container.listFiles().forEach { file ->
+                                            Files.move(file, ideDir.resolve(file.simpleName))
                                         }
-                                        container.deleteRecursively()
+                                        container.forceRemoveDirectory()
                                     }
                                 }
                             } catch (e: Exception) {
@@ -616,7 +748,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                             debug(context, "IDE extracted to: $ideDir")
                             ideDir
                         }
-
                     }.let { files -> project.files(files) }
             })
             verifierPath.convention(project.provider {
@@ -680,10 +811,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureVerifyPluginConfigurationTask(project: Project) {
+    private fun configureVerifyPluginConfigurationTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring plugin configuration verification task")
 
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
         val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME)
         val compileJavaTaskProvider = project.tasks.named<JavaCompile>(COMPILE_JAVA_TASK_NAME)
@@ -699,11 +829,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
             group = PLUGIN_GROUP_NAME
             description = "Checks if Java and Kotlin compilers configuration meet IntelliJ SDK requirements"
 
-            platformBuild.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTaskProvider ->
-                setupDependenciesTaskProvider.idea.map { it.buildNumber }
+            platformBuild.convention(ideaDependencyProvider.map {
+                it.buildNumber
             })
-            platformVersion.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTaskProvider ->
-                setupDependenciesTaskProvider.idea.map { it.version }
+            platformVersion.convention(ideaDependencyProvider.map {
+                it.version
             })
             pluginXmlFiles.convention(patchPluginXmlTaskProvider.flatMap { patchPluginXmlTask ->
                 patchPluginXmlTask.outputFiles
@@ -737,7 +867,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
             }
 
             dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
-            dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
         }
     }
 
@@ -819,23 +948,31 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun RunIdeBase.prepareConventionMappingsForRunIdeTask(project: Project, extension: IntelliJPluginExtension, prepareSandBoxTaskName: String) {
+    private fun RunIdeBase.prepareConventionMappingsForRunIdeTask(
+        project: Project,
+        extension: IntelliJPluginExtension,
+        ideaDependencyProvider: Provider<IdeaDependency>,
+        prepareSandBoxTaskName: String
+    ) {
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
 
         val taskContext = logCategory()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
-        ideDir.convention(setupDependenciesTaskProvider.get().idea.map { project.file(it.classes.path) })
+        ideDir.convention(ideaDependencyProvider.map {
+            project.file(it.classes.path)
+        })
         requiredPluginIds.convention(project.provider {
             pluginIds
         })
-        configDir.convention(prepareSandboxTaskProvider.get().configDir.map { project.file(it) })
+        configDir.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+            prepareSandboxTask.configDir.map { project.file(it) }
+        })
         pluginsDir.convention(prepareSandboxTaskProvider.map { prepareSandboxTask ->
             project.layout.projectDirectory.dir(prepareSandboxTask.destinationDir.path)
         })
-        systemDir.convention(project.provider {
-            project.file("${extension.sandboxDir.get()}/system")
+        systemDir.convention(extension.sandboxDir.map {
+            project.file("$it/system")
         })
         autoReloadPlugins.convention(ideDir.map {
             val number = ideBuildNumber(it)
@@ -859,8 +996,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 ideDir = ideDir.orNull,
             )
         })
-
-        dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
     }
 
     private fun configureJarSearchableOptionsTask(project: Project) {
@@ -889,10 +1024,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension) {
+    private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring compile tasks")
 
-        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+        val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
 
         if (extension.instrumentCode.get()) {
             jarTaskProvider.configure { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
@@ -917,8 +1052,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 description = "Code instrumentation task."
                 group = PLUGIN_GROUP_NAME
 
-                val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
-                val setupDependenciesTask = setupDependenciesTaskProvider.get()
                 val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
                 sourceDirs.from(project.provider {
@@ -938,9 +1071,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 sourceSetCompileClasspath.from(project.provider {
                     sourceSet.compileClasspath
                 })
-                compilerVersion.convention(project.provider {
-                    val ideaDependency = setupDependenciesTask.idea.get()
-                    val productInfo = ideProductInfo(ideaDependency.classes)
+                compilerVersion.convention(ideaDependencyProvider.map {
+                    val productInfo = ideProductInfo(it.classes)
 
                     val version = extension.getVersionNumber().orNull.orEmpty()
                     val type = extension.getVersionType().orNull.orEmpty()
@@ -955,7 +1087,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     when {
                         localPath.isNotBlank() || !version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> {
                             val eapSuffix = RELEASE_SUFFIX_EAP.takeIf { productInfo?.versionSuffix == "EAP" }.orEmpty()
-                            IdeVersion.createIdeVersion(ideaDependency.buildNumber).stripExcessComponents().asStringWithoutProductCode() + eapSuffix
+                            IdeVersion.createIdeVersion(it.buildNumber).stripExcessComponents().asStringWithoutProductCode() + eapSuffix
                         }
 
                         version == DEFAULT_IDEA_VERSION && types.contains(type) -> {
@@ -963,6 +1095,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                             } ?: version
                         }
+
                         else -> {
                             val prefix = when (type) {
                                 PLATFORM_TYPE_CLION -> "CLION-"
@@ -975,13 +1108,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         }
                     }
                 })
-                ideaDependency.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-                    setupDependenciesTask.idea
-                })
-                javac2.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-                    setupDependenciesTask.idea.map {
-                        it.classes.resolve("lib/javac2.jar")
-                    }
+                ideaDependency.convention(ideaDependencyProvider)
+                javac2.convention(ideaDependencyProvider.map {
+                    it.classes.resolve("lib/javac2.jar")
                 })
                 compilerClassPathFromMaven.convention(compilerVersion.map { compilerVersion ->
                     if (compilerVersion == DEFAULT_IDEA_VERSION || Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
@@ -1060,7 +1189,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                     )
                                 }
                             },
-                        ).asSequence().mapNotNull { it() }.firstOrNull() ?: emptyList()
+                        ).asSequence().mapNotNull { it() }.firstOrNull().orEmpty()
                     } else {
                         warn(
                             logCategory(),
@@ -1073,7 +1202,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 outputDir.convention(setupInstrumentCodeTaskProvider.get().instrumentedDir.map { it.dir(name) })
 
                 dependsOn(sourceSet.classesTaskName)
-                dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
                 dependsOn(SETUP_INSTRUMENT_CODE_TASK_NAME)
                 onlyIf { instrumentCodeProvider.get() }
             }
@@ -1097,6 +1225,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 doLast { classesDirs.setFrom(outputDir.get()) }
 
                 dependsOn(instrumentTask)
+                finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
             }
 
             // Ensure that our task is invoked when the source set is built
@@ -1104,28 +1233,23 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension) {
+    private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring tests tasks")
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(RUN_IDE_TASK_NAME)
         val prepareTestingSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_TESTING_SANDBOX_TASK_NAME)
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
-        val buildNumberProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-            setupDependenciesTask.idea.map {
-                it.buildNumber
-            }
+        val buildNumberProvider = ideaDependencyProvider.map {
+            it.buildNumber
         }
         val ideDirProvider = runIdeTaskProvider.flatMap { runIdeTask ->
             runIdeTask.ideDir
         }
 
-        val ideaDependencyLibrariesProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-            setupDependenciesTask.idea
-                .map { it.classes }
-                .map { project.files("$it/lib/resources.jar", "$it/lib/idea.jar", "$it/lib/app.jar") }
-        }
+        val ideaDependencyLibrariesProvider = ideaDependencyProvider
+            .map { it.classes }
+            .map { project.files("$it/lib/resources.jar", "$it/lib/idea.jar", "$it/lib/app.jar") }
 
         val sandboxDirProvider = extension.sandboxDir.map {
             project.file(it)
@@ -1153,6 +1277,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val ideaPluginsConfigurationFiles = project.provider {
             project.files(project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).resolve())
         }
+        val ideaClasspathFiles = ideDirProvider.map {
+            project.files(getIdeaClasspath(it))
+        }
 
         testTasks.configureEach {
             enableAssertions = true
@@ -1178,12 +1305,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 .withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class)
 
-            dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
             dependsOn(PREPARE_TESTING_SANDBOX_TASK_NAME)
             finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
             doFirst {
-                jvmArgs = getIdeJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
+                jvmArgs = getIdeaJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
                 classpath += ideaDependencyLibrariesProvider.get()
                 classpath -= classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
 
@@ -1194,6 +1320,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
                 // Add source roots to the classpath.
                 classpath += sourceSetsOutputs.get()
+                classpath += ideaClasspathFiles.get()
+
 
                 systemProperties(
                     getIdeaSystemProperties(
@@ -1217,6 +1345,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
                             ?.joinToString("${File.pathSeparator},") { it.path }
                             .orEmpty(),
                     )
+                }
+
+                if (ideVersion.baselineVersion >= 221) {
+                    systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
                 }
             }
         }
@@ -1409,26 +1541,24 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sinceBuild.convention(patchPluginXmlTaskProvider.flatMap { it.sinceBuild })
             untilBuild.convention(patchPluginXmlTaskProvider.flatMap { it.untilBuild })
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
+
+            dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
         }
     }
 
-    private fun configureListBundledPluginsTask(project: Project) {
+    private fun configureListBundledPluginsTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring list bundled plugins task")
-
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
 
         project.tasks.register<ListBundledPluginsTask>(LIST_BUNDLED_PLUGINS_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "List bundled plugins within the currently targeted IntelliJ-based IDE release."
 
-            ideDir.convention(setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-                setupDependenciesTask.idea.map { project.file(it.classes.path) }
+            ideDir.convention(ideaDependencyProvider.map {
+                project.file(it.classes.path)
             })
             outputFile.convention(
                 project.layout.buildDirectory.file("$LIST_BUNDLED_PLUGINS_TASK_NAME.txt")
             )
-
-            dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
         }
     }
 
@@ -1437,7 +1567,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring resources task")
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
 
-        project.tasks.named<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
+        project.tasks.named<ProcessResources>(PROCESS_RESOURCES_TASK_NAME) {
             from(patchPluginXmlTaskProvider) {
                 duplicatesStrategy = DuplicatesStrategy.INCLUDE
                 into("META-INF")
@@ -1445,191 +1575,66 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureSetupDependenciesTask(project: Project, extension: IntelliJPluginExtension) {
+    private fun configureSetupDependenciesTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring setup dependencies task")
 
         project.tasks.register<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "Sets up required dependencies for building and running project."
 
-            var defaultDependenciesResolved = false
-
-            val ideaConfiguration = with(project.configurations) {
-                val idea = create(IDEA_CONFIGURATION_NAME)
-                    .setVisible(false)
-
-                val ideaPlugins = create(IDEA_PLUGINS_CONFIGURATION_NAME)
-                    .setVisible(false)
-                    .apply {
-                        configurePluginDependencies(project, this@register, extension, this)
-                    }
-
-                val defaultDependencies = create(INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME)
-                    .setVisible(false)
-                    .defaultDependencies {
-                        add(
-                            project.dependencies.create(
-                                group = "org.jetbrains",
-                                name = "annotations",
-                                version = ANNOTATIONS_DEPENDENCY_VERSION,
-                            )
-                        )
-                    }
-
-                val performanceTest = create(IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME)
-                    .setVisible(false)
-                    .withDependencies {
-                        // Check that `runIdePerformanceTest` task was launched
-                        // Check that `performanceTesting.jar` is absent (that means it's community version)
-                        // Check that user didn't pass custom version of the performance plugin
-                        if (
-                            RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
-                            && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
-                        ) {
-                            val ideaDependency = this@register.idea.get()
-                            val bundledPlugins = BuiltinPluginsRegistry.resolveBundledPlugins(ideaDependency.classes, context)
-                            if (!bundledPlugins.contains(PERFORMANCE_PLUGIN_ID)) {
-                                val resolver = project.objects.newInstance<PluginDependencyManager>(
-                                    project.gradle.gradleUserHomeDir.canonicalPath,
-                                    ideaDependency,
-                                    extension.getPluginsRepositories(),
-                                    archiveUtils,
-                                    context,
-                                )
-
-                                val buildNumber = ideaDependency.buildNumber
-                                val resolvedPlugin = resolveLatestPluginUpdate(PERFORMANCE_PLUGIN_ID, buildNumber)
-                                    ?: throw BuildException("No suitable plugin update found for $PERFORMANCE_PLUGIN_ID:$buildNumber", null)
-
-                                val plugin = resolver.resolve(project, resolvedPlugin)
-                                    ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" }, null)
-
-                                configurePluginDependency(project, plugin, extension, this, resolver)
-                            }
-                        }
-                    }
-
-                fun Configuration.extend() = extendsFrom(defaultDependencies, idea, ideaPlugins, performanceTest)
-
-                getByName(JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).extend()
-                getByName(JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME).extend()
-                project.pluginManager.withPlugin("java-test-fixtures") {
-                    getByName("testFixturesCompileOnly").extend()
-                }
-                idea
-            }
-
-            idea.convention(project.provider {
-                val dependencyManager = project.objects.newInstance<IdeaDependencyManager>(
-                    extension.intellijRepository.get(),
-                    extension.ideaDependencyCachePath.orNull.orEmpty(),
-                    archiveUtils,
-                    dependenciesDownloader,
-                    context,
-                )
-                val localPath = extension.localPath.orNull
-                val version = extension.getVersionNumber().orNull
-                val type = extension.getVersionType().orNull
-
-                val ideaDependency = when {
-                    localPath != null && version != null -> {
-                        throw GradleException("Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present.")
-                    }
-
-                    version != null && type != null -> {
-                        info(context, "Using IDE from remote repository")
-                        val extraDependencies = extension.extraDependencies.get()
-                        dependencyManager.resolveRemote(
-                            project,
-                            version,
-                            type,
-                            extension.downloadSources.get(),
-                            extraDependencies,
-                        )
-                    }
-
-                    localPath != null -> {
-                        info(context, "Using path to locally installed IDE: $localPath")
-                        dependencyManager.resolveLocal(project, localPath, extension.localSourcesPath.orNull)
-                    }
-
-                    else -> {
-                        throw GradleException("Either 'intellij.localPath' or 'intellij.version' must be specified")
-                    }
-                }
-                if (extension.configureDefaultDependencies.get() && !defaultDependenciesResolved) {
-                    defaultDependenciesResolved = true
-                    info(context, "${ideaDependency.buildNumber} is used for building")
-                    dependencyManager.register(project, ideaDependency, ideaConfiguration.dependencies)
-                    ideaConfiguration.resolve()
-
-                    if (!ideaDependency.extraDependencies.isEmpty()) {
-                        info(
-                            context,
-                            "Note: ${ideaDependency.buildNumber} extra dependencies (${ideaDependency.extraDependencies}) should be applied manually",
-                        )
-                    }
-                } else {
-                    info(context, "IDE ${ideaDependency.buildNumber} dependencies are applied manually")
-                }
-
-                ideaDependency
-            }).finalizeValueOnRead()
+            idea.convention(ideaDependencyProvider)
 
             Jvm.current().toolsJar?.let { toolsJar ->
-                project.dependencies.add(JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
+                project.dependencies.add(RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
             }
         }
     }
 
     private fun configurePluginDependencies(
         project: Project,
-        task: SetupDependenciesTask,
+        ideaDependencyProvider: Provider<IdeaDependency>,
         extension: IntelliJPluginExtension,
-        configuration: Configuration,
+        dependencies: DependencySet,
     ) {
-        configuration.withDependencies {
-            info(context, "Configuring plugin dependencies")
-            val ideaDependency = task.idea.get()
-            val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
-            val resolver = project.objects.newInstance<PluginDependencyManager>(
-                project.gradle.gradleUserHomeDir.canonicalPath,
-                ideaDependency,
-                extension.getPluginsRepositories(),
-                archiveUtils,
-                context,
-            )
-            extension.plugins.get().forEach {
-                info(context, "Configuring plugin: $it")
-                if (it is Project) {
-                    configureProjectPluginDependency(project, it, this, extension)
-                } else {
-                    val pluginDependency = PluginDependencyNotation.parsePluginDependencyString(it.toString())
-                    if (pluginDependency.id.isEmpty()) {
-                        throw BuildException("Failed to resolve plugin: $it", null)
-                    }
-                    val plugin = resolver.resolve(project, pluginDependency)
-                        ?: throw BuildException("Failed to resolve plugin $it", null)
-                    if (!plugin.isCompatible(ideVersion)) {
-                        throw BuildException("Plugin '$it' is not compatible to: ${ideVersion.asString()}", null)
-                    }
-                    configurePluginDependency(project, plugin, extension, this, resolver)
+        val ideaDependency = ideaDependencyProvider.get() // TODO fix
+
+        info(context, "Configuring plugin dependencies")
+        val ideVersion = IdeVersion.createIdeVersion(ideaDependency.buildNumber)
+        val resolver = project.objects.newInstance<PluginDependencyManager>(
+            project.gradle.gradleUserHomeDir.canonicalPath,
+            ideaDependencyProvider,
+            extension.getPluginsRepositories(),
+            archiveUtils,
+            context,
+        )
+        extension.plugins.get().forEach {
+            info(context, "Configuring plugin: $it")
+            if (it is Project) {
+                configureProjectPluginDependency(project, it, dependencies, extension)
+            } else {
+                val pluginDependency = PluginDependencyNotation.parsePluginDependencyString(it.toString())
+                if (pluginDependency.id.isEmpty()) {
+                    throw BuildException("Failed to resolve plugin: $it")
                 }
+                val plugin = resolver.resolve(project, pluginDependency)
+                    ?: throw BuildException("Failed to resolve plugin $it")
+                if (!plugin.isCompatible(ideVersion)) {
+                    throw BuildException("Plugin '$it' is not compatible to: ${ideVersion.asString()}")
+                }
+                configurePluginDependency(project, plugin, extension, dependencies, resolver)
             }
-            if (extension.configureDefaultDependencies.get()) {
-                configureBuiltinPluginsDependencies(project, this, resolver, extension, ideaDependency)
-            }
-            verifyJavaPluginDependency(project, ideaDependency, extension.plugins.get())
-            extension.getPluginsRepositories().forEach {
-                it.postResolve(project, context)
-            }
+        }
+        if (extension.configureDefaultDependencies.get()) {
+            configureBuiltinPluginsDependencies(project, dependencies, resolver, extension, ideaDependency)
+        }
+        verifyJavaPluginDependency(project, ideaDependency, extension.plugins.get())
+        extension.getPluginsRepositories().forEach {
+            it.postResolve(project, context)
         }
     }
 
-    private fun configureClassPathIndexCleanupTask(project: Project) {
-        info(context, "Configuring setup dependencies task")
-
-        val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
+    private fun configureClassPathIndexCleanupTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
+        info(context, "Configuring classpath.index cleanup task")
 
         project.tasks.register<ClasspathIndexCleanupTask>(CLASSPATH_INDEX_CLEANUP_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
@@ -1649,16 +1654,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
             })
 
-            val buildNumberProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
-                setupDependenciesTask.idea.map { it.buildNumber }
+            val buildNumberProvider = ideaDependencyProvider.map {
+                it.buildNumber
             }
 
             onlyIf {
                 val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                 ideVersion.baselineVersion >= 221
             }
-
-            dependsOn(SETUP_DEPENDENCIES_TASK_NAME)
         }
     }
 

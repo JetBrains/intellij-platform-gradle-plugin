@@ -11,20 +11,25 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     SELF_UPDATE_CHECK(true),
     ;
 
-    fun getValue(project: Project) = project.findProperty(toString())?.toString()?.toBoolean() ?: defaultValue
+    fun getValue(project: Project) = project.findProperty(toString())
+        ?.toString()
+        ?.toBoolean()
+        .or { defaultValue }
 
     override fun toString() = name
         .toLowerCase()
         .split('_')
-        .joinToString("") { it.capitalize() }
+        .joinToString("", transform = String::capitalize)
         .decapitalize()
         .let { "$prefix.buildFeature.$it" }
 }
 
 fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
-    feature.getValue(this).apply {
-        when (this) {
-            true -> "Build feature is enabled: $feature"
-            false -> "Build feature is disabled: $feature"
-        }.also { info(logCategory(), it) }
-    }
+    feature
+        .getValue(this)
+        .apply {
+            when (this) {
+                true -> "Build feature is enabled: $feature"
+                false -> "Build feature is disabled: $feature"
+            }.also { info(logCategory(), it) }
+        }

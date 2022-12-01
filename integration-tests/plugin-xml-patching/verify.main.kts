@@ -4,7 +4,7 @@
 
 __FILE__.init {
     runGradleTask("patchPluginXml").let { logs ->
-        logs matchesRegex ":plugin-xml-patching:patchPluginXml .*? completed."
+        logs containsText ":plugin-xml-patching:patchPluginXml"
     }
 
     buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml"

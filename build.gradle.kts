@@ -9,10 +9,13 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.7.10"
-    kotlin("plugin.serialization") version "1.7.10"
-    id("com.gradle.plugin-publish") version "1.0.0"
-    id("org.jetbrains.changelog") version "1.3.1"
+    kotlin("jvm") version "1.7.22"
+    kotlin("plugin.serialization") version "1.7.22"
+    // Fix for "Multiple incompatible variants of org.jetbrains.kotlin:kotlin-gradle-plugin-api:1.7.22 were selected". Should be fixed in 1.8.20
+    // See: https://youtrack.jetbrains.com/issue/KT-54691/Kotlin-Gradle-Plugin-libraries-alignment-platform
+    id("org.jetbrains.kotlin.plugin.sam.with.receiver") version "1.7.22"
+    id("com.gradle.plugin-publish") version "1.1.0"
+    id("org.jetbrains.changelog") version "2.0.0"
     id("org.jetbrains.dokka") version "1.7.10"
 }
 
@@ -32,10 +35,10 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.238") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.245") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.238") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.245") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.28") {
@@ -43,13 +46,13 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.4.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
-    implementation("com.googlecode.plist:dd-plist:1.25")
+    implementation("com.googlecode.plist:dd-plist:1.26")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6")
-    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.10")
+    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation(gradleTestKit())
@@ -185,7 +188,6 @@ publishing {
 
 changelog {
     unreleasedTerm.set("next")
-    version.set("${project.version}")
-    path.set("${project.projectDir}/CHANGES.md")
     groups.set(emptyList())
+    repositoryUrl.set("https://github.com/JetBrains/gradle-intellij-plugin")
 }

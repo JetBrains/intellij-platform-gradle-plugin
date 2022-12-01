@@ -13,14 +13,11 @@ import org.gradle.api.file.FileType
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.tooling.BuildException
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.dependency.IdeaDependency
-import org.jetbrains.intellij.ifFalse
-import org.jetbrains.intellij.info
-import org.jetbrains.intellij.logCategory
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -83,24 +80,34 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
         val instrumentNotNull = prepareNotNullInstrumenting(classpath)
 
         val outputDirPath = outputDir.get().asFile.toPath()
-        val temporaryDirPath = temporaryDir.also {
-            it.mkdirs()
-        }.toPath()
+        val temporaryDirPath = temporaryDir
+            .toPath()
+            .also {
+                it.deleteQuietly()
+                it.createDir()
+            }
 
         inputChanges.getFileChanges(formsDirs).forEach { change ->
             val path = change.file.toPath()
-            val sourceDir = sourceDirs.find { sourceDir ->
-                path.startsWith(sourceDir.toPath())
-            }?.toPath() ?: return@forEach
+            val sourceDir = sourceDirs
+                .find { path.startsWith(it.toPath()) }
+                ?.toPath()
+                ?: return@forEach
             val relativePath = sourceDir.relativize(path)
 
             val compiledClassRelativePath = relativePath.toString().replace(".form", ".class")
-            val compiledClassPath = classesDirs.asFileTree.find {
-                it.endsWith(compiledClassRelativePath)
-            }?.takeIf { it.exists() }?.toPath() ?: return@forEach
-            val instrumentedClassPath = temporaryDirPath.resolve(compiledClassRelativePath).also {
-                it.exists().ifFalse(it::create)
-            }
+            val compiledClassPath = classesDirs.asFileTree
+                .find { it.endsWith(compiledClassRelativePath) }
+                ?.takeIf { it.exists() }
+                ?.toPath()
+                ?: return@forEach
+            val instrumentedClassPath = temporaryDirPath
+                .resolve(compiledClassRelativePath)
+                .also {
+                    it
+                        .exists()
+                        .ifFalse(it::create)
+                }
 
             Files.copy(compiledClassPath, instrumentedClassPath, StandardCopyOption.REPLACE_EXISTING)
         }
@@ -141,8 +148,9 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
     }
 
     // local compiler
-    private fun compilerClassPath() = javac2.orNull?.let {
-        it.takeIf(File::exists)?.let { file ->
+    private fun compilerClassPath() = javac2.orNull
+        ?.takeIf(File::exists)
+        ?.let { file ->
             File("${ideaDependency.get().classes}/lib").listFiles { _, name ->
                 listOf(
                     "jdom.jar",
@@ -156,7 +164,7 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
                 }
             }.orEmpty().filterNotNull() + file
         }
-    } ?: compilerClassPathFromMaven.get()
+        .or { compilerClassPathFromMaven.get() }
 
     private fun prepareNotNullInstrumenting(classpath: List<File>): Boolean {
         try {

@@ -5,6 +5,8 @@
 
 package org.jetbrains.intellij
 
+import com.dd.plist.NSDictionary
+import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
@@ -98,14 +100,19 @@ fun transformXml(document: Document, file: File) {
     }
 }
 
+private fun String.resolveIdeHomeVariable(ideDirectory: File) = this
+    .replace("\$APP_PACKAGE", ideDirectory.canonicalPath)
+    .replace("\$IDE_HOME", ideDirectory.canonicalPath)
+    .replace("%IDE_HOME%", ideDirectory.canonicalPath)
+
 fun getIdeaSystemProperties(
-    ideDirFile: File,
+    ideDirectory: File,
     configDirectory: File,
     systemDirectory: File,
     pluginsDirectory: File,
     requirePluginIds: List<String>,
 ): Map<String, String> {
-    val currentLaunch = ideProductInfo(ideDirFile)?.currentLaunch
+    val currentLaunch = ideProductInfo(ideDirectory)?.currentLaunch
     val result = mapOf(
         "idea.config.path" to configDirectory.canonicalPath,
         "idea.system.path" to systemDirectory.canonicalPath,
@@ -119,42 +126,102 @@ fun getIdeaSystemProperties(
         }
         ?.associate {
             it
+                .resolveIdeHomeVariable(ideDirectory)
                 .substring(2)
                 .split('=')
-                .let { (key, value) ->
-                    key to value
-                        .replace("\$APP_PACKAGE", ideDirFile.canonicalPath)
-                        .replace("\$IDE_HOME", ideDirFile.canonicalPath)
-                        .replace("%IDE_HOME%", ideDirFile.canonicalPath)
-                }
+                .let { (key, value) -> key to value }
         }
         .orEmpty()
 
     val requirePluginProperties = requirePluginIds
         .takeIf(List<String>::isNotEmpty)
         ?.let { mapOf("idea.required.plugins.id" to it.joinToString(",")) }
-        ?: emptyMap()
+        .orEmpty()
 
     return result + currentLaunchProperties + requirePluginProperties
 }
 
-fun getIdeJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
+fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
     val productInfo = ideProductInfo(ideDirectory!!)
-    val defaults = listOf("-Xmx512m", "-Xms256m")
     val bootclasspath = ideDirectory
         .resolve("lib/boot.jar")
         .takeIf { it.exists() }
         ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
         .orEmpty()
-    val vmOptions = productInfo?.currentLaunch?.vmOptionsFilePath
+    val vmOptions = productInfo
+        ?.currentLaunch
+        ?.vmOptionsFilePath
+        ?.removePrefix("../")
         ?.let { ideDirectory.resolve(it).readLines() }
         .orEmpty()
-    val additionalJvmArguments = productInfo?.currentLaunch?.additionalJvmArguments
+    val additionalJvmArguments = productInfo
+        ?.currentLaunch
+        ?.additionalJvmArguments
         ?.filterNot { it.startsWith("-D") }
         ?.takeIf { it.isNotEmpty() }
+        ?.map { it.resolveIdeHomeVariable(ideDirectory) }
         ?: OpenedPackages
 
-    return (defaults + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + options.allJvmArgs).distinct()
+    val defaultHeapSpace = listOf("-Xmx512m", "-Xms256m")
+    val heapSpace = listOfNotNull(
+        options.maxHeapSize?.let { "-Xmx${it}" },
+        options.minHeapSize?.let { "-Xms${it}" },
+    )
+
+    return (defaultHeapSpace + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + heapSpace)
+        .filter { it.isNotBlank() }
+        .distinct()
+}
+
+fun getIdeaClasspath(ideDirFile: File): List<String> {
+    val buildNumber = ideBuildNumber(ideDirFile).split('-').last().let { Version.parse(it) }
+    val build203 = Version.parse("203.0")
+    val build221 = Version.parse("221.0")
+    val build223 = Version.parse("223.0")
+
+    val currentLaunch = ideProductInfo(ideDirFile)?.currentLaunch
+    val infoPlist = ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
+        PropertyListParser.parse(it) as NSDictionary
+    }
+
+    return when {
+        buildNumber > build223 ->
+            currentLaunch
+                ?.bootClassPathJarNames
+                ?: infoPlist
+                    ?.getDictionary("JVMOptions")
+                    ?.getValue("ClassPath")
+                    ?.split(':')
+                    ?.map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
+                    .orEmpty()
+
+        buildNumber > build221 -> listOf(
+            "3rd-party-rt.jar",
+            "util.jar",
+            "util_rt.jar",
+            "jna.jar",
+        )
+
+        buildNumber > build203 -> listOf(
+            "bootstrap.jar",
+            "util.jar",
+            "jdom.jar",
+            "log4j.jar",
+            "jna.jar",
+        )
+
+        else -> listOf(
+            "bootstrap.jar",
+            "extensions.jar",
+            "util.jar",
+            "jdom.jar",
+            "log4j.jar",
+            "jna.jar",
+            "trove4j.jar",
+        )
+    }.map {
+        "${ideDirFile.canonicalPath}/lib/$it"
+    }
 }
 
 fun ideBuildNumber(ideDirectory: File) = (
@@ -174,18 +241,20 @@ fun ideaDir(path: String) = File(path).let {
     it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
 }
 
-fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
+fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }) =
     collectFiles(directory) { it.toPath().isJar() && filter.test(it) }
 
-fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }): Collection<File> =
+fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }) =
     collectFiles(directory) { it.toPath().isZip() && filter.test(it) }
 
-private fun collectFiles(directory: File, filter: Predicate<File>): Collection<File> = when {
-    !directory.isDirectory -> emptyList()
-    else -> FileUtils.listFiles(directory, object : AbstractFileFilter() {
-        override fun accept(file: File) = filter.test(file)
-    }, FalseFileFilter.FALSE)
-}
+private fun collectFiles(directory: File, filter: Predicate<File>) = directory
+    .takeIf { it.isDirectory }
+    ?.let {
+        FileUtils.listFiles(it, object : AbstractFileFilter() {
+            override fun accept(file: File) = filter.test(file)
+        }, FalseFileFilter.FALSE)
+    }
+    .orEmpty()
 
 fun releaseType(version: String) = when {
     version.endsWith(RELEASE_SUFFIX_EAP) ||
@@ -257,6 +326,10 @@ val repositoryVersion: String by lazy {
     )
 }
 
+fun <T> T?.or(other: T): T = this ?: other
+
+fun <T> T?.or(block: () -> T): T = this ?: block()
+
 fun <T> T?.ifNull(block: () -> Unit): T? {
     if (this == null) {
         block()
@@ -270,3 +343,7 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
     }
     return this
 }
+
+fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
+
+fun NSDictionary.getValue(key: String) = this[key].toString()

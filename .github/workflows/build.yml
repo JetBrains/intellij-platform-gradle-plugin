@@ -42,7 +42,7 @@ jobs:
 
   codeInspection:
     name: Code Inspection
-    needs: gradleValidation
+    needs: integrationTests
     uses: ./.github/workflows/reusable-codeInspection.yml
 
   build:

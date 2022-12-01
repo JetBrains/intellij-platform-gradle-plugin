@@ -37,7 +37,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version '1.0'
-
+            
             verifyPlugin {
                 ignoreWarnings = false
             }
@@ -87,7 +87,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version '1.0'
-
+            
             verifyPlugin {
                 ignoreUnacceptableWarnings = true
             }
@@ -138,7 +138,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version '1.0'
-
+            
             verifyPlugin {
                 ignoreUnacceptableWarnings = true
             }
@@ -165,7 +165,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version '1.0'
-
+            
             verifyPlugin {
                 ignoreFailures = true
             }
@@ -192,7 +192,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version '1.0'
-
+            
             verifyPlugin { 
                 ignoreWarnings = false 
             }

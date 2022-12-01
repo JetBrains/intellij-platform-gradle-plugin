@@ -74,7 +74,9 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
      * @return Robot Server version
      */
     internal fun resolveRobotServerPluginVersion(version: String?) =
-        version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+        version
+            ?.takeIf { it != VERSION_LATEST }
+            ?: resolveLatestVersion()
 
     internal fun getDependency(version: String) = when {
         Version.parse(version) >= Version.parse(NEW_ROBOT_SERVER_VERSION) -> NEW_ROBOT_SERVER_DEPENDENCY

@@ -49,8 +49,8 @@ abstract class BuildSearchableOptionsTask : RunIdeBase(false) {
     }
 
     override fun setArgs(applicationArgs: List<String>?) =
-        super.setArgs(traverseUIArgs.union(applicationArgs?.toList() ?: emptyList()))
+        super.setArgs(traverseUIArgs.union(applicationArgs?.toList().orEmpty()))
 
     override fun setArgs(applicationArgs: MutableIterable<*>?) =
-        super.setArgs(traverseUIArgs.union(applicationArgs?.toList() ?: emptyList()))
+        super.setArgs(traverseUIArgs.union(applicationArgs?.toList().orEmpty()))
 }

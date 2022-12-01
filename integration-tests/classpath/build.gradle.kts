@@ -11,6 +11,13 @@ tasks {
         enabled = false
     }
 
+    withType<Test> {
+        configure<JacocoTaskExtension> {
+            isIncludeNoLocationClasses = true
+            excludes = listOf("jdk.internal.*")
+        }
+    }
+
     test {
         // <workaround>
         // apply JUnit compatibility workaround

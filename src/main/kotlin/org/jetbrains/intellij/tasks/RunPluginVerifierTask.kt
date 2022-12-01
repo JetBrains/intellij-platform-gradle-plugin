@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -288,17 +289,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return path to `verifier-cli` jar
      */
-    private fun resolveVerifierPath(): String {
-        val path = verifierPath.orNull
-        if (!path.isNullOrEmpty()) {
-            val verifier = File(path)
-            if (verifier.exists()) {
-                return path
-            }
-        }
-
-        throw InvalidUserDataException("Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
-    }
+    private fun resolveVerifierPath() =
+        verifierPath.orNull
+            ?.let(Path::of)
+            ?.takeIf(Path::exists)
+            ?: throw InvalidUserDataException("Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
 
     /**
      * Resolves the Java Runtime directory.
@@ -363,7 +358,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
      */
-    private fun requiresJava11() = Version.parse(resolveVerifierVersion(verifierVersion.orNull)) >= Version(1, 260)
+    private fun requiresJava11() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 260)
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
@@ -402,7 +397,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @return Plugin Verifier home directory
      */
     @Suppress("DEPRECATION")
-    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir").forUseAtConfigurationTime().map { Path.of(it) }
+    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir")
+        .forUseAtConfigurationTime()
+        .map { Path.of(it) }
         .orElse(providers.environmentVariable("XDG_CACHE_HOME").forUseAtConfigurationTime().map { Path.of(it).resolve("pluginVerifier") })
         .orElse(providers.systemProperty("user.home").forUseAtConfigurationTime().map { Path.of(it).resolve(".cache/pluginVerifier") })
         .orElse(temporaryDir.toPath().resolve("pluginVerifier"))
@@ -423,10 +420,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     internal fun resolveIdePath(
         ideVersion: String,
-        downloadDir: File,
+        downloadPath: Path,
         context: String?,
-        block: (type: String, version: String, buildType: String) -> File,
-    ): String {
+        block: (type: String, version: String, buildType: String) -> Path,
+    ): Path {
         debug(context, "Resolving IDE path for: $ideVersion")
         var (type, version) = ideVersion.trim().split('-', limit = 2) + null
 
@@ -437,11 +434,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         val name = "$type-$version"
-        val ideDir = downloadDir.resolve(name)
+        val ideDirPath = downloadPath.resolve(name)
 
-        if (ideDir.exists()) {
-            debug(context, "IDE already available in: $ideDir")
-            return ideDir.canonicalPath
+        if (ideDirPath.exists()) {
+            debug(context, "IDE already available in: $ideDirPath")
+            return ideDirPath
         }
 
         val buildTypes = when (type) {
@@ -450,9 +447,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         buildTypes.forEach { buildType ->
-            debug(context, "Downloading IDE '$type-$version' from '$buildType' channel to: $downloadDir")
+            debug(context, "Downloading IDE '$type-$version' from '$buildType' channel to: $downloadPath")
             try {
-                return block(type!!, version!!, buildType).canonicalPath.also {
+                return block(type!!, version!!, buildType).also {
                     debug(context, "Resolved IDE '$type-$version' path: $it")
                 }
             } catch (e: IOException) {
