@@ -4,6 +4,7 @@
 
 ### Fixed
 - Fixed "Error: Could not find or load main class" when using older SDK versions
+- Fix launch information could not be found for macOS.[#1230](../../issues/1230)
 
 ## [1.10.0] - 2022-11-17
 
@@ -23,7 +24,6 @@
 - Plugin dependencies not resolved in multi-module project [#1196](../../issues/1196)
 - Finalize instrumentation with `classpathIndexCleanup` run to remove `classpath.index` file which breaks incremental build
 - Misleading message about Kotlin language version [#1156](../../issues/1156)
-- Fix launch information could not be found for macOS.[#1230](../../issues/1230)
 
 ### Changed
 - Set minimum supported Gradle version from `6.7.1` to `6.8`
