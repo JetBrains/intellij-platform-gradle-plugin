@@ -51,7 +51,7 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("com.googlecode.plist:dd-plist:1.26")
 
-    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.6")
+    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7")
     api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
