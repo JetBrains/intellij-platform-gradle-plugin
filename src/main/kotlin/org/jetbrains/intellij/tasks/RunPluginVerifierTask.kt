@@ -378,9 +378,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
         if (teamCityOutputFormat.get()) {
             args.add("-team-city")
         }
-        if (subsystemsToCheck.orNull != null) {
+        subsystemsToCheck.orNull?.let {
             args.add("-subsystems-to-check")
-            args.add(subsystemsToCheck.get())
+            args.add(it)
         }
         if (offline.get()) {
             args.add("-offline")
