@@ -4,7 +4,8 @@
 
 ### Fixed
 - Fixed "Error: Could not find or load main class" when using older SDK versions
-- Fix launch information could not be found for macOS.[#1230](../../issues/1230)
+- Fix launch information could not be found for macOS. [#1230](../../issues/1230)
+- Fixed "Cannot change dependencies of dependency configuration ... after it has been included in dependency resolution" [#1209](../../issues/1209)
 
 ## [1.10.0] - 2022-11-17
 
