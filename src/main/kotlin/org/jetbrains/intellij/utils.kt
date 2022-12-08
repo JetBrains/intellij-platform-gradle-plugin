@@ -29,7 +29,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.JDOMException
@@ -61,7 +61,8 @@ import java.util.function.Predicate
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
 fun mainSourceSet(project: Project): SourceSet = project
-    .extensions.getByType<JavaPluginConvention>()
+    .convention.getPlugin<JavaPluginConvention>()
+//    .extensions.getByType<JavaPluginConvention>() // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
 
 fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
