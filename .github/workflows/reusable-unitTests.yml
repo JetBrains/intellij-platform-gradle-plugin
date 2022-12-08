@@ -7,10 +7,10 @@ env:
 
 jobs:
   baseUnitTest:
-    name: Gradle 7.5.1 @ ubuntu-latest
+    name: Gradle 7.6 @ ubuntu-latest
     uses: ./.github/workflows/reusable-single-unitTest.yml
     with:
-      gradleVersion: 7.5.1
+      gradleVersion: 7.6
       os: ubuntu-latest
       script: |
         sudo rm -rf /usr/share/dotnet
@@ -44,4 +44,4 @@ jobs:
               sudo rm -rf /opt/ghc
         exclude:
           - os: ubuntu-latest
-            gradleVersion: 7.5.1
+            gradleVersion: 7.6
