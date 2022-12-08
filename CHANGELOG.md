@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Changed
+- Set minimum supported Gradle version from `6.8` to `7.1`
+
 ### Fixed
 - Fixed "Error: Could not find or load main class" when using older SDK versions
 - Fix launch information could not be found for macOS. [#1230](../../issues/1230)
