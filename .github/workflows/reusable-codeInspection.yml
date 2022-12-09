@@ -17,4 +17,4 @@ jobs:
           fetch-depth: 0 # only report issues that appeared in a PR
 
       - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v2022.2.4
+        uses: JetBrains/qodana-action@v2022.3.0
