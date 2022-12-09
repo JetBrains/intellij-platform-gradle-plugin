@@ -51,7 +51,7 @@ abstract class PluginDependencyManager @Inject constructor(
                     return PluginDependencyImpl(it.name, dependency.id, builtinPluginVersion, it, true)
                 }
             }
-            throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency?.classes?.canonicalPath}", null)
+            throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency.classes.canonicalPath}", null)
         }
         pluginsRepositories.forEach { repository ->
             repository.resolve(project, dependency, context)?.let {
@@ -113,12 +113,12 @@ abstract class PluginDependencyManager @Inject constructor(
             ivyArtifactRepository = project.repositories.ivy {
                 val ivyFileSuffix = plugin.getFqn().substring("${plugin.id}-${plugin.version}".length)
                 ivyPattern("$cacheDirectoryPath/[organisation]/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
-                ideaDependency?.classes?.let {
+                ideaDependency.classes.let {
                     artifactPattern("$it/plugins/[module]/[artifact](.[ext])") // builtin plugins
                     artifactPattern("$it/[artifact](.[ext])") // plugin sources delivered with IDE
                 }
                 artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
-                if (ideaDependency?.sources != null) {
+                if (ideaDependency.sources != null) {
                     artifactPattern("${ideaDependency.sources.parent}/[artifact]-${ideaDependency.version}(-[classifier]).[ext]")
                 }
             }

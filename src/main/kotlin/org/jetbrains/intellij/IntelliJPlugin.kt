@@ -680,12 +680,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
             productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
                 listProductsReleasesTask.outputFile.asFile
             })
-            ides.convention(ideVersions.map { ideVersions ->
-                val userHome = Path.of(System.getProperty("user.home"))
+            ides.convention(ideVersions.zip(project.providers.systemProperty("user.home")) { ideVersions, userHome ->
+                val userHomePath = Path.of(userHome)
                 val downloadPath = with(downloadDir.get()) {
                     when {
-                        startsWith("~/") -> userHome.resolve(removePrefix("~/"))
-                        equals("~") -> userHome
+                        startsWith("~/") -> userHomePath.resolve(removePrefix("~/"))
+                        equals("~") -> userHomePath
                         else -> Path.of(this)
                     }
                 }

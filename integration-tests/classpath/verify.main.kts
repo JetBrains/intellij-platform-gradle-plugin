@@ -50,11 +50,11 @@ __FILE__.init {
 
     runGradleTask("clean", "build").let { logs ->
         buildDirectory.resolve("jacoco/test.exec").let { jacocoTestExec ->
-            assert(Files.exists(jacocoTestExec)) { "expect that ${jacocoTestExec} exists" }
+            assert(Files.exists(jacocoTestExec)) { "expect that $jacocoTestExec exists" }
         }
 
         buildDirectory.resolve("reports/jacoco.xml").let { jacocoXml ->
-            assert(Files.exists(jacocoXml))  { "expect that ${jacocoXml} exists" }
+            assert(Files.exists(jacocoXml))  { "expect that $jacocoXml exists" }
 
             jacocoXml containsText """
                 <method name="getRandomNumber" desc="()I" line="7">
