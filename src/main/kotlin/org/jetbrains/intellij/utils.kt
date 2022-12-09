@@ -10,9 +10,7 @@ import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
-import com.jetbrains.plugin.structure.base.utils.isJar
-import com.jetbrains.plugin.structure.base.utils.isZip
-import com.jetbrains.plugin.structure.intellij.beans.PluginBean
+import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
@@ -32,7 +30,6 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
-import org.jdom2.JDOMException
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
@@ -47,11 +44,10 @@ import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.model.ProductInfo
 import org.jetbrains.intellij.utils.OpenedPackages
-import org.xml.sax.SAXParseException
 import java.io.File
-import java.io.IOException
 import java.io.StringWriter
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -60,29 +56,24 @@ import java.util.function.Predicate
 
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
-fun mainSourceSet(project: Project): SourceSet = project
+internal fun sourcePluginXmlFiles(project: Project) = project
     .convention.getPlugin<JavaPluginConvention>()
-//    .extensions.getByType<JavaPluginConvention>() // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+    .resources
+    .srcDirs
+    .filterNotNull()
+    .map(File::toPath)
+    .map { it.resolve("META-INF/plugin.xml") }
+    .filter { it.exists() && it.length > 0 }
 
-fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
-    File(it, "META-INF/plugin.xml").takeIf { file -> file.exists() && file.length() > 0 }
-}
-
-fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
-    try {
-        pluginXml.inputStream().use {
-            val document = JDOMUtil.loadDocument(it)
-            return PluginBeanExtractor.extractPluginBean(document)
-        }
-    } catch (e: SAXParseException) {
-        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
-    } catch (e: JDOMException) {
-        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
-    } catch (e: IOException) {
-        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
+internal fun parsePluginXml(pluginXml: Path, logCategory: String?) = runCatching {
+    pluginXml.inputStream().use {
+        val document = JDOMUtil.loadDocument(it)
+        PluginBeanExtractor.extractPluginBean(document)
     }
-    return null
+}.getOrElse {
+    warn(logCategory, "Cannot read: $pluginXml. Skipping", it)
+    null
 }
 
 fun transformXml(document: Document, file: File) {

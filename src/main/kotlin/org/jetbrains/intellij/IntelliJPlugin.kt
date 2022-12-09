@@ -380,13 +380,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun verifyJavaPluginDependency(project: Project, ideaDependency: IdeaDependency, plugins: List<Any>) {
         val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
         if (!hasJavaPluginDependency && File(ideaDependency.classes, "plugins/java").exists()) {
-            sourcePluginXmlFiles(project).forEach { file ->
-                parsePluginXml(file, context)?.dependencies?.forEach {
+            sourcePluginXmlFiles(project).forEach { path ->
+                parsePluginXml(path, context)?.dependencies?.forEach {
                     if (it.dependencyId == "com.intellij.modules.java") {
-                        throw BuildException(
-                            "The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\n Please delete 'depends' tag from '${file.canonicalPath}' or add 'java' plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })",
-                            null
-                        )
+                        throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add 'java' plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })")
                     }
                 }
             }
@@ -469,7 +466,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 project.version.toString()
             })
             pluginXmlFiles.convention(project.provider {
-                sourcePluginXmlFiles(project)
+                sourcePluginXmlFiles(project).map(Path::toFile)
             })
             destinationDir.convention(project.layout.buildDirectory.dir(PLUGIN_XML_DIR_NAME))
             outputFiles.convention(pluginXmlFiles.map {
@@ -947,7 +944,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         project: Project,
         extension: IntelliJPluginExtension,
         ideaDependencyProvider: Provider<IdeaDependency>,
-        prepareSandBoxTaskName: String
+        prepareSandBoxTaskName: String,
     ) {
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
 
