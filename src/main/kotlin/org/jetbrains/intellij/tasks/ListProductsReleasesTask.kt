@@ -19,7 +19,7 @@ import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.or
-import java.nio.file.Paths
+import java.nio.file.Path
 
 abstract class ListProductsReleasesTask : DefaultTask() {
 
@@ -117,7 +117,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             updatePaths.mapNotNull(extractor::fetch)
         }
         val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let { extractor ->
-            Paths.get(androidStudioUpdatePath.get()).let(extractor::fetch)
+            Path.of(androidStudioUpdatePath.get()).let(extractor::fetch)
         } ?: AndroidStudioReleases()
 
         val since = sinceVersion.orNull
