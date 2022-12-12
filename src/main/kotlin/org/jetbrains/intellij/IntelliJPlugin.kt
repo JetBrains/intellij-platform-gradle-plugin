@@ -985,7 +985,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 jbrVersion = jbrVersion.orNull,
                 jbrVariant = jbrVariant.orNull,
                 ideDir = ideDir.orNull,
-            )
+            ).toString()
         })
     }
 

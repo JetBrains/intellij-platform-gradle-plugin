@@ -321,8 +321,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
             jbrVariant = jbrVariant.orNull,
             ideDir = ideDir.orNull,
         ) {
-            validateRuntimeDir(it)
-        } ?: throw InvalidUserDataException(
+            validateRuntimeDir(it.toString())
+        }?.toString() ?: throw InvalidUserDataException(
             when {
                 requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
                 else -> "Java Runtime directory couldn't be resolved"
