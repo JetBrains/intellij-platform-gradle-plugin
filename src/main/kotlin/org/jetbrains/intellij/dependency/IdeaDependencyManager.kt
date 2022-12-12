@@ -153,18 +153,18 @@ abstract class IdeaDependencyManager @Inject constructor(
         type: String,
         checkVersionChange: Boolean,
     ) = archiveUtils.extract(
-        zipFile,
+        zipFile.toPath(), // FIXME
         cacheDirectory.resolve(
             zipFile
                 .name
                 .removeSuffix(".zip")
                 .removeSuffix(".tar.gz")
-        ),
+        ).toPath(), // FIXME
         context,
-        { markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange) },
+        { markerFile -> isCacheUpToDate(zipFile, markerFile.toFile(), checkVersionChange) }, // FIXME
         { unzippedDirectory, markerFile ->
-            resetExecutablePermissions(unzippedDirectory, type)
-            storeCache(unzippedDirectory, markerFile)
+            resetExecutablePermissions(unzippedDirectory.toFile(), type) // FIXME
+            storeCache(unzippedDirectory.toFile(), markerFile.toFile()) // FIXME
         },
     )
 
@@ -320,7 +320,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                     else -> "zip"
                 },
             ) {
-                with(it.toPath()) {
+                with(it) {
                     Files.list(resolveAndroidStudioPath(this))
                         .forEach { entry -> Files.move(entry, resolve(entry.fileName), StandardCopyOption.REPLACE_EXISTING) }
                 }
@@ -377,7 +377,7 @@ abstract class IdeaDependencyManager @Inject constructor(
         }
 
         info(context, "IDE dependency cache directory: $classesDirectory")
-        val buildNumber = ideBuildNumber(classesDirectory)
+        val buildNumber = ideBuildNumber(classesDirectory.toFile()) // FIXME
         val sourcesDirectory = when {
             remoteIdeaDependency.hasSources ?: sources -> resolveSources(version, type)
             else -> null
@@ -388,7 +388,7 @@ abstract class IdeaDependencyManager @Inject constructor(
             type,
             version,
             buildNumber,
-            classesDirectory,
+            classesDirectory.toFile(), // FIXME
             sourcesDirectory,
             project,
             resolvedExtraDependencies,
@@ -470,7 +470,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                             dependencyFile,
                             PLATFORM_TYPE_INTELLIJ_COMMUNITY,
                             version.endsWith(RELEASE_SUFFIX_SNAPSHOT)
-                        )
+                        ).toFile() // FIXME
                     }
 
                     else -> {
@@ -506,6 +506,6 @@ abstract class IdeaDependencyManager @Inject constructor(
         val name: String,
         val hasSources: Boolean? = null,
         val artifactExtension: String = "zip",
-        val postProcess: (File) -> Unit = {},
+        val postProcess: (Path) -> Unit = {},
     )
 }

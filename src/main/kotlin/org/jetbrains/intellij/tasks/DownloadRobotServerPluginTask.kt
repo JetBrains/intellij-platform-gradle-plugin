@@ -62,8 +62,9 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
 
     @TaskAction
     fun downloadPlugin() {
-        val target = outputDir.get().asFile
-        archiveUtils.extract(pluginArchive.get(), target, context)
+        val archive = pluginArchive.get().toPath()
+        val target = outputDir.get().asFile.toPath()
+        archiveUtils.extract(archive, target, context)
     }
 
     /**

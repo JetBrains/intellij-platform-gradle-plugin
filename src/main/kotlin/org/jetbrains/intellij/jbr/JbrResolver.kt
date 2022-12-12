@@ -133,7 +133,7 @@ abstract class JbrResolver @Inject constructor(
 
         return getJavaArchive(jbrArtifact)?.let {
             val javaDir = File(it.path.replaceAfter(jbrArtifact.name, "")).resolve("extracted")
-            archiveUtils.extract(it, javaDir, context)
+            archiveUtils.extract(it.toPath(), javaDir.toPath(), context) // FIXME
             fromDir(javaDir, version)
         }
     }

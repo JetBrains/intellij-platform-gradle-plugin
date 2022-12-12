@@ -90,10 +90,10 @@ abstract class PluginDependencyManager @Inject constructor(
     private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {
         val pluginDir = findSingleDirectory(
             archiveUtils.extract(
-                pluginFile,
-                File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}"),
+                pluginFile.toPath(),
+                File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}").toPath(), // FIXME
                 context,
-            )
+            ).toFile() // FIXME
         )
         return externalPluginDependency(pluginDir, dependency.channel, true)
     }

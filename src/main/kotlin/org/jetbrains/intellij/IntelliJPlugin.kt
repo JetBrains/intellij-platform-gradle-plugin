@@ -655,6 +655,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME)
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(RUN_IDE_TASK_NAME)
+        val userHomeProvider = project.providers.systemProperty("user.home")
 
         project.tasks.register<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
@@ -677,8 +678,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
             productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
                 listProductsReleasesTask.outputFile.asFile
             })
-            ides.convention(ideVersions.zip(project.providers.systemProperty("user.home")) { ideVersions, userHome ->
-                val userHomePath = Path.of(userHome)
+            ides.convention(ideVersions.map { ideVersions ->
+                val userHomePath = Path.of(userHomeProvider.get())
                 val downloadPath = with(downloadDir.get()) {
                     when {
                         startsWith("~/") -> userHomePath.resolve(removePrefix("~/"))
@@ -724,7 +725,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 }).first()
 
                                 debug(context, "IDE downloaded, extracting...")
-                                archiveUtils.extract(ideArchive, ideDir.toFile(), context)
+                                archiveUtils.extract(ideArchive.toPath(), ideDir, context) // FIXME ideArchive.toPath()
                                 ideDir.listFiles().let { files ->
                                     files.filter { it.isDirectory }.forEach { container ->
                                         container.listFiles().forEach { file ->
@@ -810,11 +811,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME)
         val compileJavaTaskProvider = project.tasks.named<JavaCompile>(COMPILE_JAVA_TASK_NAME)
 
-        // TODO: workaround required for Gradle <7.0 – remove `project.provider` when targeting 7+
-        val downloadDirProvider = project.provider {
-            runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
-                runPluginVerifierTask.downloadDir
-            }.get()
+        val downloadDirProvider = runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
+            runPluginVerifierTask.downloadDir
         }
 
         project.tasks.register<VerifyPluginConfigurationTask>(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME) {
@@ -853,8 +851,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 kotlinLanguageVersion.convention(project.provider {
                     compileKotlinTaskProvider.get().kotlinOptions.languageVersion
                 })
-                kotlinStdlibDefaultDependency.convention(project.provider {
-                    project.properties["kotlin.stdlib.default.dependency"]?.toString()?.toBoolean()
+                kotlinStdlibDefaultDependency.convention(project.providers.systemProperty("kotlin.stdlib.default.dependency").map {
+                    it.toBoolean()
                 })
             }
 
