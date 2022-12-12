@@ -1480,7 +1480,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     it.outputs.files.asFileTree
                 })
             androidStudioUpdatePath.convention(project.provider {
-                dependenciesDownloader.getAndroidStudioReleases(logCategory())
+                dependenciesDownloader.getAndroidStudioReleases(logCategory()).toString()
             })
             outputFile.convention(
                 project.layout.buildDirectory.file("$LIST_PRODUCTS_RELEASES_TASK_NAME.txt")

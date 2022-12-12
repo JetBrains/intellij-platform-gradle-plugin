@@ -2,11 +2,14 @@
 
 package org.jetbrains.intellij.model
 
+import com.jetbrains.plugin.structure.base.utils.inputStream
+import com.jetbrains.plugin.structure.base.utils.outputStream
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.InputStream
+import java.nio.file.Path
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBException
 
@@ -19,22 +22,25 @@ class XmlExtractor<T>(private val context: String? = null) {
     @Throws(JAXBException::class)
     fun unmarshal(file: File) = file.inputStream().use { unmarshal(it) }
 
+    @Throws(JAXBException::class)
+    fun unmarshal(path: Path) = path.inputStream().use { unmarshal(it) }
+
     @Suppress("UNCHECKED_CAST")
     @Throws(JAXBException::class)
     fun unmarshal(inputStream: InputStream) = jaxbContext.createUnmarshaller().unmarshal(inputStream) as T
 
     @Throws(JAXBException::class)
-    fun marshal(bean: T, file: File) {
-        jaxbContext.createMarshaller().marshal(bean, file)
+    fun marshal(bean: T, path: Path) {
+        jaxbContext.createMarshaller().marshal(bean, path.outputStream())
 
-        file
+        path
             .inputStream()
             .use { JDOMUtil.loadDocument(it) }
-            .let { transformXml(it, file) }
+            .let { transformXml(it, path) }
     }
 
-    fun fetch(path: String) =
-        runCatching { unmarshal(File(path)) }
+    fun fetch(path: Path) =
+        runCatching { unmarshal(path) }
             .onFailure { warn(context, "Failed to get products releases list: ${it.message}", it) }
             .getOrNull()
 }

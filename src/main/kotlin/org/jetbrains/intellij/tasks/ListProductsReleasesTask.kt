@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -12,11 +13,13 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.or
+import java.nio.file.Path
 
 abstract class ListProductsReleasesTask : DefaultTask() {
 
@@ -108,15 +111,14 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
     @TaskAction
     fun list() {
-        val updatePaths = productsReleasesUpdateFiles.files.map { it.canonicalPath }
+        val updatePaths = productsReleasesUpdateFiles.files.map { it.toPath() }
 
-        val releases = XmlExtractor<ProductsReleases>(context).let {
-            updatePaths.mapNotNull(it::fetch)
+        val releases = XmlExtractor<ProductsReleases>(context).let { extractor ->
+            updatePaths.mapNotNull(extractor::fetch)
         }
-        val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let {
-            androidStudioUpdatePath.get().let(it::fetch)
+        val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let { extractor ->
+            Path.of(androidStudioUpdatePath.get()).let(extractor::fetch)
         } ?: AndroidStudioReleases()
-
 
         val since = sinceVersion.orNull
             .or { sinceBuild.get() }
@@ -187,7 +189,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             false -> emptyList()
         }
 
-        outputFile.get().asFile.outputStream().use { os ->
+        outputFile.get().asPath.outputStream().use { os ->
             (result + androidStudioResult).joinToString("\n").apply {
                 TeeOutputStream(System.out, os).write(toByteArray())
             }

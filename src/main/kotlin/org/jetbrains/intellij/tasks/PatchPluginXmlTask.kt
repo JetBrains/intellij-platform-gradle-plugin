@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.inputStream
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -11,6 +13,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jdom2.Document
 import org.jdom2.Element
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
@@ -93,30 +96,32 @@ abstract class PatchPluginXmlTask : DefaultTask() {
 
     @TaskAction
     fun patchPluginXmlFiles() {
-        pluginXmlFiles.get().forEach { file ->
-            file.inputStream().use { inputStream ->
-                val document = JDOMUtil.loadDocument(inputStream)
+        pluginXmlFiles.get()
+            .map(File::toPath)
+            .forEach { path ->
+                path.inputStream().use { inputStream ->
+                    val document = JDOMUtil.loadDocument(inputStream)
 
-                sinceBuild.orNull
-                    ?.let { patchAttribute(document, "idea-version", "since-build", it) }
-                untilBuild.orNull
-                    ?.let { patchAttribute(document, "idea-version", "until-build", it) }
-                pluginDescription.orNull
-                    ?.let { patchTag(document, "description", it) }
-                changeNotes.orNull
-                    ?.let { patchTag(document, "change-notes", it) }
-                version.orNull
-                    .takeIf { it != Project.DEFAULT_VERSION }
-                    ?.let { patchTag(document, "version", it) }
-                pluginId.orNull
-                    ?.let { patchTag(document, "id", it) }
+                    sinceBuild.orNull
+                        ?.let { patchAttribute(document, "idea-version", "since-build", it) }
+                    untilBuild.orNull
+                        ?.let { patchAttribute(document, "idea-version", "until-build", it) }
+                    pluginDescription.orNull
+                        ?.let { patchTag(document, "description", it) }
+                    changeNotes.orNull
+                        ?.let { patchTag(document, "change-notes", it) }
+                    version.orNull
+                        .takeIf { it != Project.DEFAULT_VERSION }
+                        ?.let { patchTag(document, "version", it) }
+                    pluginId.orNull
+                        ?.let { patchTag(document, "id", it) }
 
-                destinationDir.get()
-                    .asFile
-                    .resolve(file.name)
-                    .let { transformXml(document, it) }
+                    destinationDir.get()
+                        .asPath
+                        .resolve(path.simpleName)
+                        .let { transformXml(document, it) }
+                }
             }
-        }
     }
 
     /**

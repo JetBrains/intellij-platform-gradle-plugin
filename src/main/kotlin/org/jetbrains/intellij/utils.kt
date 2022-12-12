@@ -77,7 +77,7 @@ internal fun parsePluginXml(pluginXml: Path, logCategory: String?) = runCatching
     null
 }
 
-fun transformXml(document: Document, file: File) {
+fun transformXml(document: Document, path: Path) {
     val xmlOutput = XMLOutputter()
     xmlOutput.format.apply {
         indent = "  "
@@ -87,7 +87,7 @@ fun transformXml(document: Document, file: File) {
 
     StringWriter().use {
         xmlOutput.output(document, it)
-        file.writeText(it.toString())
+        path.writeText(it.toString())
     }
 }
 

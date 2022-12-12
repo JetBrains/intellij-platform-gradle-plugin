@@ -110,4 +110,4 @@ internal fun DependenciesDownloader.getAndroidStudioReleases(context: String?) =
     )
 }, {
     ivyRepository(ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
-}).first().canonicalPath
+}).first().toPath()
