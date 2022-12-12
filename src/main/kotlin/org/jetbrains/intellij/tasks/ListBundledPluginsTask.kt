@@ -42,7 +42,7 @@ abstract class ListBundledPluginsTask : DefaultTask() {
     fun list() {
         outputFile.get().asPath.outputStream().use { os ->
             BuiltinPluginsRegistry
-                .resolveBundledPlugins(ideDir.get(), context)
+                .resolveBundledPlugins(ideDir.get().toPath(), context)
                 .joinToString("\n")
                 .let {
                     TeeOutputStream(System.out, os).write(it.toByteArray())

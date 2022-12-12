@@ -91,7 +91,7 @@ abstract class IdeaDependencyManager @Inject constructor(
         )
 
         else -> {
-            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), context)
+            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(classesDirectory.resolve("plugins").toPath(), context)
             when (type) {
                 null -> LocalIdeaDependency(
                     name,
@@ -377,7 +377,7 @@ abstract class IdeaDependencyManager @Inject constructor(
         }
 
         info(context, "IDE dependency cache directory: $classesDirectory")
-        val buildNumber = ideBuildNumber(classesDirectory.toFile()) // FIXME
+        val buildNumber = ideBuildNumber(classesDirectory)
         val sourcesDirectory = when {
             remoteIdeaDependency.hasSources ?: sources -> resolveSources(version, type)
             else -> null
@@ -401,7 +401,7 @@ abstract class IdeaDependencyManager @Inject constructor(
         if (!ideaDir.exists() || !ideaDir.isDirectory) {
             throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
-        val buildNumber = ideBuildNumber(ideaDir)
+        val buildNumber = ideBuildNumber(ideaDir.toPath())
         val sources = when {
             !localPathSources.isNullOrEmpty() -> File(localPathSources)
             else -> null

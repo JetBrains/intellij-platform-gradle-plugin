@@ -22,7 +22,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     companion object {
         const val version = 1
 
-        fun fromDirectory(pluginsDirectory: File, context: String?) = BuiltinPluginsRegistry(pluginsDirectory, context).apply {
+        fun fromDirectory(pluginsDirectory: Path, context: String?) = BuiltinPluginsRegistry(pluginsDirectory.toFile(), context).apply {
             val extractor = XmlExtractor<PluginsCache>(context)
             if (!fillFromCache(extractor)) {
                 debug(context, "Builtin registry cache is missing")
@@ -31,7 +31,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
             }
         }
 
-        fun resolveBundledPlugins(ideDir: File, context: String?) = ideProductInfo(ideDir)
+        fun resolveBundledPlugins(ideDir: Path, context: String?) = ideProductInfo(ideDir)
             ?.bundledPlugins
             ?.takeIf { it.isNotEmpty() }
             ?: fromDirectory(ideDir.resolve("plugins"), context)

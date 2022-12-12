@@ -340,7 +340,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
                     && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
                 ) {
-                    val bundledPlugins = BuiltinPluginsRegistry.resolveBundledPlugins(ideaDependencyProvider.get().classes, context)
+                    val bundledPlugins = BuiltinPluginsRegistry.resolveBundledPlugins(ideaDependencyProvider.get().classes.toPath(), context)
                     if (!bundledPlugins.contains(PERFORMANCE_PLUGIN_ID)) {
                         val buildNumber = ideaDependencyProvider.get().buildNumber
                         val resolvedPlugin = resolveLatestPluginUpdate(PERFORMANCE_PLUGIN_ID, buildNumber)
@@ -570,10 +570,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val buildSdk = project.provider {
             extension.localPath.flatMap {
                 ideaDependencyProvider.map { ideaDependency ->
-                    ideaDependency.classes.let {
-                        ideProductInfo(it)?.run { "$productCode-$projectVersion" }
-                        // Fall back on build number if product-info.json is not present, this is the case
-                        // for recent versions of Android Studio.
+                    ideaDependency.classes.toPath().let {
+                        // Fall back on build number if product-info.json is not present, this is the case for recent versions of Android Studio.
+                        ideProductInfo(it)
+                            ?.run { "$productCode-$projectVersion" }
                             ?: ideBuildNumber(it)
                     }
                 }
@@ -933,7 +933,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
 
             onlyIf {
-                val number = ideBuildNumber(ideDir.get())
+                val number = ideBuildNumber(ideDir.get().toPath())
                 Version.parse(number.split('-').last()) >= Version.parse("191.2752")
             }
         }
@@ -966,7 +966,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             project.file("$it/system")
         })
         autoReloadPlugins.convention(ideDir.map {
-            val number = ideBuildNumber(it)
+            val number = ideBuildNumber(it.toPath())
             Version.parse(number.split('-').last()) >= Version.parse("202.0")
         })
         projectWorkingDir.convention(ideDir.map {
@@ -1063,7 +1063,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     sourceSet.compileClasspath
                 })
                 compilerVersion.convention(ideaDependencyProvider.map {
-                    val productInfo = ideProductInfo(it.classes)
+                    val productInfo = ideProductInfo(it.classes.toPath())
 
                     val version = extension.getVersionNumber().orNull.orEmpty()
                     val type = extension.getVersionType().orNull.orEmpty()
@@ -1235,7 +1235,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             it.buildNumber
         }
         val ideDirProvider = runIdeTaskProvider.flatMap { runIdeTask ->
-            runIdeTask.ideDir
+            runIdeTask.ideDir.map { it.toPath() }
         }
 
         val ideaDependencyLibrariesProvider = ideaDependencyProvider

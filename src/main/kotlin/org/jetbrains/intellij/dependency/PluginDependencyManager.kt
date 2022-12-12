@@ -43,7 +43,7 @@ abstract class PluginDependencyManager @Inject constructor(
         if (dependency.version.isNullOrEmpty() && dependency.channel.isNullOrEmpty()) {
             if (Paths.get(dependency.id).isAbsolute) {
                 return externalPluginDependency(File(dependency.id))
-            } else if (ideaDependency != null) {
+            } else {
                 info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.canonicalPath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +

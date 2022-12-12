@@ -91,19 +91,22 @@ fun transformXml(document: Document, path: Path) {
     }
 }
 
-private fun String.resolveIdeHomeVariable(ideDirectory: File) = this
-    .replace("\$APP_PACKAGE", ideDirectory.canonicalPath)
-    .replace("\$IDE_HOME", ideDirectory.canonicalPath)
-    .replace("%IDE_HOME%", ideDirectory.canonicalPath)
+private fun String.resolveIdeHomeVariable(ideDir: Path) =
+    ideDir.toAbsolutePath().toString().let {
+        this
+            .replace("\$APP_PACKAGE", it)
+            .replace("\$IDE_HOME", it)
+            .replace("%IDE_HOME%", it)
+    }
 
 fun getIdeaSystemProperties(
-    ideDirectory: File,
+    ideDir: Path,
     configDirectory: File,
     systemDirectory: File,
     pluginsDirectory: File,
     requirePluginIds: List<String>,
 ): Map<String, String> {
-    val currentLaunch = ideProductInfo(ideDirectory)?.currentLaunch
+    val currentLaunch = ideProductInfo(ideDir)?.currentLaunch
     val result = mapOf(
         "idea.config.path" to configDirectory.canonicalPath,
         "idea.system.path" to systemDirectory.canonicalPath,
@@ -117,7 +120,7 @@ fun getIdeaSystemProperties(
         }
         ?.associate {
             it
-                .resolveIdeHomeVariable(ideDirectory)
+                .resolveIdeHomeVariable(ideDir)
                 .substring(2)
                 .split('=')
                 .let { (key, value) -> key to value }
@@ -132,12 +135,12 @@ fun getIdeaSystemProperties(
     return result + currentLaunchProperties + requirePluginProperties
 }
 
-fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
-    val productInfo = ideProductInfo(ideDirectory!!)
+fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: Path): List<String> {
+    val productInfo = ideProductInfo(ideDirectory)
     val bootclasspath = ideDirectory
         .resolve("lib/boot.jar")
         .takeIf { it.exists() }
-        ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
+        ?.let { listOf("-Xbootclasspath/a:$it") }
         .orEmpty()
     val vmOptions = productInfo
         ?.currentLaunch
@@ -164,14 +167,14 @@ fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirect
         .distinct()
 }
 
-fun getIdeaClasspath(ideDirFile: File): List<String> {
-    val buildNumber = ideBuildNumber(ideDirFile).split('-').last().let { Version.parse(it) }
+fun getIdeaClasspath(ideDir: Path): List<String> {
+    val buildNumber = ideBuildNumber(ideDir).split('-').last().let { Version.parse(it) }
     val build203 = Version.parse("203.0")
     val build221 = Version.parse("221.0")
     val build223 = Version.parse("223.0")
 
-    val currentLaunch = ideProductInfo(ideDirFile)?.currentLaunch
-    val infoPlist = ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
+    val currentLaunch = ideProductInfo(ideDir)?.currentLaunch
+    val infoPlist = ideDir.resolve("Info.plist").takeIf(Path::exists)?.let {
         PropertyListParser.parse(it) as NSDictionary
     }
 
@@ -210,21 +213,20 @@ fun getIdeaClasspath(ideDirFile: File): List<String> {
             "jna.jar",
             "trove4j.jar",
         )
-    }.map {
-        "${ideDirFile.canonicalPath}/lib/$it"
-    }
+    }.map { "$ideDir/lib/$it" }
 }
 
-fun ideBuildNumber(ideDirectory: File) = (
-        File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-            ?: File(ideDirectory, "build.txt")
-        ).readText().trim()
+fun ideBuildNumber(ideDir: Path) = ideDir
+    .resolve("Resources/build.txt")
+    .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+    .or { ideDir.resolve("build.txt") }
+    .readText().trim()
 
 private val json = Json { ignoreUnknownKeys = true }
-fun ideProductInfo(ideDirectory: File) = (
-        File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-            ?: File(ideDirectory, "product-info.json")
-        )
+fun ideProductInfo(ideDir: Path) = ideDir
+    .resolve("Resources/product-info.json")
+    .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+    .or { ideDir.resolve("product-info.json") }
     .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
 
