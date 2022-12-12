@@ -6,6 +6,7 @@ import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import org.jetbrains.intellij.Version
+import java.nio.file.Paths
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,13 +14,15 @@ import kotlin.test.assertEquals
 @Suppress("ComplexRedundantLet")
 class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
-    private val ideaReleasesPath = "products-releases/idea-releases.xml".let {
-        "'${javaClass.classLoader.getResource(it)?.path}'"
+    private fun resolveResourcePath(path: String) = path.let {
+        javaClass.classLoader.getResource(it)?.let { url ->
+            Paths.get(url.toURI()).toAbsolutePath().toString().replace('\\', '/')
+        }
     }
 
-    private val androidStudioReleasesPath = "products-releases/android-studio-products-releases.xml".let {
-        "'${javaClass.classLoader.getResource(it)?.path}'"
-    }
+    private val ideaReleasesPath = resolveResourcePath("products-releases/idea-releases.xml")
+
+    private val androidStudioReleasesPath = resolveResourcePath("products-releases/android-studio-products-releases.xml")
 
     @BeforeTest
     override fun setUp() {
@@ -31,8 +34,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 version = "2020.1"
             }
             listProductsReleases {
-                productsReleasesUpdateFiles.setFrom([${ideaReleasesPath}])
-                androidStudioUpdatePath = $androidStudioReleasesPath
+                productsReleasesUpdateFiles.setFrom(['$ideaReleasesPath'])
+                androidStudioUpdatePath = '$androidStudioReleasesPath'
             }
             """.trimIndent()
         )
@@ -40,6 +43,10 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list for the current platformType, sinceBuild and untilBuild`() {
+        println("buildFile = ${buildFile.readText()}")
+        println("androidStudioReleasesPath = ${androidStudioReleasesPath}")
+        println("ideaReleasesPath = ${ideaReleasesPath}")
+
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertEquals(listOf("IC-2020.1.4"), it.taskOutput())
         }
@@ -223,7 +230,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 types = ["IU", "PS", "PY"]
                 
-                updatePaths = [${ideaReleasesPath}]
+                updatePaths = ['$ideaReleasesPath']
                 
                 // no values set for productsReleasesUpdateFiles
             }
