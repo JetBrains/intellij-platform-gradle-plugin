@@ -810,6 +810,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
         val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME)
         val compileJavaTaskProvider = project.tasks.named<JavaCompile>(COMPILE_JAVA_TASK_NAME)
+        val stdlibDefaultDependencyProvider = project.providers.gradleProperty("kotlin.stdlib.default.dependency").map {
+            it.toBoolean()
+        }
 
         val downloadDirProvider = runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
             runPluginVerifierTask.downloadDir
@@ -851,9 +854,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 kotlinLanguageVersion.convention(project.provider {
                     compileKotlinTaskProvider.get().kotlinOptions.languageVersion
                 })
-                kotlinStdlibDefaultDependency.convention(project.providers.systemProperty("kotlin.stdlib.default.dependency").map {
-                    it.toBoolean()
-                })
+                kotlinStdlibDefaultDependency.convention(stdlibDefaultDependencyProvider)
             }
 
             dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
