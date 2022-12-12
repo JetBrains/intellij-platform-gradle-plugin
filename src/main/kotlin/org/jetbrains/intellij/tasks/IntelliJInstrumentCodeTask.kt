@@ -20,6 +20,7 @@ import org.jetbrains.intellij.*
 import org.jetbrains.intellij.dependency.IdeaDependency
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 
 abstract class IntelliJInstrumentCodeTask : DefaultTask() {
@@ -137,11 +138,11 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
         instrumentCode(instrumentNotNull) {
             Files.walk(temporaryDirPath)
                 .filter { !it.isDirectory }
-                .forEach { file ->
-                    val relativePath = temporaryDirPath.relativize(file)
+                .forEach { path ->
+                    val relativePath = temporaryDirPath.relativize(path)
                     outputDirPath.resolve(relativePath).apply {
                         createParentDirs()
-                        Files.copy(file, this, StandardCopyOption.REPLACE_EXISTING)
+                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
                     }
                 }
         }
@@ -149,9 +150,10 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
 
     // local compiler
     private fun compilerClassPath() = javac2.orNull
-        ?.takeIf(File::exists)
-        ?.let { file ->
-            File("${ideaDependency.get().classes}/lib").listFiles { _, name ->
+        ?.let(File::toPath)
+        ?.takeIf(Path::exists)
+        ?.let { path ->
+            ideaDependency.get().classes.toPath().resolve("lib").listFiles().filter {
                 listOf(
                     "jdom.jar",
                     "asm-all.jar",
@@ -159,20 +161,20 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
                     "jgoodies-forms.jar",
                     "forms-*.jar",
                 ).any { pattern ->
-                    val parts = pattern.split('*')
-                    name.startsWith(parts.first()) && name.endsWith(parts.last())
+                    val (first, last) = pattern.split('*')
+                    it.simpleName.startsWith(first) && it.simpleName.endsWith(last)
                 }
-            }.orEmpty().filterNotNull() + file
+            } + path
         }
-        .or { compilerClassPathFromMaven.get() }
+        .or { compilerClassPathFromMaven.get().map(File::toPath) }
 
-    private fun prepareNotNullInstrumenting(classpath: List<File>): Boolean {
+    private fun prepareNotNullInstrumenting(classpath: List<Path>): Boolean {
         try {
             ant.invokeMethod(
                 "typedef",
                 mapOf(
                     "name" to "skip",
-                    "classpath" to classpath.joinToString(":"),
+                    "classpath" to classpath.map(Path::toAbsolutePath).joinToString(":"),
                     "loaderref" to LOADER_REF,
                     "classname" to FILTER_ANNOTATION_REGEXP_CLASS,
                 ),

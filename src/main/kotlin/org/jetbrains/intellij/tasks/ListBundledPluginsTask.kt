@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Incubating
@@ -38,7 +39,7 @@ abstract class ListBundledPluginsTask : DefaultTask() {
 
     @TaskAction
     fun list() {
-        outputFile.get().asFile.outputStream().use { os ->
+        outputFile.get().asFile.toPath().outputStream().use { os ->
             BuiltinPluginsRegistry
                 .resolveBundledPlugins(ideDir.get(), context)
                 .joinToString("\n")
