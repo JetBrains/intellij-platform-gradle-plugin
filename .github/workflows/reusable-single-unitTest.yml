@@ -61,7 +61,7 @@ jobs:
           TEST_NAME: ${{ inputs.testName }}
         shell: bash
         run: |
-          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests '$TEST_NAME'"
+          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
           
           ./gradlew check test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
