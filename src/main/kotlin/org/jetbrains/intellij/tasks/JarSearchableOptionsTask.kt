@@ -9,6 +9,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 import java.nio.file.Path
@@ -73,7 +74,7 @@ abstract class JarSearchableOptionsTask : Jar() {
                     }
                 }
             }
-            outputDir.get().asFile.toPath().toAbsolutePath()
+            outputDir.get().asPath
         })
 
         this.eachFile { path = "search/$name" }

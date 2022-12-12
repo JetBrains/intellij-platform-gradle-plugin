@@ -11,6 +11,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.dependency.BuiltinPluginsRegistry
 import org.jetbrains.intellij.logCategory
 import java.io.File
@@ -39,7 +40,7 @@ abstract class ListBundledPluginsTask : DefaultTask() {
 
     @TaskAction
     fun list() {
-        outputFile.get().asFile.toPath().outputStream().use { os ->
+        outputFile.get().asPath.outputStream().use { os ->
             BuiltinPluginsRegistry
                 .resolveBundledPlugins(ideDir.get(), context)
                 .joinToString("\n")

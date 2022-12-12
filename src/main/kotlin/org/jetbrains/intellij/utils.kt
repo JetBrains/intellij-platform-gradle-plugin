@@ -22,6 +22,7 @@ import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -337,3 +338,6 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
 fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
 
 fun NSDictionary.getValue(key: String) = this[key].toString()
+
+internal val FileSystemLocation.asPath
+    get() = asFile.toPath().toAbsolutePath()

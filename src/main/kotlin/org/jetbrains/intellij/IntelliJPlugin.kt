@@ -1398,7 +1398,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 project.layout.file(
                     buildPluginTaskProvider.flatMap { buildPluginTask ->
                         buildPluginTask.archiveFile
-                            .map { it.asFile.toPath() }
+                            .map { it.asPath }
                             .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
                     })
             )

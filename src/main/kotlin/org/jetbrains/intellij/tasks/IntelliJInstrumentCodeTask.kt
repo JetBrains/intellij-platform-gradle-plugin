@@ -80,7 +80,7 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
         info(context, "Compiling forms and instrumenting code with nullability preconditions")
         val instrumentNotNull = prepareNotNullInstrumenting(classpath)
 
-        val outputDirPath = outputDir.get().asFile.toPath()
+        val outputDirPath = outputDir.get().asPath
         val temporaryDirPath = temporaryDir
             .toPath()
             .also {
