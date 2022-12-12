@@ -240,8 +240,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @TaskAction
     fun runPluginVerifier() {
-        val file = distributionFile.orNull
-        if (file == null || !file.asFile.exists()) {
+        val file = distributionFile.orNull?.asPath
+        if (file == null || !file.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
         }
 
@@ -251,9 +251,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         val verifierPath = resolveVerifierPath()
-        val verifierArgs = listOf("check-plugin") + getOptions() + file.asFile.canonicalPath + paths
+        val verifierArgs = listOf("check-plugin") + getOptions() + file.toString() + paths
 
-        debug(context, "Distribution file: ${file.asFile.canonicalPath}")
+        debug(context, "Distribution file: $file")
         debug(context, "Verifier path: $verifierPath")
 
         ByteArrayOutputStream().use { os ->
@@ -343,7 +343,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         execOperations.exec {
-            executable = File(runtimeDirPath).resolve("bin/java").canonicalPath
+            executable = Path.of(runtimeDirPath).resolve("bin/java").toAbsolutePath().toString()
             args = listOf("-version")
             errorOutput = os
         }

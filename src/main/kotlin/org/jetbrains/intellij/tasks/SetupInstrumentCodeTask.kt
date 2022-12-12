@@ -10,6 +10,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.intellij.asPath
 
 abstract class SetupInstrumentCodeTask : DefaultTask() {
 
@@ -22,8 +23,7 @@ abstract class SetupInstrumentCodeTask : DefaultTask() {
     @TaskAction
     fun setupInstrumentCode() {
         instrumentedDir.get()
-            .asFile
-            .toPath()
+            .asPath
             .run {
                 if (!instrumentationEnabled.get()) {
                     deleteQuietly()

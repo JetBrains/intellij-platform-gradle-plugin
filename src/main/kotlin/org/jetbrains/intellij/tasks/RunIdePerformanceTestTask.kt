@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.extension
+import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import org.gradle.api.Incubating
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
@@ -15,6 +17,7 @@ import org.jetbrains.intellij.performanceTest.ProfilerName
 import org.jetbrains.intellij.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.performanceTest.parsers.SimpleIJPerformanceParser
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
@@ -53,18 +56,16 @@ abstract class RunIdePerformanceTestTask : RunIdeBase(true) {
     @TaskAction
     override fun exec() {
         val dir = Paths.get(artifactsDir.get()).createDir()
-        val testData = Path.of(testDataDir.get()).toFile()
+        val testData = Path.of(testDataDir.get())
         val testExecutionResults = mutableListOf<PerformanceTestResult>()
 
-        testData
-            .walk()
-            .maxDepth(1)
+        Files.walk(testData, 1)
             .filter { it.extension == "ijperf" }
             .forEach {
                 val testName = it.nameWithoutExtension
-                val testScript = SimpleIJPerformanceParser(it.path).parse()
+                val testScript = SimpleIJPerformanceParser(it).parse()
 
-                scriptPath = it.toPath().toAbsolutePath().toString()
+                scriptPath = it.toAbsolutePath().toString()
                 testArtifactsDirPath = dir.resolve(testName).createDir().toAbsolutePath()
 
                 // Passing to IDE project to open

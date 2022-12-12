@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.performanceTest.parsers
 
+import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -10,7 +11,8 @@ class SimpleIJPerfParserTest {
 
     @Test
     fun `simple parser test`() {
-        SimpleIJPerformanceParser("src/test/resources/performanceTest/test-scripts/test.ijperf").parse().let {
+        val path = Path.of("src/test/resources/performanceTest/test-scripts/test.ijperf")
+        SimpleIJPerformanceParser(path).parse().let {
             assertEquals(60_000, it.assertionTimeout)
             assertEquals("project1", it.projectName)
             assertEquals(
@@ -28,7 +30,8 @@ class SimpleIJPerfParserTest {
 
     @Test
     fun `assertTimeout is null`() {
-        SimpleIJPerformanceParser("src/test/resources/performanceTest/test-scripts/assertTimeoutAbsent.ijperf").parse().let {
+        val path = Path.of("src/test/resources/performanceTest/test-scripts/assertTimeoutAbsent.ijperf")
+        SimpleIJPerformanceParser(path).parse().let {
             assertNull(it.assertionTimeout)
             assertEquals("project1", it.projectName)
             assertEquals(
