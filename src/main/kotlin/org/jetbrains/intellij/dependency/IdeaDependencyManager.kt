@@ -2,10 +2,7 @@
 
 package org.jetbrains.intellij.dependency
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.extension
-import com.jetbrains.plugin.structure.base.utils.isZip
-import com.jetbrains.plugin.structure.base.utils.simpleName
+import com.jetbrains.plugin.structure.base.utils.*
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
@@ -397,16 +394,19 @@ abstract class IdeaDependencyManager @Inject constructor(
 
     fun resolveLocal(project: Project, localPath: String, localPathSources: String?): IdeaDependency {
         debug(context, "Adding local IDE dependency")
-        val ideaDir = ideaDir(localPath)
+        val ideaDir = Path.of(localPath).let {
+            it.takeUnless { it.endsWith(".app") } ?: it.resolve("Contents")
+        }
+
         if (!ideaDir.exists() || !ideaDir.isDirectory) {
             throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
-        val buildNumber = ideBuildNumber(ideaDir.toPath())
+        val buildNumber = ideBuildNumber(ideaDir)
         val sources = when {
             !localPathSources.isNullOrEmpty() -> File(localPathSources)
             else -> null
         }
-        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, emptyList())
+        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir.toFile(), sources, project, emptyList())
     }
 
     private fun getZipCacheDirectory(zipFile: File, project: Project, type: String): File {

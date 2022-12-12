@@ -230,10 +230,6 @@ fun ideProductInfo(ideDir: Path) = ideDir
     .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
 
-fun ideaDir(path: String) = File(path).let {
-    it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
-}
-
 fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }) =
     collectFiles(directory) { it.toPath().isJar() && filter.test(it) }
 
