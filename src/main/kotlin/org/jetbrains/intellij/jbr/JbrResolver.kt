@@ -5,6 +5,7 @@ package org.jetbrains.intellij.jbr
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.listFiles
 import com.jetbrains.plugin.structure.base.utils.simpleName
+import org.gradle.api.provider.Provider
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
@@ -21,8 +22,7 @@ import java.util.*
 import javax.inject.Inject
 
 abstract class JbrResolver @Inject constructor(
-    private val jreRepository: String,
-    private val isOffline: Boolean,
+    private val jreRepository: Provider<String>,
     private val archiveUtils: ArchiveUtils,
     private val dependenciesDownloader: DependenciesDownloader,
     private val context: String?,
@@ -146,13 +146,9 @@ abstract class JbrResolver @Inject constructor(
             .ifNull { warn(context, "Cannot find java executable in: $javaDir") }
 
     private fun getJavaArchive(jbrArtifact: JbrArtifact): Path? {
-        if (isOffline) {
-            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'. Gradle runs in offline mode.")
-            return null
-        }
-
         val url = jreRepository
-            .takeIf(String::isNotEmpty)
+            .orNull
+            .takeUnless { it.isNullOrBlank() }
             .or(jbrArtifact.repositoryUrl)
 
         return try {

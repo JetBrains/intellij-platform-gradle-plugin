@@ -116,6 +116,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader
+    private lateinit var jbrResolver: JbrResolver
     private lateinit var context: String
 
     override fun apply(project: Project) {
@@ -125,7 +126,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         checkPluginVersion(project)
 
         archiveUtils = project.objects.newInstance()
-        dependenciesDownloader = project.objects.newInstance()
+        dependenciesDownloader = project.objects.newInstance(project.gradle.startParameter.isOffline)
 
         project.plugins.apply(JavaPlugin::class)
         project.plugins.apply(IdeaExtPlugin::class)
@@ -141,7 +142,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             }
         }
 
-        val extension = project.extensions.create<IntelliJPluginExtension>(EXTENSION_NAME).apply {
+        val extension = project.extensions.create<IntelliJPluginExtension>(EXTENSION_NAME, dependenciesDownloader).apply {
             version.convention(project.provider {
                 if (!localPath.isPresent) {
                     throw GradleException("The value for the 'intellij.version' property was not specified, see: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#intellij-extension-version")
@@ -164,6 +165,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
             configureDefaultDependencies.convention(true)
             type.convention(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
         }
+
+        jbrResolver = project.objects.newInstance(
+            extension.jreRepository,
+            archiveUtils,
+            dependenciesDownloader,
+            context,
+        )
 
         val ideaDependencyProvider = prepareIdeaDependencyProvider(project, extension)
         configureDependencies(project, extension, ideaDependencyProvider)
@@ -331,7 +339,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     archiveUtils,
                     context,
                 )
-
 
                 // Check that `runIdePerformanceTest` task was launched
                 // Check that `performanceTesting.jar` is absent (that means it's community version)
@@ -761,6 +768,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
             jreRepository.convention(extension.jreRepository)
             offline.set(project.gradle.startParameter.isOffline)
+            resolvedRuntimeDir.convention(project.provider {
+                resolveRuntimeDir(jbrResolver)
+            })
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)
             dependsOn(VERIFY_PLUGIN_TASK_NAME)
@@ -973,14 +983,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
             it.resolve("bin")
         })
         projectExecutable.convention(project.provider {
-            val jbrResolver = project.objects.newInstance<JbrResolver>(
-                extension.jreRepository.orNull.orEmpty(),
-                project.gradle.startParameter.isOffline,
-                archiveUtils,
-                dependenciesDownloader,
-                taskContext,
-            )
-
             jbrResolver.resolveRuntime(
                 jbrVersion = jbrVersion.orNull,
                 jbrVariant = jbrVariant.orNull,

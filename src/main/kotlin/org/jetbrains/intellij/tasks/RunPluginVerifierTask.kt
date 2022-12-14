@@ -15,7 +15,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.newInstance
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.*
@@ -25,8 +24,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.jbr.JbrResolver
-import org.jetbrains.intellij.utils.ArchiveUtils
-import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -196,6 +193,18 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val runtimeDir: Property<String>
 
     /**
+     * Resolves the Java Runtime directory.
+     * [runtimeDir] property is used if provided with the task configuration.
+     * Otherwise, [jbrVersion] is used for resolving the JBR.
+     * If it's not set, or it's impossible to resolve a valid version, built-in JBR will be used.
+     * As a last fallback, current JVM will be used.
+     *
+     * @return path to the Java Runtime directory
+     */
+    @get:Internal
+    abstract val resolvedRuntimeDir: Property<String>
+
+    /**
      * The list of classes prefixes from the external libraries.
      * The Plugin Verifier will not report `No such class` for classes of these packages.
      */
@@ -304,31 +313,22 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return path to the Java Runtime directory
      */
-    private fun resolveRuntimeDir(): String {
-        val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
-        val dependenciesDownloader = objectFactory.newInstance<DependenciesDownloader>()
-        val jbrResolver = objectFactory.newInstance<JbrResolver>(
-            jreRepository.orNull.orEmpty(),
-            offline.get(),
-            archiveUtils,
-            dependenciesDownloader,
-            context,
-        )
-
-        return jbrResolver.resolveRuntimeDir(
-            runtimeDir = runtimeDir.orNull,
-            jbrVersion = jbrVersion.orNull,
-            jbrVariant = jbrVariant.orNull,
-            ideDir = ideDir.orNull,
-        ) {
-            validateRuntimeDir(it.toString())
-        }?.toString() ?: throw InvalidUserDataException(
-            when {
-                requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
-                else -> "Java Runtime directory couldn't be resolved"
-            }
-        )
-    }
+    internal fun resolveRuntimeDir(jbrResolver: JbrResolver) =
+        jbrResolver
+            .resolveRuntimeDir(
+                runtimeDir = runtimeDir.orNull,
+                jbrVersion = jbrVersion.orNull,
+                jbrVariant = jbrVariant.orNull,
+                ideDir = ideDir.orNull,
+            ) {
+                validateRuntimeDir(it.toString())
+            }?.toString()
+            ?: throw InvalidUserDataException(
+                when {
+                    requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
+                    else -> "Java Runtime directory couldn't be resolved"
+                }
+            )
 
     /**
      * Verifies if provided Java Runtime directory points to Java 11 when using Plugin Verifier 1.260+.
@@ -368,7 +368,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private fun getOptions(): List<String> {
         val args = mutableListOf(
             "-verification-reports-dir", verificationReportsDir.get(),
-            "-runtime-dir", resolveRuntimeDir(),
+            "-runtime-dir", resolvedRuntimeDir.get(),
         )
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {

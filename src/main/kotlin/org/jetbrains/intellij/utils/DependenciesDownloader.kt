@@ -14,6 +14,7 @@ import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.repositoryVersion
 import java.io.File
 import java.net.URI
@@ -23,6 +24,7 @@ abstract class DependenciesDownloader @Inject constructor(
     private val configurationContainer: ConfigurationContainer,
     private val dependencyHandler: DependencyHandler,
     private val repositoryHandler: RepositoryHandler,
+    private val isOffline: Boolean,
 ) {
 
     fun downloadFromRepository(
@@ -69,8 +71,18 @@ abstract class DependenciesDownloader @Inject constructor(
         try {
             return configurationContainer.detachedConfiguration(dependency).files.toList()
         } catch (e: Exception) {
-            if (!silent) {
-                error(context, "Error when resolving dependency: $dependency", e)
+            when {
+                isOffline || silent -> {
+                    info(
+                        context,
+                        "Gradle runs in offline mode. ".takeIf { isOffline }.orEmpty()
+                                + "Error when resolving dependency: $dependency",
+                        e,
+                    )
+                    return emptyList()
+                }
+
+                else -> error(context, "Error when resolving dependency: $dependency", e)
             }
             throw e
         } finally {
@@ -110,4 +122,4 @@ internal fun DependenciesDownloader.getAndroidStudioReleases(context: String?) =
     )
 }, {
     ivyRepository(ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
-}).first().toPath()
+}).firstOrNull()?.toPath()

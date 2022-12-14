@@ -6,7 +6,6 @@ import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepository
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
@@ -14,7 +13,7 @@ import java.io.File
 import java.net.URI
 import java.net.URL
 
-class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
+class CustomPluginsRepository(repositoryUrl: String, private val dependenciesDownloader: DependenciesDownloader) : PluginsRepository {
 
     private val pluginsXmlUri: URI
     private val repositoryUrl: String
@@ -47,17 +46,16 @@ class CustomPluginsRepository(repositoryUrl: String) : PluginsRepository {
             ?.downloadUrl
 
     private fun downloadZipArtifact(project: Project, url: URL, plugin: PluginDependencyNotation, context: String?) =
-        project.objects.newInstance<DependenciesDownloader>()
-            .downloadFromRepository(context, {
-                create(
-                    group = "com.jetbrains.plugins",
-                    name = plugin.id,
-                    version = plugin.version,
-                    ext = "zip",
-                )
-            }, {
-                ivyRepository(url.toString())
-            }).first()
+        dependenciesDownloader.downloadFromRepository(context, {
+            create(
+                group = "com.jetbrains.plugins",
+                name = plugin.id,
+                version = plugin.version,
+                ext = "zip",
+            )
+        }, {
+            ivyRepository(url.toString())
+        }).first()
 
     override fun postResolve(project: Project, context: String?) {
     }

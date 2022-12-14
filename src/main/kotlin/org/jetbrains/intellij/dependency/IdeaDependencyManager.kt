@@ -336,9 +336,10 @@ abstract class IdeaDependencyManager @Inject constructor(
         }, {
             when (type) {
                 PLATFORM_TYPE_ANDROID_STUDIO -> {
-                    val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context)
-                        .fetch(dependenciesDownloader.getAndroidStudioReleases(context))
-                        ?: throw GradleException("Cannot resolve Android Studio Releases list")
+                    val androidStudioReleases =
+                        dependenciesDownloader.getAndroidStudioReleases(context)?.let {
+                            XmlExtractor<AndroidStudioReleases>(context).fetch(it)
+                        } ?: throw GradleException("Cannot resolve Android Studio Releases list")
 
                     val release = androidStudioReleases.items.find {
                         it.version == version || it.build == "$PLATFORM_TYPE_ANDROID_STUDIO-$version"
