@@ -326,8 +326,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline").let {
-            assertContains("No cached resource", it.output)
-            println("it.output = ${it.output}")
+            assertContains("Cannot download", it.output)
         }
     }
 

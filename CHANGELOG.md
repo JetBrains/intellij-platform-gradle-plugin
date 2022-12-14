@@ -5,6 +5,7 @@
 ### Fixed
 
 - Replace `Contents/Contents` part within JVM arguments to a single `Contents` – happens with macOS distribution
+- `--offline` prevents from using JBR even if it is already downloaded [#1251](../../issues/1251)
 
 ## [1.10.1] - 2022-12-08
 
