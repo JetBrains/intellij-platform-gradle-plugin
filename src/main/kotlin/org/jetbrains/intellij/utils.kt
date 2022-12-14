@@ -97,6 +97,7 @@ private fun String.resolveIdeHomeVariable(ideDir: Path) =
             .replace("\$APP_PACKAGE", it)
             .replace("\$IDE_HOME", it)
             .replace("%IDE_HOME%", it)
+            .replace("Contents/Contents", "Contents")
     }
 
 fun getIdeaSystemProperties(
