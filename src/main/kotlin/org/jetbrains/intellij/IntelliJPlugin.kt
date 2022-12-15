@@ -79,6 +79,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_TEST_CODE_
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
@@ -1512,7 +1513,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureListBundledPluginsTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring list bundled plugins task")
 
-        project.tasks.register<ListBundledPluginsTask>(LIST_BUNDLED_PLUGINS_TASK_NAME) {
+        val listBundledPluginsTaskProvider = project.tasks.register<ListBundledPluginsTask>(LIST_BUNDLED_PLUGINS_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "List bundled plugins within the currently targeted IntelliJ-based IDE release."
 
@@ -1522,6 +1523,17 @@ abstract class IntelliJPlugin : Plugin<Project> {
             outputFile.convention(
                 project.layout.buildDirectory.file("$LIST_BUNDLED_PLUGINS_TASK_NAME.txt")
             )
+        }
+
+        project.tasks.register<PrintBundledPluginsTask>(PRINT_BUNDLED_PLUGINS_TASK_NAME) {
+            group = PLUGIN_GROUP_NAME
+            description = "Prints bundled plugins within the currently targeted IntelliJ-based IDE release."
+
+            inputFile.convention(listBundledPluginsTaskProvider.flatMap { listBundledPluginsTask ->
+                listBundledPluginsTask.outputFile
+            })
+
+            dependsOn(LIST_BUNDLED_PLUGINS_TASK_NAME)
         }
     }
 

@@ -4,10 +4,12 @@
 
 ### Added
 - `printProductsReleases` task to print the result of the `listProductsReleases` task
+- `printBundledPlugins` task to print the result of the `listBundledPlugins` task
 
 ### Changed
 - `custom(String)` helper of `intellij.pluginRepositories` configuration requires now passing a direct URL to the `updatePlugins.xml` file [#1252](../../issues/1252)
 - `listProductsReleases` task doesn't print output anymore
+- `listBundledPlugins` task doesn't print output anymore
 
 ### Fixed
 - Replace `Contents/Contents` part within JVM arguments to a single `Contents` – happens with macOS distribution

@@ -9,11 +9,11 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 
 @Suppress("UnstableApiUsage")
-@UntrackedTask(because = "Prints the output produced by the listProductsReleases task")
-abstract class PrintProductsReleasesTask : DefaultTask() {
+@UntrackedTask(because = "Prints the output produced by the listBundledPlugins task")
+abstract class PrintBundledPluginsTask : DefaultTask() {
 
     /**
-     * Input form the [ListProductsReleasesTask].
+     * Input form the [ListBundledPluginsTask].
      */
     @get:InputFile
     abstract val inputFile: RegularFileProperty
