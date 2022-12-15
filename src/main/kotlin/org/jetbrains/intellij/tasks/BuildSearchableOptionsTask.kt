@@ -11,7 +11,7 @@ import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 
 @CacheableTask
-abstract class BuildSearchableOptionsTask : RunIdeBase(false) {
+abstract class BuildSearchableOptionsTask : RunIdeBase() {
 
     /**
      * The directory where the searchable options will be generated.
