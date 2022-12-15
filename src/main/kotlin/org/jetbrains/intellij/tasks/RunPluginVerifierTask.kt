@@ -34,6 +34,8 @@ import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
 
+@Suppress("UnstableApiUsage")
+@UntrackedTask(because = "Should always run Plugin Verifier")
 abstract class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,

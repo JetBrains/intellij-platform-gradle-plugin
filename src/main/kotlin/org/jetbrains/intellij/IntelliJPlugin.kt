@@ -784,8 +784,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }
             }
             listProductsReleasesTaskProvider.get().onlyIf { isIdeVersionsEmpty.get() }
-
-            outputs.upToDateWhen { false }
         }
     }
 

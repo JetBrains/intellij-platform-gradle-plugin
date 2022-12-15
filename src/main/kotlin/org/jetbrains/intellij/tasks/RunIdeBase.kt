@@ -21,7 +21,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.streams.asSequence
 
-abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
+abstract class RunIdeBase : JavaExec() {
 
     companion object {
         private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
@@ -162,9 +162,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     init {
         mainClass.set("com.intellij.idea.Main")
         enableAssertions = true
-        if (runAlways) {
-            outputs.upToDateWhen { false }
-        }
     }
 
     /**
