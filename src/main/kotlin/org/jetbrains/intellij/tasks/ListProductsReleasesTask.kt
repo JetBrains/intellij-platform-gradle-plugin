@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.outputStream
-import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
@@ -56,6 +55,9 @@ abstract class ListProductsReleasesTask : DefaultTask() {
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
+    /**
+     * List of types of IDEs that will be listed in results.
+     */
     @get:Input
     @get:Optional
     abstract val types: ListProperty<String>
@@ -191,7 +193,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
         outputFile.get().asPath.outputStream().use { os ->
             (result + androidStudioResult).joinToString("\n").apply {
-                TeeOutputStream(System.out, os).write(toByteArray())
+                os.write(toByteArray())
             }
         }
     }

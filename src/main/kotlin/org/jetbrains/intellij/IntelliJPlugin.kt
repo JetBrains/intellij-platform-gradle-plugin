@@ -79,6 +79,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_TEST_CODE_
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
@@ -1473,7 +1474,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             into(temporaryDir)
         }
 
-        project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
+        val listProductsReleasesTaskProvider = project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
             description = "List all available IntelliJ-based IDE releases with their updates."
 
@@ -1494,6 +1495,17 @@ abstract class IntelliJPlugin : Plugin<Project> {
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
 
             dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
+        }
+
+        project.tasks.register<PrintProductsReleasesTask>(PRINT_PRODUCTS_RELEASES_TASK_NAME) {
+            group = PLUGIN_GROUP_NAME
+            description = "Prints all available IntelliJ-based IDE releases with their updates."
+
+            inputFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTaskProvider ->
+                listProductsReleasesTaskProvider.outputFile
+            })
+
+            dependsOn(LIST_PRODUCTS_RELEASES_TASK_NAME)
         }
     }
 

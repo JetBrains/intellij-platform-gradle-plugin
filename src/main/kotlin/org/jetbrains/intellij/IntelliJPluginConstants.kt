@@ -19,6 +19,7 @@ object IntelliJPluginConstants {
     const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     const val LIST_BUNDLED_PLUGINS_TASK_NAME = "listBundledPlugins"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
+    const val PRINT_PRODUCTS_RELEASES_TASK_NAME = "printProductsReleases"
     const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
     const val POST_INSTRUMENT_CODE_TASK_NAME = "postInstrumentCode"
     const val POST_INSTRUMENT_TEST_CODE_TASK_NAME = "postInstrumentTestCode"
