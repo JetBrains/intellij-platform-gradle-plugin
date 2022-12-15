@@ -13,7 +13,7 @@ on:
         type: choice
         options:
           - 7.6
-          - 7.1
+          - 7.3
       os:
         description: 'Operation System'
         required: true
