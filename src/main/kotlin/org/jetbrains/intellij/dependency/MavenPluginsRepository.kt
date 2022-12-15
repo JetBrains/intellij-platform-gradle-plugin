@@ -33,7 +33,7 @@ interface MavenRepository : PluginsRepository {
 class MavenRepositoryPluginByAction(
     private val maven: Action<in MavenArtifactRepository>,
     private val dependenciesDownloader: DependenciesDownloader,
-    ) : MavenRepository {
+) : MavenRepository {
 
     override var resolvedDependency = false
 

@@ -18,6 +18,7 @@ import org.jetbrains.intellij.info
 import org.jetbrains.intellij.repositoryVersion
 import java.io.File
 import java.net.URI
+import java.net.URL
 import javax.inject.Inject
 
 abstract class DependenciesDownloader @Inject constructor(
@@ -99,9 +100,15 @@ internal fun RepositoryHandler.ivyRepository(
     repositoryUrl: String,
     pattern: String = "",
     block: (IvyArtifactRepository.() -> Unit)? = null,
+) = ivyRepository(URL(repositoryUrl), pattern, block)
+
+internal fun RepositoryHandler.ivyRepository(
+    repositoryUrl: URL,
+    pattern: String = "",
+    block: (IvyArtifactRepository.() -> Unit)? = null,
 ) =
     ivy {
-        url = URI(repositoryUrl)
+        url = repositoryUrl.toURI()
         patternLayout { artifact(pattern) }
         metadataSources { artifact() }
         block?.invoke(this)

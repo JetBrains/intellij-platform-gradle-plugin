@@ -47,6 +47,8 @@ import org.jetbrains.intellij.model.ProductInfo
 import org.jetbrains.intellij.utils.OpenedPackages
 import java.io.File
 import java.io.StringWriter
+import java.net.HttpURLConnection
+import java.net.URL
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -340,3 +342,13 @@ fun NSDictionary.getValue(key: String) = this[key].toString()
 
 internal val FileSystemLocation.asPath
     get() = asFile.toPath().toAbsolutePath()
+
+internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnection) {
+    instanceFollowRedirects = false
+    inputStream.use {
+        when (responseCode) {
+            HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP -> URL(this@resolveRedirection, getHeaderField("Location"))
+            else -> this@resolveRedirection
+        }
+    }.also { disconnect() }
+}
