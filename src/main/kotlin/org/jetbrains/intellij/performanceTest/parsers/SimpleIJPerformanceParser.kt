@@ -8,10 +8,10 @@ import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
-class SimpleIJPerformanceParser(private val filePath: String) {
+class SimpleIJPerformanceParser(private val path: Path) {
 
     fun parse() = PerformanceTestScript.Builder().apply {
-        Path.of(filePath).forEachLine {
+        path.forEachLine {
             with(it) {
                 when {
                     contains(Keywords.PROJECT) -> projectName(substringAfter("${Keywords.PROJECT} "))

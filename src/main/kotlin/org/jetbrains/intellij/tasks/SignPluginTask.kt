@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
@@ -12,6 +13,7 @@ import org.gradle.api.tasks.*
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
@@ -157,8 +159,8 @@ abstract class SignPluginTask @Inject constructor(
 
     @TaskAction
     fun signPlugin() {
-        val file = inputArchiveFile.orNull
-        if (file == null || !file.asFile.exists()) {
+        val file = inputArchiveFile.orNull?.asPath
+        if (file == null || !file.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
         }
 
@@ -176,7 +178,7 @@ abstract class SignPluginTask @Inject constructor(
         val cliPath = resolveCliPath()
         val cliArgs = listOf("sign") + getOptions()
 
-        debug(context, "Distribution file: ${file.asFile.canonicalPath}")
+        debug(context, "Distribution file: $file")
         debug(context, "Marketplace ZIP Signer CLI path: $cliPath")
 
         ByteArrayOutputStream().use { os ->
@@ -221,8 +223,8 @@ abstract class SignPluginTask @Inject constructor(
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
-            "-in", inputArchiveFile.get().asFile.canonicalPath,
-            "-out", outputArchiveFile.get().asFile.canonicalPath,
+            "-in", inputArchiveFile.get().asPath.toAbsolutePath().toString(),
+            "-out", outputArchiveFile.get().asPath.toAbsolutePath().toString(),
         )
 
         privateKey.orNull?.let {
@@ -231,7 +233,7 @@ abstract class SignPluginTask @Inject constructor(
             debug(context, "Using private key passed as content")
         } ?: run {
             args.add("-key-file")
-            args.add(privateKeyFile.get().asFile.canonicalPath)
+            args.add(privateKeyFile.get().asPath.toAbsolutePath().toString())
             debug(context, "Using private key passed as file")
         }
         certificateChain.orNull?.let {
@@ -240,7 +242,7 @@ abstract class SignPluginTask @Inject constructor(
             debug(context, "Using certificate chain passed as content")
         } ?: run {
             args.add("-cert-file")
-            args.add(certificateChainFile.get().asFile.canonicalPath)
+            args.add(certificateChainFile.get().asPath.toAbsolutePath().toString())
             debug(context, "Using certificate chain passed as file")
         }
 

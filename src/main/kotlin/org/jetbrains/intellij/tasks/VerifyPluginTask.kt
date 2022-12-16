@@ -13,6 +13,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
@@ -55,7 +56,7 @@ abstract class VerifyPluginTask : DefaultTask() {
 
     @TaskAction
     fun verifyPlugin() {
-        val creationResult = pluginDir.get().let { IdePluginManager.createManager().createPlugin(it.asFile.toPath()) }
+        val creationResult = pluginDir.get().let { IdePluginManager.createManager().createPlugin(it.asPath) }
         when (creationResult) {
             is PluginCreationSuccess -> {
                 creationResult.warnings.forEach {

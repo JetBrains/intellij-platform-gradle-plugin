@@ -111,24 +111,26 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
 
         sequence {
-            pluginXmlFiles.get().mapNotNull { parsePluginXml(it, context) }.forEach { plugin ->
-                val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
-                val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
-                val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)
+            pluginXmlFiles.get()
+                .mapNotNull { parsePluginXml(it.toPath(), context) }
+                .forEach { plugin ->
+                    val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
+                    val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
+                    val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)
 
-                if (sinceBuild.major < platformBuildVersion.major) {
-                    yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.")
+                    if (sinceBuild.major < platformBuildVersion.major) {
+                        yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.")
+                    }
+                    if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
+                        yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
+                    }
+                    if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
+                        yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
+                    }
+                    if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
+                        yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
+                    }
                 }
-                if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                    yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
-                }
-                if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                    yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
-                }
-                if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                    yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
-                }
-            }
 
             if (platformJavaVersion > sourceCompatibilityJavaVersion) {
                 yield("The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.")

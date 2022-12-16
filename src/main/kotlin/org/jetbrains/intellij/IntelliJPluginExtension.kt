@@ -17,6 +17,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COM
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginsRepositoryConfiguration
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import javax.inject.Inject
 
 /**
@@ -24,6 +25,7 @@ import javax.inject.Inject
  */
 abstract class IntelliJPluginExtension @Inject constructor(
     objectFactory: ObjectFactory,
+    dependenciesDownloader: DependenciesDownloader,
 ) {
     companion object {
         private val versionTypeRegex = Regex("([A-Z]{2,3})-(.*)")
@@ -190,7 +192,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @get:Input
     @get:Optional
     @get:Nested
-    val pluginsRepositories = objectFactory.newInstance<PluginsRepositoryConfiguration>()
+    val pluginsRepositories = objectFactory.newInstance<PluginsRepositoryConfiguration>(dependenciesDownloader)
 
     private var pluginDependenciesConfigured = false
 

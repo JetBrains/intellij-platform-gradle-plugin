@@ -13,6 +13,7 @@ import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.LatestVersionResolver
@@ -62,8 +63,9 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
 
     @TaskAction
     fun downloadPlugin() {
-        val target = outputDir.get().asFile
-        archiveUtils.extract(pluginArchive.get(), target, context)
+        val archive = pluginArchive.get().toPath()
+        val target = outputDir.get().asPath
+        archiveUtils.extract(archive, target, context)
     }
 
     /**

@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Incubating
@@ -10,6 +11,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.dependency.BuiltinPluginsRegistry
 import org.jetbrains.intellij.logCategory
 import java.io.File
@@ -38,9 +40,9 @@ abstract class ListBundledPluginsTask : DefaultTask() {
 
     @TaskAction
     fun list() {
-        outputFile.get().asFile.outputStream().use { os ->
+        outputFile.get().asPath.outputStream().use { os ->
             BuiltinPluginsRegistry
-                .resolveBundledPlugins(ideDir.get(), context)
+                .resolveBundledPlugins(ideDir.get().toPath(), context)
                 .joinToString("\n")
                 .let {
                     TeeOutputStream(System.out, os).write(it.toByteArray())

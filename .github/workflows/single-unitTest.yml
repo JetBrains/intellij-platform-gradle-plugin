@@ -1,0 +1,37 @@
+name: Manual Unit Tests
+on:
+  workflow_dispatch:
+    inputs:
+      testName:
+        description: 'Test name'
+        required: true
+        default: 'org.jetbrains.intellij.tasks.ClassName.method name'
+        type: string
+      gradleVersion:
+        description: 'Gradle Version'
+        required: true
+        type: choice
+        options:
+          - 7.6
+          - 7.3
+      os:
+        description: 'Operation System'
+        required: true
+        type: choice
+        options:
+          - ubuntu-latest
+          - windows-latest
+          - macos-latest
+  workflow_call:
+
+env:
+  XDG_CACHE_HOME: "~/.config/"
+
+jobs:
+  unitTest:
+    name: Gradle ${{ inputs.gradleVersion }} @ ${{ inputs.os }}
+    uses: ./.github/workflows/reusable-single-unitTest.yml
+    with:
+      gradleVersion: ${{ inputs.gradleVersion }}
+      os: ${{ inputs.os }}
+      testName: ${{ inputs.testName }}

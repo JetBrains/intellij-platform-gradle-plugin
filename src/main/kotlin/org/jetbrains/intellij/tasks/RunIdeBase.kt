@@ -4,6 +4,7 @@ package org.jetbrains.intellij.tasks
 
 import com.dd.plist.NSDictionary
 import com.dd.plist.PropertyListParser
+import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.hasExtension
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
@@ -17,9 +18,10 @@ import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
 import java.io.File
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.streams.asSequence
 
-abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
+abstract class RunIdeBase : JavaExec() {
 
     companion object {
         private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
@@ -136,18 +138,18 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     @get:Internal
     abstract val projectExecutable: Property<String>
 
-    private val ideDirFile by lazy {
-        ideDir.get()
+    private val ideDirPath by lazy {
+        ideDir.get().toPath()
     }
     private val infoPlist by lazy {
-        ideDirFile
+        ideDirPath
             .resolve("Info.plist")
-            .takeIf(File::exists)
+            .takeIf(Path::exists)
             ?.let { PropertyListParser.parse(it) as NSDictionary }
     }
 
     private val buildNumber by lazy {
-        ideDirFile
+        ideDirPath
             .let(::ideBuildNumber)
             .split('-')
             .last()
@@ -160,9 +162,6 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     init {
         mainClass.set("com.intellij.idea.Main")
         enableAssertions = true
-        if (runAlways) {
-            outputs.upToDateWhen { false }
-        }
     }
 
     /**
@@ -193,7 +192,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
                 classpath += objectFactory.fileCollection().from(it)
             }
 
-        classpath += getIdeaClasspath(ideDirFile)
+        classpath += getIdeaClasspath(ideDirPath)
             .let { objectFactory.fileCollection().from(it) }
     }
 
@@ -204,7 +203,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         systemProperties(systemProperties)
         systemProperties(
             getIdeaSystemProperties(
-                ideDirFile,
+                ideDirPath,
                 configDir.get(),
                 systemDir.get(),
                 pluginsDir.get().asFile,
@@ -233,7 +232,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = findIdePrefix()
-            if (prefix == null && !ideBuildNumber(ideDir.get()).startsWith("$PLATFORM_TYPE_INTELLIJ_ULTIMATE-")) {
+            if (prefix == null && !ideBuildNumber(ideDir.get().toPath()).startsWith("$PLATFORM_TYPE_INTELLIJ_ULTIMATE-")) {
                 throw TaskExecutionException(
                     this,
                     GradleException(
@@ -262,7 +261,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
     private fun findIdePrefix(): String? {
         info(context, "Looking for platform prefix")
 
-        val prefix = Files.list(ideDirFile.toPath().resolve("bin"))
+        val prefix = Files.list(ideDirPath.resolve("bin"))
             .asSequence()
             .filter { it.hasExtension("sh") || it.hasExtension("bat") }
             .flatMap { Files.lines(it).asSequence() }
@@ -298,7 +297,7 @@ abstract class RunIdeBase(runAlways: Boolean) : JavaExec() {
         jvmArgs = collectJvmArgs()
     }
 
-    protected open fun collectJvmArgs() = getIdeaJvmArgs(this, jvmArgs, ideDir.get())
+    protected open fun collectJvmArgs() = getIdeaJvmArgs(this, jvmArgs, ideDir.get().toPath())
 
     /**
      * Resolves the path to the `tools.jar` library.

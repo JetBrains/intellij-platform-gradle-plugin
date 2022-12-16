@@ -2,12 +2,11 @@
 
 package org.jetbrains.intellij.tasks
 
-import com.jetbrains.plugin.structure.base.utils.extension
-import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
-import com.jetbrains.plugin.structure.base.utils.simpleName
+import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
+import org.gradle.api.Task
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -86,7 +85,7 @@ abstract class PrepareSandboxTask : Sync() {
 
     override fun getDestinationDir() = defaultDestinationDir.get()
 
-    override fun configure(closure: Closure<*>) = super.configure(closure)
+    override fun configure(closure: Closure<*>): Task = super.configure(closure)
 
     fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
         from(pluginDependency.artifact) {
@@ -110,13 +109,19 @@ abstract class PrepareSandboxTask : Sync() {
     }
 
     private fun disableIdeUpdate() {
-        val optionsDir = File(configDir.get(), "/options")
-            .takeIf { it.exists() || it.mkdirs() }
+        val optionsDir = Path.of(configDir.get())
+            .resolve("options")
+            .takeIf { it.createDir().exists() }
             .ifNull { error(context, "Cannot disable update checking in host IDE") }
             ?: return
 
-        val updatesConfig = File(optionsDir, "updates.xml")
-            .takeIf { it.exists() || it.createNewFile() }
+        val updatesConfig = optionsDir.resolve("updates.xml")
+            .also {
+                if (!it.exists()) {
+                    it.create()
+                }
+            }
+            .takeIf(Path::exists)
             .ifNull { error(context, "Cannot disable update checking in host IDE") }
             ?: return
 
@@ -153,13 +158,13 @@ abstract class PrepareSandboxTask : Sync() {
         }
     }
 
-    fun ensureName(file: Path): String {
-        var name = file.simpleName
+    fun ensureName(path: Path): String {
+        var name = path.simpleName
         var index = 1
-        var previousPath = usedNames.putIfAbsent(name, file)
-        while (previousPath != null && previousPath != file) {
-            name = "${file.nameWithoutExtension}_${index++}.${file.extension}"
-            previousPath = usedNames.putIfAbsent(name, file)
+        var previousPath = usedNames.putIfAbsent(name, path)
+        while (previousPath != null && previousPath != path) {
+            name = "${path.nameWithoutExtension}_${index++}.${path.extension}"
+            previousPath = usedNames.putIfAbsent(name, path)
         }
 
         return name

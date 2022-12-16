@@ -2,10 +2,7 @@
 
 package org.jetbrains.intellij.dependency
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.extension
-import com.jetbrains.plugin.structure.base.utils.isZip
-import com.jetbrains.plugin.structure.base.utils.simpleName
+import com.jetbrains.plugin.structure.base.utils.*
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
@@ -91,7 +88,7 @@ abstract class IdeaDependencyManager @Inject constructor(
         )
 
         else -> {
-            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(File(classesDirectory, "plugins"), context)
+            val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(classesDirectory.resolve("plugins").toPath(), context)
             when (type) {
                 null -> LocalIdeaDependency(
                     name,
@@ -153,18 +150,18 @@ abstract class IdeaDependencyManager @Inject constructor(
         type: String,
         checkVersionChange: Boolean,
     ) = archiveUtils.extract(
-        zipFile,
+        zipFile.toPath(), // FIXME
         cacheDirectory.resolve(
             zipFile
                 .name
                 .removeSuffix(".zip")
                 .removeSuffix(".tar.gz")
-        ),
+        ).toPath(), // FIXME
         context,
-        { markerFile -> isCacheUpToDate(zipFile, markerFile, checkVersionChange) },
+        { markerFile -> isCacheUpToDate(zipFile, markerFile.toFile(), checkVersionChange) }, // FIXME
         { unzippedDirectory, markerFile ->
-            resetExecutablePermissions(unzippedDirectory, type)
-            storeCache(unzippedDirectory, markerFile)
+            resetExecutablePermissions(unzippedDirectory.toFile(), type) // FIXME
+            storeCache(unzippedDirectory.toFile(), markerFile.toFile()) // FIXME
         },
     )
 
@@ -320,7 +317,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                     else -> "zip"
                 },
             ) {
-                with(it.toPath()) {
+                with(it) {
                     Files.list(resolveAndroidStudioPath(this))
                         .forEach { entry -> Files.move(entry, resolve(entry.fileName), StandardCopyOption.REPLACE_EXISTING) }
                 }
@@ -339,9 +336,10 @@ abstract class IdeaDependencyManager @Inject constructor(
         }, {
             when (type) {
                 PLATFORM_TYPE_ANDROID_STUDIO -> {
-                    val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context)
-                        .fetch(dependenciesDownloader.getAndroidStudioReleases(context))
-                        ?: throw GradleException("Cannot resolve Android Studio Releases list")
+                    val androidStudioReleases =
+                        dependenciesDownloader.getAndroidStudioReleases(context)?.let {
+                            XmlExtractor<AndroidStudioReleases>(context).fetch(it)
+                        } ?: throw GradleException("Cannot resolve Android Studio Releases list")
 
                     val release = androidStudioReleases.items.find {
                         it.version == version || it.build == "$PLATFORM_TYPE_ANDROID_STUDIO-$version"
@@ -388,7 +386,7 @@ abstract class IdeaDependencyManager @Inject constructor(
             type,
             version,
             buildNumber,
-            classesDirectory,
+            classesDirectory.toFile(), // FIXME
             sourcesDirectory,
             project,
             resolvedExtraDependencies,
@@ -397,7 +395,10 @@ abstract class IdeaDependencyManager @Inject constructor(
 
     fun resolveLocal(project: Project, localPath: String, localPathSources: String?): IdeaDependency {
         debug(context, "Adding local IDE dependency")
-        val ideaDir = ideaDir(localPath)
+        val ideaDir = Path.of(localPath).let {
+            it.takeUnless { it.endsWith(".app") } ?: it.resolve("Contents")
+        }
+
         if (!ideaDir.exists() || !ideaDir.isDirectory) {
             throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
@@ -406,7 +407,7 @@ abstract class IdeaDependencyManager @Inject constructor(
             !localPathSources.isNullOrEmpty() -> File(localPathSources)
             else -> null
         }
-        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir, sources, project, emptyList())
+        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir.toFile(), sources, project, emptyList())
     }
 
     private fun getZipCacheDirectory(zipFile: File, project: Project, type: String): File {
@@ -470,7 +471,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                             dependencyFile,
                             PLATFORM_TYPE_INTELLIJ_COMMUNITY,
                             version.endsWith(RELEASE_SUFFIX_SNAPSHOT)
-                        )
+                        ).toFile() // FIXME
                     }
 
                     else -> {
@@ -506,6 +507,6 @@ abstract class IdeaDependencyManager @Inject constructor(
         val name: String,
         val hasSources: Boolean? = null,
         val artifactExtension: String = "zip",
-        val postProcess: (File) -> Unit = {},
+        val postProcess: (Path) -> Unit = {},
     )
 }

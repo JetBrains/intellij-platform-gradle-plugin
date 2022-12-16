@@ -19,6 +19,8 @@ object IntelliJPluginConstants {
     const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     const val LIST_BUNDLED_PLUGINS_TASK_NAME = "listBundledPlugins"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
+    const val PRINT_BUNDLED_PLUGINS_TASK_NAME = "printBundledPlugins"
+    const val PRINT_PRODUCTS_RELEASES_TASK_NAME = "printProductsReleases"
     const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
     const val POST_INSTRUMENT_CODE_TASK_NAME = "postInstrumentCode"
     const val POST_INSTRUMENT_TEST_CODE_TASK_NAME = "postInstrumentTestCode"
@@ -48,9 +50,9 @@ object IntelliJPluginConstants {
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
 
-    const val ANNOTATIONS_DEPENDENCY_VERSION = "23.0.0"
+    const val ANNOTATIONS_DEPENDENCY_VERSION = "23.1.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-    const val MINIMAL_SUPPORTED_GRADLE_VERSION = "6.8"
+    const val MINIMAL_SUPPORTED_GRADLE_VERSION = "7.3"
 
     const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"
     const val RELEASE_SUFFIX_EAP_CANDIDATE = "-EAP-CANDIDATE-SNAPSHOT"

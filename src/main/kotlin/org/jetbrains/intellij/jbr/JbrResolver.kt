@@ -2,6 +2,10 @@
 
 package org.jetbrains.intellij.jbr
 
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.listFiles
+import com.jetbrains.plugin.structure.base.utils.simpleName
+import org.gradle.api.provider.Provider
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
@@ -18,8 +22,7 @@ import java.util.*
 import javax.inject.Inject
 
 abstract class JbrResolver @Inject constructor(
-    private val jreRepository: String,
-    private val isOffline: Boolean,
+    private val jreRepository: Provider<String>,
     private val archiveUtils: ArchiveUtils,
     private val dependenciesDownloader: DependenciesDownloader,
     private val context: String?,
@@ -32,7 +35,7 @@ abstract class JbrResolver @Inject constructor(
         jbrVersion: String? = null,
         jbrVariant: String? = null,
         ideDir: File? = null,
-        validate: (executable: String) -> Boolean = { true },
+        validate: (executable: Path) -> Boolean = { true },
     ) = resolveRuntime(runtimeDir, jbrVersion, jbrVariant, ideDir, false, validate)
 
     fun resolveRuntime(
@@ -41,15 +44,14 @@ abstract class JbrResolver @Inject constructor(
         jbrVariant: String? = null,
         ideDir: File? = null,
         resolveExecutable: Boolean = true,
-        validate: (executable: String) -> Boolean = { true },
-    ): String? {
+        validate: (executable: Path) -> Boolean = { true },
+    ): Path? {
         debug(context, "Resolving runtime directory.")
 
         return listOf(
             {
                 runtimeDir?.let { path ->
-                    path
-                        .let(::File)
+                    Path.of(path)
                         .let(::getJbrRoot)
                         .run {
                             when (resolveExecutable) {
@@ -57,8 +59,7 @@ abstract class JbrResolver @Inject constructor(
                                 else -> this
                             }
                         }
-                        .takeIf(File::exists)
-                        ?.canonicalPath
+                        .takeIf(Path::exists)
                         .also { debug(context, "Runtime specified with runtimeDir='$path' resolved as: $it") }
                         .ifNull { debug(context, "Cannot resolve runtime with runtimeDir='$path'") }
                 }
@@ -67,8 +68,8 @@ abstract class JbrResolver @Inject constructor(
                 jbrVersion?.let { version ->
                     resolve(version, jbrVariant)?.run {
                         when (resolveExecutable) {
-                            true -> javaExecutable
-                            else -> javaHome.let(::getJbrRoot).canonicalPath
+                            true -> javaExecutable?.let { Path.of(it) }
+                            else -> javaHome.let(::getJbrRoot)
                         }
                     }
                         .also { debug(context, "Runtime specified with jbrVersion='$version', jbrVariant='$jbrVariant' resolved as: $it") }
@@ -78,12 +79,13 @@ abstract class JbrResolver @Inject constructor(
             {
                 ideDir?.let { file ->
                     file
+                        .toPath()
                         .let(::getJbrRoot)
                         .run {
-                            resolve("bin/java").takeIf(File::exists)?.let { executable ->
+                            resolve("bin/java").takeIf(Path::exists)?.let { executable ->
                                 when (resolveExecutable) {
-                                    true -> executable.canonicalPath
-                                    else -> canonicalPath.takeIf { executable.exists() }
+                                    true -> executable
+                                    else -> takeIf { executable.exists() }
                                 }
                             }
                         }
@@ -97,8 +99,8 @@ abstract class JbrResolver @Inject constructor(
                         ?.let { version ->
                             resolve(version, jbrVariant)?.run {
                                 when (resolveExecutable) {
-                                    true -> javaExecutable
-                                    else -> javaHome.let(::getJbrRoot).canonicalPath
+                                    true -> javaExecutable?.let { Path.of(it) }
+                                    else -> javaHome.let(::getJbrRoot)
                                 }
                             }
                                 .also { debug(context, "Runtime specified with ideDir='$file', version='$version' resolved as: $it") }
@@ -111,8 +113,8 @@ abstract class JbrResolver @Inject constructor(
                 Jvm.current()
                     .run {
                         when (resolveExecutable) {
-                            true -> javaExecutable.canonicalPath
-                            false -> javaHome.let(::getJbrRoot).canonicalPath
+                            true -> javaExecutable.toPath()
+                            false -> javaHome.toPath().let(::getJbrRoot)
                         }
                     }
                     .also { debug(context, "Using current JVM: $it") }
@@ -132,25 +134,21 @@ abstract class JbrResolver @Inject constructor(
         val jbrArtifact = JbrArtifact.from(version, variant, operatingSystem)
 
         return getJavaArchive(jbrArtifact)?.let {
-            val javaDir = File(it.path.replaceAfter(jbrArtifact.name, "")).resolve("extracted")
+            val javaDir = Path.of(it.toString().replaceAfter(jbrArtifact.name, "")).resolve("extracted")
             archiveUtils.extract(it, javaDir, context)
             fromDir(javaDir, version)
         }
     }
 
-    private fun fromDir(javaDir: File, version: String) =
+    private fun fromDir(javaDir: Path, version: String) =
         findJavaExecutable(javaDir)
             ?.let { Jbr(version, javaDir, it.toFile().canonicalPath) }
             .ifNull { warn(context, "Cannot find java executable in: $javaDir") }
 
-    private fun getJavaArchive(jbrArtifact: JbrArtifact): File? {
-        if (isOffline) {
-            warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'. Gradle runs in offline mode.")
-            return null
-        }
-
+    private fun getJavaArchive(jbrArtifact: JbrArtifact): Path? {
         val url = jreRepository
-            .takeIf(String::isNotEmpty)
+            .orNull
+            .takeUnless { it.isNullOrBlank() }
             .or(jbrArtifact.repositoryUrl)
 
         return try {
@@ -163,25 +161,25 @@ abstract class JbrResolver @Inject constructor(
                 )
             }, {
                 ivyRepository(url, "[revision].tar.gz")
-            }).first()
+            }).first().toPath()
         } catch (e: Exception) {
             warn(context, "Cannot download JetBrains Java Runtime '${jbrArtifact.name}'")
             null
         }
     }
 
-    private fun findJavaExecutable(javaHome: File): Path? {
+    private fun findJavaExecutable(javaHome: Path): Path? {
         val root = getJbrRoot(javaHome)
-        val jre = File(root, "jre")
-        val java = File(
-            jre.takeIf { it.exists() } ?: root,
-            "bin/java" + ".exe".takeIf { operatingSystem.isWindows }.orEmpty()
-        )
-        return java.toPath().takeIf { java.exists() }
+        val jre = root.resolve("jre")
+        val java = jre
+            .takeIf { it.exists() }
+            .or(root)
+            .resolve("bin/java" + ".exe".takeIf { operatingSystem.isWindows }.orEmpty())
+        return java.takeIf { java.exists() }
     }
 
-    private fun getJbrRoot(javaHome: File): File {
-        val jbr = javaHome.listFiles()?.firstOrNull { it.name.startsWith("jbr") }?.takeIf(File::exists)
+    private fun getJbrRoot(javaHome: Path): Path {
+        val jbr = javaHome.listFiles().firstOrNull { it.simpleName.startsWith("jbr") }?.takeIf(Path::exists)
         return when {
             operatingSystem.isMacOsX -> when {
                 javaHome.endsWith("Contents/Home") -> javaHome

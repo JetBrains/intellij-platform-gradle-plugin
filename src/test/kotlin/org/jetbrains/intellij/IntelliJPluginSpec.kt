@@ -23,6 +23,8 @@ import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_TEST_CODE_
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_BUNDLED_PLUGINS_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
@@ -64,6 +66,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 PREPARE_SANDBOX_TASK_NAME,
                 PREPARE_TESTING_SANDBOX_TASK_NAME,
                 PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
+                PRINT_BUNDLED_PLUGINS_TASK_NAME,
+                PRINT_PRODUCTS_RELEASES_TASK_NAME,
                 PUBLISH_PLUGIN_TASK_NAME,
                 RUN_IDE_TASK_NAME,
                 RUN_IDE_FOR_UI_TESTS_TASK_NAME,

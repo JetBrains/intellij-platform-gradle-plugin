@@ -10,9 +10,7 @@ import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
-import com.jetbrains.plugin.structure.base.utils.isJar
-import com.jetbrains.plugin.structure.base.utils.isZip
-import com.jetbrains.plugin.structure.intellij.beans.PluginBean
+import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
@@ -24,6 +22,7 @@ import org.apache.commons.io.filefilter.AbstractFileFilter
 import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
@@ -32,7 +31,6 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
-import org.jdom2.JDOMException
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
@@ -47,11 +45,12 @@ import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.model.ProductInfo
 import org.jetbrains.intellij.utils.OpenedPackages
-import org.xml.sax.SAXParseException
 import java.io.File
-import java.io.IOException
 import java.io.StringWriter
+import java.net.HttpURLConnection
+import java.net.URL
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
@@ -60,32 +59,27 @@ import java.util.function.Predicate
 
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
-fun mainSourceSet(project: Project): SourceSet = project
+internal fun sourcePluginXmlFiles(project: Project) = project
     .convention.getPlugin<JavaPluginConvention>()
-//    .extensions.getByType<JavaPluginConvention>() // available since Gradle 7.1
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+    .resources
+    .srcDirs
+    .filterNotNull()
+    .map(File::toPath)
+    .map { it.resolve("META-INF/plugin.xml") }
+    .filter { it.exists() && it.length > 0 }
 
-fun sourcePluginXmlFiles(project: Project) = mainSourceSet(project).resources.srcDirs.mapNotNull {
-    File(it, "META-INF/plugin.xml").takeIf { file -> file.exists() && file.length() > 0 }
-}
-
-fun parsePluginXml(pluginXml: File, logCategory: String?): PluginBean? {
-    try {
-        pluginXml.inputStream().use {
-            val document = JDOMUtil.loadDocument(it)
-            return PluginBeanExtractor.extractPluginBean(document)
-        }
-    } catch (e: SAXParseException) {
-        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
-    } catch (e: JDOMException) {
-        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
-    } catch (e: IOException) {
-        warn(logCategory, "Cannot read: ${pluginXml.canonicalPath}. Skipping", e)
+internal fun parsePluginXml(pluginXml: Path, logCategory: String?) = runCatching {
+    pluginXml.inputStream().use {
+        val document = JDOMUtil.loadDocument(it)
+        PluginBeanExtractor.extractPluginBean(document)
     }
-    return null
+}.getOrElse {
+    warn(logCategory, "Cannot read: $pluginXml. Skipping", it)
+    null
 }
 
-fun transformXml(document: Document, file: File) {
+fun transformXml(document: Document, path: Path) {
     val xmlOutput = XMLOutputter()
     xmlOutput.format.apply {
         indent = "  "
@@ -95,23 +89,27 @@ fun transformXml(document: Document, file: File) {
 
     StringWriter().use {
         xmlOutput.output(document, it)
-        file.writeText(it.toString())
+        path.writeText(it.toString())
     }
 }
 
-private fun String.resolveIdeHomeVariable(ideDirectory: File) = this
-    .replace("\$APP_PACKAGE", ideDirectory.canonicalPath)
-    .replace("\$IDE_HOME", ideDirectory.canonicalPath)
-    .replace("%IDE_HOME%", ideDirectory.canonicalPath)
+private fun String.resolveIdeHomeVariable(ideDir: Path) =
+    ideDir.toAbsolutePath().toString().let {
+        this
+            .replace("\$APP_PACKAGE", it)
+            .replace("\$IDE_HOME", it)
+            .replace("%IDE_HOME%", it)
+            .replace("Contents/Contents", "Contents")
+    }
 
 fun getIdeaSystemProperties(
-    ideDirectory: File,
+    ideDir: Path,
     configDirectory: File,
     systemDirectory: File,
     pluginsDirectory: File,
     requirePluginIds: List<String>,
 ): Map<String, String> {
-    val currentLaunch = ideProductInfo(ideDirectory)?.currentLaunch
+    val currentLaunch = ideProductInfo(ideDir)?.currentLaunch
     val result = mapOf(
         "idea.config.path" to configDirectory.canonicalPath,
         "idea.system.path" to systemDirectory.canonicalPath,
@@ -125,7 +123,7 @@ fun getIdeaSystemProperties(
         }
         ?.associate {
             it
-                .resolveIdeHomeVariable(ideDirectory)
+                .resolveIdeHomeVariable(ideDir)
                 .substring(2)
                 .split('=')
                 .let { (key, value) -> key to value }
@@ -140,12 +138,12 @@ fun getIdeaSystemProperties(
     return result + currentLaunchProperties + requirePluginProperties
 }
 
-fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: File?): List<String> {
-    val productInfo = ideProductInfo(ideDirectory!!)
+fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: Path): List<String> {
+    val productInfo = ideProductInfo(ideDirectory)
     val bootclasspath = ideDirectory
         .resolve("lib/boot.jar")
         .takeIf { it.exists() }
-        ?.let { listOf("-Xbootclasspath/a:${it.canonicalPath}") }
+        ?.let { listOf("-Xbootclasspath/a:$it") }
         .orEmpty()
     val vmOptions = productInfo
         ?.currentLaunch
@@ -172,14 +170,14 @@ fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirect
         .distinct()
 }
 
-fun getIdeaClasspath(ideDirFile: File): List<String> {
-    val buildNumber = ideBuildNumber(ideDirFile).split('-').last().let { Version.parse(it) }
+fun getIdeaClasspath(ideDir: Path): List<String> {
+    val buildNumber = ideBuildNumber(ideDir).split('-').last().let { Version.parse(it) }
     val build203 = Version.parse("203.0")
     val build221 = Version.parse("221.0")
     val build223 = Version.parse("223.0")
 
-    val currentLaunch = ideProductInfo(ideDirFile)?.currentLaunch
-    val infoPlist = ideDirFile.resolve("Info.plist").takeIf(File::exists)?.let {
+    val currentLaunch = ideProductInfo(ideDir)?.currentLaunch
+    val infoPlist = ideDir.resolve("Info.plist").takeIf(Path::exists)?.let {
         PropertyListParser.parse(it) as NSDictionary
     }
 
@@ -218,27 +216,22 @@ fun getIdeaClasspath(ideDirFile: File): List<String> {
             "jna.jar",
             "trove4j.jar",
         )
-    }.map {
-        "${ideDirFile.canonicalPath}/lib/$it"
-    }
+    }.map { "$ideDir/lib/$it" }
 }
 
-fun ideBuildNumber(ideDirectory: File) = (
-        File(ideDirectory, "Resources/build.txt").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-            ?: File(ideDirectory, "build.txt")
-        ).readText().trim()
+fun ideBuildNumber(ideDir: Path) = ideDir
+    .resolve("Resources/build.txt")
+    .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+    .or { ideDir.resolve("build.txt") }
+    .readText().trim()
 
 private val json = Json { ignoreUnknownKeys = true }
-fun ideProductInfo(ideDirectory: File) = (
-        File(ideDirectory, "Resources/product-info.json").takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-            ?: File(ideDirectory, "product-info.json")
-        )
+fun ideProductInfo(ideDir: Path) = ideDir
+    .resolve("Resources/product-info.json")
+    .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+    .or { ideDir.resolve("product-info.json") }
     .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
-
-fun ideaDir(path: String) = File(path).let {
-    it.takeUnless { it.name.endsWith(".app") } ?: File(it, "Contents")
-}
 
 fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }) =
     collectFiles(directory) { it.toPath().isJar() && filter.test(it) }
@@ -346,3 +339,16 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
 fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
 
 fun NSDictionary.getValue(key: String) = this[key].toString()
+
+internal val FileSystemLocation.asPath
+    get() = asFile.toPath().toAbsolutePath()
+
+internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnection) {
+    instanceFollowRedirects = false
+    inputStream.use {
+        when (responseCode) {
+            HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP -> URL(this@resolveRedirection, getHeaderField("Location"))
+            else -> this@resolveRedirection
+        }
+    }.also { disconnect() }
+}

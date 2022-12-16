@@ -1,4 +1,4 @@
-name: Reusable Single Unit Tests
+name: Single Unit Test
 
 on:
   workflow_call:
@@ -15,6 +15,10 @@ on:
         type: string
         required: false
         description: 'Optional OS-dedicated script to run in the beginning'
+      testName:
+        type: string
+        required: false
+        description: 'Optional test name to run'
 
 env:
   XDG_CACHE_HOME: "~/.config/"
@@ -53,7 +57,16 @@ jobs:
             ${{ runner.os }}-XDG_CACHE_HOME-
 
       - name: Run Tests
-        run: ./gradlew check -PtestGradleVersion="${{ inputs.gradleVersion }}" ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }}
+        env:
+          TEST_NAME: ${{ inputs.testName }}
+        shell: bash
+        run: |
+          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
+          
+          ./gradlew check test \
+            -PtestGradleVersion="${{ inputs.gradleVersion }}" \
+            ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} \
+            $TESTS
 
       - name: Test Report
         uses: dorny/test-reporter@v1

@@ -2,10 +2,9 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.jetbrains.intellij.Version
+import java.nio.file.Paths
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,13 +12,18 @@ import kotlin.test.assertEquals
 @Suppress("ComplexRedundantLet")
 class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
-    private val ideaReleasesPath = "products-releases/idea-releases.xml".let {
-        "'${javaClass.classLoader.getResource(it)?.path}'"
+    private fun resolveResourcePath(path: String) = path.let {
+        javaClass.classLoader.getResource(it)?.let { url ->
+            Paths.get(url.toURI()).toAbsolutePath().toString().replace('\\', '/')
+        }
     }
 
-    private val androidStudioReleasesPath = "products-releases/android-studio-products-releases.xml".let {
-        "'${javaClass.classLoader.getResource(it)?.path}'"
-    }
+    private val ideaReleasesPath = resolveResourcePath("products-releases/idea-releases.xml")
+
+    private val androidStudioReleasesPath = resolveResourcePath("products-releases/android-studio-products-releases.xml")
+
+    private val outputFile
+        get() = buildDirectory.resolve("$LIST_PRODUCTS_RELEASES_TASK_NAME.txt")
 
     @BeforeTest
     override fun setUp() {
@@ -31,8 +35,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 version = "2020.1"
             }
             listProductsReleases {
-                productsReleasesUpdateFiles.setFrom([${ideaReleasesPath}])
-                androidStudioUpdatePath = $androidStudioReleasesPath
+                productsReleasesUpdateFiles.setFrom(['$ideaReleasesPath'])
+                androidStudioUpdatePath = '$androidStudioReleasesPath'
             }
             """.trimIndent()
         )
@@ -40,9 +44,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `get IDEs list for the current platformType, sinceBuild and untilBuild`() {
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(listOf("IC-2020.1.4"), it.taskOutput())
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+
+        assertEquals(
+            """
+            IC-2020.1.4
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -55,18 +64,17 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    "IC-2021.2.2",
-                    "IC-2021.1.3",
-                    "IC-2020.3.4",
-                    "IC-2020.2.4",
-                    "IC-2020.1.4",
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            IC-2021.2.2
+            IC-2021.1.3
+            IC-2020.3.4
+            IC-2020.2.4
+            IC-2020.1.4
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -80,16 +88,15 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    "IC-2021.2.1",
-                    "IC-2021.1.3",
-                    "IC-2020.3.4"
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            IC-2021.2.1
+            IC-2021.1.3
+            IC-2020.3.4
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -103,16 +110,15 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    "IC-2021.2.2",
-                    "IC-2021.1.3",
-                    "IC-2020.3.4",
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            IC-2021.2.2
+            IC-2021.1.3
+            IC-2020.3.4
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -129,16 +135,15 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    "IC-2021.2.2",
-                    "IC-2021.1.3",
-                    "IC-2020.3.4",
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            IC-2021.2.2
+            IC-2021.1.3
+            IC-2020.3.4
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -152,12 +157,13 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf("PY-2021.1.3"),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            PY-2021.1.3
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -173,16 +179,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    // "IC-2021.2.2" - available only in the EAP channel and shouldn't be listed here
-                    "IC-2021.2.1",
-                    "IC-2021.1.3"
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            IC-2021.2.1
+            IC-2021.1.3
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -196,19 +200,18 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    "IU-2021.2.2",
-                    "IU-2021.1.3",
-                    "PS-2021.2.2",
-                    "PS-2021.1.4",
-                    "PY-2021.2.2",
-                    "PY-2021.1.3",
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            IU-2021.2.2
+            IU-2021.1.3
+            PS-2021.2.2
+            PS-2021.1.4
+            PY-2021.2.2
+            PY-2021.1.3
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -223,26 +226,25 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 types = ["IU", "PS", "PY"]
                 
-                updatePaths = [${ideaReleasesPath}]
+                updatePaths = ['$ideaReleasesPath']
                 
                 // no values set for productsReleasesUpdateFiles
             }
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    "IU-2021.2.2",
-                    "IU-2021.1.3",
-                    "PS-2021.2.2",
-                    "PS-2021.1.4",
-                    "PY-2021.2.2",
-                    "PY-2021.1.3",
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            IU-2021.2.2
+            IU-2021.1.3
+            PS-2021.2.2
+            PS-2021.1.4
+            PY-2021.2.2
+            PY-2021.1.3
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -256,16 +258,15 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf(
-                    "AI-2021.3.1.7",
-                    "AI-2021.2.1.11",
-                    "AI-2021.1.1.22",
-                ),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            AI-2021.3.1.7
+            AI-2021.2.1.11
+            AI-2021.1.1.22
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -282,12 +283,13 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertEquals(
-                listOf("AI-2021.1.1.20"),
-                it.taskOutput()
-            )
-        }
+        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
+        assertEquals(
+            """
+            AI-2021.1.1.20
+            """.trimIndent(),
+            outputFile.readText(),
+        )
     }
 
     @Test
@@ -296,14 +298,5 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
             assertContains("Reusing configuration cache.", it.output)
         }
-    }
-
-    private fun BuildResult.taskOutput() = output.lines().run {
-        val from = indexOf("> Task :$LIST_PRODUCTS_RELEASES_TASK_NAME") + 1
-        val to = indexOfFirst { it.startsWith("BUILD SUCCESSFUL") } - when {
-            Version.parse(gradleVersion) >= Version.parse("7.4") -> 4
-            else -> 0
-        }
-        subList(from, to)
     }
 }
