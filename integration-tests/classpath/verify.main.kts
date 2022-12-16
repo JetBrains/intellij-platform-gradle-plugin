@@ -25,10 +25,10 @@ __FILE__.init {
             +--- org.jetbrains:markdown:0.3.1
             |    \--- org.jetbrains:markdown-jvm:0.3.1
             |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
-            |         |    +--- org.jetbrains:annotations:13.0 -> 23.0.0
+            |         |    +--- org.jetbrains:annotations:13.0 -> 23.1.0
             |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
             |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
-            +--- org.jetbrains:annotations:23.0.0
+            +--- org.jetbrains:annotations:23.1.0
             \--- com.jetbrains:ideaIC:2022.1
         """.trimIndent()
 
@@ -39,7 +39,7 @@ __FILE__.init {
 
         logs containsText """
             z10_intellijDefaultDependencies
-            \--- org.jetbrains:annotations:23.0.0
+            \--- org.jetbrains:annotations:23.1.0
         """.trimIndent()
 
         logs containsText """
@@ -50,11 +50,11 @@ __FILE__.init {
 
     runGradleTask("clean", "build").let { logs ->
         buildDirectory.resolve("jacoco/test.exec").let { jacocoTestExec ->
-            assert(Files.exists(jacocoTestExec)) { "expect that ${jacocoTestExec} exists" }
+            assert(Files.exists(jacocoTestExec)) { "expect that $jacocoTestExec exists" }
         }
 
         buildDirectory.resolve("reports/jacoco.xml").let { jacocoXml ->
-            assert(Files.exists(jacocoXml))  { "expect that ${jacocoXml} exists" }
+            assert(Files.exists(jacocoXml))  { "expect that $jacocoXml exists" }
 
             jacocoXml containsText """
                 <method name="getRandomNumber" desc="()I" line="7">

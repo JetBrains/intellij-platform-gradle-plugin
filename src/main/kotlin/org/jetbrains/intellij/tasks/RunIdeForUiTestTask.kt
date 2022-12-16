@@ -2,4 +2,8 @@
 
 package org.jetbrains.intellij.tasks
 
-abstract class RunIdeForUiTestTask : RunIdeBase(true)
+import org.gradle.api.tasks.UntrackedTask
+
+@Suppress("UnstableApiUsage")
+@UntrackedTask(because = "Should always run IDE for UI tests")
+abstract class RunIdeForUiTestTask : RunIdeBase()

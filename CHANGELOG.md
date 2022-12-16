@@ -2,6 +2,22 @@
 
 ## [next]
 
+### Added
+- `printProductsReleases` task to print the result of the `listProductsReleases` task
+- `printBundledPlugins` task to print the result of the `listBundledPlugins` task
+
+### Changed
+- `custom(String)` helper of `intellij.pluginRepositories` configuration requires now passing a direct URL to the `updatePlugins.xml` file [#1252](../../issues/1252)
+- `listProductsReleases` task doesn't print output anymore
+- `listBundledPlugins` task doesn't print output anymore
+- Set minimum supported Gradle version to `7.3`
+
+### Fixed
+- Replace `Contents/Contents` part within JVM arguments to a single `Contents` – happens with macOS distribution
+- `--offline` prevents from using JBR even if it is already downloaded [#1251](../../issues/1251)
+
+## [1.10.2] - 2022-12-16
+
 ### Changed
 - Revert back the minimum supported Gradle version to `6.8`
 

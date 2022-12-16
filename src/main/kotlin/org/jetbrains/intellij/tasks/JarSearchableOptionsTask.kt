@@ -2,14 +2,17 @@
 
 package org.jetbrains.intellij.tasks
 
+import com.jetbrains.plugin.structure.base.utils.listFiles
+import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
 import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
-import java.io.File
+import java.nio.file.Path
 
 abstract class JarSearchableOptionsTask : Jar() {
 
@@ -53,14 +56,17 @@ abstract class JarSearchableOptionsTask : Jar() {
         val pluginJarFiles = mutableSetOf<String>()
 
         this.from({
-            include {
+            include { it ->
                 when {
                     it.isDirectory -> true
                     else -> {
                         if (it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) && pluginJarFiles.isEmpty()) {
-                            File(sandboxDir.get(), "${pluginName.get()}/lib").list()?.let { files ->
-                                pluginJarFiles.addAll(files)
-                            }
+                            Path.of(sandboxDir.get())
+                                .resolve(pluginName.get())
+                                .resolve("lib")
+                                .listFiles()
+                                .map(Path::simpleName)
+                                .let(pluginJarFiles::addAll)
                         }
                         it.name
                             .replace(SEARCHABLE_OPTIONS_SUFFIX, "")
@@ -68,7 +74,7 @@ abstract class JarSearchableOptionsTask : Jar() {
                     }
                 }
             }
-            outputDir.get().asFile.canonicalPath
+            outputDir.get().asPath
         })
 
         this.eachFile { path = "search/$name" }

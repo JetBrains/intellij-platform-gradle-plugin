@@ -2,11 +2,11 @@
 
 package org.jetbrains.intellij.utils
 
-import com.jetbrains.plugin.structure.base.utils.simpleName
+import com.jetbrains.plugin.structure.base.utils.*
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.jetbrains.intellij.debug
-import java.io.File
+import java.nio.file.Path
 import java.util.function.BiConsumer
 import java.util.function.Predicate
 import javax.inject.Inject
@@ -17,28 +17,27 @@ abstract class ArchiveUtils @Inject constructor(
 ) {
 
     fun extract(
-        archiveFile: File,
-        targetDirectory: File,
+        archive: Path,
+        targetDirectory: Path,
         context: String?,
-        isUpToDate: Predicate<File>? = null,
-        markUpToDate: BiConsumer<File, File>? = null,
-    ): File {
-        val archive = archiveFile.toPath() // TODO: migrate archiveFile to Path
+        isUpToDate: Predicate<Path>? = null,
+        markUpToDate: BiConsumer<Path, Path>? = null,
+    ): Path {
         val name = archive.simpleName
-        val markerFile = File(targetDirectory, "markerFile")
+        val markerFile = targetDirectory.resolve("markerFile")
         if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
             return targetDirectory
         }
 
-        targetDirectory.deleteRecursively()
-        targetDirectory.mkdirs()
+        targetDirectory.deleteQuietly()
+        targetDirectory.createDir()
 
         debug(context, "Extracting: $name")
 
         when {
             name.endsWith(".zip") || name.endsWith(".sit") -> {
                 fileSystemOperations.copy {
-                    from(archiveOperations.zipTree(archiveFile))
+                    from(archiveOperations.zipTree(archive))
                     into(targetDirectory)
                 }
             }
@@ -55,7 +54,7 @@ abstract class ArchiveUtils @Inject constructor(
 
         debug(context, "Extracted: $name")
 
-        markerFile.createNewFile()
+        markerFile.create()
         markUpToDate?.accept(targetDirectory, markerFile)
         return targetDirectory
     }

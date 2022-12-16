@@ -326,7 +326,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline").let {
-            assertContains("Gradle runs in offline mode.", it.output)
+            assertContains("Cannot download", it.output)
         }
     }
 

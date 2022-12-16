@@ -14,15 +14,18 @@ import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.error
+import org.jetbrains.intellij.info
 import org.jetbrains.intellij.repositoryVersion
 import java.io.File
 import java.net.URI
+import java.net.URL
 import javax.inject.Inject
 
 abstract class DependenciesDownloader @Inject constructor(
     private val configurationContainer: ConfigurationContainer,
     private val dependencyHandler: DependencyHandler,
     private val repositoryHandler: RepositoryHandler,
+    private val isOffline: Boolean,
 ) {
 
     fun downloadFromRepository(
@@ -69,8 +72,18 @@ abstract class DependenciesDownloader @Inject constructor(
         try {
             return configurationContainer.detachedConfiguration(dependency).files.toList()
         } catch (e: Exception) {
-            if (!silent) {
-                error(context, "Error when resolving dependency: $dependency", e)
+            when {
+                isOffline || silent -> {
+                    info(
+                        context,
+                        "Gradle runs in offline mode. ".takeIf { isOffline }.orEmpty()
+                                + "Error when resolving dependency: $dependency",
+                        e,
+                    )
+                    return emptyList()
+                }
+
+                else -> error(context, "Error when resolving dependency: $dependency", e)
             }
             throw e
         } finally {
@@ -87,9 +100,15 @@ internal fun RepositoryHandler.ivyRepository(
     repositoryUrl: String,
     pattern: String = "",
     block: (IvyArtifactRepository.() -> Unit)? = null,
+) = ivyRepository(URL(repositoryUrl), pattern, block)
+
+internal fun RepositoryHandler.ivyRepository(
+    repositoryUrl: URL,
+    pattern: String = "",
+    block: (IvyArtifactRepository.() -> Unit)? = null,
 ) =
     ivy {
-        url = URI(repositoryUrl)
+        url = repositoryUrl.toURI()
         patternLayout { artifact(pattern) }
         metadataSources { artifact() }
         block?.invoke(this)
@@ -110,4 +129,4 @@ internal fun DependenciesDownloader.getAndroidStudioReleases(context: String?) =
     )
 }, {
     ivyRepository(ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
-}).first().canonicalPath
+}).firstOrNull()?.toPath()

@@ -16,6 +16,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TAS
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
+import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_CODE_TASK_NAME
@@ -23,6 +24,8 @@ import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_TEST_CODE_
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_BUNDLED_PLUGINS_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
@@ -64,6 +67,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 PREPARE_SANDBOX_TASK_NAME,
                 PREPARE_TESTING_SANDBOX_TASK_NAME,
                 PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
+                PRINT_BUNDLED_PLUGINS_TASK_NAME,
+                PRINT_PRODUCTS_RELEASES_TASK_NAME,
                 PUBLISH_PLUGIN_TASK_NAME,
                 RUN_IDE_TASK_NAME,
                 RUN_IDE_FOR_UI_TESTS_TASK_NAME,
@@ -575,12 +580,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
 //    @Test
-//    fun `expect successful build using minimal supported Gradle version`() {
-//        val buildResult = build(MINIMAL_SUPPORTED_GRADLE_VERSION, false, "help")
-//
-//        assertContains("BUILD SUCCESSFUL", buildResult.output)
-//        assertNotContains("Gradle IntelliJ Plugin requires Gradle", buildResult.output)
-//    }
+    fun `expect successful build using minimal supported Gradle version`() {
+        val buildResult = build(MINIMAL_SUPPORTED_GRADLE_VERSION, false, "help")
+
+        assertContains("BUILD SUCCESSFUL", buildResult.output)
+        assertNotContains("Gradle IntelliJ Plugin requires Gradle", buildResult.output)
+    }
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
     fun assertPathParameters(testCommand: ProcessProperties, sandboxPath: String) {

@@ -12,6 +12,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
@@ -70,8 +71,8 @@ abstract class PublishPluginTask : DefaultTask() {
     fun publishPlugin() {
         validateInput()
 
-        val file = distributionFile.get().asFile
-        when (val creationResult = IdePluginManager.createManager().createPlugin(file.toPath())) {
+        val path = distributionFile.get().asPath
+        when (val creationResult = IdePluginManager.createManager().createPlugin(path)) {
             is PluginCreationSuccess -> {
                 if (creationResult.unacceptableWarnings.isNotEmpty()) {
                     val problems = creationResult.unacceptableWarnings.joinToString()
@@ -79,7 +80,7 @@ abstract class PublishPluginTask : DefaultTask() {
                 }
                 val pluginId = creationResult.plugin.pluginId
                 channels.get().forEach { channel ->
-                    info(context, "Uploading plugin '$pluginId' from '${file.canonicalPath}' to '${host.get()}', channel: '$channel'")
+                    info(context, "Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
                     try {
                         val repositoryClient = when (toolboxEnterprise.get()) {
                             true -> PluginRepositoryFactory.createWithImplementationClass(
@@ -91,7 +92,7 @@ abstract class PublishPluginTask : DefaultTask() {
 
                             false -> PluginRepositoryFactory.create(host.get(), token.get())
                         }
-                        repositoryClient.uploader.upload(pluginId as StringPluginId, file, channel.takeIf { it != "default" }, null)
+                        repositoryClient.uploader.upload(pluginId as StringPluginId, path.toFile(), channel.takeIf { it != "default" }, null)
                         info(context, "Uploaded successfully")
                     } catch (exception: Exception) {
                         throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))

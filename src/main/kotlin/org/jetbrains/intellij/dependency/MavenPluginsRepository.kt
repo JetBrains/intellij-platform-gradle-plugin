@@ -6,7 +6,6 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
-import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.mavenRepository
@@ -16,9 +15,9 @@ interface MavenRepository : PluginsRepository {
 
     var resolvedDependency: Boolean
 
-    fun getPluginFile(project: Project, dependency: Dependency, repository: MavenArtifactRepository, url: String, context: String?) =
+    fun getPluginFile(project: Project, dependenciesDownloader: DependenciesDownloader, dependency: Dependency, repository: MavenArtifactRepository, url: String, context: String?) =
         runCatching {
-            project.objects.newInstance<DependenciesDownloader>()
+            dependenciesDownloader
                 .downloadFromRepository(context, { dependency }, { repository })
                 .first()
                 .also { resolvedDependency = true }
@@ -31,14 +30,17 @@ interface MavenRepository : PluginsRepository {
     }
 }
 
-class MavenRepositoryPluginByAction(private val maven: Action<in MavenArtifactRepository>) : MavenRepository {
+class MavenRepositoryPluginByAction(
+    private val maven: Action<in MavenArtifactRepository>,
+    private val dependenciesDownloader: DependenciesDownloader,
+) : MavenRepository {
 
     override var resolvedDependency = false
 
     override fun resolve(project: Project, plugin: PluginDependencyNotation, context: String?): File? {
         val dependency = plugin.toDependency(project)
         val repository = project.repositories.maven(maven)
-        return getPluginFile(project, dependency, repository, repository.url.toString(), context)
+        return getPluginFile(project, dependenciesDownloader, dependency, repository, repository.url.toString(), context)
     }
 
     override fun postResolve(project: Project, context: String?) =
@@ -49,14 +51,17 @@ class MavenRepositoryPluginByAction(private val maven: Action<in MavenArtifactRe
         }
 }
 
-class MavenRepositoryPlugin(private val repositoryUrl: String) : MavenRepository {
+class MavenRepositoryPlugin(
+    private val repositoryUrl: String,
+    private val dependenciesDownloader: DependenciesDownloader,
+) : MavenRepository {
 
     override var resolvedDependency = false
 
     override fun resolve(project: Project, plugin: PluginDependencyNotation, context: String?): File? {
         val dependency = plugin.toDependency(project)
         val mavenRepository = project.repositories.mavenRepository(repositoryUrl)
-        return getPluginFile(project, dependency, mavenRepository, repositoryUrl, context)
+        return getPluginFile(project, dependenciesDownloader, dependency, mavenRepository, repositoryUrl, context)
     }
 
     override fun postResolve(project: Project, context: String?) =
