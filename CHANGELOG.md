@@ -3,6 +3,11 @@
 ## [next]
 
 ### Changed
+- Revert back the minimum supported Gradle version to `6.8`
+
+## [1.10.1] - 2022-12-08
+
+### Changed
 - Set minimum supported Gradle version from `6.8` to `7.1`
 
 ### Fixed
@@ -605,7 +610,8 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.10.0...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.10.1...HEAD
+[1.10.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.10.0...v1.10.1
 [1.10.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.9.0...v1.10.0
 [1.9.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.8.1...v1.9.0
 [1.8.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.8.0...v1.8.1
