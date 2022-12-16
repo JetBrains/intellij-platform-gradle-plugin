@@ -181,6 +181,14 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val jbrVariant: Property<String>
 
     /**
+     * JetBrains Runtime architecture.
+     * By default, it's resolved based on the current OS and JRE architecture, see [JbrResolver.JbrArtifact.arch].
+     */
+    @get:Input
+    @get:Optional
+    abstract val jbrArch: Property<String>
+
+    /**
      * URL of repository for downloading JetBrains Runtime.
      */
     @get:Input
@@ -321,6 +329,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
                 runtimeDir = runtimeDir.orNull,
                 jbrVersion = jbrVersion.orNull,
                 jbrVariant = jbrVariant.orNull,
+                jbrArch = jbrArch.orNull,
                 ideDir = ideDir.orNull,
             ) {
                 validateRuntimeDir(it.toString())

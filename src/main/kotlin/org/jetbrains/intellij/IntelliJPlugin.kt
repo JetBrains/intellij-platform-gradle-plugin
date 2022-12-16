@@ -986,6 +986,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             jbrResolver.resolveRuntime(
                 jbrVersion = jbrVersion.orNull,
                 jbrVariant = jbrVariant.orNull,
+                jbrArch = jbrArch.orNull,
                 ideDir = ideDir.orNull,
             ).toString()
         })

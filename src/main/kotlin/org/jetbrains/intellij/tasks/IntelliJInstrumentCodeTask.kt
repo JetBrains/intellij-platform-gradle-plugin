@@ -161,8 +161,8 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
                     "jgoodies-forms.jar",
                     "forms-*.jar",
                 ).any { pattern ->
-                    val (first, last) = pattern.split('*')
-                    it.simpleName.startsWith(first) && it.simpleName.endsWith(last)
+                    val (first, last) = pattern.split('*') + listOf("")
+                    it.simpleName.startsWith(first) && (last.isEmpty() || it.simpleName.endsWith(last))
                 }
             } + path
         }

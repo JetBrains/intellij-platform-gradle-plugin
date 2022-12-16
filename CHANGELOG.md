@@ -5,6 +5,7 @@
 ### Added
 - `printProductsReleases` task to print the result of the `listProductsReleases` task
 - `printBundledPlugins` task to print the result of the `listBundledPlugins` task
+- `runIde.jbrArch` and `runPluginVerifier.jbrArch` properties for the explicit JBR architecture specification
 
 ### Changed
 - `custom(String)` helper of `intellij.pluginRepositories` configuration requires now passing a direct URL to the `updatePlugins.xml` file [#1252](../../issues/1252)

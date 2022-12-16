@@ -16,6 +16,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
+import org.jetbrains.intellij.jbr.JbrResolver
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -78,6 +79,14 @@ abstract class RunIdeBase : JavaExec() {
     @get:Input
     @get:Optional
     abstract val jbrVariant: Property<String>
+
+    /**
+     * JetBrains Runtime architecture.
+     * By default, it's resolved based on the current OS and JRE architecture, see [JbrResolver.JbrArtifact.arch].
+     */
+    @get:Input
+    @get:Optional
+    abstract val jbrArch: Property<String>
 
     /**
      * Path to the `plugins` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
