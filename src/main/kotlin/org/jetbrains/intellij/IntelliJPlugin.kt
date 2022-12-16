@@ -175,7 +175,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             context,
         )
 
-        val ideaDependencyProvider = prepareIdeaDependencyProvider(project, extension)
+        val ideaDependencyProvider = prepareIdeaDependencyProvider(project, extension).memoize()
         configureDependencies(project, extension, ideaDependencyProvider)
         configureTasks(project, extension, ideaDependencyProvider)
     }
