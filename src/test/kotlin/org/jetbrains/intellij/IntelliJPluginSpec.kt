@@ -574,7 +574,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
     }
 
-    @Test
+//    @Test
 //    fun `expect successful build using minimal supported Gradle version`() {
 //        val buildResult = build(MINIMAL_SUPPORTED_GRADLE_VERSION, false, "help")
 //
