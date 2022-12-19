@@ -14,6 +14,7 @@ import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 import java.nio.file.Path
 
+@CacheableTask
 abstract class JarSearchableOptionsTask : Jar() {
 
     /**

@@ -22,6 +22,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.streams.asSequence
 
+@UntrackedTask(because = "Runs an IDE which should happen every time this task is run.")
 abstract class RunIdeBase : JavaExec() {
 
     companion object {

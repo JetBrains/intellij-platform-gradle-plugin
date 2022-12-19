@@ -118,6 +118,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:InputFile
     @get:SkipWhenEmpty
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val distributionFile: RegularFileProperty
 
     /**

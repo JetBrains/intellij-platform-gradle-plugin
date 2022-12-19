@@ -10,8 +10,10 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.asPath
 
+@DisableCachingByDefault(because = "Deletion cannot be cached")
 abstract class SetupInstrumentCodeTask : DefaultTask() {
 
     @get:Input

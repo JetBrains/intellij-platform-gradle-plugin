@@ -12,6 +12,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
@@ -19,6 +20,7 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 import org.jetbrains.intellij.utils.ToolboxEnterprisePluginRepositoryService
 
+@UntrackedTask(because = "Output is stored remotely")
 abstract class PublishPluginTask : DefaultTask() {
 
     /**
@@ -28,6 +30,7 @@ abstract class PublishPluginTask : DefaultTask() {
      */
     @get:InputFile
     @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val distributionFile: RegularFileProperty
 
     /**

@@ -19,6 +19,7 @@ import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
 import java.io.File
 
+@CacheableTask
 abstract class PatchPluginXmlTask : DefaultTask() {
 
     /**
@@ -42,6 +43,7 @@ abstract class PatchPluginXmlTask : DefaultTask() {
      */
     @get:SkipWhenEmpty
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginXmlFiles: ListProperty<File>
 
     /**

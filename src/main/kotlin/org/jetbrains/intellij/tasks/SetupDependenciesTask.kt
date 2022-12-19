@@ -6,10 +6,12 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 
+@DisableCachingByDefault(because = "No output state to track")
 abstract class SetupDependenciesTask : DefaultTask() {
 
     /**
