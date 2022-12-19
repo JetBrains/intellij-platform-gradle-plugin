@@ -70,8 +70,6 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
     fun instrumentClasses(inputChanges: InputChanges) {
         val classpath = compilerClassPath()
 
-        println("classpath.joinToString(\":\") = ${classpath.joinToString(":")}")
-
         ant.invokeMethod(
             "taskdef",
             mapOf(
