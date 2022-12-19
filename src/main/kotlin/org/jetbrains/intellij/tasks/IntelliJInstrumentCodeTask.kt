@@ -70,6 +70,8 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
     fun instrumentClasses(inputChanges: InputChanges) {
         val classpath = compilerClassPath()
 
+        println("classpath.joinToString(\":\") = ${classpath.joinToString(":")}")
+
         ant.invokeMethod(
             "taskdef",
             mapOf(
@@ -167,7 +169,7 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
                     val (first, last) = pattern.split('*') + listOf("")
                     it.simpleName.startsWith(first) && (last.isEmpty() || it.simpleName.endsWith(last))
                 }
-            } + path
+            } + listOf(path)
         }
         .or { compilerClassPathFromMaven.get().map(File::toPath) }
 
