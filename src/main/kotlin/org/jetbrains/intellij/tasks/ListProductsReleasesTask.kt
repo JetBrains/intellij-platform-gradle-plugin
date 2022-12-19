@@ -194,9 +194,11 @@ abstract class ListProductsReleasesTask : DefaultTask() {
         }
 
         outputFile.get().asPath.outputStream().use { os ->
-            (result + androidStudioResult).joinToString("\n").apply {
-                os.write(toByteArray())
-            }
+            (result + androidStudioResult)
+                .joinToString("\n")
+                .apply {
+                    os.write(toByteArray())
+                }
         }
     }
 

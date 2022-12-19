@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.tasks
 
 import com.jetbrains.plugin.structure.base.utils.outputStream
-import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Incubating
 import org.gradle.api.file.RegularFileProperty
@@ -46,8 +45,8 @@ abstract class ListBundledPluginsTask : DefaultTask() {
             BuiltinPluginsRegistry
                 .resolveBundledPlugins(ideDir.get().toPath(), context)
                 .joinToString("\n")
-                .let {
-                    TeeOutputStream(System.out, os).write(it.toByteArray())
+                .apply {
+                    os.write(toByteArray())
                 }
         }
     }

@@ -7,6 +7,7 @@
 
 ### Fixed
 - Added missing incremental task annotation properties and cacheability annotations [#1258](../../issues/1258)
+- Make `listBundledPlugins` not printing output as `printBundledPlugins` does that
 
 ## [1.11.0] - 2022-12-17
 
