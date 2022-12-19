@@ -107,6 +107,10 @@ tasks {
     jar {
         patchManifest()
     }
+
+    validatePlugins {
+        enableStricterValidation.set(true)
+    }
 }
 
 val dokkaHtml by tasks.getting(DokkaTask::class)
