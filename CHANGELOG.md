@@ -9,6 +9,7 @@
 - Added missing incremental task annotation properties and cacheability annotations [#1258](../../issues/1258)
 - Make `listBundledPlugins` not printing output as `printBundledPlugins` does that
 - Fixed `taskdef class com.intellij.ant.InstrumentIdeaExtensions cannot be found` [#1259](../../issues/1259)
+- Don't warn about unexpected instrumentation task name [#1214](../../issues/1214)
 
 ## [1.11.0] - 2022-12-17
 

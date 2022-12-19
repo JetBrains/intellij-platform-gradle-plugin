@@ -50,8 +50,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
-import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
@@ -75,8 +73,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_PATH
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_CODE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
@@ -1040,10 +1036,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
-            if (name != INSTRUMENT_CODE_TASK_NAME && name != INSTRUMENT_TEST_CODE_TASK_NAME) {
-                warn(context, "Unexpected instrumentation task name: $name")
-            }
-
             val instrumentTaskProvider = project.tasks.register<IntelliJInstrumentCodeTask>(name) {
                 description = "Code instrumentation task."
                 group = PLUGIN_GROUP_NAME
@@ -1205,9 +1197,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
             val postInstrumentName = "post${name.capitalize()}"
-            if (postInstrumentName != POST_INSTRUMENT_CODE_TASK_NAME && postInstrumentName != POST_INSTRUMENT_TEST_CODE_TASK_NAME) {
-                warn(context, "Unexpected instrumentation task name: $postInstrumentName")
-            }
             val updateTask = project.tasks.register(postInstrumentName) {
                 description = "Code post-instrumentation task."
                 group = PLUGIN_GROUP_NAME
