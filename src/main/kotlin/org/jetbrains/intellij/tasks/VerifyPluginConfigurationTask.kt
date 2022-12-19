@@ -9,8 +9,11 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.intellij.*
@@ -21,6 +24,7 @@ import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
 
+@CacheableTask
 abstract class VerifyPluginConfigurationTask @Inject constructor(
     private val providers: ProviderFactory,
 ) : DefaultTask() {
@@ -31,6 +35,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
      * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
      */
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginXmlFiles: ListProperty<File>
 
     /**

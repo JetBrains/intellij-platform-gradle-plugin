@@ -11,6 +11,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
@@ -21,6 +22,7 @@ import org.jetbrains.intellij.transformXml
 import java.io.File
 import java.nio.file.Path
 
+@DisableCachingByDefault(because = "Setting up configuration on local machine")
 abstract class PrepareSandboxTask : Sync() {
 
     /**
@@ -45,6 +47,7 @@ abstract class PrepareSandboxTask : Sync() {
      * Default value: `jar` task output
      */
     @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginJar: RegularFileProperty
 
     /**

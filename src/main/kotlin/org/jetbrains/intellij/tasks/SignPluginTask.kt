@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import javax.inject.Inject
 
+@UntrackedTask(because = "External resources are pulled by this task which cannot be cached")
 abstract class SignPluginTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
@@ -45,6 +46,7 @@ abstract class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:SkipWhenEmpty
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputArchiveFile: RegularFileProperty
 
     /**
@@ -127,6 +129,7 @@ abstract class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
     abstract val privateKeyFile: RegularFileProperty
 
     /**
@@ -153,6 +156,7 @@ abstract class SignPluginTask @Inject constructor(
      */
     @get:InputFile
     @get:Optional
+    @get:PathSensitive(PathSensitivity.ABSOLUTE)
     abstract val certificateChainFile: RegularFileProperty
 
     private val context = logCategory()

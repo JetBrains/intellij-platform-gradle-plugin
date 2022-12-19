@@ -23,6 +23,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 
+@CacheableTask
 abstract class IntelliJInstrumentCodeTask : DefaultTask() {
 
     companion object {
@@ -46,10 +47,12 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
 
     @get:Incremental
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val classesDirs: ConfigurableFileCollection
 
     @get:Incremental
     @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val formsDirs: ConfigurableFileCollection
 
     @get:Internal

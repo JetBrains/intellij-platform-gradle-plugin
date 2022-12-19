@@ -20,6 +20,7 @@ import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.or
 import java.nio.file.Path
 
+@CacheableTask
 abstract class ListProductsReleasesTask : DefaultTask() {
 
     /**
@@ -28,6 +29,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
      */
     @get:InputFiles
     @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val productsReleasesUpdateFiles: ConfigurableFileCollection
 
     /**

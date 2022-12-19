@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.newInstance
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
@@ -20,6 +21,7 @@ import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.File
 import javax.inject.Inject
 
+@DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : DefaultTask() {
