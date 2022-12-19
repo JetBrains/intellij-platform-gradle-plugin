@@ -24,7 +24,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val version = SignPluginTask.resolveLatestVersion()
+        val version = DownloadZipSignerTask.resolveLatestVersion()
         build(SIGN_PLUGIN_TASK_NAME, "--info").let {
             assertContains("marketplace-zip-signer-cli-$version.jar", it.output)
         }
@@ -36,8 +36,10 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """
             version = "1.0.0"
             
+            downloadZipSigner {
+                version = "0.1.7"
+            }
             signPlugin {
-                cliVersion = "0.1.7"
                 certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
                 privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
             }
@@ -68,8 +70,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """
             version = "1.0.0"
             
-            signPlugin {
-                cliVersion = "0.0.1"
+            downloadZipSigner {
+                version = "0.0.1"
             }
             """.trimIndent()
         )

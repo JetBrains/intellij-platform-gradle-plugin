@@ -10,6 +10,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_T
 import org.jetbrains.intellij.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
@@ -56,6 +57,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 CLASSPATH_INDEX_CLEANUP_TASK_NAME,
                 DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME,
                 DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
+                DOWNLOAD_ZIP_SIGNER_TASK_NAME,
                 INSTRUMENT_CODE_TASK_NAME,
                 INSTRUMENT_TEST_CODE_TASK_NAME,
                 JAR_SEARCHABLE_OPTIONS_TASK_NAME,

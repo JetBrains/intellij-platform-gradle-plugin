@@ -44,6 +44,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITOR
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_SANDBOX
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.EXTENSION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
@@ -218,7 +219,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureSetupDependenciesTask(project, ideaDependencyProvider)
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configurePatchPluginXmlTask(project, extension, ideaDependencyProvider)
-        configureRobotServerDownloadTask(project)
+        configureDownloadRobotServerPluginTask(project)
         configurePrepareSandboxTasks(project, extension, ideaDependencyProvider)
         configureListProductsReleasesTask(project, extension)
         configureListBundledPluginsTask(project, ideaDependencyProvider)
@@ -230,6 +231,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureJarSearchableOptionsTask(project)
         configureBuildPluginTask(project)
         configureRunPluginVerifierTask(project, extension)
+        configureDownloadZipSignerTask(project)
         configureSignPluginTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
@@ -519,7 +521,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureRobotServerDownloadTask(project: Project) {
+    private fun configureDownloadRobotServerPluginTask(project: Project) {
         info(context, "Configuring robot-server download Task")
 
         project.tasks.register<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) {
@@ -1388,27 +1390,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureSignPluginTask(project: Project) {
-        info(context, "Configuring sign plugin task")
-
-        val buildPluginTaskProvider = project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME)
-
-        project.tasks.register<SignPluginTask>(SIGN_PLUGIN_TASK_NAME) {
+    private fun configureDownloadZipSignerTask(project: Project) {
+        project.tasks.register<DownloadZipSignerTask>(DOWNLOAD_ZIP_SIGNER_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
-            description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
+            description = "Downloads marketplace-zip-signer library."
 
-            inputArchiveFile.convention(resolveBuildTaskOutput(project))
-            outputArchiveFile.convention(
-                project.layout.file(
-                    buildPluginTaskProvider.flatMap { buildPluginTask ->
-                        buildPluginTask.archiveFile
-                            .map { it.asPath }
-                            .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
-                    })
-            )
-            cliVersion.convention(VERSION_LATEST)
-            cliPath.convention(project.provider {
-                val resolvedCliVersion = resolveCliVersion(cliVersion.orNull)
+            version.convention(VERSION_LATEST)
+            cliPath.convention(version.map {
+                val resolvedCliVersion = resolveCliVersion(version.orNull)
                 val url = resolveCliUrl(resolvedCliVersion)
                 debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
 
@@ -1423,9 +1412,35 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     ivyRepository(url)
                 }).first().canonicalPath
             })
+        }
+    }
+
+    private fun configureSignPluginTask(project: Project) {
+        info(context, "Configuring sign plugin task")
+
+        val buildPluginTaskProvider = project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME)
+        val downloadZipSignerTaskProvider = project.tasks.named<DownloadZipSignerTask>(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
+
+        project.tasks.register<SignPluginTask>(SIGN_PLUGIN_TASK_NAME) {
+            group = PLUGIN_GROUP_NAME
+            description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
+
+            inputArchiveFile.convention(resolveBuildTaskOutput(project))
+            outputArchiveFile.convention(
+                project.layout.file(
+                    buildPluginTaskProvider.flatMap { buildPluginTask ->
+                        buildPluginTask.archiveFile
+                            .map { it.asPath }
+                            .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
+                    })
+            )
+            cliPath.convention(downloadZipSignerTaskProvider.flatMap { downloadZipSignerTask ->
+                downloadZipSignerTask.cliPath
+            })
 
             onlyIf { (privateKey.isPresent || privateKeyFile.isPresent) && (certificateChain.isPresent || certificateChainFile.isPresent) }
             dependsOn(BUILD_PLUGIN_TASK_NAME)
+            dependsOn(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
         }
     }
 

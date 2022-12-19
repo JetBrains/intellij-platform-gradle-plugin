@@ -1,14 +1,14 @@
 # Changelog
 
 ## [next]
-### Added
 
-### Changed
+### Added
+- Extract ZIP Signer CLI tool downloading as `downloadZipSigner` task
 
 ### Fixed
 - Added missing incremental task annotation properties and cacheability annotations [#1258](../../issues/1258)
 
-## [1.11.0]
+## [1.11.0] - 2022-12-17
 
 ### Added
 - `printProductsReleases` task to print the result of the `listProductsReleases` task
