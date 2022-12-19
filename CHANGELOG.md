@@ -1,6 +1,14 @@
 # Changelog
 
 ## [next]
+### Added
+
+### Changed
+
+### Fixed
+- Added missing incremental task annotation properties and cacheability annotations [#1258](../../issues/1258)
+
+## [1.11.0]
 
 ### Added
 - `printProductsReleases` task to print the result of the `listProductsReleases` task
