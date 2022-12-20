@@ -4,6 +4,7 @@
 
 ### Added
 - Extract ZIP Signer CLI tool downloading as `downloadZipSigner` task
+- Allow for passing `signPlugin.privateKey` and `signPlugin.certificateChain` as base64-encoded value
 
 ### Fixed
 - Added missing incremental task annotation properties and cacheability annotations [#1258](../../issues/1258)

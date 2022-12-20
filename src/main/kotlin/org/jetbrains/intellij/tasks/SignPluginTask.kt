@@ -10,6 +10,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Optional
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.asPath
@@ -18,6 +19,7 @@ import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
+import java.util.*
 import javax.inject.Inject
 
 @CacheableTask
@@ -209,7 +211,12 @@ abstract class SignPluginTask @Inject constructor(
 
         privateKey.orNull?.let {
             args.add("-key")
-            args.add(it)
+
+            Base64.getDecoder()
+                .runCatching { decode(it.trim()).let(::String) }
+                .getOrDefault(it)
+                .let(args::add)
+
             debug(context, "Using private key passed as content")
         } ?: run {
             args.add("-key-file")
@@ -218,7 +225,12 @@ abstract class SignPluginTask @Inject constructor(
         }
         certificateChain.orNull?.let {
             args.add("-cert")
-            args.add(it)
+
+            Base64.getDecoder()
+                .runCatching { decode(it.trim()).let(::String) }
+                .getOrDefault(it)
+                .let(args::add)
+
             debug(context, "Using certificate chain passed as content")
         } ?: run {
             args.add("-cert-file")
