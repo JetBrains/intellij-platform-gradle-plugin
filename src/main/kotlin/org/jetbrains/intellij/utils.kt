@@ -61,7 +61,7 @@ val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPa
 
 internal fun sourcePluginXmlFiles(project: Project) = project
     .convention.getPlugin<JavaPluginConvention>()
-    .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+    .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) // TODO: iterate over all sourceSets?
     .resources
     .srcDirs
     .filterNotNull()

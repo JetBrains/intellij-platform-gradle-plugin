@@ -15,6 +15,7 @@ plugins {
     id("com.gradle.plugin-publish") version "1.1.0"
     id("org.jetbrains.changelog") version "2.0.0"
     id("org.jetbrains.dokka") version "1.7.10"
+//    id("org.barfuin.gradle.taskinfo") version "2.0.0" // TODO: use whenever it supports Gradle 7.6
 }
 
 version = when (properties("snapshot")?.toBoolean() ?: false) {
