@@ -46,7 +46,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
+        build(
+            gradleVersion = gradleVersion,
+            fail = true,
+            assertValidConfigurationCache = false,
+            RUN_PLUGIN_VERIFIER_TASK_NAME,
+        ).let {
             assertContains("Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254", it.output)
         }
     }
@@ -327,25 +332,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME, "--offline").let {
             assertContains("Cannot download", it.output)
-        }
-    }
-
-    @Test
-    fun `reuse configuration cache`() {
-        writePluginXmlFile()
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            
-            runPluginVerifier {
-                ideVersions = ["2020.2.3"]
-            }
-            """.trimIndent()
-        )
-
-        build(RUN_PLUGIN_VERIFIER_TASK_NAME)
-        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
         }
     }
 

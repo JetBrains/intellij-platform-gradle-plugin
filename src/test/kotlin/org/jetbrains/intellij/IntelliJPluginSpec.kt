@@ -574,7 +574,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
 
         unsupportedGradleVersions.forEach { gradleVersion ->
-            build(gradleVersion, true, "help").apply {
+            build(
+                gradleVersion = gradleVersion,
+                fail = true,
+                assertValidConfigurationCache = true,
+                "help",
+            ).apply {
                 assertContains("Gradle IntelliJ Plugin requires Gradle", output)
                 assertContains("FAILURE: Build failed with an exception", output)
             }
@@ -583,7 +588,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `expect successful build using minimal supported Gradle version`() {
-        val buildResult = build(MINIMAL_SUPPORTED_GRADLE_VERSION, false, "help")
+        val buildResult = build(
+            gradleVersion = MINIMAL_SUPPORTED_GRADLE_VERSION,
+            fail = false,
+            assertValidConfigurationCache = true,
+            "help",
+        )
 
         assertContains("BUILD SUCCESSFUL", buildResult.output)
         assertNotContains("Gradle IntelliJ Plugin requires Gradle", buildResult.output)

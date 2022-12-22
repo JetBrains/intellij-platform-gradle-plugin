@@ -2,11 +2,8 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.jetbrains.intellij.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import kotlin.test.Test
 
-@Suppress("ComplexRedundantLet")
 class ListBundledPluginsTaskSpec : IntelliJPluginSpecBase() {
 
 //    @Test
@@ -77,12 +74,4 @@ class ListBundledPluginsTaskSpec : IntelliJPluginSpecBase() {
 //            content,
 //        )
 //    }
-
-    @Test
-    fun `reuse configuration cache`() {
-        build(LIST_BUNDLED_PLUGINS_TASK_NAME)
-        build(LIST_BUNDLED_PLUGINS_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }

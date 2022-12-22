@@ -7,7 +7,7 @@ import org.jetbrains.intellij.IntelliJPluginSpecBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@Suppress("ComplexRedundantLet")
+@Suppress("ComplexRedundantLet", "RedundantSuppression")
 class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
@@ -39,23 +39,6 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
         buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
             assertContains("token property must be specified for plugin publishing", it.output)
-        }
-    }
-
-    @Test
-    fun `reuse configuration cache`() {
-        buildFile.groovy(
-            """
-            publishPlugin { }
-            verifyPlugin {
-                ignoreFailures = true
-            }
-            """.trimIndent()
-        )
-
-        buildAndFail(PUBLISH_PLUGIN_TASK_NAME)
-        buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
         }
     }
 }

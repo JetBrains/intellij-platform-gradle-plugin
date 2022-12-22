@@ -76,7 +76,12 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(SIGN_PLUGIN_TASK_NAME).let {
+        build(
+            gradleVersion = gradleVersion,
+            fail = true,
+            assertValidConfigurationCache = false,
+            SIGN_PLUGIN_TASK_NAME,
+        ).let {
             assertContains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1.", it.output)
         }
     }
@@ -99,36 +104,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         assertTrue(distributionFolder.listFiles()?.asList()?.any {
             it.name.equals("projectName-1.0.0-signed.zip")
         } ?: false)
-    }
-
-    @Test
-    fun `reuse configuration cache`() {
-        build(SIGN_PLUGIN_TASK_NAME)
-        build(SIGN_PLUGIN_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
-
-    @Test
-    fun `ignore cache when optional parameter changes`() {
-        build(SIGN_PLUGIN_TASK_NAME)
-        build(SIGN_PLUGIN_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            
-            signPlugin {
-                password = "foo"
-            }
-            """.trimIndent()
-        )
-
-        build(SIGN_PLUGIN_TASK_NAME).let {
-            assertNotContains("Reusing configuration cache.", it.output)
-        }
     }
 
     private fun loadCertFile(name: String) = javaClass.classLoader.getResource(name)?.path

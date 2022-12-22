@@ -15,10 +15,7 @@ import java.io.FileOutputStream
 import java.nio.file.Files.createTempDirectory
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
-import kotlin.test.BeforeTest
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 @Suppress("GroovyUnusedAssignment")
 abstract class IntelliJPluginSpecBase {
@@ -108,17 +105,30 @@ abstract class IntelliJPluginSpecBase {
         debugEnabled = false
     }
 
-    protected fun buildAndFail(vararg tasks: String) = build(true, *tasks)
+    protected fun build(vararg tasksList: String) = build(
+        tasks = tasksList,
+    )
 
-    protected fun build(vararg tasks: String) = build(false, *tasks)
+    protected fun buildAndFail(vararg tasksList: String) = build(
+        fail = true,
+        tasks = tasksList,
+    )
 
-    protected fun build(fail: Boolean, vararg tasks: String) = build(gradleVersion, fail, *tasks)
-
-    protected fun build(gradleVersion: String, fail: Boolean = false, vararg tasks: String): BuildResult =
-        builder(gradleVersion, *tasks).run {
+    protected fun build(
+        gradleVersion: String = this@IntelliJPluginSpecBase.gradleVersion,
+        fail: Boolean = false,
+        assertValidConfigurationCache: Boolean = true,
+        vararg tasks: String,
+    ): BuildResult = builder(gradleVersion, *tasks)
+        .run {
             when (fail) {
                 true -> buildAndFail()
                 false -> build()
+            }
+        }
+        .also {
+            if (assertValidConfigurationCache) {
+                assertNotContains("Configuration cache problems found in this build.", it.output)
             }
         }
 

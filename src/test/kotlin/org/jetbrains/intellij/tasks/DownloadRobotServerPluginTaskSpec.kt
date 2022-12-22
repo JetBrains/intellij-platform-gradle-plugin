@@ -148,12 +148,4 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
                 .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-$resolvedVersion.jar"))
         )
     }
-
-    @Test
-    fun `reuse configuration cache`() {
-        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-        build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }

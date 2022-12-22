@@ -491,31 +491,4 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
         }
     }
-
-    @Test
-    fun `reuse configuration cache`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
-
-        buildFile.groovy(
-            """
-            version = '0.42.321'
-            
-            intellij {
-                pluginName = 'myPluginName'
-            }
-            """.trimIndent()
-        )
-
-        build(BUILD_PLUGIN_TASK_NAME)
-        build(BUILD_PLUGIN_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }

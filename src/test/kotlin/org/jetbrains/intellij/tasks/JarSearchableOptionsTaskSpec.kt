@@ -49,22 +49,4 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             assertEquals(setOf("/lib/searchableOptions.jar"), collectPaths(it))
         }
     }
-
-    @Test
-    fun `reuse configuration cache`() {
-        pluginXml.xml(getPluginXmlWithSearchableConfigurable())
-        buildFile.groovy(
-            """
-            intellij {
-                version = '$intellijVersion'
-            }
-            """.trimIndent()
-        )
-        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
-
-        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
-        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }

@@ -474,28 +474,4 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             )
         }
     }
-
-
-    @Test
-    fun `reuse configuration cache`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
-
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '$intellijVersion'
-            }
-            """.trimIndent()
-        )
-
-        build(PATCH_PLUGIN_XML_TASK_NAME)
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }

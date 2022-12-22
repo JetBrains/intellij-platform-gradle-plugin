@@ -291,12 +291,4 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             outputFile.readText(),
         )
     }
-
-    @Test
-    fun `reuse configuration cache`() {
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME)
-        build(LIST_PRODUCTS_RELEASES_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }

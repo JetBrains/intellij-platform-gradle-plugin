@@ -37,12 +37,4 @@ class SetupDependenciesTaskSpec : IntelliJPluginSpecBase() {
             assertContains("Reusing configuration cache.", it.output)
         }
     }
-
-    @Test
-    fun `reuse configuration cache`() {
-        build(SETUP_DEPENDENCIES_TASK_NAME)
-        build(SETUP_DEPENDENCIES_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }

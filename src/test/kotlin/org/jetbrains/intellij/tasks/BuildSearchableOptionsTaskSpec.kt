@@ -51,12 +51,4 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             assertContains("hit=\"Label for Test Searchable Configurable\"", it)
         }
     }
-
-    @Test
-    fun `reuse configuration cache`() {
-        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME).let {
-            assertContains("Reusing configuration cache.", it.output)
-        }
-    }
 }
