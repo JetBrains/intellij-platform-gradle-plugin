@@ -4,7 +4,7 @@ on:
     inputs:
       testName:
         description: 'Test name'
-        required: true
+        required: false
         default: 'org.jetbrains.intellij.tasks.ClassName.method name'
         type: string
       gradleVersion:
