@@ -80,6 +80,7 @@ abstract class IntelliJPluginSpecBase {
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
+            org.jetbrains.intellij.buildFeature.selfUpdateCheck = false
             """.trimIndent()
         )
     }
