@@ -5,7 +5,6 @@ on:
       testName:
         description: 'Test name'
         required: false
-        default: 'org.jetbrains.intellij.tasks.ClassName.method name'
         type: string
       gradleVersion:
         description: 'Gradle Version'
