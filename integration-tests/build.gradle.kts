@@ -5,7 +5,7 @@ fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
     id("org.jetbrains.kotlin.jvm") version "1.7.22" apply false
-    id("org.jetbrains.kotlin.plugin.sam.with.receiver") version "1.7.22"
+    id("org.jetbrains.kotlin.plugin.sam.with.receiver") version "1.8.0"
     id("org.jetbrains.intellij") version "0.0.0" apply false
     `kotlin-dsl`
 }
