@@ -9,12 +9,12 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.7.22"
-    kotlin("plugin.serialization") version "1.7.22"
-    id("org.jetbrains.kotlin.plugin.sam.with.receiver") version "1.7.22"
+    kotlin("jvm") version "1.8.0"
+    kotlin("plugin.serialization") version "1.8.0"
+    id("org.jetbrains.kotlin.plugin.sam.with.receiver") version "1.8.0"
     id("com.gradle.plugin-publish") version "1.1.0"
     id("org.jetbrains.changelog") version "2.0.0"
-    id("org.jetbrains.dokka") version "1.7.10"
+    id("org.jetbrains.dokka") version "1.7.20"
 //    id("org.barfuin.gradle.taskinfo") version "2.0.0" // TODO: use whenever it supports Gradle 7.6
 }
 
@@ -51,7 +51,7 @@ dependencies {
     implementation("com.googlecode.plist:dd-plist:1.26")
 
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7")
-    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.7.22")
+    api("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
     testImplementation(gradleTestKit())
