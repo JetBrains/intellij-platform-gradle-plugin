@@ -3,13 +3,17 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.utils.LatestVersionResolver
+import org.jetbrains.kotlin.konan.file.recursiveCopyTo
+import java.nio.file.Path
 
 @DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadZipSignerTask : DefaultTask() {
@@ -35,11 +39,20 @@ abstract class DownloadZipSignerTask : DefaultTask() {
     @get:Optional
     abstract val version: Property<String>
 
+    @get:Input
+    @get:Optional
+    abstract val cliPath: Property<String>
+
     /**
      * Local path to the Marketplace ZIP Signer CLI that will be used.
      */
     @get:OutputFile
-    abstract val cliPath: Property<String>
+    abstract val cli: RegularFileProperty
+
+    @TaskAction
+    fun downloadZipSigner() {
+        Path.of(cliPath.get()).recursiveCopyTo(cli.asFile.get().toPath())
+    }
 
     /**
      * Resolves the Marketplace ZIP Signer CLI version.

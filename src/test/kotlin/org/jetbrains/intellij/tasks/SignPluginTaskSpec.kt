@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
@@ -21,12 +22,20 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
                 privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
             }
+            
+            downloadZipSigner {
+                doLast {
+                    println cli.get()     
+                    println "version:" + version.get()
+                }
+            }
             """.trimIndent()
         )
 
         val version = DownloadZipSignerTask.resolveLatestVersion()
-        build(SIGN_PLUGIN_TASK_NAME, "--info").let {
-            assertContains("marketplace-zip-signer-cli-$version.jar", it.output)
+        build(DOWNLOAD_ZIP_SIGNER_TASK_NAME, "--info").let {
+            assertContains("marketplace-zip-signer-cli.jar", it.output)
+            assertContains("version:latest", it.output)
         }
     }
 
@@ -47,7 +56,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(SIGN_PLUGIN_TASK_NAME, "--info").let {
-            assertContains("marketplace-zip-signer-cli-0.1.7.jar", it.output)
+            assertContains("marketplace-zip-signer-cli.jar", it.output)
         }
     }
 

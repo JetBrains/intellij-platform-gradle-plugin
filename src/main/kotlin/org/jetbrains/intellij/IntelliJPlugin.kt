@@ -1384,13 +1384,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
             group = PLUGIN_GROUP_NAME
             description = "Downloads marketplace-zip-signer library."
 
+            val context = logCategory()
+
             version.convention(VERSION_LATEST)
             cliPath.convention(version.map {
                 val resolvedCliVersion = resolveCliVersion(version.orNull)
                 val url = resolveCliUrl(resolvedCliVersion)
                 debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
 
-                dependenciesDownloader.downloadFromRepository(logCategory(), {
+                dependenciesDownloader.downloadFromRepository(context, {
                     create(
                         group = "org.jetbrains",
                         name = "marketplace-zip-signer-cli",
@@ -1399,8 +1401,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     )
                 }, {
                     ivyRepository(url)
-                }).first().canonicalPath
+                }).first().absolutePath
             })
+            cli.convention(project.layout.buildDirectory.file("tools/marketplace-zip-signer-cli.jar"))
         }
     }
 
@@ -1424,7 +1427,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     })
             )
             cliPath.convention(downloadZipSignerTaskProvider.flatMap { downloadZipSignerTask ->
-                downloadZipSignerTask.cliPath
+                downloadZipSignerTask.cli.map {
+                    it.asPath.toString()
+                }
             })
 
             onlyIf { (privateKey.isPresent || privateKeyFile.isPresent) && (certificateChain.isPresent || certificateChainFile.isPresent) }
