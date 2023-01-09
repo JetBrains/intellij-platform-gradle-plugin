@@ -140,7 +140,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
         writePluginXmlFile()
 
-        val resource = javaClass.classLoader.getResource("products-releases/idea-releases.xml")?.path
+        val resource = resolveResourcePath("products-releases/idea-releases.xml")
         buildFile.groovy(
             """
             import org.jetbrains.intellij.tasks.ListProductsReleasesTask.Channel

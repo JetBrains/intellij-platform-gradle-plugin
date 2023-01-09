@@ -13,6 +13,7 @@ import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Paths
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.test.*
@@ -270,6 +271,12 @@ abstract class IntelliJPluginSpecBase {
         return directory.walkTopDown().filterNot { it.isDirectory }.map {
             adjustWindowsPath(it.canonicalPath.substring(directory.canonicalPath.length))
         }.toSet()
+    }
+
+    protected fun resolveResourcePath(path: String) = path.let {
+        javaClass.classLoader.getResource(it)?.let { url ->
+            Paths.get(url.toURI()).toAbsolutePath().toString().replace('\\', '/')
+        }
     }
 
     // Methods can be simplified, when following tickets will be handled:

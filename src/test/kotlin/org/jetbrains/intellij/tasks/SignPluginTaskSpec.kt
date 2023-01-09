@@ -18,8 +18,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             signPlugin {
-                certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
-                privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
+                certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
+                privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
             }
             """.trimIndent()
         )
@@ -40,8 +40,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
                 version = "0.1.7"
             }
             signPlugin {
-                certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
-                privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
+                certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
+                privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
             }
             """.trimIndent()
         )
@@ -93,8 +93,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             signPlugin {
-                certificateChainFile = file("${loadCertFile("certificates/cert.crt")}")
-                privateKeyFile = file("${loadCertFile("certificates/cert.key")}")
+                certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
+                privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
             }
             """.trimIndent()
         )
@@ -105,6 +105,4 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             it.name.equals("projectName-1.0.0-signed.zip")
         } ?: false)
     }
-
-    private fun loadCertFile(name: String) = javaClass.classLoader.getResource(name)?.path
 }

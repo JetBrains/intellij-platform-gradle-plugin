@@ -4,19 +4,11 @@ package org.jetbrains.intellij.tasks
 
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import java.nio.file.Paths
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("ComplexRedundantLet")
 class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
-
-    private fun resolveResourcePath(path: String) = path.let {
-        javaClass.classLoader.getResource(it)?.let { url ->
-            Paths.get(url.toURI()).toAbsolutePath().toString().replace('\\', '/')
-        }
-    }
 
     private val ideaReleasesPath = resolveResourcePath("products-releases/idea-releases.xml")
 
