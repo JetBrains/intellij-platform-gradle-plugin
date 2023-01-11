@@ -8,6 +8,8 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
+import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.logCategory
@@ -54,6 +56,9 @@ abstract class JarSearchableOptionsTask : Jar() {
     private val context = logCategory()
 
     init {
+        group = PLUGIN_GROUP_NAME
+        description = "Creates a JAR file with searchable options to be distributed with the plugin."
+
         val pluginJarFiles = mutableSetOf<String>()
 
         this.from({

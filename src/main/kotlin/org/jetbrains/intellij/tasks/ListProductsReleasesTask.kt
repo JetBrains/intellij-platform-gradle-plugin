@@ -10,14 +10,13 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
-import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.asPath
-import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
-import org.jetbrains.intellij.or
 import java.nio.file.Path
 
 @CacheableTask
@@ -113,8 +112,13 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
     private val context = logCategory()
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "List all available IntelliJ-based IDE releases with their updates."
+    }
+
     @TaskAction
-    fun list() {
+    fun listProductsReleases() {
         val updatePaths = productsReleasesUpdateFiles.files.map { it.toPath() }
 
         val releases = XmlExtractor<ProductsReleases>(context).let { extractor ->

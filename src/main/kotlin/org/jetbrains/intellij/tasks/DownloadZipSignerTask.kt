@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.utils.LatestVersionResolver
 import org.jetbrains.kotlin.konan.file.recursiveCopyTo
@@ -48,6 +49,11 @@ abstract class DownloadZipSignerTask : DefaultTask() {
      */
     @get:OutputFile
     abstract val cli: RegularFileProperty
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Downloads marketplace-zip-signer library."
+    }
 
     @TaskAction
     fun downloadZipSigner() {

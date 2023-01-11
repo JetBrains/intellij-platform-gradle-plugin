@@ -17,6 +17,7 @@ import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.dependency.IdeaDependency
 import java.io.File
 import java.nio.file.Files
@@ -66,8 +67,13 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
 
     private val context = logCategory()
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Code instrumentation task."
+    }
+
     @TaskAction
-    fun instrumentClasses(inputChanges: InputChanges) {
+    fun intelliJInstrumentCode(inputChanges: InputChanges) {
         val classpath = compilerClassPath()
 
         ant.invokeMethod(

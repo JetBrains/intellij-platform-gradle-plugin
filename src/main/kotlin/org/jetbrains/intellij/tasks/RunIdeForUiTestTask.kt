@@ -3,7 +3,13 @@
 package org.jetbrains.intellij.tasks
 
 import org.gradle.api.tasks.UntrackedTask
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 
-@Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run IDE for UI tests")
-abstract class RunIdeForUiTestTask : RunIdeBase()
+abstract class RunIdeForUiTestTask : RunIdeBase() {
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing."
+    }
+}

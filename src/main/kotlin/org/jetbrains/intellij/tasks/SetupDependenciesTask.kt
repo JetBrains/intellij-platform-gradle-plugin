@@ -7,6 +7,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
@@ -21,6 +22,11 @@ abstract class SetupDependenciesTask : DefaultTask() {
     abstract val idea: Property<IdeaDependency>
 
     private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Sets up required dependencies for building and running project."
+    }
 
     @TaskAction
     fun setupDependencies() {

@@ -17,6 +17,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.utils.PlatformJavaVersions
 import org.jetbrains.intellij.utils.PlatformKotlinVersions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
@@ -101,8 +102,13 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
 
     private val context = logCategory()
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Checks if Java and Kotlin compilers configuration meet IntelliJ SDK requirements"
+    }
+
     @TaskAction
-    fun verifyPlugin() {
+    fun verifyPluginConfiguration() {
         val platformVersion = platformVersion.get().let(Version::parse)
         val platformBuildVersion = platformBuild.get().let(Version::parse)
         val platformJavaVersion = platformBuildVersion.let(::getPlatformJavaVersion)

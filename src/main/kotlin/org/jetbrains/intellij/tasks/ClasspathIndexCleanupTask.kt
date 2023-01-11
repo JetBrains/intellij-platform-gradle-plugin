@@ -10,6 +10,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
 
@@ -26,6 +27,11 @@ abstract class ClasspathIndexCleanupTask : DefaultTask() {
     abstract val classpathIndexFiles: ConfigurableFileCollection
 
     private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Removes classpath index files created by PathClassLoader"
+    }
 
     @TaskAction
     fun classpathIndexCleanup() {

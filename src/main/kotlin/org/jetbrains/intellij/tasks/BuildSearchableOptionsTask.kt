@@ -7,6 +7,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 
@@ -30,6 +31,8 @@ abstract class BuildSearchableOptionsTask : RunIdeBase() {
     private val context = logCategory()
 
     init {
+        group = PLUGIN_GROUP_NAME
+        description = "Builds an index of UI components (searchable options) for the plugin."
         args = traverseUIArgs
     }
 

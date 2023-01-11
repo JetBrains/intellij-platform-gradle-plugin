@@ -12,6 +12,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
@@ -19,7 +20,6 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 import org.jetbrains.intellij.utils.ToolboxEnterprisePluginRepositoryService
 
-@Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Output is stored remotely")
 abstract class PublishPluginTask : DefaultTask() {
 
@@ -69,6 +69,11 @@ abstract class PublishPluginTask : DefaultTask() {
     abstract val toolboxEnterprise: Property<Boolean>
 
     private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Publishes plugin to the remote Marketplace repository."
+    }
 
     @TaskAction
     fun publishPlugin() {

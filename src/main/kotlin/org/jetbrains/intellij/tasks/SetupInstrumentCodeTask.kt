@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.asPath
 
 @DisableCachingByDefault(because = "Deletion cannot be cached")
@@ -21,6 +22,11 @@ abstract class SetupInstrumentCodeTask : DefaultTask() {
 
     @get:Internal
     abstract val instrumentedDir: DirectoryProperty
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Prepares code instrumentation tasks."
+    }
 
     @TaskAction
     fun setupInstrumentCode() {

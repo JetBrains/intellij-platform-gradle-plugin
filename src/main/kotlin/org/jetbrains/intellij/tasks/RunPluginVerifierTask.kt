@@ -21,6 +21,7 @@ import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.jbr.JbrResolver
@@ -254,6 +255,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val offline: Property<Boolean>
 
     private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds."
+    }
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.

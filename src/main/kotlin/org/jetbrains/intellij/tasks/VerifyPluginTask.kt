@@ -10,16 +10,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
-import org.jetbrains.intellij.asPath
-import org.jetbrains.intellij.error
-import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.warn
+import org.gradle.api.tasks.*
+import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 
 @CacheableTask
 abstract class VerifyPluginTask : DefaultTask() {
@@ -58,6 +51,11 @@ abstract class VerifyPluginTask : DefaultTask() {
     abstract val pluginDir: DirectoryProperty
 
     private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure."
+    }
 
     @TaskAction
     fun verifyPlugin() {

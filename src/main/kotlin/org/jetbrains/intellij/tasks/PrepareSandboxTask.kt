@@ -7,18 +7,18 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Task
+import org.gradle.api.file.CopySpec
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
+import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.dependency.PluginDependency
 import org.jetbrains.intellij.dependency.PluginProjectDependency
-import org.jetbrains.intellij.error
-import org.jetbrains.intellij.ifNull
-import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.transformXml
 import java.io.File
 import java.nio.file.Path
 
@@ -78,15 +78,21 @@ abstract class PrepareSandboxTask : Sync() {
     private val context = logCategory()
     private val usedNames = mutableMapOf<String, Path>()
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Prepares sandbox directory with installed plugin and its dependencies."
+        duplicatesStrategy = DuplicatesStrategy.FAIL
+    }
+
     @TaskAction
     override fun copy() {
         disableIdeUpdate()
         super.copy()
     }
 
-    fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
+    fun intoChild(destinationDir: Any): CopySpec = mainSpec.addChild().into(destinationDir)
 
-    override fun getDestinationDir() = defaultDestinationDir.get()
+    override fun getDestinationDir(): File = defaultDestinationDir.get()
 
     override fun configure(closure: Closure<*>): Task = super.configure(closure)
 

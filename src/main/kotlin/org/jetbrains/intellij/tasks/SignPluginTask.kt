@@ -13,10 +13,9 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
+import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.asPath
-import org.jetbrains.intellij.debug
-import org.jetbrains.intellij.error
-import org.jetbrains.intellij.logCategory
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.util.*
@@ -138,6 +137,11 @@ abstract class SignPluginTask @Inject constructor(
     abstract val certificateChainFile: RegularFileProperty
 
     private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
+    }
 
     @TaskAction
     fun signPlugin() {

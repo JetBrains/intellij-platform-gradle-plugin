@@ -11,6 +11,7 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.dependency.BuiltinPluginsRegistry
 import org.jetbrains.intellij.logCategory
@@ -39,8 +40,13 @@ abstract class ListBundledPluginsTask : DefaultTask() {
 
     private val context = logCategory()
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "List bundled plugins within the currently targeted IntelliJ-based IDE release."
+    }
+
     @TaskAction
-    fun list() {
+    fun listBundledPlugins() {
         outputFile.get().asPath.outputStream().use { os ->
             BuiltinPluginsRegistry
                 .resolveBundledPlugins(ideDir.get().toPath(), context)

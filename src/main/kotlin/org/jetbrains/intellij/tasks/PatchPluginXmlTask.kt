@@ -13,10 +13,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jdom2.Document
 import org.jdom2.Element
+import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.asPath
-import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.transformXml
-import org.jetbrains.intellij.warn
 import java.io.File
 
 @CacheableTask
@@ -96,8 +95,13 @@ abstract class PatchPluginXmlTask : DefaultTask() {
 
     private val context = logCategory()
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Patches `plugin.xml` files with values provided to the task."
+    }
+
     @TaskAction
-    fun patchPluginXmlFiles() {
+    fun patchPluginXml() {
         pluginXmlFiles.get()
             .map(File::toPath)
             .forEach { path ->

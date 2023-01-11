@@ -10,6 +10,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.error
 import org.jetbrains.intellij.info
 import org.jetbrains.intellij.logCategory
@@ -23,7 +24,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 @Incubating
-@Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run IDE for performance tests")
 abstract class RunIdePerformanceTestTask : RunIdeBase() {
 
@@ -55,6 +55,11 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
     private lateinit var scriptPath: String
     private lateinit var testArtifactsDirPath: Path
     private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Runs performance tests on the IDE with the developed plugin installed."
+    }
 
     @TaskAction
     override fun exec() {

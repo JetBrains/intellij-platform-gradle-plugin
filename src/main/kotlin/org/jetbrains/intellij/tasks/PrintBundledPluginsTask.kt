@@ -4,13 +4,9 @@ package org.jetbrains.intellij.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.UntrackedTask
+import org.gradle.api.tasks.*
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 
-@Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Prints the output produced by the listBundledPlugins task")
 abstract class PrintBundledPluginsTask : DefaultTask() {
 
@@ -21,6 +17,11 @@ abstract class PrintBundledPluginsTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputFile: RegularFileProperty
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Prints bundled plugins within the currently targeted IntelliJ-based IDE release."
+    }
+
     @TaskAction
-    fun print() = println(inputFile.asFile.get().readText())
+    fun printBundledPlugins() = println(inputFile.asFile.get().readText())
 }

@@ -12,6 +12,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.asPath
@@ -63,8 +64,13 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
 
     private val context = logCategory()
 
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Download `robot-server` plugin."
+    }
+
     @TaskAction
-    fun downloadPlugin() {
+    fun downloadRobotServerPlugin() {
         val archive = pluginArchive.get().toPath()
         val target = outputDir.get().asPath
         archiveUtils.extract(archive, target, context)
