@@ -13,6 +13,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.jvm.toolchain.JavaLauncher
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
@@ -183,16 +184,12 @@ abstract class RunIdeBase : JavaExec() {
         workingDir = projectWorkingDir.get()
         configureSystemProperties()
         configureJvmArgs()
-        executable(projectExecutable.get())
         configureClasspath()
-
-        // TODO: remove after fixing: Toolchain from `executable` property does not match toolchain from `javaLauncher` property
-        println("executable = ${executable}")
-        println("projectExecutable = ${projectExecutable.get()}")
-        println("javaLauncher = ${javaLauncher.get().executablePath}")
 
         super.exec()
     }
+
+    override fun getExecutable(): String = projectExecutable.get()
 
     /**
      * Prepares the classpath for the IDE based on the IDEA version.
