@@ -33,10 +33,16 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     testRuntimeOnly    DependenciesUtils.intellij(project)
                 } 
             }
-            task printMainCompileClassPath { doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath } }
-            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
-            task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
-            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
+            
+            def implementation = project.provider { sourceSets.main.compileClasspath.asPath }
+            def runtimeOnly = project.provider { sourceSets.main.runtimeClasspath.asPath }
+            def testImplementation = project.provider { sourceSets.test.compileClasspath.asPath }
+            def testRuntimeOnly = project.provider { sourceSets.test.runtimeClasspath.asPath }
+            
+            task printMainCompileClassPath { doLast { println 'implementation: ' + implementation.get() } }
+            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + runtimeOnly.get() } }
+            task printTestCompileClassPath { doLast { println 'testImplementation: ' + testImplementation.get() } }
+            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + testRuntimeOnly.get() } }
             """.trimIndent()
         )
 
@@ -96,10 +102,16 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     testRuntimeOnly    DependenciesUtils.intellijPlugins(project, 'junit', 'testng')
                 } 
             }
-            task printMainCompileClassPath { doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath } }
-            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
-            task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
-            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
+            
+            def implementation = project.provider { sourceSets.main.compileClasspath.asPath }
+            def runtimeOnly = project.provider { sourceSets.main.runtimeClasspath.asPath }
+            def testImplementation = project.provider { sourceSets.test.compileClasspath.asPath }
+            def testRuntimeOnly = project.provider { sourceSets.test.runtimeClasspath.asPath }
+            
+            task printMainCompileClassPath { doLast { println 'implementation: ' + implementation.get() } }
+            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + runtimeOnly.get() } }
+            task printTestCompileClassPath { doLast { println 'testImplementation: ' + testImplementation.get() } }
+            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + testRuntimeOnly.get() } }
             """.trimIndent()
         )
 
@@ -162,10 +174,16 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
                     testRuntimeOnly    DependenciesUtils.intellijExtra(project, 'intellij-core')
                 } 
             }
-            task printMainCompileClassPath { doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath } }
-            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath } }
-            task printTestCompileClassPath { doLast { println 'testImplementation: ' + sourceSets.test.compileClasspath.asPath } }
-            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + sourceSets.test.runtimeClasspath.asPath } }
+            
+            def implementation = project.provider { sourceSets.main.compileClasspath.asPath }
+            def runtimeOnly = project.provider { sourceSets.main.runtimeClasspath.asPath }
+            def testImplementation = project.provider { sourceSets.test.compileClasspath.asPath }
+            def testRuntimeOnly = project.provider { sourceSets.test.runtimeClasspath.asPath }
+            
+            task printMainCompileClassPath { doLast { println 'implementation: ' + implementation.get() } }
+            task printMainRuntimeClassPath { doLast { println 'runtimeOnly: ' + runtimeOnly.get() } }
+            task printTestCompileClassPath { doLast { println 'testImplementation: ' + testImplementation.get() } }
+            task printTestRuntimeClassPath { doLast { println 'testRuntimeOnly: ' + testRuntimeOnly.get() } }
             """.trimIndent()
         )
 

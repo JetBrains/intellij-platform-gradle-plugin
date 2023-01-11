@@ -614,13 +614,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun File.appendPrintMainClassPathsTasks() {
         this.groovy(
             """
+            def runtimeOnly = project.provider { sourceSets.main.runtimeClasspath.asPath }
+            def implementation = project.provider { sourceSets.main.compileClasspath.asPath }
+            
             task printMainRuntimeClassPath {
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
-                doLast { println 'runtimeOnly: ' + sourceSets.main.runtimeClasspath.asPath }
+                doLast { println 'runtimeOnly: ' + runtimeOnly.get() }
             }
             task printMainCompileClassPath {
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
-                doLast { println 'implementation: ' + sourceSets.main.compileClasspath.asPath }
+                doLast { println 'implementation: ' + implementation.get() }
             }
             """.trimIndent()
         )
@@ -637,13 +640,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun File.appendPrintClassPathsTasks(sourceSetName: String) {
         this.groovy(
             """
+            def runtimeOnly = project.provider { sourceSets.$sourceSetName.runtimeClasspath.asPath }
+            def implementation = project.provider { sourceSets.$sourceSetName.compileClasspath.asPath }
+            
             task print${sourceSetName.capitalize()}RuntimeClassPath {
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
-                doLast { println 'runtimeOnly: ' + sourceSets.$sourceSetName.runtimeClasspath.asPath }
+                doLast { println 'runtimeOnly: ' + runtimeOnly.get() }
             }
             task print${sourceSetName.capitalize()}CompileClassPath { 
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
-                doLast { println 'implementation: ' + sourceSets.$sourceSetName.compileClasspath.asPath }
+                doLast { println 'implementation: ' + implementation.get() }
             }
             """.trimIndent()
         )
@@ -695,7 +701,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 task printPluginSourceArtifacts {
                     dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
                 
-                    doLast {
+                    def artifactsProvider = project.provider {
                         def pluginComponentId = configurations.compileClasspath
                             .resolvedConfiguration.lenientConfiguration
                             .allModuleDependencies
@@ -703,23 +709,27 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                             .flatten()
                             .collect { it.id.componentIdentifier }
                             .find { it.displayName.startsWith("$pluginComponentId") }
-                
-                    dependencies.createArtifactResolutionQuery()
-                        .forComponents([pluginComponentId])
-                        .withArtifacts(JvmLibrary.class, SourcesArtifact.class)
-                        .execute()
-                        .resolvedComponents
-                        .collect { it.getArtifacts(SourcesArtifact.class) }
-                        .flatten()
-                        .findAll {
-                            if (it instanceof UnresolvedArtifactResult) {
-                                println "WARNING:"
-                                it.failure.printStackTrace()
-                                return false
+                            
+                        dependencies.createArtifactResolutionQuery()
+                            .forComponents([pluginComponentId])
+                            .withArtifacts(JvmLibrary.class, SourcesArtifact.class)
+                            .execute()
+                            .resolvedComponents
+                            .collect { it.getArtifacts(SourcesArtifact.class) }
+                            .flatten()
+                            .findAll {
+                                if (it instanceof UnresolvedArtifactResult) {
+                                    println "WARNING:"
+                                    it.failure.printStackTrace()
+                                    return false
+                                }
+                                return true
                             }
-                            return true
-                        }
-                        .each { println("source artifact:" + it.id.displayName) }
+                            .collect { it.id.displayName }
+                    }
+                
+                    doLast {
+                        artifactsProvider.get().each { println("source artifact:" + it) }
                     }
                 }
                 """.trimIndent()

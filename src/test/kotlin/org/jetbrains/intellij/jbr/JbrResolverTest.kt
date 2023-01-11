@@ -35,13 +35,18 @@ class JbrResolverTest : IntelliJPluginSpecBase() {
     private fun testJbrResolving(version: String, expected: String, variant: String? = null) {
         buildFile.groovy(
             """
+            import org.jetbrains.intellij.tasks.RunIdeTask
+            
             runIde {
                 jbrVersion = "$version"
-                ${"jbrVariant = \"$variant\"".takeIf { variant != null }}
+                ${"jbrVariant = \"$variant\"".takeIf { variant != null }.orEmpty()}
             }
+                
+            def projectExecutableProvider = tasks.named("runIde").flatMap { it.projectExecutable }
+                        
             task $TASK_NAME {
                 doLast {
-                    println(runIde.projectExecutable.get())
+                    println(projectExecutableProvider.get())
                 }
             }
             """.trimIndent()
