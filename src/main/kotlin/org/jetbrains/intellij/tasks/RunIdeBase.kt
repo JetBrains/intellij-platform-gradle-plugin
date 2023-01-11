@@ -185,6 +185,12 @@ abstract class RunIdeBase : JavaExec() {
         configureJvmArgs()
         executable(projectExecutable.get())
         configureClasspath()
+
+        // TODO: remove after fixing: Toolchain from `executable` property does not match toolchain from `javaLauncher` property
+        println("executable = ${executable}")
+        println("projectExecutable = ${projectExecutable.get()}")
+        println("javaLauncher = ${javaLauncher.get().executablePath}")
+
         super.exec()
     }
 

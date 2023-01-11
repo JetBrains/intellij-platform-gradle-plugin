@@ -4,6 +4,5 @@ package org.jetbrains.intellij.tasks
 
 import org.gradle.api.tasks.UntrackedTask
 
-@Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run guest IDE")
 abstract class RunIdeTask : RunIdeBase()
