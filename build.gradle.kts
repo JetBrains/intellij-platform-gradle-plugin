@@ -33,7 +33,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains:annotations:23.1.0")
+    implementation("org.jetbrains:annotations:24.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.246") {
         exclude("org.jetbrains.kotlin")
     }
