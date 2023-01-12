@@ -2,8 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
-import com.jetbrains.plugin.structure.base.utils.createDir
-import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.*
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -15,6 +14,8 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.*
@@ -24,16 +25,22 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
+import org.jetbrains.intellij.Version
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.LatestVersionResolver
+import org.jetbrains.intellij.utils.ivyRepository
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
 
 @UntrackedTask(because = "Should always run Plugin Verifier")
 abstract class RunPluginVerifierTask @Inject constructor(
@@ -43,7 +50,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
 ) : DefaultTask() {
 
     /**
-     * Defines the verification level at which task should fail if any reported issue will match.
+     * Defines the verification level at which the task should fail if any reported issue matches.
      * Can be set as [FailureLevel] enum or [EnumSet<FailureLevel>].
      *
      * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
@@ -68,13 +75,6 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:Input
     @get:Optional
     abstract val ideVersions: ListProperty<String>
-
-    /**
-     * List of the paths to the specified IDE versions in [ideVersions] used for the verification.
-     * By default, it resolves paths to the downloaded [ideVersions] IDEs.
-     */
-    @get:Input
-    abstract val ides: ListProperty<File>
 
     /**
      * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
@@ -130,6 +130,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:Input
     @get:Optional
     abstract val downloadDir: Property<String>
+
+    @get:Internal
+    abstract val downloadPath: Property<Path>
 
     /**
      * Custom JBR version to use for running the IDE.
@@ -259,7 +262,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
             throw IllegalStateException("Plugin file does not exist: $file")
         }
 
-        val paths = (ides.get() + localPaths.get()).mapNotNull(File::getCanonicalPath)
+        val paths = getPaths()
         if (paths.isEmpty()) {
             throw GradleException("'ideVersions' and 'localPaths' properties should not be empty")
         }
@@ -293,6 +296,71 @@ abstract class RunPluginVerifierTask @Inject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun getPaths(): List<String> {
+        val dependenciesDownloader = objectFactory.newInstance<DependenciesDownloader>(offline.get())
+        val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
+
+        val idePaths = ideVersions.map { ideVersions ->
+            ideVersions
+                .ifEmpty {
+                    when {
+                        localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
+                        else -> null
+                    }
+                }
+                .orEmpty()
+                .map { ideVersion ->
+                    resolveIdePath(ideVersion, downloadPath.get(), context) { type, version, buildType ->
+                        val name = "$type-$version"
+                        val ideDir = downloadPath.get().resolve(name)
+                        info(context, "Downloading IDE '$name' to: $ideDir")
+
+                        val url = resolveIdeUrl(type, version, buildType, context)
+                        val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
+                        val group = when (type) {
+                            PLATFORM_TYPE_ANDROID_STUDIO -> "com.android"
+                            else -> "com.jetbrains"
+                        }
+                        debug(context, "Downloading IDE from $url")
+
+                        try {
+                            val ideArchive = dependenciesDownloader.downloadFromRepository(context, {
+                                create(
+                                    group = group,
+                                    name = "ides",
+                                    version = dependencyVersion,
+                                    ext = "tar.gz",
+                                )
+                            }, {
+                                ivyRepository(url)
+                            }).first()
+
+                            debug(context, "IDE downloaded, extracting...")
+                            archiveUtils.extract(ideArchive.toPath(), ideDir, context) // FIXME ideArchive.toPath()
+                            ideDir.listFiles().let { files ->
+                                files.filter { it.isDirectory }.forEach { container ->
+                                    container.listFiles().forEach { file ->
+                                        Files.move(file, ideDir.resolve(file.simpleName))
+                                    }
+                                    container.forceRemoveDirectory()
+                                }
+                            }
+                        } catch (e: Exception) {
+                            warn(context, "Cannot download '$type-$version' from '$buildType' channel: $url", e)
+                        }
+
+                        debug(context, "IDE extracted to: $ideDir")
+                        ideDir
+                    }
+                }
+        }.get()
+        val userPaths = localPaths.get().map { it.toPath() }
+
+        return (idePaths + userPaths).map {
+            it.absolutePathString()
         }
     }
 
@@ -337,7 +405,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
             )
 
     /**
-     * Verifies if provided Java Runtime directory points to Java 11 when using Plugin Verifier 1.260+.
+     * Verifies if the provided Java Runtime directory points to Java 11 when using Plugin Verifier 1.260+.
      *
      * @return Java Runtime directory points to Java 8 for Plugin Verifier versions < 1.260, or Java 11 for 1.260+.
      */
@@ -424,7 +492,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @param ideVersion IDE version. Can be "2020.2", "IC-2020.2", "202.1234.56"
      * @return path to the resolved IDE
      */
-    internal fun resolveIdePath(
+    private fun resolveIdePath(
         ideVersion: String,
         downloadPath: Path,
         context: String?,
@@ -469,14 +537,14 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Resolves direct IDE download URL provided by the JetBrains Data Services.
      * The URL created with [IDEA_DOWNLOAD_URL] contains HTTP redirection, which is supposed to be resolved.
-     * Direct download URL is prepended with [CACHE_REDIRECTOR] host for providing caching mechanism.
+     * Direct download URL is prepended with [CACHE_REDIRECTOR] host for providing a caching mechanism.
      *
      * @param type IDE type, i.e. IC, PS
      * @param version IDE version, i.e. 2020.2 or 203.1234.56
      * @param buildType release, rc, eap, beta
      * @return direct download URL prepended with [CACHE_REDIRECTOR] host
      */
-    internal fun resolveIdeUrl(type: String, version: String, buildType: String, context: String?): String {
+    private fun resolveIdeUrl(type: String, version: String, buildType: String, context: String?): String {
         val isAndroidStudio = type == PLATFORM_TYPE_ANDROID_STUDIO
         val url = when {
             isAndroidStudio -> "$ANDROID_STUDIO_DOWNLOAD_URL/$version/android-studio-$version-linux.tar.gz"

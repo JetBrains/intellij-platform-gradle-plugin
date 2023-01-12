@@ -6,6 +6,9 @@
 - Extract ZIP Signer CLI tool downloading as `downloadZipSigner` task
 - Allow for passing `signPlugin.privateKey` and `signPlugin.certificateChain` as base64-encoded value
 
+### Changed
+- Download IDEs used by the Plugin Verifier in the task execution phase.
+
 ### Fixed
 - Added missing incremental task annotation properties and cacheability annotations [#1258](../../issues/1258)
 - Make `listBundledPlugins` not printing output as `printBundledPlugins` does that

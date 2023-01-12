@@ -62,7 +62,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_V
 import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_CLION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
@@ -105,7 +104,6 @@ import org.jetbrains.intellij.utils.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
-import java.nio.file.Files
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -665,6 +663,16 @@ abstract class IntelliJPlugin : Plugin<Project> {
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
             })
+            downloadPath.convention(userHomeProvider.map {
+                val userHomePath = Path.of(it)
+                with(downloadDir.get()) {
+                    when {
+                        startsWith("~/") -> userHomePath.resolve(removePrefix("~/"))
+                        equals("~") -> userHomePath
+                        else -> Path.of(this)
+                    }
+                }
+            })
             teamCityOutputFormat.convention(false)
             subsystemsToCheck.convention("all")
             ideDir.convention(runIdeTaskProvider.flatMap { runIdeTask ->
@@ -672,71 +680,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
             productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
                 listProductsReleasesTask.outputFile.asFile
-            })
-            ides.convention(ideVersions.map { ideVersions ->
-                val userHomePath = Path.of(userHomeProvider.get())
-                val downloadPath = with(downloadDir.get()) {
-                    when {
-                        startsWith("~/") -> userHomePath.resolve(removePrefix("~/"))
-                        equals("~") -> userHomePath
-                        else -> Path.of(this)
-                    }
-                }
-
-                ideVersions
-                    .ifEmpty {
-                        when {
-                            localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
-                            else -> null
-                        }
-                    }
-                    .orEmpty()
-                    .map { ideVersion ->
-                        val context = logCategory()
-
-                        resolveIdePath(ideVersion, downloadPath, context) { type, version, buildType ->
-                            val name = "$type-$version"
-                            val ideDir = downloadPath.resolve(name)
-                            info(context, "Downloading IDE '$name' to: $ideDir")
-
-                            val url = resolveIdeUrl(type, version, buildType, context)
-                            val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
-                            val group = when (type) {
-                                PLATFORM_TYPE_ANDROID_STUDIO -> "com.android"
-                                else -> "com.jetbrains"
-                            }
-                            debug(context, "Downloading IDE from $url")
-
-                            try {
-                                val ideArchive = dependenciesDownloader.downloadFromRepository(context, {
-                                    create(
-                                        group = group,
-                                        name = "ides",
-                                        version = dependencyVersion,
-                                        ext = "tar.gz",
-                                    )
-                                }, {
-                                    ivyRepository(url)
-                                }).first()
-
-                                debug(context, "IDE downloaded, extracting...")
-                                archiveUtils.extract(ideArchive.toPath(), ideDir, context) // FIXME ideArchive.toPath()
-                                ideDir.listFiles().let { files ->
-                                    files.filter { it.isDirectory }.forEach { container ->
-                                        container.listFiles().forEach { file ->
-                                            Files.move(file, ideDir.resolve(file.simpleName))
-                                        }
-                                        container.forceRemoveDirectory()
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                warn(context, "Cannot download '$type-$version' from '$buildType' channel: $url", e)
-                            }
-
-                            debug(context, "IDE extracted to: $ideDir")
-                            ideDir
-                        }
-                    }.let { files -> project.files(files) }
             })
             verifierPath.convention(project.provider {
                 val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
