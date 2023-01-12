@@ -593,10 +593,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
                             ?: ideBuildNumber(it)
                     }
                 }
-            }.orElse(project.provider {
-                val version = extension.getVersionNumber()
-                val type = extension.getVersionType()
-                "$version-$type"
+            }.orElse(extension.getVersionType().zip(extension.getVersionNumber()) { type, version ->
+                "$type-$version"
             })
         }
 

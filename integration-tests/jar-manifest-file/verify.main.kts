@@ -12,5 +12,7 @@ __FILE__.init {
         this containsText "Version: 1.0.0"
         this containsText "Build-Plugin: Gradle IntelliJ Plugin"
         this containsText "Build-Plugin-Version:"
+        this containsText "Build-OS:"
+        this containsText "Build-SDK: IC-2022.1.4"
     }
 }

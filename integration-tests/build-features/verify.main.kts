@@ -60,7 +60,6 @@ __FILE__.init {
         runGradleTask(
             "clean", "buildSearchableOptions", projectProperties = mapOf(
                 "buildSearchableOptionsEnabled" to true,
-                "projectExecutable" to "echo",
                 flag to true,
             )
         ).let { logs ->

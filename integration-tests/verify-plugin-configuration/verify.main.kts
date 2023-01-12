@@ -5,6 +5,7 @@
 import java.nio.file.Files
 
 __FILE__.init {
+    val issuesFoundSentence = "[gradle-intellij-plugin :verify-plugin-configuration verify-plugin-configuration:verify-plugin-configuration:verifyPluginConfiguration] The following plugin configuration issues were found:"
     val userHome = projectDirectory.resolve("home")
     val ides = userHome.resolve(".pluginVerifier/ides").also {
         Files.deleteIfExists(it.resolve("foo"))
@@ -23,7 +24,7 @@ __FILE__.init {
     runGradleTask(
         "clean", "verifyPluginConfiguration", systemProperties = defaultSystemProperties, projectProperties = defaultProjectProperties
     ).let { logs ->
-        logs notContainsText "[gradle-intellij-plugin :verify-plugin-configuration:verifyPluginConfiguration] The following plugin configuration issues were found:"
+        logs notContainsText issuesFoundSentence
     }
 
     runGradleTask(
@@ -31,7 +32,7 @@ __FILE__.init {
             "languageVersion" to "11",
         )
     ).let { logs ->
-        logs containsText "[gradle-intellij-plugin :verify-plugin-configuration:verifyPluginConfiguration] The following plugin configuration issues were found:"
+        logs containsText issuesFoundSentence
         logs containsText "- The Java configuration specifies sourceCompatibility=11 but IntelliJ Platform 2022.2 requires sourceCompatibility=17."
     }
 
@@ -40,7 +41,7 @@ __FILE__.init {
             "sinceBuild" to "203",
         )
     ).let { logs ->
-        logs containsText "[gradle-intellij-plugin :verify-plugin-configuration:verifyPluginConfiguration] The following plugin configuration issues were found:"
+        logs containsText issuesFoundSentence
         logs containsText "- The 'since-build' property is lower than the target IntelliJ Platform major version: 203 < 222."
         logs containsText "- The Java configuration specifies targetCompatibility=17 but since-build='203' property requires targetCompatibility=11."
     }

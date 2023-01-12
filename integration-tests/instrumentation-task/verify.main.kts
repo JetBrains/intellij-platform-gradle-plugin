@@ -30,7 +30,7 @@ __FILE__.init {
         }
         buildDirectory.resolve("classes/kotlin/main/MainKt.class").run {
             assert(Files.exists(this))
-            assert(Files.size(this) == 793L)
+            assert(Files.size(this) == 798L)
         }
 
         buildDirectory.resolve("libs/instrumentation-task-1.0.0.jar").let { jar ->
@@ -41,7 +41,7 @@ __FILE__.init {
             assert((jar readEntry "Form.class").length == 1269)
 
             jar containsFileInArchive "MainKt.class"
-            assert((jar readEntry "MainKt.class").length == 1185)
+            assert((jar readEntry "MainKt.class").length == 1190)
 
             jar containsFileInArchive "CustomMain.class"
             assert((jar readEntry "CustomMain.class").length == 1040)

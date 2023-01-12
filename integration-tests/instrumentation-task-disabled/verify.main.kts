@@ -23,7 +23,7 @@ __FILE__.init {
         buildDirectory.resolve("classes/kotlin/main").run {
             resolve("MainKt.class").run {
                 assert(Files.exists(this))
-                assert(Files.size(this) == 977L)
+                assert(Files.size(this) == 982L)
             }
         }
 
@@ -40,7 +40,7 @@ __FILE__.init {
             assert((jar readEntry "Main.class").length == 658)
 
             jar containsFileInArchive "MainKt.class"
-            assert((jar readEntry "MainKt.class").length == 975)
+            assert((jar readEntry "MainKt.class").length == 980)
 
             buildDirectory.resolve("instrumented").run {
                 assert(Files.isDirectory(this))
@@ -81,7 +81,7 @@ __FILE__.init {
             assert((jar readEntry "Main.class").length == 1015)
 
             jar containsFileInArchive "MainKt.class"
-            assert((jar readEntry "MainKt.class").length == 975)
+            assert((jar readEntry "MainKt.class").length == 980)
         }
     }
 
