@@ -632,8 +632,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun collectSourceSetClassPaths(sourceSetName: String = "test"): Pair<String, String> {
         buildFile.appendPrintClassPathsTasks(sourceSetName)
         return buildAndGetClassPaths(
-            "print${sourceSetName.replaceFirstChar(Char::uppercase)}CompileClassPath",
-            "print${sourceSetName.replaceFirstChar(Char::uppercase)}RuntimeClassPath"
+            "print${sourceSetName.capitalize()}CompileClassPath",
+            "print${sourceSetName.capitalize()}RuntimeClassPath"
         )
     }
 
@@ -643,11 +643,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             def runtimeOnly = project.provider { sourceSets.$sourceSetName.runtimeClasspath.asPath }
             def implementation = project.provider { sourceSets.$sourceSetName.compileClasspath.asPath }
             
-            task print${sourceSetName.replaceFirstChar(Char::uppercase)}RuntimeClassPath {
+            task print${sourceSetName.capitalize()}RuntimeClassPath {
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'runtimeOnly: ' + runtimeOnly.get() }
             }
-            task print${sourceSetName.replaceFirstChar(Char::uppercase)}CompileClassPath { 
+            task print${sourceSetName.capitalize()}CompileClassPath { 
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'implementation: ' + implementation.get() }
             }

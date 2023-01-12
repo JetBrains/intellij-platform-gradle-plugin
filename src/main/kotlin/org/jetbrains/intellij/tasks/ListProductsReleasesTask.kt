@@ -157,7 +157,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             .flatMap { product -> product.codes.map { it to product }.asSequence() }
             .filter { (type) -> types.contains(type) }
             .flatMap { (type, product) -> product.channels.map { type to it }.asSequence() }
-            .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.uppercase())) }
+            .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.toUpperCase())) }
             .flatMap { (type, channel) ->
                 channel.builds.map {
                     type to (it.version.run(Version::parse) to it.number.run(Version::parse))
@@ -181,7 +181,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
                     val build = item.platformBuild?.let(Version::parse)
                     testVersion(version, build)
                 }
-                .filter { channels.contains(Channel.valueOf(it.channel.uppercase())) }
+                .filter { channels.contains(Channel.valueOf(it.channel.toUpperCase())) }
                 .groupBy { it.version.split('.').dropLast(1).joinToString(".") }
                 .mapNotNull { entry ->
                     entry.value.maxByOrNull {

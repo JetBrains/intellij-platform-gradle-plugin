@@ -1114,7 +1114,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
-            val postInstrumentName = "post${name.replaceFirstChar(Char::uppercase)}"
+            val postInstrumentName = "post${name.capitalize()}"
             val updateTask = project.tasks.register(postInstrumentName) {
                 description = "Code post-instrumentation task."
                 group = PLUGIN_GROUP_NAME

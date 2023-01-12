@@ -42,6 +42,7 @@ import java.util.*
 import javax.inject.Inject
 import kotlin.io.path.absolutePathString
 
+@Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run Plugin Verifier")
 abstract class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
