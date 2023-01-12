@@ -59,6 +59,10 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
 @Suppress("UnstableApiUsage")
 gradlePlugin {
     website.set(properties("website"))

@@ -10,6 +10,10 @@ plugins {
     `kotlin-dsl`
 }
 
+kotlin {
+    jvmToolchain(11)
+}
+
 repositories {
     mavenCentral()
 }
@@ -29,9 +33,7 @@ subprojects {
     }
 
     kotlin {
-        jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(11))
-        }
+        jvmToolchain(11)
     }
 
     configure<IntelliJPluginExtension> {
