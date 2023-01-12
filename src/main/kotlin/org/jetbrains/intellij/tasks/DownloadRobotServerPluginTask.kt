@@ -69,8 +69,7 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
 
     /**
      * Resolves the Robot Server version.
-     * If set to [VERSION_LATEST], there's request to [METADATA_URL]
-     * performed for the latest available version.
+     * If set to [VERSION_LATEST], there's request to [METADATA_URL] performed for the latest available version.
      *
      * @return Robot Server version
      */

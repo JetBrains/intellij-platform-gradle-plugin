@@ -50,8 +50,7 @@ abstract class DownloadZipSignerTask : DefaultTask() {
 
     /**
      * Resolves the Marketplace ZIP Signer CLI version.
-     * If set to [VERSION_LATEST], there's request to [MARKETPLACE_ZIP_SIGNER_URL]
-     * performed for the latest available version.
+     * If set to [VERSION_LATEST], there's request to [MARKETPLACE_ZIP_SIGNER_URL] performed for the latest available version.
      *
      * @return Marketplace ZIP Signer CLI version
      */

@@ -77,8 +77,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val ides: ListProperty<File>
 
     /**
-     * A list of the paths to locally installed IDE distributions that should be used for verification
-     * in addition to those specified in [ideVersions].
+     * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
      */
     @get:Input
     abstract val localPaths: ListProperty<File>
@@ -166,8 +165,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * - `8u202b1483.24`
      * - `11_0_2b159`
      *
-     * All JetBrains Java versions are available at JetBrains Space Packages,
-     * and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
+     * All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
     @get:Input
     @get:Optional
@@ -216,8 +214,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val externalPrefixes: ListProperty<String>
 
     /**
-     * A flag that controls the output format - if set to `true`, the TeamCity compatible output
-     * will be returned to stdout.
+     * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
      *
      * Default value: `false`
      */

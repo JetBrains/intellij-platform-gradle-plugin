@@ -186,11 +186,7 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
         } catch (e: BuildException) {
             val cause = e.cause
             if (cause is ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.message) {
-                info(
-                    context,
-                    "Old version of Javac2 is used, instrumenting code with nullability will be skipped. " +
-                            "Use IDEA >14 SDK (139.*) to fix this",
-                )
+                info(context, "Old version of Javac2 is used, instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
                 return false
             } else {
                 throw e

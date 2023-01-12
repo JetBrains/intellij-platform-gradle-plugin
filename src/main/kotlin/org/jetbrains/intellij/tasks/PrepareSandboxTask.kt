@@ -51,10 +51,10 @@ abstract class PrepareSandboxTask : Sync() {
     abstract val pluginJar: RegularFileProperty
 
     /**
-     * Libraries that will be ignored when preparing the sandbox. By default, excludes all libraries that are a part
-     * of the [SetupDependenciesTask.idea] dependency.
+     * Libraries that will be ignored when preparing the sandbox.
+     * By default, excludes all libraries that are a part of the [SetupDependenciesTask.idea] dependency.
      *
-     * Default value: [SetupDependenciesTask.idea.get().jarFiles]
+     * Default value: [org.jetbrains.intellij.dependency.IdeaDependency.jarFiles] of [SetupDependenciesTask.idea]
      */
     @get:Input
     @get:Optional

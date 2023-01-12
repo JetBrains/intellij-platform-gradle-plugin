@@ -70,8 +70,7 @@ abstract class RunIdeBase : JavaExec() {
      * - `8u202b1483.24`
      * - `11_0_2b159`
      *
-     * All JetBrains Java versions are available at JetBrains Space Packages,
-     * and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
+     * All JetBrains Java versions are available at JetBrains Space Packages and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
      */
     @get:Input
     @get:Optional

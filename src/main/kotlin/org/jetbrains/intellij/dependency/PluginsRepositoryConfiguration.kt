@@ -15,21 +15,21 @@ abstract class PluginsRepositoryConfiguration @Inject constructor(
     private val pluginsRepositories = mutableListOf<PluginsRepository>()
 
     /**
-     * Use default marketplace repository
+     * Use default marketplace repository.
      */
     fun marketplace() {
         pluginsRepositories.add(MavenRepositoryPlugin(DEFAULT_INTELLIJ_PLUGINS_REPOSITORY, dependenciesDownloader))
     }
 
     /**
-     * Use a Maven repository with plugin artifacts
+     * Use a Maven repository with plugin artifacts.
      */
     fun maven(url: String) {
         pluginsRepositories.add(MavenRepositoryPlugin(url, dependenciesDownloader))
     }
 
     /**
-     * Use a Maven repository by action
+     * Use a Maven repository by action.
      */
     fun maven(action: Action<in MavenArtifactRepository>) {
         pluginsRepositories.add(MavenRepositoryPluginByAction(action, dependenciesDownloader))

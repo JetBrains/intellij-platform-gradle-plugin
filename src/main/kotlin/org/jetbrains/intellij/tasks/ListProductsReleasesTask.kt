@@ -22,8 +22,7 @@ import java.nio.file.Path
 abstract class ListProductsReleasesTask : DefaultTask() {
 
     /**
-     * Path to the products releases update files. By default, one is downloaded from
-     * [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
+     * Path to the products releases update files. By default, one is downloaded from [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
      */
     @get:InputFiles
     @get:Optional
@@ -31,8 +30,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
     abstract val productsReleasesUpdateFiles: ConfigurableFileCollection
 
     /**
-     * Path to the products releases update files. By default, one is downloaded from
-     * [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
+     * Path to the products releases update files. By default, one is downloaded from [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
      */
     @get:Internal
     @Deprecated("replaced with `productsReleasesUpdateFiles`, to improve compatibility with the Gradle API")

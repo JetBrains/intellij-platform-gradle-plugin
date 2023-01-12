@@ -16,8 +16,7 @@ import org.jetbrains.intellij.logCategory
 
 /**
  * Remove `classpath.index` files that are created by the `PathClassLoader`.
- * This loader, due to the implementation bug, ignores the `idea.classpath.index.enabled=false` flag and as a workaround,
- * files have to be removed manually.
+ * This loader, due to the implementation bug, ignores the `idea.classpath.index.enabled=false` flag and as a workaround, files have to be removed manually.
  */
 @DisableCachingByDefault(because = "Deletion cannot be cached")
 abstract class ClasspathIndexCleanupTask : DefaultTask() {
