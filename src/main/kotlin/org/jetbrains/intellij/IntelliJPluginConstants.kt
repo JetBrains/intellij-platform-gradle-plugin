@@ -51,7 +51,7 @@ object IntelliJPluginConstants {
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
 
-    const val ANNOTATIONS_DEPENDENCY_VERSION = "23.1.0"
+    const val ANNOTATIONS_DEPENDENCY_VERSION = "24.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     const val MINIMAL_SUPPORTED_GRADLE_VERSION = "7.3"
 
