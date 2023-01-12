@@ -64,7 +64,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
      * Check the available build versions on [IntelliJ Platform Builds list](https://jb.gg/intellij-platform-builds-list).
      *
-     * Default value: output of the [org.jetbrains.intellij.tasks.ListProductsReleasesTask] task
+     * Default value: output of the [ListProductsReleasesTask] task
      */
     @get:Input
     @get:Optional

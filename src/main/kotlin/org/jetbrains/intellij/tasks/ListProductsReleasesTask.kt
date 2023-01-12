@@ -13,7 +13,6 @@ import org.gradle.api.tasks.*
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.asPath
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
@@ -24,7 +23,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
     /**
      * Path to the products releases update files. By default, one is downloaded from
-     * [org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
+     * [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
      */
     @get:InputFiles
     @get:Optional
@@ -33,7 +32,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
     /**
      * Path to the products releases update files. By default, one is downloaded from
-     * [org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
+     * [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
      */
     @get:Internal
     @Deprecated("replaced with `productsReleasesUpdateFiles`, to improve compatibility with the Gradle API")
@@ -67,7 +66,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
      * Lower boundary of the listed results in marketing product version format, like `2020.2.1`.
      * Takes the precedence over [sinceBuild] property.
      *
-     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.version]
+     * Default value: [IntelliJPluginExtension.version]
      */
     @get:Input
     @get:Optional
@@ -86,7 +85,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
     /**
      * Lower boundary of the listed results in build number format, like `192`.
      *
-     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.version]
+     * Default value: [IntelliJPluginExtension.version]
      */
     @get:Input
     @get:Optional

@@ -17,7 +17,7 @@ import org.jetbrains.intellij.utils.DependenciesDownloader
 import javax.inject.Inject
 
 /**
- * Configuration options for the [org.jetbrains.intellij.IntelliJPlugin].
+ * Configuration options for the [IntelliJPlugin].
  */
 abstract class IntelliJPluginExtension @Inject constructor(
     objectFactory: ObjectFactory,

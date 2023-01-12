@@ -28,7 +28,7 @@ abstract class PrepareSandboxTask : Sync() {
     /**
      * The name of the plugin.
      *
-     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.pluginName]
+     * Default value: [IntelliJPluginExtension.pluginName]
      */
     @get:Input
     abstract val pluginName: Property<String>
@@ -36,7 +36,7 @@ abstract class PrepareSandboxTask : Sync() {
     /**
      * The directory with the plugin configuration.
      *
-     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.sandboxDir]/config
+     * Default value: [IntelliJPluginExtension.sandboxDir]/config
      */
     @get:Input
     abstract val configDir: Property<String>
@@ -52,9 +52,9 @@ abstract class PrepareSandboxTask : Sync() {
 
     /**
      * Libraries that will be ignored when preparing the sandbox. By default, excludes all libraries that are a part
-     * of the [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea] dependency.
+     * of the [SetupDependenciesTask.idea] dependency.
      *
-     * Default value: [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea.get().jarFiles]
+     * Default value: [SetupDependenciesTask.idea.get().jarFiles]
      */
     @get:Input
     @get:Optional
@@ -63,7 +63,7 @@ abstract class PrepareSandboxTask : Sync() {
     /**
      * List of dependencies of the current plugin.
      *
-     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.getPluginDependenciesList]
+     * Default value: [IntelliJPluginExtension.getPluginDependenciesList]
      */
     @get:Input
     @get:Optional

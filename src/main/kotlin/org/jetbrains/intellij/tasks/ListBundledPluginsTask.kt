@@ -23,7 +23,7 @@ abstract class ListBundledPluginsTask : DefaultTask() {
 
     /**
      * The IDEA dependency sources path.
-     * Configured automatically with the [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea] dependency.
+     * Configured automatically with the [SetupDependenciesTask.idea] dependency.
      *
      * Default value: `setupDependenciesTask.idea.get().classes.path`
      */

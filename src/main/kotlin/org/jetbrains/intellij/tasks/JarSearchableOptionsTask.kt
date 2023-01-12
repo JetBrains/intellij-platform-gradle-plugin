@@ -8,7 +8,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.intellij.IntelliJPluginConstants
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.asPath
@@ -40,7 +39,7 @@ abstract class JarSearchableOptionsTask : Jar() {
     /**
      * The sandbox output directory.
      *
-     * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.getDestinationDir]
+     * Default value: [PrepareSandboxTask.getDestinationDir]
      */
     @get:Input
     @get:Optional

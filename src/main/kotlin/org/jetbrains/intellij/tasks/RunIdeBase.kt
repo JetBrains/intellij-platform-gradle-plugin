@@ -13,7 +13,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.jvm.toolchain.JavaLauncher
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
@@ -31,7 +30,7 @@ abstract class RunIdeBase : JavaExec() {
 
     /**
      * The IDEA dependency sources path.
-     * Configured automatically with the [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea] dependency.
+     * Configured automatically with the [SetupDependenciesTask.idea] dependency.
      *
      * Default value: `setupDependenciesTask.idea.get().classes.path`
      */
@@ -88,10 +87,10 @@ abstract class RunIdeBase : JavaExec() {
     abstract val jbrArch: Property<String>
 
     /**
-     * Path to the `plugins` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
+     * Path to the `plugins` directory within the sandbox prepared with [PrepareSandboxTask].
      * Provided to the `idea.plugins.path` system property.
      *
-     * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.getDestinationDir]
+     * Default value: [PrepareSandboxTask.getDestinationDir]
      */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.NONE)
@@ -115,19 +114,19 @@ abstract class RunIdeBase : JavaExec() {
     abstract val requiredPluginIds: ListProperty<String>
 
     /**
-     * Path to the `config` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
+     * Path to the `config` directory within the sandbox prepared with [PrepareSandboxTask].
      * Provided to the `idea.config.path` system property.
      *
-     * Default value: [org.jetbrains.intellij.tasks.PrepareSandboxTask.configDir]
+     * Default value: [PrepareSandboxTask.configDir]
      */
     @get:Internal
     abstract val configDir: Property<File>
 
     /**
-     * Path to the `system` directory within the sandbox prepared with [org.jetbrains.intellij.tasks.PrepareSandboxTask].
+     * Path to the `system` directory within the sandbox prepared with [PrepareSandboxTask].
      * Provided to the `idea.system.path` system property.
      *
-     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.sandboxDir]/system
+     * Default value: [IntelliJPluginExtension.sandboxDir]/system
      */
     @get:Internal
     abstract val systemDir: Property<File>
@@ -135,7 +134,7 @@ abstract class RunIdeBase : JavaExec() {
     /**
      * The IDEA binary working directory.
      *
-     * Default value: [org.jetbrains.intellij.tasks.SetupDependenciesTask.idea]/bin
+     * Default value: [SetupDependenciesTask.idea]/bin
      */
     @get:Internal
     abstract val projectWorkingDir: Property<File>
