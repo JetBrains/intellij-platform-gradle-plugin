@@ -59,6 +59,7 @@ dependencies {
     testImplementation(kotlin("test-junit"))
 }
 
+@Suppress("UnstableApiUsage")
 gradlePlugin {
     website.set(properties("website"))
     vcsUrl.set(properties("vcsUrl"))

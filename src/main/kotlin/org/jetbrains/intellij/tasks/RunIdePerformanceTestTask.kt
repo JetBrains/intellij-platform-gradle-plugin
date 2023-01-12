@@ -113,7 +113,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
         "-Dlinux.native.menu.force.disable=true",
         "-Didea.fatal.error.notification=true",
         "-Dtestscript.filename=$scriptPath",
-        "-DintegrationTests.profiler=${profilerName.get().name.toLowerCase()}",
+        "-DintegrationTests.profiler=${profilerName.get().name.lowercase()}",
         "-Dide.performance.screenshot.before.kill=$testArtifactsDirPath",
         "-Didea.log.path=$testArtifactsDirPath",
         "-Dsnapshots.path=$testArtifactsDirPath",

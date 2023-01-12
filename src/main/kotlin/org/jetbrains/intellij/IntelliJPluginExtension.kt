@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
@@ -161,7 +162,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * - `maven { repositoryUrl }` - use custom Maven repository with plugins where you can configure additional parameters (credentials, authentication and etc.)
      * - `custom(pluginsXmlUrl)` - use custom plugin repository
      */
-    val pluginsRepositories = objectFactory.newInstance<PluginsRepositoryConfiguration>(dependenciesDownloader)
+    private val pluginsRepositories = objectFactory.newInstance<PluginsRepositoryConfiguration>(dependenciesDownloader)
 
     private var pluginDependenciesConfigured = false
 
@@ -222,11 +223,11 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @get:Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     abstract val ideaDependency: Property<IdeaDependency>
 
-    fun getVersionNumber() = version.map {
+    fun getVersionNumber(): Provider<String> = version.map {
         versionTypeRegex.matchEntire(it)?.groupValues?.getOrNull(2) ?: it
     }
 
-    fun getVersionType() = version.map {
+    fun getVersionType(): Provider<String> = version.map {
         versionTypeRegex.matchEntire(it)?.groupValues?.getOrNull(1)
             ?: type.getOrElse(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
     }
