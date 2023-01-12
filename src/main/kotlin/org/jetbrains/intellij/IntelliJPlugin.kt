@@ -309,11 +309,19 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureDependencies(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         val idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
             .setVisible(false)
+            .apply {
+                isCanBeConsumed = false
+                isCanBeResolved = true
+            }
 
         val ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
             .setVisible(false)
             .withDependencies {
                 configurePluginDependencies(project, ideaDependencyProvider, extension, this)
+            }
+            .apply {
+                isCanBeConsumed = false
+                isCanBeResolved = true
             }
 
         val defaultDependencies = project.configurations.create(INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME)
@@ -326,6 +334,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         version = ANNOTATIONS_DEPENDENCY_VERSION,
                     )
                 )
+            }
+            .apply {
+                isCanBeConsumed = false
+                isCanBeResolved = true
             }
 
         val performanceTest = project.configurations.create(PERFORMANCE_TEST_CONFIGURATION_NAME)
@@ -358,6 +370,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         configurePluginDependency(project, plugin, extension, this, resolver)
                     }
                 }
+            }
+            .apply {
+                isCanBeConsumed = false
+                isCanBeResolved = true
             }
 
         fun Configuration.extend() = extendsFrom(defaultDependencies, idea, ideaPlugins, performanceTest)
