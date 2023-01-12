@@ -40,7 +40,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
-import kotlin.io.path.absolutePathString
 
 @Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run Plugin Verifier")
@@ -361,7 +360,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
         val userPaths = localPaths.get().map { it.toPath() }
 
         return (idePaths + userPaths).map {
-            it.absolutePathString()
+            it.toAbsolutePath().toString()
         }
     }
 

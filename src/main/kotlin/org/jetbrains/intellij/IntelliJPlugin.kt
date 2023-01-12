@@ -14,7 +14,6 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
-import org.gradle.api.internal.tasks.DefaultTaskDependencyFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
@@ -1289,7 +1288,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
 
             val archivesConfiguration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
-            ArchivePublishArtifact(DefaultTaskDependencyFactory.withNoAssociatedProject(), this).let { zipArtifact ->
+            ArchivePublishArtifact(this).let { zipArtifact ->
                 archivesConfiguration.artifacts.add(zipArtifact)
                 project.extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(zipArtifact)
                 project.components.add(IntelliJPluginLibrary())
