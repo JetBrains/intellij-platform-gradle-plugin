@@ -11,10 +11,6 @@ import kotlin.test.Test
 @Suppress("PluginXmlCapitalization", "PluginXmlValidity", "ComplexRedundantLet")
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
-    companion object {
-        const val HEADER = "The following plugin configuration issues were found"
-    }
-
     @BeforeTest
     override fun setUp() {
         super.setUp()
@@ -205,5 +201,9 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         build("clean", VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertNotContains(HEADER, it.output)
         }
+    }
+
+    companion object {
+        const val HEADER = "The following plugin configuration issues were found"
     }
 }

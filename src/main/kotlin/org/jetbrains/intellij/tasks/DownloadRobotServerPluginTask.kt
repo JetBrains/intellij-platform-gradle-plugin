@@ -27,15 +27,6 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,
 ) : DefaultTask() {
 
-    companion object {
-        private const val METADATA_URL = "$INTELLIJ_DEPENDENCIES/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"
-        private const val OLD_ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
-        private const val NEW_ROBOT_SERVER_DEPENDENCY = "com.intellij.remoterobot:robot-server-plugin"
-        private const val NEW_ROBOT_SERVER_VERSION = "0.11.0"
-
-        fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Robot Server Plugin", METADATA_URL)
-    }
-
     /**
      * The version of the Robot Server Plugin to download.
      *
@@ -91,5 +82,14 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
     internal fun getDependency(version: String) = when {
         Version.parse(version) >= Version.parse(NEW_ROBOT_SERVER_VERSION) -> NEW_ROBOT_SERVER_DEPENDENCY
         else -> OLD_ROBOT_SERVER_DEPENDENCY
+    }
+
+    companion object {
+        private const val METADATA_URL = "$INTELLIJ_DEPENDENCIES/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"
+        private const val OLD_ROBOT_SERVER_DEPENDENCY = "org.jetbrains.test:robot-server-plugin"
+        private const val NEW_ROBOT_SERVER_DEPENDENCY = "com.intellij.remoterobot:robot-server-plugin"
+        private const val NEW_ROBOT_SERVER_VERSION = "0.11.0"
+
+        fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Robot Server Plugin", METADATA_URL)
     }
 }

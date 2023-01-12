@@ -19,18 +19,6 @@ import java.nio.file.Path
 @DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadZipSignerTask : DefaultTask() {
 
-    companion object {
-        private const val MARKETPLACE_ZIP_SIGNER_URL = "https://github.com/JetBrains/marketplace-zip-signer"
-        private const val RELEASE_DOWNLOAD_URL = "$MARKETPLACE_ZIP_SIGNER_URL/releases/download/%VERSION%/marketplace-zip-signer-cli.jar"
-
-        /**
-         * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
-         *
-         * @return latest CLI version
-         */
-        fun resolveLatestVersion() = LatestVersionResolver.fromGitHub("Marketplace ZIP Signer CLI", MARKETPLACE_ZIP_SIGNER_URL)
-    }
-
     /**
      * Returns the version of the Marketplace ZIP Signer CLI that will be used.
      *
@@ -76,5 +64,17 @@ abstract class DownloadZipSignerTask : DefaultTask() {
      */
     internal fun resolveCliUrl(version: String?) = resolveCliVersion(version).let {
         RELEASE_DOWNLOAD_URL.replace("%VERSION%", it)
+    }
+
+    companion object {
+        private const val MARKETPLACE_ZIP_SIGNER_URL = "https://github.com/JetBrains/marketplace-zip-signer"
+        private const val RELEASE_DOWNLOAD_URL = "$MARKETPLACE_ZIP_SIGNER_URL/releases/download/%VERSION%/marketplace-zip-signer-cli.jar"
+
+        /**
+         * Resolves the latest version available of the Marketplace ZIP Signer CLI using GitHub API.
+         *
+         * @return latest CLI version
+         */
+        fun resolveLatestVersion() = LatestVersionResolver.fromGitHub("Marketplace ZIP Signer CLI", MARKETPLACE_ZIP_SIGNER_URL)
     }
 }

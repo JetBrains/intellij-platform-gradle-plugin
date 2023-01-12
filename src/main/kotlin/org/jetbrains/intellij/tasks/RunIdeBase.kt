@@ -27,10 +27,6 @@ import kotlin.streams.asSequence
 @UntrackedTask(because = "Runs an IDE which should happen every time this task is run.")
 abstract class RunIdeBase : JavaExec() {
 
-    companion object {
-        private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
-    }
-
     private val context = logCategory()
 
     /**
@@ -153,6 +149,7 @@ abstract class RunIdeBase : JavaExec() {
     private val ideDirPath by lazy {
         ideDir.get().toPath()
     }
+
     private val infoPlist by lazy {
         ideDirPath
             .resolve("Info.plist")
@@ -167,6 +164,7 @@ abstract class RunIdeBase : JavaExec() {
             .last()
             .let(Version::parse)
     }
+
     private val build221 by lazy {
         Version.parse("221.0")
     }
@@ -323,5 +321,9 @@ abstract class RunIdeBase : JavaExec() {
             else -> "../lib/tools.jar"
         }
         return File(binDir, path)
+    }
+
+    companion object {
+        private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
     }
 }

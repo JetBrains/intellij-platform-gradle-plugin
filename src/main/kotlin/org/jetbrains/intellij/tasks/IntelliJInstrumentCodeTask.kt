@@ -27,11 +27,6 @@ import java.nio.file.StandardCopyOption
 @CacheableTask
 abstract class IntelliJInstrumentCodeTask : DefaultTask() {
 
-    companion object {
-        const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
-        const val LOADER_REF = "java2.loader"
-    }
-
     @get:Internal
     abstract val sourceSetCompileClasspath: ConfigurableFileCollection
 
@@ -250,5 +245,10 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
                 System.clearProperty("java.awt.headless")
             }
         }
+    }
+
+    companion object {
+        const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
+        const val LOADER_REF = "java2.loader"
     }
 }

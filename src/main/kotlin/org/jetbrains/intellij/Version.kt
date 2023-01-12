@@ -9,17 +9,6 @@ class Version(
     val version: String = "",
 ) : Comparable<Version> {
 
-    companion object {
-        fun parse(versionString: String) =
-            versionString.split(' ', '.', '-', '"', '_')
-                .map(String::toIntOrNull)
-                .dropWhile { it == null }
-                .takeWhile { it != null }
-                .filterNotNull()
-                .let { it + List(3) { 0 } }
-                .let { (major, minor, patch) -> Version(major, minor, patch, versionString) }
-    }
-
     private inline fun Int.or(other: () -> Int) = takeIf { this != 0 } ?: other()
 
     override fun compareTo(other: Version) =
@@ -58,5 +47,16 @@ class Version(
         result = 31 * result + patch
         result = 31 * result + version.hashCode()
         return result
+    }
+
+    companion object {
+        fun parse(versionString: String) =
+            versionString.split(' ', '.', '-', '"', '_')
+                .map(String::toIntOrNull)
+                .dropWhile { it == null }
+                .takeWhile { it != null }
+                .filterNotNull()
+                .let { it + List(3) { 0 } }
+                .let { (major, minor, patch) -> Version(major, minor, patch, versionString) }
     }
 }

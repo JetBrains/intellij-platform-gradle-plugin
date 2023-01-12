@@ -43,14 +43,6 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private val providers: ProviderFactory,
 ) : DefaultTask() {
 
-    companion object {
-        private const val METADATA_URL = "$PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
-        private const val IDEA_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
-        private const val ANDROID_STUDIO_DOWNLOAD_URL = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
-
-        fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Plugin Verifier", METADATA_URL)
-    }
-
     /**
      * Defines the verification level at which task should fail if any reported issue will match.
      * Can be set as [FailureLevel] enum or [EnumSet<FailureLevel>].
@@ -547,6 +539,14 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @return directory for downloaded IDEs
      */
     internal fun ideDownloadDir() = verifierHomeDir().map { it.resolve("ides").createDir() }
+
+    companion object {
+        private const val METADATA_URL = "$PLUGIN_VERIFIER_REPOSITORY/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
+        private const val IDEA_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
+        private const val ANDROID_STUDIO_DOWNLOAD_URL = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
+
+        fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Plugin Verifier", METADATA_URL)
+    }
 
     enum class FailureLevel(val sectionHeading: String, val message: String) {
         COMPATIBILITY_WARNINGS(

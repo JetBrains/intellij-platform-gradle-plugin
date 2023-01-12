@@ -16,30 +16,9 @@ import java.io.Serializable
 import java.nio.file.Path
 
 class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val context: String?) : Serializable {
+
     private val plugins = mutableMapOf<String, PluginsCachePlugin>()
     private val directoryNameMapping = mutableMapOf<String, String>()
-
-    companion object {
-        const val version = 1
-
-        fun fromDirectory(pluginsDirectory: Path, context: String?) = BuiltinPluginsRegistry(pluginsDirectory.toFile(), context).apply {
-            val extractor = XmlExtractor<PluginsCache>(context)
-            if (!fillFromCache(extractor)) {
-                debug(context, "Builtin registry cache is missing")
-                fillFromDirectory()
-                dumpToCache(extractor)
-            }
-        }
-
-        fun resolveBundledPlugins(ideDir: Path, context: String?) = ideProductInfo(ideDir)
-            ?.bundledPlugins
-            ?.takeIf { it.isNotEmpty() }
-            ?: fromDirectory(ideDir.resolve("plugins"), context)
-                .plugins
-                .keys
-                .takeIf { it.isNotEmpty() }
-            ?: throw GradleException("Unable to resolve bundled plugins")
-    }
 
     private fun fillFromCache(extractor: XmlExtractor<PluginsCache>): Boolean {
         val cache = cacheFile().takeIf(Path::exists) ?: return false
@@ -135,5 +114,27 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
         result = 31 * result + plugins.hashCode()
         result = 31 * result + directoryNameMapping.hashCode()
         return result
+    }
+
+    companion object {
+        const val version = 1
+
+        fun fromDirectory(pluginsDirectory: Path, context: String?) = BuiltinPluginsRegistry(pluginsDirectory.toFile(), context).apply {
+            val extractor = XmlExtractor<PluginsCache>(context)
+            if (!fillFromCache(extractor)) {
+                debug(context, "Builtin registry cache is missing")
+                fillFromDirectory()
+                dumpToCache(extractor)
+            }
+        }
+
+        fun resolveBundledPlugins(ideDir: Path, context: String?) = ideProductInfo(ideDir)
+            ?.bundledPlugins
+            ?.takeIf { it.isNotEmpty() }
+            ?: fromDirectory(ideDir.resolve("plugins"), context)
+                .plugins
+                .keys
+                .takeIf { it.isNotEmpty() }
+            ?: throw GradleException("Unable to resolve bundled plugins")
     }
 }

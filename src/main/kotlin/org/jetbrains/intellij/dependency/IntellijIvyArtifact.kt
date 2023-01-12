@@ -17,32 +17,6 @@ class IntellijIvyArtifact(
     private var configuration: String? = null
     private val buildDependencies = DefaultTaskDependency()
 
-    companion object {
-        fun createJarDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
-            createDependency(baseDir, file, configuration, "jar", "jar", classifier)
-
-        fun createZipDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
-            createDependency(baseDir, file, configuration, "zip", "zip", classifier)
-
-        fun createDirectoryDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
-            createDependency(baseDir, file, configuration, "", "directory", classifier)
-
-        private fun createDependency(
-            baseDir: File,
-            file: File,
-            configuration: String,
-            extension: String,
-            type: String,
-            classifier: String?,
-        ): IvyArtifact {
-            val relativePath = baseDir.toURI().relativize(file.toURI()).path
-            val name = relativePath.removeSuffix(".$extension")
-            return IntellijIvyArtifact(file, name, extension, type, classifier).apply {
-                this.configuration = configuration
-            }
-        }
-    }
-
     override fun getBuildDependencies() = buildDependencies
 
     override fun getFile() = file
@@ -82,4 +56,30 @@ class IntellijIvyArtifact(
     }
 
     override fun toString() = "IntellijIvyArtifact $name:$type:$extension:$classifier"
+
+    companion object {
+        fun createJarDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
+            createDependency(baseDir, file, configuration, "jar", "jar", classifier)
+
+        fun createZipDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
+            createDependency(baseDir, file, configuration, "zip", "zip", classifier)
+
+        fun createDirectoryDependency(file: File, configuration: String, baseDir: File, classifier: String? = null) =
+            createDependency(baseDir, file, configuration, "", "directory", classifier)
+
+        private fun createDependency(
+            baseDir: File,
+            file: File,
+            configuration: String,
+            extension: String,
+            type: String,
+            classifier: String?,
+        ): IvyArtifact {
+            val relativePath = baseDir.toURI().relativize(file.toURI()).path
+            val name = relativePath.removeSuffix(".$extension")
+            return IntellijIvyArtifact(file, name, extension, type, classifier).apply {
+                this.configuration = configuration
+            }
+        }
+    }
 }

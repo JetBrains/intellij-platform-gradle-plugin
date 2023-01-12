@@ -3,25 +3,14 @@
 package org.jetbrains.intellij.dependency
 
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
 import org.jetbrains.intellij.or
 import java.io.File
 import java.io.Serializable
 
 class PluginDependencyNotation(val id: String, val version: String?, val channel: String?) : Serializable {
 
-    companion object {
-        fun parsePluginDependencyString(s: String): PluginDependencyNotation {
-            if (File(s).exists()) {
-                return PluginDependencyNotation(s, null, null)
-            }
-
-            val (idVersion, channel) = s.split('@', limit = 2) + null
-            val (id, version) = idVersion.or(s).split(':', limit = 2) + null
-            return PluginDependencyNotation(id.or(s), version?.takeIf(String::isNotEmpty), channel)
-        }
-    }
-
-    fun toDependency(project: Project) = project.dependencies.create(toString())
+    fun toDependency(project: Project): Dependency = project.dependencies.create(toString())
 
     override fun toString(): String {
         val groupPrefix = channel.takeUnless { channel.isNullOrBlank() }?.let { "$it." }.orEmpty()
@@ -46,5 +35,17 @@ class PluginDependencyNotation(val id: String, val version: String?, val channel
         result = 31 * result + (version?.hashCode() ?: 0)
         result = 31 * result + (channel?.hashCode() ?: 0)
         return result
+    }
+
+    companion object {
+        fun parsePluginDependencyString(s: String): PluginDependencyNotation {
+            if (File(s).exists()) {
+                return PluginDependencyNotation(s, null, null)
+            }
+
+            val (idVersion, channel) = s.split('@', limit = 2) + null
+            val (id, version) = idVersion.or(s).split(':', limit = 2) + null
+            return PluginDependencyNotation(id.or(s), version?.takeIf(String::isNotEmpty), channel)
+        }
     }
 }

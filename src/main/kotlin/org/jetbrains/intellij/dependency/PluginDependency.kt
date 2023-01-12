@@ -9,10 +9,6 @@ import java.io.Serializable
 @Suppress("BooleanMethodIsAlwaysInverted")
 interface PluginDependency : Serializable {
 
-    companion object {
-        private const val formatVersion = 3
-    }
-
     val id: String
     val platformPluginId: String?
     val version: String
@@ -29,4 +25,8 @@ interface PluginDependency : Serializable {
     fun isCompatible(ideVersion: IdeVersion): Boolean
 
     fun getFqn(): String = "$id-$version-$formatVersion"
+
+    companion object {
+        private const val formatVersion = 3
+    }
 }

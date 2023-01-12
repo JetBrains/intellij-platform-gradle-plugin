@@ -196,6 +196,22 @@ abstract class JbrResolver @Inject constructor(
         }
     }
 
+    private fun getBuiltinJbrVersion(ideDirectory: File): String? {
+        val dependenciesFile = File(ideDirectory, "dependencies.txt")
+        if (dependenciesFile.exists()) {
+            val properties = Properties()
+            val reader = FileReader(dependenciesFile)
+            try {
+                properties.load(reader)
+                return properties.getProperty("runtimeBuild") ?: properties.getProperty("jdkBuild")
+            } catch (ignore: IOException) {
+            } finally {
+                reader.close()
+            }
+        }
+        return null
+    }
+
     internal class JbrArtifact(val name: String, val repositoryUrl: String) {
 
         companion object {
@@ -283,21 +299,5 @@ abstract class JbrResolver @Inject constructor(
                 }
             }
         }
-    }
-
-    private fun getBuiltinJbrVersion(ideDirectory: File): String? {
-        val dependenciesFile = File(ideDirectory, "dependencies.txt")
-        if (dependenciesFile.exists()) {
-            val properties = Properties()
-            val reader = FileReader(dependenciesFile)
-            try {
-                properties.load(reader)
-                return properties.getProperty("runtimeBuild") ?: properties.getProperty("jdkBuild")
-            } catch (ignore: IOException) {
-            } finally {
-                reader.close()
-            }
-        }
-        return null
     }
 }

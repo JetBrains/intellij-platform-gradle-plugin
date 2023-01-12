@@ -23,9 +23,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
     objectFactory: ObjectFactory,
     dependenciesDownloader: DependenciesDownloader,
 ) {
-    companion object {
-        private val versionTypeRegex = Regex("([A-Z]{2,3})-(.*)")
-    }
 
     /**
      * The list of bundled IDE plugins and plugins from the [JetBrains Marketplace](https://plugins.jetbrains.com)
@@ -257,4 +254,8 @@ abstract class IntelliJPluginExtension @Inject constructor(
     @Suppress("DEPRECATION")
     @Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     fun getIdeaDependency(@Suppress("UNUSED_PARAMETER") project: Project): IdeaDependency = ideaDependency.get()
+
+    companion object {
+        private val versionTypeRegex = Regex("([A-Z]{2,3})-(.*)")
+    }
 }
