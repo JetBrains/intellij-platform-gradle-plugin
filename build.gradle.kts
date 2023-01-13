@@ -65,16 +65,19 @@ kotlin {
 
 @Suppress("UnstableApiUsage")
 gradlePlugin {
-    website.set(properties("website"))
-    vcsUrl.set(properties("vcsUrl"))
-
     plugins.create("intellijPlugin") {
         id = properties("pluginId")
         displayName = properties("pluginDisplayName")
         implementationClass = properties("pluginImplementationClass")
         description = project.description
-        tags.set(properties("tags")?.split(','))
     }
+}
+
+pluginBundle {
+    website = properties("website")
+    vcsUrl = properties("vcsUrl")
+    tags = properties("tags")?.split(',')
+    description = project.description
 }
 
 tasks {
@@ -105,11 +108,6 @@ tasks {
         systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion")
         systemProperties["plugins.repository"] = properties("pluginsRepository")
         outputs.dir(testGradleHomePath)
-
-        testLogging {
-            outputs.upToDateWhen { false }
-            showStandardStreams = true
-        }
     }
 
     jar {
