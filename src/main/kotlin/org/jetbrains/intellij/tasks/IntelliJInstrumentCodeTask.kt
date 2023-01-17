@@ -217,7 +217,7 @@ abstract class IntelliJInstrumentCodeTask : DefaultTask() {
                         "instrumentNotNull" to instrumentNotNull
                     ),
                     object : Closure<Any>(this, this) {
-                        @Suppress("unused") // Groovy calls using reflection inside of Closure
+                        @Suppress("unused") // Groovy calls using reflection inside Closure
                         fun doCall() = when {
                             instrumentNotNull -> {
                                 ant.invokeMethod(

@@ -11,7 +11,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 abstract class PrintProductsReleasesTask : DefaultTask() {
 
     /**
-     * Input form the [ListProductsReleasesTask].
+     * Input from the [ListProductsReleasesTask].
      */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)

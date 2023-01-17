@@ -1,6 +1,6 @@
 name: Build
 on:
-  # Trigger the workflow on pushes to only the 'master' branch (this avoids duplicate checks being run e.g. for dependabot pull requests)
+  # Trigger the workflow on pushes to only the 'master' branch (this avoids duplicate checks being run, e.g. for dependabot pull requests)
   push:
     branches: [master]
     paths-ignore: ['**.md', '.teamcity/**']
@@ -119,7 +119,7 @@ jobs:
       - name: Fetch Sources
         uses: actions/checkout@v3
 
-      # Remove old release drafts by using the curl request for the available releases with draft flag
+      # Remove old release drafts by using the curl request for the available releases with a draft flag
       - name: Remove Old Release Drafts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -128,7 +128,7 @@ jobs:
             --jq '.[] | select(.draft == true) | .id' \
             | xargs -I '{}' gh api -X DELETE repos/{owner}/{repo}/releases/{}
 
-      # Create new release draft - which is not publicly visible and requires manual acceptance
+      # Create a new release draft which is not publicly visible and requires manual acceptance
       - name: Create Release Draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

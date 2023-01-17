@@ -55,7 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # Fail if conditional job failed
+      # Fail if the conditional job failed
       - name: Safety Check
         if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1

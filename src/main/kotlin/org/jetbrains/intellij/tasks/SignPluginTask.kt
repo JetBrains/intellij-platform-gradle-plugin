@@ -15,7 +15,6 @@ import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.asPath
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.util.*
@@ -93,7 +92,7 @@ abstract class SignPluginTask @Inject constructor(
     abstract val keyStoreProviderName: Property<String>
 
     /**
-     * Encoded private key in PEM format.
+     * Encoded private key in the PEM format.
      * Refers to `key` CLI option.
      */
     @get:Input
@@ -101,7 +100,7 @@ abstract class SignPluginTask @Inject constructor(
     abstract val privateKey: Property<String>
 
     /**
-     * A file with encoded private key in PEM format.
+     * A file with an encoded private key in the PEM format.
      * Refers to `key-file` CLI option.
      */
     @get:InputFile

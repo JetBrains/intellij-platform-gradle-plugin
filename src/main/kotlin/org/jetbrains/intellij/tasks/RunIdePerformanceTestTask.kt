@@ -34,7 +34,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
     abstract val testDataDir: Property<String>
 
     /**
-     * Path to directory where performance test artifacts (IDE logs, snapshots, screenshots, etc.) will be stored.
+     * Path to the directory where performance test artifacts (IDE logs, snapshots, screenshots, etc.) will be stored.
      * If the directory doesn't exist, it will be created.
      */
     @get:Input
@@ -76,7 +76,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
                 scriptPath = it.toAbsolutePath().toString()
                 testArtifactsDirPath = dir.resolve(testName).createDir().toAbsolutePath()
 
-                // Passing to IDE project to open
+                // Passing to the IDE project to open
                 args = listOf("${testDataDir.get()}/${testScript.projectName}")
 
                 super.exec()
@@ -113,7 +113,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
         "-Dlinux.native.menu.force.disable=true",
         "-Didea.fatal.error.notification=true",
         "-Dtestscript.filename=$scriptPath",
-        "-DintegrationTests.profiler=${profilerName.get().name.toLowerCase()}",
+        "-DintegrationTests.profiler=${profilerName.get().name.lowercase()}",
         "-Dide.performance.screenshot.before.kill=$testArtifactsDirPath",
         "-Didea.log.path=$testArtifactsDirPath",
         "-Dsnapshots.path=$testArtifactsDirPath",

@@ -36,7 +36,7 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
     abstract val version: Property<String>
 
     /**
-     * The archive with the Robot Server Plugin, by default downloaded by to the Maven cache.
+     * The archive with the Robot Server Plugin, by default downloaded to the Maven cache.
      *
      * Default value: Maven cache
      */

@@ -61,7 +61,7 @@ abstract class JarSearchableOptionsTask : Jar() {
         val pluginJarFiles = mutableSetOf<String>()
 
         this.from({
-            include { it ->
+            include {
                 when {
                     it.isDirectory -> true
                     else -> {

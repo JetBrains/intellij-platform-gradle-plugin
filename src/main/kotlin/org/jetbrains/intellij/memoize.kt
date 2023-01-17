@@ -27,7 +27,7 @@ private class MemoizedProvider<T>(private val delegate: ProviderInternal<T>) : A
     // always the same type as Provider value we are memoizing
     override fun getType(): Class<T>? = delegate.type
 
-    // producer is from the source provider
+    // the producer is from the source provider
     override fun getProducer() = delegate.producer
 
     override fun toString() = "memoized($delegate)"

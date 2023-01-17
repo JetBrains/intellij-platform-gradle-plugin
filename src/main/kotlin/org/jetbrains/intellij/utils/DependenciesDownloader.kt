@@ -56,7 +56,7 @@ abstract class DependenciesDownloader @Inject constructor(
                     ).contains(it.name)
                 }
 
-                // Add custom plugin repositories after project custom repositories
+                // Add custom plugin repositories after project repositories
                 repositoriesBlock(this)
 
                 // Add common project repositories after to the end of the list

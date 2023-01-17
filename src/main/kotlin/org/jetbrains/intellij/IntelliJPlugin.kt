@@ -129,7 +129,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         project.pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
             project.idea {
-                // IdeaModel.project is available only for root project
+                // IdeaModel.project is available only for a root project
                 this.project?.settings {
                     taskTriggers {
                         afterSync(SETUP_DEPENDENCIES_TASK_NAME)
@@ -349,9 +349,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     context,
                 )
 
-                // Check that `runIdePerformanceTest` task was launched
-                // Check that `performanceTesting.jar` is absent (that means it's community version)
-                // Check that user didn't pass custom version of the performance plugin
+                // Check that the `runIdePerformanceTest` task was launched
+                // Check that `performanceTesting.jar` is absent (that means it's a community version)
+                // Check that user didn't pass a custom version of the performance plugin
                 if (
                     RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
                     && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
@@ -453,7 +453,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun configureProjectPluginDependency(project: Project, dependency: Project, dependencies: DependencySet, extension: IntelliJPluginExtension) {
-        // invoke on demand, when plugins artifacts are needed
+        // invoke on demand when plugin artifacts are needed
         if (dependency.plugins.findPlugin(IntelliJPlugin::class) == null) {
             throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}")
         }
@@ -1112,7 +1112,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             // A dedicated task ensures that sources substitution is always run,
             // even when the instrumentCode task is up-to-date.
-            val postInstrumentName = "post${name.capitalize()}"
+            val postInstrumentName = "post${name.replaceFirstChar(Char::uppercase)}"
             val updateTask = project.tasks.register(postInstrumentName) {
                 description = "Code post-instrumentation task."
                 group = PLUGIN_GROUP_NAME
@@ -1193,7 +1193,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             // to understand PluginClassLoaders. Unfortunately, I couldn't find a way to do that.
             systemProperty("idea.use.core.classloader.for.plugin.path", "true")
             systemProperty("idea.force.use.core.classloader", "true")
-            // the same as previous – setting appClassLoader but outdated. Works for part of 203 builds.
+            // the same as previous setting appClassLoader but outdated. Works for part of 203 builds.
             systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
             outputs.dir(systemDirectoryProvider)
@@ -1214,7 +1214,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 classpath += ideaDependencyLibrariesProvider.get()
                 classpath -= classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
 
-                // Rearrange classpath to put idea and plugins in the right order.
+                // Rearrange classpath to put the IDEA and plugins in the right order.
                 classpath -= ideaConfigurationFiles.get()
                 classpath -= ideaPluginsConfigurationFiles.get()
                 classpath += ideaConfigurationFiles.get() + ideaPluginsConfigurationFiles.get()
@@ -1235,7 +1235,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 )
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
-                // to handle this, use plugin.path property as task's the very first source of plugins
+                // to handle this, use plugin.path property as the task's the very first source of plugins
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
                 val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                 if (ideVersion.baselineVersion >= 193) {
@@ -1566,12 +1566,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
     ) = (this as ExtensionAware).extensions.configure("taskTriggers", action)
 
     /**
-     * Strips an [IdeVersion] of components other than SNAPSHOT and * that exceeds patch, i.e. "excess" in the following
+     * Strips an [IdeVersion] of components other than SNAPSHOT and * that exceeds a patch, i.e. "excess" in the following
      * version will be stripped: major.minor.patch.excess.SNAPSHOT.
      * This is needed due to recent versions of Android Studio having additional components in its build number; e.g.
      * 2020.3.1-patch-4 has build number AI-203.7717.56.2031.7935034, with these additional components instrumentCode
      * fails because it tries to resolve a non-existent compiler version (203.7717.56.2031.7935034). This function
-     * strips it down so that only major minor and patch are used.
+     * strips it down so that only major, minor, and patch are used.
      */
     private fun IdeVersion.stripExcessComponents() = asStringWithoutProductCode()
         .split(".")
