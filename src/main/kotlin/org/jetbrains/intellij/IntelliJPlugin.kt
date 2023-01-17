@@ -12,7 +12,6 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.internal.artifacts.publish.ArchivePublishArtifact
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
@@ -1272,7 +1271,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             from(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
                 prepareSandboxTask.pluginName.map {
-                    "${prepareSandboxTask.destinationDir}/$it"
+                    prepareSandboxTask.destinationDir.resolve(it)
                 }
             })
             from(jarSearchableOptionsTaskProvider.flatMap { jarSearchableOptionsTask ->
@@ -1287,12 +1286,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
 
-            val archivesConfiguration = project.configurations.getByName(Dependency.ARCHIVES_CONFIGURATION)
-            ArchivePublishArtifact(this).let { zipArtifact ->
-                archivesConfiguration.artifacts.add(zipArtifact)
-                project.extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(zipArtifact)
-                project.components.add(IntelliJPluginLibrary())
-            }
+            val publishArtifact = project.artifacts.add(Dependency.ARCHIVES_CONFIGURATION, archiveFile)
+            project.extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(publishArtifact)
+            project.components.add(IntelliJPluginLibrary())
         }
     }
 
