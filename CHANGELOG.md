@@ -3,6 +3,14 @@
 ## [next]
 
 ### Added
+- Support for Gradle 8.0-RC.2
+
+### Fixed
+- Don't enforce the Kotlin version of the project by using `compileOnly` instead of `api` when declaring the `org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0` dependency [#1276](../../issues/1276)
+
+## [1.12.0] - 2023-01-13
+
+### Added
 - Extract ZIP Signer CLI tool downloading as `downloadZipSigner` task
 - Allow for passing `signPlugin.privateKey` and `signPlugin.certificateChain` as base64-encoded value
 
