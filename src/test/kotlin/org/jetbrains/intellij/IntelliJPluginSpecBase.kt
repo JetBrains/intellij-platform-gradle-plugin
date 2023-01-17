@@ -39,7 +39,7 @@ abstract class IntelliJPluginSpecBase {
     val gradleProperties get() = file("gradle.properties")
     val buildFile get() = file("build.gradle")
     val pluginXml get() = file("src/main/resources/META-INF/plugin.xml")
-    val buildDirectory get() = File(dir, "build")
+    val buildDirectory get() = dir.resolve("build")
 
     @BeforeTest
     open fun setUp() {
@@ -140,7 +140,7 @@ abstract class IntelliJPluginSpecBase {
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
-//            .withDebug(debugEnabled)
+            .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
             .withArguments(
                 *tasks,

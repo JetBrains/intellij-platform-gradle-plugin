@@ -7,7 +7,6 @@ import com.jetbrains.plugin.structure.base.utils.outputStream
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.jetbrains.intellij.transformXml
 import org.jetbrains.intellij.warn
-import java.io.File
 import java.io.InputStream
 import java.nio.file.Path
 import javax.xml.bind.JAXBContext
@@ -18,9 +17,6 @@ class XmlExtractor<T>(private val context: String? = null) {
     private val jaxbContext by lazy {
         JAXBContext.newInstance("org.jetbrains.intellij.model", ObjectFactory::class.java.classLoader)
     }
-
-    @Throws(JAXBException::class)
-    fun unmarshal(file: File) = file.inputStream().use { unmarshal(it) }
 
     @Throws(JAXBException::class)
     fun unmarshal(path: Path) = path.inputStream().use { unmarshal(it) }

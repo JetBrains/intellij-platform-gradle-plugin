@@ -134,7 +134,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(BUILD_PLUGIN_TASK_NAME)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
         val zipFile = ZipFile(distribution)
