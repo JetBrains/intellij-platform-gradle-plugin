@@ -21,24 +21,24 @@ object IntelliJPluginConstants {
     const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     const val LIST_BUNDLED_PLUGINS_TASK_NAME = "listBundledPlugins"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
-    const val PRINT_BUNDLED_PLUGINS_TASK_NAME = "printBundledPlugins"
-    const val PRINT_PRODUCTS_RELEASES_TASK_NAME = "printProductsReleases"
     const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
     const val POST_INSTRUMENT_CODE_TASK_NAME = "postInstrumentCode"
     const val POST_INSTRUMENT_TEST_CODE_TASK_NAME = "postInstrumentTestCode"
     const val PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     const val PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
     const val PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
+    const val PRINT_BUNDLED_PLUGINS_TASK_NAME = "printBundledPlugins"
+    const val PRINT_PRODUCTS_RELEASES_TASK_NAME = "printProductsReleases"
     const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
+    const val RUN_IDE_TASK_NAME = "runIde"
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
-    const val RUN_IDE_TASK_NAME = "runIde"
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
     const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
     const val SETUP_INSTRUMENT_CODE_TASK_NAME = "setupInstrumentCode"
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
-    const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
+    const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
 
     val TASKS = listOf(
         BUILD_PLUGIN_TASK_NAME,
@@ -53,24 +53,24 @@ object IntelliJPluginConstants {
         JAR_SEARCHABLE_OPTIONS_TASK_NAME,
         LIST_BUNDLED_PLUGINS_TASK_NAME,
         LIST_PRODUCTS_RELEASES_TASK_NAME,
-        PRINT_BUNDLED_PLUGINS_TASK_NAME,
-        PRINT_PRODUCTS_RELEASES_TASK_NAME,
         PATCH_PLUGIN_XML_TASK_NAME,
         POST_INSTRUMENT_CODE_TASK_NAME,
         POST_INSTRUMENT_TEST_CODE_TASK_NAME,
         PREPARE_SANDBOX_TASK_NAME,
         PREPARE_TESTING_SANDBOX_TASK_NAME,
         PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
+        PRINT_BUNDLED_PLUGINS_TASK_NAME,
+        PRINT_PRODUCTS_RELEASES_TASK_NAME,
         PUBLISH_PLUGIN_TASK_NAME,
+        RUN_IDE_TASK_NAME,
         RUN_IDE_FOR_UI_TESTS_TASK_NAME,
         RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
-        RUN_IDE_TASK_NAME,
         RUN_PLUGIN_VERIFIER_TASK_NAME,
         SETUP_DEPENDENCIES_TASK_NAME,
         SETUP_INSTRUMENT_CODE_TASK_NAME,
         SIGN_PLUGIN_TASK_NAME,
-        VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
         VERIFY_PLUGIN_TASK_NAME,
+        VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
     )
 
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
