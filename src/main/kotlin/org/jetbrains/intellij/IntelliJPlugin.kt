@@ -1263,7 +1263,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_TASK_NAME)
         val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
 
-        project.tasks.register<Zip>(BUILD_PLUGIN_TASK_NAME) {
+        val buildPluginTaskProvider = project.tasks.register<Zip>(BUILD_PLUGIN_TASK_NAME) {
             description = "Assembles plugin and prepares ZIP archive for deployment."
             group = PLUGIN_GROUP_NAME
 
@@ -1287,11 +1287,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             dependsOn(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
-
-            val publishArtifact = project.artifacts.add(Dependency.ARCHIVES_CONFIGURATION, archiveFile)
-            project.extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(publishArtifact)
-            project.components.add(IntelliJPluginLibrary())
         }
+
+        val publishArtifact = project.artifacts.add(Dependency.ARCHIVES_CONFIGURATION, buildPluginTaskProvider)
+        project.extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(publishArtifact)
+        project.components.add(IntelliJPluginLibrary())
     }
 
     private fun configureDownloadZipSignerTask(project: Project) {
