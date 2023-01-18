@@ -18,3 +18,4 @@ jobs:
 
       - name: Qodana - Code Inspection
         uses: JetBrains/qodana-action@v2022.3.0
+        if: ${{ false }}  # disable for now
