@@ -930,7 +930,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
             archiveBaseName.convention("lib/$SEARCHABLE_OPTIONS_DIR_NAME")
             destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
-            noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(NO_SEARCHABLE_OPTIONS_WARNING))
+            noSearchableOptionsWarning.convention(project.provider {
+                project.isBuildFeatureEnabled(NO_SEARCHABLE_OPTIONS_WARNING)
+            })
 
             dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
