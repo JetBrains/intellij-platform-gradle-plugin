@@ -5,38 +5,11 @@ package org.jetbrains.intellij
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
-import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
-import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_CODE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.POST_INSTRUMENT_TEST_CODE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_BUNDLED_PLUGINS_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PRINT_PRODUCTS_RELEASES_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_INSTRUMENT_CODE_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.test.createLocalIdeIfNotExists
 import org.junit.Assume.assumeFalse
@@ -52,37 +25,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `intellij-specific tasks`() {
         assumeFalse(Version.parse(gradleVersion) < Version.parse("6.9"))
         assertEquals(
-            listOf(
-                BUILD_PLUGIN_TASK_NAME,
-                BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
-                CLASSPATH_INDEX_CLEANUP_TASK_NAME,
-                DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME,
-                DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
-                DOWNLOAD_ZIP_SIGNER_TASK_NAME,
-                INSTRUMENT_CODE_TASK_NAME,
-                INSTRUMENT_TEST_CODE_TASK_NAME,
-                JAR_SEARCHABLE_OPTIONS_TASK_NAME,
-                LIST_BUNDLED_PLUGINS_TASK_NAME,
-                LIST_PRODUCTS_RELEASES_TASK_NAME,
-                PATCH_PLUGIN_XML_TASK_NAME,
-                POST_INSTRUMENT_CODE_TASK_NAME,
-                POST_INSTRUMENT_TEST_CODE_TASK_NAME,
-                PREPARE_SANDBOX_TASK_NAME,
-                PREPARE_TESTING_SANDBOX_TASK_NAME,
-                PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
-                PRINT_BUNDLED_PLUGINS_TASK_NAME,
-                PRINT_PRODUCTS_RELEASES_TASK_NAME,
-                PUBLISH_PLUGIN_TASK_NAME,
-                RUN_IDE_TASK_NAME,
-                RUN_IDE_FOR_UI_TESTS_TASK_NAME,
-                RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
-                RUN_PLUGIN_VERIFIER_TASK_NAME,
-                SETUP_DEPENDENCIES_TASK_NAME,
-                SETUP_INSTRUMENT_CODE_TASK_NAME,
-                SIGN_PLUGIN_TASK_NAME,
-                VERIFY_PLUGIN_TASK_NAME,
-                VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
-            ).joinToString("\n"),
+            TASKS.joinToString("\n"),
             tasks(PLUGIN_GROUP_NAME).joinToString("\n"),
         )
     }

@@ -16,7 +16,6 @@ import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
-import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
@@ -32,7 +31,8 @@ import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
-import org.jetbrains.intellij.BuildFeature.*
+import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
+import org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
@@ -45,10 +45,11 @@ import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEA
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.EXTENSION_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
+import org.jetbrains.intellij.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
@@ -57,7 +58,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
-import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
@@ -67,7 +67,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_PATH
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
@@ -89,6 +88,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAM
 import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
@@ -107,7 +107,6 @@ import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import java.util.jar.Manifest
 
 abstract class IntelliJPlugin : Plugin<Project> {
 
@@ -117,18 +116,16 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private lateinit var context: String
 
     override fun apply(project: Project) {
+        project.checkGradleVersion()
+
         context = project.logCategory()
-
-        checkGradleVersion(project)
-        checkPluginVersion(project)
-
         archiveUtils = project.objects.newInstance()
         dependenciesDownloader = project.objects.newInstance(project.gradle.startParameter.isOffline)
 
         project.plugins.apply(JavaPlugin::class)
         project.plugins.apply(IdeaExtPlugin::class)
 
-        project.pluginManager.withPlugin("org.jetbrains.gradle.plugin.idea-ext") {
+        project.pluginManager.withPlugin(IDEA_GRADLE_PLUGIN_ID) {
             project.idea {
                 // IdeaModel.project is available only for a root project
                 this.project?.settings {
@@ -175,32 +172,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureTasks(project, extension, ideaDependencyProvider)
     }
 
-    private fun checkGradleVersion(project: Project) {
-        if (Version.parse(project.gradle.gradleVersion) < Version.parse(MINIMAL_SUPPORTED_GRADLE_VERSION)) {
-            throw PluginInstantiationException("$PLUGIN_NAME requires Gradle $MINIMAL_SUPPORTED_GRADLE_VERSION and higher")
-        }
-    }
-
-    private fun checkPluginVersion(project: Project) {
-        if (!project.isBuildFeatureEnabled(SELF_UPDATE_CHECK)) {
-            return
-        }
-        if (project.gradle.startParameter.isOffline) {
-            return
-        }
-        try {
-            val version = getCurrentVersion()
-                ?.let(Version::parse)
-                .or { Version() }
-            val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, GITHUB_REPOSITORY)
-            if (version < Version.parse(latestVersion)) {
-                warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
-            }
-        } catch (e: Exception) {
-            error(context, e.message.orEmpty(), e)
-        }
-    }
-
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring plugin")
         project.tasks.withType<RunIdeBase>().configureEach {
@@ -210,6 +181,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
         }
 
+        configureInitializeGradleIntelliJPluginTask(project)
         configureSetupDependenciesTask(project, ideaDependencyProvider)
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configurePatchPluginXmlTask(project, extension, ideaDependencyProvider)
@@ -241,6 +213,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         project.tasks.withType<JavaCompile>().configureEach {
             dependsOn(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
+        }
+
+        (TASKS - INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME).forEach {
+            project.tasks.named(it) {
+                dependsOn(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
+            }
         }
 
         project.afterEvaluate {
@@ -605,7 +583,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 "Build-JVM" to Jvm.current(),
                 "Version" to projectVersion,
                 "Build-Plugin" to PLUGIN_NAME,
-                "Build-Plugin-Version" to getCurrentVersion().or("0.0.0"),
+                "Build-Plugin-Version" to getCurrentPluginVersion().or("0.0.0"),
                 "Build-OS" to OperatingSystem.current(),
                 "Build-SDK" to buildSdk.get(),
             )
@@ -711,7 +689,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }).first().canonicalPath
             })
             jreRepository.convention(extension.jreRepository)
-            offline.set(project.gradle.startParameter.isOffline)
+            offline.convention(project.gradle.startParameter.isOffline)
             resolvedRuntimeDir.convention(project.provider {
                 resolveRuntimeDir(jbrResolver)
             })
@@ -1453,6 +1431,17 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
+    private fun configureInitializeGradleIntelliJPluginTask(project: Project) {
+        info(context, "Initializing Gradle IntelliJ Plugin")
+
+        project.tasks.register<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME) {
+            offline.convention(project.gradle.startParameter.isOffline)
+            selfUpdateCheck.convention(project.provider {
+                project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK)
+            })
+        }
+    }
+
     private fun configureSetupDependenciesTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring setup dependencies task")
 
@@ -1538,23 +1527,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun resolveBuildTaskOutput(project: Project) = project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME).flatMap { it.archiveFile }
-
-    private fun getCurrentVersion() = IntelliJPlugin::class.java
-        .run { getResource("$simpleName.class") }
-        .runCatching {
-            val manifestPath = with(this?.path) {
-                when {
-                    this == null -> return@runCatching null
-                    startsWith("jar:") -> this
-                    startsWith("file:") -> "jar:$this"
-                    else -> return@runCatching null
-                }
-            }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
-            info(context, "Resolving Gradle IntelliJ Plugin version with: $manifestPath")
-            URL(manifestPath).openStream().use {
-                Manifest(it).mainAttributes.getValue("Version")
-            }
-        }.getOrNull()
 
     private fun Project.idea(
         action: IdeaModel.() -> Unit,

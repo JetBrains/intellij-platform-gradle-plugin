@@ -26,6 +26,7 @@ import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
@@ -33,8 +34,10 @@ import org.gradle.process.JavaForkOptions
 import org.jdom2.Document
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
+import org.jetbrains.intellij.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM_COMMUNITY
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_CUSTOM_SNAPSHOT
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
@@ -56,6 +59,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
+import java.util.jar.Manifest
 
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
@@ -352,3 +356,26 @@ internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnecti
         }
     }.also { disconnect() }
 }
+
+internal fun Project.checkGradleVersion() {
+    if (Version.parse(gradle.gradleVersion) < Version.parse(MINIMAL_SUPPORTED_GRADLE_VERSION)) {
+        throw PluginInstantiationException("$PLUGIN_NAME requires Gradle $MINIMAL_SUPPORTED_GRADLE_VERSION and higher")
+    }
+}
+
+internal fun getCurrentPluginVersion() = IntelliJPlugin::class.java
+    .run { getResource("$simpleName.class") }
+    .runCatching {
+        val manifestPath = with(this?.path) {
+            when {
+                this == null -> return@runCatching null
+                startsWith("jar:") -> this
+                startsWith("file:") -> "jar:$this"
+                else -> return@runCatching null
+            }
+        }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
+        info(null, "Resolving Gradle IntelliJ Plugin version with: $manifestPath")
+        URL(manifestPath).openStream().use {
+            Manifest(it).mainAttributes.getValue("Version")
+        }
+    }.getOrNull()
