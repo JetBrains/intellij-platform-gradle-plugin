@@ -84,17 +84,16 @@ jobs:
         shell: bash
         run: |
           PROPERTIES="$(./gradlew properties --console=plain -q)"
-          NAME="$(echo "$PROPERTIES" | grep "^name:" | cut -f2- -d ' ')"
           VERSION="$(echo "$PROPERTIES" | grep "^version:" | cut -f2- -d ' ')"
-          ARTIFACT="$NAME-$VERSION.jar"
+          NAME="$(echo "$PROPERTIES" | grep "^name:" | cut -f2- -d ' ')"
           CHANGELOG="$(./gradlew getChangelog --unreleased --no-header --console=plain -q)"
-          CHANGELOG="${CHANGELOG//'%'/'%25'}"
-          CHANGELOG="${CHANGELOG//$'\n'/'%0A'}"
-          CHANGELOG="${CHANGELOG//$'\r'/'%0D'}"
+          
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
 
-          echo "::set-output name=version::$VERSION"
-          echo "::set-output name=artifact::$ARTIFACT"
-          echo "::set-output name=changelog::$CHANGELOG"
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Build Plugin
         run: ./gradlew build -x test
