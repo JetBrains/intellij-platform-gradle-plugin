@@ -42,6 +42,7 @@ import org.jetbrains.intellij.test.createLocalIdeIfNotExists
 import org.junit.Assume.assumeFalse
 import java.io.*
 import java.nio.file.Path
+import java.util.*
 import kotlin.test.*
 
 @Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
@@ -632,8 +633,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     private fun collectSourceSetClassPaths(sourceSetName: String = "test"): Pair<String, String> {
         buildFile.appendPrintClassPathsTasks(sourceSetName)
         return buildAndGetClassPaths(
-            "print${sourceSetName.capitalize()}CompileClassPath",
-            "print${sourceSetName.capitalize()}RuntimeClassPath"
+            "print${sourceSetName.replaceFirstChar { it.uppercase() }}CompileClassPath",
+            "print${sourceSetName.replaceFirstChar { it.uppercase() }}RuntimeClassPath"
         )
     }
 
@@ -643,11 +644,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             def runtimeOnly = project.provider { sourceSets.$sourceSetName.runtimeClasspath.asPath }
             def implementation = project.provider { sourceSets.$sourceSetName.compileClasspath.asPath }
             
-            task print${sourceSetName.capitalize()}RuntimeClassPath {
+            task print${sourceSetName.replaceFirstChar { it.uppercase() }}RuntimeClassPath {
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'runtimeOnly: ' + runtimeOnly.get() }
             }
-            task print${sourceSetName.capitalize()}CompileClassPath { 
+            task print${sourceSetName.replaceFirstChar { it.uppercase() }}CompileClassPath { 
                 dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
                 doLast { println 'implementation: ' + implementation.get() }
             }

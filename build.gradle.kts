@@ -32,6 +32,8 @@ repositories {
     mavenCentral()
 }
 
+val additionalPluginClasspath: Configuration by configurations.creating
+
 dependencies {
     implementation("org.jetbrains:annotations:24.0.0")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.246") {
@@ -51,7 +53,8 @@ dependencies {
     implementation("com.googlecode.plist:dd-plist:1.26")
 
     compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
-    
+    additionalPluginClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0")
+
     api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7")
     api("com.squareup.retrofit2:retrofit:2.9.0")
 
@@ -90,6 +93,10 @@ tasks {
     wrapper {
         gradleVersion = properties("gradleVersion")
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    }
+
+    pluginUnderTestMetadata {
+        pluginClasspath.from(additionalPluginClasspath)
     }
 
     test {
