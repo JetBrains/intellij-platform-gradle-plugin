@@ -53,6 +53,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENC
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
+import org.jetbrains.intellij.IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
@@ -232,7 +233,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureVerifyPluginConfigurationTask(project, ideaDependencyProvider)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
-        project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
             project.tasks.withType<KotlinCompile>().configureEach {
                 dependsOn(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
             }
@@ -785,9 +786,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             pluginVerifierDownloadDir.convention(downloadDirProvider)
 
             kotlinPluginAvailable.convention(project.provider {
-                project.pluginManager.hasPlugin("org.jetbrains.kotlin.jvm")
+                project.pluginManager.hasPlugin(KOTLIN_GRADLE_PLUGIN_ID)
             })
-            project.pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+            project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
                 val compileKotlinTaskProvider = project.tasks.named<KotlinCompile>(COMPILE_KOTLIN_TASK_NAME)
 
                 kotlinJvmTarget.convention(project.provider {

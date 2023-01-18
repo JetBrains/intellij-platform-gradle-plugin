@@ -40,6 +40,7 @@ object IntelliJPluginConstants {
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
 
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
+    const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
 
     const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
     const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
