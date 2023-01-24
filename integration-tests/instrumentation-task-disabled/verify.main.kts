@@ -95,8 +95,6 @@ __FILE__.init {
     }
 
     runGradleTask("jar", projectProperties = mapOf("instrumentCode" to true)).let { logs ->
-        logs containsText "Task ':instrumentation-task-disabled:postInstrumentCode' is not up-to-date"
-
         buildDirectory.resolve("instrumented").run {
             assert(Files.isDirectory(this))
             assert(Files.list(this).toArray().isNotEmpty())

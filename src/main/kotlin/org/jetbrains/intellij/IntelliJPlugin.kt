@@ -923,10 +923,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring compile tasks")
 
         val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
-
-        if (extension.instrumentCode.get()) {
-            jarTaskProvider.configure { duplicatesStrategy = DuplicatesStrategy.EXCLUDE }
-        }
+        val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
         val setupInstrumentCodeTaskProvider = project.tasks.register<SetupInstrumentCodeTask>(SETUP_INSTRUMENT_CODE_TASK_NAME) {
             instrumentationEnabled.convention(extension.instrumentCode)
@@ -937,8 +934,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
             val instrumentTaskProvider = project.tasks.register<IntelliJInstrumentCodeTask>(name) {
-                val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
-
                 sourceDirs.from(project.provider {
                     sourceSet.allJava.srcDirs
                 })
@@ -1084,34 +1079,25 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
                 })
 
-                outputDir.convention(setupInstrumentCodeTaskProvider.get().instrumentedDir.map { it.dir(name) })
+                outputDir.convention(setupInstrumentCodeTaskProvider.flatMap { setupInstrumentCodeTask ->
+                    setupInstrumentCodeTask.instrumentedDir.map { it.dir(name) }
+                })
 
                 dependsOn(sourceSet.classesTaskName)
                 dependsOn(SETUP_INSTRUMENT_CODE_TASK_NAME)
-                onlyIf { instrumentCodeProvider.get() }
-            }
-
-            // A dedicated task ensures that sources substitution is always run,
-            // even when the instrumentCode task is up-to-date.
-            val postInstrumentName = "post${name.replaceFirstChar(Char::uppercase)}"
-            val updateTask = project.tasks.register(postInstrumentName) {
-                description = "Code post-instrumentation task."
-                group = PLUGIN_GROUP_NAME
-
-                val instrumentTask = instrumentTaskProvider.get()
-                val instrumentCodeProvider = project.provider { extension.instrumentCode.get() && instrumentTask.isEnabled }
-                val classesDirs = sourceSet.output.classesDirs as ConfigurableFileCollection
-                val outputDir = project.provider { instrumentTask.outputDir.get() }
-
-                onlyIf { instrumentCodeProvider.get() }
-                doLast { classesDirs.setFrom(outputDir.get()) }
-
-                dependsOn(instrumentTask)
                 finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+                onlyIf { instrumentCodeProvider.get() }
             }
 
             // Ensure that our task is invoked when the source set is built
-            sourceSet.compiledBy(updateTask)
+            sourceSet.compiledBy(instrumentTaskProvider)
+
+            jarTaskProvider.configure {
+                if (extension.instrumentCode.get()) {
+                    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+                }
+                from(instrumentTaskProvider)
+            }
         }
     }
 

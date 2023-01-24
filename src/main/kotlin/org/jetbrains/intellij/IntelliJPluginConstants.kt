@@ -22,8 +22,6 @@ object IntelliJPluginConstants {
     const val LIST_BUNDLED_PLUGINS_TASK_NAME = "listBundledPlugins"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
     const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
-    const val POST_INSTRUMENT_CODE_TASK_NAME = "postInstrumentCode"
-    const val POST_INSTRUMENT_TEST_CODE_TASK_NAME = "postInstrumentTestCode"
     const val PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
     const val PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
     const val PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
@@ -54,8 +52,8 @@ object IntelliJPluginConstants {
         LIST_BUNDLED_PLUGINS_TASK_NAME,
         LIST_PRODUCTS_RELEASES_TASK_NAME,
         PATCH_PLUGIN_XML_TASK_NAME,
-        POST_INSTRUMENT_CODE_TASK_NAME,
-        POST_INSTRUMENT_TEST_CODE_TASK_NAME,
+//        POST_INSTRUMENT_CODE_TASK_NAME,
+//        POST_INSTRUMENT_TEST_CODE_TASK_NAME,
         PREPARE_SANDBOX_TASK_NAME,
         PREPARE_TESTING_SANDBOX_TASK_NAME,
         PREPARE_UI_TESTING_SANDBOX_TASK_NAME,

@@ -5,8 +5,14 @@
 import java.nio.file.Files
 
 __FILE__.init {
-    runGradleTask("clean", "jar").let { logs ->
+    val defaultArgs = listOf("--configuration-cache")
+
+    runGradleTask("clean", "jar", args = defaultArgs).let { logs ->
         logs containsText "[ant:instrumentIdeaExtensions] Added @NotNull assertions to 3 files"
+    }
+
+    runGradleTask("jar", args = defaultArgs).let { logs ->
+        logs notContainsText "[ant:instrumentIdeaExtensions] Added"
 
         buildDirectory.resolve("classes/java/main/Main.class").run {
             assert(Files.exists(this))
@@ -48,28 +54,28 @@ __FILE__.init {
         }
     }
 
-    runGradleTask("jar").let { logs ->
+    runGradleTask("jar", args = defaultArgs).let { logs ->
         logs containsText "> Task :instrumentation-task:compileKotlin UP-TO-DATE"
         logs containsText "> Task :instrumentation-task:compileJava UP-TO-DATE"
     }
 
     projectDirectory.resolve("src/main/kotlin/MainKt.kt").toFile().appendText("// foo\n")
 
-    runGradleTask("jar").let { logs ->
+    runGradleTask("jar", args = defaultArgs).let { logs ->
         logs containsText "Task ':instrumentation-task:compileKotlin' is not up-to-date"
         logs containsText "> Task :instrumentation-task:compileJava UP-TO-DATE"
     }
 
     projectDirectory.resolve("src/main/java/Main.java").toFile().appendText("// foo\n")
 
-    runGradleTask("jar").let { logs ->
+    runGradleTask("jar", args = defaultArgs).let { logs ->
         logs containsText "Task ':instrumentation-task:compileKotlin' is not up-to-date"
         logs containsText "Task ':instrumentation-task:compileJava' is not up-to-date"
     }
 
     projectDirectory.resolve("src/main/java/Form.form").toFile().appendText("<!-- foo -->\n")
 
-    runGradleTask("jar").let { logs ->
+    runGradleTask("jar", args = defaultArgs).let { logs ->
         logs containsText "> Task :instrumentation-task:compileKotlin UP-TO-DATE"
         logs containsText "> Task :instrumentation-task:compileJava UP-TO-DATE"
         logs containsText "Form.form has changed"

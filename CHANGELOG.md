@@ -8,6 +8,7 @@
 
 ### Fixed
 - Don't enforce the Kotlin version of the project by using `compileOnly` instead of `api` when declaring the `org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0` dependency [#1276](../../issues/1276)
+- Instrumentation: fixed configuration cache support, dropped the `postInstrumentCode` and `postInstrumentTestCode` tasks [#1283](../../issues/1283)
 
 ## [1.12.0] - 2023-01-13
 

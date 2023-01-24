@@ -112,35 +112,41 @@ val Path.pluginsCacheDirectory
  * Runs the given Gradle task(s) within the current integration test.
  * Provides logs to STDOUT and as a returned value for further assertions.
  */
-fun Path.runGradleTask(vararg tasks: String, projectProperties: Map<String, Any> = emptyMap(), systemProperties: Map<String, Any> = emptyMap()) =
-    ProcessBuilder()
-        .command(
-            gradleWrapper.toString(),
-            *projectProperties
-                .run { this + mapOf("platformVersion" to System.getenv("PLATFORM_VERSION")).filterNot { it.value == null } }
-                .map { "-P${it.key}=${it.value}" }
-                .toTypedArray(),
-            *systemProperties
-                .map { "-D${it.key}=${it.value}" }
-                .toTypedArray(),
-            *tasks
-                .map { ":$projectName:$it" }
-                .toTypedArray(),
-            "--info",
-            "--stacktrace",
-        )
-        .apply { environment().put("INTEGRATION_TEST", projectName) }
-        .directory(projectDirectory.toFile())
-        .start()
-        .run {
-            val stdoutBuffer = ByteArrayOutputStream()
-            val stderrBuffer = ByteArrayOutputStream()
+fun Path.runGradleTask(
+    vararg tasks: String,
+    projectProperties: Map<String, Any> = emptyMap(),
+    systemProperties: Map<String, Any> = emptyMap(),
+    args: List<String> = emptyList(),
+) = ProcessBuilder()
+    .command(
+        gradleWrapper.toString(),
+        *projectProperties
+            .run { this + mapOf("platformVersion" to System.getenv("PLATFORM_VERSION")).filterNot { it.value == null } }
+            .map { "-P${it.key}=${it.value}" }
+            .toTypedArray(),
+        *systemProperties
+            .map { "-D${it.key}=${it.value}" }
+            .toTypedArray(),
+        *tasks
+            .map { ":$projectName:$it" }
+            .toTypedArray(),
+        "--info",
+        "--stacktrace",
+        *args
+            .toTypedArray(),
+    )
+    .apply { environment().put("INTEGRATION_TEST", projectName) }
+    .directory(projectDirectory.toFile())
+    .start()
+    .run {
+        val stdoutBuffer = ByteArrayOutputStream()
+        val stderrBuffer = ByteArrayOutputStream()
 
-            inputStream.copyTo(TeeOutputStream(stdoutBuffer, System.out))
-            errorStream.copyTo(TeeOutputStream(stderrBuffer, System.err))
+        inputStream.copyTo(TeeOutputStream(stdoutBuffer, System.out))
+        errorStream.copyTo(TeeOutputStream(stderrBuffer, System.err))
 
-            stdoutBuffer.toString() + stderrBuffer.toString()
-        }
+        stdoutBuffer.toString() + stderrBuffer.toString()
+    }
 
 fun <T> T.exitIf(block: T.() -> Boolean, message: T.() -> String = { "" }): T {
     if (block()) {
