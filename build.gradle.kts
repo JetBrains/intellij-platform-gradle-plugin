@@ -47,7 +47,7 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
     implementation("com.googlecode.plist:dd-plist:1.26")
