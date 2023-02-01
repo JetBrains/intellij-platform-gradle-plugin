@@ -27,3 +27,4 @@ if (!System.getenv().containsKey("INTEGRATION_TEST")) {
     throw GradleException("INTEGRATION_TEST environment variable has to be provided with the integration test subroject name specified.")
 }
 include(System.getenv().get("INTEGRATION_TEST"))
+include(System.getenv().get("INTEGRATION_TEST") + ":submodule")

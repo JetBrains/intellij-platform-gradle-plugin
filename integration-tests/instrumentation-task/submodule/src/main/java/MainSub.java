@@ -1,8 +1,8 @@
 import org.jetbrains.annotations.NotNull;
 
-class Main {
+class MainSub {
     public static void main(@NotNull String[] args) {
-        System.out.println("Hello, World!");
+        System.out.println("Hello, World Sub!");
     }
 }
 // foo
