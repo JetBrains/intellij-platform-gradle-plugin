@@ -4,7 +4,7 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 fun properties(key: String) = project.findProperty(key).toString()
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.8.0" apply false
+    id("org.jetbrains.kotlin.jvm") version "1.8.10" apply false
     id("org.jetbrains.kotlin.plugin.sam.with.receiver") version "1.8.0"
     id("org.jetbrains.intellij") version "0.0.0" apply false
     `kotlin-dsl`
