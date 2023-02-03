@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij
 
+@Suppress("MemberVisibilityCanBePrivate")
 object IntelliJPluginConstants {
     const val PLUGIN_NAME = "Gradle IntelliJ Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij"
@@ -52,8 +53,6 @@ object IntelliJPluginConstants {
         LIST_BUNDLED_PLUGINS_TASK_NAME,
         LIST_PRODUCTS_RELEASES_TASK_NAME,
         PATCH_PLUGIN_XML_TASK_NAME,
-//        POST_INSTRUMENT_CODE_TASK_NAME,
-//        POST_INSTRUMENT_TEST_CODE_TASK_NAME,
         PREPARE_SANDBOX_TASK_NAME,
         PREPARE_TESTING_SANDBOX_TASK_NAME,
         PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
