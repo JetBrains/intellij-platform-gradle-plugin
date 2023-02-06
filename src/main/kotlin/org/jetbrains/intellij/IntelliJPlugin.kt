@@ -1092,23 +1092,19 @@ abstract class IntelliJPlugin : Plugin<Project> {
             // Ensure that our task is invoked when the source set is built
             sourceSet.compiledBy(instrumentTaskProvider)
 
-            val instrumentedContent = instrumentTaskProvider
-                .map { it.outputDir }
-                .map { it.asFile.get() to it.asFileTree.files }
-                .map { (directory, files) -> files.map { file -> file.toRelativeString(directory) } }
-                .memoize()
             val outputDirProvider = instrumentTaskProvider.flatMap { instrumentTask ->
-                instrumentTask.outputDir.asFile.map { file -> file.absolutePath }
+                instrumentTask.outputDir.asFile
             }
-
             jarTaskProvider.configure {
                 // Bundle non-test sources into the output jar when instrumentation is enabled
                 if (extension.instrumentCode.get() && sourceSet.name != "test") {
                     from(instrumentTaskProvider)
                     exclude {
-                        !it.isDirectory // not a directory
-                                && !it.file.absolutePath.startsWith(outputDirProvider.get()) // not an instrumented class
-                                && instrumentedContent.get().contains(it.path) // is a raw class and got instrumented
+                        with(outputDirProvider.get()) {
+                            !it.isDirectory // not a directory
+                                    && !it.file.absolutePath.startsWith(absolutePath) // not an instrumented class
+                                    && it.relativePath.getFile(this).exists() // has an instrumented equivalent
+                        }
                     }
                 }
             }
