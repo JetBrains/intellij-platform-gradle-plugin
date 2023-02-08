@@ -2,9 +2,11 @@
 
 package org.jetbrains.intellij.tasks
 
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Jar
 import org.jetbrains.intellij.IntelliJPluginConstants
 
+@CacheableTask
 abstract class InstrumentedJarTask : Jar() {
 
     init {
