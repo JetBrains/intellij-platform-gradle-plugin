@@ -53,7 +53,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_TEST_JAR_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
@@ -546,12 +545,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring $taskName task")
 
         val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
-        val instrumentedJarTaskName = when (isTest) {
-            true -> INSTRUMENTED_TEST_JAR_TASK_NAME
-            false -> INSTRUMENTED_JAR_TASK_NAME
-        }
-
-        val instrumentedJarTaskProvider = project.tasks.named<Jar>(instrumentedJarTaskName)
+        val instrumentedJarTaskProvider = project.tasks.named<Jar>(INSTRUMENTED_JAR_TASK_NAME)
         val runtimeConfiguration = project.configurations.getByName(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
 
         val ideaDependencyJarFiles = ideaDependencyProvider.map {
@@ -944,6 +938,16 @@ abstract class IntelliJPlugin : Plugin<Project> {
             }
 
         val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
+        val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(INSTRUMENTED_JAR_TASK_NAME) {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+            archiveBaseName.convention(jarTaskProvider.flatMap { jarTask ->
+                jarTask.archiveBaseName.map {
+                    "$INSTRUMENTED_JAR_PREFIX-$it"
+                }
+            })
+        }
+
         val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
         val setupInstrumentCodeTaskProvider = project.tasks.register<SetupInstrumentCodeTask>(SETUP_INSTRUMENT_CODE_TASK_NAME) {
@@ -954,7 +958,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
-            val instrumentedJarName = sourceSet.getTaskName("instrumented", "jar")
             val instrumentTaskProvider = project.tasks.register<IntelliJInstrumentCodeTask>(name) {
                 sourceDirs.from(project.provider {
                     sourceSet.allJava.srcDirs
@@ -1114,16 +1117,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             // Ensure that our task is invoked when the source set is built
             sourceSet.compiledBy(instrumentTaskProvider)
 
-            val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(instrumentedJarName) {
-                val jarTask = jarTaskProvider.get()
-
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                archiveBaseName.convention(jarTask.archiveBaseName.map { name ->
-                    listOfNotNull(INSTRUMENTED_JAR_PREFIX, sourceSet.name.takeIf { it != "main" }, name).joinToString("-")
-                })
-
+            instrumentedJarTaskProvider.configure {
                 from(instrumentTaskProvider)
-                with(jarTask)
+                with(jarTaskProvider.get())
 
                 dependsOn(instrumentTaskProvider)
             }
