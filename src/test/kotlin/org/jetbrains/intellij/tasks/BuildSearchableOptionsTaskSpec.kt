@@ -46,7 +46,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             assertContains("Searchable options index builder completed", it.output)
         }
 
-        getSearchableOptionsXml("projectName").readText().let {
+        getSearchableOptionsXml("instrumented-projectName").readText().let {
             assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", it)
             assertContains("hit=\"Label for Test Searchable Configurable\"", it)
         }

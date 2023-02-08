@@ -43,8 +43,7 @@ __FILE__.init {
             assert((jar readEntry "MainKt.class").length == 980)
 
             buildDirectory.resolve("instrumented").run {
-                assert(Files.isDirectory(this))
-                assert(Files.list(this).toArray().isEmpty())
+                assert(!Files.exists(this))
             }
         }
     }
@@ -75,10 +74,10 @@ __FILE__.init {
             jar readEntry "META-INF/plugin.xml" containsText "<action id=\"ExampleAction\" class=\"ExampleAction\" text=\"Example Action\">"
 
             jar containsFileInArchive "ExampleAction.class"
-            assert((jar readEntry "ExampleAction.class").length == 1028)
+            assert((jar readEntry "ExampleAction.class").length == 625)
 
             jar containsFileInArchive "Main.class"
-            assert((jar readEntry "Main.class").length == 1015)
+            assert((jar readEntry "Main.class").length == 658)
 
             jar containsFileInArchive "MainKt.class"
             assert((jar readEntry "MainKt.class").length == 980)
@@ -89,8 +88,7 @@ __FILE__.init {
         logs containsText "Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 
         buildDirectory.resolve("instrumented").run {
-            assert(Files.isDirectory(this))
-            assert(Files.list(this).toArray().isEmpty())
+            assert(!Files.exists(this))
         }
     }
 

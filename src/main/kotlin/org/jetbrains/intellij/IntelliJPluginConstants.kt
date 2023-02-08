@@ -19,6 +19,8 @@ object IntelliJPluginConstants {
     const val INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME = "initializeIntelliJPlugin"
     const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
+    const val INSTRUMENTED_JAR_TASK_NAME = "instrumentedJar"
+    const val INSTRUMENTED_TEST_JAR_TASK_NAME = "instrumentedTestJar"
     const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     const val LIST_BUNDLED_PLUGINS_TASK_NAME = "listBundledPlugins"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
@@ -48,6 +50,8 @@ object IntelliJPluginConstants {
         DOWNLOAD_ZIP_SIGNER_TASK_NAME,
         INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME,
         INSTRUMENT_CODE_TASK_NAME,
+        INSTRUMENTED_JAR_TASK_NAME,
+        INSTRUMENTED_TEST_JAR_TASK_NAME,
         INSTRUMENT_TEST_CODE_TASK_NAME,
         JAR_SEARCHABLE_OPTIONS_TASK_NAME,
         LIST_BUNDLED_PLUGINS_TASK_NAME,
@@ -83,6 +87,8 @@ object IntelliJPluginConstants {
     const val PERFORMANCE_TEST_CONFIGURATION_NAME = "z20_performanceTest"
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
+    const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
+    const val INSTRUMENTED_JAR_PREFIX = "instrumented"
 
     const val ANNOTATIONS_DEPENDENCY_VERSION = "24.0.0"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"

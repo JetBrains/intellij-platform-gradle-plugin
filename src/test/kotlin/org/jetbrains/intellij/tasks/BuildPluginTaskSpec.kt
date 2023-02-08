@@ -72,13 +72,13 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "myPluginName/",
                 "myPluginName/lib/",
                 "myPluginName/lib/joda-time-2.8.1.jar",
-                "myPluginName/lib/projectName-0.42.123.jar",
+                "myPluginName/lib/instrumented-projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
             collectPaths(zipFile)
         )
 
-        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
+        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/instrumented-projectName-0.42.123.jar"))
         assertEquals(
             setOf(
                 "App.class",
@@ -142,13 +142,13 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             setOf(
                 "myPluginName/",
                 "myPluginName/lib/",
-                "myPluginName/lib/projectName-0.42.123.jar",
+                "myPluginName/lib/instrumented-projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
             collectPaths(zipFile),
         )
 
-        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
+        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/instrumented-projectName-0.42.123.jar"))
         assertEquals(
             setOf(
                 "App.class",
@@ -220,7 +220,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "myPluginName/",
                 "myPluginName/lib/",
                 "myPluginName/lib/joda-time-2.8.1.jar",
-                "myPluginName/lib/projectName-0.42.123.jar",
+                "myPluginName/lib/instrumented-projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
             collectPaths(ZipFile(distribution))
@@ -295,7 +295,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/instrumented-projectName-0.42.123.jar")
         assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
     }
 
@@ -340,7 +340,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/instrumented-projectName-0.42.123.jar")
         assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
     }
 
@@ -378,13 +378,13 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             setOf(
                 "myPluginName/",
                 "myPluginName/lib/",
-                "myPluginName/lib/projectName-0.42.123.jar",
+                "myPluginName/lib/instrumented-projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
             collectPaths(zip)
         )
 
-        val jar = extractFile(zip, "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(zip, "myPluginName/lib/instrumented-projectName-0.42.123.jar")
         assertEquals(
             setOf(
                 "META-INF/",
@@ -441,13 +441,13 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             setOf(
                 "myPluginName/",
                 "myPluginName/lib/",
-                "myPluginName/lib/projectName-0.42.123.jar",
+                "myPluginName/lib/instrumented-projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
             collectPaths(zip)
         )
 
-        val jar = extractFile(zip, "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(zip, "myPluginName/lib/instrumented-projectName-0.42.123.jar")
         assertEquals(
             setOf(
                 "META-INF/",
@@ -478,7 +478,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         build(BUILD_PLUGIN_TASK_NAME)
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
-        val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
+        val artifact = extractFile(ZipFile(archive), "projectName/lib/instrumented-projectName-0.42.123.jar")
         fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
             assertNotNull(it)
 

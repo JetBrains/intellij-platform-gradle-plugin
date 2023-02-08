@@ -39,7 +39,7 @@ __FILE__.init {
             assert(Files.size(this) == 798L)
         }
 
-        buildDirectory.resolve("libs/instrumentation-task-1.0.0.jar").let { jar ->
+        buildDirectory.resolve("libs/instrumented-instrumentation-task-1.0.0.jar").let { jar ->
             jar containsFileInArchive "Main.class"
             assert((jar readEntry "Main.class").length == 1015)
 

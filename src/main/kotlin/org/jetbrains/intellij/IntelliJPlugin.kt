@@ -50,6 +50,10 @@ import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
+import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_TEST_JAR_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
@@ -184,6 +188,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureInitializeGradleIntelliJPluginTask(project)
         configureSetupDependenciesTask(project, ideaDependencyProvider)
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
+        configureInstrumentation(project, extension, ideaDependencyProvider)
         configurePatchPluginXmlTask(project, extension, ideaDependencyProvider)
         configureDownloadRobotServerPluginTask(project)
         configurePrepareSandboxTasks(project, extension, ideaDependencyProvider)
@@ -201,7 +206,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         configureSignPluginTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
-        configureInstrumentation(project, extension, ideaDependencyProvider)
         configureVerifyPluginConfigurationTask(project, ideaDependencyProvider)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
@@ -496,9 +500,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configurePrepareSandboxTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
-        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_SANDBOX_TASK_NAME, "")
-        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
-        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest") {
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_SANDBOX_TASK_NAME, "", false)
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test", true)
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest", true) {
             it.from(downloadPluginTaskProvider.flatMap { downloadPluginTask ->
                 downloadPluginTask.outputDir
             })
@@ -536,18 +540,25 @@ abstract class IntelliJPlugin : Plugin<Project> {
         ideaDependencyProvider: Provider<IdeaDependency>,
         taskName: String,
         testSuffix: String,
+        isTest: Boolean,
         configure: ((it: PrepareSandboxTask) -> Unit)? = null,
     ) {
         info(context, "Configuring $taskName task")
 
         val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
+        val instrumentedJarTaskName = when (isTest) {
+            true -> INSTRUMENTED_TEST_JAR_TASK_NAME
+            false -> INSTRUMENTED_JAR_TASK_NAME
+        }
+
+        val instrumentedJarTaskProvider = project.tasks.named<Jar>(instrumentedJarTaskName)
         val runtimeConfiguration = project.configurations.getByName(RUNTIME_CLASSPATH_CONFIGURATION_NAME)
 
         val ideaDependencyJarFiles = ideaDependencyProvider.map {
             project.files(it.jarFiles)
         }
-        val jarArchiveFile = jarTaskProvider.flatMap { jarTask ->
-            jarTask.archiveFile
+        val instrumentedJarProvider = instrumentedJarTaskProvider.flatMap { instrumentedJarTask ->
+            instrumentedJarTask.archiveFile
         }
         val runtimeConfigurationFiles = project.provider {
             runtimeConfiguration.allDependencies.flatMap {
@@ -575,23 +586,25 @@ abstract class IntelliJPlugin : Plugin<Project> {
             })
         }
 
-        jarTaskProvider.configure {
-            exclude("**/classpath.index")
+        listOf(jarTaskProvider, instrumentedJarTaskProvider).forEach {
+            it.configure {
+                exclude("**/classpath.index")
 
-            manifest.attributes(
-                "Created-By" to gradleVersion.map { "Gradle $it" },
-                "Build-JVM" to Jvm.current(),
-                "Version" to projectVersion,
-                "Build-Plugin" to PLUGIN_NAME,
-                "Build-Plugin-Version" to getCurrentPluginVersion().or("0.0.0"),
-                "Build-OS" to OperatingSystem.current(),
-                "Build-SDK" to buildSdk.get(),
-            )
+                manifest.attributes(
+                    "Created-By" to gradleVersion.map { "Gradle $it" },
+                    "Build-JVM" to Jvm.current(),
+                    "Version" to projectVersion,
+                    "Build-Plugin" to PLUGIN_NAME,
+                    "Build-Plugin-Version" to getCurrentPluginVersion().or("0.0.0"),
+                    "Build-OS" to OperatingSystem.current(),
+                    "Build-SDK" to buildSdk.get(),
+                )
+            }
         }
 
         project.tasks.register<PrepareSandboxTask>(taskName) {
             pluginName.convention(extension.pluginName)
-            pluginJar.convention(jarArchiveFile)
+            pluginJar.convention(instrumentedJarProvider)
             defaultDestinationDir.convention(extension.sandboxDir.map {
                 project.file("$it/plugins$testSuffix")
             })
@@ -619,7 +632,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }
 
             dependsOn(runtimeConfiguration)
-            dependsOn(JAR_TASK_NAME)
+            dependsOn(instrumentedJarTaskProvider)
 
             configure?.invoke(this)
         }.let { taskProvider ->
@@ -922,6 +935,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring compile tasks")
 
+        val instrumentedJar = project.configurations.create(INSTRUMENTED_JAR_CONFIGURATION_NAME)
+            .apply {
+                isCanBeConsumed = true
+                isCanBeResolved = false
+
+                extendsFrom(project.configurations["implementation"], project.configurations["runtimeOnly"])
+            }
+
         val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
         val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
@@ -933,6 +954,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
+            val instrumentedJarName = sourceSet.getTaskName("instrumented", "jar")
             val instrumentTaskProvider = project.tasks.register<IntelliJInstrumentCodeTask>(name) {
                 sourceDirs.from(project.provider {
                     sourceSet.allJava.srcDirs
@@ -1092,22 +1114,21 @@ abstract class IntelliJPlugin : Plugin<Project> {
             // Ensure that our task is invoked when the source set is built
             sourceSet.compiledBy(instrumentTaskProvider)
 
-            val outputDirProvider = instrumentTaskProvider.flatMap { instrumentTask ->
-                instrumentTask.outputDir.asFile
+            val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(instrumentedJarName) {
+                val jarTask = jarTaskProvider.get()
+
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                archiveBaseName.convention(jarTask.archiveBaseName.map { name ->
+                    listOfNotNull(INSTRUMENTED_JAR_PREFIX, sourceSet.name.takeIf { it != "main" }, name).joinToString("-")
+                })
+
+                from(instrumentTaskProvider)
+                with(jarTask)
+
+                dependsOn(instrumentTaskProvider)
             }
-            jarTaskProvider.configure {
-                // Bundle non-test sources into the output jar when instrumentation is enabled
-                if (extension.instrumentCode.get() && sourceSet.name != "test") {
-                    from(instrumentTaskProvider)
-                    exclude {
-                        with(outputDirProvider.get()) {
-                            !it.isDirectory // not a directory
-                                    && !it.file.absolutePath.startsWith(absolutePath) // not an instrumented class
-                                    && it.relativePath.getFile(this).exists() // has an instrumented equivalent
-                        }
-                    }
-                }
-            }
+
+            project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
         }
     }
 

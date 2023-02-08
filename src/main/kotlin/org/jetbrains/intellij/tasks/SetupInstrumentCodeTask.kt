@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.tasks
 
-import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
@@ -36,7 +35,7 @@ abstract class SetupInstrumentCodeTask : DefaultTask() {
                 if (!instrumentationEnabled.get()) {
                     deleteQuietly()
                 }
-                createDir()
+//                createDir()
             }
     }
 }
