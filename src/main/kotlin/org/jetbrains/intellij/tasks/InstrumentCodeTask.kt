@@ -25,7 +25,7 @@ import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 
 @CacheableTask
-abstract class IntelliJInstrumentCodeTask : DefaultTask() {
+abstract class InstrumentCodeTask : DefaultTask() {
 
     @get:Internal
     abstract val sourceSetCompileClasspath: ConfigurableFileCollection

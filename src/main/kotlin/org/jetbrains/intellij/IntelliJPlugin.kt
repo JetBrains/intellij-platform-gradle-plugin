@@ -948,7 +948,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
-            val instrumentTaskProvider = project.tasks.register<IntelliJInstrumentCodeTask>(name) {
+            val instrumentTaskProvider = project.tasks.register<InstrumentCodeTask>(name) {
                 sourceDirs.from(project.provider {
                     sourceSet.allJava.srcDirs
                 })
@@ -1108,7 +1108,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sourceSet.compiledBy(instrumentTaskProvider)
         }
 
-        val mainInstrumentTaskProvider = project.tasks.named<IntelliJInstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
+        val mainInstrumentTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
         val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(INSTRUMENTED_JAR_TASK_NAME) {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 

@@ -14,6 +14,7 @@
 
 ### Breaking Changes
 - It is required to use the `instrumentedJar` configuration when referring submodules in multi-modules project, like `dependencies { implementation(project(":submodule", "instrumentedJar")) }`
+- Rename `IntelliJInstrumentCodeTask` to `InstrumentCodeTask`
 
 ## [1.12.0] - 2023-01-13
 
