@@ -7,6 +7,7 @@
 - Introduced the `initializeIntelliJPlugin` task for executing plugin initialization actions, like `checkPluginVersion`
 - `instrumentJar` task to produce independent jar file with instrumented classes
 - `instrumentedJar` configuration for multi-modules projects
+- Publish plugin marker to the Maven Snapshot Repository
 
 ### Fixed
 - Don't enforce the Kotlin version of the project by using `compileOnly` instead of `api` when declaring the `org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0` dependency [#1276](../../issues/1276)
