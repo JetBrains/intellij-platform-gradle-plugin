@@ -162,7 +162,7 @@ publishing {
     }
     publications {
         create<MavenPublication>("snapshot") {
-            groupId = properties("pluginId")
+            groupId = properties("group")
             artifactId = properties("artifactId")
             version = version.toString()
 
