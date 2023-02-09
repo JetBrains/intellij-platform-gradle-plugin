@@ -51,8 +51,8 @@ import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
@@ -938,16 +938,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
             }
 
         val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
-        val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(INSTRUMENTED_JAR_TASK_NAME) {
-            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-            archiveBaseName.convention(jarTaskProvider.flatMap { jarTask ->
-                jarTask.archiveBaseName.map {
-                    "$INSTRUMENTED_JAR_PREFIX-$it"
-                }
-            })
-        }
-
         val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
         val setupInstrumentCodeTaskProvider = project.tasks.register<SetupInstrumentCodeTask>(SETUP_INSTRUMENT_CODE_TASK_NAME) {
@@ -1116,16 +1106,25 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             // Ensure that our task is invoked when the source set is built
             sourceSet.compiledBy(instrumentTaskProvider)
-
-            instrumentedJarTaskProvider.configure {
-                from(instrumentTaskProvider)
-                with(jarTaskProvider.get())
-
-                dependsOn(instrumentTaskProvider)
-            }
-
-            project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
         }
+
+        val mainInstrumentTaskProvider = project.tasks.named<IntelliJInstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
+        val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(INSTRUMENTED_JAR_TASK_NAME) {
+            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+            archiveBaseName.convention(jarTaskProvider.flatMap { jarTask ->
+                jarTask.archiveBaseName.map {
+                    "${IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX}-$it"
+                }
+            })
+
+            from(mainInstrumentTaskProvider)
+            with(jarTaskProvider.get())
+
+            dependsOn(mainInstrumentTaskProvider)
+        }
+
+        project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
     }
 
     private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
