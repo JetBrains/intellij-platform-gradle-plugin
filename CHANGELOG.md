@@ -2,8 +2,10 @@
 
 ## [next]
 
+## [1.13.0] - 2023-02-10
+
 ### Added
-- Support for Gradle `8.0-RC.3`
+- Support for Gradle `8.0`
 - Introduced the `initializeIntelliJPlugin` task for executing plugin initialization actions, like `checkPluginVersion`
 - `instrumentJar` task to produce independent jar file with instrumented classes
 - `instrumentedJar` configuration for multi-modules projects
