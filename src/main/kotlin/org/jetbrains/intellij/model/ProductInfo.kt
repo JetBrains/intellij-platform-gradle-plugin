@@ -25,12 +25,15 @@ data class ProductInfo(
     val currentLaunch: Launch
         get() = with(OperatingSystem.current()) {
             val arch = with(launch.map { it.arch }.toSet()) {
-                System.getProperty("os.arch")
-                    .takeIf { contains(it) }
-                    ?: when {
-                        contains("amd64") -> "amd64"
-                        else -> (this - "aarch64").first()
-                    }
+                System.getProperty("os.arch").let { osArch ->
+                    osArch
+                        .takeIf { contains(it) }
+                        ?: when {
+                            contains("amd64") -> "amd64"
+                            else -> (this - "aarch64").firstOrNull()
+                        }
+                        ?: throw GradleException("Unsupported JVM architecture was selected for running Gradle tasks: $osArch. Supported architectures: ${joinToString()}")
+                }
             }
 
             launch.find {
