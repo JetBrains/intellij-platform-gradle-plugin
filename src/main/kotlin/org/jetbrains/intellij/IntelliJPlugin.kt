@@ -499,9 +499,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configurePrepareSandboxTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
-        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_SANDBOX_TASK_NAME, "", false)
-        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test", true)
-        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest", true) {
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_SANDBOX_TASK_NAME, "")
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_TESTING_SANDBOX_TASK_NAME, "-test")
+        configurePrepareSandboxTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME, "-uiTest") {
             it.from(downloadPluginTaskProvider.flatMap { downloadPluginTask ->
                 downloadPluginTask.outputDir
             })
@@ -539,7 +539,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         ideaDependencyProvider: Provider<IdeaDependency>,
         taskName: String,
         testSuffix: String,
-        isTest: Boolean,
         configure: ((it: PrepareSandboxTask) -> Unit)? = null,
     ) {
         info(context, "Configuring $taskName task")
