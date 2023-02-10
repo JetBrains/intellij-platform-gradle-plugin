@@ -24,15 +24,14 @@ data class ProductInfo(
 ) {
     val currentLaunch: Launch
         get() = with(OperatingSystem.current()) {
-            val arch = with(launch.map { it.arch }.toSet()) {
-                System.getProperty("os.arch").let { osArch ->
-                    osArch
-                        .takeIf { contains(it) }
-                        ?: when {
-                            contains("amd64") -> "amd64"
-                            else -> (this - "aarch64").firstOrNull()
-                        }
-                        ?: throw GradleException("Unsupported JVM architecture was selected for running Gradle tasks: $osArch. Supported architectures: ${joinToString()}")
+            val currentArchitecture = System.getProperty("os.arch")
+            val availableArchitectures = launch.mapNotNull { it.arch }.toSet()
+
+            val arch = with(availableArchitectures) {
+                when {
+                    isEmpty() -> null// older SDKs or Maven releases don't provide architecture information, null is used in such a case
+                    contains(currentArchitecture) -> currentArchitecture
+                    else -> throw GradleException("Unsupported JVM architecture was selected for running Gradle tasks: $currentArchitecture. Supported architectures: ${joinToString()}")
                 }
             }
 
