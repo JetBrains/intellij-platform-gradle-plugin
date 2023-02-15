@@ -31,6 +31,7 @@ data class ProductInfo(
                 when {
                     isEmpty() -> null// older SDKs or Maven releases don't provide architecture information, null is used in such a case
                     contains(currentArchitecture) -> currentArchitecture
+                    contains("amd64") && currentArchitecture == "x86_64" -> "amd64"
                     else -> throw GradleException("Unsupported JVM architecture was selected for running Gradle tasks: $currentArchitecture. Supported architectures: ${joinToString()}")
                 }
             }
