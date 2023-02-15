@@ -7,9 +7,7 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Task
-import org.gradle.api.file.CopySpec
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.*
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -74,6 +72,10 @@ abstract class PrepareSandboxTask : Sync() {
      */
     @get:Internal
     abstract val defaultDestinationDir: Property<File>
+
+    @get:InputFiles
+    @get:Classpath
+    abstract val runtimeClasspathFiles: Property<FileCollection>
 
     private val context = logCategory()
     private val usedNames = mutableMapOf<String, Path>()

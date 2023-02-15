@@ -553,11 +553,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val instrumentedJarProvider = instrumentedJarTaskProvider.flatMap { instrumentedJarTask ->
             instrumentedJarTask.archiveFile
         }
-        val runtimeConfigurationFiles = project.provider {
-            runtimeConfiguration.allDependencies.flatMap {
-                runtimeConfiguration.fileCollection(it)
-            }
-        }
         val gradleVersion = project.provider {
             project.gradle.gradleVersion
         }
@@ -584,7 +579,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 exclude("**/classpath.index")
 
                 manifest.attributes(
-                    "Created-By" to gradleVersion.map { "Gradle $it" },
+                    "Created-By" to gradleVersion.map { version -> "Gradle $version" },
                     "Build-JVM" to Jvm.current(),
                     "Version" to projectVersion,
                     "Build-Plugin" to PLUGIN_NAME,
@@ -608,9 +603,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
             pluginDependencies.convention(project.provider {
                 extension.getPluginDependenciesList(project)
             })
+            runtimeClasspathFiles.convention(runtimeConfiguration)
 
             intoChild(pluginName.map { "$it/lib" })
-                .from(runtimeConfigurationFiles.map { files ->
+                .from(runtimeClasspathFiles.map { files ->
                     val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
                     val pluginDirectories = pluginDependencies.get().map { it.artifact.canonicalPath }
 
