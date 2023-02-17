@@ -10,7 +10,7 @@ jobs:
     name: Gradle 8.0 @ ubuntu-latest
     uses: ./.github/workflows/reusable-single-unitTest.yml
     with:
-      gradleVersion: 8.0
+      gradleVersion: "8.0"
       os: ubuntu-latest
       script: |
         sudo rm -rf /usr/share/dotnet
@@ -45,4 +45,4 @@ jobs:
               sudo rm -rf /opt/ghc
         exclude:
           - os: ubuntu-latest
-            gradleVersion: 8.0
+            gradleVersion: "8.0"
