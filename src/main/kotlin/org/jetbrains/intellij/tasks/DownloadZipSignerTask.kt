@@ -13,8 +13,8 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.utils.LatestVersionResolver
-import org.jetbrains.kotlin.konan.file.recursiveCopyTo
 import java.nio.file.Path
+import kotlin.io.path.copyTo
 
 @DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadZipSignerTask : DefaultTask() {
@@ -45,7 +45,7 @@ abstract class DownloadZipSignerTask : DefaultTask() {
 
     @TaskAction
     fun downloadZipSigner() {
-        Path.of(cliPath.get()).recursiveCopyTo(cli.asFile.get().toPath())
+        Path.of(cliPath.get()).copyTo(cli.asFile.get().toPath(), true)
     }
 
     /**

@@ -4,6 +4,7 @@
 
 ### Fixed
 - Instrumentation ignores `intellij.instrumentCode = false` [#1310](../../issues/1310)
+- `NoClassDefFoundError: org/jetbrains/kotlin/konan/file/FileKt` when running `signPlugin` task on Gradle lower than 8.0 [#1319](../../issues/1319)
 
 ## [1.13.0] - 2023-02-10
 
