@@ -83,6 +83,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
+import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_RELEASES
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_TASK_NAME
@@ -1019,11 +1020,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                     version = version,
                                 )
                             }, {
-                                listOf(
+                                setOf(
                                     "${extension.intellijRepository.get()}/${releaseType(version)}",
+                                    "${extension.intellijRepository.get()}/$RELEASE_TYPE_RELEASES",
                                     INTELLIJ_DEPENDENCIES,
                                 ).map(::mavenRepository)
-                            }, true)
+                            }, true).takeIf { it.isNotEmpty() }
                         }
 
                         listOf(
