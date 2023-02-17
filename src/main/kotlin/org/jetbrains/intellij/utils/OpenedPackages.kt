@@ -5,7 +5,7 @@ package org.jetbrains.intellij.utils
 import org.gradle.internal.os.OperatingSystem
 
 // OpenedPackages list synchronized with:
-// https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt
+// https://github.com/JetBrains/intellij-community/blob/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt
 // last version: 647407b1aaab13a51a8880689431ed780ab45668
 val OpenedPackages = listOf(
     "--add-opens=java.base/java.io=ALL-UNNAMED",
