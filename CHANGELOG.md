@@ -3,6 +3,7 @@
 ## [next]
 
 ### Fixed
+- Unsupported JVM architecture was selected for running Gradle tasks: `x86_64` [#1317](../../issues/1317)
 - Instrumentation ignores `intellij.instrumentCode = false` [#1310](../../issues/1310)
 - `NoClassDefFoundError: org/jetbrains/kotlin/konan/file/FileKt` when running `signPlugin` task on Gradle lower than 8.0 [#1319](../../issues/1319)
 
