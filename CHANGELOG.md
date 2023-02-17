@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Fixed
+- Instrumentation ignores `intellij.instrumentCode = false` [#1310](../../issues/1310)
+
 ## [1.13.0] - 2023-02-10
 
 ### Added

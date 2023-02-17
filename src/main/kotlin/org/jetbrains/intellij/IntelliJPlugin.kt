@@ -550,9 +550,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val ideaDependencyJarFiles = ideaDependencyProvider.map {
             project.files(it.jarFiles)
         }
-        val instrumentedJarProvider = instrumentedJarTaskProvider.flatMap { instrumentedJarTask ->
-            instrumentedJarTask.archiveFile
-        }
+        val pluginJarProvider = extension.instrumentCode.flatMap { instrumentCode ->
+            when (instrumentCode) {
+                true -> instrumentedJarTaskProvider
+                false -> jarTaskProvider
+            }
+        }.flatMap { jarTask -> jarTask.archiveFile }
+
         val gradleVersion = project.provider {
             project.gradle.gradleVersion
         }
@@ -592,7 +596,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         project.tasks.register<PrepareSandboxTask>(taskName) {
             pluginName.convention(extension.pluginName)
-            pluginJar.convention(instrumentedJarProvider)
+            pluginJar.convention(pluginJarProvider)
             defaultDestinationDir.convention(extension.sandboxDir.map {
                 project.file("$it/plugins$testSuffix")
             })
@@ -621,6 +625,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }
 
             dependsOn(runtimeConfiguration)
+            dependsOn(jarTaskProvider)
             dependsOn(instrumentedJarTaskProvider)
 
             configure?.invoke(this)
@@ -938,6 +943,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val setupInstrumentCodeTaskProvider = project.tasks.register<SetupInstrumentCodeTask>(SETUP_INSTRUMENT_CODE_TASK_NAME) {
             instrumentationEnabled.convention(extension.instrumentCode)
             instrumentedDir.convention(project.layout.buildDirectory.dir("instrumented"))
+
+            onlyIf { instrumentCodeProvider.get() }
         }
 
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
@@ -1117,6 +1124,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
             with(jarTaskProvider.get())
 
             dependsOn(mainInstrumentTaskProvider)
+
+            onlyIf { instrumentCodeProvider.get() }
         }
 
         project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
