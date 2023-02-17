@@ -84,7 +84,7 @@ __FILE__.init {
         }
     }
 
-    runGradleTask("jar", projectProperties = mapOf("instrumentCode" to false)).let { logs ->
+    runGradleTask("clean", "jar", projectProperties = mapOf("instrumentCode" to false)).let { logs ->
         logs containsText "Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 
         buildDirectory.resolve("instrumented").run {
