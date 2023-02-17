@@ -3,16 +3,16 @@ on:
   workflow_dispatch:
     inputs:
       testName:
-        description: 'Test name'
+        description: "Test name"
         required: false
         type: string
       gradleVersion:
-        description: 'Gradle Version'
+        description: "Gradle Version"
         required: true
         type: string
-        default: '8.0'
+        default: "8.0.1"
       os:
-        description: 'Operation System'
+        description: "Operation System"
         required: true
         type: choice
         options:

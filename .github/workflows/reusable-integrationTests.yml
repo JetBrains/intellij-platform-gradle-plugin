@@ -57,7 +57,7 @@ jobs:
         gradleVersion:
           - "7.3"
           - "7.6"
-          - "8.0"
+          - "8.0.1"
         os:
           - windows-latest
           - ubuntu-latest
