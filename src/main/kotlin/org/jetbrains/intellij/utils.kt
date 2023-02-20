@@ -171,7 +171,6 @@ fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirect
 
     return (defaultHeapSpace + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + heapSpace)
         .filter { it.isNotBlank() }
-        .distinct()
 }
 
 fun getIdeaClasspath(ideDir: Path): List<String> {
