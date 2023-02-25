@@ -43,7 +43,7 @@ project {
 
 
 object UnitTests : BuildType({
-    val gradleVersions = listOf("7.3", "7.6", "8.0.1")
+    val gradleVersions = listOf("7.3", "7.6.1", "8.0.1")
 
     name = "Unit Tests"
 

@@ -14,7 +14,7 @@ Running Integration Tests is based on GitHub Actions and makes use of the matrix
 - Operating systems: macOS, Windows, Linux
 - Gradle versions:
   - first supported: `7.3`
-  - latest available: `7.6`
+  - latest available: `7.6.1`
 - IntelliJ IDEA SDK versions:
   - latest stable: `2021.3.3`
 
