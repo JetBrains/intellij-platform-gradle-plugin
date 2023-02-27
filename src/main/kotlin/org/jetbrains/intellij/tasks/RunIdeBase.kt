@@ -280,7 +280,7 @@ abstract class RunIdeBase : JavaExec() {
         return when {
             prefix != null -> prefix
 
-            OperatingSystem.current().isMacOsX -> infoPlist
+            OperatingSystem.current().isMacOsX && infoPlist != null -> infoPlist
                 ?.getDictionary("JVMOptions")
                 ?.getDictionary("Properties")
                 ?.getValue("idea.platform.prefix")
