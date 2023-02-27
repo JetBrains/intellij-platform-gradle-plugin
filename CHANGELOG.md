@@ -8,6 +8,7 @@
 - `NoClassDefFoundError: org/jetbrains/kotlin/konan/file/FileKt` when running `signPlugin` task on Gradle lower than 8.0 [#1319](../../issues/1319)
 - `taskdef class com.intellij.ant.InstrumentIdeaExtensions cannot be found` when running instrumentation on Android Studio [#1288](../../issues/1288)
 - JVM arguments mangled since `1.10` resulting in `ClassNotFoundException` for `PathClassLoader` [#1311](../../issues/1311)
+- Add missing compiled classes to the instrumentation task classpath
 
 ## [1.13.0] - 2023-02-10
 

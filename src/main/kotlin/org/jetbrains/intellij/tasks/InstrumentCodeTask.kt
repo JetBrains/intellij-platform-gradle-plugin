@@ -216,7 +216,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
                     mapOf(
                         "srcdir" to dirs.joinToString(":"),
                         "destdir" to temporaryDir,
-                        "classpath" to sourceSetCompileClasspath.joinToString(":"),
+                        "classpath" to (sourceSetCompileClasspath + classesDirs).joinToString(":"),
                         "includeantruntime" to false,
                         "instrumentNotNull" to instrumentNotNull
                     ),
