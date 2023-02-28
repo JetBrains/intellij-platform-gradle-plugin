@@ -51,6 +51,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
@@ -1118,7 +1119,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             archiveBaseName.convention(jarTaskProvider.flatMap { jarTask ->
                 jarTask.archiveBaseName.map {
-                    "${IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX}-$it"
+                    "$INSTRUMENTED_JAR_PREFIX-$it"
                 }
             })
 
@@ -1221,7 +1222,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 // Add source roots to the classpath.
                 classpath += sourceSetsOutputs.get()
                 classpath += ideaClasspathFiles.get()
-
 
                 systemProperties(
                     getIdeaSystemProperties(
