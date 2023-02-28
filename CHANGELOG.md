@@ -12,6 +12,7 @@
 - `taskdef class com.intellij.ant.InstrumentIdeaExtensions cannot be found` when running instrumentation on Android Studio [#1288](../../issues/1288)
 - JVM arguments mangled since `1.10` resulting in `ClassNotFoundException` for `PathClassLoader` [#1311](../../issues/1311)
 - Add missing compiled classes to the instrumentation task classpath
+- Mark `RunPluginVerifierTask.FailureLevel.ALL` and `RunPluginVerifierTask.FailureLevel.NONE` with `@JvmField` annotation [#1323](../../issues/1323)
 
 ## [1.13.0] - 2023-02-10
 

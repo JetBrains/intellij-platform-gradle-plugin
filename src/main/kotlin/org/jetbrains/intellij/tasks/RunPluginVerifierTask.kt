@@ -611,6 +611,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
         fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Plugin Verifier", METADATA_URL)
     }
 
+    @Suppress("unused")
     enum class FailureLevel(val sectionHeading: String, val message: String) {
         COMPATIBILITY_WARNINGS(
             "Compatibility warnings",
@@ -662,7 +663,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
         );
 
         companion object {
+            @JvmField
             val ALL: EnumSet<FailureLevel> = EnumSet.allOf(FailureLevel::class.java)
+
+            @JvmField
             val NONE: EnumSet<FailureLevel> = EnumSet.noneOf(FailureLevel::class.java)
         }
     }
