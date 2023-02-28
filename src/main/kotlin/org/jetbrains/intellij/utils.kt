@@ -107,27 +107,27 @@ private fun String.resolveIdeHomeVariable(ideDir: Path) =
     }
 
 fun getIdeaSystemProperties(
-    ideDir: Path,
+    ideDirectory: Path,
     configDirectory: File,
     systemDirectory: File,
     pluginsDirectory: File,
     requirePluginIds: List<String>,
 ): Map<String, String> {
-    val currentLaunch = ideProductInfo(ideDir)?.currentLaunch
-    val result = mapOf(
+    val productInfo = ideProductInfo(ideDirectory)
+    val ideaSystemProperties = mapOf(
         "idea.config.path" to configDirectory.canonicalPath,
         "idea.system.path" to systemDirectory.canonicalPath,
+        "idea.log.path" to systemDirectory.resolve("log").canonicalPath,
         "idea.plugins.path" to pluginsDirectory.canonicalPath,
     )
 
-    val currentLaunchProperties = currentLaunch
+    val currentLaunchProperties = productInfo
+        ?.currentLaunch
         ?.additionalJvmArguments
-        ?.filter {
-            it.startsWith("-D")
-        }
+        ?.filter { it.startsWith("-D") }
         ?.associate {
             it
-                .resolveIdeHomeVariable(ideDir)
+                .resolveIdeHomeVariable(ideDirectory)
                 .substring(2)
                 .split('=')
                 .let { (key, value) -> key to value }
@@ -139,7 +139,7 @@ fun getIdeaSystemProperties(
         ?.let { mapOf("idea.required.plugins.id" to it.joinToString(",")) }
         .orEmpty()
 
-    return result + currentLaunchProperties + requirePluginProperties
+    return ideaSystemProperties + currentLaunchProperties + requirePluginProperties
 }
 
 fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: Path): List<String> {

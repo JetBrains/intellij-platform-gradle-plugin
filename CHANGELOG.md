@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- Provide `idea.log.path` system property for `RunIde`-based tasks and tests
+
 ### Fixed
 - Unsupported JVM architecture was selected for running Gradle tasks: `x86_64` [#1317](../../issues/1317)
 - Instrumentation ignores `intellij.instrumentCode = false` [#1310](../../issues/1310)
