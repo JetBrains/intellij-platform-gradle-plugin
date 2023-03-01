@@ -1,8 +1,13 @@
-import jetbrains.buildServer.configs.kotlin.*
+
+import jetbrains.buildServer.configs.kotlin.BuildType
+import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
+import jetbrains.buildServer.configs.kotlin.ui.add
+import jetbrains.buildServer.configs.kotlin.version
 
 /*
 The settings script is an entry point for defining a TeamCity
@@ -29,8 +34,9 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 version = "2022.10"
 
 project {
-
     buildType(UnitTests)
+
+    description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/gradle-intellij-plugin"
 
     features {
         githubIssues {
@@ -41,11 +47,10 @@ project {
     }
 }
 
-
-object UnitTests : BuildType({
+fun BuildType.configure(family: String) = {
     val gradleVersions = listOf("7.3", "7.6.1", "8.0.1")
 
-    name = "Unit Tests"
+    name = "Unit Tests ($family)"
 
     vcs {
         root(DslContext.settingsRoot)
@@ -76,4 +81,16 @@ object UnitTests : BuildType({
             param("github_oauth_user", "hsz")
         }
     }
+
+    requirements {
+        add {
+            equals("teamcity.agent.jvm.os.family", family)
+        }
+    }
+}
+object UnitTestsLinux : BuildType({
+    this.configure("Linux")
+})
+object UnitTestsWindows : BuildType({
+    this.configure("Windows")
 })
