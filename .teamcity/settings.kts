@@ -34,7 +34,8 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 version = "2022.10"
 
 project {
-    buildType(UnitTests)
+    buildType(UnitTestsLinux)
+    buildType(UnitTestsWindows)
 
     description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/gradle-intellij-plugin"
 
