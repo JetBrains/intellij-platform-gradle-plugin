@@ -35,7 +35,7 @@ repositories {
 val additionalPluginClasspath: Configuration by configurations.creating
 
 dependencies {
-    implementation("org.jetbrains:annotations:24.0.0")
+    implementation("org.jetbrains:annotations:24.0.1")
     implementation("org.jetbrains.intellij.plugins:structure-base:3.249") {
         exclude("org.jetbrains.kotlin")
     }
