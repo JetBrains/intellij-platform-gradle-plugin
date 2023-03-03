@@ -45,7 +45,7 @@ project {
     }
 
     val operatingSystems = listOf("Linux", "Windows", "macOS")
-    val gradleVersions = listOf("7.3", "7.6.1", "8.0.1")
+    val gradleVersions = listOf("7.3", "7.6.1", "8.0.2")
 
     operatingSystems.forEach { os ->
         buildType {
