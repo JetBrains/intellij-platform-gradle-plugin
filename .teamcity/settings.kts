@@ -34,9 +34,6 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 version = "2022.10"
 
 project {
-    buildType(UnitTestsLinux)
-    buildType(UnitTestsWindows)
-
     description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/gradle-intellij-plugin"
 
     features {
@@ -46,52 +43,45 @@ project {
             repositoryURL = "https://github.com/JetBrains/gradle-intellij-plugin"
         }
     }
-}
 
-fun BuildType.configure(family: String) = {
+    val operatingSystems = listOf("Linux", "Windows", "macOS")
     val gradleVersions = listOf("7.3", "7.6.1", "8.0.1")
 
-    name = "Unit Tests ($family)"
+    operatingSystems.forEach { os ->
+        buildType {
+            id("UnitTests${os.uppercase()}")
+            name = "Unit Tests ($os)"
 
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
-    steps {
-        gradleVersions.forEach { gradleVersion ->
-            gradle {
-                name = "Unit Tests – Gradle $gradleVersion"
-                tasks = "check -PtestGradleVersion=$gradleVersion"
+            vcs {
+                root(DslContext.settingsRoot)
             }
-        }
-    }
 
-    triggers {
-        vcs {
-        }
-    }
-
-    features {
-        commitStatusPublisher {
-            publisher = github {
-                githubUrl = "https://api.github.com"
-                authType = personalToken {
-                    token = "credentialsJSON:935e7750-4963-410f-8aab-e86748770a1f"
+            steps {
+                gradleVersions.forEach { gradleVersion ->
+                    gradle {
+                        name = "Unit Tests – Gradle $gradleVersion"
+                        tasks = "check -PtestGradleVersion=$gradleVersion"
+                    }
                 }
             }
-            param("github_oauth_user", "hsz")
-        }
-    }
 
-    requirements {
-        add {
-            equals("teamcity.agent.jvm.os.family", family)
+            features {
+                commitStatusPublisher {
+                    publisher = github {
+                        githubUrl = "https://api.github.com"
+                        authType = personalToken {
+                            token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
+                        }
+                    }
+                    param("github_oauth_user", "hsz")
+                }
+            }
+
+            requirements {
+                add {
+                    equals("teamcity.agent.jvm.os.family", os)
+                }
+            }
         }
     }
 }
-object UnitTestsLinux : BuildType({
-    this.configure("Linux")
-})
-object UnitTestsWindows : BuildType({
-    this.configure("Windows")
-})
