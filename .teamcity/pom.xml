@@ -6,10 +6,6 @@
   <artifactId>OpenSourceProjects_GradleIntellijPlugin_dsl</artifactId>
   <version>1.0-SNAPSHOT</version>
 
-  <properties>
-    <kotlin.version>1.6.21</kotlin.version>
-  </properties>
-
   <parent>
     <groupId>org.jetbrains.teamcity</groupId>
     <artifactId>configs-dsl-kotlin-parent</artifactId>
@@ -41,26 +37,25 @@
   </pluginRepositories>
 
   <build>
+    <sourceDirectory>${basedir}</sourceDirectory>
     <plugins>
       <plugin>
         <artifactId>kotlin-maven-plugin</artifactId>
         <groupId>org.jetbrains.kotlin</groupId>
         <version>${kotlin.version}</version>
 
-        <configuration>
-          <jvmTarget>1.6</jvmTarget>
-        </configuration>
+        <configuration/>
         <executions>
           <execution>
             <id>compile</id>
-            <phase>compile</phase>
+            <phase>process-sources</phase>
             <goals>
               <goal>compile</goal>
             </goals>
           </execution>
           <execution>
             <id>test-compile</id>
-            <phase>test-compile</phase>
+            <phase>process-test-sources</phase>
             <goals>
               <goal>test-compile</goal>
             </goals>
@@ -104,17 +99,6 @@
       <artifactId>kotlin-script-runtime</artifactId>
       <version>${kotlin.version}</version>
       <scope>compile</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-stdlib-jdk8</artifactId>
-      <version>${kotlin.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jetbrains.kotlin</groupId>
-      <artifactId>kotlin-test</artifactId>
-      <version>${kotlin.version}</version>
-      <scope>test</scope>
     </dependency>
   </dependencies>
 </project>

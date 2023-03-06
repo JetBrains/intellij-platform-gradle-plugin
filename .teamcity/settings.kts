@@ -1,10 +1,9 @@
-
-import jetbrains.buildServer.configs.kotlin.BuildType
 import jetbrains.buildServer.configs.kotlin.DslContext
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
+import jetbrains.buildServer.configs.kotlin.sequential
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 import jetbrains.buildServer.configs.kotlin.ui.add
 import jetbrains.buildServer.configs.kotlin.version
@@ -47,41 +46,45 @@ project {
     val operatingSystems = listOf("Linux", "Windows", "macOS")
     val gradleVersions = listOf("7.3", "7.6.1", "8.0.2")
 
-    operatingSystems.forEach { os ->
-        buildType {
-            id("UnitTests${os.uppercase()}")
-            name = "Unit Tests ($os)"
+    val buildChain = sequential {
+        operatingSystems.forEach { os ->
+            this@project.buildType {
+                id("UnitTests${os.uppercase()}")
+                name = "Unit Tests ($os)"
 
-            vcs {
-                root(DslContext.settingsRoot)
-            }
-
-            steps {
-                gradleVersions.forEach { gradleVersion ->
-                    gradle {
-                        name = "Unit Tests – Gradle $gradleVersion"
-                        tasks = "check -PtestGradleVersion=$gradleVersion"
-                    }
+                vcs {
+                    root(DslContext.settingsRoot)
                 }
-            }
 
-            features {
-                commitStatusPublisher {
-                    publisher = github {
-                        githubUrl = "https://api.github.com"
-                        authType = personalToken {
-                            token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
+                steps {
+                    gradleVersions.forEach { gradleVersion ->
+                        gradle {
+                            name = "Unit Tests – Gradle $gradleVersion"
+                            tasks = "check -PtestGradleVersion=$gradleVersion"
                         }
                     }
-                    param("github_oauth_user", "hsz")
                 }
-            }
 
-            requirements {
-                add {
-                    equals("teamcity.agent.jvm.os.family", os)
+                features {
+                    commitStatusPublisher {
+                        publisher = github {
+                            githubUrl = "https://api.github.com"
+                            authType = personalToken {
+                                token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
+                            }
+                        }
+                        param("github_oauth_user", "hsz")
+                    }
+                }
+
+                requirements {
+                    add {
+                        equals("teamcity.agent.jvm.os.family", os)
+                    }
                 }
             }
         }
     }
+
+    buildChain.buildTypes().forEach { buildType(it) }
 }
