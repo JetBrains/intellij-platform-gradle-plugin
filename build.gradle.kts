@@ -36,7 +36,7 @@ val additionalPluginClasspath: Configuration by configurations.creating
 
 dependencies {
     implementation("org.jetbrains:annotations:24.0.1")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.249") {
+    implementation("org.jetbrains.intellij.plugins:structure-base:3.250") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij.plugins:structure-intellij:3.250") {
