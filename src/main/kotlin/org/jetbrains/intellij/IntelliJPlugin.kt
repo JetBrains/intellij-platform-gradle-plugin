@@ -2,7 +2,9 @@
 
 package org.jetbrains.intellij
 
-import com.jetbrains.plugin.structure.base.utils.*
+import com.jetbrains.plugin.structure.base.utils.extension
+import com.jetbrains.plugin.structure.base.utils.hasExtension
+import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -1113,7 +1115,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sourceSet.compiledBy(instrumentTaskProvider)
         }
 
-        val mainInstrumentTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
+        val instrumentTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
         val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(INSTRUMENTED_JAR_TASK_NAME) {
             duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
@@ -1123,10 +1125,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }
             })
 
-            from(mainInstrumentTaskProvider)
+            from(instrumentTaskProvider)
             with(jarTaskProvider.get())
 
-            dependsOn(mainInstrumentTaskProvider)
+            dependsOn(instrumentTaskProvider)
 
             onlyIf { instrumentCodeProvider.get() }
         }
@@ -1138,6 +1140,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring tests tasks")
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(RUN_IDE_TASK_NAME)
         val prepareTestingSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_TESTING_SANDBOX_TASK_NAME)
+        val instrumentedCodeTaskProviders = project.tasks.withType<InstrumentCodeTask>()
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
@@ -1211,17 +1214,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             doFirst {
                 jvmArgs = getIdeaJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
-                classpath += ideaDependencyLibrariesProvider.get()
-                classpath -= classpath.filter { !it.toPath().isDirectory && !it.toPath().isJar() }
-
-                // Rearrange classpath to put the IDEA and plugins in the right order.
-                classpath -= ideaConfigurationFiles.get()
-                classpath -= ideaPluginsConfigurationFiles.get()
-                classpath += ideaConfigurationFiles.get() + ideaPluginsConfigurationFiles.get()
-
-                // Add source roots to the classpath.
-                classpath += sourceSetsOutputs.get()
-                classpath += ideaClasspathFiles.get()
+                classpath = project.files(
+                    instrumentedCodeTaskProviders,
+                    sourceSetsOutputs,
+                    ideaDependencyLibrariesProvider,
+                    ideaConfigurationFiles,
+                    ideaPluginsConfigurationFiles,
+                    ideaClasspathFiles,
+                ) + classpath
 
                 systemProperties(
                     getIdeaSystemProperties(

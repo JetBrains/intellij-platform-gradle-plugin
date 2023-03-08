@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Fixed
+- Add instrumented classes (sources + tests) to the tests classpath [#1332](../../issues/1332)
+
 ## [1.13.1] - 2023-03-02
 
 ### Added
