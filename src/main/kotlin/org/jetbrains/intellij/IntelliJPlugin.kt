@@ -1141,6 +1141,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(RUN_IDE_TASK_NAME)
         val prepareTestingSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_TESTING_SANDBOX_TASK_NAME)
         val instrumentedCodeTaskProviders = project.tasks.withType<InstrumentCodeTask>()
+        val instrumentedCodeOutputsProvider = project.provider {
+            project.files(instrumentedCodeTaskProviders.map { it.outputDir.asFile })
+        }
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
@@ -1214,14 +1217,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             doFirst {
                 jvmArgs = getIdeaJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
-                classpath = project.files(
-                    instrumentedCodeTaskProviders,
-                    sourceSetsOutputs,
-                    ideaDependencyLibrariesProvider,
-                    ideaConfigurationFiles,
-                    ideaPluginsConfigurationFiles,
-                    ideaClasspathFiles,
-                ) + classpath
+                classpath =
+                    instrumentedCodeOutputsProvider.get().filter { it.exists() } +
+                    sourceSetsOutputs.get().filter { it.exists() } +
+                    ideaDependencyLibrariesProvider.get() +
+                    ideaConfigurationFiles.get() +
+                    ideaPluginsConfigurationFiles.get() +
+                    ideaClasspathFiles.get() +
+                    classpath
 
                 systemProperties(
                     getIdeaSystemProperties(
