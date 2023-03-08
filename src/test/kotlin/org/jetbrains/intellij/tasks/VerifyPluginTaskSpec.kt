@@ -78,7 +78,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Description is too short", it.output)
+            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
         }
     }
 
@@ -105,7 +105,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Description is too short", it.output)
+            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
         }
     }
 
@@ -183,7 +183,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Description is too short", it.output)
+            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
         }
     }
 

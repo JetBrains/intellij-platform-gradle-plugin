@@ -145,7 +145,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
         val resolvedVersion = DownloadRobotServerPluginTask.resolveLatestVersion()
         assertTrue(
             collectPaths(File(buildDirectory, "robotServerPlugin"))
-                .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-$resolvedVersion.jar"))
+                .containsAll(setOf("/robot-server-plugin/lib/instrumented-robot-server-plugin-$resolvedVersion.jar"))
         )
     }
 }
