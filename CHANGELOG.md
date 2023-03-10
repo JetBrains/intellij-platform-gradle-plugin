@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.13.2] - 2023-03-10
+
 ### Fixed
 - Add instrumented classes (sources + tests) to the tests classpath [#1332](../../issues/1332)
 
@@ -678,7 +680,8 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.1...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.2...HEAD
+[1.13.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.1...v1.13.2
 [1.13.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.0...v1.13.1
 [1.13.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.12.0...v1.13.0
 [1.12.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.11.0...v1.12.0
