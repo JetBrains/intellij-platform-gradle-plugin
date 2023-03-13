@@ -31,6 +31,7 @@ import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
 import org.gradle.process.JavaForkOptions
+import org.gradle.util.GradleVersion
 import org.jdom2.Document
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
@@ -357,7 +358,7 @@ internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnecti
 }
 
 internal fun Project.checkGradleVersion() {
-    if (Version.parse(gradle.gradleVersion) < Version.parse(MINIMAL_SUPPORTED_GRADLE_VERSION)) {
+    if (GradleVersion.current() < GradleVersion.version(MINIMAL_SUPPORTED_GRADLE_VERSION)) {
         throw PluginInstantiationException("$PLUGIN_NAME requires Gradle $MINIMAL_SUPPORTED_GRADLE_VERSION and higher")
     }
 }
