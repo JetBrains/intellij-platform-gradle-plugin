@@ -3,7 +3,8 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-fun properties(key: String) = project.findProperty(key)?.toString()
+fun properties(key: String) = providers.gradleProperty(key)
+fun environment(key: String) = providers.environmentVariable(key)
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
 plugins {
@@ -18,12 +19,12 @@ plugins {
 //    id("org.barfuin.gradle.taskinfo") version "2.0.0" // TODO: use whenever it supports Gradle 7.6
 }
 
-version = when (properties("snapshot")?.toBoolean() ?: false) {
-    true -> "${properties("snapshotVersion")}-SNAPSHOT"
+version = when (properties("snapshot").get().toBoolean()) {
+    true -> properties("snapshotVersion").map { "$it-SNAPSHOT"}
     false -> properties("version")
-}.orEmpty()
-group = properties("group")!!
-description = properties("description")!!
+}.get()
+group = properties("group").get()
+description = properties("description").get()
 
 repositories {
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
@@ -73,11 +74,11 @@ gradlePlugin {
     vcsUrl.set(properties("vcsUrl"))
 
     plugins.create("intellijPlugin") {
-        id = properties("pluginId")
-        displayName = properties("pluginDisplayName")
-        implementationClass = properties("pluginImplementationClass")
+        id = properties("pluginId").get()
+        displayName = properties("pluginDisplayName").get()
+        implementationClass = properties("pluginImplementationClass").get()
         description = project.description
-        tags.set(properties("tags")?.split(','))
+        tags.set(properties("tags").map { it.split(',') })
     }
 }
 
@@ -91,7 +92,7 @@ tasks {
     }
 
     wrapper {
-        gradleVersion = properties("gradleVersion")
+        gradleVersion = properties("gradleVersion").get()
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
     }
 
@@ -100,18 +101,18 @@ tasks {
     }
 
     test {
-        val testGradleHomePath = properties("testGradleUserHome") ?: "$buildDir/testGradleHome"
+        val testGradleHomePath = properties("testGradleUserHome").getOrElse("$buildDir/testGradleHome")
         doFirst {
             File(testGradleHomePath).mkdir()
         }
         systemProperties["test.gradle.home"] = testGradleHomePath
-        systemProperties["test.kotlin.version"] = properties("kotlinVersion")
-        systemProperties["test.gradle.default"] = properties("gradleVersion")
-        systemProperties["test.gradle.version"] = properties("testGradleVersion")
-        systemProperties["test.gradle.arguments"] = properties("testGradleArguments")
-        systemProperties["test.intellij.version"] = properties("testIntelliJVersion")
-        systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion")
-        systemProperties["plugins.repository"] = properties("pluginsRepository")
+        systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
+        systemProperties["test.gradle.default"] = properties("gradleVersion").get()
+        systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
+        systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
+        systemProperties["test.intellij.version"] = properties("testIntelliJVersion").get()
+        systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
+        systemProperties["plugins.repository"] = properties("pluginsRepository").get()
         outputs.dir(testGradleHomePath)
 
 // Verbose tests output used for debugging tasks:
@@ -153,17 +154,17 @@ publishing {
     repositories {
         maven {
             name = "snapshot"
-            url = uri(properties("snapshotUrl")!!)
+            url = uri(properties("snapshotUrl").get())
             credentials {
-                username = properties("ossrhUsername")
-                password = properties("ossrhPassword")
+                username = properties("ossrhUsername").get()
+                password = properties("ossrhPassword").get()
             }
         }
     }
     publications {
         create<MavenPublication>("snapshot") {
-            groupId = properties("group")
-            artifactId = properties("artifactId")
+            groupId = properties("group").get()
+            artifactId = properties("artifactId").get()
             version = version.toString()
 
             from(components["java"])
@@ -207,6 +208,6 @@ publishing {
 
 changelog {
     unreleasedTerm.set("next")
-    groups.set(emptyList())
+    groups.empty()
     repositoryUrl.set("https://github.com/JetBrains/gradle-intellij-plugin")
 }
