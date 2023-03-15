@@ -1224,25 +1224,18 @@ abstract class IntelliJPlugin : Plugin<Project> {
             doFirst {
                 jvmArgs = getIdeaJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
                 classpath =
-                    instrumentedCodeOutputsProvider.get().filter { it.exists() } +
-                    instrumentedTestCodeOutputsProvider.get().filter { it.exists() } +
-                    sourceSetsOutputs.get().filter { it.exists() } +
+//                    instrumentedCodeOutputsProvider.get().filter { it.exists() } +
+//                    instrumentedTestCodeOutputsProvider.get().filter { it.exists() } +
+//                    sourceSetsOutputs.get().filter { it.exists() } +
                     classpath +
                     ideaDependencyLibrariesProvider.get() +
                     ideaConfigurationFiles.get() +
                     ideaPluginsConfigurationFiles.get() +
                     ideaClasspathFiles.get()
 
-                if (instrumentCodeProvider.get()) {
-                    sourceSets.forEach {
-                        (it.output.classesDirs as ConfigurableFileCollection).setFrom(
-                            when (it.name) {
-                                "test" -> instrumentedTestCodeOutputsProvider.get()
-                                else -> instrumentedCodeOutputsProvider.get()
-                            }
-                        )
-                    }
-                }
+                testClassesDirs =
+                    instrumentedTestCodeOutputsProvider.get().filter { it.exists() } +
+                    testClassesDirs
 
                 systemProperties(
                     getIdeaSystemProperties(
