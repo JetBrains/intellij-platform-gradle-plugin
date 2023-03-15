@@ -56,6 +56,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURA
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
@@ -1140,10 +1141,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring tests tasks")
         val runIdeTaskProvider = project.tasks.named<RunIdeTask>(RUN_IDE_TASK_NAME)
         val prepareTestingSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_TESTING_SANDBOX_TASK_NAME)
-        val instrumentedCodeTaskProviders = project.tasks.withType<InstrumentCodeTask>()
+        val instrumentedCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
+        val instrumentedTestCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_TEST_CODE_TASK_NAME)
         val instrumentedCodeOutputsProvider = project.provider {
-            project.files(instrumentedCodeTaskProviders.map { it.outputDir.asFile })
+            project.files(instrumentedCodeTaskProvider.map { it.outputDir.asFile })
         }
+        val instrumentedTestCodeOutputsProvider = project.provider {
+            project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile })
+        }
+        val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
@@ -1219,12 +1225,24 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 jvmArgs = getIdeaJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
                 classpath =
                     instrumentedCodeOutputsProvider.get().filter { it.exists() } +
+                    instrumentedTestCodeOutputsProvider.get().filter { it.exists() } +
                     sourceSetsOutputs.get().filter { it.exists() } +
+                    classpath +
                     ideaDependencyLibrariesProvider.get() +
                     ideaConfigurationFiles.get() +
                     ideaPluginsConfigurationFiles.get() +
-                    ideaClasspathFiles.get() +
-                    classpath
+                    ideaClasspathFiles.get()
+
+                if (instrumentCodeProvider.get()) {
+                    sourceSets.forEach {
+                        (it.output.classesDirs as ConfigurableFileCollection).setFrom(
+                            when (it.name) {
+                                "test" -> instrumentedTestCodeOutputsProvider.get()
+                                else -> instrumentedCodeOutputsProvider.get()
+                            }
+                        )
+                    }
+                }
 
                 systemProperties(
                     getIdeaSystemProperties(
