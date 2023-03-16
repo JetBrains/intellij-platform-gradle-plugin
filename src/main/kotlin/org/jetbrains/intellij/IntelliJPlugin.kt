@@ -1144,12 +1144,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val instrumentedCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
         val instrumentedTestCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_TEST_CODE_TASK_NAME)
         val instrumentedCodeOutputsProvider = project.provider {
-            project.files(instrumentedCodeTaskProvider.map { it.outputDir.asFile })
+            project.files(instrumentedCodeTaskProvider.map { it.outputDir.asFile }).filter { it.exists() }
         }
         val instrumentedTestCodeOutputsProvider = project.provider {
-            project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile })
+            project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile }).filter { it.exists() }
         }
-        val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
@@ -1224,9 +1223,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
             doFirst {
                 jvmArgs = getIdeaJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
                 classpath =
-//                    instrumentedCodeOutputsProvider.get().filter { it.exists() } +
-//                    instrumentedTestCodeOutputsProvider.get().filter { it.exists() } +
-//                    sourceSetsOutputs.get().filter { it.exists() } +
+                    instrumentedCodeOutputsProvider.get() +
+                    instrumentedTestCodeOutputsProvider.get() +
                     classpath +
                     ideaDependencyLibrariesProvider.get() +
                     ideaConfigurationFiles.get() +
