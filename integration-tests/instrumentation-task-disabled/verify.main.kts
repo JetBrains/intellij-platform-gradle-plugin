@@ -5,7 +5,9 @@
 import java.nio.file.Files
 
 __FILE__.init {
-    runGradleTask("clean", "jar", projectProperties = mapOf("instrumentCode" to false)).let { logs ->
+    val defaultArgs = listOf("--configuration-cache")
+
+    runGradleTask("clean", "jar", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)).let { logs ->
         logs containsText "> Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 
         buildDirectory containsFile "libs/instrumentation-task-disabled-1.0.0.jar"
@@ -48,7 +50,7 @@ __FILE__.init {
         }
     }
 
-    runGradleTask("jar", projectProperties = mapOf("instrumentCode" to true)).let { logs ->
+    runGradleTask("jar", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)).let { logs ->
         logs containsText "Task ':instrumentation-task-disabled:instrumentCode' is not up-to-date"
 
         buildDirectory containsFile "libs/instrumentation-task-disabled-1.0.0.jar"
@@ -84,7 +86,7 @@ __FILE__.init {
         }
     }
 
-    runGradleTask("clean", "jar", projectProperties = mapOf("instrumentCode" to false)).let { logs ->
+    runGradleTask("clean", "jar", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)).let { logs ->
         logs containsText "Task :instrumentation-task-disabled:instrumentCode SKIPPED"
 
         buildDirectory.resolve("instrumented").run {
@@ -92,10 +94,22 @@ __FILE__.init {
         }
     }
 
-    runGradleTask("jar", projectProperties = mapOf("instrumentCode" to true)).let { logs ->
+    runGradleTask("jar", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)).let { logs ->
         buildDirectory.resolve("instrumented").run {
             assert(Files.isDirectory(this))
             assert(Files.list(this).toArray().isNotEmpty())
         }
+    }
+
+    runGradleTask("clean", "test", args = defaultArgs).let { logs ->
+        logs containsText """
+            InstrumentationTests > fooTest STANDARD_OUT
+                null
+        """.trimIndent()
+
+        logs containsText """
+            InstrumentationTests > test STANDARD_OUT
+                null
+        """.trimIndent()
     }
 }
