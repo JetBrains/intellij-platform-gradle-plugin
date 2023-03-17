@@ -8,7 +8,7 @@ __FILE__.init {
     val defaultArgs = listOf("--configuration-cache")
 
     runGradleTask("clean", "buildPlugin", args = defaultArgs).let { logs ->
-        logs containsText "[ant:instrumentIdeaExtensions] Added @NotNull assertions to 3 files"
+        logs containsText "[ant:instrumentIdeaExtensions] Added @NotNull assertions to 4 files"
     }
 
     runGradleTask("jar", args = defaultArgs).let { logs ->
@@ -79,5 +79,13 @@ __FILE__.init {
         logs containsText "> Task :instrumentation-task:compileKotlin UP-TO-DATE"
         logs containsText "> Task :instrumentation-task:compileJava UP-TO-DATE"
         logs containsText "Form.form has changed"
+    }
+
+    runGradleTask("clean", "test", args = defaultArgs).let { logs ->
+        logs containsText "InstrumentationTests > fooTest FAILED"
+        logs containsText "Argument for @NotNull parameter 's' of TestFoo.testFoo must not be null"
+
+        logs containsText "InstrumentationTests > test FAILED"
+        logs containsText "Argument for @NotNull parameter 's' of Foo.foo must not be null"
     }
 }
