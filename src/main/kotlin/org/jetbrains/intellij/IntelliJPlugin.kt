@@ -1144,10 +1144,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val instrumentedCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
         val instrumentedTestCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_TEST_CODE_TASK_NAME)
         val instrumentedCodeOutputsProvider = project.provider {
-            project.files(instrumentedCodeTaskProvider.map { it.outputDir.asFile }).filter { it.exists() }
+            project.files(instrumentedCodeTaskProvider.map { it.outputDir.asFile })
         }
         val instrumentedTestCodeOutputsProvider = project.provider {
-            project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile }).filter { it.exists() }
+            project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile })
         }
 
         val testTasks = project.tasks.withType<Test>()
@@ -1174,13 +1174,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
         val pluginsDirectoryProvider = prepareTestingSandboxTaskProvider.map { prepareSandboxTask ->
             prepareSandboxTask.destinationDir.apply { mkdirs() }
-        }
-
-        val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
-        val sourceSetsOutputs = project.provider {
-            project.files(sourceSets.map {
-                it.output.run { classesDirs + generatedSourcesDirs + resourcesDir }
-            })
         }
 
         val ideaConfigurationFiles = project.provider {
@@ -1220,20 +1213,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
             dependsOn(PREPARE_TESTING_SANDBOX_TASK_NAME)
             finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
-            doFirst {
-                jvmArgs = getIdeaJvmArgs((this as Test), jvmArgs, ideDirProvider.get())
-                classpath =
-                    instrumentedCodeOutputsProvider.get() +
-                    instrumentedTestCodeOutputsProvider.get() +
-                    classpath +
-                    ideaDependencyLibrariesProvider.get() +
-                    ideaConfigurationFiles.get() +
-                    ideaPluginsConfigurationFiles.get() +
-                    ideaClasspathFiles.get()
+            jvmArgs = getIdeaJvmArgs(this, jvmArgs, ideDirProvider.get())
+            classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
+            testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
 
-                testClassesDirs =
-                    instrumentedTestCodeOutputsProvider.get().filter { it.exists() } +
-                    testClassesDirs
+            doFirst {
+                classpath += ideaDependencyLibrariesProvider.get() +
+                        ideaConfigurationFiles.get() +
+                        ideaPluginsConfigurationFiles.get() +
+                        ideaClasspathFiles.get()
 
                 systemProperties(
                     getIdeaSystemProperties(
