@@ -30,9 +30,10 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-#          - "7.3"
+          - "7.3"
           - "7.6.1"
           - "8.0.2"
+          - "8.1-rc-1"
         os:
           - windows-latest
           - ubuntu-latest
