@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- Run tests using JBR [#473](../../issues/473)
+
 ### Fixed
 - Add instrumented classes (sources + tests) to the tests classpath before tests execution [#1332](../../issues/1332)
 - Fixed `NSDictionary` helper methods to return `null` instead of `"null"` — causing "Resource not found: /idea/nullApplicationInfo.xml" [#1348](../../issues/1348)

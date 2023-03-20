@@ -13,9 +13,8 @@ import org.jetbrains.intellij.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.test.createLocalIdeIfNotExists
 import org.junit.Assume.assumeFalse
-import java.io.*
+import java.io.File
 import java.nio.file.Path
-import java.util.*
 import kotlin.test.*
 
 @Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
@@ -695,9 +694,12 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     private fun parseCommand(output: String) = output.lines()
-        .find { it.startsWith("Starting process ") && !it.contains("vm_stat") }
+        .find { it.startsWith("Starting process ") && !it.contains("vm_stat") && !it.contains("JavaProbe") }
         .let { assertNotNull(it) }
         .substringAfter("Command: ")
+        .also {
+            println("Command: $it")
+        }
         .let(::ProcessProperties)
 
     class ProcessProperties(command: String) {

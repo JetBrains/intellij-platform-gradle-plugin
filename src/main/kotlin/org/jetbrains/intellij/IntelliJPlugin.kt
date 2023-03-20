@@ -1158,6 +1158,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val ideDirProvider = runIdeTaskProvider.flatMap { runIdeTask ->
             runIdeTask.ideDir.map { it.toPath() }
         }
+        val jbrArchProvider = runIdeTaskProvider.flatMap { runIdeTask ->
+            runIdeTask.jbrArch
+        }
+        val jbrVersionProvider = runIdeTaskProvider.flatMap { runIdeTask ->
+            runIdeTask.jbrVersion
+        }
+        val jbrVariantProvider = runIdeTaskProvider.flatMap { runIdeTask ->
+            runIdeTask.jbrVariant
+        }
 
         val ideaDependencyLibrariesProvider = ideaDependencyProvider
             .map { it.classes }
@@ -1212,6 +1221,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             dependsOn(PREPARE_TESTING_SANDBOX_TASK_NAME)
             finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+
+            jbrResolver.resolveRuntime(
+                jbrVersion = jbrVersionProvider.orNull,
+                jbrVariant = jbrVariantProvider.orNull,
+                jbrArch = jbrArchProvider.orNull,
+                ideDir = ideDirProvider.map { it.toFile() }.orNull,
+            )?.let {
+                executable = it.toString()
+            }
 
             jvmArgs = getIdeaJvmArgs(this, jvmArgs, ideDirProvider.get())
             classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
