@@ -340,9 +340,9 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
     return this
 }
 
-fun NSDictionary.getDictionary(key: String) = this[key] as NSDictionary
+fun NSDictionary.getDictionary(key: String) = this[key] as? NSDictionary
 
-fun NSDictionary.getValue(key: String) = this[key].toString()
+fun NSDictionary.getValue(key: String) = this[key]?.toString()
 
 internal val FileSystemLocation.asPath
     get() = asFile.toPath().toAbsolutePath()
