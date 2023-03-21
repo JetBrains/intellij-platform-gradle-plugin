@@ -707,7 +707,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             jreRepository.convention(extension.jreRepository)
             offline.convention(project.gradle.startParameter.isOffline)
             resolvedRuntimeDir.convention(project.provider {
-                resolveRuntimeDir(jbrResolver)
+                resolveRuntimeDir(jbrResolver).toFile()
             })
 
             dependsOn(BUILD_PLUGIN_TASK_NAME)

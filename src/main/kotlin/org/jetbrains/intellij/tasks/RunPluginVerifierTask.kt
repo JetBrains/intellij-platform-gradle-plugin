@@ -205,7 +205,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @return path to the Java Runtime directory
      */
     @get:Internal
-    abstract val resolvedRuntimeDir: Property<String>
+    abstract val resolvedRuntimeDir: Property<File>
 
     /**
      * The list of classes prefixes from the external libraries.
@@ -256,6 +256,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @TaskAction
     fun runPluginVerifier() {
+        validateRuntimeDir(resolvedRuntimeDir.get())
+
         val file = distributionFile.orNull?.asPath
         if (file == null || !file.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
@@ -386,29 +388,25 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @return path to the Java Runtime directory
      */
     internal fun resolveRuntimeDir(jbrResolver: JbrResolver) =
-        jbrResolver
-            .resolveRuntimeDir(
-                runtimeDir = runtimeDir.orNull,
-                jbrVersion = jbrVersion.orNull,
-                jbrVariant = jbrVariant.orNull,
-                jbrArch = jbrArch.orNull,
-                ideDir = ideDir.orNull,
-            ) {
-                validateRuntimeDir(it.toString())
-            }?.toString()
-            ?: throw InvalidUserDataException(
-                when {
-                    requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
-                    else -> "Java Runtime directory couldn't be resolved"
-                }
-            )
+        jbrResolver.resolveRuntimeDir(
+            runtimeDir = runtimeDir.orNull,
+            jbrVersion = jbrVersion.orNull,
+            jbrVariant = jbrVariant.orNull,
+            jbrArch = jbrArch.orNull,
+            ideDir = ideDir.orNull,
+        ) ?: throw InvalidUserDataException(
+            when {
+                requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
+                else -> "Java Runtime directory couldn't be resolved"
+            }
+        )
 
     /**
      * Verifies if the provided Java Runtime directory points to Java 11 when using Plugin Verifier 1.260+.
      *
      * @return Java Runtime directory points to Java 8 for Plugin Verifier versions < 1.260, or Java 11 for 1.260+.
      */
-    private fun validateRuntimeDir(runtimeDirPath: String) = ByteArrayOutputStream().use { os ->
+    private fun validateRuntimeDir(runtimeDirPath: File) = ByteArrayOutputStream().use { os ->
         debug(context, "Plugin Verifier JRE verification: $runtimeDirPath")
 
         if (!requiresJava11()) {
@@ -416,7 +414,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         execOperations.exec {
-            executable = Path.of(runtimeDirPath).resolve("bin/java").toAbsolutePath().toString()
+            executable = runtimeDirPath.resolve("bin/java").absolutePath
             args = listOf("-version")
             errorOutput = os
         }
@@ -424,7 +422,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
         val result = version >= Version(11)
 
         result.ifFalse {
-            debug(context, "Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDirPath")
+            throw GradleException("Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDirPath")
         }
     }
 
@@ -441,7 +439,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private fun getOptions(): List<String> {
         val args = mutableListOf(
             "-verification-reports-dir", verificationReportsDir.get(),
-            "-runtime-dir", resolvedRuntimeDir.get(),
+            "-runtime-dir", resolvedRuntimeDir.get().absolutePath,
         )
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {
