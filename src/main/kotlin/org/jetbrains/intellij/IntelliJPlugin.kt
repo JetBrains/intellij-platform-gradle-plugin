@@ -518,12 +518,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring robot-server download Task")
 
         project.tasks.register<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME) {
+            val taskContext = logCategory()
+
             version.convention(VERSION_LATEST)
             outputDir.convention(project.layout.buildDirectory.dir("robotServerPlugin"))
             pluginArchive.convention(project.provider {
                 val resolvedVersion = resolveRobotServerPluginVersion(version.orNull)
                 val (group, name) = getDependency(resolvedVersion).split(':')
-                dependenciesDownloader.downloadFromRepository(logCategory(), {
+                dependenciesDownloader.downloadFromRepository(taskContext, {
                     create(
                         group = group,
                         name = name,
@@ -657,6 +659,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val userHomeProvider = project.providers.systemProperty("user.home")
 
         project.tasks.register<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME) {
+            val taskContext = logCategory()
+
             failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
             verifierVersion.convention(VERSION_LATEST)
             distributionFile.convention(resolveBuildTaskOutput(project))
@@ -688,7 +692,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
                 debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
 
-                dependenciesDownloader.downloadFromRepository(logCategory(), {
+                dependenciesDownloader.downloadFromRepository(taskContext, {
                     create(
                         group = "org.jetbrains.intellij.plugins",
                         name = "verifier-cli",
@@ -869,9 +873,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         ideaDependencyProvider: Provider<IdeaDependency>,
         prepareSandBoxTaskName: String,
     ) {
-        val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
-
         val taskContext = logCategory()
+        val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
         ideDir.convention(ideaDependencyProvider.map {
@@ -956,6 +959,8 @@ abstract class IntelliJPlugin : Plugin<Project> {
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
             val instrumentTaskProvider = project.tasks.register<InstrumentCodeTask>(name) {
+                val taskContext = logCategory()
+
                 sourceDirs.from(project.provider {
                     sourceSet.allJava.srcDirs
                 })
@@ -1017,7 +1022,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 compilerClassPathFromMaven.convention(compilerVersion.map { compilerVersion ->
                     if (compilerVersion == DEFAULT_IDEA_VERSION || Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
                         val downloadCompiler = { version: String ->
-                            dependenciesDownloader.downloadFromMultipleRepositories(logCategory(), {
+                            dependenciesDownloader.downloadFromMultipleRepositories(taskContext, {
                                 create(
                                     group = "com.jetbrains.intellij.java",
                                     name = "java-compiler-ant-tasks",
@@ -1037,7 +1042,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 runCatching { downloadCompiler(compilerVersion) }.fold(
                                     onSuccess = { it },
                                     onFailure = {
-                                        warn(logCategory(), "Cannot resolve java-compiler-ant-tasks in version: $compilerVersion")
+                                        warn(taskContext, "Cannot resolve java-compiler-ant-tasks in version: $compilerVersion")
                                         null
                                     },
                                 )
@@ -1052,11 +1057,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                     val nonEapVersion = compilerVersion.replace(RELEASE_SUFFIX_EAP, "")
                                     runCatching { downloadCompiler(nonEapVersion) }.fold(
                                         onSuccess = {
-                                            warn(logCategory(), "Resolved non-EAP java-compiler-ant-tasks version: $nonEapVersion")
+                                            warn(taskContext, "Resolved non-EAP java-compiler-ant-tasks version: $nonEapVersion")
                                             it
                                         },
                                         onFailure = {
-                                            warn(logCategory(), "Cannot resolve java-compiler-ant-tasks in version: $nonEapVersion")
+                                            warn(taskContext, "Cannot resolve java-compiler-ant-tasks in version: $nonEapVersion")
                                             null
                                         },
                                     )
@@ -1077,16 +1082,16 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 }
 
                                 if (closestCompilerVersion == null) {
-                                    warn(logCategory(), "Cannot resolve java-compiler-ant-tasks Maven metadata")
+                                    warn(taskContext, "Cannot resolve java-compiler-ant-tasks Maven metadata")
                                     null
                                 } else {
                                     runCatching { downloadCompiler(closestCompilerVersion) }.fold(
                                         onSuccess = {
-                                            warn(logCategory(), "Resolved closest lower java-compiler-ant-tasks version: $closestCompilerVersion")
+                                            warn(taskContext, "Resolved closest lower java-compiler-ant-tasks version: $closestCompilerVersion")
                                             it
                                         },
                                         onFailure = {
-                                            warn(logCategory(), "Cannot resolve java-compiler-ant-tasks in version: $closestCompilerVersion")
+                                            warn(taskContext, "Cannot resolve java-compiler-ant-tasks in version: $closestCompilerVersion")
                                             null
                                         },
                                     )
@@ -1095,7 +1100,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         ).asSequence().mapNotNull { it() }.firstOrNull().orEmpty()
                     } else {
                         warn(
-                            logCategory(),
+                            taskContext,
                             "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. Use higher 'intellij.version' or specify the 'compilerVersion' property manually.",
                         )
                         emptyList()
@@ -1311,15 +1316,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
     private fun configureDownloadZipSignerTask(project: Project) {
         project.tasks.register<DownloadZipSignerTask>(DOWNLOAD_ZIP_SIGNER_TASK_NAME) {
-            val context = logCategory()
+            val taskContext = logCategory()
 
             version.convention(VERSION_LATEST)
             cliPath.convention(version.map {
                 val resolvedCliVersion = resolveCliVersion(version.orNull)
                 val url = resolveCliUrl(resolvedCliVersion)
-                debug(context, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
+                debug(taskContext, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
 
-                dependenciesDownloader.downloadFromRepository(context, {
+                dependenciesDownloader.downloadFromRepository(taskContext, {
                     create(
                         group = "org.jetbrains",
                         name = "marketplace-zip-signer-cli",
@@ -1405,13 +1410,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
 
         val listProductsReleasesTaskProvider = project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
+            val taskContext = logCategory()
+
             productsReleasesUpdateFiles
                 .from(updatePaths)
                 .from(downloadIdeaProductReleasesXml.map {
                     it.outputs.files.asFileTree
                 })
             androidStudioUpdatePath.convention(project.provider {
-                dependenciesDownloader.getAndroidStudioReleases(logCategory()).toString()
+                dependenciesDownloader.getAndroidStudioReleases(taskContext).toString()
             })
             outputFile.convention(
                 project.layout.buildDirectory.file("$LIST_PRODUCTS_RELEASES_TASK_NAME.txt")
