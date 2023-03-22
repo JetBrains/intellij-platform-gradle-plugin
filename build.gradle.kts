@@ -40,7 +40,7 @@ dependencies {
     implementation("org.jetbrains.intellij.plugins:structure-base:3.250") {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.250") {
+    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.251") {
         exclude("org.jetbrains.kotlin")
     }
     implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.30") {
