@@ -7,10 +7,21 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
+import org.jetbrains.intellij.BuildFeature
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 
+/**
+ * Builds an index of UI components (searchable options) for the plugin.
+ * This task runs a headless IDE instance to collect all the available options provided by the plugin's [Settings](https://plugins.jetbrains.com/docs/intellij/settings.html).
+ * Note, that this is a [RunIdeBase]-based task with predefined arguments and all properties of the [RunIdeBase] task are also applied to [BuildSearchableOptionsTask] tasks.
+ *
+ * If your plugin doesn't implement custom settings, it is recommended to disable it.
+ *
+ * @see [RunIdeBase]
+ * @see [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING]
+ */
 @CacheableTask
 abstract class BuildSearchableOptionsTask : RunIdeBase() {
 
@@ -22,7 +33,7 @@ abstract class BuildSearchableOptionsTask : RunIdeBase() {
 
     /**
      * Emit warning if the task is executed by a paid plugin.
-     * Can be disabled with [org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING].
+     * Can be disabled with [BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING].
      */
     @get:Internal
     abstract val showPaidPluginWarning: Property<Boolean>

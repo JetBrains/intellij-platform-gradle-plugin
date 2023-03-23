@@ -20,6 +20,16 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 import org.jetbrains.intellij.utils.ToolboxEnterprisePluginRepositoryService
 
+/**
+ * Publishes plugin to the remote [JetBrains Marketplace](https://plugins.jetbrains.com) repository.
+ *
+ * The following attributes are a part of the Publishing DSL `publishPlugin { ... }` in which allows Gradle to upload plugin to [JetBrains Marketplace](https://plugins.jetbrains.com).
+ * Note that you need to [upload the plugin](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#uploading-a-plugin-to-jetbrains-marketplace) to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
+ *
+ * See the instruction on [how to generate authentication token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html).
+ *
+ * See [Publishing Plugin With Gradle](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#publishing-plugin-with-gradle) tutorial for step-by-step instructions.
+ */
 @UntrackedTask(because = "Output is stored remotely")
 abstract class PublishPluginTask : DefaultTask() {
 

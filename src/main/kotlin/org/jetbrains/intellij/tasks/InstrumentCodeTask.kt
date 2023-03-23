@@ -28,6 +28,9 @@ import java.nio.file.StandardCopyOption
 @Deprecated("Use 'InstrumentCodeTask' instead", ReplaceWith("InstrumentCodeTask"), DeprecationLevel.ERROR)
 typealias IntelliJInstrumentCodeTask = InstrumentCodeTask
 
+/**
+ * The following attributes help you to tune instrumenting behaviour in `instrumentCode { ... }` block.
+ */
 @CacheableTask
 abstract class InstrumentCodeTask : DefaultTask() {
 

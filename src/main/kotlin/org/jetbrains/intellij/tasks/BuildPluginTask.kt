@@ -2,20 +2,18 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.bundling.Zip
 import org.jetbrains.intellij.IntelliJPluginConstants
 
 /**
- * Creates a JAR file with instrumented classes.
+ * Assembles a plugin and prepares ZIP archive for deployment.
  *
- * @see [InstrumentCodeTask]
+ * @see [Zip]
  */
-@CacheableTask
-abstract class InstrumentedJarTask : Jar() {
+abstract class BuildPluginTask : Zip() {
 
     init {
         group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
-        description = "Assembles an instrumented JAR archive."
+        description = "Assembles plugin and prepares ZIP archive for deployment."
     }
 }

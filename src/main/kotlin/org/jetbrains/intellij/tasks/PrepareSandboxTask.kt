@@ -23,6 +23,9 @@ import org.jetbrains.intellij.dependency.PluginProjectDependency
 import java.io.File
 import java.nio.file.Path
 
+/**
+ * Prepares sandbox directory with installed plugin and its dependencies.
+ */
 @DisableCachingByDefault(because = "Setting up configuration on local machine")
 abstract class PrepareSandboxTask : Sync() {
 

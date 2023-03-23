@@ -11,9 +11,17 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.asPath
+import org.jetbrains.intellij.error
+import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.warn
 
+/**
+ * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.
+ *
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
+ */
 @CacheableTask
 abstract class VerifyPluginTask : DefaultTask() {
 

@@ -21,6 +21,9 @@ import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 
+/**
+ * Base class for tasks that use Marketplace ZIP Signer CLI.
+ */
 @CacheableTask
 abstract class ZipSigningToolBase(
     private val objectFactory: ObjectFactory,

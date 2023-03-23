@@ -7,6 +7,11 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 
+/**
+ * Prints the output produced by the [ListBundledPluginsTask] task.
+ *
+ * @see [ListBundledPluginsTask]
+ */
 @UntrackedTask(because = "Prints the output produced by the listBundledPlugins task")
 abstract class PrintBundledPluginsTask : DefaultTask() {
 

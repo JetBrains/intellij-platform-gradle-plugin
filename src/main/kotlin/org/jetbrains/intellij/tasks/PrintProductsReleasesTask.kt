@@ -7,6 +7,11 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 
+/**
+ * Prints the output produced by the [ListProductsReleasesTask] task.
+ *
+ * @see [ListProductsReleasesTask]
+ */
 @UntrackedTask(because = "Prints the output produced by the listProductsReleases task")
 abstract class PrintProductsReleasesTask : DefaultTask() {
 

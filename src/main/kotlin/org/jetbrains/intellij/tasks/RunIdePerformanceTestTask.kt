@@ -8,6 +8,7 @@ import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import org.gradle.api.Incubating
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
@@ -23,6 +24,18 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 
+/**
+ * Runs performance tests on the IDE with the developed plugin installed.
+ *
+ * The [RunIdePerformanceTestTask] task extends the [RunIdeBase] task, so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [RunIdePerformanceTestTask] as well.
+ * See [RunIdeTask] task for more details.
+ *
+ * Currently, the task is under adaptation; more documentation will be added in the future.
+ *
+ * @see [RunIdeTask]
+ * @see [RunIdeBase]
+ * @see [JavaExec]
+ */
 @Incubating
 @UntrackedTask(because = "Should always run IDE for performance tests")
 abstract class RunIdePerformanceTestTask : RunIdeBase() {

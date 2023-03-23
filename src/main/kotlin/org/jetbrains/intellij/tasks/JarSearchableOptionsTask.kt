@@ -15,6 +15,9 @@ import org.jetbrains.intellij.logCategory
 import org.jetbrains.intellij.warn
 import java.nio.file.Path
 
+/**
+ * Creates a JAR file with searchable options to be distributed with the plugin.
+ */
 @CacheableTask
 abstract class JarSearchableOptionsTask : Jar() {
 

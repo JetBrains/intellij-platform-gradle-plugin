@@ -14,6 +14,9 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.utils.LatestVersionResolver
 
+/**
+ * Initializes the Gradle IntelliJ Plugin and performs various checks, like if the plugin is up to date.
+ */
 @UntrackedTask(because = "Should always be run to initialize the plugin")
 abstract class InitializeIntelliJPluginTask : DefaultTask() {
 

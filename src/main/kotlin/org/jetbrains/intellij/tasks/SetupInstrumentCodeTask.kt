@@ -13,6 +13,9 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.asPath
 
+/**
+ * Prepares code instrumentation tasks.
+ */
 @DisableCachingByDefault(because = "Deletion cannot be cached")
 abstract class SetupInstrumentCodeTask : DefaultTask() {
 

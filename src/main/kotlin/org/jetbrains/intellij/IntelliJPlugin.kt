@@ -1283,10 +1283,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_TASK_NAME)
         val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
 
-        val buildPluginTaskProvider = project.tasks.register<Zip>(BUILD_PLUGIN_TASK_NAME) {
-            description = "Assembles plugin and prepares ZIP archive for deployment."
-            group = PLUGIN_GROUP_NAME
-
+        val buildPluginTaskProvider = project.tasks.register<BuildPluginTask>(BUILD_PLUGIN_TASK_NAME) {
             archiveBaseName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
                 prepareSandboxTask.pluginName
             })

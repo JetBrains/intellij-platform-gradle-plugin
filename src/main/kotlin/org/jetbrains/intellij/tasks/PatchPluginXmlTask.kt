@@ -13,10 +13,20 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jdom2.Document
 import org.jdom2.Element
-import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.asPath
+import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.transformXml
+import org.jetbrains.intellij.warn
 import java.io.File
 
+/**
+ * Patches `plugin.xml` files with values provided to the task.
+ *
+ * To maintain and generate an up-to-date changelog, try using [Gradle Changelog Plugin](https://github.com/JetBrains/gradle-changelog-plugin).
+ *
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
+ */
 @CacheableTask
 abstract class PatchPluginXmlTask : DefaultTask() {
 

@@ -13,6 +13,14 @@ import org.jetbrains.intellij.debug
 import org.jetbrains.intellij.logCategory
 import javax.inject.Inject
 
+/**
+ * Validates the signature of the plugin archive file using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
+ *
+ * For more details, see [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html) article.
+ *
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-signing.html">Plugin Signing</a>
+ * @see <a href="https://github.com/JetBrains/marketplace-zip-signer">Marketplace ZIP Signer</a>
+ */
 @CacheableTask
 abstract class VerifyPluginSignatureTask @Inject constructor(
     objectFactory: ObjectFactory,

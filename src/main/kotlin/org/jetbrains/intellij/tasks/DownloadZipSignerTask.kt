@@ -16,6 +16,9 @@ import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.nio.file.Path
 import kotlin.io.path.copyTo
 
+/**
+ * Resolves and downloads Marketplace ZIP Signer CLI tool used by the [SignPluginTask] task.
+ */
 @DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadZipSignerTask : DefaultTask() {
 

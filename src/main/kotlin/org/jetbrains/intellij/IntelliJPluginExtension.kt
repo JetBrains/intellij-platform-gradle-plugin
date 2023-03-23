@@ -18,7 +18,9 @@ import org.jetbrains.intellij.utils.DependenciesDownloader
 import javax.inject.Inject
 
 /**
- * Configuration options for the [IntelliJPlugin].
+ * After the Gradle IntelliJ Plugin is applied, the `intellij` extension can be used to configure the plugin and common settings of the provided tasks.
+ *
+ * It is mandatory to specify at least the [version] property.
  */
 abstract class IntelliJPluginExtension @Inject constructor(
     objectFactory: ObjectFactory,

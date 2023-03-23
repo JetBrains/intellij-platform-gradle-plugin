@@ -22,6 +22,9 @@ import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.streams.asSequence
 
+/**
+ * Base task for running an IDE with the current plugin in various modes.
+ */
 @UntrackedTask(because = "Runs an IDE which should happen every time this task is run.")
 abstract class RunIdeBase : JavaExec() {
 

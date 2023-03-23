@@ -22,6 +22,13 @@ import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.File
 import javax.inject.Inject
 
+/**
+ * Downloads `robot-server` plugin.
+ *
+ * The `robot-server` plugin is required for running the UI tests using the [RunIdeForUiTestTask] task.
+ *
+ * @see <a href="https://github.com/JetBrains/intellij-ui-test-robot">IntelliJ UI Test Robot</a>
+ */
 @DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,

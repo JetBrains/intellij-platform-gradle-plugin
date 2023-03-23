@@ -17,6 +17,13 @@ import org.jetbrains.intellij.dependency.BuiltinPluginsRegistry
 import org.jetbrains.intellij.logCategory
 import java.io.File
 
+/**
+ * Lists all IDs of plugins bundled within the currently targeted IDE.
+ *
+ * This can be used to determine Plugin ID for setting up [Plugin Dependencies](https://plugins.jetbrains.com/docs/intellij/plugin-dependencies.html).
+ *
+ * @see [PrintBundledPluginsTask]
+ */
 @Incubating
 @CacheableTask
 abstract class ListBundledPluginsTask : DefaultTask() {

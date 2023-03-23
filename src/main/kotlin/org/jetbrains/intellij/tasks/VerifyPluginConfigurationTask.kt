@@ -9,12 +9,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
@@ -25,6 +20,27 @@ import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
 
+/**
+ * Validates the plugin project configuration:
+ *
+ * - The [PatchPluginXmlTask.sinceBuild] property can't be lower than the major version of the currently used IntelliJ SDK set with the [IntelliJPluginExtension.version].
+ * - The [sourceCompatibility] property of the Java configuration can't be lower than the Java version used for assembling the IntelliJ SDK specified by the [IntelliJPluginExtension.version].
+ * - The [targetCompatibility] property of the Java configuration can't be higher than the Java version required for running IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
+ * - The [kotlinJvmTarget] property of the Kotlin configuration (if used) can't be higher than the Java version required for running IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
+ * - The [kotlinLanguageVersion] property of the Kotlin configuration (if used) can't be lower than the Kotlin bundled with IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
+ * - The [kotlinApiVersion] property of the Kotlin configuration (if used) can't be higher than the Kotlin bundled with IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
+ *
+ * For more details regarding the Java version used in the specific IntelliJ SDK, see [Build Number Ranges](https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html).
+ *
+ * The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform.
+ *
+ * Read more about controlling this behavior on [Kotlin Standard Library](https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library).
+ *
+ * An old default [RunPluginVerifierTask.downloadDir] path contains downloaded IDEs but another default is in use. Links to the [FAQ section](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#the-plugin-verifier-download-directory-is-set-to-but-downloaded-ides-were-also-found-in)
+ *
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
+ */
 @CacheableTask
 abstract class VerifyPluginConfigurationTask @Inject constructor(
     private val providers: ProviderFactory,

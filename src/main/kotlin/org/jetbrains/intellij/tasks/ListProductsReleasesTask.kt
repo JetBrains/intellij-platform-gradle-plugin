@@ -18,6 +18,20 @@ import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
 import java.nio.file.Path
 
+/**
+ * List all available IntelliJ-based IDE releases with their updates.
+ * The result list is used for testing the plugin with Plugin Verifier using the [RunPluginVerifierTask] task.
+ *
+ * Plugin Verifier requires a list of the IDEs that will be used for verifying your plugin build against.
+ * The availability of the releases may change in time, i.e., due to security issues in one version – which will be later removed and replaced with an updated IDE release.
+ *
+ * With the [ListProductsReleasesTask] task, it is possible to list the currently available IDEs matching given conditions, like platform types, since/until release versions.
+ * Such a list is fetched from the remote updates file: `https://www.jetbrains.com/updates/updates.xml`, parsed and filtered considering the specified [ListProductsReleasesTask.types], [ListProductsReleasesTask.sinceVersion], [ListProductsReleasesTask.untilVersion] (or [ListProductsReleasesTask.sinceBuild], [ListProductsReleasesTask.untilBuild]) properties.
+ *
+ * The result list is stored within the [outputFile], which is used as a source for the Plugin Verifier if the [RunPluginVerifierTask] task has no [RunPluginVerifierTask.ideVersions] property specified, the output of the [ListProductsReleasesTask] task is used.
+ *
+ * @see [PrintProductsReleasesTask]
+ */
 @CacheableTask
 abstract class ListProductsReleasesTask : DefaultTask() {
 
