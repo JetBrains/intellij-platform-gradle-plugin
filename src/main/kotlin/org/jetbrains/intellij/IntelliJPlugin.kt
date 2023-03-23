@@ -1391,6 +1391,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
                 )
             )
+
+            onlyIf {
+                // Workaround for Gradle 7.x to don't fail on "An input file was expected to be present but it doesn't exist."
+                inputArchiveFile.isPresent && inputArchiveFile.get().asFile.exists()
+            }
             dependsOn(SIGN_PLUGIN_TASK_NAME)
         }
     }

@@ -210,7 +210,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(VERIFY_PLUGIN_SIGNATURE_TASK_NAME).let {
             assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", it.output)
-            assertContains("Task :$VERIFY_PLUGIN_SIGNATURE_TASK_NAME NO-SOURCE", it.output)
+            assertContains("Task :$VERIFY_PLUGIN_SIGNATURE_TASK_NAME SKIPPED", it.output)
         }
     }
 
