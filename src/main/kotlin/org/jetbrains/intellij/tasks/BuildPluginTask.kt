@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Zip
 import org.jetbrains.intellij.IntelliJPluginConstants
 
@@ -10,6 +11,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants
  *
  * @see [Zip]
  */
+@CacheableTask
 abstract class BuildPluginTask : Zip() {
 
     init {
