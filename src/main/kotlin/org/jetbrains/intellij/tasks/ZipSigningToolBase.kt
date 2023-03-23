@@ -19,11 +19,10 @@ import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
-import javax.inject.Inject
 import kotlin.io.path.absolutePathString
 
 @CacheableTask
-abstract class ZipSigningToolBase @Inject constructor(
+abstract class ZipSigningToolBase(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
 ) : DefaultTask() {

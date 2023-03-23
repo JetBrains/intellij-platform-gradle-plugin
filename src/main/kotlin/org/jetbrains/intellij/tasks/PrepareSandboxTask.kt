@@ -7,7 +7,10 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Task
-import org.gradle.api.file.*
+import org.gradle.api.file.CopySpec
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.FileCollection
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -59,7 +62,7 @@ abstract class PrepareSandboxTask : Sync() {
     abstract val librariesToIgnore: ListProperty<File>
 
     /**
-     * List of dependencies of the current plugin.
+     * List of dependencies on external plugins.
      *
      * Default value: [IntelliJPluginExtension.getPluginDependenciesList]
      */

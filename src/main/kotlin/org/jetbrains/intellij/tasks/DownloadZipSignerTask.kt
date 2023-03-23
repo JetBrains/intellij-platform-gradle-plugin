@@ -28,6 +28,9 @@ abstract class DownloadZipSignerTask : DefaultTask() {
     @get:Optional
     abstract val version: Property<String>
 
+    /**
+     * The output of the ZIP Signer CLI tool.
+     */
     @get:Input
     @get:Optional
     abstract val cliPath: Property<String>

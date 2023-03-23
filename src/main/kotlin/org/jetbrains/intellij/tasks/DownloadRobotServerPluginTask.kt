@@ -52,7 +52,6 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
     abstract val outputDir: DirectoryProperty
 
     private val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
-
     private val context = logCategory()
 
     init {

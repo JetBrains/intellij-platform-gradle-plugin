@@ -8,7 +8,10 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.*
+import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_ID
+import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.utils.LatestVersionResolver
 
 @UntrackedTask(because = "Should always be run to initialize the plugin")
@@ -32,6 +35,9 @@ abstract class InitializeIntelliJPluginTask : DefaultTask() {
         checkPluginVersion()
     }
 
+    /**
+     * Checks if the plugin is up to date.
+     */
     private fun checkPluginVersion() {
         if (!selfUpdateCheck.get() || offline.get()) {
             return
@@ -41,9 +47,9 @@ abstract class InitializeIntelliJPluginTask : DefaultTask() {
             val version = getCurrentPluginVersion()
                 ?.let(Version::parse)
                 .or { Version() }
-            val latestVersion = LatestVersionResolver.fromGitHub(IntelliJPluginConstants.PLUGIN_NAME, IntelliJPluginConstants.GITHUB_REPOSITORY)
+            val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, GITHUB_REPOSITORY)
             if (version < Version.parse(latestVersion)) {
-                warn(context, "${IntelliJPluginConstants.PLUGIN_NAME} is outdated: $version. Update `${IntelliJPluginConstants.PLUGIN_ID}` to: $latestVersion")
+                warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
         } catch (e: Exception) {
             error(context, e.message.orEmpty(), e)

@@ -21,6 +21,9 @@ import org.jetbrains.intellij.logCategory
 @DisableCachingByDefault(because = "Deletion cannot be cached")
 abstract class ClasspathIndexCleanupTask : DefaultTask() {
 
+    /**
+     * The list of `classpath.index` files to be removed.
+     */
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val classpathIndexFiles: ConfigurableFileCollection
@@ -29,7 +32,7 @@ abstract class ClasspathIndexCleanupTask : DefaultTask() {
 
     init {
         group = PLUGIN_GROUP_NAME
-        description = "Removes classpath index files created by PathClassLoader"
+        description = "Removes classpath.index files created by PathClassLoader"
     }
 
     @TaskAction

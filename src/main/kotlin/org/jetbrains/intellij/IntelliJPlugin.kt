@@ -967,7 +967,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 })
                 formsDirs.from(project.provider {
                     sourceDirs.asFileTree.filter {
-                        // TODO: migrate to Path
                         it.toPath().hasExtension("form")
                     }
                 })
@@ -1380,6 +1379,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 signPluginTaskProvider.flatMap { signPluginTask ->
                     signPluginTask.certificateChainFile
                 }.orElse(
+                    // workaround due to https://github.com/JetBrains/marketplace-zip-signer/issues/142
                     signPluginTaskProvider.flatMap { signPluginTask ->
                         signPluginTask.certificateChain.map { content ->
                             temporaryDir.resolve("certificate-chain.pem").also {

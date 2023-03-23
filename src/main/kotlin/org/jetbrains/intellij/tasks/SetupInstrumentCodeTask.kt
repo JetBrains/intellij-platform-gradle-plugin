@@ -16,9 +16,19 @@ import org.jetbrains.intellij.asPath
 @DisableCachingByDefault(because = "Deletion cannot be cached")
 abstract class SetupInstrumentCodeTask : DefaultTask() {
 
+    /**
+     * A flag that controls whether code instrumentation is enabled.
+     *
+     * Default value: [org.jetbrains.intellij.IntelliJPluginExtension.instrumentCode]
+     */
     @get:Input
     abstract val instrumentationEnabled: Property<Boolean>
 
+    /**
+     * The path to the directory where instrumented classes will be saved.
+     *
+     * Default value: ${project.buildDir}/instrumented
+     */
     @get:Internal
     abstract val instrumentedDir: DirectoryProperty
 
@@ -35,7 +45,6 @@ abstract class SetupInstrumentCodeTask : DefaultTask() {
                 if (!instrumentationEnabled.get()) {
                     deleteQuietly()
                 }
-//                createDir()
             }
     }
 }

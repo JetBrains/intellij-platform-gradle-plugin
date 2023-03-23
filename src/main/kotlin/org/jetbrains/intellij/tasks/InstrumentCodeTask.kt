@@ -31,25 +31,54 @@ typealias IntelliJInstrumentCodeTask = InstrumentCodeTask
 @CacheableTask
 abstract class InstrumentCodeTask : DefaultTask() {
 
+    /**
+     * Compile classpath of the project's source set.
+     */
     @get:Internal
     abstract val sourceSetCompileClasspath: ConfigurableFileCollection
 
+    /**
+     * The dependency on IntelliJ IDEA.
+     *
+     * Default value: [SetupDependenciesTask.idea]
+     */
     @get:Input
     @get:Optional
     abstract val ideaDependency: Property<IdeaDependency>
 
+    /**
+     * Path to the `javac2.jar` file of the IntelliJ IDEA.
+     *
+     * Default value: `lib/javac2.jar` resolved in [ideaDependency]
+     */
     @get:Input
     @get:Optional
     abstract val javac2: Property<File>
 
+    /**
+     * A version of instrumenting compiler.
+     * It's used in cases when targeting non-IntelliJ IDEA IDEs (e.g. CLion or Rider).
+     *
+     * Default value: Build number of the IDE dependency.
+     */
     @get:Input
     abstract val compilerVersion: Property<String>
 
+    /**
+     * The list of directories with compiled classes.
+     *
+     * Default value: `classesDirs` of the project's source sets.
+     */
     @get:Incremental
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val classesDirs: ConfigurableFileCollection
 
+    /**
+     * The list of directories with GUI Designer form files.
+     *
+     * Default value: `.form` files of the project's source sets.
+     */
     @get:Incremental
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -58,9 +87,17 @@ abstract class InstrumentCodeTask : DefaultTask() {
     @get:Internal
     abstract val sourceDirs: ConfigurableFileCollection
 
+    /**
+     * The output directory for instrumented classes.
+     *
+     * Default value: [SetupInstrumentCodeTask.instrumentedDir]
+     */
     @get:OutputDirectory
     abstract val outputDir: DirectoryProperty
 
+    /**
+     * The classpath for Java instrumentation compiler.
+     */
     @get:Input
     abstract val compilerClassPathFromMaven: ListProperty<File>
 

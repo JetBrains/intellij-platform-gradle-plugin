@@ -218,6 +218,9 @@ abstract class IntelliJPluginExtension @Inject constructor(
      */
     abstract val extraDependencies: ListProperty<String>
 
+    /**
+     * List of dependencies on external plugins.
+     */
     abstract val pluginDependencies: ListProperty<PluginDependency>
 
     @get:Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
