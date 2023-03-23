@@ -98,6 +98,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_INSTRUMENT_CODE_TASK
 import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.dependency.*
@@ -663,7 +664,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
             verifierVersion.convention(VERSION_LATEST)
-            distributionFile.convention(resolveBuildTaskOutput(project))
+            distributionFile.convention(project.resolveBuildTaskOutput())
             verificationReportsDir.convention(
                 project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath }
             )
@@ -1342,11 +1343,18 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureSignPluginTask(project: Project) {
         info(context, "Configuring sign plugin task")
 
+        val signPluginTaskProvider = project.tasks.register<SignPluginTask>(SIGN_PLUGIN_TASK_NAME)
         val buildPluginTaskProvider = project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME)
         val downloadZipSignerTaskProvider = project.tasks.named<DownloadZipSignerTask>(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
+        val cliPathProvider = downloadZipSignerTaskProvider.flatMap { downloadZipSignerTask ->
+            downloadZipSignerTask.cli.map {
+                it.asPath.toString()
+            }
+        }
 
-        project.tasks.register<SignPluginTask>(SIGN_PLUGIN_TASK_NAME) {
-            inputArchiveFile.convention(resolveBuildTaskOutput(project))
+        signPluginTaskProvider.configure {
+            inputArchiveFile.convention(project.resolveBuildTaskOutput())
+            cliPath.convention(cliPathProvider)
             outputArchiveFile.convention(
                 project.layout.file(
                     buildPluginTaskProvider.flatMap { buildPluginTask ->
@@ -1355,15 +1363,35 @@ abstract class IntelliJPlugin : Plugin<Project> {
                             .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
                     })
             )
-            cliPath.convention(downloadZipSignerTaskProvider.flatMap { downloadZipSignerTask ->
-                downloadZipSignerTask.cli.map {
-                    it.asPath.toString()
-                }
-            })
 
             onlyIf { (privateKey.isPresent || privateKeyFile.isPresent) && (certificateChain.isPresent || certificateChainFile.isPresent) }
             dependsOn(BUILD_PLUGIN_TASK_NAME)
             dependsOn(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
+        }
+
+        project.tasks.register<VerifyPluginSignatureTask>(VERIFY_PLUGIN_SIGNATURE_TASK_NAME) {
+            inputArchiveFile.convention(signPluginTaskProvider.flatMap { signPluginTask ->
+                signPluginTask.outputArchiveFile
+            })
+            cliPath.convention(signPluginTaskProvider.flatMap { signPluginTask ->
+                signPluginTask.cliPath
+            })
+            certificateChainFile.convention(
+                signPluginTaskProvider.flatMap { signPluginTask ->
+                    signPluginTask.certificateChainFile
+                }.orElse(
+                    signPluginTaskProvider.flatMap { signPluginTask ->
+                        signPluginTask.certificateChain.map { content ->
+                            temporaryDir.resolve("certificate-chain.pem").also {
+                                it.writeText(content)
+                            }
+                        }
+                    }.let {
+                        project.layout.file(it)
+                    }
+                )
+            )
+            dependsOn(SIGN_PLUGIN_TASK_NAME)
         }
     }
 
@@ -1384,7 +1412,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     .flatMap { signPluginTask ->
                         when (signPluginTask.didWork) {
                             true -> signPluginTask.outputArchiveFile
-                            else -> resolveBuildTaskOutput(project)
+                            else -> project.resolveBuildTaskOutput()
                         }
                     }
             )
@@ -1569,7 +1597,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    private fun resolveBuildTaskOutput(project: Project) = project.tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME).flatMap { it.archiveFile }
+    private fun Project.resolveBuildTaskOutput() = tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME).flatMap { it.archiveFile }
 
     private fun Project.idea(
         action: IdeaModel.() -> Unit,

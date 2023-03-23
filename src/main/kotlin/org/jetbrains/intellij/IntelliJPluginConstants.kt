@@ -39,6 +39,7 @@ object IntelliJPluginConstants {
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
+    const val VERIFY_PLUGIN_SIGNATURE_TASK_NAME = "verifyPluginSignature"
 
     val TASKS = listOf(
         BUILD_PLUGIN_TASK_NAME,
@@ -70,6 +71,7 @@ object IntelliJPluginConstants {
         SIGN_PLUGIN_TASK_NAME,
         VERIFY_PLUGIN_TASK_NAME,
         VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
+        VERIFY_PLUGIN_SIGNATURE_TASK_NAME,
     )
 
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"

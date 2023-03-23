@@ -2,9 +2,6 @@
 
 package org.jetbrains.intellij.tasks
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import org.apache.tools.ant.util.TeeOutputStream
-import org.gradle.api.DefaultTask
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
@@ -12,28 +9,18 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
 import org.gradle.process.ExecOperations
-import org.gradle.process.internal.ExecException
-import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import java.io.ByteArrayOutputStream
-import java.nio.file.Path
+import org.jetbrains.intellij.asPath
+import org.jetbrains.intellij.debug
+import org.jetbrains.intellij.logCategory
 import java.util.*
 import javax.inject.Inject
 
 @CacheableTask
 abstract class SignPluginTask @Inject constructor(
-    private val objectFactory: ObjectFactory,
-    private val execOperations: ExecOperations,
-) : DefaultTask() {
-
-    /**
-     * Input, unsigned ZIP archive file.
-     * Refers to `in` CLI option.
-     */
-    @get:InputFile
-    @get:SkipWhenEmpty
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val inputArchiveFile: RegularFileProperty
+    objectFactory: ObjectFactory,
+    execOperations: ExecOperations,
+) : ZipSigningToolBase(objectFactory, execOperations) {
 
     /**
      * Output, signed ZIP archive file.
@@ -43,13 +30,6 @@ abstract class SignPluginTask @Inject constructor(
      */
     @get:OutputFile
     abstract val outputArchiveFile: RegularFileProperty
-
-    /**
-     * Local path to the Marketplace ZIP Signer CLI that will be used.
-     */
-    @get:Input
-    @get:Optional
-    abstract val cliPath: Property<String>
 
     /**
      * KeyStore file path.
@@ -144,129 +124,80 @@ abstract class SignPluginTask @Inject constructor(
 
     @TaskAction
     fun signPlugin() {
-        val file = inputArchiveFile.orNull?.asPath
-        if (file == null || !file.exists()) {
-            throw IllegalStateException("Plugin file does not exist: $file")
-        }
-
-        if (privateKey.orNull == null && privateKeyFile.orNull == null) {
-            throw InvalidUserDataException(
-                "Private key not found. One of the 'signPlugin.privateKey' or 'signPlugin.privateKeyFile' properties has to be provided."
-            )
-        }
-        if (certificateChain.orNull == null && certificateChainFile.orNull == null) {
-            throw InvalidUserDataException(
-                "Certificate chain not found. One of the 'signPlugin.certificateChain' or 'signPlugin.certificateChainFile' properties has to be provided."
-            )
-        }
-
-        val cliPath = resolveCliPath()
-        val cliArgs = listOf("sign") + getOptions()
-
-        debug(context, "Distribution file: $file")
-        debug(context, "Marketplace ZIP Signer CLI path: $cliPath")
-
-        ByteArrayOutputStream().use { os ->
-            try {
-                execOperations.javaexec {
-                    classpath = objectFactory.fileCollection().from(cliPath)
-                    mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
-                    args = cliArgs
-                    standardOutput = TeeOutputStream(System.out, os)
-                    errorOutput = TeeOutputStream(System.err, os)
-                }
-            } catch (e: ExecException) {
-                error(context, "Error during Marketplace ZIP Signer CLI execution:\n$os")
-                throw e
-            }
-        }
+        executeZipSigningTool("sign")
     }
 
-    /**
-     * Resolves the path to the IntelliJ Marketplace ZIP Signer.
-     * At first, checks if it was provided with [cliPath].
-     * Fetches Marketplace ZIP Signer artifact from the GitHub Releases and resolves the path to `zip-signer-cli` jar file.
-     *
-     * @return path to zip-signer-cli jar
-     */
-    private fun resolveCliPath(): String {
-        val path = cliPath.orNull
-        if (!path.isNullOrEmpty()) {
-            val verifier = Path.of(path)
-            if (verifier.exists()) {
-                return path
-            }
-        }
-
-        throw InvalidUserDataException("Provided Marketplace ZIP Signer path doesn't exist.")
-    }
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with all available CLI options
      */
-    private fun getOptions(): List<String> {
-        val args = mutableListOf(
-            "-in", inputArchiveFile.get().asPath.toAbsolutePath().toString(),
+    override fun collectArguments(): List<String> {
+        val arguments = mutableListOf(
             "-out", outputArchiveFile.get().asPath.toAbsolutePath().toString(),
         )
 
         privateKey.orNull?.let {
-            args.add("-key")
+            arguments.add("-key")
 
             Base64.getDecoder()
                 .runCatching { decode(it.trim()).let(::String) }
                 .getOrDefault(it)
-                .let(args::add)
+                .let(arguments::add)
 
             debug(context, "Using private key passed as content")
-        } ?: run {
-            args.add("-key-file")
-            args.add(privateKeyFile.get().asPath.toAbsolutePath().toString())
-            debug(context, "Using private key passed as file")
         }
+            ?: privateKeyFile.orNull?.let {
+                arguments.add("-key-file")
+                arguments.add(it.asPath.toAbsolutePath().toString())
+                debug(context, "Using private key passed as file")
+            }
+            ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
+
         certificateChain.orNull?.let {
-            args.add("-cert")
+            arguments.add("-cert")
 
             Base64.getDecoder()
                 .runCatching { decode(it.trim()).let(::String) }
                 .getOrDefault(it)
-                .let(args::add)
+                .let(arguments::add)
 
             debug(context, "Using certificate chain passed as content")
-        } ?: run {
-            args.add("-cert-file")
-            args.add(certificateChainFile.get().asPath.toAbsolutePath().toString())
-            debug(context, "Using certificate chain passed as file")
         }
+            ?: certificateChainFile.orNull?.let {
+                arguments.add("-cert-file")
+                arguments.add(it.asPath.toAbsolutePath().toString())
+                debug(context, "Using certificate chain passed as file")
+            }
+            ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
 
         password.orNull?.let {
-            args.add("-key-pass")
-            args.add(it)
+            arguments.add("-key-pass")
+            arguments.add(it)
             debug(context, "Using private key password")
         }
         keyStore.orNull?.let {
-            args.add("-ks")
-            args.add(it)
+            arguments.add("-ks")
+            arguments.add(it)
         }
         keyStorePassword.orNull?.let {
-            args.add("-ks-pass")
-            args.add(it)
+            arguments.add("-ks-pass")
+            arguments.add(it)
         }
         keyStoreKeyAlias.orNull?.let {
-            args.add("-ks-key-alias")
-            args.add(it)
+            arguments.add("-ks-key-alias")
+            arguments.add(it)
         }
         keyStoreType.orNull?.let {
-            args.add("-ks-type")
-            args.add(it)
+            arguments.add("-ks-type")
+            arguments.add(it)
         }
         keyStoreProviderName.orNull?.let {
-            args.add("-ks-provider-name")
-            args.add(it)
+            arguments.add("-ks-provider-name")
+            arguments.add(it)
         }
 
-        return args
+        return arguments + super.collectArguments()
     }
 }

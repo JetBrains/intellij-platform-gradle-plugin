@@ -271,7 +271,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             import org.jetbrains.intellij.DependenciesUtils
-
+            
             intellij {
                 configureDefaultDependencies = false
                 plugins = []

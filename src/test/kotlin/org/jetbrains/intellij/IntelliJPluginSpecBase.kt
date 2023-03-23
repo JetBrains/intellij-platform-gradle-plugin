@@ -16,7 +16,10 @@ import java.nio.file.Files.createTempDirectory
 import java.nio.file.Paths
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
-import kotlin.test.*
+import kotlin.test.BeforeTest
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment")
 abstract class IntelliJPluginSpecBase {
@@ -278,6 +281,8 @@ abstract class IntelliJPluginSpecBase {
             Paths.get(url.toURI()).toAbsolutePath().toString().replace('\\', '/')
         }
     }
+
+    protected fun resolveResourceContent(path: String) = resolveResourcePath(path)?.let { File(it).readText() }
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517

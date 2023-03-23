@@ -4,6 +4,7 @@
 
 ### Added
 - Run tests using JBR [#473](../../issues/473)
+- Introduce `verifyPluginSignature` task for verification signed plugin archive produced by `signPlugin` task
 
 ### Fixed
 - Add instrumented classes (sources + tests) to the tests classpath before tests execution [#1332](../../issues/1332)
