@@ -26,6 +26,7 @@ abstract class IntelliJPluginSpecBase {
 
     private var debugEnabled = true
     private val gradleDefault = System.getProperty("test.gradle.default")
+    private val gradleScan = System.getProperty("test.gradle.scan").toBoolean()
     protected val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     protected val kotlinPluginVersion: String = System.getProperty("test.kotlin.version")
     protected val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
@@ -41,6 +42,7 @@ abstract class IntelliJPluginSpecBase {
 
     val gradleProperties get() = file("gradle.properties")
     val buildFile get() = file("build.gradle")
+    val settingsFile get() = file("settings.gradle")
     val pluginXml get() = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory get() = dir.resolve("build")
 
@@ -48,7 +50,27 @@ abstract class IntelliJPluginSpecBase {
     open fun setUp() {
         dir = createTempDirectory("tmp").toFile()
 
-        file("settings.gradle").groovy("rootProject.name = 'projectName'")
+        if (gradleScan) {
+            settingsFile.groovy(
+                """
+                plugins {
+                    id("com.gradle.enterprise") version("3.12.6")
+                }
+                gradleEnterprise {
+                    buildScan {
+                        server = "https://ge.jetbrains.com"
+                        termsOfServiceUrl = "https://ge.jetbrains.com/terms-of-service"
+                        termsOfServiceAgree = "yes"
+                    }
+                }
+                """.trimIndent()
+            )
+        }
+        settingsFile.groovy(
+            """
+            rootProject.name = 'projectName'
+            """.trimIndent()
+        )
 
         buildFile.groovy(
             """
@@ -147,8 +169,11 @@ abstract class IntelliJPluginSpecBase {
             .withTestKitDir(File(gradleHome))
             .withArguments(
                 *tasks,
-                "--stacktrace",
-                "--configuration-cache",
+                *listOfNotNull(
+                    "--stacktrace",
+                    "--configuration-cache",
+                    "--scan".takeIf { gradleScan },
+                ).toTypedArray(),
                 *gradleArguments.toTypedArray()
             )//, "-Dorg.gradle.debug=true")
 

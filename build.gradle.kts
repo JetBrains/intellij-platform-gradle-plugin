@@ -106,6 +106,7 @@ tasks {
             File(testGradleHomePath).mkdir()
         }
         systemProperties["test.gradle.home"] = testGradleHomePath
+        systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
         systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
         systemProperties["test.gradle.default"] = properties("gradleVersion").get()
         systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
