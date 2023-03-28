@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.13.3] - 2023-03-28
+
 ### Added
 - Run tests using JBR [#473](../../issues/473)
 - Introduce `verifyPluginSignature` task for verification signed plugin archive produced by `signPlugin` task
@@ -689,7 +691,8 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.2...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.3...HEAD
+[1.13.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.2...v1.13.3
 [1.13.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.1...v1.13.2
 [1.13.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.0...v1.13.1
 [1.13.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.12.0...v1.13.0
