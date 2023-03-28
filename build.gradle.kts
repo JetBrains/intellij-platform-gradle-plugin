@@ -8,6 +8,7 @@ fun environment(key: String) = providers.environmentVariable(key)
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
 plugins {
+    `java-test-fixtures`
     `kotlin-dsl`
     `maven-publish`
     alias(libs.plugins.kotlin)
@@ -61,6 +62,11 @@ dependencies {
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
     testImplementation(kotlin("test-junit"))
+
+    testFixturesImplementation(gradleTestKit())
+    testFixturesImplementation(kotlin("test"))
+    testFixturesImplementation(kotlin("test-junit"))
+    testFixturesImplementation(libs.annotations)
 }
 
 kotlin {

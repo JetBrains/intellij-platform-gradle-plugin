@@ -12,8 +12,8 @@ import kotlin.test.Test
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
 
         gradleArguments.add("-Duser.home=$gradleHome")
         File(gradleHome).resolve(".pluginVerifier/ides").run {

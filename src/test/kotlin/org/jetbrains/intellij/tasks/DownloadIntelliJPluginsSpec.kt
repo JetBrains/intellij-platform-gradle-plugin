@@ -19,8 +19,8 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     private val pluginsDevCacheDir = File(gradleHome, "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.dev.com.jetbrains.plugins")
 
     @BeforeTest
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
 
         pluginsRepositoryCacheDir.delete()
         pluginsNightlyRepositoryCacheDir.delete()

@@ -18,8 +18,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         get() = buildDirectory.resolve("$LIST_PRODUCTS_RELEASES_TASK_NAME.txt")
 
     @BeforeTest
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
 
         buildFile.groovy(
             """

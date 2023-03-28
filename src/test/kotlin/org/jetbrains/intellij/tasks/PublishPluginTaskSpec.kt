@@ -11,8 +11,8 @@ import kotlin.test.Test
 class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
-    override fun setUp() {
-        super.setUp()
+    override fun setup() {
+        super.setup()
 
         pluginXml.xml(
             """
