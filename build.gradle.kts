@@ -10,17 +10,16 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     `kotlin-dsl`
     `maven-publish`
-    kotlin("jvm") version "1.8.10"
-    kotlin("plugin.serialization") version "1.8.10"
-    id("org.jetbrains.kotlin.plugin.sam.with.receiver") version "1.8.10"
-    id("com.gradle.plugin-publish") version "1.1.0"
-    id("org.jetbrains.changelog") version "2.0.0"
-    id("org.jetbrains.dokka") version "1.8.10"
-//    id("org.barfuin.gradle.taskinfo") version "2.0.0" // TODO: use whenever it supports Gradle 7.6
+    alias(libs.plugins.kotlin)
+    alias(libs.plugins.kotlinSerialization)
+    alias(libs.plugins.kotlinSamWithReceiver)
+    alias(libs.plugins.pluginPublish)
+    alias(libs.plugins.changelog)
+    alias(libs.plugins.dokka)
 }
 
 version = when (properties("snapshot").get().toBoolean()) {
-    true -> properties("snapshotVersion").map { "$it-SNAPSHOT"}
+    true -> properties("snapshotVersion").map { "$it-SNAPSHOT" }
     false -> properties("version")
 }.get()
 group = properties("group").get()
@@ -36,28 +35,28 @@ repositories {
 val additionalPluginClasspath: Configuration by configurations.creating
 
 dependencies {
-    implementation("org.jetbrains:annotations:24.0.1")
-    implementation("org.jetbrains.intellij.plugins:structure-base:3.251") {
+    implementation(libs.annotations)
+    implementation(libs.intellijStructureBase) {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij.plugins:structure-intellij:3.251") {
+    implementation(libs.intellijStructureIntellij) {
         exclude("org.jetbrains.kotlin")
     }
-    implementation("org.jetbrains.intellij:plugin-repository-rest-client:2.0.30") {
+    implementation(libs.intellijPluginRepositoryRestClient) {
         exclude("org.jetbrains.kotlin")
         exclude("org.slf4j")
     }
 
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.14.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0")
-    implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
-    implementation("com.googlecode.plist:dd-plist:1.26")
+    implementation(libs.jacksonDatabind)
+    implementation(libs.kotlinxSerializationJson)
+    implementation(libs.jaxbApi)
+    implementation(libs.ddPlist)
 
-    compileOnly("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
-    additionalPluginClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.10")
+    compileOnly(libs.kotlinGradlePlugin)
+    additionalPluginClasspath(libs.kotlinGradlePlugin)
 
-    api("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.1.7")
-    api("com.squareup.retrofit2:retrofit:2.9.0")
+    api(libs.gradleIdeaExt)
+    api(libs.retrofit)
 
     testImplementation(gradleTestKit())
     testImplementation(kotlin("test"))
