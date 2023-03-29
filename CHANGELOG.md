@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Fixed
+- Resolving Android Studio JNA libraries on macOS [#1353](../../issues/1353)
+
 ## [1.13.3] - 2023-03-28
 
 ### Added

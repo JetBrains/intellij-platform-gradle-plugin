@@ -54,6 +54,7 @@ import java.io.StringWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Files.exists
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -105,6 +106,12 @@ private fun String.resolveIdeHomeVariable(ideDir: Path) =
             .replace("\$IDE_HOME", it)
             .replace("%IDE_HOME%", it)
             .replace("Contents/Contents", "Contents")
+            .run {
+                when {
+                    Path.of(this).exists() -> this
+                    else -> replace("/Contents", "")
+                }
+            }
     }
 
 fun getIdeaSystemProperties(
