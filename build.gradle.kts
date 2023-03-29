@@ -60,12 +60,12 @@ dependencies {
     api(libs.retrofit)
 
     testImplementation(gradleTestKit())
-    testImplementation(kotlin("test"))
-    testImplementation(kotlin("test-junit"))
+    testImplementation(libs.kotlinTest)
+    testImplementation(libs.kotlinTestJunit)
 
     testFixturesImplementation(gradleTestKit())
-    testFixturesImplementation(kotlin("test"))
-    testFixturesImplementation(kotlin("test-junit"))
+    testFixturesImplementation(libs.kotlinTest)
+    testFixturesImplementation(libs.kotlinTestJunit)
     testFixturesImplementation(libs.annotations)
 }
 
