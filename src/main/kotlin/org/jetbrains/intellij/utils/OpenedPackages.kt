@@ -6,7 +6,7 @@ import org.gradle.internal.os.OperatingSystem
 
 // OpenedPackages list synchronized with:
 // https://github.com/JetBrains/intellij-community/blob/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt
-// last version: 647407b1aaab13a51a8880689431ed780ab45668
+// last version: b07b9599eb668f17717d292db845c9a1129e68fd
 val OpenedPackages = listOf(
     "--add-opens=java.base/java.io=ALL-UNNAMED",
     "--add-opens=java.base/java.lang=ALL-UNNAMED",
@@ -40,6 +40,7 @@ val OpenedPackages = listOf(
     "--add-opens=java.desktop/sun.font=ALL-UNNAMED",
     "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED",
     "--add-opens=java.desktop/sun.swing=ALL-UNNAMED",
+    "--add-opens=java.desktop/com.sun.java.swing=ALL-UNNAMED",
     "--add-opens=jdk.attach/sun.tools.attach=ALL-UNNAMED",
     "--add-opens=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED",
     "--add-opens=jdk.internal.jvmstat/sun.jvmstat.monitor=ALL-UNNAMED",
