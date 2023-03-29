@@ -60,7 +60,7 @@ abstract class IntelliJPlatformTestBase {
             .withProjectDir(dir)
             .withGradleVersion(gradleVersion)
             .forwardOutput()
-            .withPluginClasspath()
+//            .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
             .withArguments(
