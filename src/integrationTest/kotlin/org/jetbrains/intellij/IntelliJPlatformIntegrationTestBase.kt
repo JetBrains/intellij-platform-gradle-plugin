@@ -4,11 +4,19 @@ package org.jetbrains.intellij
 
 import java.nio.file.Files
 import java.nio.file.Path
+import kotlin.io.path.copyTo
 
 open class IntelliJPlatformIntegrationTestBase : IntelliJPlatformTestBase() {
 
-    fun foo() {
+    protected fun use(resourceName: String) {
+        val sourcePath = Path.of("src", "integrationTest", "resources", resourceName)
+        val destinationPath = dir.toPath()
 
+        Files.walk(sourcePath)
+            .forEach { sourceFile ->
+                val destinationFile: Path = destinationPath.resolve(sourcePath.relativize(sourceFile))
+                sourceFile.copyTo(destinationFile, true)
+            }
     }
 //    /**
 //     * Shorthand for the setup method.
@@ -88,13 +96,7 @@ open class IntelliJPlatformIntegrationTestBase : IntelliJPlatformTestBase() {
      * Path to the Gradle user home directory., e.g., `/Users/hsz/.gradle`.
      */
     val gradleUserHomeDirectory
-        get() = Path.of(
-            System.getProperty("gradle.user.home")
-                ?: System.getenv("GRADLE_USER_HOME")
-                ?: "${System.getProperty("user.home")}/.gradle"
-        ).also {
-            assert(Files.exists(it)) { "Gradle user home directory does not exist: $it" }
-        }
+        get() = Path.of(System.getProperty("test.gradle.home"))
 
     /**
      * Path to the Gradle cache directory.,

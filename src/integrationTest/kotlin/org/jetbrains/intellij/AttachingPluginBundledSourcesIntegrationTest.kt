@@ -8,6 +8,8 @@ class AttachingPluginBundledSourcesIntegrationTest : IntelliJPlatformIntegration
 
     @Test
     fun test() {
+        use("attaching-plugin-bundled-sources")
+
         build("buildPlugin").let {
             val goPluginIvyFileName = "go-goland-GO-212.5457.54-withSources-3.xml"
 

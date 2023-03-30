@@ -5,9 +5,11 @@ package org.jetbrains.intellij
 import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.internal.DefaultGradleRunner
 import org.intellij.lang.annotations.Language
 import java.io.File
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Paths
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
@@ -28,13 +30,29 @@ abstract class IntelliJPlatformTestBase {
         dir = createTempDirectory("tmp").toFile()
     }
 
-    protected fun build(vararg tasksList: String) = build(
+    protected fun build(
+        vararg tasksList: String,
+        projectProperties: Map<String, Any> = emptyMap(),
+        systemProperties: Map<String, Any> = emptyMap(),
+        args: List<String> = emptyList(),
+    ) = build(
         tasks = tasksList,
+        projectProperties = projectProperties,
+        systemProperties = systemProperties,
+        args = args,
     )
 
-    protected fun buildAndFail(vararg tasksList: String) = build(
+    protected fun buildAndFail(
+        vararg tasksList: String,
+        projectProperties: Map<String, Any> = emptyMap(),
+        systemProperties: Map<String, Any> = emptyMap(),
+        args: List<String> = emptyList(),
+    ) = build(
         fail = true,
         tasks = tasksList,
+        projectProperties = projectProperties,
+        systemProperties = systemProperties,
+        args = args,
     )
 
     protected fun build(
@@ -42,7 +60,16 @@ abstract class IntelliJPlatformTestBase {
         fail: Boolean = false,
         assertValidConfigurationCache: Boolean = true,
         vararg tasks: String,
-    ): BuildResult = builder(gradleVersion, *tasks)
+        projectProperties: Map<String, Any> = emptyMap(),
+        systemProperties: Map<String, Any> = emptyMap(),
+        args: List<String> = emptyList(),
+    ): BuildResult = builder(
+        gradleVersion = gradleVersion,
+        tasks = tasks,
+        projectProperties = projectProperties,
+        systemProperties = systemProperties,
+        args = args,
+    )
         .run {
             when (fail) {
                 true -> buildAndFail()
@@ -55,23 +82,54 @@ abstract class IntelliJPlatformTestBase {
             }
         }
 
-    private fun builder(gradleVersion: String, vararg tasks: String) =
+    private fun builder(
+        gradleVersion: String,
+        vararg tasks: String,
+        projectProperties: Map<String, Any> = emptyMap(),
+        systemProperties: Map<String, Any> = emptyMap(),
+        args: List<String> = emptyList(),
+    ) =
         GradleRunner.create()
             .withProjectDir(dir)
             .withGradleVersion(gradleVersion)
             .forwardOutput()
-//            .withPluginClasspath()
+            .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
             .withArguments(
+                *projectProperties
+                    .run { this + mapOf("platformVersion" to System.getenv("PLATFORM_VERSION")).filterNot { it.value == null } }
+                    .map { "-P${it.key}=${it.value}" }
+                    .toTypedArray(),
+                *systemProperties
+                    .map { "-D${it.key}=${it.value}" }
+                    .toTypedArray(),
                 *tasks,
                 *listOfNotNull(
                     "--stacktrace",
                     "--configuration-cache",
                     "--scan".takeIf { gradleScan },
                 ).toTypedArray(),
-                *gradleArguments.toTypedArray()
+                *gradleArguments.toTypedArray(),
+                *args.toTypedArray(),
             )//, "-Dorg.gradle.debug=true")
+
+    private fun getPluginClasspath(): List<File> {
+        //Get the default classpath
+        val defaultClasspath = DefaultGradleRunner()
+            .withProjectDir(dir)
+            .withPluginClasspath()
+            .pluginClasspath
+
+        //Replace the Gradle classpath with the IntelliJ one
+        println("System.getProperty(\"IntelliJClasspath\") = ${System.getProperty("IntelliJClasspath")}")
+        if (System.getProperty("IntelliJClasspath") != null) {
+            return defaultClasspath
+                .filterNot { it.absolutePath.contains("classes") }
+                .plus(Paths.get("./out/production/classes").toFile())
+        }
+        return defaultClasspath
+    }
     protected fun assertNotContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertFalse(

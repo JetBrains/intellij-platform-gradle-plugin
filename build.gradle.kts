@@ -8,7 +8,9 @@ fun environment(key: String) = providers.environmentVariable(key)
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
 plugins {
+    `jvm-test-suite`
     `java-test-fixtures`
+    `java-gradle-plugin`
     `kotlin-dsl`
     `maven-publish`
     alias(libs.plugins.kotlin)
@@ -73,20 +75,6 @@ kotlin {
     jvmToolchain(11)
 }
 
-@Suppress("UnstableApiUsage")
-gradlePlugin {
-    website.set(properties("website"))
-    vcsUrl.set(properties("vcsUrl"))
-
-    plugins.create("intellijPlugin") {
-        id = properties("pluginId").get()
-        displayName = properties("pluginDisplayName").get()
-        implementationClass = properties("pluginImplementationClass").get()
-        description = project.description
-        tags.set(properties("tags").map { it.split(',') })
-    }
-}
-
 tasks {
     withType<KotlinCompile> {
         kotlinOptions {
@@ -135,6 +123,55 @@ tasks {
     validatePlugins {
         enableStricterValidation.set(true)
     }
+
+//    @Suppress("UnstableApiUsage")
+//    check {
+//        dependsOn(testing.suites.getByName("integrationTest")) // TODO: run after `test`?
+//    }
+}
+
+@Suppress("UnstableApiUsage")
+testing {
+    suites {
+//        named<JvmTestSuite>("test") {
+//            dependencies {
+//                implementation(project())
+//                implementation(testFixtures(project()))
+//            }
+//        }
+
+        register<JvmTestSuite>("integrationTest") {
+            testType.set(TestSuiteType.INTEGRATION_TEST)
+
+            dependencies {
+                implementation(project())
+                implementation(gradleTestKit())
+                implementation(testFixtures(project()))
+//                implementation(libs.kotlinTest)
+//                implementation(libs.kotlinTestJunit)
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        val testGradleHomePath = properties("testGradleUserHome").getOrElse("$buildDir/testGradleHome")
+                        doFirst {
+                            File(testGradleHomePath).mkdir()
+                        }
+                        systemProperties["test.gradle.home"] = testGradleHomePath
+                        systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
+                        systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
+                        systemProperties["test.gradle.default"] = properties("gradleVersion").get()
+                        systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
+                        systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
+                        systemProperties["test.intellij.version"] = properties("testIntelliJVersion").get()
+                        systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
+                        systemProperties["plugins.repository"] = properties("pluginsRepository").get()
+                    }
+                }
+            }
+        }
+    }
 }
 
 val dokkaHtml by tasks.getting(DokkaTask::class)
@@ -154,6 +191,22 @@ val sourcesJar = tasks.register<Jar>("sourcesJar") {
 artifacts {
     archives(javadocJar)
     archives(sourcesJar)
+}
+
+@Suppress("UnstableApiUsage")
+gradlePlugin {
+    website.set(properties("website"))
+    vcsUrl.set(properties("vcsUrl"))
+
+    plugins.create("intellijPlugin") {
+        id = properties("pluginId").get()
+        displayName = properties("pluginDisplayName").get()
+        implementationClass = properties("pluginImplementationClass").get()
+        description = project.description
+        tags.set(properties("tags").map { it.split(',') })
+    }
+
+    testSourceSets.add(sourceSets["integrationTest"])
 }
 
 publishing {
