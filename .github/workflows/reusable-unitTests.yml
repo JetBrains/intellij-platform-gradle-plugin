@@ -33,7 +33,7 @@ jobs:
           - "7.3"
           - "7.6.1"
           - "8.0.2"
-          - "8.1-rc-2"
+          - "8.1-rc-3"
         os:
           - windows-latest
           - ubuntu-latest
