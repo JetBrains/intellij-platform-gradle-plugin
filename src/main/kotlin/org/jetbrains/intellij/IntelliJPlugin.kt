@@ -109,6 +109,7 @@ import org.jetbrains.intellij.performanceTest.ProfilerName
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.*
+import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
@@ -757,6 +758,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val stdlibDefaultDependencyProvider = project.providers.gradleProperty("kotlin.stdlib.default.dependency").map {
             it.toBoolean()
         }
+        val incrementalUseClasspathSnapshot = project.providers.gradleProperty("kotlin.incremental.useClasspathSnapshot").map {
+            it.toBoolean()
+        }
 
         val downloadDirProvider = runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
             runPluginVerifierTask.downloadDir
@@ -795,7 +799,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 kotlinLanguageVersion.convention(project.provider {
                     compileKotlinTaskProvider.get().kotlinOptions.languageVersion
                 })
+                kotlinVersion.convention(project.provider {
+                    project.kotlinExtension.coreLibrariesVersion
+                })
                 kotlinStdlibDefaultDependency.convention(stdlibDefaultDependencyProvider)
+                kotlinIncrementalUseClasspathSnapshot.convention(incrementalUseClasspathSnapshot)
             }
 
             dependsOn(PATCH_PLUGIN_XML_TASK_NAME)

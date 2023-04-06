@@ -98,11 +98,10 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
     abstract val kotlinLanguageVersion: Property<String?>
 
     /**
-     * The path to the directory where IDEs used for the verification will be downloaded.
-     * Value propagated with [RunPluginVerifierTask.downloadDir].
+     * The version of the Kotlin used in the project.
      */
     @get:Internal
-    abstract val pluginVerifierDownloadDir: Property<String>
+    abstract val kotlinVersion: Property<String?>
 
     /**
      * The `jvmTarget` property of [KotlinCompile.kotlinOptions] defined in the build script.
@@ -115,6 +114,19 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
      */
     @get:Internal
     abstract val kotlinStdlibDefaultDependency: Property<Boolean>
+
+    /**
+     * `kotlin.incremental.useClasspathSnapshot` property value defined in the `gradle.properties` file.
+     */
+    @get:Internal
+    abstract val kotlinIncrementalUseClasspathSnapshot: Property<Boolean>
+
+    /**
+     * The path to the directory where IDEs used for the verification will be downloaded.
+     * Value propagated with [RunPluginVerifierTask.downloadDir].
+     */
+    @get:Internal
+    abstract val pluginVerifierDownloadDir: Property<String>
 
     private val context = logCategory()
 
@@ -133,6 +145,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.let(JavaVersion::toVersion)
         val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
+        val kotlinVersion = kotlinVersion.orNull?.let(Version::parse)
         val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)?.run { Version(major, minor) }
         val pluginVerifierDownloadPath = pluginVerifierDownloadDir.get().let(Path::of).toAbsolutePath()
         val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
@@ -173,6 +186,9 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             }
             if (kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull == null) {
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
+            }
+            if (kotlinPluginAvailable.get() && kotlinVersion >= Version(1, 8, 20) && kotlinVersion < Version(1, 9) && kotlinIncrementalUseClasspathSnapshot.orNull == null) {
+                yield("The Kotlin plugin in version $kotlinVersion used with the Gradle IntelliJ Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
             }
         }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
             warn(

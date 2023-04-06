@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- VerifyPluginConfigurationTask: Kotlin version check — report OOM for Kotlin `1.8.20+`, see: https://jb.gg/intellij-platform-kotlin-oom
+
 ### Fixed
 - Resolving Android Studio JNA libraries on macOS [#1353](../../issues/1353)
 
