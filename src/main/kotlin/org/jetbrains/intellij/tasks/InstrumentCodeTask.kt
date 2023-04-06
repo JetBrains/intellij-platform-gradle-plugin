@@ -90,6 +90,9 @@ abstract class InstrumentCodeTask : DefaultTask() {
     @get:Internal
     abstract val sourceDirs: ConfigurableFileCollection
 
+    @get:Internal
+    abstract val instrumentationLogs: Property<Boolean>
+
     /**
      * The output directory for instrumented classes.
      *
@@ -249,9 +252,9 @@ abstract class InstrumentCodeTask : DefaultTask() {
 
             val dirs = sourceDirs.filter { it.exists() }
             if (!dirs.isEmpty) {
-                // to enable debug mode, use:
-                // ant.lifecycleLogLevel = org.gradle.api.AntBuilder.AntMessagePriority.DEBUG
-
+                if (instrumentationLogs.get()) {
+                    ant.lifecycleLogLevel = org.gradle.api.AntBuilder.AntMessagePriority.INFO
+                }
                 ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
                     mapOf(
                         "srcdir" to dirs.joinToString(":"),

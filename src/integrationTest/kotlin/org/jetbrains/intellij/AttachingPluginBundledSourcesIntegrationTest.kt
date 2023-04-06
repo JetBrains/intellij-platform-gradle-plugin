@@ -2,14 +2,14 @@
 
 package org.jetbrains.intellij
 
-import org.junit.jupiter.api.Test
+import kotlin.test.Test
 
-class AttachingPluginBundledSourcesIntegrationTest : IntelliJPlatformIntegrationTestBase() {
+class AttachingPluginBundledSourcesIntegrationTest : IntelliJPlatformIntegrationTestBase(
+    resourceName = "attaching-plugin-bundled-sources",
+) {
 
     @Test
-    fun test() {
-        use("attaching-plugin-bundled-sources")
-
+    fun `attach bundled plugin sources`() {
         build("buildPlugin").let {
             val goPluginIvyFileName = "go-goland-GO-212.5457.54-withSources-3.xml"
 

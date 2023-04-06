@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij
 
-import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.internal.DefaultGradleRunner
@@ -10,6 +9,7 @@ import org.intellij.lang.annotations.Language
 import java.io.File
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Paths
+import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
@@ -94,7 +94,7 @@ abstract class IntelliJPlatformTestBase {
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
-            .withDebug(debugEnabled)
+//            .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
             .withArguments(
                 *projectProperties

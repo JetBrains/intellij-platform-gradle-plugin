@@ -2,20 +2,40 @@
 
 package org.jetbrains.intellij
 
+import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.zip.ZipFile
 import kotlin.io.path.copyTo
+import kotlin.io.path.notExists
+import kotlin.test.BeforeTest
 
-open class IntelliJPlatformIntegrationTestBase : IntelliJPlatformTestBase() {
+open class IntelliJPlatformIntegrationTestBase(
+    private val resourceName: String? = null,
+) : IntelliJPlatformTestBase() {
+
+
+    @BeforeTest
+    override fun setup() {
+        super.setup()
+
+        if (resourceName != null) {
+            use(resourceName)
+        }
+    }
 
     protected fun use(resourceName: String) {
-        val sourcePath = Path.of("src", "integrationTest", "resources", resourceName)
+        val resourcePath = Path.of("src", "integrationTest", "resources", resourceName)
         val destinationPath = dir.toPath()
 
-        Files.walk(sourcePath)
-            .forEach { sourceFile ->
-                val destinationFile: Path = destinationPath.resolve(sourcePath.relativize(sourceFile))
-                sourceFile.copyTo(destinationFile, true)
+        if (resourcePath.notExists()) {
+            throw IllegalArgumentException("Integration tests resource '$resourceName' not found in: $resourcePath")
+        }
+
+        Files.walk(resourcePath)
+            .forEach {
+                val destinationFile = destinationPath.resolve(resourcePath.relativize(it))
+                it.copyTo(destinationFile, true)
             }
     }
 //    /**
@@ -50,15 +70,17 @@ open class IntelliJPlatformIntegrationTestBase : IntelliJPlatformTestBase() {
 //     */
 //    val Path.rootDirectory
 //        get() = testsRootDirectory.parent
-//
-//    /**
-//     * Path to the build directory of the integration tests single project,
-//     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/`.
-//     */
-//    val Path.buildDirectory
-//        get() = projectDirectory.resolve("build")
-//            .exitIf(Files::notExists) { "build directory does not exist: ${toAbsolutePath()}" }
-//
+
+    /**
+     * Path to the build directory of the integration tests single project,
+     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/`.
+     */
+    val buildDirectory
+        get() = dir.resolve("build").toPath()
+            .also {
+                assert(Files.exists(it)) { "Build directory does not exist: $it" }
+            }
+
 //    /**
 //     * Path to the Gradle Wrapper – uses first argument provided to the script or falls back to the project instance,
 //     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/gradlew`.
@@ -66,15 +88,17 @@ open class IntelliJPlatformIntegrationTestBase : IntelliJPlatformTestBase() {
 ////    val Path.gradleWrapper
 ////        get() = args.firstOrNull() ?: rootDirectory.resolve("gradlew")
 //
-//    /**
-//     * Path to the patched `plugin.xml` file located within the build directory of the integration tests single project,
-//     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml`.
-//     */
-//    val Path.patchedPluginXml
-//        get() = buildDirectory
-//            .resolve("patchedPluginXmlFiles/plugin.xml")
-//            .exitIf(Files::notExists) { "plugin.xml file does not exist: ${toAbsolutePath()}" }
-//
+    /**
+     * Path to the patched `plugin.xml` file located within the build directory of the integration tests single project,
+     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml`.
+     */
+    val patchedPluginXml
+        get() = buildDirectory
+            .resolve("patchedPluginXmlFiles/plugin.xml")
+            .also {
+                assert(Files.exists(it)) { "plugin.xml file does not exist: $it" }
+            }
+
 //    /**
 //     * Path to the generated plugin ZIP achive located in build/distrubutions directory,
 //     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/distributions/plugin-xml-patching-1.0.0.zip`.
@@ -82,15 +106,17 @@ open class IntelliJPlatformIntegrationTestBase : IntelliJPlatformTestBase() {
 //    val Path.pluginArchive
 //        get() = buildDirectory
 //            .resolve("distributions/$projectName-1.0.0.zip")
-//
-//    /**
-//     * Path to the generated plugin JAR achive located in build/libs directory,
-//     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/libs/plugin-xml-patching-1.0.0.jar`.
-//     */
-//    val Path.pluginJar
-//        get() = buildDirectory
-//            .resolve("libs/$projectName-1.0.0.jar")
-//            .exitIf(Files::notExists) { "Plugin jar file does not exist: ${toAbsolutePath()}" }
+
+    /**
+     * Path to the generated plugin JAR achive located in build/libs directory,
+     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/libs/plugin-xml-patching-1.0.0.jar`.
+     */
+    val pluginJar
+        get() = buildDirectory
+            .resolve("libs/test-1.0.0.jar")
+            .also {
+                assert(Files.exists(it)) { "Plugin jar file does not exist: $it" }
+            }
 
     /**
      * Path to the Gradle user home directory., e.g., `/Users/hsz/.gradle`.
@@ -120,80 +146,44 @@ open class IntelliJPlatformIntegrationTestBase : IntelliJPlatformTestBase() {
                 assert(Files.exists(it)) { "IDE Plugins cache directory does not exist: $it" }
             }
 
-//    /**
-//     * Runs the given Gradle task(s) within the current integration test.
-//     * Provides logs to STDOUT and as a returned value for further assertions.
-//     */
-//    fun Path.runGradleTask__________(
-//        vararg tasks: String,
-//        projectProperties: Map<String, Any> = emptyMap(),
-//        systemProperties: Map<String, Any> = emptyMap(),
-//        args: List<String> = emptyList(),
-//    ) = ProcessBuilder()
-//        .command(
-////            gradleWrapper.toString(),
-//            *projectProperties
-//                .run { this + mapOf("platformVersion" to System.getenv("PLATFORM_VERSION")).filterNot { it.value == null } }
-//                .map { "-P${it.key}=${it.value}" }
-//                .toTypedArray(),
-//            *systemProperties
-//                .map { "-D${it.key}=${it.value}" }
-//                .toTypedArray(),
-//            *tasks
-//                .map { ":$projectName:$it" }
-//                .toTypedArray(),
-//            "--info",
-//            "--stacktrace",
-//            *args
-//                .toTypedArray(),
-//        )
-//        .apply { environment().put("INTEGRATION_TEST", projectName) }
-//        .directory(projectDirectory.toFile())
-//        .start()
-//        .run {
-//            val stdoutBuffer = ByteArrayOutputStream()
-//            val stderrBuffer = ByteArrayOutputStream()
-//
-//            inputStream.copyTo(TeeOutputStream(stdoutBuffer, System.out))
-//            errorStream.copyTo(TeeOutputStream(stderrBuffer, System.err))
-//
-//            stdoutBuffer.toString() + stderrBuffer.toString()
-//        }
-
     infix fun String.containsText(string: String) {
         assert(contains(string)) { "expect '$this' contains '$string'" }
     }
 
-//    infix fun String.notContainsText(string: String) {
-//        assert(!contains(string)) { "expect '$this' does not contain '$string'" }
-//    }
+    infix fun String.notContainsText(string: String) {
+        assert(!contains(string)) { "expect '$this' does not contain '$string'" }
+    }
 
     infix fun Path.containsText(string: String) {
         Files.readString(this).containsText(string)
     }
 
-//    infix fun String.matchesRegex(regex: String) {
-//        matchesRegex(regex.toRegex())
-//    }
-//
-//    infix fun String.matchesRegex(regex: Regex) {
-//        assert(regex.containsMatchIn(this)) { "expect '$this' matches '$regex'" }
-//    }
+    infix fun String.matchesRegex(regex: String) {
+        matchesRegex(regex.toRegex())
+    }
+
+    infix fun String.matchesRegex(regex: Regex) {
+        assert(regex.containsMatchIn(this)) { "expect '$this' matches '$regex'" }
+    }
 
     infix fun Path.containsFile(path: String) {
         assert(resolve(path).let(Files::exists)) { "expect '$this' contains file '$path'" }
     }
 
-//    infix fun Path.containsFileInArchive(path: String) {
-//        val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
-//        assert(fs.getPath(path).let(Files::exists)) { "expect archive '$this' contains file '$path'" }
-//    }
-//
-//    infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
-//        val entry = zip.getEntry(path)
-//        zip.getInputStream(entry).bufferedReader().use { it.readText() }
-//    }
-//
+    infix fun Path.notContainsFile(path: String) {
+        assert(resolve(path).let(Files::notExists)) { "expect '$this' not contains file '$path'" }
+    }
+
+    infix fun Path.containsFileInArchive(path: String) {
+        val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
+        assert(fs.getPath(path).let(Files::exists)) { "expect archive '$this' contains file '$path'" }
+    }
+
+    infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
+        val entry = zip.getEntry(path)
+        zip.getInputStream(entry).bufferedReader().use { it.readText() }
+    }
+
 //    class TeeOutputStream(vararg targets: OutputStream) : OutputStream() {
 //
 //        private val targets = targets.toList()

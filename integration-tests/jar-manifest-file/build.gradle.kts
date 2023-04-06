@@ -1,5 +1,0 @@
-tasks {
-    buildSearchableOptions {
-        enabled = false
-    }
-}

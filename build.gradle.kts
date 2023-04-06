@@ -141,14 +141,15 @@ testing {
 //        }
 
         register<JvmTestSuite>("integrationTest") {
+            useJUnit()
             testType.set(TestSuiteType.INTEGRATION_TEST)
 
             dependencies {
                 implementation(project())
                 implementation(gradleTestKit())
                 implementation(testFixtures(project()))
-//                implementation(libs.kotlinTest)
-//                implementation(libs.kotlinTestJunit)
+                implementation(libs.kotlinTest)
+                implementation(libs.kotlinTestJunit)
             }
 
             targets {

@@ -130,8 +130,8 @@ fun Path.runGradleTask(
         *tasks
             .map { ":$projectName:$it" }
             .toTypedArray(),
-        "--info",
-        "--stacktrace",
+//        "--info",
+//        "--stacktrace",
         *args
             .toTypedArray(),
     )
