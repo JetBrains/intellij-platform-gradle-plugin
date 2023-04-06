@@ -15,6 +15,7 @@ import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
+import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
@@ -33,8 +34,7 @@ import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
-import org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
-import org.jetbrains.intellij.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
+import org.jetbrains.intellij.BuildFeature.*
 import org.jetbrains.intellij.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
@@ -1110,6 +1110,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 outputDir.convention(setupInstrumentCodeTaskProvider.flatMap { setupInstrumentCodeTask ->
                     setupInstrumentCodeTask.instrumentedDir.map { it.dir(name) }
                 })
+                instrumentationLogs.convention(project.gradle.startParameter.logLevel == LogLevel.INFO)
 
                 dependsOn(sourceSet.classesTaskName)
                 dependsOn(SETUP_INSTRUMENT_CODE_TASK_NAME)
@@ -1510,7 +1511,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         project.tasks.register<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME) {
             offline.convention(project.gradle.startParameter.isOffline)
             selfUpdateCheck.convention(project.provider {
-                project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK)
+                project.isBuildFeatureEnabled(SELF_UPDATE_CHECK)
             })
         }
     }
