@@ -24,6 +24,12 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not show errors when configuration is valid`() {
+        gradleProperties.properties(
+            """
+            kotlin.incremental.useClasspathSnapshot = false
+            """.trimIndent()
+        )
+
         pluginXml.xml(
             """
             <idea-plugin>
@@ -185,6 +191,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = true
+            kotlin.incremental.useClasspathSnapshot = false
             """.trimIndent()
         )
 
