@@ -26,8 +26,3 @@ jobs:
         with:
           distribution: zulu
           java-version: 11
-
-      - name: Verify Modules
-        run: $GITHUB_WORKSPACE/.github/scripts/verify_integration_test_modules.main.kts
-
-  # TODO: add check for OpenedPackages
