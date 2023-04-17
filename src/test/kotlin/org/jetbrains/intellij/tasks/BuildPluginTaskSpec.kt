@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
+@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -106,7 +106,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `build plugin distribution with Kotlin 1_1_4`() {
+    fun `build plugin distribution with Kotlin`() {
         writeJavaFile()
         writeKotlinUIFile()
 
@@ -129,6 +129,12 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             buildSearchableOptions {
                 enabled = true
             }
+            """.trimIndent()
+        )
+
+        gradleProperties.properties(
+            """
+            kotlin.incremental.useClasspathSnapshot = false
             """.trimIndent()
         )
 
