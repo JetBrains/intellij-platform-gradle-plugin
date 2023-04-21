@@ -94,7 +94,7 @@ abstract class RunIdeBase : JavaExec() {
      * Default value: [PrepareSandboxTask.getDestinationDir]
      */
     @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.NONE)
+    @get:Classpath
     abstract val pluginsDir: DirectoryProperty
 
     /**
