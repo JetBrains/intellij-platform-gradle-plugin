@@ -26,9 +26,10 @@ abstract class JarSearchableOptionsTask : Jar() {
      *
      * Default value: `build/searchableOptions`
      */
-    @get:OutputDirectory
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
-    abstract val outputDir: DirectoryProperty
+    abstract val inputDir: DirectoryProperty
 
     /**
      * The name of the plugin.
@@ -82,7 +83,7 @@ abstract class JarSearchableOptionsTask : Jar() {
                     }
                 }
             }
-            outputDir.get().asPath
+            inputDir.get().asPath
         })
 
         this.eachFile { path = "search/$name" }

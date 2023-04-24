@@ -925,7 +925,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_TASK_NAME)
 
         project.tasks.register<JarSearchableOptionsTask>(JAR_SEARCHABLE_OPTIONS_TASK_NAME) {
-            outputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
+            inputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
             pluginName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
                 prepareSandboxTask.pluginName
             })
@@ -940,7 +940,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
-            onlyIf { outputDir.get().asFile.isDirectory }
+            onlyIf { inputDir.get().asFile.isDirectory }
         }
     }
 
