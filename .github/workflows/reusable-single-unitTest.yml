@@ -29,7 +29,8 @@ jobs:
     runs-on: ${{ inputs.os }}
     strategy:
       fail-fast: false
-
+    permissions:
+      checks: write
     steps:
 
       - name: Run OS-dedicated script
