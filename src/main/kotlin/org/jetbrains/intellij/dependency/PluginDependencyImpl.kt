@@ -32,14 +32,14 @@ class PluginDependencyImpl(
         if (artifact.isDirectory) {
             val lib = File(artifact, "lib")
             if (lib.isDirectory) {
-                jarFiles = collectJars(lib)
-                sourceJarFiles = collectJars(File(lib, "src"))
+                jarFiles = collectJars(lib.toPath()).map { it.toFile() }
+                sourceJarFiles = collectJars(lib.toPath().resolve("src")).map { it.toFile() }
             }
-            val classes = File(artifact, "classes")
+            val classes = artifact.resolve("classes")
             if (classes.isDirectory) {
                 classesDirectory = classes
             }
-            val metaInf = File(artifact, "META-INF")
+            val metaInf = artifact.resolve("META-INF")
             if (metaInf.isDirectory) {
                 metaInfDirectory = metaInf
             }

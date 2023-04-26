@@ -455,7 +455,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             }
         }
 
-        val pluginDependency = PluginProjectDependency(dependencyDirectory.get(), context)
+        val pluginDependency = PluginProjectDependency(dependencyDirectory.get().toPath(), context)
         extension.addPluginDependency(pluginDependency)
         project.tasks.withType<PrepareSandboxTask>().configureEach {
             configureCompositePlugin(pluginDependency)
@@ -621,11 +621,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
             intoChild(pluginName.map { "$it/lib" })
                 .from(runtimeClasspathFiles.map { files ->
                     val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
-                    val pluginDirectories = pluginDependencies.get().map { it.artifact.canonicalPath }
+                    val pluginDirectories = pluginDependencies.get().map { it.artifact }
 
                     listOf(pluginJar.get().asFile) + files.filter { file ->
                         !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-                            file.canonicalPath == p || file.canonicalPath.startsWith("$p${File.separator}")
+                            file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
                         })
                     }
                 })

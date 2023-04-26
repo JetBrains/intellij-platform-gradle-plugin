@@ -2,7 +2,8 @@
 
 package org.jetbrains.intellij.dependency
 
-import java.io.File
+import java.nio.file.Path
+import kotlin.io.path.name
 
 object IdePluginSourceZipFilesProvider {
 
@@ -20,7 +21,7 @@ object IdePluginSourceZipFilesProvider {
     /**
      * Provides source ZIP file for a given `platformPluginId` in the IDE directory specified by the `ideaDependency`.
      */
-    fun getSourceZips(sourceZipFiles: Collection<File>, platformPluginId: String?): File? {
+    fun getSourceZips(sourceZipFiles: Collection<Path>, platformPluginId: String?): Path? {
         val sourceZipFileName = pluginIdToSourceZipFileName[platformPluginId]
         return sourceZipFiles.firstOrNull { it.name == sourceZipFileName }
     }

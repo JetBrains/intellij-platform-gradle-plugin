@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.dependency
 
 import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.createPlugin
 import org.jetbrains.intellij.debug
@@ -14,6 +15,8 @@ import org.jetbrains.intellij.warn
 import java.io.File
 import java.io.Serializable
 import java.nio.file.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.name
 
 class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val context: String?) : Serializable {
 
@@ -38,12 +41,10 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
 
     private fun fillFromDirectory() {
         pluginsDirectory
+            .toPath()
             .listFiles()
-            ?.apply {
-                asSequence()
-                    .filter { it.isDirectory }
-                    .forEach(::add)
-            }
+            .filter { it.isDirectory() }
+            .forEach(::add)
         debug(context, "Builtin registry populated with ${plugins.size} plugins")
     }
 
@@ -56,14 +57,14 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
         }
     }
 
-    private fun cacheFile() = pluginsDirectory.toPath().resolve("builtinRegistry-$version.xml")
+    private fun cacheFile() = pluginsDirectory.resolve("builtinRegistry-$version.xml").toPath()
 
-    fun findPlugin(name: String): File? {
+    fun findPlugin(name: String): Path? {
         val plugin = plugins[name] ?: plugins[directoryNameMapping[name]] ?: return null
-        val result = File(pluginsDirectory, plugin.directoryName)
+        val result = pluginsDirectory.resolve(plugin.directoryName)
 
         return when {
-            result.exists() && result.isDirectory -> result
+            result.exists() && result.isDirectory -> result.toPath()
             else -> null
         }
     }
@@ -83,7 +84,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
         return result
     }
 
-    fun add(artifact: File) {
+    fun add(artifact: Path) {
         debug(context, "Adding directory to plugins index: $artifact)")
         val intellijPlugin = createPlugin(artifact, false, context) ?: return
         val id = intellijPlugin.pluginId ?: return
