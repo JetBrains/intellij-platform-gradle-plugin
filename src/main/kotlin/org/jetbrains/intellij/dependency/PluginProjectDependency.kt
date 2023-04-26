@@ -7,10 +7,8 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.jetbrains.intellij.error
 import java.io.File
-import java.nio.file.Path
-import kotlin.io.path.exists
 
-class PluginProjectDependency(private val pluginDirectory: Path, val context: String?) : PluginDependency {
+class PluginProjectDependency(private val pluginDirectory: File, val context: String?) : PluginDependency {
 
     private val pluginDependency: PluginDependencyImpl? by lazy {
         pluginDirectory.takeIf { it.exists() }?.let {
@@ -20,7 +18,7 @@ class PluginProjectDependency(private val pluginDirectory: Path, val context: St
                 val pluginId = intellijPlugin.pluginId ?: return@let null
                 val pluginVersion = intellijPlugin.pluginVersion ?: return@let null
 
-                PluginDependencyImpl(pluginId, pluginId, pluginVersion, it.toFile(), builtin = false, maven = false).apply {
+                PluginDependencyImpl(pluginId, pluginId, pluginVersion, it, builtin = false, maven = false).apply {
                     sinceBuild = intellijPlugin.sinceBuild?.asStringWithoutProductCode()
                     untilBuild = intellijPlugin.untilBuild?.asStringWithoutProductCode()
                 }
@@ -44,7 +42,7 @@ class PluginProjectDependency(private val pluginDirectory: Path, val context: St
         get() = pluginDependency?.channel
 
     override val artifact: File
-        get() = pluginDirectory.toFile()
+        get() = pluginDirectory
 
     override val jarFiles: Collection<File>
         get() = pluginDependency?.jarFiles.orEmpty()

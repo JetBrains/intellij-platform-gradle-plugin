@@ -455,7 +455,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             }
         }
 
-        val pluginDependency = PluginProjectDependency(dependencyDirectory.get().toPath(), context)
+        val pluginDependency = PluginProjectDependency(dependencyDirectory.get(), context)
         extension.addPluginDependency(pluginDependency)
         project.tasks.withType<PrepareSandboxTask>().configureEach {
             configureCompositePlugin(pluginDependency)
