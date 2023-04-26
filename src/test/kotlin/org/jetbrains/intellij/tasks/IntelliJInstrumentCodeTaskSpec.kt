@@ -84,6 +84,12 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
+        gradleProperties.properties(
+            """
+            kotlin.incremental.useClasspathSnapshot=false
+            """.trimIndent()
+        )
+
         file("src/main/kotlin/pack/AppKt.form").xml(
             """
             <?xml version="1.0" encoding="UTF-8"?>
