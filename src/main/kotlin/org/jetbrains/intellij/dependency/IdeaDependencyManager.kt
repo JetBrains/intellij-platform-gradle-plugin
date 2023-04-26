@@ -232,7 +232,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                 addConfiguration(DefaultIvyConfiguration("sources"))
 
                 dependency.jarFiles.forEach {
-                    addArtifact(IntellijIvyArtifact.createJarDependency(it, "compile", dependency.classes, null))
+                    addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), "compile", dependency.classes.toPath(), null))
                 }
 
                 if (dependency.sources != null) {
@@ -240,7 +240,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                         isDependencyOnPyCharm(dependency) -> "pycharmPC"
                         else -> "ideaIC"
                     }
-                    IntellijIvyArtifact(dependency.sources, name, "jar", "sources", "sources").apply {
+                    IntellijIvyArtifact(dependency.sources.toPath(), name, "jar", "sources", "sources").apply {
                         conf = "sources"
                         addArtifact(this)
                     }

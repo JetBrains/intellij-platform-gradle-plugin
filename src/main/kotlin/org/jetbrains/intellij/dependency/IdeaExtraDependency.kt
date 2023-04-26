@@ -8,7 +8,7 @@ import java.io.File
 class IdeaExtraDependency(val name: String, val classes: File) {
 
     val jarFiles = when {
-        classes.isDirectory -> collectJars(classes)
+        classes.isDirectory -> collectJars(classes.toPath()).map { it.toFile() }
         else -> setOf(classes)
     }
 

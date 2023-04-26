@@ -2,10 +2,7 @@
 
 package org.jetbrains.intellij.dependency
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.isJar
-import com.jetbrains.plugin.structure.base.utils.isZip
-import com.jetbrains.plugin.structure.base.utils.simpleName
+import com.jetbrains.plugin.structure.base.utils.*
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
@@ -23,6 +20,9 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.isDirectory
+import kotlin.io.path.name
 
 abstract class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
@@ -42,13 +42,13 @@ abstract class PluginDependencyManager @Inject constructor(
 
         if (dependency.version.isNullOrEmpty() && dependency.channel.isNullOrEmpty()) {
             if (Paths.get(dependency.id).isAbsolute) {
-                return externalPluginDependency(File(dependency.id))
+                return externalPluginDependency(Path.of(dependency.id))
             } else {
                 info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.canonicalPath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
                     val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
                             "-withSources".takeIf { ideaDependency.sources != null }.orEmpty()
-                    return PluginDependencyImpl(it.name, dependency.id, builtinPluginVersion, it, true)
+                    return PluginDependencyImpl(it.name, dependency.id, builtinPluginVersion, it.toFile(), true)
                 }
             }
             throw BuildException("Cannot find builtin plugin '${dependency.id}' for IDE: ${ideaDependency.classes.canonicalPath}", null)
@@ -57,8 +57,8 @@ abstract class PluginDependencyManager @Inject constructor(
             repository.resolve(project, dependency, context)?.let {
                 val file = it.toPath() // TODO: migrate to Path
                 return when {
-                    file.isZip() -> zippedPluginDependency(it, dependency)
-                    file.isJar() -> externalPluginDependency(it, dependency.channel, true)
+                    file.isZip() -> zippedPluginDependency(file, dependency)
+                    file.isJar() -> externalPluginDependency(file, dependency.channel, true)
                     else -> throw BuildException("Invalid type of downloaded plugin: ${file.simpleName}", null)
                 }
             }
@@ -87,13 +87,13 @@ abstract class PluginDependencyManager @Inject constructor(
         )
     }
 
-    private fun zippedPluginDependency(pluginFile: File, dependency: PluginDependencyNotation): PluginDependency? {
+    private fun zippedPluginDependency(pluginFile: Path, dependency: PluginDependencyNotation): PluginDependency? {
         val pluginDir = findSingleDirectory(
             archiveUtils.extract(
-                pluginFile.toPath(),
+                pluginFile,
                 File(cacheDirectoryPath, groupId(dependency.channel)).resolve("${dependency.id}-${dependency.version}").toPath(), // FIXME
                 context,
-            ).toFile() // FIXME
+            )
         )
         return externalPluginDependency(pluginDir, dependency.channel, true)
     }
@@ -103,8 +103,8 @@ abstract class PluginDependencyManager @Inject constructor(
         else -> "unzipped.$channel.com.jetbrains.plugins"
     }
 
-    private fun findSingleDirectory(dir: File) =
-        dir.listFiles()?.singleOrNull { it.isDirectory } ?: throw BuildException("Single directory expected in: $dir", null)
+    private fun findSingleDirectory(dir: Path) =
+        dir.listFiles().singleOrNull { it.isDirectory() } ?: throw BuildException("Single directory expected in: $dir", null)
 
     private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
         val ideaDependency = ideaDependencyProvider.get() // TODO fix
@@ -124,10 +124,9 @@ abstract class PluginDependencyManager @Inject constructor(
             }
         }
         if (!plugin.builtin && !plugin.maven) {
-            val artifactParent = plugin.artifact.parentFile
-            val pluginSource = artifactParent.canonicalPath
-            if (artifactParent.parentFile.canonicalPath != cacheDirectoryPath && pluginSources.add(pluginSource)) {
-                ivyArtifactRepository?.artifactPattern("$pluginSource/[artifact](.[ext])")  // local plugins
+            val artifactParent = plugin.artifact.toPath().parent
+            if (artifactParent.parent != Path.of(cacheDirectoryPath) && pluginSources.add(artifactParent.absolutePathString())) {
+                ivyArtifactRepository?.artifactPattern("$artifactParent/[artifact](.[ext])")  // local plugins
             }
         }
     }
@@ -136,8 +135,8 @@ abstract class PluginDependencyManager @Inject constructor(
         val ideaDependency = ideaDependencyProvider.get() // TODO fix
 
         val baseDir = when {
-            plugin.builtin -> plugin.artifact
-            else -> plugin.artifact.parentFile
+            plugin.builtin -> plugin.artifact.toPath()
+            else -> plugin.artifact.toPath().parent
         }
         val pluginFqn = plugin.getFqn()
         val groupId = groupId(plugin.channel)
@@ -150,14 +149,14 @@ abstract class PluginDependencyManager @Inject constructor(
             .writeTo(ivyFile)
     }
 
-    private fun externalPluginDependency(artifact: File, channel: String? = null, maven: Boolean = false): PluginDependency? {
-        if (!artifact.toPath().isJar() && !artifact.isDirectory) {
+    private fun externalPluginDependency(artifact: Path, channel: String? = null, maven: Boolean = false): PluginDependency? {
+        if (!artifact.isJar() && !artifact.isDirectory()) {
             warn(context, "Cannot create plugin from file '$artifact' - only directories or jars are supported")
         }
         return createPlugin(artifact, true, context)?.let {
             val pluginId = it.pluginId ?: return null
             val pluginVersion = it.pluginVersion ?: return null
-            return PluginDependencyImpl(pluginId, pluginId, pluginVersion, artifact, false, maven).apply {
+            return PluginDependencyImpl(pluginId, pluginId, pluginVersion, artifact.toFile(), false, maven).apply {
                 this.channel = channel
                 this.sinceBuild = it.sinceBuild?.asStringWithoutProductCode()
                 this.untilBuild = it.untilBuild?.asStringWithoutProductCode()

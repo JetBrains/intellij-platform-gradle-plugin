@@ -39,36 +39,37 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
         return this
     }
 
-    fun addCompileArtifacts(plugin: PluginDependency, baseDir: File, groupId: String): IntelliJIvyDescriptorFileGenerator {
+    fun addCompileArtifacts(plugin: PluginDependency, baseDir: Path, groupId: String): IntelliJIvyDescriptorFileGenerator {
         val compileConfiguration = DefaultIvyConfiguration("compile")
 
         addConfiguration(compileConfiguration)
 
         plugin.jarFiles.forEach {
-            addArtifact(IntellijIvyArtifact.createJarDependency(it, compileConfiguration.name, baseDir, groupId))
+            addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), compileConfiguration.name, baseDir, groupId))
         }
         plugin.classesDirectory?.let {
-            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, compileConfiguration.name, baseDir, groupId))
+            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it.toPath(), compileConfiguration.name, baseDir, groupId))
         }
         plugin.metaInfDirectory?.let {
-            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it, compileConfiguration.name, baseDir, groupId))
+            addArtifact(IntellijIvyArtifact.createDirectoryDependency(it.toPath(), compileConfiguration.name, baseDir, groupId))
         }
 
         return this
     }
 
-    fun addSourceArtifacts(ideaDependency: IdeaDependency?, plugin: PluginDependency, baseDir: File, groupId: String): IntelliJIvyDescriptorFileGenerator {
+    fun addSourceArtifacts(ideaDependency: IdeaDependency?, plugin: PluginDependency, baseDir: Path, groupId: String): IntelliJIvyDescriptorFileGenerator {
         val sourcesConfiguration = DefaultIvyConfiguration("sources")
         addConfiguration(sourcesConfiguration)
         if (plugin.sourceJarFiles.isNotEmpty()) {
             plugin.sourceJarFiles.forEach {
-                addArtifact(IntellijIvyArtifact.createJarDependency(it, sourcesConfiguration.name, baseDir, groupId))
+                addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), sourcesConfiguration.name, baseDir, groupId))
             }
         } else {
             ideaDependency
                 ?.sourceZipFiles
+                ?.map { it.toPath() }
                 ?.let { IdePluginSourceZipFilesProvider.getSourceZips(it, plugin.platformPluginId) }
-                ?.let { IntellijIvyArtifact.createZipDependency(it, sourcesConfiguration.name, ideaDependency.classes) }
+                ?.let { IntellijIvyArtifact.createZipDependency(it, sourcesConfiguration.name, ideaDependency.classes.toPath()) }
                 ?.let(::addArtifact)
         }
         // see: https://github.com/JetBrains/gradle-intellij-plugin/issues/153
@@ -77,7 +78,7 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
             ?.takeIf { plugin.builtin }
             ?.let {
                 val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
-                val artifact = IntellijIvyArtifact(it, name, "jar", "sources", "sources")
+                val artifact = IntellijIvyArtifact(it.toPath(), name, "jar", "sources", "sources")
                 artifact.conf = sourcesConfiguration.name
                 addArtifact(artifact)
             }

@@ -17,9 +17,6 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.filefilter.AbstractFileFilter
-import org.apache.commons.io.filefilter.FalseFileFilter
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemLocation
@@ -54,7 +51,6 @@ import java.io.StringWriter
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files.createTempDirectory
-import java.nio.file.Files.exists
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -244,20 +240,17 @@ fun ideProductInfo(ideDir: Path) = ideDir
     .runCatching { json.decodeFromString<ProductInfo>(readText()) }
     .getOrNull()
 
-fun collectJars(directory: File, filter: Predicate<File> = Predicate { true }) =
-    collectFiles(directory) { it.toPath().isJar() && filter.test(it) }
+fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
+    collectFiles(directory) { it.isJar() && filter.test(it) }
 
-fun collectZips(directory: File, filter: Predicate<File> = Predicate { true }) =
-    collectFiles(directory) { it.toPath().isZip() && filter.test(it) }
+fun collectZips(directory: Path, filter: Predicate<Path> = Predicate { true }) =
+    collectFiles(directory) { it.isZip() && filter.test(it) }
 
-private fun collectFiles(directory: File, filter: Predicate<File>) = directory
+private fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
     .takeIf { it.isDirectory }
-    ?.let {
-        FileUtils.listFiles(it, object : AbstractFileFilter() {
-            override fun accept(file: File) = filter.test(file)
-        }, FalseFileFilter.FALSE)
-    }
+    ?.listFiles()
     .orEmpty()
+    .filter { filter.test(it) }
 
 fun releaseType(version: String) = when {
     version.endsWith(RELEASE_SUFFIX_EAP) ||
@@ -290,10 +283,10 @@ fun Project.logCategory(): String = path + if (path.endsWith(name)) " $name" els
 
 fun Task.logCategory(): String = project.logCategory() + path.removePrefix(project.logCategory())
 
-fun createPlugin(artifact: File, validatePluginXml: Boolean, context: String?): IdePlugin? {
+fun createPlugin(artifact: Path, validatePluginXml: Boolean, context: String?): IdePlugin? {
     val extractDirectory = createTempDirectory("tmp")
     val creationResult = IdePluginManager.createManager(extractDirectory)
-        .createPlugin(artifact.toPath(), validatePluginXml, IdePluginManager.PLUGIN_XML)
+        .createPlugin(artifact, validatePluginXml, IdePluginManager.PLUGIN_XML)
 
     return when (creationResult) {
         is PluginCreationSuccess -> creationResult.plugin

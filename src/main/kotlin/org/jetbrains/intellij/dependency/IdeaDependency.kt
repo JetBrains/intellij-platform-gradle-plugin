@@ -7,6 +7,8 @@ import org.jetbrains.intellij.collectZips
 import org.jetbrains.intellij.isKotlinRuntime
 import java.io.File
 import java.io.Serializable
+import kotlin.io.path.isDirectory
+import kotlin.io.path.name
 
 open class IdeaDependency(
     val name: String,
@@ -25,13 +27,13 @@ open class IdeaDependency(
 
     protected open fun collectJarFiles(): Collection<File> {
         if (classes.isDirectory) {
-            val lib = File(classes, "lib")
-            if (lib.isDirectory) {
+            val lib = classes.toPath().resolve("lib")
+            if (lib.isDirectory()) {
                 val baseFiles = (collectJars(lib) { file ->
                     (withKotlin || !isKotlinRuntime(file.name.removeSuffix(".jar"))) && file.name != "junit.jar" && file.name != "annotations.jar"
                 }).sorted()
-                val antFiles = collectJars(File(lib, "ant/lib")).sorted()
-                return baseFiles + antFiles
+                val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
+                return (baseFiles + antFiles).map { it.toFile() }
             }
         }
         return emptyList()
@@ -39,7 +41,7 @@ open class IdeaDependency(
 
     private fun collectSourceZipFiles(): Collection<File> {
         if (classes.isDirectory) {
-            return collectZips(File(classes, "lib/src"))
+            return collectZips(classes.toPath().resolve("lib/src")).map { it.toFile() }
         }
         return emptyList()
     }
