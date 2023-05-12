@@ -8,7 +8,7 @@ intellijStructure = "3.252"
 intellijPluginRepositoryRestClient = "2.0.32"
 jacksonDatabind = "2.14.2"
 jaxbApi = "2.4.0-b180830.0359"
-kotlinxSerializationJson = "1.5.0"
+kotlinxSerializationJson = "1.5.1"
 retrofit = "2.9.0"
 
 # plugins
