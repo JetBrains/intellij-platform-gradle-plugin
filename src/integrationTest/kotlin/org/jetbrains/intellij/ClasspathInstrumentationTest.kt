@@ -40,7 +40,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
             """.trimIndent()
 
             it.output containsText """
-                implementation - Implementation only dependencies for compilation 'main' (target  (jvm)). (n)
+                implementation - Implementation only dependencies for null/main. (n)
                 \--- org.jetbrains:markdown:0.3.1 (n)
             """.trimIndent()
 
