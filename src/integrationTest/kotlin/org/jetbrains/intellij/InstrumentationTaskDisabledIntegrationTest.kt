@@ -110,12 +110,12 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
     @Test
     fun `run tests and print nulls when instrumentation is disabled`() {
         build("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)).let {
-            it.output containsText """
+            it.safeOutput containsText """
                 InstrumentationTests > fooTest STANDARD_OUT
                     null
             """.trimIndent()
 
-            it.output containsText """
+            it.safeOutput containsText """
                 InstrumentationTests > test STANDARD_OUT
                     null
             """.trimIndent()
@@ -124,12 +124,12 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
     @Test
     fun `run tests and throw unmet assertion exceptions when instrumentation is enabled`() {
         buildAndFail("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)).let {
-            it.output containsText """
+            it.safeOutput containsText """
                 InstrumentationTests > fooTest FAILED
                     java.lang.IllegalArgumentException at InstrumentationTests.java:12
             """.trimIndent()
 
-            it.output containsText """
+            it.safeOutput containsText """
                 InstrumentationTests > test FAILED
                     java.lang.IllegalArgumentException at InstrumentationTests.java:7
             """.trimIndent()

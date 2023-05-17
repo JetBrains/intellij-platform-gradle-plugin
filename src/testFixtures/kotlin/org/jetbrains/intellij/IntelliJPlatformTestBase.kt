@@ -142,4 +142,10 @@ abstract class IntelliJPlatformTestBase {
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
         assertEquals(expectedContent.trim(), file?.readText()?.replace("\r", "")?.trim())
+
+    protected val BuildResult.safeOutput: String
+        get() = output.replace("\r", "")
+
+    protected val BuildResult.safeLogs: String
+        get() = safeOutput.lineSequence().filterNot { it.startsWith("[gradle-intellij-plugin") }.joinToString("\n")
 }

@@ -14,7 +14,6 @@ open class IntelliJPlatformIntegrationTestBase(
     private val resourceName: String? = null,
 ) : IntelliJPlatformTestBase() {
 
-
     @BeforeTest
     override fun setup() {
         super.setup()

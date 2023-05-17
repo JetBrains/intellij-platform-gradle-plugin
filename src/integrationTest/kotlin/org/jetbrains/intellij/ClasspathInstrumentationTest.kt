@@ -39,17 +39,17 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
                 \--- com.jetbrains:ideaIC:2022.1
             """.trimIndent()
 
-            it.output containsText """
+            it.safeOutput containsText """
                 implementation - Implementation only dependencies for null/main. (n)
                 \--- org.jetbrains:markdown:0.3.1 (n)
             """.trimIndent()
 
-            it.output containsText """
+            it.safeOutput containsText """
                 z10_intellijDefaultDependencies
                 \--- org.jetbrains:annotations:24.0.0
             """.trimIndent()
 
-            it.output containsText """
+            it.safeOutput containsText """
                 z90_intellij
                 \--- com.jetbrains:ideaIC:2022.1
             """.trimIndent()
@@ -78,7 +78,4 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
             }
         }
     }
-
-    private val BuildResult.safeLogs: String
-        get() = output.lineSequence().filterNot { it.startsWith("[gradle-intellij-plugin") }.joinToString("\n")
 }
