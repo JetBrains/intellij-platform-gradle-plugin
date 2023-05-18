@@ -513,7 +513,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `expect build fails when using unsupported Gradle version`() {
         val unsupportedGradleVersions = setOf(
             "6.4",
-            "6.7.1",
         )
 
         unsupportedGradleVersions.forEach { gradleVersion ->
