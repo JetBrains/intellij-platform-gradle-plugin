@@ -8,6 +8,9 @@
 ### Fixed
 - Resolving Android Studio JNA libraries on macOS [#1353](../../issues/1353)
 
+### Changed
+- Set minimum supported Gradle version from `7.3` to `7.6`
+
 ## [1.13.3] - 2023-03-28
 
 ### Added
