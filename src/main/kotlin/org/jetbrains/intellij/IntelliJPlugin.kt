@@ -31,6 +31,7 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.plugins.ide.idea.model.IdeaProject
+import org.gradle.util.GradleVersion
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
@@ -1236,13 +1237,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
             dependsOn(PREPARE_TESTING_SANDBOX_TASK_NAME)
             finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
-            jbrResolver.resolveRuntime(
-                jbrVersion = jbrVersionProvider.orNull,
-                jbrVariant = jbrVariantProvider.orNull,
-                jbrArch = jbrArchProvider.orNull,
-                ideDir = ideDirProvider.map { it.toFile() }.orNull,
-            )?.let {
-                executable = it.toString()
+            if (GradleVersion.current() >= GradleVersion.version("8.0")) { // TODO: remove in 2.0 as Gradle 8 will become the minimum supported version
+                jbrResolver.resolveRuntime(
+                    jbrVersion = jbrVersionProvider.orNull,
+                    jbrVariant = jbrVariantProvider.orNull,
+                    jbrArch = jbrArchProvider.orNull,
+                    ideDir = ideDirProvider.map { it.toFile() }.orNull,
+                )?.let {
+                    executable = it.toString()
+                }
             }
 
             jvmArgs = getIdeaJvmArgs(this, jvmArgs, ideDirProvider.get())
