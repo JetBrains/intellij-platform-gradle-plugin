@@ -64,7 +64,7 @@ jobs:
         uses: dorny/test-reporter@v1
         if: ${{ always() }}
         with:
-          name: "Unit Tests Report: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}"
+          name: "Integration Tests Report: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}"
           path: "**/build/test-results/*/TEST-*.xml"
           reporter: java-junit
 
@@ -72,7 +72,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
-          name: test-results-${{ matrix.gradleVersion }}-${{ matrix.os }}
+          name: integration-tests-${{ matrix.gradleVersion }}-${{ runner.os }}
           path: |
             ${{ github.workspace }}/build/reports/tests
             ${{ github.workspace }}/build/reports/configuration-cache
