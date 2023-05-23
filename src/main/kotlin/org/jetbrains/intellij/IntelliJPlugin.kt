@@ -1,4 +1,4 @@
-// Copyright 2000-2022 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij
 
@@ -393,7 +393,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             sourcePluginXmlFiles(project).forEach { path ->
                 parsePluginXml(path, context)?.dependencies?.forEach {
                     if (it.dependencyId == "com.intellij.modules.java") {
-                        throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add 'java' plugin to Gradle dependencies (e.g. intellij { plugins = ['java'] })")
+                        throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add Java plugin to Gradle dependencies (https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html#java)")
                     }
                 }
             }
