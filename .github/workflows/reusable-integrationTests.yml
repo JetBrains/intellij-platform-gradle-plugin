@@ -36,12 +36,12 @@ jobs:
             17
             11
 
+      - name: Add extra JVMs to toolchains
+        run: |
+          echo "org.gradle.java.installations.fromEnv=JAVA_HOME_11_X64,JAVA_HOME_17_X64" >> gradle.properties
+
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-
-      - name: Check Gradle
-        run: |
-          gradle -q javaToolchains
 
       - name: Check Gradle 2
         run: |
