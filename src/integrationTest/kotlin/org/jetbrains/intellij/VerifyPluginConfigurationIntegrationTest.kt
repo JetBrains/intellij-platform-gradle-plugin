@@ -26,6 +26,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     fun `should not report issues on valid configuration`() {
         build(
             "clean",
+            "javaToolchains",
             "verifyPluginConfiguration",
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties,
@@ -38,6 +39,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     fun `should report incorrect source compatibility`() {
         build(
             "clean",
+            "javaToolchains",
             "verifyPluginConfiguration",
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("languageVersion" to "11"),
@@ -51,6 +53,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     fun `should report incorrect target compatibility`() {
         build(
             "clean",
+            "javaToolchains",
             "verifyPluginConfiguration",
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("sinceBuild" to "203"),
@@ -73,6 +76,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
 
         build(
             "clean",
+            "javaToolchains",
             "verifyPluginConfiguration",
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("downloadDir" to downloadDir),
