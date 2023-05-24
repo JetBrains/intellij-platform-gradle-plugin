@@ -15,6 +15,7 @@ repositories {
 kotlin {
     jvmToolchain {
         languageVersion.set(JavaLanguageVersion.of(languageVersionProperty))
+        vendor.set(JvmVendorSpec.ADOPTIUM)
     }
 }
 
