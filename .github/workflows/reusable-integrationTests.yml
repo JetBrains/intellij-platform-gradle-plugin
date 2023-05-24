@@ -19,7 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "7.6"
           - "8.1.1"
         os:
           - windows-latest
@@ -40,13 +39,13 @@ jobs:
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
 
-      - name: Cache XDG_CACHE_HOME
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.XDG_CACHE_HOME }}
-          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-XDG_CACHE_HOME-
+      - name: Check Gradle
+        run: |
+          gradle -q javaToolchains
+
+      - name: Check Gradle 2
+        run: |
+          ./gradlew -q javaToolchains
 
       - name: Run Tests
         env:
