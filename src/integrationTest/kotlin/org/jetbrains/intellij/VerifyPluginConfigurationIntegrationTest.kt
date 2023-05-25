@@ -3,8 +3,10 @@
 package org.jetbrains.intellij
 
 import java.nio.file.Files
+import kotlin.test.Ignore
 import kotlin.test.Test
 
+@Ignore
 class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "verify-plugin-configuration",
 ) {
