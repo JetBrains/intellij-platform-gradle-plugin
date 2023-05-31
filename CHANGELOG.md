@@ -10,6 +10,7 @@
 - Fixed "Must not use `executable` property on `Test` together with `javaLauncher` property" for Gradle `7.x` [#1358](../../issues/1358)
 - Task `:listProductsReleases` creates empty file due to `MalformedByteSequenceException` [#1389](../../issues/1389)
 - Make `RunIdeBase.pluginsDir` a `@Classpath` input, fixes cacheability of `buildSearchableOptions` [#1370](../../issues/1370)
+- Fixed `JarSearchableOptionsTask` cacheability [#1375](../../issues/1375)
 
 ### Changed
 - Set minimum supported Gradle version from `7.3` to `7.6`
