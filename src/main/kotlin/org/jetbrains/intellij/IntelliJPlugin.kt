@@ -1445,7 +1445,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val downloadIdeaProductReleasesXml = project.tasks.register<Sync>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME) {
             group = PLUGIN_GROUP_NAME
-            from(project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL)) {
+            from(project.resources.text.fromUri(IDEA_PRODUCTS_RELEASES_URL).asFile("UTF-8")) {
                 rename { "idea_product_releases.xml" }
             }
             into(temporaryDir)

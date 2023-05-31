@@ -8,6 +8,7 @@
 ### Fixed
 - Resolving Android Studio JNA libraries on macOS [#1353](../../issues/1353)
 - Fixed "Must not use `executable` property on `Test` together with `javaLauncher` property" for Gradle `7.x` [#1358](../../issues/1358)
+- Task `:listProductsReleases` creates empty file due to `MalformedByteSequenceException` [#1389](../../issues/1389)
 
 ### Changed
 - Set minimum supported Gradle version from `7.3` to `7.6`
