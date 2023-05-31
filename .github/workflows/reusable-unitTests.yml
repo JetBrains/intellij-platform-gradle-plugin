@@ -13,9 +13,11 @@ jobs:
       gradleVersion: "8.1.1"
       os: ubuntu-latest
       script: |
-        sudo rm -rf /usr/share/dotnet
-        sudo rm -rf /usr/local/lib/android
-        sudo rm -rf /opt/ghc
+        mkdir /tmp/empty_dir
+        sudo rsync -a --delete /tmp/empty_dir/ /usr/share/dotnet
+        sudo rsync -a --delete /tmp/empty_dir/ /usr/local/lib/android
+        sudo rsync -a --delete /tmp/empty_dir/ /opt/ghc
+        rmdir /tmp/empty_dir
 
   unitTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
@@ -39,9 +41,11 @@ jobs:
         include:
           - os: ubuntu-latest
             script: |
-              sudo rm -rf /usr/share/dotnet
-              sudo rm -rf /usr/local/lib/android
-              sudo rm -rf /opt/ghc
+              mkdir /tmp/empty_dir
+              sudo rsync -a --delete /tmp/empty_dir/ /usr/share/dotnet
+              sudo rsync -a --delete /tmp/empty_dir/ /usr/local/lib/android
+              sudo rsync -a --delete /tmp/empty_dir/ /opt/ghc
+              rmdir /tmp/empty_dir
         exclude:
           - os: ubuntu-latest
             gradleVersion: "8.1.1"
