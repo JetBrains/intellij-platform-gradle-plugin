@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Fixed
+- `Illegal char <:> at index 25: -Djna.boot.library.path=...` exception on Windows when calculating the IDE home path
+
 ## [1.14.0] - 2023-06-02
 
 ### Added

@@ -15,7 +15,6 @@ import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -96,16 +95,17 @@ fun transformXml(document: Document, path: Path) {
 }
 
 private fun String.resolveIdeHomeVariable(ideDir: Path) =
-    ideDir.toAbsolutePath().toString().let {
+    ideDir.toAbsolutePath().toString().let { idePath ->
         this
-            .replace("\$APP_PACKAGE", it)
-            .replace("\$IDE_HOME", it)
-            .replace("%IDE_HOME%", it)
+            .replace("\$APP_PACKAGE", idePath)
+            .replace("\$IDE_HOME", idePath)
+            .replace("%IDE_HOME%", idePath)
             .replace("Contents/Contents", "Contents")
-            .run {
+            .let { entry ->
+                val (_, value) = entry.split("=")
                 when {
-                    Path.of(this).exists() -> this
-                    else -> replace("/Contents", "")
+                    Path.of(value).exists() -> entry
+                    else -> entry.replace("/Contents", "")
                 }
             }
     }
