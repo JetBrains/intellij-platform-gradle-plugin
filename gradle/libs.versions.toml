@@ -4,7 +4,7 @@
 annotations = "24.0.1"
 ddPlist = "1.27"
 gradleIdeaExt = "1.1.7"
-intellijStructure = "3.258"
+intellijStructure = "3.259"
 intellijPluginRepositoryRestClient = "2.0.32"
 jacksonDatabind = "2.15.2"
 jaxbApi = "2.4.0-b180830.0359"
@@ -15,7 +15,7 @@ retrofit = "2.9.0"
 dokka = "1.8.10"
 kotlin = "1.8.21"
 gradlePluginPublish = "1.2.0"
-gradleChangelogPlugin = "2.0.0"
+gradleChangelogPlugin = "2.1.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
