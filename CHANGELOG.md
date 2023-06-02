@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.14.0] - 2023-06-02
+
 ### Added
 - VerifyPluginConfigurationTask: Kotlin version check — report OOM for Kotlin `1.8.20+`, see: https://jb.gg/intellij-platform-kotlin-oom
 
@@ -704,7 +706,8 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.3...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.0...HEAD
+[1.14.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.3...v1.14.0
 [1.13.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.2...v1.13.3
 [1.13.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.1...v1.13.2
 [1.13.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.0...v1.13.1
