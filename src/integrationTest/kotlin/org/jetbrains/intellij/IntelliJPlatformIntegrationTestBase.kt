@@ -8,6 +8,7 @@ import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.copyTo
 import kotlin.io.path.notExists
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 open class IntelliJPlatformIntegrationTestBase(
@@ -21,6 +22,11 @@ open class IntelliJPlatformIntegrationTestBase(
         if (resourceName != null) {
             use(resourceName)
         }
+    }
+
+    @AfterTest
+    fun cleanup() {
+        dir.deleteRecursively()
     }
 
     protected fun use(resourceName: String) {
