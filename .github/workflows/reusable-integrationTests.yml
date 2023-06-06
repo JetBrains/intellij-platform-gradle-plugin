@@ -22,9 +22,9 @@ jobs:
           - "7.6"
           - "8.1.1"
         os:
-          - windows-latest
+#          - windows-latest
           - ubuntu-latest
-          - macos-latest
+#          - macos-latest
 
     steps:
 

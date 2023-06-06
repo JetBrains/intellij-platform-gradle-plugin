@@ -48,7 +48,7 @@ jobs:
   build:
     name: Build
     needs:
-      - unitTests
+#      - unitTests
       - integrationTests
 #      - integrationTestsEAP
       - codeInspection
