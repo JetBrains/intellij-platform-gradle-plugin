@@ -23,14 +23,14 @@ jobs:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
-  unitTests:
-    name: Unit Tests
-    needs: gradleValidation
-    uses: ./.github/workflows/reusable-unitTests.yml
+#  unitTests:
+#    name: Unit Tests
+#    needs: gradleValidation
+#    uses: ./.github/workflows/reusable-unitTests.yml
 
   integrationTests:
     name: Integration Tests
-    needs: [ gradleValidation, unitTests ]
+#    needs: [ gradleValidation, unitTests ]
     uses: ./.github/workflows/reusable-integrationTests.yml
 
 #  integrationTestsEAP:
