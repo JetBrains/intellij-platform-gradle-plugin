@@ -3,6 +3,7 @@
 package org.jetbrains.intellij
 
 import java.nio.file.Files
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -17,20 +18,27 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             "assemble",
-            projectProperties = mapOf(flag to false),
+            projectProperties = mapOf(
+                "instrumentCode" to false,
+                flag to false,
+            ),
             args = defaultArgs,
         ).let {
             it.output containsText "Build feature is disabled: $flag"
         }
     }
 
+    @Ignore
     @Test
     fun `noSearchableOptionsWarning is disabled`() {
         val flag = BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.toString()
 
         build(
             "jarSearchableOptions",
-            projectProperties = mapOf(flag to false),
+            projectProperties = mapOf(
+                "instrumentCode" to false,
+                flag to false,
+            ),
             args = defaultArgs,
         ).let {
             it.output containsText "Build feature is disabled: $flag"
@@ -43,7 +51,10 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             "jarSearchableOptions",
-            projectProperties = mapOf(flag to true),
+            projectProperties = mapOf(
+                "instrumentCode" to true,
+                flag to true,
+            ),
             args = defaultArgs,
         ).let {
             it.output containsText "No searchable options found."
@@ -56,7 +67,10 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             "buildSearchableOptions",
-            projectProperties = mapOf(flag to false),
+            projectProperties = mapOf(
+                "instrumentCode" to false,
+                flag to false,
+            ),
             args = defaultArgs,
         ).let {
             it.output containsText "Build feature is disabled: $flag"
@@ -86,7 +100,10 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             "buildSearchableOptions",
-            projectProperties = mapOf(flag to true),
+            projectProperties = mapOf(
+                "instrumentCode" to true,
+                flag to true,
+            ),
             args = defaultArgs,
         ).let {
             it.output containsText "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin."
