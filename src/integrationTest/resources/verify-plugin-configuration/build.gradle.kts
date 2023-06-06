@@ -4,7 +4,7 @@ val languageVersionProperty = project.property("languageVersion").toString()
 val downloadDirProperty = project.property("downloadDir").toString()
 
 plugins {
-    id("org.jetbrains.kotlin.jvm") version "1.8.21"
+    id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij")
 }
 
