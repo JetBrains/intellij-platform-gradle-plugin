@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.14.1] - 2023-06-07
+
 ### Fixed
 - `Illegal char <:> at index 25: -Djna.boot.library.path=...` exception on Windows when calculating the IDE home path
 
@@ -709,7 +711,8 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.0...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.1...HEAD
+[1.14.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.3...v1.14.0
 [1.13.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.2...v1.13.3
 [1.13.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.1...v1.13.2
