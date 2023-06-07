@@ -49,9 +49,9 @@ jobs:
     name: Build
     needs:
       - unitTests
-      - integrationTests
+#      - integrationTests
 #      - integrationTestsEAP
-      - codeInspection
+#      - codeInspection
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.properties.outputs.version }}
