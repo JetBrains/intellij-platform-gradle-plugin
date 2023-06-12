@@ -7,6 +7,7 @@
 
 ### Changed
 - New project name: IntelliJ Platform Gradle Plugin
+- New project ID: `org.jetbrains.intellij.platform`
 - Disabled caching for `BuildPluginTask`
 
 ## [1.15.0] - 2023-07-07

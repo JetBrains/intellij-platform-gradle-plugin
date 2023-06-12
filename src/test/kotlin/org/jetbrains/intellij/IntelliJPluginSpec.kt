@@ -300,7 +300,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             plugins {
                 id 'java'
-                id 'org.jetbrains.intellij'
+                id 'org.jetbrains.intellij.platform'
                 id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
@@ -333,7 +333,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             plugins {
                 id 'java'
-                id 'org.jetbrains.intellij'
+                id 'org.jetbrains.intellij.platform'
                 id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
@@ -408,7 +408,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             plugins {
                 id 'java'
-                id 'org.jetbrains.intellij'
+                id 'org.jetbrains.intellij.platform'
                 id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {

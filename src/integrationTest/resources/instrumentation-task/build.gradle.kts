@@ -2,7 +2,7 @@
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
-    id("org.jetbrains.intellij")
+    id("org.jetbrains.intellij.platform")
 }
 
 version = "1.0.0"

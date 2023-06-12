@@ -56,7 +56,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         file("nestedProject/build.gradle").groovy(
             """
             repositories { mavenCentral() }
-            apply plugin: 'org.jetbrains.intellij'
+            apply plugin: 'org.jetbrains.intellij.platform'
             version = '0.42.123'
             
             compileJava {
@@ -137,7 +137,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             allprojects {
                 repositories { mavenCentral() }
                 version = '0.42.123'
-                apply plugin: 'org.jetbrains.intellij'
+                apply plugin: 'org.jetbrains.intellij.platform'
                 intellij { 
                     downloadSources = false
                     version = "$intellijVersion"

@@ -1,7 +1,7 @@
 plugins {
     id("java")
     id("kotlin")
-    id("org.jetbrains.intellij")
+    id("org.jetbrains.intellij.platform")
 }
 
 repositories {

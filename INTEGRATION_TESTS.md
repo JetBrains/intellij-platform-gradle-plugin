@@ -58,7 +58,7 @@ The `build.gradle.kts` should apply the IntelliJ Platform Gradle Plugin without 
 
 ```kotlin
 plugins {
-  id("org.jetbrains.intellij")
+  id("org.jetbrains.intellij.platform")
 }
 
 // ...
