@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Fixed
+- Handle the `Could not HEAD 'https://www.jetbrains.com/updates/updates.xml'` gracefully when running `downloadIdeaProductReleasesXml` with no Internet connection
+
 ## [1.14.1] - 2023-06-07
 
 ### Fixed
