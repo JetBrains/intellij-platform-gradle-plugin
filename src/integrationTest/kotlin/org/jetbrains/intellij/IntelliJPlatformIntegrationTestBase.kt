@@ -70,7 +70,7 @@ open class IntelliJPlatformIntegrationTestBase(
 //        get() = projectDirectory.parent
 //
 //    /**
-//     * Path to the Gradle IntelliJ Plugin root directory,
+//     * Path to the IntelliJ Platform Gradle Plugin root directory,
 //     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/`.
 //     */
 //    val Path.rootDirectory

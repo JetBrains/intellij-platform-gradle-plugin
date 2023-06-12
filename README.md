@@ -5,19 +5,19 @@
 [![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)][jb:twitter]
 [![Slack](https://img.shields.io/badge/Slack-%23gradle--intellij--plugin-blue?style=flat-square&logo=Slack)][jb:slack]
 
-![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-dark.svg#gh-dark-mode-only)
-![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-light.svg#gh-light-mode-only)
+![IntelliJ Platform Gradle Plugin](.github/readme/intellij-platform-gradle-plugin-dark.svg#gh-dark-mode-only)
+![IntelliJ Platform Gradle Plugin](.github/readme/intellij-platform-gradle-plugin-light.svg#gh-light-mode-only)
 
 
-# Gradle IntelliJ Plugin
-The Gradle IntelliJ Plugin is a plugin for the Gradle build system to help configuring your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
+# IntelliJ Platform Gradle Plugin
+The IntelliJ Platform Gradle Plugin is a plugin for the Gradle build system to help configuring your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
 
 ## Documentation
-The documentation of the Gradle IntelliJ Plugin has moved to the IntelliJ Platform Plugin SDK Documentation:
+The documentation of the IntelliJ Platform Gradle Plugin has moved to the IntelliJ Platform Plugin SDK Documentation:
 https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html
 
 ### Installation
-To install the Gradle IntelliJ Plugin in your project, follow [Usage](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#usage) section of the plugin documentation.
+To install the IntelliJ Platform Gradle Plugin in your project, follow [Usage](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#usage) section of the plugin documentation.
 There's also a [Snapshot Release](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#snapshot-release) available built nightly form the main branch containing the always-latest version of the plugin.
 
 ## Changelog

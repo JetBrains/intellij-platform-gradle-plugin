@@ -1549,7 +1549,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     }
 
     private fun configureInitializeGradleIntelliJPluginTask(project: Project) {
-        info(context, "Initializing Gradle IntelliJ Plugin")
+        info(context, "Initializing IntelliJ Platform Gradle Plugin")
 
         project.tasks.register<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
         project.tasks.withType<InitializeIntelliJPluginTask> {

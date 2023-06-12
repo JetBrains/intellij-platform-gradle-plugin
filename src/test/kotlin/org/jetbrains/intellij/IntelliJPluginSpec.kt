@@ -522,7 +522,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 assertValidConfigurationCache = true,
                 "help",
             ).apply {
-                assertContains("Gradle IntelliJ Plugin requires Gradle", output)
+                assertContains("IntelliJ Platform Gradle Plugin requires Gradle", output)
                 assertContains("FAILURE: Build failed with an exception", output)
             }
         }
@@ -538,7 +538,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
 
         assertContains("BUILD SUCCESSFUL", buildResult.output)
-        assertNotContains("Gradle IntelliJ Plugin requires Gradle", buildResult.output)
+        assertNotContains("IntelliJ Platform Gradle Plugin requires Gradle", buildResult.output)
     }
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")

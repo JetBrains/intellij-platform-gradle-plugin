@@ -3,7 +3,7 @@
 package org.jetbrains.intellij
 
 object IntelliJPluginConstants {
-    const val PLUGIN_NAME = "Gradle IntelliJ Plugin"
+    const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij"
     const val PLUGIN_GROUP_NAME = "intellij"
     const val EXTENSION_NAME = "intellij"

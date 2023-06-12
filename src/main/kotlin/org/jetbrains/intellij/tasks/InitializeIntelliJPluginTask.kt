@@ -17,7 +17,7 @@ import org.jetbrains.intellij.utils.LatestVersionResolver
 import java.io.File
 
 /**
- * Initializes the Gradle IntelliJ Plugin and performs various checks, like if the plugin is up to date.
+ * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up to date.
  */
 @UntrackedTask(because = "Should always be run to initialize the plugin")
 abstract class InitializeIntelliJPluginTask : DefaultTask() {
@@ -33,7 +33,7 @@ abstract class InitializeIntelliJPluginTask : DefaultTask() {
 
     init {
         group = PLUGIN_GROUP_NAME
-        description = "Initializes the Gradle IntelliJ Plugin"
+        description = "Initializes the IntelliJ Platform Gradle Plugin"
     }
 
     private val context = logCategory()

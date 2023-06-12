@@ -20,7 +20,7 @@ A clear and concise description of what you expected to happen.
 
 **Environment:**
  - OS: [e.g. macOS]
- - Gradle IntelliJ Plugin Version [e.g. 1.6.0]
+ - IntelliJ Platform Gradle Plugin Version [e.g. 2.0]
  - Gradle Version [e.g. 7.4.2]
 
 **Additional context**

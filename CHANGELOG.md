@@ -6,6 +6,7 @@
 - Configure all tasks that extend task classes instead of just those created by the plugin 
 
 ### Changed
+- New project name: IntelliJ Platform Gradle Plugin
 - Disabled caching for `BuildPluginTask`
 
 ## [1.15.0] - 2023-07-07

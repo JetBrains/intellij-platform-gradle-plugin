@@ -14,7 +14,7 @@ class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
             pluginJar containsFileInArchive "META-INF/MANIFEST.MF"
             with(pluginJar readEntry "META-INF/MANIFEST.MF") {
                 this containsText "Version: 1.0.0"
-                this containsText "Build-Plugin: Gradle IntelliJ Plugin"
+                this containsText "Build-Plugin: IntelliJ Platform Gradle Plugin"
                 this containsText "Build-Plugin-Version:"
                 this containsText "Build-OS:"
                 this containsText "Build-SDK: IC-2022.1.4"

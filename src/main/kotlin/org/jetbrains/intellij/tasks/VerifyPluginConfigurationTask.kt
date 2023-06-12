@@ -188,7 +188,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
             }
             if (kotlinPluginAvailable.get() && kotlinVersion >= Version(1, 8, 20) && kotlinVersion < Version(1, 9) && kotlinIncrementalUseClasspathSnapshot.orNull == null) {
-                yield("The Kotlin plugin in version $kotlinVersion used with the Gradle IntelliJ Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
+                yield("The Kotlin plugin in version $kotlinVersion used with the IntelliJ Platform Gradle Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
             }
         }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
             warn(

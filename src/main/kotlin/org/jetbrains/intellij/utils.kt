@@ -307,7 +307,7 @@ internal fun getCurrentPluginVersion() = IntelliJPlugin::class.java
                 else -> return@runCatching null
             }
         }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
-        info(null, "Resolving Gradle IntelliJ Plugin version with: $manifestPath")
+        info(null, "Resolving IntelliJ Platform Gradle Plugin version with: $manifestPath")
         URL(manifestPath).openStream().use {
             Manifest(it).mainAttributes.getValue("Version")
         }

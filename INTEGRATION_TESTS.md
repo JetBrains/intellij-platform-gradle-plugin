@@ -1,10 +1,10 @@
-# Gradle IntelliJ Plugin Integration Tests
+# IntelliJ Platform Gradle Plugin Integration Tests
 
 ## Purpose of running Integration Tests
 
-The Gradle IntelliJ Plugin already contains a set of unit tests, but in some cases, it is not enough when a more complex configuration is used.
+The IntelliJ Platform Gradle Plugin already contains a set of unit tests, but in some cases, it is not enough when a more complex configuration is used.
 
-Integration Tests are supposed to build the Gradle IntelliJ Plugin from the sources held in the currently used branch (i.e., for specific commits, pull request) and use it against the curated list of subprojects.
+Integration Tests are supposed to build the IntelliJ Platform Gradle Plugin from the sources held in the currently used branch (i.e., for specific commits, pull request) and use it against the curated list of subprojects.
 
 Each of the Integration Tests is a standalone project that focuses on a specific use-case, like patching the `plugin.xml` file, running one of the small IDEs with extra dependencies and feature implemented, etc.
 
@@ -24,7 +24,7 @@ Each matrix variation is used to run the Integration Tests projects as a separat
 
 The Integration Tests workflow is stored in the [`integration-tests.yml`](../.github/workflows/integration-tests.yml) file.
 It defines a couple of triggers:
-- `workflow_dispatch` – manual trigger via the [Actions](https://github.com/JetBrains/gradle-intellij-plugin/actions) tab of the Gradle IntelliJ Plugin GitHub repository.
+- `workflow_dispatch` – manual trigger via the [Actions](https://github.com/JetBrains/gradle-intellij-plugin/actions) tab of the IntelliJ Platform Gradle Plugin GitHub repository.
 - `schedule` (WIP) – CRON job
 - `push` (WIP) – trigger any push to the main branch
 - `pull_request` (WIP) – trigger on any push to pull requests
@@ -47,14 +47,14 @@ The Gradle task execution is performed via the `runGradleTask()` function, which
 │   │   ├── build.gradle.kts      custom project configuration
 │   │   ├── src                   module sources, like Java/Kotlin implementation, plugin.xml, other resources
 │   │   └── verify.main.kts       custom verification script containing assertions against build output, artifact, and Gradle output
-│   ├── settings.gradle.kts       combines subprojects, loads Gradle IntelliJ Plugin
+│   ├── settings.gradle.kts       combines subprojects, loads IntelliJ Platform Gradle Plugin
 │   └── verify.utils.kts          util methods for verify.main.kts scripts which are located in modules
 └── ...
 ```
 
 To introduce a new subproject to the Integration Tests set, it is required to create a new directory within the `integration-tests` folder and provide at least `build.gradle.kts` and `verify.main.kts` scripts.
 
-The `build.gradle.kts` should apply the Gradle IntelliJ Plugin without specifying its version and define dependencies of the `integrationTest` task:
+The `build.gradle.kts` should apply the IntelliJ Platform Gradle Plugin without specifying its version and define dependencies of the `integrationTest` task:
 
 ```kotlin
 plugins {
