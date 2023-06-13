@@ -1,0 +1,118 @@
+// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+
+package org.jetbrains.intellij.platform.gradleplugin.tasks
+
+import com.jetbrains.plugin.structure.base.utils.createDir
+import com.jetbrains.plugin.structure.base.utils.extension
+import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
+import org.gradle.api.Incubating
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.UntrackedTask
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradleplugin.error
+import org.jetbrains.intellij.platform.gradleplugin.info
+import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.model.PerformanceTestResult
+import org.jetbrains.intellij.platform.gradleplugin.performanceTest.ProfilerName
+import org.jetbrains.intellij.platform.gradleplugin.performanceTest.TestExecutionFailException
+import org.jetbrains.intellij.platform.gradleplugin.performanceTest.parsers.IdeaLogParser
+import org.jetbrains.intellij.platform.gradleplugin.performanceTest.parsers.SimpleIJPerformanceParser
+import org.jetbrains.intellij.propertyProviders.PerformanceTestArgumentProvider
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
+
+/**
+ * Runs performance tests on the IDE with the developed plugin installed.
+ *
+ * The [RunIdePerformanceTestTask] task extends the [RunIdeBase] task, so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [RunIdePerformanceTestTask] as well.
+ * See [RunIdeTask] task for more details.
+ *
+ * Currently, the task is under adaptation; more documentation will be added in the future.
+ *
+ * @see [RunIdeTask]
+ * @see [RunIdeBase]
+ * @see [JavaExec]
+ */
+@Incubating
+@UntrackedTask(because = "Should always run IDE for performance tests")
+abstract class RunIdePerformanceTestTask : RunIdeBase() {
+
+    /**
+     * Path to directory with test projects and '.ijperf' files.
+     */
+    @get:Input
+    abstract val testDataDir: Property<String>
+
+    /**
+     * Path to the directory where performance test artifacts (IDE logs, snapshots, screenshots, etc.) will be stored.
+     * If the directory doesn't exist, it will be created.
+     */
+    @get:Input
+    abstract val artifactsDir: Property<String>
+
+    /**
+     * Name of the profiler which will be used during execution.
+     *
+     * Default value: [ProfilerName.ASYNC]
+     *
+     * Acceptable values:
+     * - [ProfilerName.ASYNC]
+     * - [ProfilerName.YOURKIT]
+     */
+    @get:Input
+    abstract val profilerName: Property<ProfilerName>
+
+    private val context = logCategory()
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Runs performance tests on the IDE with the developed plugin installed."
+    }
+
+    @TaskAction
+    override fun exec() {
+        val dir = Paths.get(artifactsDir.get()).createDir()
+        val testData = Path.of(testDataDir.get())
+        val testExecutionResults = mutableListOf<PerformanceTestResult>()
+
+        Files.walk(testData, 1)
+            .filter { it.extension == "ijperf" }
+            .forEach {scriptPath ->
+                val testName = scriptPath.nameWithoutExtension
+                val testScript = SimpleIJPerformanceParser(scriptPath).parse()
+                val testArtifactsDirPath = dir.resolve(testName).createDir()
+
+                // Passing to the IDE project to open
+                args = listOf("${testDataDir.get()}/${testScript.projectName}")
+
+                jvmArgumentProviders.add(PerformanceTestArgumentProvider(
+                    scriptPath,
+                    testArtifactsDirPath,
+                    profilerName.get().name.lowercase(),
+                ))
+                super.exec()
+
+                IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toAbsolutePath().toString())
+                    .getTestStatistic()
+                    .let { testResults ->
+                        info(context, "Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
+
+                        if (testScript.assertionTimeout != null && testResults.totalTime!! > testScript.assertionTimeout) {
+                            testExecutionResults.add(PerformanceTestResult(testName, testResults, testScript))
+                        }
+                    }
+            }
+
+        if (testExecutionResults.isNotEmpty()) {
+            testExecutionResults.forEach {
+                error(context, "TEST `${it.testName}` FAILED")
+                error(context, "Expected time of execution `${it.script.assertionTimeout}ms`, but was ${it.statistic.totalTime}ms")
+            }
+            throw TestExecutionFailException("${testExecutionResults.size} test(s) failed")
+        }
+    }
+}

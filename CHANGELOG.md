@@ -8,6 +8,8 @@
 ### Changed
 - New project name: IntelliJ Platform Gradle Plugin
 - New project ID: `org.jetbrains.intellij.platform`
+- New Maven coordinates: `org.jetbrains.intellij.platform:intellij-platform-gradle-plugin`
+- Move classes under the new package: `org.jetbrains.intellij.platform.gradleplugin`
 - Disabled caching for `BuildPluginTask`
 
 ## [1.15.0] - 2023-07-07
