@@ -20,6 +20,7 @@ import org.jetbrains.intellij.performanceTest.ProfilerName
 import org.jetbrains.intellij.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.performanceTest.parsers.SimpleIJPerformanceParser
+import org.jetbrains.intellij.propertyProviders.PerformanceTestArgumentProvider
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -65,8 +66,6 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
     @get:Input
     abstract val profilerName: Property<ProfilerName>
 
-    private lateinit var scriptPath: String
-    private lateinit var testArtifactsDirPath: Path
     private val context = logCategory()
 
     init {
@@ -82,19 +81,22 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
 
         Files.walk(testData, 1)
             .filter { it.extension == "ijperf" }
-            .forEach {
-                val testName = it.nameWithoutExtension
-                val testScript = SimpleIJPerformanceParser(it).parse()
-
-                scriptPath = it.toAbsolutePath().toString()
-                testArtifactsDirPath = dir.resolve(testName).createDir().toAbsolutePath()
+            .forEach {scriptPath ->
+                val testName = scriptPath.nameWithoutExtension
+                val testScript = SimpleIJPerformanceParser(scriptPath).parse()
+                val testArtifactsDirPath = dir.resolve(testName).createDir()
 
                 // Passing to the IDE project to open
                 args = listOf("${testDataDir.get()}/${testScript.projectName}")
 
+                jvmArgumentProviders.add(PerformanceTestArgumentProvider(
+                    scriptPath,
+                    testArtifactsDirPath,
+                    profilerName.get().name.lowercase(),
+                ))
                 super.exec()
 
-                IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toString())
+                IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toAbsolutePath().toString())
                     .getTestStatistic()
                     .let { testResults ->
                         info(context, "Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
@@ -113,23 +115,4 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
             throw TestExecutionFailException("${testExecutionResults.size} test(s) failed")
         }
     }
-
-    /**
-     * Configures arguments passed to JVM.
-     */
-    override fun collectJvmArgs() = super.collectJvmArgs() + mutableListOf(
-        "-Djdk.attach.allowAttachSelf=true",
-        "-Didea.is.integration.test=true",
-        "-Djb.privacy.policy.text=<!--999.999-->",
-        "-Djb.consents.confirmation.enabled=false",
-        "-Didea.local.statistics.without.report=true",
-        "-Dlinux.native.menu.force.disable=true",
-        "-Didea.fatal.error.notification=true",
-        "-Dtestscript.filename=$scriptPath",
-        "-DintegrationTests.profiler=${profilerName.get().name.lowercase()}",
-        "-Dide.performance.screenshot.before.kill=$testArtifactsDirPath",
-        "-Didea.log.path=$testArtifactsDirPath",
-        "-Dsnapshots.path=$testArtifactsDirPath",
-        "-Dmemory.snapshots.path=$testArtifactsDirPath"
-    )
 }

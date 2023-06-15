@@ -116,7 +116,6 @@ object IntelliJPluginConstants {
         "$DEFAULT_INTELLIJ_REPOSITORY/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml"
     const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
 
-    const val PLUGIN_PATH = "plugin.path"
     const val VERSION_LATEST = "latest"
     const val PERFORMANCE_PLUGIN_ID = "com.jetbrains.performancePlugin"
 

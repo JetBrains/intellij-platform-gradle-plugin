@@ -76,7 +76,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_PATH
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
@@ -108,6 +107,9 @@ import org.jetbrains.intellij.model.MavenMetadata
 import org.jetbrains.intellij.model.XmlExtractor
 import org.jetbrains.intellij.performanceTest.ProfilerName
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
+import org.jetbrains.intellij.propertyProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.propertyProviders.LaunchSystemArgumentProvider
+import org.jetbrains.intellij.propertyProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.intellij.utils.*
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
@@ -1250,36 +1252,33 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
             testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
+            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(
+                ideDirProvider.get(),
+                this as Test,
+                jvmArgs,
+            ))
 
             doFirst {
-                jvmArgs = getIdeaJvmArgs(this as Test, jvmArgs, ideDirProvider.get())
                 classpath += ideaDependencyLibrariesProvider.get() +
                         ideaConfigurationFiles.get() +
                         ideaPluginsConfigurationFiles.get() +
                         ideaClasspathFiles.get()
 
-                systemProperties(
-                    getIdeaSystemProperties(
-                        ideDirProvider.get(),
-                        configDirectoryProvider.get(),
-                        systemDirectoryProvider.get(),
-                        pluginsDirectoryProvider.get(),
-                        pluginIds,
-                    )
-                )
+
+                jvmArgumentProviders.add(LaunchSystemArgumentProvider(
+                    ideDirProvider.get(),
+                    configDirectoryProvider.get(),
+                    systemDirectoryProvider.get(),
+                    pluginsDirectoryProvider.get(),
+                    pluginIds,
+                ))
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as the task's the very first source of plugins
                 // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
                 val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                 if (ideVersion.baselineVersion >= 193) {
-                    systemProperty(
-                        PLUGIN_PATH,
-                        pluginsDirectoryProvider.get()
-                            .listFiles()
-                            ?.joinToString("${File.pathSeparator},") { it.path }
-                            .orEmpty(),
-                    )
+                    jvmArgumentProviders.add(PluginPathArgumentProvider(pluginsDirectoryProvider.get()))
                 }
 
                 if (ideVersion.baselineVersion >= 221) {

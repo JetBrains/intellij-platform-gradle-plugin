@@ -6,6 +6,7 @@
 - Handle the `Could not HEAD 'https://www.jetbrains.com/updates/updates.xml'` gracefully when running `downloadIdeaProductReleasesXml` with no Internet connection
 - Improved checking if `Provider` holds non-empty value
 - Fixed calculationg of JVM arguments for running tests [#1360](../../issues/1360)
+- Introduce CommandLineArgumentProviders for better management of JVM arguments and avoiding passing absolute paths to support Gradle Build Cache [#1376](../../issues/1376)
 
 ## [1.14.1] - 2023-06-07
 

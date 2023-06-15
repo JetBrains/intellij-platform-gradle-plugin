@@ -17,6 +17,8 @@ import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
 import org.jetbrains.intellij.jbr.JbrResolver
+import org.jetbrains.intellij.propertyProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.propertyProviders.LaunchSystemArgumentProvider
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -180,8 +182,8 @@ abstract class RunIdeBase : JavaExec() {
     @TaskAction
     override fun exec() {
         workingDir = projectWorkingDir.get()
+        jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDir.get().toPath(), this, jvmArgs))
         configureSystemProperties()
-        configureJvmArgs()
         configureClasspath()
 
         super.exec()
@@ -213,15 +215,13 @@ abstract class RunIdeBase : JavaExec() {
      */
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
-        systemProperties(
-            getIdeaSystemProperties(
-                ideDirPath,
-                configDir.get(),
-                systemDir.get(),
-                pluginsDir.get().asFile,
-                requiredPluginIds.get()
-            )
-        )
+        jvmArgumentProviders.add(LaunchSystemArgumentProvider(
+            ideDirPath,
+            configDir.get(),
+            systemDir.get(),
+            pluginsDir.get().asFile,
+            requiredPluginIds.get(),
+        ))
 
         val operatingSystem = OperatingSystem.current()
         val userDefinedSystemProperties = systemProperties
@@ -301,15 +301,6 @@ abstract class RunIdeBase : JavaExec() {
             systemProperty(name, value)
         }
     }
-
-    /**
-     * Configures JVM arguments based on the current IDE version.
-     */
-    private fun configureJvmArgs() {
-        jvmArgs = collectJvmArgs()
-    }
-
-    protected open fun collectJvmArgs() = getIdeaJvmArgs(this, jvmArgs, ideDir.get().toPath())
 
     /**
      * Resolves the path to the `tools.jar` library.

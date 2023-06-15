@@ -28,7 +28,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
-import org.gradle.process.JavaForkOptions
 import org.gradle.util.GradleVersion
 import org.jdom2.Document
 import org.jdom2.output.Format
@@ -46,7 +45,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_RELEASES
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.dependency.IdeaDependency
 import org.jetbrains.intellij.model.ProductInfo
-import org.jetbrains.intellij.utils.OpenedPackages
 import java.io.File
 import java.io.StringWriter
 import java.net.HttpURLConnection
@@ -96,7 +94,7 @@ fun transformXml(document: Document, path: Path) {
     }
 }
 
-private fun String.resolveIdeHomeVariable(ideDir: Path) =
+internal fun String.resolveIdeHomeVariable(ideDir: Path) =
     ideDir.toAbsolutePath().toString().let { idePath ->
         this
             .replace("\$APP_PACKAGE", idePath)
@@ -111,73 +109,6 @@ private fun String.resolveIdeHomeVariable(ideDir: Path) =
                 }
             }
     }
-
-fun getIdeaSystemProperties(
-    ideDirectory: Path,
-    configDirectory: File,
-    systemDirectory: File,
-    pluginsDirectory: File,
-    requirePluginIds: List<String>,
-): Map<String, String> {
-    val productInfo = ideProductInfo(ideDirectory)
-    val ideaSystemProperties = mapOf(
-        "idea.config.path" to configDirectory.canonicalPath,
-        "idea.system.path" to systemDirectory.canonicalPath,
-        "idea.log.path" to systemDirectory.resolve("log").canonicalPath,
-        "idea.plugins.path" to pluginsDirectory.canonicalPath,
-    )
-
-    val currentLaunchProperties = productInfo
-        ?.currentLaunch
-        ?.additionalJvmArguments
-        ?.filter { it.startsWith("-D") }
-        ?.associate {
-            it
-                .resolveIdeHomeVariable(ideDirectory)
-                .substring(2)
-                .split('=')
-                .let { (key, value) -> key to value }
-        }
-        .orEmpty()
-
-    val requirePluginProperties = requirePluginIds
-        .takeIf(List<String>::isNotEmpty)
-        ?.let { mapOf("idea.required.plugins.id" to it.joinToString(",")) }
-        .orEmpty()
-
-    return ideaSystemProperties + currentLaunchProperties + requirePluginProperties
-}
-
-fun getIdeaJvmArgs(options: JavaForkOptions, arguments: List<String>?, ideDirectory: Path): List<String> {
-    val productInfo = ideProductInfo(ideDirectory)
-    val bootclasspath = ideDirectory
-        .resolve("lib/boot.jar")
-        .takeIf { it.exists() }
-        ?.let { listOf("-Xbootclasspath/a:$it") }
-        .orEmpty()
-    val vmOptions = productInfo
-        ?.currentLaunch
-        ?.vmOptionsFilePath
-        ?.removePrefix("../")
-        ?.let { ideDirectory.resolve(it).readLines() }
-        .orEmpty()
-    val additionalJvmArguments = productInfo
-        ?.currentLaunch
-        ?.additionalJvmArguments
-        ?.filterNot { it.startsWith("-D") }
-        ?.takeIf { it.isNotEmpty() }
-        ?.map { it.resolveIdeHomeVariable(ideDirectory) }
-        ?: OpenedPackages
-
-    val defaultHeapSpace = listOf("-Xmx512m", "-Xms256m")
-    val heapSpace = listOfNotNull(
-        options.maxHeapSize?.let { "-Xmx${it}" },
-        options.minHeapSize?.let { "-Xms${it}" },
-    )
-
-    return (defaultHeapSpace + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + heapSpace)
-        .filter { it.isNotBlank() }
-}
 
 fun getIdeaClasspath(ideDir: Path): List<String> {
     val buildNumber = ideBuildNumber(ideDir).split('-').last().let { Version.parse(it) }
