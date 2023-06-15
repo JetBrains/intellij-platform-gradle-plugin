@@ -1248,11 +1248,11 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 }
             }
 
-            jvmArgs = getIdeaJvmArgs(this, jvmArgs, ideDirProvider.get())
             classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
             testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
 
             doFirst {
+                jvmArgs = getIdeaJvmArgs(this as Test, jvmArgs, ideDirProvider.get())
                 classpath += ideaDependencyLibrariesProvider.get() +
                         ideaConfigurationFiles.get() +
                         ideaPluginsConfigurationFiles.get() +
