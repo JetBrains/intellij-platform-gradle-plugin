@@ -149,7 +149,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val extension = project.extensions.create<IntelliJPluginExtension>(EXTENSION_NAME, dependenciesDownloader).apply {
             version.convention(project.provider {
-                if (!localPath.isPresent) {
+                if (!localPath.isSpecified) {
                     throw GradleException("The value for the 'intellij.version' property was not specified, see: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#intellij-extension-version")
                 }
                 null
@@ -1372,7 +1372,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     })
             )
 
-            onlyIf { (privateKey.isPresent || privateKeyFile.isPresent) && (certificateChain.isPresent || certificateChainFile.isPresent) }
+            onlyIf { (privateKey.isSpecified || privateKeyFile.isSpecified) && (certificateChain.isSpecified || certificateChainFile.isSpecified) }
             dependsOn(BUILD_PLUGIN_TASK_NAME)
             dependsOn(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
         }
@@ -1403,7 +1403,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             onlyIf {
                 // Workaround for Gradle 7.x to don't fail on "An input file was expected to be present but it doesn't exist."
-                inputArchiveFile.isPresent && inputArchiveFile.get().asFile.exists()
+                inputArchiveFile.isSpecified
             }
             dependsOn(SIGN_PLUGIN_TASK_NAME)
         }

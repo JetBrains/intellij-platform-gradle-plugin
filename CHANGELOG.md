@@ -4,6 +4,7 @@
 
 ### Fixed
 - Handle the `Could not HEAD 'https://www.jetbrains.com/updates/updates.xml'` gracefully when running `downloadIdeaProductReleasesXml` with no Internet connection
+- Improved checking if `Provider` holds non-empty value
 
 ## [1.14.1] - 2023-06-07
 

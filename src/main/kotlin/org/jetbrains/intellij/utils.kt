@@ -19,10 +19,12 @@ import kotlinx.serialization.json.Json
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemLocation
+import org.gradle.api.file.RegularFile
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginConvention
 import org.gradle.api.plugins.PluginInstantiationException
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getPlugin
@@ -379,3 +381,12 @@ internal fun getCurrentPluginVersion() = IntelliJPlugin::class.java
             Manifest(it).mainAttributes.getValue("Version")
         }
     }.getOrNull()
+
+internal val <T> Property<T>.isSpecified: Boolean
+    get() = isPresent && when(val value = orNull) {
+        null -> false
+        is String -> value.isNotEmpty()
+        is RegularFile -> value.asFile.exists()
+        else -> true
+    }
+
