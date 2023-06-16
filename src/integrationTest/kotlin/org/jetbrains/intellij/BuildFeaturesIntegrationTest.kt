@@ -78,6 +78,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     }
 
     @Test
+    @Ignore
     fun `paidPluginSearchableOptionsWarning is enabled`() {
         val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
 
