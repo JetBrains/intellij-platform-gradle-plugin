@@ -9,9 +9,6 @@ on:
         type: boolean
   workflow_call:
 
-env:
-  XDG_CACHE_HOME: "~/.config/"
-
 jobs:
 
   gradleValidation:
@@ -66,22 +63,8 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 11
-
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-
-      - name: Cache XDG_CACHE_HOME
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.XDG_CACHE_HOME }}
-          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-XDG_CACHE_HOME-
 
       # Publish the plugin to the Gradle Plugins
       - name: Publish Plugin

@@ -21,9 +21,6 @@ on:
           - macos-latest
   workflow_call:
 
-env:
-  XDG_CACHE_HOME: "~/.config/"
-
 jobs:
   unitTest:
     name: Gradle ${{ inputs.gradleVersion }} @ ${{ inputs.os }}

@@ -2,9 +2,6 @@ name: Integration Tests
 
 on: [ workflow_dispatch ]
 
-env:
-  XDG_CACHE_HOME: "~/.config/"
-
 jobs:
 
   gradleValidation:
