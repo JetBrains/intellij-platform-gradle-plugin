@@ -57,7 +57,7 @@ jobs:
         run: |
           [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
           
-          ./gradlew check integrationTest \
+          ./gradlew integrationTest \
             -PtestGradleVersion="${{ matrix.gradleVersion }}" \
             ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} \
             --console=plain
