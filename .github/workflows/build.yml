@@ -2,20 +2,17 @@ name: Build
 on:
   # Trigger the workflow on pushes to only the 'master' branch (this avoids duplicate checks being run, e.g. for dependabot pull requests)
   push:
-    branches: [master]
-    paths-ignore: ['**.md', '.teamcity/**']
+    branches: [ master ]
+    paths-ignore: [ '**.md', '.teamcity/**' ]
   # Trigger the workflow on any pull request
   pull_request:
-    paths-ignore: ['**.md', '.teamcity/**']
+    paths-ignore: [ '**.md', '.teamcity/**' ]
 
 
 # This allows a subsequently queued workflow run to interrupt previous runs
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
-
-env:
-  XDG_CACHE_HOME: "~/.config/"
 
 jobs:
 
@@ -33,12 +30,12 @@ jobs:
     needs: [ gradleValidation, unitTests ]
     uses: ./.github/workflows/reusable-integrationTests.yml
 
-#  integrationTestsEAP:
-#    name: Integration Tests EAP
-#    needs: gradleValidation
-#    uses: ./.github/workflows/reusable-integrationTests.yml
-#    with:
-#      platformVersion: 222-EAP-SNAPSHOT
+  #  integrationTestsEAP:
+  #    name: Integration Tests EAP
+  #    needs: gradleValidation
+  #    uses: ./.github/workflows/reusable-integrationTests.yml
+  #    with:
+  #      platformVersion: 222-EAP-SNAPSHOT
 
   codeInspection:
     name: Code Inspection
@@ -49,9 +46,9 @@ jobs:
     name: Build
     needs:
       - unitTests
-#      - integrationTests
-#      - integrationTestsEAP
-#      - codeInspection
+    # - integrationTests
+    # - integrationTestsEAP
+    # - codeInspection
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.properties.outputs.version }}
@@ -69,14 +66,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-
-      - name: Cache XDG_CACHE_HOME
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.XDG_CACHE_HOME }}
-          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-XDG_CACHE_HOME-
 
       # Set environment variables
       - name: Export Properties

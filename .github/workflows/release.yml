@@ -4,9 +4,6 @@ on:
   release:
     types: [prereleased, released]
 
-env:
-  XDG_CACHE_HOME: "~/.config/"
-
 jobs:
 
   # Prepare and publish the Gradle Plugins repository
@@ -29,14 +26,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/gradle-build-action@v2
-
-      - name: Cache XDG_CACHE_HOME
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.XDG_CACHE_HOME }}
-          key: ${{ runner.os }}-XDG_CACHE_HOME-${{ hashFiles('**/*.gradle*') }}
-          restore-keys: |
-            ${{ runner.os }}-XDG_CACHE_HOME-
 
       # Set environment variables
       - name: Export Properties

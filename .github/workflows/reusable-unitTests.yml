@@ -2,9 +2,6 @@ name: Reusable Unit Tests
 
 on: [ workflow_call ]
 
-env:
-  XDG_CACHE_HOME: "~/.config/"
-
 jobs:
   baseUnitTest:
     name: Gradle 8.1.1 @ ubuntu-latest

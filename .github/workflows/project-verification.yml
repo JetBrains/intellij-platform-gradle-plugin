@@ -5,24 +5,8 @@ on:
   schedule:
     - cron: "0 0 * * *"
 
-env:
-  XDG_CACHE_HOME: "~/.config/"
-
 jobs:
 
   gradleValidation:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
-
-  integrationTestsCheck:
-    name: Integration Tests Check
-    runs-on: ubuntu-latest
-    steps:
-      - name: Fetch Sources
-        uses: actions/checkout@v3
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: zulu
-          java-version: 11
