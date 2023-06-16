@@ -46,7 +46,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             val testCommand = parseCommand(it.output)
 
             assertPathParameters(testCommand, sandboxPath)
-            assertFalse(testCommand.properties.containsKey("idea.required.plugins.id"))
+            assertEquals(testCommand.properties.get("idea.required.plugins.id"), "")
 
             assertEquals("boot.jar", File(testCommand.xclasspath).name)
             assertEquals("lib", File(testCommand.xclasspath).parentFile.name)
