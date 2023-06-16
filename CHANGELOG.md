@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- Create a date-based lock file to limit daily update checks for the Gradle IntelliJ Plugin.
+
 ### Fixed
 - Handle the `Could not HEAD 'https://www.jetbrains.com/updates/updates.xml'` gracefully when running `downloadIdeaProductReleasesXml` with no Internet connection
 - Improved checking if `Provider` holds non-empty value

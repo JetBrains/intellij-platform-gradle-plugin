@@ -117,6 +117,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
 import java.nio.file.Path
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -1530,6 +1531,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
             selfUpdateCheck.convention(project.provider {
                 project.isBuildFeatureEnabled(SELF_UPDATE_CHECK)
             })
+            lockFile.convention(project.provider{
+                temporaryDir.resolve(LocalDate.now().toString())
+            })
+
+            onlyIf {
+                !lockFile.get().exists()
+            }
         }
     }
 

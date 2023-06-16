@@ -13,6 +13,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.utils.LatestVersionResolver
+import java.io.File
 
 /**
  * Initializes the Gradle IntelliJ Plugin and performs various checks, like if the plugin is up to date.
@@ -25,6 +26,9 @@ abstract class InitializeIntelliJPluginTask : DefaultTask() {
 
     @get:Internal
     abstract val selfUpdateCheck: Property<Boolean>
+
+    @get:Internal
+    abstract val lockFile: Property<File>
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -54,6 +58,8 @@ abstract class InitializeIntelliJPluginTask : DefaultTask() {
             if (version < Version.parse(latestVersion)) {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
+
+            lockFile.get().createNewFile()
         } catch (e: Exception) {
             error(context, e.message.orEmpty(), e)
         }
