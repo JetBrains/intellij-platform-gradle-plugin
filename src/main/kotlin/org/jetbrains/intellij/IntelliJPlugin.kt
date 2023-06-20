@@ -20,7 +20,10 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.ClasspathNormalizer
+import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.api.tasks.TaskProvider
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.api.tasks.compile.JavaCompile
@@ -51,7 +54,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.EXTENSION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
@@ -74,7 +76,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
-import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
@@ -1442,28 +1443,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
         info(context, "Configuring list products task")
 
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
-
-        val downloadIdeaProductReleasesXml = project.tasks.register<Sync>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME) {
-            group = PLUGIN_GROUP_NAME
-            // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
-            from(
-                project.resources.text
-                    .fromUri(IDEA_PRODUCTS_RELEASES_URL)
-                    .runCatching { asFile("UTF-8") }
-                    .onFailure { error(context, "Cannot resolve product releases", it) }
-                    .getOrDefault("<products />")
-            ) {
-                rename { "idea_product_releases.xml" }
-            }
-            into(temporaryDir)
-        }
-
+        val downloadIdeaProductReleasesXmlTaskProvider = project.tasks.register<DownloadIdeaProductReleasesXmlTask>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)
         val listProductsReleasesTaskProvider = project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
             val taskContext = logCategory()
 
             productsReleasesUpdateFiles
                 .from(updatePaths)
-                .from(downloadIdeaProductReleasesXml.map {
+                .from(downloadIdeaProductReleasesXmlTaskProvider.map {
                     it.outputs.files.asFileTree
                 })
             androidStudioUpdatePath.convention(project.provider {
@@ -1477,6 +1463,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             untilBuild.convention(patchPluginXmlTaskProvider.flatMap { it.untilBuild })
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
 
+            dependsOn(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)
             dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
         }
 
