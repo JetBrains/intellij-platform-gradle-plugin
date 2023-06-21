@@ -11,6 +11,9 @@
 - Fixed calculationg of JVM arguments for running tests [#1360](../../issues/1360)
 - Introduce CommandLineArgumentProviders for better management of JVM arguments and avoiding passing absolute paths to support Gradle Build Cache [#1376](../../issues/1376)
 
+### Removed
+- Removed redundant `SetupInstrumentCodeTask` task
+
 ## [1.14.1] - 2023-06-07
 
 ### Fixed

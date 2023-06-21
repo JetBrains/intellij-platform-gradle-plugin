@@ -95,7 +95,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.RUN_IDE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
-import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
@@ -962,13 +961,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val jarTaskProvider = project.tasks.named<Jar>(JAR_TASK_NAME)
         val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
 
-        val setupInstrumentCodeTaskProvider = project.tasks.register<SetupInstrumentCodeTask>(SETUP_INSTRUMENT_CODE_TASK_NAME) {
-            instrumentationEnabled.convention(extension.instrumentCode)
-            instrumentedDir.convention(project.layout.buildDirectory.dir("instrumented"))
-
-            onlyIf { instrumentCodeProvider.get() }
-        }
-
         val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
         sourceSets.forEach { sourceSet ->
             val name = sourceSet.getTaskName("instrument", "code")
@@ -1120,13 +1112,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     }
                 })
 
-                outputDir.convention(setupInstrumentCodeTaskProvider.flatMap { setupInstrumentCodeTask ->
-                    setupInstrumentCodeTask.instrumentedDir.map { it.dir(name) }
-                })
+                outputDir.convention(project.layout.buildDirectory.map { it.dir("instrumented").dir(name) })
                 instrumentationLogs.convention(project.gradle.startParameter.logLevel == LogLevel.INFO)
 
                 dependsOn(sourceSet.classesTaskName)
-                dependsOn(SETUP_INSTRUMENT_CODE_TASK_NAME)
                 finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
                 onlyIf { instrumentCodeProvider.get() }
             }

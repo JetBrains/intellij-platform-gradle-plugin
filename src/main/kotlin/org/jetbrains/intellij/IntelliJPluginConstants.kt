@@ -35,7 +35,6 @@ object IntelliJPluginConstants {
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
     const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
-    const val SETUP_INSTRUMENT_CODE_TASK_NAME = "setupInstrumentCode"
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
@@ -67,7 +66,6 @@ object IntelliJPluginConstants {
         RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
         RUN_PLUGIN_VERIFIER_TASK_NAME,
         SETUP_DEPENDENCIES_TASK_NAME,
-        SETUP_INSTRUMENT_CODE_TASK_NAME,
         SIGN_PLUGIN_TASK_NAME,
         VERIFY_PLUGIN_TASK_NAME,
         VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
