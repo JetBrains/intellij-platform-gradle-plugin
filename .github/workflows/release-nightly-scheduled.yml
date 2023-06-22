@@ -13,3 +13,4 @@ jobs:
   release-nightly:
     if: contains('JetBrains/gradle-intellij-plugin', github.repository)
     uses: ./.github/workflows/release-nightly.yml
+    secrets: inherit
