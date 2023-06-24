@@ -1,7 +1,7 @@
 // Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 @file:JvmName("Utils")
-@file:Suppress("DEPRECATION", "BooleanMethodIsAlwaysInverted")
+@file:Suppress("BooleanMethodIsAlwaysInverted")
 
 package org.jetbrains.intellij
 
@@ -22,12 +22,12 @@ import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
-import org.gradle.api.plugins.JavaPluginConvention
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.SourceSet
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.getPlugin
+import org.gradle.kotlin.dsl.getByName
 import org.gradle.util.GradleVersion
 import org.jdom2.Document
 import org.jdom2.output.Format
@@ -61,7 +61,7 @@ import java.util.jar.Manifest
 val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
 internal fun sourcePluginXmlFiles(project: Project) = project
-    .convention.getPlugin<JavaPluginConvention>()
+    .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
     .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) // TODO: iterate over all sourceSets?
     .resources
     .srcDirs
