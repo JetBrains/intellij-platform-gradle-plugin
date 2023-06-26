@@ -1243,11 +1243,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
             testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
-            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(
-                ideDirProvider.get(),
-                this as Test,
-                jvmArgs,
-            ))
+            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDirProvider.get(), this))
 
             doFirst {
                 classpath += ideaDependencyLibrariesProvider.get() +
@@ -1256,13 +1252,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         ideaClasspathFiles.get()
 
 
-                jvmArgumentProviders.add(LaunchSystemArgumentProvider(
-                    ideDirProvider.get(),
-                    configDirectoryProvider.get(),
-                    systemDirectoryProvider.get(),
-                    pluginsDirectoryProvider.get(),
-                    pluginIds,
-                ))
+                jvmArgumentProviders.add(
+                    LaunchSystemArgumentProvider(
+                        ideDirProvider.get(),
+                        configDirectoryProvider.get(),
+                        systemDirectoryProvider.get(),
+                        pluginsDirectoryProvider.get(),
+                        pluginIds,
+                    )
+                )
 
                 // since 193 plugins from classpath are loaded before plugins from plugins directory
                 // to handle this, use plugin.path property as the task's the very first source of plugins
@@ -1507,7 +1505,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             selfUpdateCheck.convention(project.provider {
                 project.isBuildFeatureEnabled(SELF_UPDATE_CHECK)
             })
-            lockFile.convention(project.provider{
+            lockFile.convention(project.provider {
                 temporaryDir.resolve(LocalDate.now().toString())
             })
 
