@@ -12,7 +12,7 @@ class PluginProjectDependency(private val pluginDirectory: File, val context: St
 
     private val pluginDependency: PluginDependencyImpl? by lazy {
         pluginDirectory.takeIf { it.exists() }?.let {
-            val creationResult = IdePluginManager.createManager().createPlugin(it)
+            val creationResult = IdePluginManager.createManager().createPlugin(it.toPath())
             if (creationResult is PluginCreationSuccess) {
                 val intellijPlugin = creationResult.plugin
                 val pluginId = intellijPlugin.pluginId ?: return@let null
