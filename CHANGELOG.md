@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.14.2] - 2023-06-26
+
 ### Added
 - Create a date-based lock file to limit daily update checks for the Gradle IntelliJ Plugin.
 
@@ -725,7 +727,8 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.1...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.2...HEAD
+[1.14.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.1...v1.14.2
 [1.14.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.3...v1.14.0
 [1.13.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.2...v1.13.3
