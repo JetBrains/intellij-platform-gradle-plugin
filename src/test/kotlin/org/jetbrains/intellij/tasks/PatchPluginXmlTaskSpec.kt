@@ -11,7 +11,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-@Suppress("PluginXmlValidity", "ComplexRedundantLet")
+@Suppress("PluginXmlValidity")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
     private val patchedPluginXml = lazy { File(buildDirectory, PLUGIN_XML_DIR_NAME).listFiles()?.first() }

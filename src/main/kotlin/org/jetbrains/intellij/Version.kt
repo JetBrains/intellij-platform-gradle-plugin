@@ -26,7 +26,6 @@ class Version(
 
     override fun toString() = version.takeIf(String::isNotEmpty) ?: "$major.$minor.$patch"
 
-    @Suppress("RedundantIf")
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

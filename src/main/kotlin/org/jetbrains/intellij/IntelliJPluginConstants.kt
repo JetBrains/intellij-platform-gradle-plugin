@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij
 
-@Suppress("MemberVisibilityCanBePrivate")
 object IntelliJPluginConstants {
     const val PLUGIN_NAME = "Gradle IntelliJ Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij"

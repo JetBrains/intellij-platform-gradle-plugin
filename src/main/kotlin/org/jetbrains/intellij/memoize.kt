@@ -8,7 +8,6 @@ import org.gradle.api.internal.provider.ProviderInternal
 import org.gradle.api.internal.provider.ValueSupplier
 import org.gradle.api.provider.Provider
 
-@Suppress("UnstableApiUsage")
 internal fun <T> Provider<T>.memoize(): Provider<T> = when (this) {
     // ValueSource instances already memoize their value
     is DefaultValueSourceProviderFactory.ValueSourceProvider<*, *> -> this
