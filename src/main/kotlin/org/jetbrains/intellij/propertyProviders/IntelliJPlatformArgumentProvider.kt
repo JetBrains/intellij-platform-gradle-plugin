@@ -17,7 +17,6 @@ import java.nio.file.Path
 class IntelliJPlatformArgumentProvider(
     @InputDirectory @PathSensitive(RELATIVE) val ideDirectory: Path,
     private val options: JavaForkOptions,
-    private val arguments: List<String>?,
 ) : CommandLineArgumentProvider {
 
     private val productInfo
@@ -55,6 +54,6 @@ class IntelliJPlatformArgumentProvider(
         )
 
     override fun asArguments() =
-        (defaultHeapSpace + arguments.orEmpty() + bootclasspath + vmOptions + additionalJvmArguments + heapSpace)
+        (defaultHeapSpace + bootclasspath + vmOptions + additionalJvmArguments + heapSpace)
             .filter { it.isNotBlank() }
 }

@@ -34,4 +34,7 @@ class LaunchSystemArgumentProvider(
         "-Didea.plugins.path=${pluginsDirectory.absolutePath}",
         "-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}",
     )
+        .also {
+            println("LaunchSystemArgumentProvider = ${it}")
+        }
 }

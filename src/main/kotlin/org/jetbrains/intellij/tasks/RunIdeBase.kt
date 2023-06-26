@@ -182,7 +182,7 @@ abstract class RunIdeBase : JavaExec() {
     @TaskAction
     override fun exec() {
         workingDir = projectWorkingDir.get()
-        jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDir.get().toPath(), this, jvmArgs))
+        jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDir.get().toPath(), this))
         configureSystemProperties()
         configureClasspath()
 
@@ -215,6 +215,8 @@ abstract class RunIdeBase : JavaExec() {
      */
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
+
+        println("systemProperties = ${systemProperties}")
         jvmArgumentProviders.add(LaunchSystemArgumentProvider(
             ideDirPath,
             configDir.get(),

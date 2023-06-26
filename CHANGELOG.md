@@ -11,6 +11,7 @@
 - Fixed calculationg of JVM arguments for running tests [#1360](../../issues/1360)
 - Introduce CommandLineArgumentProviders for better management of JVM arguments and avoiding passing absolute paths to support Gradle Build Cache [#1376](../../issues/1376)
 - Replace deprecated `JavaPluginConvention` usages with `JavaPluginExtension` for Gradle 8.2 and 9.x compatibility [#1413](../../issues/1413)
+- Fix for `Cannot load this JVM TI agent twice, check your java command line for duplicate jdwp options.`
 
 ### Removed
 - Removed redundant `SetupInstrumentCodeTask` task
