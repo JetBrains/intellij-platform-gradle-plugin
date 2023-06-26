@@ -33,7 +33,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val version = DownloadZipSignerTask.resolveLatestVersion()
         build(DOWNLOAD_ZIP_SIGNER_TASK_NAME, "--info").let {
             assertContains("marketplace-zip-signer-cli.jar", it.output)
             assertContains("version:latest", it.output)
