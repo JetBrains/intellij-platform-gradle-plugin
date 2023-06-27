@@ -122,7 +122,6 @@ abstract class IntelliJPlatformTestBase {
             .pluginClasspath
 
         //Replace the Gradle classpath with the IntelliJ one
-        println("System.getProperty(\"IntelliJClasspath\") = ${System.getProperty("IntelliJClasspath")}")
         if (System.getProperty("IntelliJClasspath") != null) {
             return defaultClasspath
                 .filterNot { it.absolutePath.contains("classes") }

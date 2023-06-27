@@ -216,7 +216,6 @@ abstract class RunIdeBase : JavaExec() {
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
 
-        println("systemProperties = ${systemProperties}")
         jvmArgumentProviders.add(LaunchSystemArgumentProvider(
             ideDirPath,
             configDir.get(),
