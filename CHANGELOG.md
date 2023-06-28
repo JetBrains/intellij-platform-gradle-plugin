@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- Attach LSP API sources to the IDEA dependency, if available
+
 ## [1.14.2] - 2023-06-26
 
 ### Added

@@ -44,6 +44,7 @@ abstract class IdeaDependencyManager @Inject constructor(
 ) {
 
     private val mainDependencies = listOf("ideaIC", "ideaIU", "riderRD", "riderRS")
+    private val sourceZipArtifacts = listOf("src_lsp-openapi")
 
     fun register(project: Project, dependency: IdeaDependency, dependencies: DependencySet) {
         val ivyFile = getOrCreateIvyXml(dependency)
@@ -231,9 +232,12 @@ abstract class IdeaDependencyManager @Inject constructor(
                 addConfiguration(DefaultIvyConfiguration("compile"))
                 addConfiguration(DefaultIvyConfiguration("sources"))
 
-                dependency.jarFiles.forEach {
-                    addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), "compile", dependency.classes.toPath(), null))
-                }
+                dependency.jarFiles
+                    .forEach { addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), "compile", dependency.classes.toPath())) }
+
+                dependency.sourceZipFiles
+                    .filter { it.nameWithoutExtension in sourceZipArtifacts }
+                    .forEach { addArtifact(IntellijIvyArtifact.createZipDependency(it.toPath(), "sources", dependency.classes.toPath())) }
 
                 if (dependency.sources != null) {
                     val name = when {
