@@ -39,6 +39,7 @@ import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.BuildFeature.*
+import org.jetbrains.intellij.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
@@ -55,6 +56,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.EXTENSION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
+import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
@@ -1430,9 +1432,34 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private fun configureListProductsReleasesTask(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring list products task")
 
+        val resolveReleasesUrl = { url: String ->
+            // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
+            project.resources.text
+                .fromUri(url)
+                .runCatching { asFile("UTF-8").readText() }
+                .onFailure { error(context, "Cannot resolve product releases", it) }
+                .getOrDefault("<products />")
+        }
+
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
-        val downloadIdeaProductReleasesXmlTaskProvider = project.tasks.register<DownloadIdeaProductReleasesXmlTask>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)
-        val downloadAndroidStudioProductReleasesXmlTaskProvider = project.tasks.register<DownloadAndroidStudioProductReleasesXmlTask>(DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME)
+        val downloadIdeaProductReleasesXmlTaskProvider =
+            project.tasks.register<DownloadIdeaProductReleasesXmlTask>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME) {
+                releasesUrl.convention(IDEA_PRODUCTS_RELEASES_URL)
+
+                from(releasesUrl.map(resolveReleasesUrl)) {
+                    rename { "idea_product_releases.xml" }
+                }
+                into(temporaryDir)
+            }
+        val downloadAndroidStudioProductReleasesXmlTaskProvider =
+            project.tasks.register<DownloadAndroidStudioProductReleasesXmlTask>(DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME) {
+                releasesUrl.convention(ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
+
+                from(releasesUrl.map(resolveReleasesUrl)) {
+                    rename { "android_studio_product_releases.xml" }
+                }
+                into(temporaryDir)
+            }
         val listProductsReleasesTaskProvider = project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
             val taskContext = logCategory()
 

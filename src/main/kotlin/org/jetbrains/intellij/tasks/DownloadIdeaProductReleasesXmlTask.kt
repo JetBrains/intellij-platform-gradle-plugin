@@ -2,32 +2,30 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Sync
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.*
 import org.jetbrains.intellij.IntelliJPluginConstants
-import org.jetbrains.intellij.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
-import org.jetbrains.intellij.error
 import org.jetbrains.intellij.logCategory
+import java.io.File
 
 @CacheableTask
 abstract class DownloadIdeaProductReleasesXmlTask : Sync() {
 
     private val context = logCategory()
 
+    /**
+     * Represents the property that holds the URL for releases.
+     * Default value: [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL]
+     */
+    @get:Input
+    @get:Optional
+    abstract val releasesUrl: Property<String>
+
+    @get:Internal
+    abstract val inputFile: Property<File>
+
     init {
         group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
         description = "Downloads XML files containing the IntelliJ IDEA product release information."
-
-        // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
-        from(
-            project.resources.text
-                .fromUri(IDEA_PRODUCTS_RELEASES_URL)
-                .runCatching { asFile("UTF-8") }
-                .onFailure { error(context, "Cannot resolve product releases", it) }
-                .getOrDefault("<products />")
-        ) {
-            rename { "idea_product_releases.xml" }
-        }
-        into(temporaryDir)
     }
 }

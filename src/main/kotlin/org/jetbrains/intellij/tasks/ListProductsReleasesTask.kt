@@ -137,7 +137,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
                 .mapNotNull(extractor::fetch)
         }
         val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let { extractor ->
-            ideaProductReleasesUpdateFiles
+            androidStudioProductReleasesUpdateFiles
                 .files
                 .map { it.toPath() }
                 .mapNotNull(extractor::fetch)
