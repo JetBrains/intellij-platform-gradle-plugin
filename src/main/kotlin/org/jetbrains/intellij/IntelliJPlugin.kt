@@ -47,6 +47,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_SANDBOX
+import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
@@ -1431,12 +1432,16 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
         val downloadIdeaProductReleasesXmlTaskProvider = project.tasks.register<DownloadIdeaProductReleasesXmlTask>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)
+        val downloadAndroidStudioProductReleasesXmlTaskProvider = project.tasks.register<DownloadAndroidStudioProductReleasesXmlTask>(DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME)
         val listProductsReleasesTaskProvider = project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
             val taskContext = logCategory()
 
-            productsReleasesUpdateFiles
-                .from(updatePaths)
+            ideaProductReleasesUpdateFiles
                 .from(downloadIdeaProductReleasesXmlTaskProvider.map {
+                    it.outputs.files.asFileTree
+                })
+            androidStudioProductReleasesUpdateFiles
+                .from(downloadAndroidStudioProductReleasesXmlTaskProvider.map {
                     it.outputs.files.asFileTree
                 })
             androidStudioUpdatePath.convention(project.provider {
@@ -1451,6 +1456,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
 
             dependsOn(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)
+            dependsOn(DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME)
             dependsOn(PATCH_PLUGIN_XML_TASK_NAME)
         }
 

@@ -16,7 +16,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.model.AndroidStudioReleases
 import org.jetbrains.intellij.model.ProductsReleases
 import org.jetbrains.intellij.model.XmlExtractor
-import java.nio.file.Path
 
 /**
  * List all available IntelliJ-based IDE releases with their updates.
@@ -41,14 +40,15 @@ abstract class ListProductsReleasesTask : DefaultTask() {
     @get:InputFiles
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val productsReleasesUpdateFiles: ConfigurableFileCollection
+    abstract val ideaProductReleasesUpdateFiles: ConfigurableFileCollection
 
     /**
-     * Path to the products releases update files. By default, one is downloaded from [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
+     * Path to the products releases update files. By default, one is downloaded from [IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL].
      */
-    @get:Internal
-    @Deprecated("replaced with `productsReleasesUpdateFiles`, to improve compatibility with the Gradle API")
-    abstract val updatePaths: ListProperty<String>
+    @get:InputFiles
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val androidStudioProductReleasesUpdateFiles: ConfigurableFileCollection
 
     /**
      * For Android Studio releases, a separated storage for the updates is used.
@@ -130,14 +130,18 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
     @TaskAction
     fun listProductsReleases() {
-        val updatePaths = productsReleasesUpdateFiles.files.map { it.toPath() }
-
         val releases = XmlExtractor<ProductsReleases>(context).let { extractor ->
-            updatePaths.mapNotNull(extractor::fetch)
+            ideaProductReleasesUpdateFiles
+                .files
+                .map { it.toPath() }
+                .mapNotNull(extractor::fetch)
         }
         val androidStudioReleases = XmlExtractor<AndroidStudioReleases>(context).let { extractor ->
-            Path.of(androidStudioUpdatePath.get()).let(extractor::fetch)
-        } ?: AndroidStudioReleases()
+            ideaProductReleasesUpdateFiles
+                .files
+                .map { it.toPath() }
+                .mapNotNull(extractor::fetch)
+        }
 
         val since = sinceVersion.orNull
             .or { sinceBuild.get() }
@@ -188,22 +192,24 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             .toList()
 
         val androidStudioResult = when (types.contains(PLATFORM_TYPE_ANDROID_STUDIO)) {
-            true -> androidStudioReleases.items
-                .asSequence()
-                .filter { item ->
-                    val version = item.platformVersion?.let(Version::parse)
-                    val build = item.platformBuild?.let(Version::parse)
-                    testVersion(version, build)
-                }
-                .filter { channels.contains(Channel.valueOf(it.channel.uppercase())) }
-                .groupBy { it.version.split('.').dropLast(1).joinToString(".") }
-                .mapNotNull { entry ->
-                    entry.value.maxByOrNull {
-                        it.version.split('.').last().toInt()
+            true -> androidStudioReleases.flatMap { release ->
+                release.items
+                    .asSequence()
+                    .filter { item ->
+                        val version = item.platformVersion?.let(Version::parse)
+                        val build = item.platformBuild?.let(Version::parse)
+                        testVersion(version, build)
                     }
-                }
-                .map { "$PLATFORM_TYPE_ANDROID_STUDIO-${it.version}" }
-                .toList()
+                    .filter { channels.contains(Channel.valueOf(it.channel.uppercase())) }
+                    .groupBy { it.version.split('.').dropLast(1).joinToString(".") }
+                    .mapNotNull { entry ->
+                        entry.value.maxByOrNull {
+                            it.version.split('.').last().toInt()
+                        }
+                    }
+                    .map { "$PLATFORM_TYPE_ANDROID_STUDIO-${it.version}" }
+                    .toList()
+            }
 
             false -> emptyList()
         }

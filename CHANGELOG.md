@@ -4,6 +4,14 @@
 
 ### Added
 - Attach LSP API sources to the IDEA dependency, if available
+- Added `ListProductsReleasesTask.androidStudioProductReleasesUpdateFiles` property
+- Added `DownloadAndroidStudioProductReleasesXmlTask` task
+
+### Changed
+- Renamed `ListProductsReleasesTask.productsReleasesUpdateFiles` property to `ListProductsReleasesTask.ideaProductReleasesUpdateFiles`
+
+### Removed
+- Removed `ListProductsReleasesTask.updatePaths` property
 
 ## [1.14.2] - 2023-06-26
 
