@@ -10,12 +10,9 @@ fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 plugins {
     `jvm-test-suite`
     `java-test-fixtures`
-    `java-gradle-plugin`
     `kotlin-dsl`
     `maven-publish`
-    alias(libs.plugins.kotlin)
     alias(libs.plugins.kotlinSerialization)
-    alias(libs.plugins.kotlinSamWithReceiver)
     alias(libs.plugins.pluginPublish)
     alias(libs.plugins.changelog)
     alias(libs.plugins.dokka)
@@ -79,8 +76,6 @@ tasks {
     withType<KotlinCompile> {
         kotlinOptions {
             jvmTarget = "11"
-            apiVersion = "1.4"
-            languageVersion = "1.4"
         }
     }
 
