@@ -4,10 +4,10 @@ on: [ workflow_call ]
 
 jobs:
   baseUnitTest:
-    name: Gradle 8.1.1 @ ubuntu-latest
+    name: Gradle 8.2 @ ubuntu-latest
     uses: ./.github/workflows/reusable-single-unitTest.yml
     with:
-      gradleVersion: "8.1.1"
+      gradleVersion: "8.2"
       os: ubuntu-latest
       script: |
         mkdir /tmp/empty_dir
@@ -30,7 +30,7 @@ jobs:
       matrix:
         gradleVersion:
           - "7.6"
-          - "8.1.1"
+          - "8.2"
           - "8.2-rc-3"
         os:
           - windows-latest
@@ -46,4 +46,4 @@ jobs:
               rmdir /tmp/empty_dir
         exclude:
           - os: ubuntu-latest
-            gradleVersion: "8.1.1"
+            gradleVersion: "8.2"
