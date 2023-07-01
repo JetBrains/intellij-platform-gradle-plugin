@@ -51,15 +51,6 @@ abstract class ListProductsReleasesTask : DefaultTask() {
     abstract val androidStudioProductReleasesUpdateFiles: ConfigurableFileCollection
 
     /**
-     * For Android Studio releases, a separated storage for the updates is used.
-     *
-     * Default value: `https://raw.githubusercontent.com/JetBrains/intellij-sdk-docs/main/topics/_generated/android_studio_releases.xml`
-     */
-    @get:Input
-    @get:Optional
-    abstract val androidStudioUpdatePath: Property<String>
-
-    /**
      * Path to the file, where the output list will be stored.
      *
      * Default value: `File("${project.buildDir}/listProductsReleases.txt")`

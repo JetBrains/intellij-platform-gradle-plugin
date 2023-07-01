@@ -5,13 +5,10 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.IntelliJPluginConstants
-import org.jetbrains.intellij.logCategory
 import java.io.File
 
 @CacheableTask
 abstract class DownloadIdeaProductReleasesXmlTask : Sync() {
-
-    private val context = logCategory()
 
     /**
      * Represents the property that holds the URL for releases.

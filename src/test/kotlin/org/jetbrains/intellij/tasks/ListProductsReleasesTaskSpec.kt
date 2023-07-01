@@ -27,8 +27,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 version = "2020.1"
             }
             listProductsReleases {
-                productsReleasesUpdateFiles.setFrom(['$ideaReleasesPath'])
-                androidStudioUpdatePath = '$androidStudioReleasesPath'
+                ideaProductReleasesUpdateFiles.setFrom(['$ideaReleasesPath'])
+                androidStudioProductReleasesUpdateFiles.setFrom(['$androidStudioReleasesPath'])
             }
             """.trimIndent()
         )
@@ -218,7 +218,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                 sinceVersion = "2021.1"
                 types = ["IU", "PS", "PY"]
                 
-                updatePaths = ['$ideaReleasesPath']
+                ideaProductReleasesUpdateFiles.setFrom(['$ideaReleasesPath'])
                 
                 // no values set for productsReleasesUpdateFiles
             }

@@ -148,7 +148,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             version = "1.0.0"
             
             listProductsReleases {
-                updatePaths = ['${resource}']
+                ideaProductReleasesUpdateFiles.setFrom(['${resource}'])
                 sinceVersion = "2020.2"
                 untilVersion = "2020.2.3"
                 releaseChannels = EnumSet.of(Channel.RELEASE)

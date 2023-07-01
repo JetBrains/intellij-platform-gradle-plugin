@@ -114,7 +114,10 @@ import org.jetbrains.intellij.propertyProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.propertyProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.propertyProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.tasks.*
-import org.jetbrains.intellij.utils.*
+import org.jetbrains.intellij.utils.ArchiveUtils
+import org.jetbrains.intellij.utils.DependenciesDownloader
+import org.jetbrains.intellij.utils.ivyRepository
+import org.jetbrains.intellij.utils.mavenRepository
 import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
@@ -1436,7 +1439,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
             project.resources.text
                 .fromUri(url)
-                .runCatching { asFile("UTF-8").readText() }
+                .runCatching { asFile("UTF-8") }
                 .onFailure { error(context, "Cannot resolve product releases", it) }
                 .getOrDefault("<products />")
         }
@@ -1471,9 +1474,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 .from(downloadAndroidStudioProductReleasesXmlTaskProvider.map {
                     it.outputs.files.asFileTree
                 })
-            androidStudioUpdatePath.convention(project.provider {
-                dependenciesDownloader.getAndroidStudioReleases(taskContext).toString()
-            })
             outputFile.convention(
                 project.layout.buildDirectory.file("$LIST_PRODUCTS_RELEASES_TASK_NAME.txt")
             )
