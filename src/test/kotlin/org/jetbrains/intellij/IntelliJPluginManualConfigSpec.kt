@@ -1,4 +1,4 @@
-// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2022 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij
 
@@ -57,7 +57,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
             assertTrue(mainClasspath.contains("openapi.jar"))           // included explicitly in compileOnly
             assertTrue(mainRuntimeClasspath.contains("openapi.jar"))    // includes all but idea.jar
-            assertFalse(testClasspath.contains("openapi.jar"))
+            assertTrue(testClasspath.contains("openapi.jar"))
             assertTrue(testRuntimeClasspath.contains("openapi.jar"))    // includes all
 
             assertTrue(mainClasspath.contains("asm-all.jar"))           // included explicitly
@@ -124,7 +124,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
             assertTrue(mainClasspath.contains("junit-rt.jar"))              // included explicitly in compileOnly
             assertFalse(mainRuntimeClasspath.contains("junit-rt.jar"))
-            assertFalse(testClasspath.contains("junit-rt.jar"))
+            assertTrue(testClasspath.contains("junit-rt.jar"))
             assertTrue(testRuntimeClasspath.contains("junit-rt.jar"))       // includes all
 
             assertTrue(mainClasspath.contains("idea-junit.jar"))            // included explicitly in compile
