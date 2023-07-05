@@ -12,7 +12,7 @@ plugins {
     `java-test-fixtures`
     `kotlin-dsl`
     `maven-publish`
-    alias(libs.plugins.kotlinSerialization)
+    kotlin("plugin.serialization") version embeddedKotlinVersion
     alias(libs.plugins.pluginPublish)
     alias(libs.plugins.changelog)
     alias(libs.plugins.dokka)
@@ -52,19 +52,19 @@ dependencies {
     implementation(libs.jaxbApi)
     implementation(libs.ddPlist)
 
-    compileOnly(libs.kotlinGradlePlugin)
-    additionalPluginClasspath(libs.kotlinGradlePlugin)
+    compileOnly(embeddedKotlin("gradle-plugin"))
+    additionalPluginClasspath(embeddedKotlin("gradle-plugin"))
 
     api(libs.gradleIdeaExt)
     api(libs.retrofit)
 
     testImplementation(gradleTestKit())
-    testImplementation(libs.kotlinTest)
-    testImplementation(libs.kotlinTestJunit)
+    testImplementation(embeddedKotlin("test"))
+    testImplementation(embeddedKotlin("test-junit"))
 
     testFixturesImplementation(gradleTestKit())
-    testFixturesImplementation(libs.kotlinTest)
-    testFixturesImplementation(libs.kotlinTestJunit)
+    testFixturesImplementation(embeddedKotlin("test"))
+    testFixturesImplementation(embeddedKotlin("test-junit"))
     testFixturesImplementation(libs.annotations)
 }
 
@@ -128,6 +128,9 @@ tasks {
 @Suppress("UnstableApiUsage")
 testing {
     suites {
+        fun JvmComponentDependencies.embeddedKotlin(module: String) =
+            project.dependencies.embeddedKotlin(module) as String
+
 //        named<JvmTestSuite>("test") {
 //            dependencies {
 //                implementation(project())
@@ -143,8 +146,8 @@ testing {
                 implementation(project())
                 implementation(gradleTestKit())
                 implementation(testFixtures(project()))
-                implementation(libs.kotlinTest)
-                implementation(libs.kotlinTestJunit)
+                implementation(embeddedKotlin("test"))
+                implementation(embeddedKotlin("test-junit"))
             }
 
             targets {

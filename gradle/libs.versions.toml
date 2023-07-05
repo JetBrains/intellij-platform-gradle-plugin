@@ -1,7 +1,4 @@
 [versions]
-# The version of Kotlin embedded in Gradle, see: https://kotlinlang.org/docs/releases.html#release-details
-embeddedKotlinVersion = "1.8.20"
-
 # libraries
 annotations = "24.0.1"
 ddPlist = "1.27"
@@ -15,7 +12,6 @@ retrofit = "2.9.0"
 
 # plugins
 dokka = "1.8.20"
-kotlin = "1.8.22"
 gradlePluginPublish = "1.2.0"
 gradleChangelogPlugin = "2.1.0"
 
@@ -28,14 +24,10 @@ intellijStructureBase = { group = "org.jetbrains.intellij.plugins", name = "stru
 intellijStructureIntellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }
 jacksonDatabind = { group = "com.fasterxml.jackson.core", name = "jackson-databind", version.ref = "jacksonDatabind" }
 jaxbApi = { group = "javax.xml.bind", name = "jaxb-api", version.ref = "jaxbApi" }
-kotlinGradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "embeddedKotlinVersion" }
-kotlinTest = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "embeddedKotlinVersion" }
-kotlinTestJunit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "embeddedKotlinVersion" }
 kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 
 [plugins]
-kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "embeddedKotlinVersion" }
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePluginPublish" }
 changelog = { id = "org.jetbrains.changelog", version.ref = "gradleChangelogPlugin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
