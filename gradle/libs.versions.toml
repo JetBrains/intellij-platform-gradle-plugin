@@ -1,6 +1,6 @@
 [versions]
 # The version of Kotlin embedded in Gradle, see: https://kotlinlang.org/docs/releases.html#release-details
-embeddedKotlinVersion = "1.8.20"
+embeddedKotlinVersion = "1.9.0"
 
 # libraries
 annotations = "24.0.1"
