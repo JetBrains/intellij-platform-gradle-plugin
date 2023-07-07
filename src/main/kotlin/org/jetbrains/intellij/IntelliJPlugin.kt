@@ -1464,8 +1464,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 into(temporaryDir)
             }
         val listProductsReleasesTaskProvider = project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME) {
-            val taskContext = logCategory()
-
             ideaProductReleasesUpdateFiles
                 .from(downloadIdeaProductReleasesXmlTaskProvider.map {
                     it.outputs.files.asFileTree
