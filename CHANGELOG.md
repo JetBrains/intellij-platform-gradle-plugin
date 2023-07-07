@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.15.0] - 2023-07-07
+
 ### Added
 - Attach LSP API sources to the IDEA dependency, if available
 - Added `ListProductsReleasesTask.androidStudioProductReleasesUpdateFiles` property
@@ -739,7 +741,8 @@
 ## [0.0.10]
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.2...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.15.0...HEAD
+[1.15.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.2...v1.15.0
 [1.14.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.1...v1.14.2
 [1.14.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.0...v1.14.1
 [1.14.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.3...v1.14.0
