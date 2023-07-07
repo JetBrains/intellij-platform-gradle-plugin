@@ -44,7 +44,7 @@ abstract class IdeaDependencyManager @Inject constructor(
 ) {
 
     private val mainDependencies = listOf("ideaIC", "ideaIU", "riderRD", "riderRS")
-    private val sourceZipArtifacts = listOf("src_lsp-openapi")
+    private val sourceZipArtifacts = listOf("src_lsp-openapi", "src_lsp-api")
 
     fun register(project: Project, dependency: IdeaDependency, dependencies: DependencySet) {
         val ivyFile = getOrCreateIvyXml(dependency)
