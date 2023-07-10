@@ -12,6 +12,7 @@
 
 ### Changed
 - Renamed `ListProductsReleasesTask.productsReleasesUpdateFiles` property to `ListProductsReleasesTask.ideaProductReleasesUpdateFiles`
+- Disabled caching for `BuildPluginTask`
 
 ### Removed
 - Removed `ListProductsReleasesTask.updatePaths` property

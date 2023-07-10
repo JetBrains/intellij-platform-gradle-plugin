@@ -11,7 +11,6 @@ import org.jetbrains.intellij.IntelliJPluginConstants
  *
  * @see [Zip]
  */
-@CacheableTask
 abstract class BuildPluginTask : Zip() {
 
     init {
