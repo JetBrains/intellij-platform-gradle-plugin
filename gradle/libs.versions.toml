@@ -13,7 +13,7 @@ retrofit = "2.9.0"
 # plugins
 dokka = "1.8.20"
 gradlePluginPublish = "1.2.0"
-gradleChangelogPlugin = "2.1.0"
+gradleChangelogPlugin = "2.1.1"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
