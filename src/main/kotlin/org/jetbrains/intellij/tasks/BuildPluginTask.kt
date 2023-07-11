@@ -2,8 +2,8 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.IntelliJPluginConstants
 
 /**
@@ -11,7 +11,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants
  *
  * @see [Zip]
  */
-@CacheableTask
+ @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
 abstract class BuildPluginTask : Zip() {
 
     init {
