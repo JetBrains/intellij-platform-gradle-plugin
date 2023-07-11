@@ -11,6 +11,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants
  *
  * @see [Zip]
  */
+ @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
 abstract class BuildPluginTask : Zip() {
 
     init {
