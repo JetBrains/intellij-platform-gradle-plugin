@@ -2,8 +2,8 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.IntelliJPluginConstants
 
 /**
