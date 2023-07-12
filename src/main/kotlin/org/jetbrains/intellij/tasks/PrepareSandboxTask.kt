@@ -83,6 +83,12 @@ abstract class PrepareSandboxTask : Sync() {
     @get:Classpath
     abstract val runtimeClasspathFiles: Property<FileCollection>
 
+    /**
+     * Represents the suffix used for test-related configuration.
+     */
+    @get:Internal
+    abstract val testSuffix: Property<String>
+
     private val context = logCategory()
     private val usedNames = mutableMapOf<String, Path>()
 

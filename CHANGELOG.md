@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- Configure all tasks that extend task classes instead of just those created by the plugin 
+
 ### Changed
 - Disabled caching for `BuildPluginTask`
 
