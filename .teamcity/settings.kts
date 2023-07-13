@@ -44,7 +44,7 @@ project {
     }
 
     val operatingSystems = listOf("Linux", "Windows", "macOS")
-    val gradleVersions = listOf("7.6", "8.2")
+    val gradleVersions = listOf("7.6", "8.2.1")
 
     val buildChain = sequential {
         operatingSystems.forEach { os ->
