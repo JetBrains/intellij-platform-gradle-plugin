@@ -20,7 +20,7 @@ import org.jetbrains.intellij.platform.gradleplugin.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradleplugin.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.platform.gradleplugin.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.platform.gradleplugin.performanceTest.parsers.SimpleIJPerformanceParser
-import org.jetbrains.intellij.propertyProviders.PerformanceTestArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.PerformanceTestArgumentProvider
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -89,11 +89,13 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
                 // Passing to the IDE project to open
                 args = listOf("${testDataDir.get()}/${testScript.projectName}")
 
-                jvmArgumentProviders.add(PerformanceTestArgumentProvider(
+                jvmArgumentProviders.add(
+                    PerformanceTestArgumentProvider(
                     scriptPath,
                     testArtifactsDirPath,
                     profilerName.get().name.lowercase(),
-                ))
+                )
+                )
                 super.exec()
 
                 IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toAbsolutePath().toString())

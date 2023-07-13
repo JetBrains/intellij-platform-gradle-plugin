@@ -7,8 +7,8 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Sync
-import org.jetbrains.intellij.IntelliJPluginConstants
-import org.jetbrains.intellij.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradleplugin.logCategory
 
 @CacheableTask
 abstract class DownloadAndroidStudioProductReleasesXmlTask : Sync() {

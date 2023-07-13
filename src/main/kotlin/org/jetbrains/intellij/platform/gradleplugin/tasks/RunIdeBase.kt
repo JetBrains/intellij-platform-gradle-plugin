@@ -17,8 +17,8 @@ import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
 import org.jetbrains.intellij.platform.gradleplugin.jbr.JbrResolver
-import org.jetbrains.intellij.propertyProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.propertyProviders.LaunchSystemArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.LaunchSystemArgumentProvider
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -216,13 +216,15 @@ abstract class RunIdeBase : JavaExec() {
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
 
-        jvmArgumentProviders.add(LaunchSystemArgumentProvider(
+        jvmArgumentProviders.add(
+            LaunchSystemArgumentProvider(
             ideDirPath,
             configDir.get(),
             systemDir.get(),
             pluginsDir.get().asFile,
             requiredPluginIds.get(),
-        ))
+        )
+        )
 
         val operatingSystem = OperatingSystem.current()
         val userDefinedSystemProperties = systemProperties

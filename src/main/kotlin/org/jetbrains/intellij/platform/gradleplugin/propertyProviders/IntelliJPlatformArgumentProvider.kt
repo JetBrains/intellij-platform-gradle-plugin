@@ -1,6 +1,6 @@
 // Copyright 2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.propertyProviders
+package org.jetbrains.intellij.platform.gradleplugin.propertyProviders
 
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.readLines
@@ -9,9 +9,9 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.ideProductInfo
-import org.jetbrains.intellij.resolveIdeHomeVariable
-import org.jetbrains.intellij.utils.OpenedPackages
+import org.jetbrains.intellij.platform.gradleplugin.ideProductInfo
+import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
+import org.jetbrains.intellij.platform.gradleplugin.utils.OpenedPackages
 import java.nio.file.Path
 
 class IntelliJPlatformArgumentProvider(

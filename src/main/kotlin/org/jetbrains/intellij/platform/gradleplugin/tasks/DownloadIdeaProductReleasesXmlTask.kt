@@ -4,7 +4,7 @@ package org.jetbrains.intellij.tasks
 
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
 import java.io.File
 
 @CacheableTask
