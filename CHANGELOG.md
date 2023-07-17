@@ -10,6 +10,7 @@
 - New project ID: `org.jetbrains.intellij.platform`
 - New Maven coordinates: `org.jetbrains.intellij.platform:intellij-platform-gradle-plugin`
 - Move classes under the new package: `org.jetbrains.intellij.platform.gradleplugin`
+- Update minimal supported Gradle version to `8.0`
 - Disabled caching for `BuildPluginTask`
 
 ## [1.15.0] - 2023-07-07

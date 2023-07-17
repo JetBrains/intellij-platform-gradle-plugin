@@ -21,7 +21,7 @@ A clear and concise description of what you expected to happen.
 **Environment:**
  - OS: [e.g. macOS]
  - IntelliJ Platform Gradle Plugin Version [e.g. 2.0]
- - Gradle Version [e.g. 7.4.2]
+ - Gradle Version [e.g. 8.2.1]
 
 **Additional context**
 Add any other context about the problem here.
