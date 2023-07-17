@@ -1,6 +1,6 @@
 // Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradleplugin
+package org.jetbrains.intellij.platform.gradleplugin.plugins
 
 import com.jetbrains.plugin.structure.base.utils.extension
 import com.jetbrains.plugin.structure.base.utils.hasExtension
@@ -36,6 +36,7 @@ import org.gradle.plugins.ide.idea.model.IdeaProject
 import org.jetbrains.gradle.ext.IdeaExtPlugin
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
@@ -128,7 +129,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
-abstract class IntelliJPlugin : Plugin<Project> {
+abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader
@@ -136,9 +137,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
     private lateinit var context: String
 
     override fun apply(project: Project) {
+        context = project.logCategory()
+
+        info(context, "Configuring plugin: org.jetbrains.intellij.platform")
         project.checkGradleVersion()
 
-        context = project.logCategory()
+
+        applyPlugins(project)
+
+        return
         archiveUtils = project.objects.newInstance()
         dependenciesDownloader = project.objects.newInstance(project.gradle.startParameter.isOffline)
 
@@ -190,6 +197,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val ideaDependencyProvider = prepareIdeaDependencyProvider(project, extension).memoize()
         configureDependencies(project, extension, ideaDependencyProvider)
         configureTasks(project, extension, ideaDependencyProvider)
+    }
+
+    private fun applyPlugins(project: Project) {
+        project.plugins.apply(IntelliJPlatformBasePlugin::class)
+        project.plugins.apply(IntelliJPlatformDependenciesPlugin::class)
+        project.plugins.apply(IntelliJPlatformTasksPlugin::class)
     }
 
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
@@ -386,7 +399,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
     private fun configureProjectAfterEvaluate(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         project.subprojects.forEach { subproject ->
-            if (subproject.plugins.findPlugin(IntelliJPlugin::class) == null) {
+            if (subproject.plugins.findPlugin(IntelliJPlatformPlugin::class) == null) {
                 subproject.extensions.findByType<IntelliJPluginExtension>()?.let {
                     configureProjectAfterEvaluate(subproject, it, ideaDependencyProvider)
                 }
@@ -443,7 +456,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
     private fun configureProjectPluginTasksDependency(dependency: Project, task: PrepareSandboxTask) {
         // invoke before tasks graph is ready
-        if (dependency.plugins.findPlugin(IntelliJPlugin::class) == null) {
+        if (dependency.plugins.findPlugin(IntelliJPlatformPlugin::class) == null) {
             throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}")
         }
         dependency.tasks.named(PREPARE_SANDBOX_TASK_NAME) {
@@ -453,7 +466,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
     private fun configureProjectPluginDependency(project: Project, dependency: Project, dependencies: DependencySet, extension: IntelliJPluginExtension) {
         // invoke on demand when plugin artifacts are needed
-        if (dependency.plugins.findPlugin(IntelliJPlugin::class) == null) {
+        if (dependency.plugins.findPlugin(IntelliJPlatformPlugin::class) == null) {
             throw BuildException("Cannot use '$dependency' as a plugin dependency. IntelliJ Plugin not found: ${dependency.plugins}")
         }
         dependencies.add(project.dependencies.create(dependency))
@@ -1094,7 +1107,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 val closestCompilerVersion = URL(JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA).openStream().use { inputStream ->
                                     val version = Version.parse(compilerVersion)
                                     XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.versions
-                                        ?.map(Version::parse)?.filter { it <= version }
+                                        ?.map(Version.Companion::parse)?.filter { it <= version }
                                         ?.maxOf { it }
                                         ?.version
                                 }

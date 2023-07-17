@@ -198,9 +198,33 @@ gradlePlugin {
     vcsUrl.set(properties("vcsUrl"))
 
     plugins.create("intellijPlugin") {
-        id = properties("pluginId").get()
-        displayName = properties("pluginDisplayName").get()
-        implementationClass = properties("pluginImplementationClass").get()
+        id = "org.jetbrains.intellij.platform"
+        displayName = "IntelliJ Platform Gradle Plugin"
+        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformPlugin"
+        description = project.description
+        tags.set(properties("tags").map { it.split(',') })
+    }
+
+    plugins.create("intellijPluginBase") {
+        id = "org.jetbrains.intellij.platform.base"
+        displayName = "IntelliJ Platform Gradle Plugin (base)"
+        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformBasePlugin"
+        description = project.description
+        tags.set(properties("tags").map { it.split(',') })
+    }
+
+    plugins.create("intellijPluginDependencies") {
+        id = "org.jetbrains.intellij.platform.dependencies"
+        displayName = "IntelliJ Platform Gradle Plugin (dependencies)"
+        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformDependenciesPlugin"
+        description = project.description
+        tags.set(properties("tags").map { it.split(',') })
+    }
+
+    plugins.create("intellijPluginTasks") {
+        id = "org.jetbrains.intellij.platform.tasks"
+        displayName = "IntelliJ Platform Gradle Plugin (tasks)"
+        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformTasksPlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
@@ -228,7 +252,7 @@ publishing {
             from(components["java"])
 
             pom {
-                name.set(properties("pluginDisplayName"))
+                name.set("IntelliJ Platform Gradle Plugin")
                 description.set(project.description)
                 url.set(properties("website"))
 

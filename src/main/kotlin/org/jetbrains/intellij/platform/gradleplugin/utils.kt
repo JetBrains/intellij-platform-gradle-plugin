@@ -45,6 +45,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELE
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.platform.gradleplugin.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradleplugin.model.ProductInfo
+import org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformPlugin
 import java.io.File
 import java.io.StringWriter
 import java.net.HttpURLConnection
@@ -201,7 +202,7 @@ fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = l
 fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
 fun debug(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, logCategory, message, e)
 
-private val logger = Logging.getLogger(IntelliJPlugin::class.java)
+private val logger = Logging.getLogger(IntelliJPlatformPlugin::class.java)
 
 private fun log(level: LogLevel, logCategory: String?, message: String, e: Throwable?) {
     val category = "gradle-intellij-plugin ${logCategory.orEmpty()}".trim()
@@ -296,7 +297,7 @@ internal fun Project.checkGradleVersion() {
     }
 }
 
-internal fun getCurrentPluginVersion() = IntelliJPlugin::class.java
+internal fun getCurrentPluginVersion() = IntelliJPlatformPlugin::class.java
     .run { getResource("$simpleName.class") }
     .runCatching {
         val manifestPath = with(this?.path) {
