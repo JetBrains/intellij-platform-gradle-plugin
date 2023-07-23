@@ -8,7 +8,11 @@ import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.provider.Provider
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.jvm.toolchain.JavaLauncher
+import org.gradle.jvm.toolchain.JavaToolchainService
+import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY
 import org.jetbrains.intellij.utils.ArchiveUtils
@@ -26,6 +30,8 @@ abstract class JbrResolver @Inject constructor(
     private val archiveUtils: ArchiveUtils,
     private val dependenciesDownloader: DependenciesDownloader,
     private val context: String?,
+    private val gradleProjectJavaToolchainSpec: JavaToolchainSpec,
+    private val gradleProjectJavaToolchainService: JavaToolchainService,
 ) {
 
     private val operatingSystem = OperatingSystem.current()
@@ -77,6 +83,22 @@ abstract class JbrResolver @Inject constructor(
                         .also { debug(context, "Runtime specified with jbrVersion='$version', jbrVariant='$jbrVariant', jbrArch='$jbrArch' resolved as: $it") }
                         .ifNull { debug(context, "Cannot resolve runtime with jbrVersion='$version', jbrVariant='$jbrVariant', jbrArch='$jbrArch'") }
                 }
+            },
+            {
+                val toolchain = gradleProjectJavaToolchainSpec
+                val gradleProjectJavaToolchain = if (toolchain.vendor.isPresent && toolchain.vendor.get().matches("JetBrains s.r.o")) gradleProjectJavaToolchainService.launcherFor(toolchain) else null
+                val path = gradleProjectJavaToolchain?.get()?.metadata?.installationPath?.asPath!!
+                path
+                    .let(::getJbrRoot)
+                    .run {
+                        when (resolveExecutable) {
+                            true -> resolve("bin/java")
+                            else -> this
+                        }
+                    }
+                    .takeIf(Path::exists)
+                    .also { debug(context, "Runtime specified with gradle project java toolchain='$path' resolved as: $it") }
+                    .ifNull { debug(context, "Cannot resolve runtime specified with gradle project java toolchain='$path'") }
             },
             {
                 ideDir?.let { file ->

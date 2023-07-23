@@ -4,6 +4,7 @@
 
 ### Added
 - Configure all tasks that extend task classes instead of just those created by the plugin 
+- Make JbrResolver prefer Gradle javaToolchains by `JetBrains s.r.o`, if available. Only otherwise start fetching and running a new one.
 
 ### Changed
 - Disabled caching for `BuildPluginTask`
