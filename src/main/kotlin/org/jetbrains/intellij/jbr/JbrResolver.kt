@@ -157,9 +157,6 @@ abstract class JbrResolver @Inject constructor(
             .mapNotNull { it()?.takeIf(validate) }
             .firstOrNull()
             ?.also { info(context, "Resolved JVM Runtime directory: $it") }
-            .also {
-                println("it = ${it}")
-            }
     }
 
     fun resolve(version: String?, variant: String?, arch: String?): Jbr? {
