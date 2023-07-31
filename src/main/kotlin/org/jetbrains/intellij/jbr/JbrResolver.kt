@@ -8,13 +8,12 @@ import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.provider.Provider
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY
+import org.jetbrains.intellij.IntelliJPluginConstants.JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME
 import org.jetbrains.intellij.utils.ArchiveUtils
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import org.jetbrains.intellij.utils.ivyRepository
@@ -29,9 +28,9 @@ abstract class JbrResolver @Inject constructor(
     private val jreRepository: Provider<String>,
     private val archiveUtils: ArchiveUtils,
     private val dependenciesDownloader: DependenciesDownloader,
+    private val javaToolchainSpec: JavaToolchainSpec,
+    private val javaToolchainService: JavaToolchainService,
     private val context: String?,
-    private val gradleProjectJavaToolchainSpec: JavaToolchainSpec,
-    private val gradleProjectJavaToolchainService: JavaToolchainService,
 ) {
 
     private val operatingSystem = OperatingSystem.current()
@@ -85,20 +84,29 @@ abstract class JbrResolver @Inject constructor(
                 }
             },
             {
-                val toolchain = gradleProjectJavaToolchainSpec
-                val gradleProjectJavaToolchain = if (toolchain.vendor.isPresent && toolchain.vendor.get().matches("JetBrains s.r.o")) gradleProjectJavaToolchainService.launcherFor(toolchain) else null
-                val path = gradleProjectJavaToolchain?.get()?.metadata?.installationPath?.asPath!!
-                path
-                    .let(::getJbrRoot)
-                    .run {
-                        when (resolveExecutable) {
-                            true -> resolve("bin/java")
-                            else -> this
-                        }
+                @Suppress("UnstableApiUsage")
+                with(javaToolchainSpec) {
+                    when {
+                        vendor.isPresent && vendor.get().matches(JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME) -> javaToolchainService.launcherFor(this).get()
+                        else -> null
                     }
-                    .takeIf(Path::exists)
-                    .also { debug(context, "Runtime specified with gradle project java toolchain='$path' resolved as: $it") }
-                    .ifNull { debug(context, "Cannot resolve runtime specified with gradle project java toolchain='$path'") }
+                }?.let { javaLauncher ->
+                    val path = javaLauncher.metadata
+                        .installationPath
+                        .asPath
+                        .let(::getJbrRoot)
+
+                    path
+                        .run {
+                            when (resolveExecutable) {
+                                true -> resolve("bin/java")
+                                else -> this
+                            }
+                        }
+                        .takeIf(Path::exists)
+                        .also { debug(context, "Runtime specified with gradle project java toolchain='$path' resolved as: $it") }
+                        .ifNull { debug(context, "Cannot resolve runtime specified with gradle project java toolchain='$path'") }
+                }
             },
             {
                 ideDir?.let { file ->
@@ -149,6 +157,9 @@ abstract class JbrResolver @Inject constructor(
             .mapNotNull { it()?.takeIf(validate) }
             .firstOrNull()
             ?.also { info(context, "Resolved JVM Runtime directory: $it") }
+            .also {
+                println("it = ${it}")
+            }
     }
 
     fun resolve(version: String?, variant: String?, arch: String?): Jbr? {

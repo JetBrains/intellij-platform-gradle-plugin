@@ -189,9 +189,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
             extension.jreRepository,
             archiveUtils,
             dependenciesDownloader,
-            context,
             gradleProjectJavaToolchainSpec,
             gradleProjectJavaService,
+            context,
         )
 
         val ideaDependencyProvider = prepareIdeaDependencyProvider(project, extension).memoize()
