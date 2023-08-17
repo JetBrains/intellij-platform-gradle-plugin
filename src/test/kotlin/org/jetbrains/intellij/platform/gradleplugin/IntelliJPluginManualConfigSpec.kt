@@ -57,7 +57,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
             assertTrue(mainClasspath.contains("openapi.jar"))           // included explicitly in compileOnly
             assertTrue(mainRuntimeClasspath.contains("openapi.jar"))    // includes all but idea.jar
-            assertTrue(testClasspath.contains("openapi.jar"))
+            assertFalse(testClasspath.contains("openapi.jar"))
             assertTrue(testRuntimeClasspath.contains("openapi.jar"))    // includes all
 
             assertTrue(mainClasspath.contains("asm-all.jar"))           // included explicitly
@@ -124,7 +124,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
 
             assertTrue(mainClasspath.contains("junit-rt.jar"))              // included explicitly in compileOnly
             assertFalse(mainRuntimeClasspath.contains("junit-rt.jar"))
-            assertTrue(testClasspath.contains("junit-rt.jar"))
+            assertFalse(testClasspath.contains("junit-rt.jar"))
             assertTrue(testRuntimeClasspath.contains("junit-rt.jar"))       // includes all
 
             assertTrue(mainClasspath.contains("idea-junit.jar"))            // included explicitly in compile

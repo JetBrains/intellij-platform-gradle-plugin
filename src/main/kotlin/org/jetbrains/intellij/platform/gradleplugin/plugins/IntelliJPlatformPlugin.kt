@@ -19,6 +19,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
@@ -29,7 +30,9 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.gradle.plugins.ide.idea.model.IdeaProject
@@ -187,10 +190,15 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             type.convention(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
         }
 
+        val gradleProjectJavaToolchainSpec = project.extensions.getByType<JavaPluginExtension>().toolchain
+        val gradleProjectJavaService = project.serviceOf<JavaToolchainService>()
+
         jbrResolver = project.objects.newInstance(
             extension.jreRepository,
             archiveUtils,
             dependenciesDownloader,
+            gradleProjectJavaToolchainSpec,
+            gradleProjectJavaService,
             context,
         )
 
@@ -851,12 +859,12 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         project.tasks.register<RunIdePerformanceTestTask>(RUN_IDE_PERFORMANCE_TEST_TASK_NAME)
         project.tasks.withType<RunIdePerformanceTestTask> {
             artifactsDir.convention(extension.type.flatMap { type ->
-                extension.version.map { version ->
-                    project.buildDir.resolve(
+                extension.version.flatMap { version ->
+                    project.layout.buildDirectory.dir(
                         "reports/performance-test/$type$version-${project.version}-${
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
                         }"
-                    ).canonicalPath
+                    ).map { it.toString() }
                 }
             })
             profilerName.convention(ProfilerName.ASYNC)

@@ -420,7 +420,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                 mkdirs()
             }
         } else if (type == PLATFORM_TYPE_RIDER && OperatingSystem.current().isWindows) {
-            return project.buildDir
+            return project.layout.buildDirectory.asFile.get()
         }
         return zipFile.parentFile
     }
