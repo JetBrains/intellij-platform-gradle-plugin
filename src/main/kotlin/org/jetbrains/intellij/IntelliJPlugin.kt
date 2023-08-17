@@ -845,12 +845,12 @@ abstract class IntelliJPlugin : Plugin<Project> {
         project.tasks.register<RunIdePerformanceTestTask>(RUN_IDE_PERFORMANCE_TEST_TASK_NAME)
         project.tasks.withType<RunIdePerformanceTestTask> {
             artifactsDir.convention(extension.type.flatMap { type ->
-                extension.version.map { version ->
-                    project.buildDir.resolve(
+                extension.version.flatMap { version ->
+                    project.layout.buildDirectory.dir(
                         "reports/performance-test/$type$version-${project.version}-${
                             LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
                         }"
-                    ).canonicalPath
+                    ).map { it.toString() }
                 }
             })
             profilerName.convention(ProfilerName.ASYNC)
