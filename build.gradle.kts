@@ -18,7 +18,8 @@ plugins {
     alias(libs.plugins.dokka)
 }
 
-version = when (properties("snapshot").get().toBoolean()) {
+val isSnapshot = properties("snapshot").get().toBoolean()
+version = when (isSnapshot) {
     true -> properties("snapshotVersion").map { "$it-SNAPSHOT" }
     false -> properties("version")
 }.get()
@@ -213,10 +214,10 @@ gradlePlugin {
         tags.set(properties("tags").map { it.split(',') })
     }
 
-    plugins.create("intellijPluginDependencies") {
-        id = "org.jetbrains.intellij.platform.dependencies"
-        displayName = "IntelliJ Platform Gradle Plugin (dependencies)"
-        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformDependenciesPlugin"
+    plugins.create("intellijPluginSettings") {
+        id = "org.jetbrains.intellij.platform.settings"
+        displayName = "IntelliJ Platform Gradle Plugin (settings)"
+        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformSettingsPlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
@@ -244,47 +245,53 @@ publishing {
         }
     }
     publications {
-        create<MavenPublication>("snapshot") {
+        create<MavenPublication>("pluginMaven") {
             groupId = properties("group").get()
             artifactId = properties("artifactId").get()
             version = version.toString()
-
-            from(components["java"])
-
-            pom {
-                name.set("IntelliJ Platform Gradle Plugin")
-                description.set(project.description)
-                url.set(properties("website"))
-
-                packaging = "jar"
-
-                scm {
-                    connection.set(properties("scmUrl"))
-                    developerConnection.set(properties("scmUrl"))
-                    url.set(properties("vcsUrl"))
-                }
-
-                licenses {
-                    license {
-                        name.set("The Apache License, Version 2.0")
-                        url.set("https://github.com/JetBrains/gradle-intellij-plugin/blob/master/LICENSE")
-                    }
-                }
-
-                developers {
-                    developer {
-                        id.set("zolotov")
-                        name.set("Alexander Zolotov")
-                        email.set("zolotov@jetbrains.com")
-                    }
-                    developer {
-                        id.set("hsz")
-                        name.set("Jakub Chrzanowski")
-                        email.set("jakub.chrzanowski@jetbrains.com")
-                    }
-                }
-            }
         }
+
+//        create<MavenPublication>("snapshot") {
+//            groupId = properties("group").get()
+//            artifactId = properties("artifactId").get()
+//            version = version.toString()
+//
+//            from(components["java"])
+//
+//            pom {
+//                name.set("IntelliJ Platform Gradle Plugin")
+//                description.set(project.description)
+//                url.set(properties("website"))
+//
+//                packaging = "jar"
+//
+//                scm {
+//                    connection.set(properties("scmUrl"))
+//                    developerConnection.set(properties("scmUrl"))
+//                    url.set(properties("vcsUrl"))
+//                }
+//
+//                licenses {
+//                    license {
+//                        name.set("The Apache License, Version 2.0")
+//                        url.set("https://github.com/JetBrains/gradle-intellij-plugin/blob/master/LICENSE")
+//                    }
+//                }
+//
+//                developers {
+//                    developer {
+//                        id.set("zolotov")
+//                        name.set("Alexander Zolotov")
+//                        email.set("zolotov@jetbrains.com")
+//                    }
+//                    developer {
+//                        id.set("hsz")
+//                        name.set("Jakub Chrzanowski")
+//                        email.set("jakub.chrzanowski@jetbrains.com")
+//                    }
+//                }
+//            }
+//        }
     }
 }
 

@@ -19,9 +19,9 @@ import org.gradle.kotlin.dsl.newInstance
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.platform.gradleplugin.*
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.AndroidStudio
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.IntellijIdeaCommunity
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.CACHE_REDIRECTOR
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERSION_LATEST
@@ -332,9 +332,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
                         info(context, "Downloading IDE '$name' to: $ideDir")
 
                         val url = resolveIdeUrl(type, version, buildType, context)
-                        val dependencyVersion = listOf(type, version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
+                        val dependencyVersion = listOf(type.toString(), version, buildType).filterNot(String::isNullOrEmpty).joinToString("-")
                         val group = when (type) {
-                            PLATFORM_TYPE_ANDROID_STUDIO -> "com.android"
+                            AndroidStudio -> "com.android"
                             else -> "com.jetbrains"
                         }
                         debug(context, "Downloading IDE from $url")
@@ -505,15 +505,16 @@ abstract class RunPluginVerifierTask @Inject constructor(
         ideVersion: String,
         downloadPath: Path,
         context: String?,
-        block: (type: String, version: String, buildType: String) -> Path,
+        block: (type: IntelliJPlatformType, version: String, buildType: String) -> Path,
     ): Path {
         debug(context, "Resolving IDE path for: $ideVersion")
-        var (type, version) = ideVersion.trim().split('-', limit = 2) + null
-
-        if (version == null) {
-            debug(context, "IDE type not specified, setting type to $PLATFORM_TYPE_INTELLIJ_COMMUNITY")
-            version = type
-            type = PLATFORM_TYPE_INTELLIJ_COMMUNITY
+        val (version, code) = ideVersion.trim().split('-', limit = 2).reversed() + null
+        val type = when(code) {
+            null -> run {
+                debug(context, "IDE type not specified, setting type to $IntellijIdeaCommunity")
+                IntellijIdeaCommunity
+            }
+            else -> IntelliJPlatformType.fromCode(code)
         }
 
         val name = "$type-$version"
@@ -525,14 +526,14 @@ abstract class RunPluginVerifierTask @Inject constructor(
         }
 
         val buildTypes = when (type) {
-            PLATFORM_TYPE_ANDROID_STUDIO -> listOf("")
+            AndroidStudio -> listOf("")
             else -> listOf("release", "rc", "eap", "beta")
         }
 
         buildTypes.forEach { buildType ->
             debug(context, "Downloading IDE '$type-$version' from '$buildType' channel to: $downloadPath")
             try {
-                return block(type!!, version!!, buildType).also {
+                return block(type, version!!, buildType).also {
                     debug(context, "Resolved IDE '$type-$version' path: $it")
                 }
             } catch (e: IOException) {
@@ -553,8 +554,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * @param buildType release, rc, eap, beta
      * @return direct download URL prepended with [CACHE_REDIRECTOR] host
      */
-    private fun resolveIdeUrl(type: String, version: String, buildType: String, context: String?): String {
-        val isAndroidStudio = type == PLATFORM_TYPE_ANDROID_STUDIO
+    private fun resolveIdeUrl(type: IntelliJPlatformType, version: String, buildType: String, context: String?): String {
+        val isAndroidStudio = type == AndroidStudio
         val url = when {
             isAndroidStudio -> "$ANDROID_STUDIO_DOWNLOAD_URL/$version/android-studio-$version-linux.tar.gz"
             else -> "$IDEA_DOWNLOAD_URL?code=$type&platform=linux&type=$buildType&${versionParameterName(version)}=$version"

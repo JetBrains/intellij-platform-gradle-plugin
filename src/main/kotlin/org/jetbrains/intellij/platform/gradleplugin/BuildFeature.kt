@@ -3,18 +3,19 @@
 package org.jetbrains.intellij.platform.gradleplugin
 
 import org.gradle.api.Project
+import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_ID as prefix
 
 enum class BuildFeature(private val defaultValue: Boolean) {
     NO_SEARCHABLE_OPTIONS_WARNING(true),
     PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING(true),
     SELF_UPDATE_CHECK(true),
+    USE_CACHE_REDIRECTOR(true),
     ;
 
-    fun getValue(project: Project) = project.findProperty(toString())
-        ?.toString()
-        ?.toBoolean()
-        .or { defaultValue }
+    fun getValue(providers: ProviderFactory) = providers.gradleProperty(toString())
+        .map { it.toBoolean() }
+        .orElse(defaultValue)
 
     override fun toString() = name
         .lowercase()
@@ -28,10 +29,12 @@ enum class BuildFeature(private val defaultValue: Boolean) {
 
 fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
     feature
-        .getValue(this)
-        .apply {
-            when (this) {
-                true -> "Build feature is enabled: $feature"
-                false -> "Build feature is disabled: $feature"
-            }.also { info(logCategory(), it) }
+        .getValue(providers)
+        .map { value ->
+            value.also {
+                when (value) {
+                    true -> "Build feature is enabled: $feature"
+                    false -> "Build feature is disabled: $feature"
+                }.also { info(logCategory(), value.toString()) }
+            }
         }

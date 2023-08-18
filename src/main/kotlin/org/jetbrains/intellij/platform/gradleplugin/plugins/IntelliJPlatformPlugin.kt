@@ -41,6 +41,7 @@ import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.*
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
@@ -48,7 +49,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUIL
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DEFAULT_SANDBOX
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
@@ -67,6 +67,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID
@@ -74,13 +75,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.LIST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PERFORMANCE_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_CLION
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
@@ -93,7 +88,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PUBL
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_TYPE_RELEASES
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_IDE_TASK_NAME
@@ -143,10 +137,10 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         context = project.logCategory()
 
         info(context, "Configuring plugin: org.jetbrains.intellij.platform")
-        project.checkGradleVersion()
 
-
-        applyPlugins(project)
+        checkGradleVersion()
+        project.applyPlugins()
+        project.applyConfigurations()
 
         return
         archiveUtils = project.objects.newInstance()
@@ -184,10 +178,9 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     .dir(DEFAULT_SANDBOX)
                     .map { it.asFile.canonicalPath }
             )
-            intellijRepository.convention(DEFAULT_INTELLIJ_REPOSITORY)
             downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
-            type.convention(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
+            type.convention(IntellijIdeaCommunity.toString())
         }
 
         val gradleProjectJavaToolchainSpec = project.extensions.getByType<JavaPluginExtension>().toolchain
@@ -202,15 +195,13 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             context,
         )
 
-        val ideaDependencyProvider = prepareIdeaDependencyProvider(project, extension).memoize()
-        configureDependencies(project, extension, ideaDependencyProvider)
+        val ideaDependencyProvider = null as Provider<IdeaDependency> // prepareIdeaDependencyProvider(project, extension).memoize()
         configureTasks(project, extension, ideaDependencyProvider)
     }
 
-    private fun applyPlugins(project: Project) {
-        project.plugins.apply(IntelliJPlatformBasePlugin::class)
-        project.plugins.apply(IntelliJPlatformDependenciesPlugin::class)
-        project.plugins.apply(IntelliJPlatformTasksPlugin::class)
+    private fun Project.applyPlugins() {
+        plugins.apply(IntelliJPlatformBasePlugin::class)
+        plugins.apply(IntelliJPlatformTasksPlugin::class)
     }
 
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
@@ -272,7 +263,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         val downloadSources = extension.downloadSources.get()
         val extraDependencies = extension.extraDependencies.get()
         val ideaDependencyCachePath = extension.ideaDependencyCachePath.orNull.orEmpty()
-        val intellijRepository = extension.intellijRepository.get()
         val localPath = extension.localPath.orNull
         val localSourcesPath = extension.localSourcesPath.orNull
         val type = extension.getVersionType().orNull
@@ -281,7 +271,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         val ideaConfiguration = project.configurations.getByName(IDEA_CONFIGURATION_NAME)
 
         val dependencyManager = project.objects.newInstance<IdeaDependencyManager>(
-            intellijRepository,
             ideaDependencyCachePath,
             archiveUtils,
             dependenciesDownloader,
@@ -324,18 +313,19 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         ideaDependency
     }
 
-    private fun configureDependencies(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
-        val idea = project.configurations.create(IDEA_CONFIGURATION_NAME)
-            .setVisible(false)
+    private fun Project.applyConfigurations() {
+        val intellijPlatformConfiguration = project.configurations.maybeCreate(INTELLIJ_PLATFORM_CONFIGURATION_NAME)
             .apply {
+                isVisible = false
                 isCanBeConsumed = false
                 isCanBeResolved = true
+                description = "..." // TODO
             }
 
         val ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
             .setVisible(false)
             .withDependencies {
-                configurePluginDependencies(project, ideaDependencyProvider, extension, this)
+//                configurePluginDependencies(project, ideaDependencyProvider, extension, this)
             }
             .apply {
                 isCanBeConsumed = false
@@ -361,46 +351,48 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         val performanceTest = project.configurations.create(PERFORMANCE_TEST_CONFIGURATION_NAME)
             .setVisible(false)
             .withDependencies {
-                val resolver = project.objects.newInstance<PluginDependencyManager>(
-                    project.gradle.gradleUserHomeDir.canonicalPath,
-                    ideaDependencyProvider,
-                    extension.getPluginsRepositories(),
-                    archiveUtils,
-                    context,
-                )
+//                val resolver = project.objects.newInstance<PluginDependencyManager>(
+//                    project.gradle.gradleUserHomeDir.canonicalPath,
+//                    ideaDependencyProvider,
+//                    extension.getPluginsRepositories(),
+//                    archiveUtils,
+//                    context,
+//                )
 
                 // Check that the `runIdePerformanceTest` task was launched
                 // Check that `performanceTesting.jar` is absent (that means it's a community version)
                 // Check that user didn't pass a custom version of the performance plugin
-                if (
-                    RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
-                    && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
-                ) {
-                    val bundledPlugins = BuiltinPluginsRegistry.resolveBundledPlugins(ideaDependencyProvider.get().classes.toPath(), context)
-                    if (!bundledPlugins.contains(PERFORMANCE_PLUGIN_ID)) {
-                        val buildNumber = ideaDependencyProvider.get().buildNumber
-                        val resolvedPlugin = resolveLatestPluginUpdate(PERFORMANCE_PLUGIN_ID, buildNumber)
-                            ?: throw BuildException("No suitable plugin update found for $PERFORMANCE_PLUGIN_ID:$buildNumber")
-
-                        val plugin = resolver.resolve(project, resolvedPlugin)
-                            ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" })
-
-                        configurePluginDependency(project, plugin, extension, this, resolver)
-                    }
-                }
+//                if (
+//                    RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
+//                    && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
+//                ) {
+//                    val bundledPlugins = BuiltinPluginsRegistry.resolveBundledPlugins(ideaDependencyProvider.get().classes.toPath(), context)
+//                    if (!bundledPlugins.contains(PERFORMANCE_PLUGIN_ID)) {
+//                        val buildNumber = ideaDependencyProvider.get().buildNumber
+//                        val resolvedPlugin = resolveLatestPluginUpdate(PERFORMANCE_PLUGIN_ID, buildNumber)
+//                            ?: throw BuildException("No suitable plugin update found for $PERFORMANCE_PLUGIN_ID:$buildNumber")
+//
+//                        val plugin = resolver.resolve(project, resolvedPlugin)
+//                            ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" })
+//
+//                        configurePluginDependency(project, plugin, extension, this, resolver)
+//                    }
+//                }
             }
             .apply {
                 isCanBeConsumed = false
                 isCanBeResolved = true
             }
 
-        fun Configuration.extend() = extendsFrom(defaultDependencies, idea, ideaPlugins, performanceTest)
+//        fun Configuration.extend() = extendsFrom(defaultDependencies, idea, ideaPlugins, performanceTest)
+        fun Configuration.extend() = extendsFrom(intellijPlatformConfiguration)
 
         with(project.configurations) {
             getByName(COMPILE_ONLY_CONFIGURATION_NAME).extend()
-            getByName(TEST_IMPLEMENTATION_CONFIGURATION_NAME).extend()
-            project.pluginManager.withPlugin("java-test-fixtures") {
-                getByName("testFixturesCompileOnly").extend()
+            getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extend()
+//            getByName(TEST_IMPLEMENTATION_CONFIGURATION_NAME).extend()
+            project.pluginManager.withPlugin("java-test-fixtures") { // TODO: move to constants
+                getByName("testFixturesCompileOnly").extend() // TODO: move to constants
             }
         }
     }
@@ -896,11 +888,9 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         project.tasks.register<BuildSearchableOptionsTask>(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
         project.tasks.withType<BuildSearchableOptionsTask> {
             outputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
-            showPaidPluginWarning.convention(project.provider {
-                project.isBuildFeatureEnabled(PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING) && run {
-                    sourcePluginXmlFiles(project).any {
-                        parsePluginXml(it, context)?.productDescriptor != null
-                    }
+            showPaidPluginWarning.convention(project.isBuildFeatureEnabled(PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
+                it && sourcePluginXmlFiles(project).any {
+                    parsePluginXml(it, context)?.productDescriptor != null
                 }
             })
 
@@ -971,9 +961,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             })
             archiveBaseName.convention("lib/$SEARCHABLE_OPTIONS_DIR_NAME")
             destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
-            noSearchableOptionsWarning.convention(project.provider {
-                project.isBuildFeatureEnabled(NO_SEARCHABLE_OPTIONS_WARNING)
-            })
+            noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(NO_SEARCHABLE_OPTIONS_WARNING))
 
             dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
@@ -1021,14 +1009,11 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     val productInfo = ideProductInfo(it.classes.toPath())
 
                     val version = extension.getVersionNumber().orNull.orEmpty()
-                    val type = extension.getVersionType().orNull.orEmpty()
+                    val type = extension.getVersionType().orNull.orEmpty().let {
+                        IntelliJPlatformType.fromCode(it)
+                    }
                     val localPath = extension.localPath.orNull.orEmpty()
-                    val types = listOf(
-                        PLATFORM_TYPE_CLION,
-                        PLATFORM_TYPE_RIDER,
-                        PLATFORM_TYPE_PYCHARM,
-                        PLATFORM_TYPE_PHPSTORM,
-                    )
+                    val types = listOf(CLion, Rider, PyCharmProfessional, PhpStorm)
 
                     when {
                         localPath.isNotBlank() || !version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> {
@@ -1044,10 +1029,10 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
                         else -> {
                             val prefix = when (type) {
-                                PLATFORM_TYPE_CLION -> "CLION-"
-                                PLATFORM_TYPE_RIDER -> "RIDER-"
-                                PLATFORM_TYPE_PYCHARM -> "PYCHARM-"
-                                PLATFORM_TYPE_PHPSTORM -> "PHPSTORM-"
+                                CLion -> "CLION-"
+                                Rider -> "RIDER-"
+                                PyCharmProfessional -> "PYCHARM-"
+                                PhpStorm -> "PHPSTORM-"
                                 else -> ""
                             }
                             prefix + version
@@ -1069,8 +1054,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                                 )
                             }, {
                                 setOf(
-                                    "${extension.intellijRepository.get()}/${releaseType(version)}",
-                                    "${extension.intellijRepository.get()}/$RELEASE_TYPE_RELEASES",
                                     INTELLIJ_DEPENDENCIES,
                                 ).map(::mavenRepository)
                             }, true).takeIf { it.isNotEmpty() }
@@ -1570,9 +1553,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         project.tasks.register<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
         project.tasks.withType<InitializeIntelliJPluginTask> {
             offline.convention(project.gradle.startParameter.isOffline)
-            selfUpdateCheck.convention(project.provider {
-                project.isBuildFeatureEnabled(SELF_UPDATE_CHECK)
-            })
+            selfUpdateCheck.convention(project.isBuildFeatureEnabled(SELF_UPDATE_CHECK))
             lockFile.convention(project.provider {
                 temporaryDir.resolve(LocalDate.now().toString())
             })

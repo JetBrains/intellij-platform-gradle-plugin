@@ -5,6 +5,10 @@
 ### Added
 - Configure all tasks that extend task classes instead of just those created by the plugin 
 - Make JbrResolver prefer Gradle javaToolchains by `JetBrains s.r.o`, if available. Only otherwise start fetching and running a new one.
+- Added `org.jetbrains.intellij.buildFeature.useCacheRedirector` build feature
+- Added `IntelliJPlatformCollectorTransformer` and `IntelliJPlatformExtractTransformer` for handling IntelliJ Platform dependency archives
+- Added `jetbrainsAnnotations` dependency helper for adding JetBrains Annotations dependency
+- Added general `intellijPlatform` along with product-specific dependency helpers for adding IntelliJ Platform dependency 
 
 ### Changed
 - New project name: IntelliJ Platform Gradle Plugin

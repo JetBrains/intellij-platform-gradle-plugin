@@ -17,7 +17,7 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
         context = project.logCategory()
 
         info(context, "Configuring plugin: org.jetbrains.intellij.platform.tasks")
-        project.checkGradleVersion()
+        checkGradleVersion()
 
         applyPlugins(project)
     }

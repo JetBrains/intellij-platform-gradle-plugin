@@ -77,7 +77,10 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
             ?.sources
             ?.takeIf { plugin.builtin }
             ?.let {
-                val name = if (isDependencyOnPyCharm(ideaDependency)) "pycharmPC" else "ideaIC"
+                val name = when(ideaDependency.name) {
+                    "pycharmPY", "pycharmPC" -> "pycharmPC"
+                    else -> "ideaIC"
+                }
                 val artifact = IntellijIvyArtifact(it.toPath(), name, "jar", "sources", "sources")
                 artifact.conf = sourcesConfiguration.name
                 addArtifact(artifact)

@@ -9,8 +9,8 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.newInstance
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.IntellijIdeaCommunity
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
 import org.jetbrains.intellij.platform.gradleplugin.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradleplugin.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradleplugin.dependency.PluginsRepositoryConfiguration
@@ -152,13 +152,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
     abstract val sandboxDir: Property<String>
 
     /**
-     * The IntelliJ-based IDE distributions repository URL.
-     *
-     * Default value: `https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository`
-     */
-    abstract val intellijRepository: Property<String>
-
-    /**
      * Configures repositories for downloading plugin dependencies.
      *
      * Default value: `pluginsRepositories { marketplace() }`
@@ -239,7 +232,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     fun getVersionType(): Provider<String> = version.map {
         versionTypeRegex.matchEntire(it)?.groupValues?.getOrNull(1)
-            ?: type.getOrElse(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
+            ?: type.getOrElse(IntellijIdeaCommunity.toString())
     }
 
     fun addPluginDependency(pluginDependency: PluginDependency) {

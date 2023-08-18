@@ -7,7 +7,9 @@ object IntelliJPluginConstants {
     const val PLUGIN_ID = "org.jetbrains.intellij.platform"
     const val PLUGIN_GROUP_NAME = "intellij"
     const val EXTENSION_NAME = "intellijPlatform"
+    const val INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME = "intellijPlatformRepositoriesSettings"
 
+    @Deprecated("Check it")
     const val DEFAULT_SANDBOX = "idea-sandbox"
 
     const val BUILD_PLUGIN_TASK_NAME = "buildPlugin"
@@ -35,6 +37,7 @@ object IntelliJPluginConstants {
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
+    @Deprecated("Deprecated in 2.0")
     const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
@@ -76,6 +79,7 @@ object IntelliJPluginConstants {
 
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
     const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
+    @Deprecated("Deprecated in 2.0")
     const val IDEA_GRADLE_PLUGIN_ID = "org.jetbrains.gradle.plugin.idea-ext"
 
     const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
@@ -83,14 +87,20 @@ object IntelliJPluginConstants {
     const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
 
     // see https://github.com/JetBrains/gradle-intellij-plugin/issues/1060
+    @Deprecated("Deprecated in 2.0")
     const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "z10_intellijDefaultDependencies"
+    @Deprecated("Deprecated in 2.0")
     const val PERFORMANCE_TEST_CONFIGURATION_NAME = "z20_performanceTest"
+    @Deprecated("Deprecated in 2.0")
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
+    @Deprecated("Deprecated in 2.0")
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
+    const val INTELLIJ_PLATFORM_CONFIGURATION_NAME = "intellijPlatformConfiguration"
+
     const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
     const val INSTRUMENTED_JAR_PREFIX = "instrumented"
 
-    const val ANNOTATIONS_DEPENDENCY_VERSION = "24.0.0"
+    const val ANNOTATIONS_DEPENDENCY_VERSION = "24.0.1"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     const val MINIMAL_SUPPORTED_GRADLE_VERSION = "8.0"
     const val JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME = "JetBrains"
@@ -99,10 +109,6 @@ object IntelliJPluginConstants {
     const val RELEASE_SUFFIX_EAP_CANDIDATE = "-EAP-CANDIDATE-SNAPSHOT"
     const val RELEASE_SUFFIX_SNAPSHOT = "-SNAPSHOT"
     const val RELEASE_SUFFIX_CUSTOM_SNAPSHOT = "-CUSTOM-SNAPSHOT"
-
-    const val RELEASE_TYPE_SNAPSHOTS = "snapshots"
-    const val RELEASE_TYPE_NIGHTLY = "nightly"
-    const val RELEASE_TYPE_RELEASES = "releases"
 
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
     const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
@@ -119,28 +125,4 @@ object IntelliJPluginConstants {
 
     const val VERSION_LATEST = "latest"
     const val PERFORMANCE_PLUGIN_ID = "com.jetbrains.performancePlugin"
-
-    const val PLATFORM_TYPE_ANDROID_STUDIO = "AI"
-    const val PLATFORM_TYPE_CLION = "CL"
-    const val PLATFORM_TYPE_GATEWAY = "GW"
-    const val PLATFORM_TYPE_GOLAND = "GO"
-    const val PLATFORM_TYPE_INTELLIJ_COMMUNITY = "IC"
-    const val PLATFORM_TYPE_INTELLIJ_ULTIMATE = "IU"
-    const val PLATFORM_TYPE_PHPSTORM = "PS"
-    const val PLATFORM_TYPE_PYCHARM = "PY"
-    const val PLATFORM_TYPE_PYCHARM_COMMUNITY = "PC"
-    const val PLATFORM_TYPE_RIDER = "RD"
-
-    val PLATFORM_TYPES = listOf(
-        PLATFORM_TYPE_ANDROID_STUDIO,
-        PLATFORM_TYPE_CLION,
-        PLATFORM_TYPE_GATEWAY,
-        PLATFORM_TYPE_GOLAND,
-        PLATFORM_TYPE_INTELLIJ_COMMUNITY,
-        PLATFORM_TYPE_INTELLIJ_ULTIMATE,
-        PLATFORM_TYPE_PHPSTORM,
-        PLATFORM_TYPE_PYCHARM,
-        PLATFORM_TYPE_PYCHARM_COMMUNITY,
-        PLATFORM_TYPE_RIDER,
-    )
 }

@@ -14,7 +14,7 @@ import org.gradle.jvm.toolchain.internal.DefaultJvmVendorSpec
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DEFAULT_JBR_REPOSITORY
-import org.jetbrains.intellij.IntelliJPluginConstants.JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME
 import org.jetbrains.intellij.platform.gradleplugin.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradleplugin.utils.DependenciesDownloader
 import org.jetbrains.intellij.platform.gradleplugin.utils.ivyRepository

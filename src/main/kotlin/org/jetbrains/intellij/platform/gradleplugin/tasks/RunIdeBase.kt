@@ -14,8 +14,8 @@ import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradleplugin.*
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.IntellijIdeaUltimate
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.GITHUB_REPOSITORY
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
 import org.jetbrains.intellij.platform.gradleplugin.jbr.JbrResolver
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.LaunchSystemArgumentProvider
@@ -247,7 +247,7 @@ abstract class RunIdeBase : JavaExec() {
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = findIdePrefix()
-            if (prefix == null && !ideBuildNumber(ideDir.get().toPath()).startsWith("$PLATFORM_TYPE_INTELLIJ_ULTIMATE-")) {
+            if (prefix == null && !ideBuildNumber(ideDir.get().toPath()).startsWith("$IntellijIdeaUltimate-")) {
                 throw TaskExecutionException(
                     this,
                     GradleException(

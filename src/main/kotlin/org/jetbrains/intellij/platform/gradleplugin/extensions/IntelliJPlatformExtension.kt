@@ -2,5 +2,5 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.extensions
 
-abstract class IntelliJPlatformExtension {
+interface IntelliJPlatformExtension {
 }

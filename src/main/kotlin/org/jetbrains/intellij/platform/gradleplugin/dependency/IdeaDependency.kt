@@ -10,6 +10,7 @@ import java.io.Serializable
 import kotlin.io.path.isDirectory
 import kotlin.io.path.name
 
+@Deprecated("Work on transformed dependency")
 open class IdeaDependency(
     val name: String,
     val version: String,

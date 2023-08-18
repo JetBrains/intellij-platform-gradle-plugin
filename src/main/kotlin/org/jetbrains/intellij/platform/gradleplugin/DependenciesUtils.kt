@@ -17,11 +17,16 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SETU
 import org.jetbrains.intellij.platform.gradleplugin.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradleplugin.tasks.SetupDependenciesTask
 
+@Deprecated("Deprecated in 2.0")
 fun Project.intellij() = intellijBase()
+@Deprecated("Deprecated in 2.0")
 fun Project.intellij(filter: Closure<*>) = intellijBase().matching(filter)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellij(filter: Action<PatternFilterable>) = intellijBase().matching(filter)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellij(filter: PatternFilterable) = intellijBase().matching(filter)
 
+@Deprecated("Deprecated in 2.0")
 private fun Project.intellijBase(): FileTree {
     val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
     val ideaProvider = setupDependenciesTaskProvider.flatMap { setupDependenciesTask ->
@@ -37,11 +42,16 @@ private fun Project.intellijBase(): FileTree {
     return ideaProvider.get()
 }
 
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijPlugin(plugin: String) = intellijPluginBase(plugin)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijPlugin(plugin: String, filter: Closure<*>) = intellijPluginBase(plugin).matching(filter)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijPlugin(plugin: String, filter: Action<PatternFilterable>) = intellijPluginBase(plugin).matching(filter)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijPlugin(plugin: String, filter: PatternFilterable) = intellijPluginBase(plugin).matching(filter)
 
+@Deprecated("Deprecated in 2.0")
 private fun Project.intellijPluginBase(plugin: String): FileTree {
     val extension = extensions.getByType<IntelliJPluginExtension>()
 
@@ -56,6 +66,7 @@ private fun Project.intellijPluginBase(plugin: String): FileTree {
     return files(dependency.jarFiles).asFileTree
 }
 
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     val extension = extensions.getByType<IntelliJPluginExtension>()
     val selectedPlugins = mutableSetOf<PluginDependency>()
@@ -76,11 +87,16 @@ fun Project.intellijPlugins(vararg plugins: String): FileCollection {
     return files(selectedPlugins.map { it.jarFiles })
 }
 
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijExtra(extra: String) = intellijExtraBase(extra)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijExtra(extra: String, filter: Closure<*>) = intellijExtraBase(extra).matching(filter)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijExtra(extra: String, filter: Action<PatternFilterable>) = intellijExtraBase(extra).matching(filter)
+@Deprecated("Deprecated in 2.0")
 fun Project.intellijExtra(extra: String, filter: PatternFilterable) = intellijExtraBase(extra).matching(filter)
 
+@Deprecated("Deprecated in 2.0")
 private fun Project.intellijExtraBase(extra: String): FileTree {
     val setupDependenciesTaskProvider = project.tasks.named<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
 

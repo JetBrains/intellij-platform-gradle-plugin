@@ -33,17 +33,7 @@ import org.jdom2.Document
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM_COMMUNITY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_CUSTOM_SNAPSHOT
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_TYPE_NIGHTLY
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_TYPE_RELEASES
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
-import org.jetbrains.intellij.platform.gradleplugin.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradleplugin.model.ProductInfo
 import org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformPlugin
 import java.io.File
@@ -58,8 +48,6 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
 import java.util.jar.Manifest
-
-val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
 
 internal fun sourcePluginXmlFiles(project: Project) = project
     .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
@@ -186,17 +174,6 @@ private fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
     .orEmpty()
     .filter { filter.test(it) }
 
-fun releaseType(version: String) = when {
-    version.endsWith(RELEASE_SUFFIX_EAP) ||
-            version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
-            version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
-            version.matches(MAJOR_VERSION_PATTERN.toRegex())
-    -> RELEASE_TYPE_SNAPSHOTS
-
-    version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> RELEASE_TYPE_NIGHTLY
-    else -> RELEASE_TYPE_RELEASES
-}
-
 fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
 fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, logCategory, message, e)
 fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
@@ -243,10 +220,6 @@ fun isKotlinRuntime(name: String) =
             name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
             name == "kotlin-test" || name.startsWith("kotlin-test-")
 
-fun isDependencyOnPyCharm(dependency: IdeaDependency) = dependency.name == "pycharmPY" || dependency.name == "pycharmPC"
-
-fun isPyCharmType(type: String) = type == PLATFORM_TYPE_PYCHARM || type == PLATFORM_TYPE_PYCHARM_COMMUNITY
-
 val repositoryVersion: String by lazy {
     LocalDateTime.now().format(
         DateTimeFormatterBuilder()
@@ -291,7 +264,7 @@ internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnecti
     }.also { disconnect() }
 }
 
-internal fun Project.checkGradleVersion() {
+internal fun checkGradleVersion() {
     if (GradleVersion.current() < GradleVersion.version(MINIMAL_SUPPORTED_GRADLE_VERSION)) {
         throw PluginInstantiationException("$PLUGIN_NAME requires Gradle $MINIMAL_SUPPORTED_GRADLE_VERSION and higher")
     }

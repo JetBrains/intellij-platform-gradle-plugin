@@ -11,7 +11,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradleplugin.*
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.AndroidStudio
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.model.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradleplugin.model.ProductsReleases
@@ -146,7 +146,9 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             ?.replace("*", "9999")
             ?.run(Version::parse)
 
-        val types = types.get()
+        val types = types.get().mapNotNull {
+            IntelliJPlatformType.fromCode(it)
+        }
         val channels = releaseChannels.get()
 
         fun testVersion(version: Version?, build: Version?): Boolean {
@@ -164,7 +166,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
         val result = releases.map(ProductsReleases::products).flatten().asSequence()
             .flatMap { product -> product.codes.map { it to product }.asSequence() }
-            .filter { (type) -> types.contains(type) }
+            .filter { (type) -> types.contains(IntelliJPlatformType.fromCode(type)) }
             .flatMap { (type, product) -> product.channels.map { type to it }.asSequence() }
             .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.uppercase())) }
             .flatMap { (type, channel) ->
@@ -182,7 +184,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             .distinct()
             .toList()
 
-        val androidStudioResult = when (types.contains(PLATFORM_TYPE_ANDROID_STUDIO)) {
+        val androidStudioResult = when (types.contains(AndroidStudio)) {
             true -> androidStudioReleases.flatMap { release ->
                 release.items
                     .asSequence()
@@ -198,7 +200,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
                             it.version.split('.').last().toInt()
                         }
                     }
-                    .map { "$PLATFORM_TYPE_ANDROID_STUDIO-${it.version}" }
+                    .map { "$AndroidStudio-${it.version}" }
                     .toList()
             }
 

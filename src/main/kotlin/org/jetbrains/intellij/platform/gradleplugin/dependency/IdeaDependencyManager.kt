@@ -13,20 +13,10 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIden
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradleplugin.*
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPES
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_ANDROID_STUDIO
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_CLION
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_GATEWAY
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_GOLAND
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COMMUNITY
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
-import org.jetbrains.intellij.platform.gradleplugin.model.AndroidStudioReleases
-import org.jetbrains.intellij.platform.gradleplugin.model.XmlExtractor
-import org.jetbrains.intellij.platform.gradleplugin.utils.*
+import org.jetbrains.intellij.platform.gradleplugin.utils.ArchiveUtils
+import org.jetbrains.intellij.platform.gradleplugin.utils.DependenciesDownloader
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -36,7 +26,6 @@ import javax.inject.Inject
 
 @Suppress("BooleanMethodIsAlwaysInverted")
 abstract class IdeaDependencyManager @Inject constructor(
-    private val repositoryUrl: String,
     private val ideaDependencyCachePath: String,
     private val archiveUtils: ArchiveUtils,
     private val dependenciesDownloader: DependenciesDownloader,
@@ -71,7 +60,7 @@ abstract class IdeaDependencyManager @Inject constructor(
 
     private fun createDependency(
         name: String,
-        type: String?,
+        type: IntelliJPlatformType?,
         version: String,
         buildNumber: String,
         classesDirectory: File,
@@ -79,7 +68,7 @@ abstract class IdeaDependencyManager @Inject constructor(
         project: Project,
         extraDependencies: Collection<IdeaExtraDependency>,
     ) = when (type) {
-        "JPS" -> JpsIdeaDependency(
+        JPS -> JpsIdeaDependency(
             version,
             buildNumber,
             classesDirectory,
@@ -116,11 +105,10 @@ abstract class IdeaDependencyManager @Inject constructor(
         }
     }
 
-    private fun resolveSources(version: String, type: String): File? {
+    private fun resolveSources(version: String, type: IntelliJPlatformType): File? {
         info(context, "Adding IDE sources repository")
         try {
-            val releaseType = releaseType(version)
-            val forPyCharm = isPyCharmType(type)
+            val forPyCharm = type == PyCharmProfessional || type == PyCharmCommunity
             val sourcesFiles = dependenciesDownloader.downloadFromRepository(context, {
                 create(
                     group = if (forPyCharm) "com.jetbrains.intellij.pycharm" else "com.jetbrains.intellij.idea",
@@ -129,8 +117,6 @@ abstract class IdeaDependencyManager @Inject constructor(
                     classifier = "sources",
                     ext = "jar",
                 )
-            }, {
-                mavenRepository("$repositoryUrl/$releaseType")
             })
             if (sourcesFiles.size == 1) {
                 val sourcesDirectory = sourcesFiles.first()
@@ -148,7 +134,7 @@ abstract class IdeaDependencyManager @Inject constructor(
     private fun unzipDependencyFile(
         cacheDirectory: File,
         zipFile: File,
-        type: String,
+        type: IntelliJPlatformType,
         checkVersionChange: Boolean,
     ) = archiveUtils.extract(
         zipFile.toPath(), // FIXME
@@ -189,8 +175,8 @@ abstract class IdeaDependencyManager @Inject constructor(
             ?.let { markerFile.writeText(it.readText().trim()) }
     }
 
-    private fun resetExecutablePermissions(cacheDirectory: File, type: String) {
-        if (type == PLATFORM_TYPE_RIDER && !OperatingSystem.current().isWindows) {
+    private fun resetExecutablePermissions(cacheDirectory: File, type: IntelliJPlatformType) {
+        if (type == Rider && !OperatingSystem.current().isWindows) {
             for (file in cacheDirectory.walkTopDown()) {
                 if (file.isFile
                     && (file.extension == "dylib"
@@ -240,8 +226,8 @@ abstract class IdeaDependencyManager @Inject constructor(
                     .forEach { addArtifact(IntellijIvyArtifact.createZipDependency(it.toPath(), "sources", dependency.classes.toPath())) }
 
                 if (dependency.sources != null) {
-                    val name = when {
-                        isDependencyOnPyCharm(dependency) -> "pycharmPC"
+                    val name = when (dependency.name) {
+                        "pycharmPY", "pycharmPC" -> "pycharmPC"
                         else -> "ideaIC"
                     }
                     IntellijIvyArtifact(dependency.sources.toPath(), name, "jar", "sources", "sources").apply {
@@ -263,56 +249,56 @@ abstract class IdeaDependencyManager @Inject constructor(
             .any { "org.jetbrains.kotlin" == it.group && isKotlinRuntime(it.name) }
 
     fun resolveRemote(project: Project, version: String, type: String, sources: Boolean, extraDependencies: List<String>): IdeaDependency {
-        val releaseType = releaseType(version)
-        debug(context, "Adding IDE repository: $repositoryUrl/$releaseType")
         debug(context, "Adding IDE dependency")
 
+        val type = IntelliJPlatformType.fromCode(type)
+
         val remoteIdeaDependency = when {
-            type == PLATFORM_TYPE_INTELLIJ_ULTIMATE -> RemoteIdeaDependency(
+            type == IntellijIdeaUltimate -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.idea",
                 name = "ideaIU",
             )
 
-            type == PLATFORM_TYPE_INTELLIJ_COMMUNITY -> RemoteIdeaDependency(
+            type == IntellijIdeaCommunity -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.idea",
                 name = "ideaIC",
             )
 
-            type == PLATFORM_TYPE_CLION -> RemoteIdeaDependency(
+            type == CLion -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.clion",
                 name = "clion",
             )
 
-            isPyCharmType(type) -> RemoteIdeaDependency(
+            type == PyCharmProfessional || type == PyCharmCommunity -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.pycharm",
                 name = "pycharm$type",
             )
 
-            type == PLATFORM_TYPE_GOLAND -> RemoteIdeaDependency(
+            type == GoLand -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.goland",
                 name = "goland",
             )
 
-            type == PLATFORM_TYPE_PHPSTORM -> RemoteIdeaDependency(
+            type == PhpStorm -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.phpstorm",
                 name = "phpstorm",
             )
 
-            type == PLATFORM_TYPE_RIDER -> RemoteIdeaDependency(
+            type == Rider -> RemoteIdeaDependency(
                 group = "com.jetbrains.intellij.rider",
                 name = "riderRD",
-                hasSources = (sources && releaseType != RELEASE_TYPE_SNAPSHOTS).ifFalse {
-                    warn(context, "IDE sources are not available for Rider SNAPSHOTS")
-                },
+//                hasSources = (sources && releaseType != RELEASE_TYPE_SNAPSHOTS).ifFalse {
+//                    warn(context, "IDE sources are not available for Rider SNAPSHOTS")
+//                },
             )
 
-            type == PLATFORM_TYPE_GATEWAY -> RemoteIdeaDependency(
+            type == Gateway -> RemoteIdeaDependency(
                 "com.jetbrains.gateway",
                 "JetBrainsGateway",
                 hasSources = false,
             )
 
-            type == PLATFORM_TYPE_ANDROID_STUDIO -> RemoteIdeaDependency(
+            type == AndroidStudio -> RemoteIdeaDependency(
                 "com.google.android.studio",
                 "android-studio",
                 hasSources = false,
@@ -327,7 +313,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                 }
             }
 
-            else -> throw BuildException("Specified type '$type' is unknown. Supported values: ${PLATFORM_TYPES.joinToString()}", null)
+            else -> throw BuildException("Specified type '$type' is unknown. Supported values: ${IntelliJPlatformType.values().joinToString(", ") { it.code }}", null)
         }
 
         val classesDirectory = dependenciesDownloader.downloadFromRepository(context, {
@@ -337,41 +323,39 @@ abstract class IdeaDependencyManager @Inject constructor(
                 version = version,
                 ext = remoteIdeaDependency.artifactExtension,
             )
-        }, {
-            when (type) {
-                PLATFORM_TYPE_ANDROID_STUDIO -> {
-                    val androidStudioReleases =
-                        dependenciesDownloader.getAndroidStudioReleases(context)?.let {
-                            XmlExtractor<AndroidStudioReleases>(context).fetch(it)
-                        } ?: throw GradleException("Cannot resolve Android Studio Releases list")
-
-                    val release = androidStudioReleases.items.find {
-                        it.version == version || it.build == "$PLATFORM_TYPE_ANDROID_STUDIO-$version"
-                    } ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
-
-                    val arch = System.getProperty("os.arch")
-                    val hasAppleM1Link by lazy { release.downloads.any { it.link.contains("-mac_arm.zip") } }
-                    val suffix = with(OperatingSystem.current()) {
-                        when {
-                            isMacOsX -> when {
-                                arch == "aarch64" && hasAppleM1Link -> "-mac_arm.zip"
-                                else -> "-mac.zip"
-                            }
-
-                            isLinux -> "-linux.tar.gz"
-                            else -> "-windows.zip"
-                        }
-                    }
-                    val url = release.downloads
-                        .find { it.link.endsWith(suffix) }
-                        ?.link
-                        ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
-
-                    ivyRepository(url)
-                }
-
-                else -> mavenRepository("$repositoryUrl/$releaseType")
-            }
+//            when (type) {
+//                PLATFORM_TYPE_ANDROID_STUDIO -> {
+//                    val androidStudioReleases =
+//                        dependenciesDownloader.getAndroidStudioReleases(context)?.let {
+//                            XmlExtractor<AndroidStudioReleases>(context).fetch(it)
+//                        } ?: throw GradleException("Cannot resolve Android Studio Releases list")
+//
+//                    val release = androidStudioReleases.items.find {
+//                        it.version == version || it.build == "$PLATFORM_TYPE_ANDROID_STUDIO-$version"
+//                    } ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
+//
+//                    val arch = System.getProperty("os.arch")
+//                    val hasAppleM1Link by lazy { release.downloads.any { it.link.contains("-mac_arm.zip") } }
+//                    val suffix = with(OperatingSystem.current()) {
+//                        when {
+//                            isMacOsX -> when {
+//                                arch == "aarch64" && hasAppleM1Link -> "-mac_arm.zip"
+//                                else -> "-mac.zip"
+//                            }
+//
+//                            isLinux -> "-linux.tar.gz"
+//                            else -> "-windows.zip"
+//                        }
+//                    }
+//                    val url = release.downloads
+//                        .find { it.link.endsWith(suffix) }
+//                        ?.link
+//                        ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
+//
+//                    ivyRepository(url)
+//                }
+//
+//                else -> null
         }).first().let {
             debug(context, "IDE zip: " + it.path)
             unzipDependencyFile(getZipCacheDirectory(it, project, type), it, type, version.endsWith(RELEASE_SUFFIX_SNAPSHOT))
@@ -414,12 +398,12 @@ abstract class IdeaDependencyManager @Inject constructor(
         return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir.toFile(), sources, project, emptyList())
     }
 
-    private fun getZipCacheDirectory(zipFile: File, project: Project, type: String): File {
+    private fun getZipCacheDirectory(zipFile: File, project: Project, type: IntelliJPlatformType): File {
         if (ideaDependencyCachePath.isNotEmpty()) {
             return File(ideaDependencyCachePath).apply {
                 mkdirs()
             }
-        } else if (type == PLATFORM_TYPE_RIDER && OperatingSystem.current().isWindows) {
+        } else if (type == Rider && OperatingSystem.current().isWindows) {
             return project.layout.buildDirectory.asFile.get()
         }
         return zipFile.parentFile
@@ -452,15 +436,12 @@ abstract class IdeaDependencyManager @Inject constructor(
 
     private fun resolveExtraDependency(project: Project, version: String, name: String): File? {
         try {
-            val releaseType = releaseType(version)
             val files = dependenciesDownloader.downloadFromRepository(context, {
                 create(
                     group = "com.jetbrains.intellij.idea",
                     name = name,
                     version = version,
                 )
-            }, {
-                mavenRepository("$repositoryUrl/$releaseType")
             })
             if (files.size == 1) {
                 val dependencyFile = files.first() // TODO: remove when migrated to Path
@@ -468,12 +449,12 @@ abstract class IdeaDependencyManager @Inject constructor(
 
                 return when {
                     dependency.isZip() -> {
-                        val cacheDirectory = getZipCacheDirectory(dependencyFile, project, PLATFORM_TYPE_INTELLIJ_COMMUNITY)
+                        val cacheDirectory = getZipCacheDirectory(dependencyFile, project, IntellijIdeaCommunity)
                         debug(context, "IDE extra dependency '$name': " + cacheDirectory.path)
                         unzipDependencyFile(
                             cacheDirectory,
                             dependencyFile,
-                            PLATFORM_TYPE_INTELLIJ_COMMUNITY,
+                            IntellijIdeaCommunity,
                             version.endsWith(RELEASE_SUFFIX_SNAPSHOT)
                         ).toFile() // FIXME
                     }
