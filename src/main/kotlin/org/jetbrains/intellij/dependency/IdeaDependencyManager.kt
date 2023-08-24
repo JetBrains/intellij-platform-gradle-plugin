@@ -327,6 +327,11 @@ abstract class IdeaDependencyManager @Inject constructor(
                 }
             }
 
+            type == IntelliJPluginConstants.PLATFORM_TYPE_FLEET -> RemoteIdeaDependency(
+                "com.jetbrains.intellij.fleetBackend",
+                "fleetBackend",
+            )
+
             else -> throw BuildException("Specified type '$type' is unknown. Supported values: ${PLATFORM_TYPES.joinToString()}", null)
         }
 
