@@ -15,6 +15,11 @@ enum class IntelliJPlatformType(val code: String, val groupId: String, val artif
         groupId = "com.jetbrains.intellij.clion",
         artifactId = "clion"
     ),
+    Fleet(
+        code = "FL",
+        groupId = "com.jetbrains.intellij.fleetBackend",
+        artifactId = "fleetBackend"
+    ),
     Gateway(
         code = "GW",
         groupId = "com.jetbrains.gateway",

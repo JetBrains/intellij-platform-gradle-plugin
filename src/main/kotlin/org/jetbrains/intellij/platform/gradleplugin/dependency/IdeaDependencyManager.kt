@@ -248,6 +248,7 @@ abstract class IdeaDependencyManager @Inject constructor(
             .allDependencies
             .any { "org.jetbrains.kotlin" == it.group && isKotlinRuntime(it.name) }
 
+    @Deprecated("Use DependencyHandlerScope.intellijPlatform(type: IntelliJPlatformType, version: String, configurationName: String)")
     fun resolveRemote(project: Project, version: String, type: String, sources: Boolean, extraDependencies: List<String>): IdeaDependency {
         debug(context, "Adding IDE dependency")
 
@@ -255,52 +256,57 @@ abstract class IdeaDependencyManager @Inject constructor(
 
         val remoteIdeaDependency = when {
             type == IntellijIdeaUltimate -> RemoteIdeaDependency(
-                group = "com.jetbrains.intellij.idea",
-                name = "ideaIU",
+                group = IntellijIdeaUltimate.groupId,
+                name = IntellijIdeaUltimate.artifactId,
             )
 
             type == IntellijIdeaCommunity -> RemoteIdeaDependency(
-                group = "com.jetbrains.intellij.idea",
-                name = "ideaIC",
+                group = IntellijIdeaCommunity.groupId,
+                name = IntellijIdeaCommunity.artifactId,
             )
 
             type == CLion -> RemoteIdeaDependency(
-                group = "com.jetbrains.intellij.clion",
-                name = "clion",
+                group = CLion.groupId,
+                name = CLion.artifactId,
             )
 
-            type == PyCharmProfessional || type == PyCharmCommunity -> RemoteIdeaDependency(
-                group = "com.jetbrains.intellij.pycharm",
-                name = "pycharm$type",
+            type == PyCharmProfessional -> RemoteIdeaDependency(
+                group = PyCharmProfessional.groupId,
+                name = PyCharmProfessional.artifactId,
+            )
+
+            type == PyCharmCommunity -> RemoteIdeaDependency(
+                group = PyCharmCommunity.groupId,
+                name = PyCharmCommunity.artifactId,
             )
 
             type == GoLand -> RemoteIdeaDependency(
-                group = "com.jetbrains.intellij.goland",
-                name = "goland",
+                group = GoLand.groupId,
+                name = GoLand.artifactId,
             )
 
             type == PhpStorm -> RemoteIdeaDependency(
-                group = "com.jetbrains.intellij.phpstorm",
-                name = "phpstorm",
+                group = PhpStorm.groupId,
+                name = PhpStorm.artifactId,
             )
 
             type == Rider -> RemoteIdeaDependency(
-                group = "com.jetbrains.intellij.rider",
-                name = "riderRD",
+                group = Rider.groupId,
+                name = Rider.artifactId,
 //                hasSources = (sources && releaseType != RELEASE_TYPE_SNAPSHOTS).ifFalse {
 //                    warn(context, "IDE sources are not available for Rider SNAPSHOTS")
 //                },
             )
 
             type == Gateway -> RemoteIdeaDependency(
-                "com.jetbrains.gateway",
-                "JetBrainsGateway",
+                group = Gateway.groupId,
+                name = Gateway.artifactId,
                 hasSources = false,
             )
 
             type == AndroidStudio -> RemoteIdeaDependency(
-                "com.google.android.studio",
-                "android-studio",
+                group = AndroidStudio.groupId,
+                name = AndroidStudio.artifactId,
                 hasSources = false,
                 artifactExtension = when {
                     OperatingSystem.current().isLinux -> "tar.gz"
@@ -312,6 +318,11 @@ abstract class IdeaDependencyManager @Inject constructor(
                         .forEach { entry -> Files.move(entry, resolve(entry.fileName), StandardCopyOption.REPLACE_EXISTING) }
                 }
             }
+
+            type == Fleet -> RemoteIdeaDependency(
+                group = Fleet.groupId,
+                name = Fleet.artifactId,
+            )
 
             else -> throw BuildException("Specified type '$type' is unknown. Supported values: ${IntelliJPlatformType.values().joinToString(", ") { it.code }}", null)
         }

@@ -6,7 +6,7 @@ import org.gradle.internal.os.OperatingSystem
 
 // OpenedPackages list synchronized with:
 // https://github.com/JetBrains/intellij-community/blob/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt
-// last version: b07b9599eb668f17717d292db845c9a1129e68fd
+// last version: 40219ff4d7880336ba0e51b15af4803b68b713e9
 val OpenedPackages = listOf(
     "--add-opens=java.base/java.io=ALL-UNNAMED",
     "--add-opens=java.base/java.lang=ALL-UNNAMED",
@@ -25,6 +25,7 @@ val OpenedPackages = listOf(
     "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
     "--add-opens=java.base/sun.security.ssl=ALL-UNNAMED",
     "--add-opens=java.base/sun.security.util=ALL-UNNAMED",
+    "--add-opens=java.base/sun.net.dns=ALL-UNNAMED",
     "--add-opens=java.desktop/java.awt=ALL-UNNAMED",
     "--add-opens=java.desktop/java.awt.dnd.peer=ALL-UNNAMED",
     "--add-opens=java.desktop/java.awt.event=ALL-UNNAMED",
