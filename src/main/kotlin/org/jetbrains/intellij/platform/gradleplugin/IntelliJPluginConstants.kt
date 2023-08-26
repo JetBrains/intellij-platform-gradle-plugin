@@ -95,7 +95,9 @@ object IntelliJPluginConstants {
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
     @Deprecated("Deprecated in 2.0")
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
+
     const val INTELLIJ_PLATFORM_CONFIGURATION_NAME = "intellijPlatformConfiguration"
+    const val INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME = "intellijPlatformSourcesConfiguration"
 
     const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
     const val INSTRUMENTED_JAR_PREFIX = "instrumented"

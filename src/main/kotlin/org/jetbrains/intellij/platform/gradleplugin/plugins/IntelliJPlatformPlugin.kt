@@ -68,6 +68,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_CONFIGURATION_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID
@@ -139,8 +140,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         info(context, "Configuring plugin: org.jetbrains.intellij.platform")
 
         checkGradleVersion()
-        project.applyPlugins()
         project.applyConfigurations()
+        project.applyPlugins()
 
         return
         archiveUtils = project.objects.newInstance()
@@ -315,6 +316,14 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
     private fun Project.applyConfigurations() {
         val intellijPlatformConfiguration = project.configurations.maybeCreate(INTELLIJ_PLATFORM_CONFIGURATION_NAME)
+            .apply {
+                isVisible = false
+                isCanBeConsumed = false
+                isCanBeResolved = true
+                description = "..." // TODO
+            }
+
+        project.configurations.maybeCreate(INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME)
             .apply {
                 isVisible = false
                 isCanBeConsumed = false

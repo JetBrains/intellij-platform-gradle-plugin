@@ -1,6 +1,6 @@
 // Copyright 2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradleplugin.artifacts
+package org.jetbrains.intellij.platform.gradleplugin.artifacts.transform
 
 import org.gradle.api.Project
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -19,32 +19,39 @@ import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradleplugin.asPath
-import java.nio.file.Path
+import java.io.File.separator
 import javax.inject.Inject
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.pathString
 
+// TODO: Allow for providing custom IDE dir?
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class IntelliJPlatformExtractTransformer @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
 ) : TransformAction<TransformParameters.None> {
 
-    @get:InputArtifact
     @get:Classpath
+    @get:InputArtifact
     abstract val inputArtifact: Provider<FileSystemLocation>
+
+    private val IntelliJPlatformType.artifactPathPart
+        get() = "$separator$groupId$separator$artifactId$separator"
 
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.get().asPath
-        val nameWithoutExtension = input.nameWithoutExtension.removeSuffix(".tar")
-        val extension = input.name.removePrefix(nameWithoutExtension)
-        val targetDirectory = outputs.dir("$nameWithoutExtension.extracted")
+
+        val type = IntelliJPlatformType.values().find {
+            input.pathString.contains(it.artifactPathPart) // com.jetbrains.intellij.idea/ideaIU
+        } ?: return
+        val version = input.getName(input.nameCount - 3)
+        val extension = input.name.removePrefix(input.nameWithoutExtension.removeSuffix(".tar"))
+        val targetDirectory = outputs.dir("$type-$version")
 
 //        val cacheDirectory = getZipCacheDirectory(input)
-
-        // TODO: Check if [nameWithoutExtension] matches our artifact names
-        // TODO: Allow for providing custom IDE dir?
 
         when (extension) {
             ".zip", ".sit" -> {
@@ -65,7 +72,7 @@ abstract class IntelliJPlatformExtractTransformer @Inject constructor(
         }
     }
 
-    private fun getZipCacheDirectory(zipFile: Path /*, project: Project, type: IntelliJPlatformType */): Path {
+//    private fun getZipCacheDirectory(zipFile: Path, project: Project, type: IntelliJPlatformType): Path {
 //        if (ideaDependencyCachePath.isNotEmpty()) {
 //            return File(ideaDependencyCachePath).apply {
 //                mkdirs()
@@ -73,8 +80,8 @@ abstract class IntelliJPlatformExtractTransformer @Inject constructor(
 //        } else if (type == IntelliJPlatformType.Rider && OperatingSystem.current().isWindows) {
 //            return project.buildDir.toPath()
 //        }
-        return zipFile.parent
-    }
+//        return zipFile.parent
+//    }
 }
 
 internal fun Project.applyIntellijPlatformExtractTransformer() {
