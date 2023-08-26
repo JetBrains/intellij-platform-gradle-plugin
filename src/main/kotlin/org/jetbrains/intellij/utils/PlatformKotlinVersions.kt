@@ -7,6 +7,7 @@ import org.jetbrains.intellij.Version
 // Bundled Kotlin versions list synchronized with:
 // https://plugins.jetbrains.com/docs/intellij/kotlin.html#kotlin-standard-library
 val PlatformKotlinVersions = mapOf(
+    Version(232) to Version(1, 8, 20),
     Version(231) to Version(1, 8, 0),
     Version(223) to Version(1, 7, 0),
     Version(222) to Version(1, 6, 21),
