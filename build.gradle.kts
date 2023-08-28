@@ -90,11 +90,19 @@ tasks {
     }
 
     test {
-        val testGradleHomePath = properties("testGradleUserHome").getOrElse("$buildDir/testGradleHome")
+        val testGradleHome = properties("testGradleUserHome")
+            .map { File(it) }
+            .getOrElse(
+                layout.buildDirectory.asFile
+                    .map { it.resolve("testGradleHome") }
+                    .get()
+            )
+
         doFirst {
-            File(testGradleHomePath).mkdir()
+            testGradleHome.mkdir()
         }
-        systemProperties["test.gradle.home"] = testGradleHomePath
+
+        systemProperties["test.gradle.home"] = testGradleHome
         systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
         systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
         systemProperties["test.gradle.default"] = properties("gradleVersion").get()
@@ -103,7 +111,7 @@ tasks {
         systemProperties["test.intellij.version"] = properties("testIntelliJVersion").get()
         systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
         systemProperties["plugins.repository"] = properties("pluginsRepository").get()
-        outputs.dir(testGradleHomePath)
+        outputs.dir(testGradleHome)
 
 // Verbose tests output used for debugging tasks:
 //        testLogging {
@@ -154,11 +162,18 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        val testGradleHomePath = properties("testGradleUserHome").getOrElse("$buildDir/testGradleHome")
+                        val testGradleHome = properties("testGradleUserHome")
+                            .map { File(it) }
+                            .getOrElse(
+                                layout.buildDirectory.asFile
+                                    .map { it.resolve("testGradleHome") }
+                                    .get()
+                            )
+
                         doFirst {
-                            File(testGradleHomePath).mkdir()
+                            testGradleHome.mkdir()
                         }
-                        systemProperties["test.gradle.home"] = testGradleHomePath
+                        systemProperties["test.gradle.home"] = testGradleHome
                         systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
                         systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
                         systemProperties["test.gradle.default"] = properties("gradleVersion").get()
