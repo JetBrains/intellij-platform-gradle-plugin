@@ -19,6 +19,9 @@
 - Disabled caching for `BuildPluginTask`
 - Deprecate `SetupDependenciesTask`
 
+### Removed
+- Removed `intellij`, `intellijPlugin`, `intellijPlugins`, `intellijExtra` helper methods from `DependenciesUtils`
+
 ## [1.15.0] - 2023-07-07
 
 ### Added

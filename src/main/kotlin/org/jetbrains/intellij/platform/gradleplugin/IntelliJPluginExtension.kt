@@ -206,21 +206,22 @@ abstract class IntelliJPluginExtension @Inject constructor(
 
     /**
      * If enabled, automatically configures the default IntelliJ Platform dependencies in the current project.
-     * Otherwise, the [intellij], [intellijPlugin], and [intellijPlugins] functions could be used for an explicit configuration.
      *
      * Default value: `true`
      */
+    @Deprecated("Dependencies should be configured directly in Gradle build script")
     abstract val configureDefaultDependencies: Property<Boolean>
 
     /**
      * Configure extra dependency artifacts from the IntelliJ repository.
-     * The dependencies on them could be configured only explicitly using the [intellijExtra] function in the `dependencies` block.
      */
+    @Deprecated("Dependencies should be configured directly in Gradle build script")
     abstract val extraDependencies: ListProperty<String>
 
     /**
      * List of dependencies on external plugins.
      */
+    @Deprecated("Dependencies should be configured directly in Gradle build script")
     abstract val pluginDependencies: ListProperty<PluginDependency>
 
     @get:Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
@@ -255,7 +256,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
         return pluginDependencies.orNull?.toSet().orEmpty()
     }
 
-    @Suppress("DEPRECATION")
     @Deprecated("ideaDependency is moved to the SetupDependenciesTask.idea", ReplaceWith("setupDependencies.idea.get()"))
     fun getIdeaDependency(@Suppress("UNUSED_PARAMETER") project: Project): IdeaDependency = ideaDependency.get()
 
