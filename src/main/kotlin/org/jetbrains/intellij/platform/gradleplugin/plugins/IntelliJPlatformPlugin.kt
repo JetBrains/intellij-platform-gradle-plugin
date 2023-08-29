@@ -9,14 +9,12 @@ import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.logging.LogLevel
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.api.plugins.JavaPluginExtension
@@ -34,11 +32,6 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.language.jvm.tasks.ProcessResources
-import org.gradle.plugins.ide.idea.model.IdeaModel
-import org.gradle.plugins.ide.idea.model.IdeaProject
-import org.jetbrains.gradle.ext.IdeaExtPlugin
-import org.jetbrains.gradle.ext.ProjectSettings
-import org.jetbrains.gradle.ext.TaskTriggersConfig
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
@@ -56,7 +49,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWN
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.EXTENSION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
@@ -67,8 +59,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID
@@ -94,7 +84,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_IDE_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
@@ -148,18 +137,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         dependenciesDownloader = project.objects.newInstance(project.gradle.startParameter.isOffline)
 
         project.plugins.apply(JavaPlugin::class)
-        project.plugins.apply(IdeaExtPlugin::class)
-
-        project.pluginManager.withPlugin(IDEA_GRADLE_PLUGIN_ID) {
-            project.idea {
-                // IdeaModel.project is available only for a root project
-                this.project?.settings {
-                    taskTriggers {
-                        afterSync(SETUP_DEPENDENCIES_TASK_NAME)
-                    }
-                }
-            }
-        }
 
         val extension = project.extensions.create<IntelliJPluginExtension>(EXTENSION_NAME, dependenciesDownloader).apply {
             version.convention(project.provider {
@@ -215,7 +192,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         }
 
         configureInitializeGradleIntelliJPluginTask(project)
-        configureSetupDependenciesTask(project, ideaDependencyProvider)
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
         configurePatchPluginXmlTask(project, extension, ideaDependencyProvider)
@@ -315,22 +291,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
     }
 
     private fun Project.applyConfigurations() {
-        val intellijPlatformConfiguration = project.configurations.maybeCreate(INTELLIJ_PLATFORM_CONFIGURATION_NAME)
-            .apply {
-                isVisible = false
-                isCanBeConsumed = false
-                isCanBeResolved = true
-                description = "..." // TODO
-            }
-
-        project.configurations.maybeCreate(INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME)
-            .apply {
-                isVisible = false
-                isCanBeConsumed = false
-                isCanBeResolved = true
-                description = "..." // TODO
-            }
-
         val ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
             .setVisible(false)
             .withDependencies {
@@ -394,16 +354,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             }
 
 //        fun Configuration.extend() = extendsFrom(defaultDependencies, idea, ideaPlugins, performanceTest)
-        fun Configuration.extend() = extendsFrom(intellijPlatformConfiguration)
-
-        with(project.configurations) {
-            getByName(COMPILE_ONLY_CONFIGURATION_NAME).extend()
-            getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extend()
-//            getByName(TEST_IMPLEMENTATION_CONFIGURATION_NAME).extend()
-            project.pluginManager.withPlugin("java-test-fixtures") { // TODO: move to constants
-                getByName("testFixturesCompileOnly").extend() // TODO: move to constants
-            }
-        }
     }
 
     private fun configureProjectAfterEvaluate(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
@@ -1573,19 +1523,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureSetupDependenciesTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
-        info(context, "Configuring setup dependencies task")
-
-        project.tasks.register<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
-        project.tasks.withType<SetupDependenciesTask> {
-            idea.convention(ideaDependencyProvider)
-
-            Jvm.current().toolsJar?.let { toolsJar ->
-                project.dependencies.add(RUNTIME_ONLY_CONFIGURATION_NAME, project.files(toolsJar))
-            }
-        }
-    }
-
     private fun configurePluginDependencies(
         project: Project,
         ideaDependencyProvider: Provider<IdeaDependency>,
@@ -1660,18 +1597,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
     }
 
     private fun Project.resolveBuildTaskOutput() = tasks.named<Zip>(BUILD_PLUGIN_TASK_NAME).flatMap { it.archiveFile }
-
-    private fun Project.idea(
-        action: IdeaModel.() -> Unit,
-    ) = extensions.configure("idea", action)
-
-    private fun IdeaProject.settings(
-        action: ProjectSettings.() -> Unit,
-    ) = (this as ExtensionAware).extensions.configure("settings", action)
-
-    private fun ProjectSettings.taskTriggers(
-        action: TaskTriggersConfig.() -> Unit,
-    ) = (this as ExtensionAware).extensions.configure("taskTriggers", action)
 
     /**
      * Strips an [IdeVersion] of components other than SNAPSHOT and * that exceeds a patch, i.e. "excess" in the following

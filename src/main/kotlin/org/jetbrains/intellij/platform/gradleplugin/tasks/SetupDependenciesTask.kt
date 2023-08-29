@@ -9,24 +9,27 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.dependency.IdeaDependency
-import org.jetbrains.intellij.platform.gradleplugin.info
+import org.jetbrains.intellij.platform.gradleplugin.error
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
 
 /**
- * Setups required dependencies for building and running project.
+ * A deprecated method for setting up IntelliJ Platform dependencies.
  *
- * This task is automatically added to the ["After Sync" Gradle trigger](https://www.jetbrains.com/help/idea/work-with-gradle-tasks.html#config_triggers_gradle) to make the IntelliJ SDK dependency available for IntelliJ IDEA right after the Gradle synchronization.
+ * The `setupDependencies` task was automatically added to the ["After Sync" Gradle trigger](https://www.jetbrains.com/help/idea/work-with-gradle-tasks.html#config_triggers_gradle) to make the IntelliJ SDK dependency available for IntelliJ IDEA right after the Gradle synchronization.
+ * With IntelliJ Platform Gradle Plugin 2.0 release, this method is no longer needed as the native Gradle dependencies resolution is in use.
  *
- * > After removing the IntelliJ Platform Gradle Plugin from your project, the `Task 'setupDependencies' not found in root project` exception may occur.
+ * To remove any references to this task, call the "Tasks Activation" action and remove the `setupDependencies` entry from the "After Sync" group.
  *
- * @see <a href="https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#task-setupdependencies-not-found-in-root-project">Frequently Asked Questions</a>
+ * TODO: Link to SDK Docs
  */
 @DisableCachingByDefault(because = "No output state to track")
 abstract class SetupDependenciesTask : DefaultTask() {
 
     /**
      * Reference to the resolved `idea` dependency.
+     * TODO: suggest alternative method for accessing IDEA dependency
      */
+    @Deprecated(message = "setupDependencies.idea is no longer available")
     @get:Internal
     abstract val idea: Property<IdeaDependency>
 
@@ -34,11 +37,11 @@ abstract class SetupDependenciesTask : DefaultTask() {
 
     init {
         group = PLUGIN_GROUP_NAME
-        description = "Sets up required dependencies for building and running project."
+        description = "Deprecated task"
     }
 
     @TaskAction
     fun setupDependencies() {
-        info(context, "Setting up dependencies using: ${idea.get().classes}")
+        error(context, "Task is deprecated now, see: [SDK Docs link]")
     }
 }

@@ -5,9 +5,12 @@ package org.jetbrains.intellij.platform.gradleplugin.plugins
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.register
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.checkGradleVersion
 import org.jetbrains.intellij.platform.gradleplugin.info
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.tasks.SetupDependenciesTask
 
 abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
 
@@ -19,10 +22,15 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
         info(context, "Configuring plugin: org.jetbrains.intellij.platform.tasks")
         checkGradleVersion()
 
-        applyPlugins(project)
+        project.applyPlugins()
+        project.applyTasks()
     }
 
-    private fun applyPlugins(project: Project) {
-        project.plugins.apply(IntelliJPlatformBasePlugin::class)
+    private fun Project.applyPlugins() {
+        plugins.apply(IntelliJPlatformBasePlugin::class)
+    }
+
+    private fun Project.applyTasks() {
+        tasks.register<SetupDependenciesTask>(SETUP_DEPENDENCIES_TASK_NAME)
     }
 }

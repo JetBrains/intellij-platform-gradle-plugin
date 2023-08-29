@@ -37,12 +37,13 @@ object IntelliJPluginConstants {
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
-    @Deprecated("Deprecated in 2.0")
     const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
     const val VERIFY_PLUGIN_SIGNATURE_TASK_NAME = "verifyPluginSignature"
+
+    const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
     val TASKS = listOf(
         BUILD_PLUGIN_TASK_NAME,
@@ -77,10 +78,8 @@ object IntelliJPluginConstants {
         VERIFY_PLUGIN_SIGNATURE_TASK_NAME,
     )
 
-    const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
     const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
-    @Deprecated("Deprecated in 2.0")
-    const val IDEA_GRADLE_PLUGIN_ID = "org.jetbrains.gradle.plugin.idea-ext"
+    const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
 
     const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
     const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
@@ -89,15 +88,19 @@ object IntelliJPluginConstants {
     // see https://github.com/JetBrains/gradle-intellij-plugin/issues/1060
     @Deprecated("Deprecated in 2.0")
     const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "z10_intellijDefaultDependencies"
+
     @Deprecated("Deprecated in 2.0")
     const val PERFORMANCE_TEST_CONFIGURATION_NAME = "z20_performanceTest"
+
     @Deprecated("Deprecated in 2.0")
     const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
+
     @Deprecated("Deprecated in 2.0")
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
 
     const val INTELLIJ_PLATFORM_CONFIGURATION_NAME = "intellijPlatformConfiguration"
     const val INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME = "intellijPlatformSourcesConfiguration"
+    const val TEST_FIXTURES_COMPILE_ONLY_CONFIGURATION_NAME = "testFixturesCompileOnly"
 
     const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
     const val INSTRUMENTED_JAR_PREFIX = "instrumented"
