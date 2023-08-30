@@ -33,7 +33,8 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.intellij.platform.gradleplugin.*
-import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.*
+import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
+import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
@@ -51,7 +52,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.EXTE
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
@@ -85,7 +85,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
@@ -111,7 +110,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
 import java.nio.file.Path
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -191,7 +189,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
         }
 
-        configureInitializeGradleIntelliJPluginTask(project)
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
         configurePatchPluginXmlTask(project, extension, ideaDependencyProvider)
@@ -222,12 +219,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         project.tasks.withType<JavaCompile> {
             dependsOn(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-        }
-
-        (TASKS - INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME).forEach {
-            project.tasks.named(it) {
-                dependsOn(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
-            }
         }
 
         project.afterEvaluate {
@@ -1502,23 +1493,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             from(patchPluginXmlTaskProvider) {
                 duplicatesStrategy = DuplicatesStrategy.INCLUDE
                 into("META-INF")
-            }
-        }
-    }
-
-    private fun configureInitializeGradleIntelliJPluginTask(project: Project) {
-        info(context, "Initializing IntelliJ Platform Gradle Plugin")
-
-        project.tasks.register<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
-        project.tasks.withType<InitializeIntelliJPluginTask> {
-            offline.convention(project.gradle.startParameter.isOffline)
-            selfUpdateCheck.convention(project.isBuildFeatureEnabled(SELF_UPDATE_CHECK))
-            lockFile.convention(project.provider {
-                temporaryDir.resolve(LocalDate.now().toString())
-            })
-
-            onlyIf {
-                !lockFile.get().exists()
             }
         }
     }
