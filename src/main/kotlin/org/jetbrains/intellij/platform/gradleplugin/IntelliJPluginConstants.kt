@@ -5,6 +5,9 @@ package org.jetbrains.intellij.platform.gradleplugin
 object IntelliJPluginConstants {
     const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij.platform"
+    const val PLUGIN_BASE_ID = "$PLUGIN_ID.base"
+    const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
+
     const val PLUGIN_GROUP_NAME = "intellij"
     const val EXTENSION_NAME = "intellijPlatform"
     const val INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME = "intellijPlatformRepositoriesSettings"
