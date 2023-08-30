@@ -27,7 +27,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
         .let { "$prefix.buildFeature.$it" }
 }
 
-fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
+fun Project.isBuildFeatureEnabled(feature: BuildFeature, context: String = logCategory()) =
     feature
         .getValue(providers)
         .map { value ->
@@ -35,6 +35,6 @@ fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
                 when (value) {
                     true -> "Build feature is enabled: $feature"
                     false -> "Build feature is disabled: $feature"
-                }.also { info(logCategory(), value.toString()) }
+                }.also { info(context, value.toString()) }
             }
         }
