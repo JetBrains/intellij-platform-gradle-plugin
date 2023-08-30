@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import com.jetbrains.plugin.structure.base.utils.create
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
@@ -60,7 +61,11 @@ abstract class InitializeIntelliJPluginTask : DefaultTask() {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
 
-            lockFile.get().toPath().create()
+            with(lockFile.get().toPath()) {
+                if (!exists()) {
+                    create()
+                }
+            }
         } catch (e: Exception) {
             error(context, e.message.orEmpty(), e)
         }
