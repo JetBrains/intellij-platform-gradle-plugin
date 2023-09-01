@@ -9,6 +9,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradleplugin.repositories.applyIntelliJPlatformSettings
 import javax.inject.Inject
 
+@Suppress("UnstableApiUsage", "unused")
 abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,

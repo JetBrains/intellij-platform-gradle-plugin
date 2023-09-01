@@ -5,16 +5,15 @@ package org.jetbrains.intellij.platform.gradleplugin.plugins
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.artifacts.ConfigurationContainer
-import org.gradle.api.plugins.ExtensionContainer
-import org.gradle.api.plugins.PluginContainer
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.register
 import org.jetbrains.intellij.platform.gradleplugin.checkGradleVersion
 import org.jetbrains.intellij.platform.gradleplugin.info
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
 
-abstract class IntelliJPlatformAbstractPlugin(val pluginId: String) : Plugin<Project> {
+abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plugin<Project> {
 
     protected lateinit var context: String
 
@@ -24,13 +23,10 @@ abstract class IntelliJPlatformAbstractPlugin(val pluginId: String) : Plugin<Pro
         info(context, "Configuring plugin: $pluginId")
         checkGradleVersion()
 
-        configure(project)
-
-        project.plugins.applyPlugins(project)
-        project.configurations.applyConfigurations(project)
-        project.extensions.applyExtension(project)
-        project.tasks.applyTasks(project)
+        project.configure()
     }
+
+    protected abstract fun Project.configure()
 
     protected inline fun <reified T : Task> TaskContainer.configureTask(name: String, noinline configuration: T.() -> Unit = {}) {
         info(context, "Configuring task: $name")
@@ -38,9 +34,11 @@ abstract class IntelliJPlatformAbstractPlugin(val pluginId: String) : Plugin<Pro
         task.configuration()
     }
 
-    protected abstract fun configure(project: Project)
-    protected abstract fun PluginContainer.applyPlugins(project: Project)
-    protected abstract fun ConfigurationContainer.applyConfigurations(project: Project)
-    protected abstract fun ExtensionContainer.applyExtension(project: Project)
-    protected abstract fun TaskContainer.applyTasks(project: Project)
+    protected inline fun <reified T : Any> Any.configureExtension(name: String, noinline configuration: T.() -> Unit = {}) {
+        info(context, "Configuring extension: $name")
+        with((this as ExtensionAware).extensions) {
+            val extension = findByName(name) as? T ?: create<T>(name)
+            extension.configuration()
+        }
+    }
 }

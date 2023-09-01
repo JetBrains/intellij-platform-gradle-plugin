@@ -9,7 +9,17 @@ object IntelliJPluginConstants {
     const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
 
     const val PLUGIN_GROUP_NAME = "intellij"
-    const val EXTENSION_NAME = "intellijPlatform"
+
+    object Extensions {
+        const val INTELLIJ_PLATFORM = "intellijPlatform"
+        const val PLUGIN_CONFIGURATION = "pluginConfiguration"
+        const val PRODUCT_DESCRIPTOR = "productDescriptor"
+    }
+
+    object Tasks {
+        const val SETUP_DEPENDENCIES = "setupDependencies"
+    }
+
     const val INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME = "intellijPlatformRepositoriesSettings"
 
     @Deprecated("Check it")
@@ -40,7 +50,6 @@ object IntelliJPluginConstants {
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
-    const val SETUP_DEPENDENCIES_TASK_NAME = "setupDependencies"
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
     const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
@@ -74,7 +83,7 @@ object IntelliJPluginConstants {
         RUN_IDE_FOR_UI_TESTS_TASK_NAME,
         RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
         RUN_PLUGIN_VERIFIER_TASK_NAME,
-        SETUP_DEPENDENCIES_TASK_NAME,
+        Tasks.SETUP_DEPENDENCIES,
         SIGN_PLUGIN_TASK_NAME,
         VERIFY_PLUGIN_TASK_NAME,
         VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,

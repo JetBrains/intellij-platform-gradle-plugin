@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.tasks
 
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginSpecBase
 import kotlin.test.Test
 
@@ -11,19 +11,19 @@ class SetupDependenciesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `idea dependency is available`() {
-        val testTaskName = "${SETUP_DEPENDENCIES_TASK_NAME}Test"
+        val testTaskName = "${Tasks.SETUP_DEPENDENCIES}Test"
 
         buildFile.groovy(
             """
             def classes = providers.provider {
-                tasks.named('$SETUP_DEPENDENCIES_TASK_NAME').get().idea.get().classes
+                tasks.named('${Tasks.SETUP_DEPENDENCIES}').get().idea.get().classes
             }
             tasks.register('$testTaskName') {
                 doLast {
                     println classes.get()
                 }
                 
-                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
+                dependsOn('${Tasks.SETUP_DEPENDENCIES}')
             }
             
             """.trimIndent()

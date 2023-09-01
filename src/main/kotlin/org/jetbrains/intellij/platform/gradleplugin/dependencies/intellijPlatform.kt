@@ -4,6 +4,7 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.dependencies
 
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.DependencyHandlerScope
 import org.gradle.kotlin.dsl.create
@@ -15,23 +16,31 @@ internal fun DependencyHandlerScope.intellijPlatform(
     type: IntelliJPlatformType,
     version: String,
     configurationName: String = INTELLIJ_PLATFORM_CONFIGURATION_NAME,
-) = add(configurationName, create(
-    group = type.groupId,
-    name = type.artifactId,
-    version = version,
-))
+) = add(configurationName, create(type, version))
 
 internal fun DependencyHandlerScope.intellijPlatform(
     type: IntelliJPlatformType,
     versionProvider: Provider<String>,
     configurationName: String = INTELLIJ_PLATFORM_CONFIGURATION_NAME,
-) = addProvider(configurationName, versionProvider.map {
-    create(
-        group = type.groupId,
-        name = type.artifactId,
-        version = it,
-    )
-})
+) = addProvider(configurationName, versionProvider.map { version -> create(type, version) })
+
+internal fun DependencyHandlerScope.intellijPlatform(
+    typeProvider: Provider<IntelliJPlatformType>,
+    version: String,
+    configurationName: String = INTELLIJ_PLATFORM_CONFIGURATION_NAME,
+) = addProvider(configurationName, typeProvider.map { type -> create(type, version) })
+
+internal fun DependencyHandlerScope.intellijPlatform(
+    typeProvider: Provider<IntelliJPlatformType>,
+    versionProvider: Provider<String>,
+    configurationName: String = INTELLIJ_PLATFORM_CONFIGURATION_NAME,
+) = addProvider(configurationName, typeProvider.zip(versionProvider) { type, version -> create(type, version) })
+
+internal fun DependencyHandler.create(type: IntelliJPlatformType, version: String) = create(
+    group = type.groupId,
+    name = type.artifactId,
+    version = version,
+)
 
 //    return when (type) {
 //        IntellijIdeaUltimate -> create(
@@ -105,7 +114,9 @@ internal fun DependencyHandlerScope.intellijPlatform(
 //    }
 
 fun DependencyHandlerScope.intellijPlatform(type: String, version: String) = intellijPlatform(IntelliJPlatformType.fromCode(type), version)
+fun DependencyHandlerScope.intellijPlatform(type: Provider<String>, version: String) = intellijPlatform(type.map { IntelliJPlatformType.fromCode(it) }, version)
 fun DependencyHandlerScope.intellijPlatform(type: String, version: Provider<String>) = intellijPlatform(IntelliJPlatformType.fromCode(type), version)
+fun DependencyHandlerScope.intellijPlatform(type: Provider<String>, version: Provider<String>) = intellijPlatform(type.map { IntelliJPlatformType.fromCode(it) }, version)
 
 fun DependencyHandlerScope.androidStudio(version: String) = intellijPlatform(AndroidStudio, version)
 fun DependencyHandlerScope.androidStudio(version: Provider<String>) = intellijPlatform(AndroidStudio, version)

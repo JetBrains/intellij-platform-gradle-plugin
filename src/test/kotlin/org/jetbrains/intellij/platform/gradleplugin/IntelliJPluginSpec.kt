@@ -8,10 +8,10 @@ import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TASKS
-import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.test.createLocalIdeIfNotExists
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.Assume.assumeFalse
 import java.io.File
 import java.nio.file.Path
@@ -560,11 +560,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             def implementation = project.provider { sourceSets.main.compileClasspath.asPath }
             
             task printMainRuntimeClassPath {
-                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
+                dependsOn('${Tasks.SETUP_DEPENDENCIES}')
                 doLast { println 'runtimeOnly: ' + runtimeOnly.get() }
             }
             task printMainCompileClassPath {
-                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
+                dependsOn('${Tasks.SETUP_DEPENDENCIES}')
                 doLast { println 'implementation: ' + implementation.get() }
             }
             """.trimIndent()
@@ -586,11 +586,11 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             def implementation = project.provider { sourceSets.$sourceSetName.compileClasspath.asPath }
             
             task print${sourceSetName.replaceFirstChar { it.uppercase() }}RuntimeClassPath {
-                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
+                dependsOn('${Tasks.SETUP_DEPENDENCIES}')
                 doLast { println 'runtimeOnly: ' + runtimeOnly.get() }
             }
             task print${sourceSetName.replaceFirstChar { it.uppercase() }}CompileClassPath { 
-                dependsOn('$SETUP_DEPENDENCIES_TASK_NAME')
+                dependsOn('${Tasks.SETUP_DEPENDENCIES}')
                 doLast { println 'implementation: ' + implementation.get() }
             }
             """.trimIndent()
@@ -638,10 +638,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         this.groovy(
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
-                import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
+                import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
                 
                 task printPluginSourceArtifacts {
-                    dependsOn(IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME)
+                    dependsOn(Tasks.SETUP_DEPENDENCIES)
                 
                     def artifactsProvider = project.provider {
                         def pluginComponentId = configurations.compileClasspath

@@ -48,7 +48,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWN
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.EXTENSION_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions.INTELLIJ_PLATFORM
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
@@ -136,7 +136,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         project.plugins.apply(JavaPlugin::class)
 
-        val extension = project.extensions.create<IntelliJPluginExtension>(EXTENSION_NAME, dependenciesDownloader).apply {
+        val extension = project.extensions.create<IntelliJPluginExtension>(INTELLIJ_PLATFORM, dependenciesDownloader).apply {
             version.convention(project.provider {
                 if (!localPath.isSpecified) {
                     throw GradleException("The value for the 'intellij.version' property was not specified, see: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#intellij-extension-version")
