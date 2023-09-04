@@ -33,7 +33,7 @@ jobs:
         run: ${{ inputs.script }}
 
       - name: Fetch Sources
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v3
