@@ -89,7 +89,7 @@ object IntelliJPluginConstants {
     const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
     const val INSTRUMENTED_JAR_PREFIX = "instrumented"
 
-    const val ANNOTATIONS_DEPENDENCY_VERSION = "24.0.0"
+    const val ANNOTATIONS_DEPENDENCY_VERSION = "24.0.1"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     const val MINIMAL_SUPPORTED_GRADLE_VERSION = "7.6"
     const val JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME = "JetBrains"
