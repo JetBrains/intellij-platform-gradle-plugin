@@ -803,6 +803,13 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 it.targetCompatibility
             })
             pluginVerifierDownloadDir.convention(downloadDirProvider)
+            kotlinxCoroutinesLibraryPresent.convention(project.provider {
+                listOf(IMPLEMENTATION_CONFIGURATION_NAME, COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->
+                    project.configurations.getByName(configurationName).dependencies.any {
+                        it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
+                    }
+                }
+            })
 
             kotlinPluginAvailable.convention(project.provider {
                 project.pluginManager.hasPlugin(KOTLIN_GRADLE_PLUGIN_ID)

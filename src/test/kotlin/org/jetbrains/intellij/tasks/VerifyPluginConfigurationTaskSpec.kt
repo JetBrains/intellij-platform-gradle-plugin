@@ -210,6 +210,25 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    @Test
+    fun `report kotlinx-coroutines dependency`() {
+        buildFile.groovy(
+            """
+            dependencies {
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.1")
+            }
+            """.trimIndent()
+        )
+
+        build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
+            assertContains(HEADER, it.output)
+            assertContains(
+                "- The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.",
+                it.output
+            )
+        }
+    }
+
     companion object {
         const val HEADER = "The following plugin configuration issues were found"
     }
