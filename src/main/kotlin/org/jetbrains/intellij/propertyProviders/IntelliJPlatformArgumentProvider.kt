@@ -16,6 +16,7 @@ import java.nio.file.Path
 
 class IntelliJPlatformArgumentProvider(
     @InputDirectory @PathSensitive(RELATIVE) val ideDirectory: Path,
+    @InputDirectory @PathSensitive(RELATIVE) val coroutinesJavaAgentPath: Path,
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
@@ -36,6 +37,8 @@ class IntelliJPlatformArgumentProvider(
             ?.removePrefix("../")
             ?.let { ideDirectory.resolve(it).readLines() }
             .orEmpty()
+            .filter { !it.contains("kotlinx.coroutines.debug=off") }
+            .let { it + "-javaagent:${coroutinesJavaAgentPath}" }
 
     private val additionalJvmArguments
         get() = productInfo

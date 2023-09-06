@@ -129,6 +129,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.io.path.exists
 
 abstract class IntelliJPlugin : Plugin<Project> {
 
@@ -907,6 +908,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
     ) {
         val taskContext = logCategory()
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
+        val initializeIntelliJPluginTaskProvider = project.tasks.named<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
         ideDir.convention(ideaDependencyProvider.map {
@@ -938,6 +940,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 jbrArch = jbrArch.orNull,
                 ideDir = ideDir.orNull,
             ).toString()
+        })
+        coroutinesJavaAgentPath.convention(initializeIntelliJPluginTaskProvider.flatMap {
+            it.coroutinesJavaAgentPath
         })
     }
 
@@ -1177,6 +1182,10 @@ abstract class IntelliJPlugin : Plugin<Project> {
         val instrumentedTestCodeOutputsProvider = project.provider {
             project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile })
         }
+        val initializeIntellijPluginTaskProvider = project.tasks.named<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
+        val coroutinesJavaAgentPathProvider = initializeIntellijPluginTaskProvider.flatMap {
+            it.coroutinesJavaAgentPath
+        }
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
@@ -1263,7 +1272,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
 
             classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
             testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
-            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDirProvider.get(), this))
+            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDirProvider.get(), coroutinesJavaAgentPathProvider.get(), this))
 
             doFirst {
                 classpath += ideaDependencyLibrariesProvider.get() +
@@ -1413,7 +1422,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             )
 
             onlyIf {
-                // Workaround for Gradle 7.x to don't fail on "An input file was expected to be present but it doesn't exist."
+                // Workaround for Gradle 7.x to don't fail on "An input file was expected to be present, but it doesn't exist."
                 inputArchiveFile.isSpecified
             }
             dependsOn(SIGN_PLUGIN_TASK_NAME)
@@ -1544,6 +1553,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
+    @Suppress("UnstableApiUsage")
     private fun configureProcessResources(project: Project) {
         info(context, "Configuring resources task")
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
@@ -1565,12 +1575,15 @@ abstract class IntelliJPlugin : Plugin<Project> {
             selfUpdateCheck.convention(project.provider {
                 project.isBuildFeatureEnabled(SELF_UPDATE_CHECK)
             })
-            lockFile.convention(project.provider {
-                temporaryDir.resolve(LocalDate.now().toString())
+            selfUpdateLockPath.convention(project.provider {
+                temporaryDir.toPath().resolve(LocalDate.now().toString())
+            })
+            coroutinesJavaAgentPath.convention(project.provider {
+                temporaryDir.toPath().resolve("coroutines-javaagent.jar")
             })
 
             onlyIf {
-                !lockFile.get().exists()
+                !selfUpdateLockPath.get().exists() || !coroutinesJavaAgentPath.get().exists()
             }
         }
     }

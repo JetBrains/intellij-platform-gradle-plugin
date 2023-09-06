@@ -148,6 +148,12 @@ abstract class RunIdeBase : JavaExec() {
     @get:Internal
     abstract val projectExecutable: Property<String>
 
+    /**
+     * Represents the path to the coroutines Java agent file.
+     */
+    @get:Internal
+    abstract val coroutinesJavaAgentPath: Property<Path>
+
     private val ideDirPath by lazy {
         ideDir.get().toPath()
     }
@@ -182,7 +188,7 @@ abstract class RunIdeBase : JavaExec() {
     @TaskAction
     override fun exec() {
         workingDir = projectWorkingDir.get()
-        jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDir.get().toPath(), this))
+        jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDir.get().toPath(), coroutinesJavaAgentPath.get(), this))
         configureSystemProperties()
         configureClasspath()
 
