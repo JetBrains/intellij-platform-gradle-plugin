@@ -52,7 +52,7 @@ class IntelliJPlatformArgumentProvider(
 
     private val kotlinxCoroutinesJavaAgent
         get() = "-javaagent:$coroutinesJavaAgentPath".takeIf {
-            buildNumber >= Version(212)
+            buildNumber >= Version(221)
         }
 
     private val additionalJvmArguments
