@@ -10,6 +10,7 @@ import java.io.File
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 
 /**
@@ -30,7 +31,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
     }
 
     URL("$DEFAULT_INTELLIJ_REPOSITORY/releases/$releasePath").openStream().use {
-        Files.copy(it, localIdeZipPath)
+        Files.copy(it, localIdeZipPath, StandardCopyOption.REPLACE_EXISTING)
     }
     localIdeZipPath.toFile().unzip()
     localIdeZipPath.forceDeleteIfExists()

@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij
 
-import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
@@ -317,7 +316,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                         "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
             )
         }
-        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
     // FIXME: test takes too long
@@ -350,7 +348,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                         "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
             )
         }
-        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
     @Test
@@ -424,7 +421,6 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 "lib/src/src_spring-openapi-ideaLocal-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43)"
             )
         }
-        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
     }
 
     @Test

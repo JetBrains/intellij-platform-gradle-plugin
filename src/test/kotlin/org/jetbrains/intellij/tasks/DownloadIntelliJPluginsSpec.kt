@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.tasks
 
-import org.gradle.api.plugins.BasePlugin
+import org.gradle.api.plugins.BasePlugin.ASSEMBLE_TASK_NAME
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import org.junit.Assume.assumeFalse
@@ -43,7 +43,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.intellij.lang.jsgraphql/3.1.3")
 
         pluginDir.list()?.let {
@@ -70,7 +70,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsNightlyRepositoryCacheDir, "dev.com.jetbrains.plugins/io.flutter/67.0.2-dev.1")
 
         pluginDir.list()?.let {
@@ -96,7 +96,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.intellij.plugins.markdown/$testMarkdownPluginVersion")
 
         pluginDir.list()?.let {
@@ -122,7 +122,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
         val pluginDir = File(pluginsRepositoryCacheDir, "com.jetbrains.plugins/org.jetbrains.postfixCompletion/0.8-beta")
 
         pluginDir.list()?.let {
@@ -149,7 +149,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
 
         pluginsCacheDir.list()?.let {
             assertTrue(it.contains("com.intellij.plugins.emacskeymap-201.6251.22"))
@@ -171,7 +171,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
 
         pluginsCacheDir.list()?.let {
             assertTrue(it.contains("com.intellij.plugins.emacskeymap-201.6251.22"))
@@ -194,7 +194,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
 
         pluginsCacheDir.list()?.let {
             assertTrue(it.contains("com.intellij.plugins.emacskeymap-201.6251.22"))
@@ -216,7 +216,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
 
         pluginsCacheDir.list()?.let {
             assertTrue(it.contains("com.intellij.plugins.emacskeymap-201.6251.22"))
@@ -238,7 +238,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(BasePlugin.ASSEMBLE_TASK_NAME)
+        build(ASSEMBLE_TASK_NAME)
 
         pluginsCacheDir.list()?.let {
             assertTrue(it.contains("com.intellij.plugins.emacskeymap-201.6251.22"))
