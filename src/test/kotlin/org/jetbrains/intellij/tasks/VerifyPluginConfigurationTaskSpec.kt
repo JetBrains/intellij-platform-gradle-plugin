@@ -69,7 +69,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
-            assertContains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 212.", it.output)
+            assertContains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 221.", it.output)
         }
     }
 
@@ -84,7 +84,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
             assertContains(
-                "- The Java configuration specifies sourceCompatibility=1.8 but IntelliJ Platform 2021.2.4 requires sourceCompatibility=11.",
+                "- The Java configuration specifies sourceCompatibility=1.8 but IntelliJ Platform 2022.1.4 requires sourceCompatibility=11.",
                 it.output
             )
         }
@@ -101,7 +101,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
             assertContains(
-                "- The Java configuration specifies targetCompatibility=17 but IntelliJ Platform 2021.2.4 requires targetCompatibility=11.",
+                "- The Java configuration specifies targetCompatibility=17 but IntelliJ Platform 2022.1.4 requires targetCompatibility=11.",
                 it.output
             )
         }
@@ -121,7 +121,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
-            assertContains("- The Kotlin configuration specifies jvmTarget=17 but IntelliJ Platform 2021.2.4 requires jvmTarget=11.", it.output)
+            assertContains("- The Kotlin configuration specifies jvmTarget=17 but IntelliJ Platform 2022.1.4 requires jvmTarget=11.", it.output)
         }
     }
 
@@ -150,7 +150,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
-            assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='212.5712' property requires apiVersion=1.5.10.", it.output)
+            assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='221.6008' property requires apiVersion=1.6.20.", it.output)
         }
     }
 
@@ -169,7 +169,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2021.2.4 requires languageVersion=1.5.",
+                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2022.1.4 requires languageVersion=1.6.0.",
                 it.output
             )
         }

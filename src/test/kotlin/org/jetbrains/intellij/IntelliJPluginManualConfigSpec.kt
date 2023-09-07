@@ -157,15 +157,12 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             
             intellij {
                 configureDefaultDependencies = false
-                extraDependencies = ['intellij-core', 'jps-build-test']
+                extraDependencies = ['jps-build-test']
             }
             afterEvaluate {
                 dependencies {
                     implementation     DependenciesUtils.intellijExtra(project, 'jps-build-test') { include('jps-build-test*.jar') }
-                    runtimeOnly        DependenciesUtils.intellijExtra(project, 'intellij-core')  { exclude('intellij-core.jar') }
-                    testImplementation DependenciesUtils.intellijExtra(project, 'intellij-core')  { include("annotations.jar") }
                     testRuntimeOnly    DependenciesUtils.intellijExtra(project, 'jps-build-test')
-                    testRuntimeOnly    DependenciesUtils.intellijExtra(project, 'intellij-core')
                 } 
             }
             
@@ -196,20 +193,6 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             assertTrue(mainRuntimeClasspath.contains("jps-build-test"))
             assertTrue(testClasspath.contains("jps-build-test"))
             assertTrue(testRuntimeClasspath.contains("jps-build-test"))     // includes all
-
-            assertFalse(mainClasspath.contains("intellij-core.jar"))
-            assertFalse(mainRuntimeClasspath.contains("intellij-core.jar")) // excluded explicitly
-            assertFalse(testClasspath.contains("intellij-core.jar"))        // not included
-            assertTrue(testRuntimeClasspath.contains("intellij-core.jar"))  // includes all
-
-            assertFalse(mainClasspath.contains("annotations.jar"))
-            assertTrue(testClasspath.contains("annotations.jar"))           // included explicitly
-            assertTrue(testRuntimeClasspath.contains("annotations.jar"))    // includes all
-
-            assertFalse(mainClasspath.contains("intellij-core-analysis-deprecated.jar"))
-            assertTrue(mainRuntimeClasspath.contains("intellij-core-analysis-deprecated.jar")) // includes intellij-core
-            assertFalse(testClasspath.contains("intellij-core-analysis-deprecated.jar"))
-            assertTrue(testRuntimeClasspath.contains("intellij-core-analysis-deprecated.jar")) // includes all
         }
     }
 

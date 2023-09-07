@@ -17,7 +17,7 @@ import java.util.zip.ZipFile
  * Downloads and extracts IDE for the tests using local IDE installation. IDEs are downloaded from [DEFAULT_INTELLIJ_REPOSITORY].
  *
  * @param localIdesPath directory to store local IDE
- * @param releasePath IDE path relative to [DEFAULT_INTELLIJ_REPOSITORY]/releases, e.g. `"com/jetbrains/intellij/idea/ideaIC/2021.2.4/ideaIC-2021.2.4.zip"`
+ * @param releasePath IDE path relative to [DEFAULT_INTELLIJ_REPOSITORY]/releases, e.g. `"com/jetbrains/intellij/idea/ideaIC/2022.1.4/ideaIC-2022.1.4.zip"`
  */
 fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String {
     val fileName = releasePath.substringAfterLast('/')

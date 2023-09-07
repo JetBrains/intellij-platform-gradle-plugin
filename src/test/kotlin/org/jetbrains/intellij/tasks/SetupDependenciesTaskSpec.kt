@@ -31,7 +31,7 @@ class SetupDependenciesTaskSpec : IntelliJPluginSpecBase() {
 
         build(testTaskName).let {
             assertContains("> Task :$testTaskName", it.output)
-            assertContains("ideaIC-2021.2.4", it.output)
+            assertContains("ideaIC-2022.1.4", it.output)
         }
         build(testTaskName).let {
             assertContains("Reusing configuration cache.", it.output)

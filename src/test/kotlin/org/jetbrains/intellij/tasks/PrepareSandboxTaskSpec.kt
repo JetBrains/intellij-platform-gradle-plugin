@@ -306,7 +306,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """
             <idea-plugin>
               <version>0.42.123</version>
-              <idea-version since-build="212.5712" until-build="212.*" />
+              <idea-version since-build="221.6008" until-build="221.*" />
               <depends config-file="other.xml" />
             </idea-plugin>
             """.trimIndent()
@@ -420,12 +420,6 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         assertEquals(
             setOf(
                 "/config/options/updates.xml",
-                "/plugins/markdown/lib/google-api-client-1.25.0.jar",
-                "/plugins/markdown/lib/google-api-services-drive-v3-rev197-1.25.0.jar",
-                "/plugins/markdown/lib/google-http-client-1.25.0.jar",
-                "/plugins/markdown/lib/google-http-client-jackson2-1.25.0.jar",
-                "/plugins/markdown/lib/google-oauth-client-1.25.0.jar",
-                "/plugins/markdown/lib/j2objc-annotations-1.1.jar",
                 "/plugins/markdown/lib/markdown.jar",
                 "/plugins/myPluginName/lib/projectName.jar",
             ),
@@ -479,7 +473,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
               <id>${it.name}</id>
               <name>Test</name>
               <version>1.0</version>
-              <idea-version since-build="212.5712" until-build="212.*" />
+              <idea-version since-build="221.6008" until-build="221.*" />
               <vendor url="https://jetbrains.com">JetBrains</vendor>
               <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
               <change-notes/>

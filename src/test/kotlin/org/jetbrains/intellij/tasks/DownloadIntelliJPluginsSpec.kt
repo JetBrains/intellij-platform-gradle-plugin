@@ -65,24 +65,24 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             intellij {
-                plugins = ["io.flutter:67.0.2-dev.1@dev"]
+                plugins = ["io.flutter:72.0.1-dev.38@dev"]
             }
             """.trimIndent()
         )
 
         build(ASSEMBLE_TASK_NAME)
-        val pluginDir = File(pluginsNightlyRepositoryCacheDir, "dev.com.jetbrains.plugins/io.flutter/67.0.2-dev.1")
+        val pluginDir = File(pluginsNightlyRepositoryCacheDir, "dev.com.jetbrains.plugins/io.flutter/72.0.1-dev.38")
 
         pluginDir.list()?.let {
             assertTrue(it.contains("9cab70cc371b245cd808ade65630f505a6443b0d"))
         }
 
         File(pluginDir, "9cab70cc371b245cd808ade65630f505a6443b0d").list()?.let {
-            assertTrue(it.contains("io.flutter-67.0.2-dev.1.zip"))
+            assertTrue(it.contains("io.flutter-72.0.1-dev.38.zip"))
         }
 
         pluginsDevCacheDir.list()?.let {
-            assertTrue(it.contains("io.flutter-67.0.2-dev.1"))
+            assertTrue(it.contains("io.flutter-72.0.1-dev.38"))
         }
     }
 

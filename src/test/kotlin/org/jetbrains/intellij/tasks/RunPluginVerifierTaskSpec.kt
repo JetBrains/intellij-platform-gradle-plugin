@@ -358,7 +358,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             class App {
             
                 public static void main(@NotNull String[] strings) {
-                    StringUtil.firstLetterToUpperCase("foo");
+                    StringUtil.escapeXml("<foo>");
                 }
             }
             """.trimIndent()
