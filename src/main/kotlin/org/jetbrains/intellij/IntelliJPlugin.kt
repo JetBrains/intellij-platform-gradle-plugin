@@ -1560,7 +1560,6 @@ abstract class IntelliJPlugin : Plugin<Project> {
         }
     }
 
-    @Suppress("UnstableApiUsage")
     private fun configureProcessResources(project: Project) {
         info(context, "Configuring resources task")
         val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
