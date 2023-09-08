@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij
 
+import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.IntelliJPluginConstants.MARKETPLACE_HOST
@@ -11,6 +12,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NA
 import org.jetbrains.intellij.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.test.createLocalIdeIfNotExists
+import org.junit.AfterClass
 import org.junit.Assume.assumeFalse
 import java.io.File
 import java.nio.file.Path
@@ -18,6 +20,27 @@ import kotlin.test.*
 
 @Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
 class IntelliJPluginSpec : IntelliJPluginSpecBase() {
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun `clean up dependencies`() {
+            val isCI = System.getProperty("test.ci").toBoolean()
+            val gradleHome = Path.of(System.getProperty("test.gradle.home"))
+
+            if (!isCI) {
+                listOf(
+                    "caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/2022.1.4",
+//                    "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.4",
+                    "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1",
+                    "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU/2022.1.4",
+//                    "com.jetbrains/jbre/jbr_jcef-11_0_15-osx-aarch64-b2043.56", ??
+                ).forEach {
+                    gradleHome.resolve(it).forceDeleteIfExists()
+                }
+            }
+        }
+    }
 
     @Test
     fun `intellij-specific tasks`() {
@@ -312,6 +335,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                         "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
             )
         }
+
+        if (isCI) {
+            Path.of(localPath).forceDeleteIfExists()
+        }
     }
 
     // FIXME: test takes too long
@@ -343,6 +370,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 "go/lib/src/go-openapi-src-221.6008.13-unzipped.com.jetbrains.plugins.jar " +
                         "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:221.6008.13)"
             )
+        }
+
+        if (isCI) {
+            Path.of(localPath).forceDeleteIfExists()
         }
     }
 
@@ -416,6 +447,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 it,
                 "lib/src/src_spring-openapi-ideaLocal-IU-221.6008.13.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-221.6008.13)"
             )
+        }
+
+        if (isCI) {
+            Path.of(localPath).forceDeleteIfExists()
         }
     }
 

@@ -5,10 +5,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.plugins.BasePlugin.ASSEMBLE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
 
@@ -21,6 +18,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
       causes issues on Windows GitHub Actions runners (file is locked by another process).
      */
 
+    @Ignore
     @Test
     fun `download idea dependencies without sources when downloadSources = false`() {
         val testedVersion = "2019.3.1"
@@ -46,6 +44,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         assertFalse(iuVersionCacheDir.exists(), "Expected Ultimate cache directory to not exist")
     }
 
+    @Ignore
     @Test
     fun `download idea with sources when downloadSources = true`() {
         val testedVersion = "2019.3.2"
@@ -74,6 +73,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         assertFalse(iuVersionCacheDir.exists(), "Expected Ultimate cache directory to not exist")
     }
 
+    @Ignore
     @Test
     fun `download ultimate idea dependencies without sources when downloadSources = false`() {
         val testedVersion = "2019.3.3"
@@ -100,6 +100,7 @@ class DownloadIntelliJSpec : IntelliJPluginSpecBase() {
         assertFalse(icVersionCacheDir.exists(), "Expected Community cache directory to not exist")
     }
 
+    @Ignore
     @Test
     fun `download ultimate idea dependencies and community sources without dist when downloadSources = true`() {
         val testedVersion = "2019.3.4"

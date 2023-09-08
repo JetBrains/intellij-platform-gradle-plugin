@@ -21,6 +21,7 @@ abstract class IntelliJPlatformTestBase {
     val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     val kotlinPluginVersion: String = System.getProperty("test.kotlin.version")
     val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
+    val isCI get() = System.getProperty("test.ci").toBoolean()
 
     val gradleHome: String = System.getProperty("test.gradle.home")
     var dir = createTempDirectory("tmp").toFile()
