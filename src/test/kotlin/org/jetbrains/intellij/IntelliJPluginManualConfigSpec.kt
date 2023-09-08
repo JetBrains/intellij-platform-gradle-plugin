@@ -18,7 +18,6 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
-                version = '14.1.4'
                 configureDefaultDependencies = false
             }
             
@@ -55,25 +54,19 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             val testClasspath = lines.find { it.startsWith("testImplementation:") }.orEmpty()
             val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") }.orEmpty()
 
-            assertTrue(mainClasspath.contains("openapi.jar"))           // included explicitly in compileOnly
-            assertTrue(mainRuntimeClasspath.contains("openapi.jar"))    // includes all but idea.jar
-            assertFalse(testClasspath.contains("openapi.jar"))
-            assertTrue(testRuntimeClasspath.contains("openapi.jar"))    // includes all
+            with ("annotations-24.0.1.jar") {
+                assertTrue(mainClasspath.contains(this))
+                assertFalse(mainRuntimeClasspath.contains(this))
+                assertTrue(testClasspath.contains(this))
+                assertTrue(testRuntimeClasspath.contains(this))
+            }
 
-            assertTrue(mainClasspath.contains("asm-all.jar"))           // included explicitly
-            assertTrue(testClasspath.contains("asm-all.jar"))
-            assertTrue(testRuntimeClasspath.contains("asm-all.jar"))    // includes all
-
-            assertFalse(mainClasspath.contains("boot.jar"))
-            assertTrue(testClasspath.contains("boot.jar"))              // included explicitly
-            assertTrue(testRuntimeClasspath.contains("boot.jar"))       // includes all
-
-            assertFalse(mainClasspath.contains("idea.jar"))
-            assertFalse(mainRuntimeClasspath.contains("idea.jar"))      // excluded explicitly
-            assertFalse(testClasspath.contains("idea.jar"))
-            assertTrue(testRuntimeClasspath.contains("idea.jar"))       // includes all
-
-            assertTrue(mainRuntimeClasspath.contains("idea_rt.jar"))    // includes all but idea.jar
+            with("app.jar") {
+                assertFalse(mainClasspath.contains(this))
+                assertTrue(mainRuntimeClasspath.contains(this))
+                assertFalse(testClasspath.contains(this))
+                assertTrue(testRuntimeClasspath.contains(this))
+            }
         }
     }
 
@@ -85,7 +78,6 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             import org.jetbrains.intellij.DependenciesUtils
             
             intellij {
-                version = '14.1.4'
                 configureDefaultDependencies = false
                 plugins = ['junit', 'testng', 'copyright']
             }
@@ -122,29 +114,36 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
             val testClasspath = lines.find { it.startsWith("testImplementation:") }.orEmpty()
             val testRuntimeClasspath = lines.find { it.startsWith("testRuntimeOnly:") }.orEmpty()
 
-            assertTrue(mainClasspath.contains("junit-rt.jar"))              // included explicitly in compileOnly
-            assertFalse(mainRuntimeClasspath.contains("junit-rt.jar"))
-            assertFalse(testClasspath.contains("junit-rt.jar"))
-            assertTrue(testRuntimeClasspath.contains("junit-rt.jar"))       // includes all
-
-            assertTrue(mainClasspath.contains("idea-junit.jar"))            // included explicitly in compile
-            assertTrue(testClasspath.contains("idea-junit.jar"))            // inherited from compile
-            assertTrue(testRuntimeClasspath.contains("idea-junit.jar"))     // includes all
-
-            assertFalse(mainClasspath.contains("testng-plugin.jar"))
-            assertFalse(mainRuntimeClasspath.contains("testng-plugin.jar")) // excluded explicitly
-            assertFalse(testClasspath.contains("testng-plugin.jar"))
-            assertTrue(testRuntimeClasspath.contains("testng-plugin.jar"))  // includes all
-
-            assertFalse(mainClasspath.contains("testng.jar"))
-            assertTrue(mainRuntimeClasspath.contains("testng.jar"))         // includes testng
-            assertTrue(testClasspath.contains("testng.jar"))                // included explicitly
-            assertTrue(testRuntimeClasspath.contains("testng.jar"))         // includes all
-
-            assertFalse(mainClasspath.contains("copyright.jar"))            // not included (same for all below)
-            assertFalse(mainRuntimeClasspath.contains("copyright.jar"))
-            assertFalse(testClasspath.contains("copyright.jar"))
-            assertFalse(testRuntimeClasspath.contains("copyright.jar"))
+            with("junit-rt.jar") {
+                assertTrue(mainClasspath.contains(this))
+                assertFalse(mainRuntimeClasspath.contains(this))
+                assertTrue(testClasspath.contains(this))
+                assertTrue(testRuntimeClasspath.contains(this))
+            }
+            with("idea-junit.jar") {
+                assertTrue(mainClasspath.contains(this))
+                assertTrue(mainRuntimeClasspath.contains(this))
+                assertTrue(testClasspath.contains(this))
+                assertTrue(testRuntimeClasspath.contains(this))
+            }
+            with("testng-plugin.jar") {
+                assertFalse(mainClasspath.contains(this))
+                assertFalse(mainRuntimeClasspath.contains(this))
+                assertFalse(testClasspath.contains(this))
+                assertTrue(testRuntimeClasspath.contains(this))
+            }
+            with("testng.jar") {
+                assertFalse(mainClasspath.contains(this))
+                assertFalse(mainRuntimeClasspath.contains(this))
+                assertFalse(testClasspath.contains(this))
+                assertFalse(testRuntimeClasspath.contains(this))
+            }
+            with("copyright.jar") {
+                assertFalse(mainClasspath.contains(this))
+                assertFalse(mainRuntimeClasspath.contains(this))
+                assertFalse(testClasspath.contains(this))
+                assertFalse(testRuntimeClasspath.contains(this))
+            }
         }
     }
 
