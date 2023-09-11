@@ -31,10 +31,10 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
                 +--- org.jetbrains:markdown:0.3.1
                 |    \--- org.jetbrains:markdown-jvm:0.3.1
                 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
-                |         |    +--- org.jetbrains:annotations:13.0 -> 24.0.0
+                |         |    +--- org.jetbrains:annotations:13.0 -> 24.0.1
                 |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
                 |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
-                +--- org.jetbrains:annotations:24.0.0
+                +--- org.jetbrains:annotations:24.0.1
                 \--- com.jetbrains:ideaIC:2022.1
             """.trimIndent()
 
@@ -45,7 +45,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
             it.safeOutput containsText """
                 z10_intellijDefaultDependencies
-                \--- org.jetbrains:annotations:24.0.0
+                \--- org.jetbrains:annotations:24.0.1
             """.trimIndent()
 
             it.safeOutput containsText """
