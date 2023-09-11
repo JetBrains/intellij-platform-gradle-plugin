@@ -128,6 +128,12 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
     @get:Internal
     abstract val pluginVerifierDownloadDir: Property<String>
 
+    /**
+     * This variable represents whether the Kotlin Coroutines library is added explicitly to the project dependencies.
+     */
+    @get:Internal
+    abstract val kotlinxCoroutinesLibraryPresent: Property<Boolean>
+
     private val context = logCategory()
 
     init {
@@ -189,6 +195,9 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             }
             if (kotlinPluginAvailable.get() && kotlinVersion >= Version(1, 8, 20) && kotlinVersion < Version(1, 9) && kotlinIncrementalUseClasspathSnapshot.orNull == null) {
                 yield("The Kotlin plugin in version $kotlinVersion used with the IntelliJ Platform Gradle Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
+            }
+            if (kotlinxCoroutinesLibraryPresent.get()) {
+                yield("The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.")
             }
         }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
             warn(

@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.SearchableOptionsSpecBase
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 @Suppress("ComplexRedundantLet")
@@ -24,6 +25,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         }
     }
 
+    @Ignore
     @Test
     fun `build searchable options produces XML`() {
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())

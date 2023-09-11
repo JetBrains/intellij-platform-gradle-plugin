@@ -109,6 +109,7 @@ tasks {
         systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
         systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
         systemProperties["test.intellij.version"] = properties("testIntelliJVersion").get()
+        systemProperties["test.ci"] = environment("CI").orElse("false")
         systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
         systemProperties["plugins.repository"] = properties("pluginsRepository").get()
         outputs.dir(testGradleHome)
@@ -180,6 +181,7 @@ testing {
                         systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
                         systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
                         systemProperties["test.intellij.version"] = properties("testIntelliJVersion").get()
+                        systemProperties["test.ci"] = environment("CI").get()
                         systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
                         systemProperties["plugins.repository"] = properties("pluginsRepository").get()
                     }

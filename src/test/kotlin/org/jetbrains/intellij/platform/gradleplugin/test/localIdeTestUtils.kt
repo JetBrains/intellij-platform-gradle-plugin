@@ -10,13 +10,14 @@ import java.io.File
 import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 
 /**
  * Downloads and extracts IDE for the tests using local IDE installation. IDEs are downloaded from [DEFAULT_INTELLIJ_REPOSITORY].
  *
  * @param localIdesPath directory to store local IDE
- * @param releasePath IDE path relative to [DEFAULT_INTELLIJ_REPOSITORY]/releases, e.g. `"com/jetbrains/intellij/idea/ideaIC/2021.2.4/ideaIC-2021.2.4.zip"`
+ * @param releasePath IDE path relative to [DEFAULT_INTELLIJ_REPOSITORY]/releases, e.g. `"com/jetbrains/intellij/idea/ideaIC/2022.1.4/ideaIC-2022.1.4.zip"`
  */
 fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String {
     val fileName = releasePath.substringAfterLast('/')
@@ -30,7 +31,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
     }
 
     URL("$DEFAULT_INTELLIJ_REPOSITORY/releases/$releasePath").openStream().use {
-        Files.copy(it, localIdeZipPath)
+        Files.copy(it, localIdeZipPath, StandardCopyOption.REPLACE_EXISTING)
     }
     localIdeZipPath.toFile().unzip()
     localIdeZipPath.forceDeleteIfExists()

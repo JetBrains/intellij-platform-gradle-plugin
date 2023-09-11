@@ -5,10 +5,13 @@ package org.jetbrains.intellij.platform.gradleplugin.propertyProviders
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.readLines
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.Version
+import org.jetbrains.intellij.ideBuildNumber
 import org.jetbrains.intellij.platform.gradleplugin.ideProductInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradleplugin.utils.OpenedPackages
@@ -16,8 +19,17 @@ import java.nio.file.Path
 
 class IntelliJPlatformArgumentProvider(
     @InputDirectory @PathSensitive(RELATIVE) val ideDirectory: Path,
+    @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentPath: Path,
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
+
+    private val buildNumber by lazy {
+        ideDirectory
+            .let(::ideBuildNumber)
+            .split('-')
+            .last()
+            .let(Version::parse)
+    }
 
     private val productInfo
         get() = ideProductInfo(ideDirectory)
@@ -36,6 +48,12 @@ class IntelliJPlatformArgumentProvider(
             ?.removePrefix("../")
             ?.let { ideDirectory.resolve(it).readLines() }
             .orEmpty()
+            .filter { !it.contains("kotlinx.coroutines.debug=off") }
+
+    private val kotlinxCoroutinesJavaAgent
+        get() = "-javaagent:$coroutinesJavaAgentPath".takeIf {
+            buildNumber >= Version(221)
+        }
 
     private val additionalJvmArguments
         get() = productInfo
@@ -54,6 +72,6 @@ class IntelliJPlatformArgumentProvider(
         )
 
     override fun asArguments() =
-        (defaultHeapSpace + bootclasspath + vmOptions + additionalJvmArguments + heapSpace)
-            .filter { it.isNotBlank() }
+        (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace)
+            .filterNot { it.isNullOrBlank() }
 }

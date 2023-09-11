@@ -113,6 +113,7 @@ import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import kotlin.io.path.exists
 
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
@@ -758,6 +759,13 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 it.targetCompatibility
             })
             pluginVerifierDownloadDir.convention(downloadDirProvider)
+            kotlinxCoroutinesLibraryPresent.convention(project.provider {
+                listOf(IMPLEMENTATION_CONFIGURATION_NAME, COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->
+                    project.configurations.getByName(configurationName).dependencies.any {
+                        it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
+                    }
+                }
+            })
 
             kotlinPluginAvailable.convention(project.provider {
                 project.pluginManager.hasPlugin(KOTLIN_GRADLE_PLUGIN_ID)
@@ -861,6 +869,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
     ) {
         val taskContext = logCategory()
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
+        val initializeIntelliJPluginTaskProvider = project.tasks.named<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
 
         ideDir.convention(ideaDependencyProvider.map {
@@ -892,6 +901,9 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 jbrArch = jbrArch.orNull,
                 ideDir = ideDir.orNull,
             ).toString()
+        })
+        coroutinesJavaAgentPath.convention(initializeIntelliJPluginTaskProvider.flatMap {
+            it.coroutinesJavaAgentPath
         })
     }
 
@@ -1124,6 +1136,10 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         val instrumentedTestCodeOutputsProvider = project.provider {
             project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile })
         }
+        val initializeIntellijPluginTaskProvider = project.tasks.named<InitializeIntelliJPluginTask>(INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME)
+        val coroutinesJavaAgentPathProvider = initializeIntellijPluginTaskProvider.flatMap {
+            it.coroutinesJavaAgentPath
+        }
 
         val testTasks = project.tasks.withType<Test>()
         val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
@@ -1208,7 +1224,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
             classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
             testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
-            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDirProvider.get(), this))
+            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDirProvider.get(), coroutinesJavaAgentPathProvider.get(), this))
 
             doFirst {
                 classpath += ideaDependencyLibrariesProvider.get() +

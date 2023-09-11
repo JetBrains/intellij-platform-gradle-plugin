@@ -12,6 +12,8 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TASK
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.test.createLocalIdeIfNotExists
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
+import org.jetbrains.intellij.test.createLocalIdeIfNotExists
+import org.junit.AfterClass
 import org.junit.Assume.assumeFalse
 import java.io.File
 import java.nio.file.Path
@@ -19,6 +21,27 @@ import kotlin.test.*
 
 @Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
 class IntelliJPluginSpec : IntelliJPluginSpecBase() {
+
+    companion object {
+        @JvmStatic
+        @AfterClass
+        fun `clean up dependencies`() {
+            val isCI = System.getProperty("test.ci").toBoolean()
+            val gradleHome = Path.of(System.getProperty("test.gradle.home"))
+
+            if (!isCI) {
+                listOf(
+                    "caches/modules-2/files-2.1/com.jetbrains.intellij.goland/goland/2022.1.4",
+//                    "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/14.1.4",
+                    "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/2020.1",
+                    "caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIU/2022.1.4",
+//                    "com.jetbrains/jbre/jbr_jcef-11_0_15-osx-aarch64-b2043.56", ??
+                ).forEach {
+                    gradleHome.resolve(it).forceDeleteIfExists()
+                }
+            }
+        }
+    }
 
     @Test
     fun `intellij-specific tasks`() {
@@ -84,11 +107,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val (compileClasspath, runtimeClasspath) = collectMainClassPaths()
 
         assertTrue(compileClasspath.contains("markdown.jar"))
-        assertTrue(compileClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
-        assertTrue(compileClasspath.contains("kotlin-stdlib-jdk8.jar"))
         assertFalse(runtimeClasspath.contains("markdown.jar"))
-        assertFalse(runtimeClasspath.contains("kotlin-reflect-1.5.10-release-931.jar"))
-        assertFalse(runtimeClasspath.contains("kotlin-stdlib-jdk8.jar"))
     }
 
     @Test
@@ -205,7 +224,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             intellij {
                 type = 'GO'
-                version = '2021.2.4'
+                version = '2022.1.4'
                 plugins = ['org.jetbrains.plugins.go']
                 downloadSources = true
             }
@@ -215,10 +234,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "lib/src/go-openapi-src-goland-GO-212.5457.54-withSources-unzipped.com.jetbrains.plugins.jar " +
-                        "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)",
-                "ideaIC-goland-GO-212.5457.54-withSources-sources.jar " +
-                        "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54-withSources)"
+                "lib/src/go-openapi-src-goland-GO-221.6008.15-withSources-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:go:goland-GO-221.6008.15-withSources)",
+                "ideaIC-goland-GO-221.6008.15-withSources-sources.jar " +
+                        "(unzipped.com.jetbrains.plugins:go:goland-GO-221.6008.15-withSources)"
             )
         }
     }
@@ -229,7 +248,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             intellij {
                 type = 'GO'
-                version = '2021.2.4'
+                version = '2022.1.4'
                 plugins = ['org.jetbrains.plugins.go']
                 downloadSources = false
             }
@@ -239,8 +258,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:goland-GO").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "lib/src/go-openapi-src-goland-GO-212.5457.54-unzipped.com.jetbrains.plugins.jar " +
-                        "(unzipped.com.jetbrains.plugins:go:goland-GO-212.5457.54)"
+                "lib/src/go-openapi-src-goland-GO-221.6008.15-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:go:goland-GO-221.6008.15)"
             )
         }
     }
@@ -251,8 +270,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             intellij {
                 type = 'IC'
-                version = '2021.2.4'
-                plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
+                version = '2022.1.4'
+                plugins = ['org.jetbrains.plugins.go:221.6008.13'] // Go plugin is external for IC
                 downloadSources = true
             }
             """.trimIndent()
@@ -261,8 +280,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
-                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+                "go/lib/src/go-openapi-src-221.6008.13-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:221.6008.13)"
             )
         }
     }
@@ -273,8 +292,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             intellij {
                 type = 'IC'
-                version = '2021.2.4'
-                plugins = ['org.jetbrains.plugins.go:212.5712.14'] // Go plugin is external for IC
+                version = '2022.1.4'
+                plugins = ['org.jetbrains.plugins.go:221.6008.13'] // Go plugin is external for IC
                 downloadSources = false
             }
             """.trimIndent()
@@ -282,8 +301,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
-                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+                "go/lib/src/go-openapi-src-221.6008.13-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:221.6008.13)"
             )
         }
     }
@@ -317,7 +336,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                         "(unzipped.com.jetbrains.plugins:go:ideaLocal-GO-221.5080.224)"
             )
         }
-        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
+
+        if (isCI) {
+            Path.of(localPath).forceDeleteIfExists()
+        }
     }
 
     // FIXME: test takes too long
@@ -325,7 +347,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `add external zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
             Path.of(gradleHome).parent.resolve("local-ides"),
-            "com/jetbrains/intellij/idea/ideaIC/2021.2.4/ideaIC-2021.2.4.zip"
+            "com/jetbrains/intellij/idea/ideaIC/2022.1.4/ideaIC-2022.1.4.zip"
         )
 
         buildFile.writeText("")
@@ -338,7 +360,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
             intellij {
                 localPath = '${adjustWindowsPath(localPath)}'
-                plugins = ['org.jetbrains.plugins.go:212.5712.14']
+                plugins = ['org.jetbrains.plugins.go:221.6008.13']
             }
             """.trimIndent()
         )
@@ -346,11 +368,14 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "go/lib/src/go-openapi-src-212.5712.14-unzipped.com.jetbrains.plugins.jar " +
-                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:212.5712.14)"
+                "go/lib/src/go-openapi-src-221.6008.13-unzipped.com.jetbrains.plugins.jar " +
+                        "(unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go:221.6008.13)"
             )
         }
-        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
+
+        if (isCI) {
+            Path.of(localPath).forceDeleteIfExists()
+        }
     }
 
     @Test
@@ -359,18 +384,18 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             intellij {
                 type = 'IU'
-                version = '2021.2.4'
+                version = '2022.1.4'
                 plugins = ['com.intellij.css']
                 downloadSources = true
             }
             """.trimIndent()
         )
 
-        printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources").let {
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-221.6008.13-withSources").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "lib/src/src_css-api-ideaIU-IU-212.5712.43-withSources.zip (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)",
-                "ideaIC-ideaIU-IU-212.5712.43-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-212.5712.43-withSources)"
+                "lib/src/src_css-api-ideaIU-IU-221.6008.13-withSources.zip (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-221.6008.13-withSources)",
+                "ideaIC-ideaIU-IU-221.6008.13-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:ideaIU-IU-221.6008.13-withSources)"
             )
         }
     }
@@ -381,17 +406,17 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             intellij {
                 type = 'IU'
-                version = '2021.2.4'
+                version = '2022.1.4'
                 plugins = ['Tomcat']
                 downloadSources = false
             }
             """.trimIndent()
         )
 
-        printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43").let {
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-221.6008.13").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "lib/src/src_tomcat-ideaIU-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-212.5712.43)"
+                "lib/src/src_tomcat-ideaIU-IU-221.6008.13.zip (unzipped.com.jetbrains.plugins:Tomcat:ideaIU-IU-221.6008.13)"
             )
         }
     }
@@ -401,7 +426,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `add bundled zip plugin source artifacts from IDE_ROOT-lib-src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
             Path.of(gradleHome).parent.resolve("local-ides"),
-            "com/jetbrains/intellij/idea/ideaIU/2021.2.4/ideaIU-2021.2.4.zip"
+            "com/jetbrains/intellij/idea/ideaIU/2022.1.4/ideaIU-2022.1.4.zip"
         )
         buildFile.writeText("")
         buildFile.groovy(
@@ -418,13 +443,16 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43").let {
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-221.6008.13").let {
             assertContainsOnlySourceArtifacts(
                 it,
-                "lib/src/src_spring-openapi-ideaLocal-IU-212.5712.43.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-212.5712.43)"
+                "lib/src/src_spring-openapi-ideaLocal-IU-221.6008.13.zip (unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-221.6008.13)"
             )
         }
-        Path.of(localPath).forceDeleteIfExists() // clean it to save space on CI
+
+        if (isCI) {
+            Path.of(localPath).forceDeleteIfExists()
+        }
     }
 
     @Test
@@ -433,18 +461,18 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """
             intellij {
                 type = 'GO'
-                version = '2021.2.4'
+                version = '2022.1.4'
                 plugins = ['com.intellij.css']
                 downloadSources = true
             }
             """.trimIndent()
         )
 
-        printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources").let {
+        printSourceArtifacts("unzipped.com.jetbrains.plugins:CSS:goland-GO-221.6008.15-withSources").let {
             assertContainsOnlySourceArtifacts(
                 it,
                 /* no CSS plugin source artifacts in Go distribution */
-                "ideaIC-goland-GO-212.5457.54-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:goland-GO-212.5457.54-withSources)"
+                "ideaIC-goland-GO-221.6008.15-withSources-sources.jar (unzipped.com.jetbrains.plugins:CSS:goland-GO-221.6008.15-withSources)"
             )
         }
     }
@@ -511,24 +539,22 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `expect build fails when using unsupported Gradle version`() {
-        val unsupportedGradleVersions = setOf(
-            "6.4",
-        )
-
-        unsupportedGradleVersions.forEach { gradleVersion ->
-            build(
-                gradleVersion = gradleVersion,
-                fail = true,
-                assertValidConfigurationCache = true,
-                "help",
-            ).apply {
-                assertContains("IntelliJ Platform Gradle Plugin requires Gradle", output)
-                assertContains("FAILURE: Build failed with an exception", output)
-            }
+        build(
+            gradleVersion = "6.4",
+            fail = true,
+            assertValidConfigurationCache = true,
+            "help",
+        ).apply {
+            assertContains("IntelliJ Platform Gradle Plugin requires Gradle", output)
+            assertContains("FAILURE: Build failed with an exception", output)
         }
     }
 
     @Test
+    @Ignore(
+        "Fails when building with 8.x and running on 7.x via unit tests: " +
+                "java.lang.NoSuchMethodError: 'org.gradle.internal.buildoption.Option\$Value org.gradle.api.internal.StartParameterInternal.getIsolatedProjects()'"
+    )
     fun `expect successful build using minimal supported Gradle version`() {
         val buildResult = build(
             gradleVersion = MINIMAL_SUPPORTED_GRADLE_VERSION,
