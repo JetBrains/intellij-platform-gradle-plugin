@@ -165,7 +165,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 fail("Verification reports directory not found")
             }
             val ideVersionDir = ideDirs.first()
-            val markdownReportFiles = ideVersionDir.listFilesOrdered { it.extension == "markdown" }
+            val markdownReportFiles = ideVersionDir.listFilesOrdered { it.extension == "md" }
             assertEquals(1, markdownReportFiles.size)
         }
     }
@@ -196,7 +196,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 fail("Verification reports directory not found")
             }
             val ideVersionDir = ideDirs.first()
-            val reportFiles = ideVersionDir.listFilesOrdered { listOf("markdown", "html").contains(it.extension) }
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
             assertTrue(reportFiles.isEmpty())
         }
     }
@@ -226,7 +226,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 fail("Verification reports directory not found")
             }
             val ideVersionDir = ideDirs.first()
-            val reportFiles = ideVersionDir.listFilesOrdered { listOf("markdown", "html").contains(it.extension) }
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
             assertTrue(reportFiles.isNotEmpty())
         }
     }
