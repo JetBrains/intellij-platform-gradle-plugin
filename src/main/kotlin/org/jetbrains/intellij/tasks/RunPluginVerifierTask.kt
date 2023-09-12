@@ -132,6 +132,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:Optional
     abstract val verificationReportsDir: Property<String>
 
+    @get:Input
+    @get:Optional
+    abstract val verificationReportsFormats: ListProperty<String>
+
     /**
      * The path to the directory where IDEs used for the verification will be downloaded.
      *
@@ -468,7 +472,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
         if (offline.get()) {
             args.add("-offline")
         }
-
+        args.add("-verification-reports-formats")
+        args.add(verificationReportsFormats.get().joinToString(","))
         return args
     }
 

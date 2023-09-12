@@ -687,6 +687,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             verificationReportsDir.convention(
                 project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath }
             )
+            verificationReportsFormats.convention(listOf("plain", "html"))
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
             })
