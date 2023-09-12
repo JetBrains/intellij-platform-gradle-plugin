@@ -8,11 +8,9 @@ import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
+import org.junit.Assert.*
 import java.net.URL
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
 class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
