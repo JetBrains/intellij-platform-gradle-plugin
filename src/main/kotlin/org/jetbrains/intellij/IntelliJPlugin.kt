@@ -102,6 +102,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAM
 import org.jetbrains.intellij.IntelliJPluginConstants.SETUP_DEPENDENCIES_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.TASKS
+import org.jetbrains.intellij.IntelliJPluginConstants.VERIFICATION_REPORTS_DEFAULT_FORMATS
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
@@ -687,7 +688,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             verificationReportsDir.convention(
                 project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath }
             )
-            verificationReportsFormats.convention(listOf("plain", "html"))
+            verificationReportsFormats.convention(VERIFICATION_REPORTS_DEFAULT_FORMATS)
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
             })
