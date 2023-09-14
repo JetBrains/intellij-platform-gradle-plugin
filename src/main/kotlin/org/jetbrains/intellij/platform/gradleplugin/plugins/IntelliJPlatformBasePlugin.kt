@@ -10,6 +10,7 @@ import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_CONFIGURATION_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_BASE_ID
@@ -40,6 +41,14 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform dependency"
                 }
 
+            val intellijPlatformDependenciesConfiguration = maybeCreate(INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME)
+                .apply {
+                    isVisible = false
+                    isCanBeConsumed = false
+                    isCanBeResolved = true
+                    description = "IntelliJ Platform Dependencies dependency"
+                }
+
             maybeCreate(INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME)
                 .apply {
                     isVisible = false
@@ -48,7 +57,10 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform Sources to be attached to the IntelliJ Platform dependency"
                 }
 
-            fun Configuration.extend() = extendsFrom(intellijPlatformConfiguration)
+            fun Configuration.extend() = extendsFrom(
+                intellijPlatformConfiguration,
+                intellijPlatformDependenciesConfiguration,
+            )
 
             getByName(COMPILE_ONLY_CONFIGURATION_NAME).extend()
             getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extend()

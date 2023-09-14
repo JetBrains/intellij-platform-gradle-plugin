@@ -113,6 +113,7 @@ object IntelliJPluginConstants {
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
 
     const val INTELLIJ_PLATFORM_CONFIGURATION_NAME = "intellijPlatform"
+    const val INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME = "intellijPlatformDependencies"
     const val INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME = "intellijPlatformSources"
     const val TEST_FIXTURES_COMPILE_ONLY_CONFIGURATION_NAME = "testFixturesCompileOnly"
 

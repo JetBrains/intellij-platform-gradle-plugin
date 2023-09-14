@@ -7,11 +7,11 @@ package org.jetbrains.intellij.platform.gradleplugin.dependencies
 import org.gradle.kotlin.dsl.DependencyHandlerScope
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_CONFIGURATION_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME
 
 fun DependencyHandlerScope.jetbrainsAnnotations(
     version: String = ANNOTATIONS_DEPENDENCY_VERSION,
-    configurationName: String = INTELLIJ_PLATFORM_CONFIGURATION_NAME,
+    configurationName: String = INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME,
 ) = create(
     group = "org.jetbrains",
     name = "annotations",
