@@ -448,6 +448,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private fun requiresJava11() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 260)
 
     /**
+     * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
+     */
+    private fun supportsVerificationReportOutputFormats() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 304)
+
+    /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with all available CLI options
@@ -472,8 +477,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
         if (offline.get()) {
             args.add("-offline")
         }
-        args.add("-verification-reports-formats")
-        args.add(verificationReportsFormats.get().joinToString(","))
+        if (supportsVerificationReportOutputFormats()) {
+            args.add("-verification-reports-formats")
+            args.add(verificationReportsFormats.get().joinToString(","))
+        }
         return args
     }
 
