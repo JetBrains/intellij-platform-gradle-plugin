@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.artifacts.transform
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.Project
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
@@ -16,6 +17,7 @@ import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NA
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
@@ -23,6 +25,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTE
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.collectJars
 import org.jetbrains.intellij.platform.gradleplugin.isKotlinRuntime
+import org.jetbrains.intellij.platform.gradleplugin.or
 import kotlin.io.path.isDirectory
 import kotlin.io.path.name
 
@@ -51,7 +54,14 @@ abstract class IntelliJPlatformCollectorTransformer : TransformAction<IntelliJPl
             }).sorted()
 
             val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
-            (baseFiles + antFiles).forEach {
+
+            val buildFile = input
+                .resolve("Resources/build.txt")
+                .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
+                .or { input.resolve("build.txt") }
+                .let { listOf(it) }
+
+            (baseFiles + antFiles + buildFile).forEach {
                 outputs.file(it)
             }
         }

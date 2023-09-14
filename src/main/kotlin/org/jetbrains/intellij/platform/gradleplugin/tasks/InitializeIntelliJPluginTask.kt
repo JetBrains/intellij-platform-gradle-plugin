@@ -68,7 +68,7 @@ abstract class InitializeIntelliJPluginTask : DefaultTask() {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
 
-            with(selfUpdateLockPath.get().toPath()) {
+            with(selfUpdateLockPath.get()) {
                 if (!exists()) {
                     create()
                 }

@@ -52,6 +52,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Exte
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
@@ -69,7 +70,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PATC
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
@@ -113,7 +113,6 @@ import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
-import kotlin.io.path.exists
 
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
@@ -192,7 +191,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
-        configurePatchPluginXmlTask(project, extension, ideaDependencyProvider)
         configureDownloadRobotServerPluginTask(project)
         configurePrepareSandboxTasks(project, extension, ideaDependencyProvider)
         configureListProductsReleasesTask(project, extension)
@@ -433,48 +431,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         extension.addPluginDependency(pluginDependency)
         project.tasks.withType<PrepareSandboxTask> {
             configureCompositePlugin(pluginDependency)
-        }
-    }
-
-    private fun configurePatchPluginXmlTask(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
-        info(context, "Configuring patch plugin.xml task")
-
-        val buildNumberProvider = ideaDependencyProvider.map { it.buildNumber }
-
-        project.tasks.register<PatchPluginXmlTask>(PATCH_PLUGIN_XML_TASK_NAME)
-        project.tasks.withType<PatchPluginXmlTask> {
-            version.convention(project.provider {
-                project.version.toString()
-            })
-            pluginXmlFiles.convention(project.provider {
-                sourcePluginXmlFiles(project).map(Path::toFile)
-            })
-            destinationDir.convention(project.layout.buildDirectory.dir(PLUGIN_XML_DIR_NAME))
-            outputFiles.convention(pluginXmlFiles.map {
-                it.map { file ->
-                    destinationDir.get().asFile.resolve(file.name)
-                }
-            })
-            sinceBuild.convention(project.provider {
-                if (extension.updateSinceUntilBuild.get()) {
-                    val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
-                    "${ideVersion.baselineVersion}.${ideVersion.build}"
-                } else {
-                    null
-                }
-            })
-            untilBuild.convention(project.provider {
-                if (extension.updateSinceUntilBuild.get()) {
-                    if (extension.sameSinceUntilBuild.get()) {
-                        "${sinceBuild.get()}.*"
-                    } else {
-                        val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
-                        "${ideVersion.baselineVersion}.*"
-                    }
-                } else {
-                    null
-                }
-            })
         }
     }
 
@@ -749,9 +705,9 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             platformVersion.convention(ideaDependencyProvider.map {
                 it.version
             })
-            pluginXmlFiles.convention(patchPluginXmlTaskProvider.flatMap { patchPluginXmlTask ->
-                patchPluginXmlTask.outputFiles
-            })
+//            pluginXmlFiles.convention(patchPluginXmlTaskProvider.flatMap { patchPluginXmlTask ->
+//                patchPluginXmlTask.outputFiles
+//            })
             sourceCompatibility.convention(compileJavaTaskProvider.map {
                 it.sourceCompatibility
             })
@@ -1459,8 +1415,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 project.layout.buildDirectory.file("$LIST_PRODUCTS_RELEASES_TASK_NAME.txt")
             )
             types.convention(extension.type.map { listOf(it) })
-            sinceBuild.convention(patchPluginXmlTaskProvider.flatMap { it.sinceBuild })
-            untilBuild.convention(patchPluginXmlTaskProvider.flatMap { it.untilBuild })
+//            sinceBuild.convention(patchPluginXmlTaskProvider.flatMap { it.sinceBuild })
+//            untilBuild.convention(patchPluginXmlTaskProvider.flatMap { it.untilBuild })
             releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
 
             dependsOn(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)

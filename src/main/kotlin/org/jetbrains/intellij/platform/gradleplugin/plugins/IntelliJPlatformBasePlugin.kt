@@ -8,7 +8,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME
 import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME
 import org.gradle.kotlin.dsl.apply
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
@@ -25,12 +25,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
         with(plugins) {
             apply(JavaPlugin::class)
-        }
-
-        configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
-            configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
-                configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
-            }
         }
 
         with(repositories) {
@@ -61,7 +55,23 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
                 getByName(TEST_FIXTURES_COMPILE_ONLY_CONFIGURATION_NAME).extend()
             }
+        }
 
+        with(IntelliJPluginConstants.Extensions) {
+            this@configure.configureExtension<IntelliJPlatformExtension>(INTELLIJ_PLATFORM) {
+                configureExtension<IntelliJPlatformExtension.PluginConfiguration>(PLUGIN_CONFIGURATION) {
+                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(PRODUCT_DESCRIPTOR)
+                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(IDEA_VERSION) {
+                        sinceBuild.convention(ideVersionProvider.map {
+                            "${it.baselineVersion}.${it.build}"
+                        })
+                        untilBuild.convention(ideVersionProvider.map {
+                            "${it.baselineVersion}.*"
+                        })
+                    }
+                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(VENDOR)
+                }
+            }
         }
 
         applyIntellijPlatformExtractTransformer()

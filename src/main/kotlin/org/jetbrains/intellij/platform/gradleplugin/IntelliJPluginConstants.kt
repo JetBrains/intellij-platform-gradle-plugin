@@ -11,9 +11,11 @@ object IntelliJPluginConstants {
     const val PLUGIN_GROUP_NAME = "intellij"
 
     object Extensions {
+        const val IDEA_VERSION = "ideaVersion"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
         const val PRODUCT_DESCRIPTOR = "productDescriptor"
+        const val VENDOR = "vendor"
     }
 
     object Tasks {
@@ -110,8 +112,8 @@ object IntelliJPluginConstants {
     @Deprecated("Deprecated in 2.0")
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
 
-    const val INTELLIJ_PLATFORM_CONFIGURATION_NAME = "intellijPlatformConfiguration"
-    const val INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME = "intellijPlatformSourcesConfiguration"
+    const val INTELLIJ_PLATFORM_CONFIGURATION_NAME = "intellijPlatform"
+    const val INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME = "intellijPlatformSources"
     const val TEST_FIXTURES_COMPILE_ONLY_CONFIGURATION_NAME = "testFixturesCompileOnly"
 
     const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"

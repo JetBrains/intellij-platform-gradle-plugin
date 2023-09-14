@@ -26,6 +26,7 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.util.GradleVersion
@@ -148,6 +149,7 @@ fun getIdeaClasspath(ideDir: Path): List<String> {
     }.map { "$ideDir/lib/$it" }
 }
 
+@Deprecated("Rely on `build.txt` artifact resolved in configuration")
 fun ideBuildNumber(ideDir: Path) = ideDir
     .resolve("Resources/build.txt")
     .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
@@ -295,3 +297,5 @@ internal val <T> Property<T>.isSpecified: Boolean
         else -> true
     }
 
+internal val Project.sourceSets
+    get() = extensions.getByName("sourceSets") as SourceSetContainer

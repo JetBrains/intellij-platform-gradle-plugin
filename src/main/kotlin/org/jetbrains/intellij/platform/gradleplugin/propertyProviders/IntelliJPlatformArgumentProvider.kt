@@ -10,8 +10,8 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.Version
-import org.jetbrains.intellij.ideBuildNumber
+import org.jetbrains.intellij.platform.gradleplugin.Version
+import org.jetbrains.intellij.platform.gradleplugin.ideBuildNumber
 import org.jetbrains.intellij.platform.gradleplugin.ideProductInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradleplugin.utils.OpenedPackages
