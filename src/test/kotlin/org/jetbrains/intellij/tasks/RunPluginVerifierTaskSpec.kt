@@ -149,7 +149,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 verificationReportsFormats = [ "markdown", "plain" ]
                 verificationReportsDir = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
-                verifierPath = "/tmp/verifier-cli.jar"
             }
             """.trimIndent()
         )
@@ -180,7 +179,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                 verificationReportsFormats = []
                 verificationReportsDir = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
-                verifierPath = "/tmp/verifier-cli.jar"
             }
             """.trimIndent()
         )
@@ -210,7 +208,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             runPluginVerifier {
                 verificationReportsDir = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
-                verifierPath = "/tmp/verifier-cli.jar"
             }
             """.trimIndent()
         )
