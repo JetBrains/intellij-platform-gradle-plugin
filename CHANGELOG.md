@@ -8,6 +8,9 @@
 - Support for Kotlin Coroutines debugging
 - Detect and warn if project adds an explicit dependency on Kotlin Coroutines library
 
+### Fixed
+- Misleading message about Kotlin API version [#1463](../../issues/1463)
+
 ### Changed
 - Disabled caching for `BuildPluginTask`
 

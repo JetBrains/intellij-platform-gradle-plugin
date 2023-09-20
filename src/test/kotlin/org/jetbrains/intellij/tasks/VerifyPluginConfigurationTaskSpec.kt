@@ -126,6 +126,34 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `do not report too high patch number in Kotlin apiVersion`() {
+        pluginXml.xml(
+            """
+            <idea-plugin>
+                <name>PluginName</name>
+                <description>Lorem ipsum.</description>
+                <vendor>JetBrains</vendor>
+                <idea-version since-build="211" until-build='212.*' />
+            </idea-plugin>
+            """.trimIndent()
+        )
+
+        buildFile.groovy(
+            """
+            compileKotlin {
+                kotlinOptions {
+                    apiVersion = "1.6"
+                }
+            }
+            """.trimIndent()
+        )
+
+        build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
+            assertNotContains(HEADER, it.output)
+        }
+    }
+
+    @Test
     fun `report too high Kotlin apiVersion`() {
         pluginXml.xml(
             """
@@ -150,7 +178,24 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
-            assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='221.6008' property requires apiVersion=1.6.20.", it.output)
+            assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='221.6008' property requires apiVersion=1.6.", it.output)
+        }
+    }
+
+    @Test
+    fun `do not report too low patch number in Kotlin languageVersion`() {
+        buildFile.groovy(
+            """
+            compileKotlin {
+                kotlinOptions {
+                    languageVersion = "1.6"
+                }
+            }
+            """.trimIndent()
+        )
+
+        build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
+            assertNotContains(HEADER, it.output)
         }
     }
 
@@ -169,7 +214,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         build(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME).let {
             assertContains(HEADER, it.output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2022.1.4 requires languageVersion=1.6.0.",
+                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2022.1.4 requires languageVersion=1.6.",
                 it.output
             )
         }

@@ -152,7 +152,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
         val kotlinVersion = kotlinVersion.orNull?.let(Version::parse)
-        val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)?.run { Version(major, minor) }
+        val platformKotlinLanguageVersion = platformBuildVersion.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
         val pluginVerifierDownloadPath = pluginVerifierDownloadDir.get().let(Path::of).toAbsolutePath()
         val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
 
@@ -162,7 +162,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
                 .forEach { plugin ->
                     val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
                     val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
-                    val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)
+                    val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
 
                     if (sinceBuild.major < platformBuildVersion.major) {
                         yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuildVersion.major}.")
