@@ -3,10 +3,12 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.commons.io.FileUtils
+import org.gradle.kotlin.dsl.support.listFilesOrdered
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
+import org.junit.Assert
 import java.net.URL
 import kotlin.test.Test
 
@@ -335,6 +337,56 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    @Test
+    fun `pass on CLI arguments passed as free args`() {
+        writeJavaFileWithDeprecation()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["2022.2.3"]
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"                
+                freeArgs = [ "-verification-reports-formats", "plain" ] 
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles() ?: emptyArray()
+            if (ideDirs.isEmpty()) {
+                Assert.fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            Assert.assertTrue(reportFiles.isEmpty())
+        }
+    }
+
+    @Test
+    fun `pass on CLI arguments the internal API usage mode as a free arg`() {
+        writeJavaFileWithInternalApiUsage()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["2023.1"]
+                freeArgs = [ "-suppress-internal-api-usages", "jetbrains-plugins" ] 
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            assertNotContains("Internal API usages (2):", buildResult.output)
+        }
+    }
+
     private fun warmupGradle() {
         buildFile.groovy(
             """
@@ -359,6 +411,18 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             
                 public static void main(@NotNull String[] strings) {
                     StringUtil.escapeXml("<foo>");
+                }
+            }
+            """.trimIndent()
+        )
+    }
+
+    private fun writeJavaFileWithInternalApiUsage() {
+        file("src/main/java/App.java").java(
+            """  
+            class App {
+                public static void main(String[] args) {
+                    new com.intellij.DynamicBundle.LanguageBundleEP();
                 }
             }
             """.trimIndent()
