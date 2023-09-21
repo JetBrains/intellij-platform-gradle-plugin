@@ -12,6 +12,9 @@
 - `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with list of problems to be ignored in a report
 - `RunPluginVerifierTask`: new `runPluginVerifier.freeArgs` property to let pass to the IntelliJ Plugin Verifier custom arguments
 
+### Fixed
+- Remove redundant `forUseAtConfigurationTime` usages for Gradle 8.4 and 9.x compatibility [#1465](../../pull/1465)
+
 ### Changed
 
 - Disabled caching for `BuildPluginTask`
