@@ -8,6 +8,9 @@
 - Support for Kotlin Coroutines debugging
 - Detect and warn if project adds an explicit dependency on Kotlin Coroutines library
 
+### Fixed
+- Remove redundant `forUseAtConfigurationTime` usages for Gradle 8.4 and 9.x compatibility [#1465](../../pull/1465)
+
 ### Changed
 - Disabled caching for `BuildPluginTask`
 
