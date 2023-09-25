@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
-import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -13,6 +12,7 @@ import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.tasks.base.IdeVersionAwareTask
 import org.jetbrains.intellij.platform.gradleplugin.transformXml
 import org.jetbrains.intellij.platform.gradleplugin.warn
 import java.io.File
@@ -26,7 +26,7 @@ import kotlin.io.path.inputStream
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
  */
 @CacheableTask
-abstract class PatchPluginXmlTask : DefaultTask() {
+abstract class PatchPluginXmlTask : IdeVersionAwareTask() {
 
     @get:SkipWhenEmpty
     @get:InputFile
@@ -143,11 +143,16 @@ abstract class PatchPluginXmlTask : DefaultTask() {
 
     @TaskAction
     fun patchPluginXml() {
+
         val inputPath = inputFile.get().toPath()
         val outputPath = outputFile.get().toPath()
 
-        println("inputPath = ${inputPath}")
-        println("outputPath = ${outputPath}")
+        val sinceBuildValue = sinceBuild.orNull ?: with(ideVersion) {
+            "$baselineVersion.$build"
+        }
+        val untilBuildValue = untilBuild.orNull ?: with(ideVersion) {
+            "$baselineVersion.*"
+        }
 
         inputPath.inputStream().use { inputStream ->
             val document = JDOMUtil.loadDocument(inputStream)
@@ -164,8 +169,8 @@ abstract class PatchPluginXmlTask : DefaultTask() {
                 patch(productDescriptorReleaseVersion, "product-descriptor", "release-version")
                 patch(productDescriptorOptional.map { it.toString() }, "product-descriptor", "optional")
 
-                patch(sinceBuild, "idea-version", "since-build")
-                patch(untilBuild, "idea-version", "until-build")
+                patch(sinceBuildValue, "idea-version", "since-build")
+                patch(untilBuildValue, "idea-version", "until-build")
 
                 patch(vendorName, "vendor")
                 patch(vendorEmail, "vendor", "email")
@@ -180,8 +185,14 @@ abstract class PatchPluginXmlTask : DefaultTask() {
      * Sets the [provider] value for the given [tagName] or [attributeName] of [tagName].
      */
     private fun Document.patch(provider: Provider<String>?, tagName: String, attributeName: String? = null) {
-        provider ?: return
-        val value = provider.orNull ?: return
+        val value = provider?.orNull ?: return
+        patch(value, tagName, attributeName)
+    }
+
+    /**
+     * Sets the [value] for the given [tagName] or [attributeName] of [tagName].
+     */
+    private fun Document.patch(value: String, tagName: String, attributeName: String? = null) {
         val pluginXml = rootElement.takeIf { it.name == "idea-plugin" } ?: return
         val element = pluginXml.getChild(tagName) ?: Element(tagName).apply {
             pluginXml.addContent(0, this)

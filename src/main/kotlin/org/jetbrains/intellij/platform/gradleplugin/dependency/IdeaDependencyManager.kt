@@ -68,14 +68,14 @@ abstract class IdeaDependencyManager @Inject constructor(
         project: Project,
         extraDependencies: Collection<IdeaExtraDependency>,
     ) = when (type) {
-        JPS -> JpsIdeaDependency(
-            version,
-            buildNumber,
-            classesDirectory,
-            sourcesDirectory,
-            !hasKotlinDependency(project),
-            context,
-        )
+//        JPS -> JpsIdeaDependency(
+//            version,
+//            buildNumber,
+//            classesDirectory,
+//            sourcesDirectory,
+//            !hasKotlinDependency(project),
+//            context,
+//        )
 
         else -> {
             val pluginsRegistry = BuiltinPluginsRegistry.fromDirectory(classesDirectory.resolve("plugins").toPath(), context)
@@ -97,9 +97,9 @@ abstract class IdeaDependencyManager @Inject constructor(
                     buildNumber,
                     classesDirectory,
                     sourcesDirectory,
-                    !hasKotlinDependency(project),
-                    pluginsRegistry,
-                    extraDependencies,
+                    withKotlin = !hasKotlinDependency(project),
+                    pluginsRegistry = pluginsRegistry,
+                    extraDependencies = extraDependencies,
                 )
             }
         }
@@ -324,7 +324,10 @@ abstract class IdeaDependencyManager @Inject constructor(
                 name = Fleet.artifactId,
             )
 
-            else -> throw BuildException("Specified type '$type' is unknown. Supported values: ${IntelliJPlatformType.values().joinToString(", ") { it.code }}", null)
+            else -> throw BuildException(
+                "Specified type '$type' is unknown. Supported values: ${IntelliJPlatformType.values().joinToString(", ") { it.code }}",
+                null
+            )
         }
 
         val classesDirectory = dependenciesDownloader.downloadFromRepository(context, {

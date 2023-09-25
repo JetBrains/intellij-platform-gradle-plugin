@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
-import org.gradle.api.attributes.Attribute
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.FileSystemOperations
@@ -20,6 +19,7 @@ import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import java.io.File.separator
 import javax.inject.Inject
@@ -38,20 +38,27 @@ abstract class IntelliJPlatformExtractTransformer @Inject constructor(
     @get:InputArtifact
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    private val IntelliJPlatformType.artifactPathPart
-        get() = "$separator$groupId$separator$artifactId$separator"
-
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.get().asPath
-
-        val type = IntelliJPlatformType.values().find {
-            input.pathString.contains(it.artifactPathPart) // com.jetbrains.intellij.idea/ideaIU
-        } ?: return
-        val version = input.getName(input.nameCount - 3)
         val extension = input.name.removePrefix(input.nameWithoutExtension.removeSuffix(".tar"))
-        val targetDirectory = outputs.dir("$type-$version")
+        val (groupId, artifactId, version) = input.pathString.split(separator).dropLast(2).takeLast(3)
 
-//        val cacheDirectory = getZipCacheDirectory(input)
+        val targetDirectory = listOf(
+            { // check if input is an IntelliJ Platform SDK artifact
+                IntelliJPlatformType.values()
+                    .find { groupId == it.groupId && artifactId == it.artifactId }
+                    ?.let { "$it-$version" }
+            },
+            { // check if input is an IntelliJ Platform Plugin fetched from JetBrains Marketplace
+                val marketplaceGroup = "com.jetbrains.plugins"
+                val channel = when {
+                    groupId == marketplaceGroup -> ""
+                    groupId.endsWith(".$marketplaceGroup") -> groupId.dropLast(marketplaceGroup.length + 1)
+                    else -> return@listOf null
+                }
+                "$artifactId-$version" + "@$channel".takeIf { channel.isNotEmpty() }.orEmpty()
+            },
+        ).firstNotNullOfOrNull { it() }?.let { outputs.dir(it) } ?: return
 
         when (extension) {
             ".zip", ".sit" -> {
@@ -71,43 +78,32 @@ abstract class IntelliJPlatformExtractTransformer @Inject constructor(
             else -> throw IllegalArgumentException("Unknown type archive type: $extension")
         }
     }
-
-//    private fun getZipCacheDirectory(zipFile: Path, project: Project, type: IntelliJPlatformType): Path {
-//        if (ideaDependencyCachePath.isNotEmpty()) {
-//            return File(ideaDependencyCachePath).apply {
-//                mkdirs()
-//            }
-//        } else if (type == IntelliJPlatformType.Rider && OperatingSystem.current().isWindows) {
-//            return project.buildDir.toPath()
-//        }
-//        return zipFile.parent
-//    }
 }
 
 internal fun Project.applyIntellijPlatformExtractTransformer() {
-    val extractedAttribute = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
-
     project.dependencies {
         attributesSchema {
-            attribute(extractedAttribute)
+            attribute(Configurations.Attributes.extracted)
         }
 
         artifactTypes.maybeCreate(ZIP_TYPE)
             .attributes
-            .attribute(extractedAttribute, false)
+            .attribute(Configurations.Attributes.extracted, false)
 
         listOf(
             configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
             configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
         ).forEach {
             it.attributes {
-                attributes.attribute(extractedAttribute, true)
+                attributes.attribute(Configurations.Attributes.extracted, true)
             }
         }
 
         registerTransform(IntelliJPlatformExtractTransformer::class) {
-            from.attribute(extractedAttribute, false)
-            to.attribute(extractedAttribute, true)
+            from
+                .attribute(Configurations.Attributes.extracted, false)
+            to
+                .attribute(Configurations.Attributes.extracted, true)
         }
     }
 }

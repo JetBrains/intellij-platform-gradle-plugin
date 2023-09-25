@@ -49,6 +49,7 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
 import java.util.jar.Manifest
+import kotlin.io.path.name
 
 internal fun sourcePluginXmlFiles(project: Project) = project
     .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
@@ -176,6 +177,14 @@ private fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
     .orEmpty()
     .filter { filter.test(it) }
 
+internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
+    val lib = parent.resolve("lib").takeIf { it.exists() && it.isDirectory } ?: return emptyList()
+    val baseFiles = collectJars(lib) { it.name !in listOf("junit.jar", "annotations.jar") }.sorted()
+    val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
+
+    return (baseFiles + antFiles)
+}
+
 fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
 fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, logCategory, message, e)
 fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
@@ -235,12 +244,9 @@ fun <T> T?.or(other: T): T = this ?: other
 
 fun <T> T?.or(block: () -> T): T = this ?: block()
 
-fun <T> T?.ifNull(block: () -> Unit): T? {
-    if (this == null) {
-        block()
-    }
-    return this
-}
+fun <T> T?.ifNull(block: () -> Unit): T? = this ?: block().let { null }
+
+fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
 
 fun Boolean.ifFalse(block: () -> Unit): Boolean {
     if (!this) {
@@ -289,8 +295,8 @@ internal fun getCurrentPluginVersion() = IntelliJPlatformPlugin::class.java
         }
     }.getOrNull()
 
-internal val <T> Property<T>.isSpecified: Boolean
-    get() = isPresent && when(val value = orNull) {
+internal val <T> Property<T>.isSpecified
+    get() = isPresent && when (val value = orNull) {
         null -> false
         is String -> value.isNotEmpty()
         is RegularFile -> value.asFile.exists()

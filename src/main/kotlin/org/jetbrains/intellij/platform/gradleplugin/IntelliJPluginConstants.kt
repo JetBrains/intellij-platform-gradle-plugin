@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradleplugin
 
+import org.gradle.api.attributes.Attribute
+
 object IntelliJPluginConstants {
     const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij.platform"
@@ -16,6 +18,21 @@ object IntelliJPluginConstants {
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
         const val PRODUCT_DESCRIPTOR = "productDescriptor"
         const val VENDOR = "vendor"
+    }
+
+    object Configurations {
+        const val INTELLIJ_PLATFORM = "intellijPlatform"
+        const val INTELLIJ_PLATFORM_BUILD_NUMBER = "intellijPlatformBuildNumber"
+        const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
+        const val INTELLIJ_PLATFORM_SOURCES = "intellijPlatformSources"
+        const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
+
+        object Attributes {
+            val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
+            val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
+            val buildNumber = Attribute.of("intellijPlatformBuildNumber", Boolean::class.javaObjectType)
+        }
+
     }
 
     object Tasks {
@@ -111,11 +128,6 @@ object IntelliJPluginConstants {
 
     @Deprecated("Deprecated in 2.0")
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"
-
-    const val INTELLIJ_PLATFORM_CONFIGURATION_NAME = "intellijPlatform"
-    const val INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME = "intellijPlatformDependencies"
-    const val INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME = "intellijPlatformSources"
-    const val TEST_FIXTURES_COMPILE_ONLY_CONFIGURATION_NAME = "testFixturesCompileOnly"
 
     const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
     const val INSTRUMENTED_JAR_PREFIX = "instrumented"

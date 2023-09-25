@@ -10,6 +10,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradleplugin.warn
 
 /**

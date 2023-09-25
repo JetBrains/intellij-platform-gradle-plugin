@@ -1,6 +1,6 @@
 // Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradleplugin.tasks
+package org.jetbrains.intellij.platform.gradleplugin.tasks.base
 
 import com.dd.plist.NSDictionary
 import com.dd.plist.PropertyListParser
@@ -224,12 +224,12 @@ abstract class RunIdeBase : JavaExec() {
 
         jvmArgumentProviders.add(
             LaunchSystemArgumentProvider(
-            ideDirPath,
-            configDir.get(),
-            systemDir.get(),
-            pluginsDir.get().asFile,
-            requiredPluginIds.get(),
-        )
+                ideDirPath,
+                configDir.get(),
+                systemDir.get(),
+                pluginsDir.get().asFile,
+                requiredPluginIds.get(),
+            )
         )
 
         val operatingSystem = OperatingSystem.current()

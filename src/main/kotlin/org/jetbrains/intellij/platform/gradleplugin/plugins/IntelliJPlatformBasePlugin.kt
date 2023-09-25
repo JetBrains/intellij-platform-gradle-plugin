@@ -2,19 +2,19 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.plugins
 
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME
 import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME
 import org.gradle.kotlin.dsl.apply
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_BASE_ID
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TEST_FIXTURES_COMPILE_ONLY_CONFIGURATION_NAME
+import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformBuildNumberTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformCollectorTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformExtractTransformer
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
@@ -33,7 +33,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         }
 
         with(configurations) {
-            val intellijPlatformConfiguration = maybeCreate(INTELLIJ_PLATFORM_CONFIGURATION_NAME)
+            val intellijPlatformConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM)
                 .apply {
                     isVisible = false
                     isCanBeConsumed = false
@@ -41,7 +41,23 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform dependency"
                 }
 
-            val intellijPlatformDependenciesConfiguration = maybeCreate(INTELLIJ_PLATFORM_DEPENDENCIES_CONFIGURATION_NAME)
+            val intellijPlatformBuildNumberConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_BUILD_NUMBER)
+                .apply {
+                    isVisible = false
+                    isCanBeConsumed = false
+                    isCanBeResolved = true
+                    description = "IntelliJ Platform dependency build number"
+
+                    attributes {
+                        attribute(Configurations.Attributes.extracted, true)
+//                        attribute(Configurations.Attributes.collected, true)
+                        attribute(Configurations.Attributes.buildNumber, true)
+                    }
+
+                    extendsFrom(intellijPlatformConfiguration)
+                }
+
+            val intellijPlatformDependenciesConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_DEPENDENCIES)
                 .apply {
                     isVisible = false
                     isCanBeConsumed = false
@@ -49,7 +65,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform Dependencies dependency"
                 }
 
-            maybeCreate(INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME)
+            maybeCreate(Configurations.INTELLIJ_PLATFORM_SOURCES)
                 .apply {
                     isVisible = false
                     isCanBeConsumed = false
@@ -65,7 +81,17 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             getByName(COMPILE_ONLY_CONFIGURATION_NAME).extend()
             getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extend()
             pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
-                getByName(TEST_FIXTURES_COMPILE_ONLY_CONFIGURATION_NAME).extend()
+                getByName(Configurations.TEST_FIXTURES_COMPILE_ONLY).extend()
+            }
+
+            val identifiers = IntelliJPlatformType.values().map { "${it.groupId}:${it.artifactId}" }
+            all {
+                incoming.beforeResolve {
+                    val matched = dependencies.filter { identifiers.contains("${it.group}:${it.name}") }
+                    if (matched.size > 1) {
+                        throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
+                    }
+                }
             }
         }
 
@@ -73,14 +99,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             this@configure.configureExtension<IntelliJPlatformExtension>(INTELLIJ_PLATFORM) {
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration>(PLUGIN_CONFIGURATION) {
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(PRODUCT_DESCRIPTOR)
-                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(IDEA_VERSION) {
-                        sinceBuild.convention(ideVersionProvider.map {
-                            "${it.baselineVersion}.${it.build}"
-                        })
-                        untilBuild.convention(ideVersionProvider.map {
-                            "${it.baselineVersion}.*"
-                        })
-                    }
+                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(IDEA_VERSION)
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(VENDOR)
                 }
             }
@@ -88,5 +107,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
         applyIntellijPlatformExtractTransformer()
         applyIntellijPlatformCollectorTransformer()
+        applyIntellijPlatformBuildNumberTransformer()
     }
 }

@@ -1,6 +1,6 @@
 // Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradleplugin.tasks
+package org.jetbrains.intellij.platform.gradleplugin.tasks.base
 
 import com.jetbrains.plugin.structure.base.utils.exists
 import org.apache.tools.ant.util.TeeOutputStream

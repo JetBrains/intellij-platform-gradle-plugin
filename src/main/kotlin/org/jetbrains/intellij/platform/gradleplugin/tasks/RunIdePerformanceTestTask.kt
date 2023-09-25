@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradleplugin.performanceTest.TestExecutio
 import org.jetbrains.intellij.platform.gradleplugin.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.platform.gradleplugin.performanceTest.parsers.SimpleIJPerformanceParser
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.PerformanceTestArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.tasks.base.RunIdeBase
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -81,7 +82,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
 
         Files.walk(testData, 1)
             .filter { it.extension == "ijperf" }
-            .forEach {scriptPath ->
+            .forEach { scriptPath ->
                 val testName = scriptPath.nameWithoutExtension
                 val testScript = SimpleIJPerformanceParser(scriptPath).parse()
                 val testArtifactsDirPath = dir.resolve(testName).createDir()
@@ -91,10 +92,10 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
 
                 jvmArgumentProviders.add(
                     PerformanceTestArgumentProvider(
-                    scriptPath,
-                    testArtifactsDirPath,
-                    profilerName.get().name.lowercase(),
-                )
+                        scriptPath,
+                        testArtifactsDirPath,
+                        profilerName.get().name.lowercase(),
+                    )
                 )
                 super.exec()
 

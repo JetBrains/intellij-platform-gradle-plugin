@@ -98,6 +98,7 @@ import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPl
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.platform.gradleplugin.tasks.*
+import org.jetbrains.intellij.platform.gradleplugin.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradleplugin.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradleplugin.utils.DependenciesDownloader
 import org.jetbrains.intellij.platform.gradleplugin.utils.ivyRepository

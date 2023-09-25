@@ -122,4 +122,3 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         }
     }
 }
-

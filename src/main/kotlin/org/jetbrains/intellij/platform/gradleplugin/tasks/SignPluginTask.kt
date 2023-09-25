@@ -13,6 +13,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUG
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.debug
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.tasks.base.ZipSigningToolBase
 import java.util.*
 import javax.inject.Inject
 

@@ -2,14 +2,12 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.artifacts.transform
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.Project
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
-import org.gradle.api.attributes.Attribute
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.plugins.JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME
@@ -17,16 +15,14 @@ import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NA
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.asPath
-import org.jetbrains.intellij.platform.gradleplugin.collectJars
-import org.jetbrains.intellij.platform.gradleplugin.isKotlinRuntime
-import org.jetbrains.intellij.platform.gradleplugin.or
-import kotlin.io.path.isDirectory
+import org.jetbrains.intellij.platform.gradleplugin.collectIntelliJPlatformDependencyJars
+import kotlin.io.path.forEachDirectoryEntry
+import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
 @DisableCachingByDefault(because = "Not worth caching")
@@ -38,30 +34,21 @@ abstract class IntelliJPlatformCollectorTransformer : TransformAction<IntelliJPl
         val sourcesClasspath: ConfigurableFileCollection
     }
 
-    @get:InputArtifact
     @get:Classpath
+    @get:InputArtifact
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.get().asPath
-        val withKotlin = true // TODO: detect if project uses Kotlin
-        val lib = input.resolve("lib")
 
-        // TODO: cleanup
-        if (lib.isDirectory()) {
-            val baseFiles = (collectJars(lib) { file ->
-                (withKotlin || !isKotlinRuntime(file.name.removeSuffix(".jar"))) && file.name != "junit.jar" && file.name != "annotations.jar"
-            }).sorted()
-
-            val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
-
-            val buildFile = input
-                .resolve("Resources/build.txt")
-                .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-                .or { input.resolve("build.txt") }
-                .let { listOf(it) }
-
-            (baseFiles + antFiles + buildFile).forEach {
+        if (input.name.startsWith("org")) { // FIXME
+            // Plugin dependency
+            input.forEachDirectoryEntry {
+                it.resolve("lib").listDirectoryEntries("*.jar").forEach(outputs::file)
+            }
+        } else {
+            // IntelliJ Platform SDK dependency
+            collectIntelliJPlatformDependencyJars(input).forEach {
                 outputs.file(it)
             }
         }
@@ -73,36 +60,34 @@ abstract class IntelliJPlatformCollectorTransformer : TransformAction<IntelliJPl
 }
 
 internal fun Project.applyIntellijPlatformCollectorTransformer() {
-    val extractedAttribute = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
-    val collectedAttribute = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
-
     project.dependencies {
         attributesSchema {
-            attribute(collectedAttribute)
+            attribute(Configurations.Attributes.collected)
         }
 
         artifactTypes.maybeCreate(ZIP_TYPE)
             .attributes
-            .attribute(collectedAttribute, false)
+            .attribute(Configurations.Attributes.collected, false)
 
         listOf(
             configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
             configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
         ).forEach {
             it.attributes {
-                attributes.attribute(collectedAttribute, true)
+                attributes.attribute(Configurations.Attributes.collected, true)
             }
         }
 
         registerTransform(IntelliJPlatformCollectorTransformer::class) {
             from
-                .attribute(extractedAttribute, true)
-                .attribute(collectedAttribute, false)
+                .attribute(Configurations.Attributes.extracted, true)
+                .attribute(Configurations.Attributes.collected, false)
             to
-                .attribute(extractedAttribute, true)
-                .attribute(collectedAttribute, true)
+                .attribute(Configurations.Attributes.extracted, true)
+                .attribute(Configurations.Attributes.collected, true)
+
             parameters {
-                sourcesClasspath.from(configurations.getByName(INTELLIJ_PLATFORM_SOURCES_CONFIGURATION_NAME))
+                sourcesClasspath.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM_SOURCES))
             }
         }
     }
