@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.artifacts.transform
 
-import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
@@ -12,7 +12,6 @@ import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
@@ -39,26 +38,19 @@ abstract class IntelliJPlatformBuildNumberTransformer : TransformAction<Transfor
     }
 }
 
+internal fun DependencyHandler.applyIntellijPlatformBuildNumberTransformer() {
+    artifactTypes.maybeCreate(ZIP_TYPE)
+        .attributes
+        .attribute(Attributes.buildNumber, false)
 
-internal fun Project.applyIntellijPlatformBuildNumberTransformer() {
-    project.dependencies {
-        attributesSchema {
-            attribute(Attributes.buildNumber)
-        }
-
-        artifactTypes.maybeCreate(ZIP_TYPE)
-            .attributes
+    registerTransform(IntelliJPlatformBuildNumberTransformer::class) {
+        from
+            .attribute(Attributes.extracted, true)
+            .attribute(Attributes.collected, false)
             .attribute(Attributes.buildNumber, false)
-
-        registerTransform(IntelliJPlatformBuildNumberTransformer::class) {
-            from
-                .attribute(Attributes.extracted, true)
-                .attribute(Attributes.collected, false)
-                .attribute(Attributes.buildNumber, false)
-            to
-                .attribute(Attributes.extracted, true)
-                .attribute(Attributes.collected, false)
-                .attribute(Attributes.buildNumber, true)
-        }
+        to
+            .attribute(Attributes.extracted, true)
+            .attribute(Attributes.collected, false)
+            .attribute(Attributes.buildNumber, true)
     }
 }

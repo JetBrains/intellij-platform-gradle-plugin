@@ -2,7 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.artifacts.transform
 
-import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
@@ -10,15 +11,12 @@ import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileSystemLocation
-import org.gradle.api.plugins.JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME
-import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.CompileClasspath
-import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.collectIntelliJPlatformDependencyJars
 import kotlin.io.path.forEachDirectoryEntry
@@ -59,36 +57,30 @@ abstract class IntelliJPlatformCollectorTransformer : TransformAction<IntelliJPl
     }
 }
 
-internal fun Project.applyIntellijPlatformCollectorTransformer() {
-    project.dependencies {
-        attributesSchema {
-            attribute(Configurations.Attributes.collected)
-        }
+internal fun DependencyHandler.applyIntellijPlatformCollectorTransformer(
+    compileClasspathConfiguration: Configuration,
+    testCompileClasspathConfiguration: Configuration,
+    intellijPlatformSources: Configuration,
+) {
+    artifactTypes.maybeCreate(ZIP_TYPE)
+        .attributes.attribute(Attributes.collected, false)
 
-        artifactTypes.maybeCreate(ZIP_TYPE)
-            .attributes
-            .attribute(Configurations.Attributes.collected, false)
+    compileClasspathConfiguration
+        .attributes.attribute(Attributes.collected, true)
 
-        listOf(
-            configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
-            configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
-        ).forEach {
-            it.attributes {
-                attributes.attribute(Configurations.Attributes.collected, true)
-            }
-        }
+    testCompileClasspathConfiguration
+        .attributes.attribute(Attributes.collected, true)
 
-        registerTransform(IntelliJPlatformCollectorTransformer::class) {
-            from
-                .attribute(Configurations.Attributes.extracted, true)
-                .attribute(Configurations.Attributes.collected, false)
-            to
-                .attribute(Configurations.Attributes.extracted, true)
-                .attribute(Configurations.Attributes.collected, true)
+    registerTransform(IntelliJPlatformCollectorTransformer::class) {
+        from
+            .attribute(Attributes.extracted, true)
+            .attribute(Attributes.collected, false)
+        to
+            .attribute(Attributes.extracted, true)
+            .attribute(Attributes.collected, true)
 
-            parameters {
-                sourcesClasspath.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM_SOURCES))
-            }
+        parameters {
+            sourcesClasspath.from(intellijPlatformSources)
         }
     }
 }

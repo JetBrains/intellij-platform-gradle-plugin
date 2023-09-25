@@ -6,12 +6,12 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME
-import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME
+import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformBuildNumberTransformer
@@ -49,9 +49,9 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform dependency build number"
 
                     attributes {
-                        attribute(Configurations.Attributes.extracted, true)
+                        attribute(Attributes.extracted, true)
 //                        attribute(Configurations.Attributes.collected, true)
-                        attribute(Configurations.Attributes.buildNumber, true)
+                        attribute(Attributes.buildNumber, true)
                     }
 
                     extendsFrom(intellijPlatformConfiguration)
@@ -95,6 +95,25 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             }
         }
 
+        with(dependencies) {
+            attributesSchema {
+                attribute(Attributes.buildNumber)
+                attribute(Attributes.collected)
+                attribute(Attributes.extracted)
+            }
+
+            applyIntellijPlatformExtractTransformer(
+                configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
+                configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
+            )
+            applyIntellijPlatformCollectorTransformer(
+                configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
+                configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
+                configurations.getByName(Configurations.INTELLIJ_PLATFORM_SOURCES),
+            )
+            applyIntellijPlatformBuildNumberTransformer()
+        }
+
         with(IntelliJPluginConstants.Extensions) {
             this@configure.configureExtension<IntelliJPlatformExtension>(INTELLIJ_PLATFORM) {
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration>(PLUGIN_CONFIGURATION) {
@@ -104,9 +123,5 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 }
             }
         }
-
-        applyIntellijPlatformExtractTransformer()
-        applyIntellijPlatformCollectorTransformer()
-        applyIntellijPlatformBuildNumberTransformer()
     }
 }
