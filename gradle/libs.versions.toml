@@ -1,7 +1,6 @@
 [versions]
 # libraries
 annotations = "24.0.1"
-ddPlist = "1.27"
 gradleIdeaExt = "1.1.7"
 intellijStructure = "3.260"
 intellijPluginRepositoryRestClient = "2.0.36"
@@ -17,7 +16,6 @@ gradleChangelogPlugin = "2.2.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
-ddPlist = { group = "com.googlecode.plist", name = "dd-plist", version.ref = "ddPlist" }
 gradleIdeaExt = { group = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext", name = "gradle-idea-ext", version.ref = "gradleIdeaExt" }
 intellijPluginRepositoryRestClient = { group = "org.jetbrains.intellij", name = "plugin-repository-rest-client", version.ref = "intellijPluginRepositoryRestClient" }
 intellijStructureBase = { group = "org.jetbrains.intellij.plugins", name = "structure-base", version.ref = "intellijStructure" }

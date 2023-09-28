@@ -37,7 +37,6 @@ import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.NO_SEARCHABLE_O
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
@@ -58,7 +57,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENTED_JAR_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
@@ -292,22 +290,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 isCanBeResolved = true
             }
 
-        val defaultDependencies = project.configurations.create(INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME)
-            .setVisible(false)
-            .withDependencies {
-                add(
-                    project.dependencies.create(
-                        group = "org.jetbrains",
-                        name = "annotations",
-                        version = ANNOTATIONS_DEPENDENCY_VERSION,
-                    )
-                )
-            }
-            .apply {
-                isCanBeConsumed = false
-                isCanBeResolved = true
-            }
-
         val performanceTest = project.configurations.create(PERFORMANCE_TEST_CONFIGURATION_NAME)
             .setVisible(false)
             .withDependencies {
@@ -462,9 +444,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 ideaDependencyProvider.map { ideaDependency ->
                     ideaDependency.classes.toPath().let {
                         // Fall back on build number if product-info.json is not present, this is the case for recent versions of Android Studio.
-                        ideProductInfo(it)
-                            ?.run { "$productCode-$projectVersion" }
-                            ?: ideBuildNumber(it)
+                        it.productInfo().run { "$productCode-$projectVersion" }
                     }
                 }
             }.orElse(extension.getVersionType().zip(extension.getVersionNumber()) { type, version ->
@@ -810,11 +790,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             })
 
             dependsOn(PREPARE_SANDBOX_TASK_NAME)
-
-            onlyIf {
-                val number = ideBuildNumber(ideDir.get().toPath())
-                Version.parse(number.split('-').last()) >= Version.parse("191.2752")
-            }
         }
     }
 
@@ -844,10 +819,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         systemDir.convention(extension.sandboxDir.map {
             project.file("$it/system")
         })
-        autoReloadPlugins.convention(ideDir.map {
-            val number = ideBuildNumber(it.toPath())
-            Version.parse(number.split('-').last()) >= Version.parse("202.0")
-        })
+        autoReloadPlugins.convention(true)
         projectWorkingDir.convention(ideDir.map {
             it.resolve("bin")
         })
@@ -925,7 +897,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     sourceSet.compileClasspath
                 })
                 compilerVersion.convention(ideaDependencyProvider.map {
-                    val productInfo = ideProductInfo(it.classes.toPath())
+                    val productInfo = it.classes.toPath().productInfo()
 
                     val version = extension.getVersionNumber().orNull.orEmpty()
                     val type = extension.getVersionType().orNull.orEmpty().let {
@@ -936,12 +908,12 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
                     when {
                         localPath.isNotBlank() || !version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> {
-                            val eapSuffix = RELEASE_SUFFIX_EAP.takeIf { productInfo?.versionSuffix == "EAP" }.orEmpty()
+                            val eapSuffix = RELEASE_SUFFIX_EAP.takeIf { productInfo.versionSuffix == "EAP" }.orEmpty()
                             IdeVersion.createIdeVersion(it.buildNumber).stripExcessComponents().asStringWithoutProductCode() + eapSuffix
                         }
 
                         version == DEFAULT_IDEA_VERSION && types.contains(type) -> {
-                            productInfo?.buildNumber?.let { buildNumber ->
+                            productInfo.buildNumber?.let { buildNumber ->
                                 Version.parse(buildNumber).let { v -> "${v.major}.${v.minor}$RELEASE_SUFFIX_EAP_CANDIDATE" }
                             } ?: version
                         }
@@ -1200,17 +1172,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     )
                 )
 
-                // since 193 plugins from classpath are loaded before plugins from plugins directory
-                // to handle this, use plugin.path property as the task's the very first source of plugins
-                // we cannot do this for IDEA < 193, as plugins from plugin.path can be loaded twice
-                val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
-                if (ideVersion.baselineVersion >= 193) {
-                    jvmArgumentProviders.add(PluginPathArgumentProvider(pluginsDirectoryProvider.get()))
-                }
-
-                if (ideVersion.baselineVersion >= 221) {
-                    systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
-                }
+                jvmArgumentProviders.add(PluginPathArgumentProvider(pluginsDirectoryProvider.get()))
+                systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
             }
         }
     }
@@ -1531,15 +1494,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                             .takeIf { it.exists() }
                     }
             })
-
-            val buildNumberProvider = ideaDependencyProvider.map {
-                it.buildNumber
-            }
-
-            onlyIf {
-                val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
-                ideVersion.baselineVersion >= 221
-            }
         }
     }
 

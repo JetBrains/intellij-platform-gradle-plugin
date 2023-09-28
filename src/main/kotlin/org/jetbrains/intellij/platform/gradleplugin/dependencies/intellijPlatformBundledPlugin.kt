@@ -6,16 +6,15 @@ package org.jetbrains.intellij.platform.gradleplugin.dependencies
 
 import org.gradle.kotlin.dsl.DependencyHandlerScope
 import org.gradle.kotlin.dsl.create
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANNOTATIONS_DEPENDENCY_VERSION
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 
-fun DependencyHandlerScope.jetbrainsAnnotations(
-    version: String = ANNOTATIONS_DEPENDENCY_VERSION,
+fun DependencyHandlerScope.intellijPlatformBundledPlugin(
+    id: String,
     configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
 ) = create(
-    group = "org.jetbrains",
-    name = "annotations",
-    version = version,
+    group = "",
+    name = id,
+    version = "version",
 ).let { dependency ->
     add(configurationName, dependency)
 }

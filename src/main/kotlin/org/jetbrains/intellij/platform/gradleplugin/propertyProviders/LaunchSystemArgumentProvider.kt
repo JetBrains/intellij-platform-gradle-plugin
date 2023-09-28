@@ -6,7 +6,7 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
-import org.jetbrains.intellij.platform.gradleplugin.ideProductInfo
+import org.jetbrains.intellij.platform.gradleplugin.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import java.io.File
 import java.nio.file.Path
@@ -20,12 +20,12 @@ class LaunchSystemArgumentProvider(
 ) : CommandLineArgumentProvider {
 
     private val currentLaunchProperties
-        get() = ideProductInfo(ideDirectory)
-            ?.currentLaunch
-            ?.additionalJvmArguments
-            ?.filter { it.startsWith("-D") }
-            ?.map { it.resolveIdeHomeVariable(ideDirectory) }
-            .orEmpty()
+        get() = ideDirectory
+            .productInfo()
+            .currentLaunch
+            .additionalJvmArguments
+            .filter { it.startsWith("-D") }
+            .map { it.resolveIdeHomeVariable(ideDirectory) }
 
     override fun asArguments() = currentLaunchProperties + listOf(
         "-Didea.config.path=${configDirectory.absolutePath}",

@@ -15,4 +15,6 @@ class ObjectFactory {
     fun createProductsReleases() = ProductsReleases()
 
     fun createAndroidStudioReleases() = AndroidStudioReleases()
+
+    fun createIvyModule() = IvyModule()
 }

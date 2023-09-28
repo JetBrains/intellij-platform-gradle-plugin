@@ -11,16 +11,14 @@ import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.asPath
-import org.jetbrains.intellij.platform.gradleplugin.or
-import kotlin.io.path.exists
+import org.jetbrains.intellij.platform.gradleplugin.resolveProductInfoPath
 
 @DisableCachingByDefault(because = "Not worth caching")
-abstract class IntelliJPlatformBuildNumberTransformer : TransformAction<TransformParameters.None> {
+abstract class ProductInfoTransformer : TransformAction<TransformParameters.None> {
 
     @get:Classpath
     @get:InputArtifact
@@ -29,28 +27,27 @@ abstract class IntelliJPlatformBuildNumberTransformer : TransformAction<Transfor
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.get().asPath
 
-        val buildFile = input
-            .resolve("Resources/build.txt")
-            .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-            .or { input.resolve("build.txt") }
+        println("ProductInfoTransformer input = ${input}")
+        val productInfo = input.resolveProductInfoPath()
+        println("productInfo = ${productInfo}")
 
-        outputs.file(buildFile)
+        outputs.file(productInfo)
     }
 }
 
-internal fun DependencyHandler.applyIntellijPlatformBuildNumberTransformer() {
+internal fun DependencyHandler.applyProductInfoTransformer() {
     artifactTypes.maybeCreate(ZIP_TYPE)
         .attributes
-        .attribute(Attributes.buildNumber, false)
+        .attribute(Attributes.productInfo, false)
 
-    registerTransform(IntelliJPlatformBuildNumberTransformer::class) {
+    registerTransform(ProductInfoTransformer::class) {
         from
             .attribute(Attributes.extracted, true)
             .attribute(Attributes.collected, false)
-            .attribute(Attributes.buildNumber, false)
+            .attribute(Attributes.productInfo, false)
         to
             .attribute(Attributes.extracted, true)
             .attribute(Attributes.collected, false)
-            .attribute(Attributes.buildNumber, true)
+            .attribute(Attributes.productInfo, true)
     }
 }

@@ -40,7 +40,7 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
 
         with(task) {
             if (this is IdeVersionAwareTask) {
-                intelliJPlatformArtifacts = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUILD_NUMBER)
+                intelliJPlatformProductInfo = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
             }
             configuration()
         }

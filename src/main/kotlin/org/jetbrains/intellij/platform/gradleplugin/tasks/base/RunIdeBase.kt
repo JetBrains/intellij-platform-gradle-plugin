@@ -2,10 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.tasks.base
 
-import com.dd.plist.NSDictionary
-import com.dd.plist.PropertyListParser
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.hasExtension
 import org.gradle.api.GradleException
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
@@ -14,15 +10,12 @@ import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradleplugin.*
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.IntellijIdeaUltimate
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.jbr.JbrResolver
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.LaunchSystemArgumentProvider
 import java.io.File
-import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.streams.asSequence
 
 /**
  * Base task for running an IDE with the current plugin in various modes.
@@ -158,25 +151,6 @@ abstract class RunIdeBase : JavaExec() {
         ideDir.get().toPath()
     }
 
-    private val infoPlist by lazy {
-        ideDirPath
-            .resolve("Info.plist")
-            .takeIf(Path::exists)
-            ?.let { PropertyListParser.parse(it) as NSDictionary }
-    }
-
-    private val buildNumber by lazy {
-        ideDirPath
-            .let(::ideBuildNumber)
-            .split('-')
-            .last()
-            .let(Version::parse)
-    }
-
-    private val build221 by lazy {
-        Version.parse("221.0")
-    }
-
     init {
         mainClass.set("com.intellij.idea.Main")
         enableAssertions = true
@@ -252,54 +226,22 @@ abstract class RunIdeBase : JavaExec() {
         }
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
-            val prefix = findIdePrefix()
-            if (prefix == null && !ideBuildNumber(ideDir.get().toPath()).startsWith("$IntellijIdeaUltimate-")) {
-                throw TaskExecutionException(
+            val prefix = ideDir.get().toPath().productInfo().productCode
+                ?: throw TaskExecutionException(
                     this,
                     GradleException(
                         "Cannot find IDE platform prefix. Please create a bug report at $GITHUB_REPOSITORY. " +
                                 "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."
                     )
                 )
-            }
 
-            if (prefix != null) {
-                systemProperty("idea.platform.prefix", prefix)
-            }
+            systemProperty("idea.platform.prefix", prefix)
             info(context, "Using idea.platform.prefix=$prefix")
         }
 
-        if (buildNumber >= build221) {
-            systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
-        }
+        systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
         systemPropertyIfNotDefined("idea.vendor.name", "JetBrains", userDefinedSystemProperties)
         systemPropertyIfNotDefined("idea.plugin.in.sandbox.mode", true, userDefinedSystemProperties)
-    }
-
-    /**
-     * Resolves the IDE prefix.
-     */
-    private fun findIdePrefix(): String? {
-        info(context, "Looking for platform prefix")
-
-        val prefix = Files.list(ideDirPath.resolve("bin"))
-            .asSequence()
-            .filter { it.hasExtension("sh") || it.hasExtension("bat") }
-            .flatMap { Files.lines(it).asSequence() }
-            .mapNotNull { platformPrefixSystemPropertyRegex.find(it)?.groupValues?.getOrNull(1) }
-            .firstOrNull()
-
-        return when {
-            prefix != null -> prefix
-
-            OperatingSystem.current().isMacOsX && infoPlist != null -> infoPlist
-                ?.getDictionary("JVMOptions")
-                ?.getDictionary("Properties")
-                ?.getValue("idea.platform.prefix")
-                .ifNull { error(context, "Cannot find prefix in $infoPlist") }
-
-            else -> null
-        }
     }
 
     /**
@@ -321,9 +263,5 @@ abstract class RunIdeBase : JavaExec() {
             else -> "../lib/tools.jar"
         }
         return File(binDir, path)
-    }
-
-    companion object {
-        private val platformPrefixSystemPropertyRegex = Regex("-Didea.platform.prefix=([A-z]+)")
     }
 }

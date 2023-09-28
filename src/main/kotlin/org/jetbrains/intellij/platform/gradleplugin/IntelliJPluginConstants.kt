@@ -22,7 +22,8 @@ object IntelliJPluginConstants {
 
     object Configurations {
         const val INTELLIJ_PLATFORM = "intellijPlatform"
-        const val INTELLIJ_PLATFORM_BUILD_NUMBER = "intellijPlatformBuildNumber"
+        const val INTELLIJ_PLATFORM_LOCAL = "intellijPlatformLocal"
+        const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
         const val INTELLIJ_PLATFORM_SOURCES = "intellijPlatformSources"
         const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
@@ -30,16 +31,20 @@ object IntelliJPluginConstants {
         object Attributes {
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
-            val buildNumber = Attribute.of("intellijPlatformBuildNumber", Boolean::class.javaObjectType)
+            val productInfo = Attribute.of("intellijPlatformProductInfo", Boolean::class.javaObjectType)
         }
+    }
 
+    object Dependencies {
+        const val INTELLIJ_PLATFORM_LOCAL_GROUP = "intellijPlatformLocal"
     }
 
     object Tasks {
         const val SETUP_DEPENDENCIES = "setupDependencies"
     }
 
-    const val INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME = "intellijPlatformRepositoriesSettings"
+    const val INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME = "intellijPlatformRepositorySettings"
+    const val INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS_NAME = "intellijPlatformDependencySettings"
 
     @Deprecated("Check it")
     const val DEFAULT_SANDBOX = "idea-sandbox"
@@ -132,9 +137,9 @@ object IntelliJPluginConstants {
     const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
     const val INSTRUMENTED_JAR_PREFIX = "instrumented"
 
-    const val ANNOTATIONS_DEPENDENCY_VERSION = "24.0.1"
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     const val MINIMAL_SUPPORTED_GRADLE_VERSION = "8.0"
+    const val MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION = "223"
     const val JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME = "JetBrains"
 
     const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"

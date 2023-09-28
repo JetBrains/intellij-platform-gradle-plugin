@@ -5,8 +5,6 @@
 
 package org.jetbrains.intellij.platform.gradleplugin
 
-import com.dd.plist.NSDictionary
-import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
@@ -16,6 +14,7 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import kotlinx.serialization.json.Json
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemLocation
@@ -27,7 +26,6 @@ import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.util.GradleVersion
 import org.jdom2.Document
@@ -49,6 +47,7 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
 import java.util.jar.Manifest
+import kotlin.io.path.exists
 import kotlin.io.path.name
 
 internal fun sourcePluginXmlFiles(project: Project) = project
@@ -101,69 +100,20 @@ internal fun String.resolveIdeHomeVariable(ideDir: Path) =
             }
     }
 
-fun getIdeaClasspath(ideDir: Path): List<String> {
-    val buildNumber = ideBuildNumber(ideDir).split('-').last().let { Version.parse(it) }
-    val build203 = Version.parse("203.0")
-    val build221 = Version.parse("221.0")
-    val build223 = Version.parse("223.0")
+fun getIdeaClasspath(ideDir: Path) = ideDir
+    .productInfo()
+    .currentLaunch
+    .bootClassPathJarNames
+    .map { "$ideDir/lib/$it" }
 
-    val currentLaunch = ideProductInfo(ideDir)?.currentLaunch
-    val infoPlist = ideDir.resolve("Info.plist").takeIf(Path::exists)?.let {
-        PropertyListParser.parse(it) as NSDictionary
-    }
-
-    return when {
-        buildNumber > build223 ->
-            currentLaunch
-                ?.bootClassPathJarNames
-                ?: infoPlist
-                    ?.getDictionary("JVMOptions")
-                    ?.getValue("ClassPath")
-                    ?.split(':')
-                    ?.map { it.removePrefix("\$APP_PACKAGE/Contents/lib/") }
-                    .orEmpty()
-
-        buildNumber > build221 -> listOf(
-            "3rd-party-rt.jar",
-            "util.jar",
-            "util_rt.jar",
-            "jna.jar",
-        )
-
-        buildNumber > build203 -> listOf(
-            "bootstrap.jar",
-            "util.jar",
-            "jdom.jar",
-            "log4j.jar",
-            "jna.jar",
-        )
-
-        else -> listOf(
-            "bootstrap.jar",
-            "extensions.jar",
-            "util.jar",
-            "jdom.jar",
-            "log4j.jar",
-            "jna.jar",
-            "trove4j.jar",
-        )
-    }.map { "$ideDir/lib/$it" }
-}
-
-@Deprecated("Rely on `build.txt` artifact resolved in configuration")
-fun ideBuildNumber(ideDir: Path) = ideDir
-    .resolve("Resources/build.txt")
-    .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-    .or { ideDir.resolve("build.txt") }
-    .readText().trim()
+internal fun Path.resolveProductInfoPath(name: String = "product-info.json") =
+    listOf(this, resolve(name), resolve("Resources").resolve(name))
+        .find { it.name == name && it.exists() }
+        ?: throw GradleException("Could not resolve $name file in: $this")
 
 private val json = Json { ignoreUnknownKeys = true }
-fun ideProductInfo(ideDir: Path) = ideDir
-    .resolve("Resources/product-info.json")
-    .takeIf { OperatingSystem.current().isMacOsX && it.exists() }
-    .or { ideDir.resolve("product-info.json") }
-    .runCatching { json.decodeFromString<ProductInfo>(readText()) }
-    .getOrNull()
+internal fun Path.productInfo() = resolveProductInfoPath()
+    .run { json.decodeFromString<ProductInfo>(readText()) }
 
 fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
     collectFiles(directory) { it.isJar() && filter.test(it) }
@@ -179,7 +129,7 @@ private fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
 
 internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
     val lib = parent.resolve("lib").takeIf { it.exists() && it.isDirectory } ?: return emptyList()
-    val baseFiles = collectJars(lib) { it.name !in listOf("junit.jar", "annotations.jar") }.sorted()
+    val baseFiles = collectJars(lib) { it.name !in listOf("junit.jar") }.sorted()
     val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
 
     return (baseFiles + antFiles)
@@ -255,10 +205,6 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
     return this
 }
 
-fun NSDictionary.getDictionary(key: String) = this[key] as? NSDictionary
-
-fun NSDictionary.getValue(key: String) = this[key]?.toString()
-
 internal val FileSystemLocation.asPath
     get() = asFile.toPath().toAbsolutePath()
 
@@ -305,3 +251,8 @@ internal val <T> Property<T>.isSpecified
 
 internal val Project.sourceSets
     get() = extensions.getByName("sourceSets") as SourceSetContainer
+
+internal val Project.gradleIntelliJPlatform
+    get() = layout.projectDirectory.asPath
+        .resolve(".gradle")
+        .resolve("intellijPlatform")

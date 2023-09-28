@@ -79,41 +79,6 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                         vendorUrl.convention(vendor.url)
                     }
                 }
-
-//                val buildNumberProvider = ideaDependencyProvider.map { it.buildNumber }
-
-//                version.convention(project.provider {
-//                    project.version.toString()
-//                })
-//                pluginXmlFiles.convention(project.provider {
-//                    sourcePluginXmlFiles(project).map(Path::toFile)
-//                })
-//                destinationDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.PLUGIN_XML_DIR_NAME))
-//                outputFiles.convention(pluginXmlFiles.map {
-//                    it.map { file ->
-//                        destinationDir.get().asFile.resolve(file.name)
-//                    }
-//                })
-//                sinceBuild.convention(project.provider {
-//                    if (extension.updateSinceUntilBuild.get()) {
-//                        val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
-//                        "${ideVersion.baselineVersion}.${ideVersion.build}"
-//                    } else {
-//                        null
-//                    }
-//                })
-//                untilBuild.convention(project.provider {
-//                    if (extension.updateSinceUntilBuild.get()) {
-//                        if (extension.sameSinceUntilBuild.get()) {
-//                            "${sinceBuild.get()}.*"
-//                        } else {
-//                            val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
-//                            "${ideVersion.baselineVersion}.*"
-//                        }
-//                    } else {
-//                        null
-//                    }
-//                })
             }
             // Make all tasks depend on [INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME]
             (TASKS - INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME).forEach {

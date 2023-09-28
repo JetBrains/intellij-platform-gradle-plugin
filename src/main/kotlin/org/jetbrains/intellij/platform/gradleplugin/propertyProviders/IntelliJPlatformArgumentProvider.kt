@@ -10,9 +10,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.platform.gradleplugin.Version
-import org.jetbrains.intellij.platform.gradleplugin.ideBuildNumber
-import org.jetbrains.intellij.platform.gradleplugin.ideProductInfo
+import org.jetbrains.intellij.platform.gradleplugin.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradleplugin.utils.OpenedPackages
 import java.nio.file.Path
@@ -23,17 +21,6 @@ class IntelliJPlatformArgumentProvider(
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
-    private val buildNumber by lazy {
-        ideDirectory
-            .let(::ideBuildNumber)
-            .split('-')
-            .last()
-            .let(Version::parse)
-    }
-
-    private val productInfo
-        get() = ideProductInfo(ideDirectory)
-
     private val bootclasspath
         get() = ideDirectory
             .resolve("lib/boot.jar")
@@ -42,25 +29,24 @@ class IntelliJPlatformArgumentProvider(
             .orEmpty()
 
     private val vmOptions
-        get() = productInfo
-            ?.currentLaunch
-            ?.vmOptionsFilePath
+        get() = ideDirectory
+            .productInfo()
+            .currentLaunch
+            .vmOptionsFilePath
             ?.removePrefix("../")
             ?.let { ideDirectory.resolve(it).readLines() }
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
 
-    private val kotlinxCoroutinesJavaAgent
-        get() = "-javaagent:$coroutinesJavaAgentPath".takeIf {
-            buildNumber >= Version(221)
-        }
+    private val kotlinxCoroutinesJavaAgent = "-javaagent:$coroutinesJavaAgentPath"
 
     private val additionalJvmArguments
-        get() = productInfo
-            ?.currentLaunch
-            ?.additionalJvmArguments
-            ?.filterNot { it.startsWith("-D") }
-            ?.takeIf { it.isNotEmpty() }
+        get() = ideDirectory
+            .productInfo()
+            .currentLaunch
+            .additionalJvmArguments
+            .filterNot { it.startsWith("-D") }
+            .takeIf { it.isNotEmpty() }
             ?.map { it.resolveIdeHomeVariable(ideDirectory) }
             ?: OpenedPackages
 

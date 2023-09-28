@@ -14,9 +14,10 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Conf
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_BASE_ID
-import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformBuildNumberTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformCollectorTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformExtractTransformer
+import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyProductInfoTransformer
+import org.jetbrains.intellij.platform.gradleplugin.dependencies.applyIntelliJPlatformSettings
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradleplugin.repositories.applyIntelliJPlatformSettings
 
@@ -41,7 +42,21 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform dependency"
                 }
 
-            val intellijPlatformBuildNumberConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_BUILD_NUMBER)
+            val intellijPlatformLocalConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_LOCAL)
+                .apply {
+                    isVisible = false
+                    isCanBeConsumed = false
+                    isCanBeResolved = true
+                    description = "IntelliJ Platform local IDE dependency"
+
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                        attribute(Attributes.collected, false)
+                        attribute(Attributes.productInfo, false)
+                    }
+                }
+
+            maybeCreate(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
                 .apply {
                     isVisible = false
                     isCanBeConsumed = false
@@ -50,8 +65,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
                     attributes {
                         attribute(Attributes.extracted, true)
-//                        attribute(Configurations.Attributes.collected, true)
-                        attribute(Attributes.buildNumber, true)
+                        attribute(Attributes.productInfo, true)
                     }
 
                     extendsFrom(intellijPlatformConfiguration)
@@ -75,6 +89,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
             fun Configuration.extend() = extendsFrom(
                 intellijPlatformConfiguration,
+                intellijPlatformLocalConfiguration,
                 intellijPlatformDependenciesConfiguration,
             )
 
@@ -96,8 +111,10 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         }
 
         with(dependencies) {
+            applyIntelliJPlatformSettings(objects, providers, layout)
+
             attributesSchema {
-                attribute(Attributes.buildNumber)
+                attribute(Attributes.productInfo)
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
             }
@@ -111,7 +128,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
                 configurations.getByName(Configurations.INTELLIJ_PLATFORM_SOURCES),
             )
-            applyIntellijPlatformBuildNumberTransformer()
+            applyProductInfoTransformer()
         }
 
         with(IntelliJPluginConstants.Extensions) {

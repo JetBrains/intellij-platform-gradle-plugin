@@ -51,7 +51,6 @@ dependencies {
     implementation(libs.jacksonDatabind)
     implementation(libs.kotlinxSerializationJson)
     implementation(libs.jaxbApi)
-    implementation(libs.ddPlist)
 
     compileOnly(embeddedKotlin("gradle-plugin"))
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))

@@ -7,10 +7,10 @@ import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradleplugin.createPlugin
 import org.jetbrains.intellij.platform.gradleplugin.debug
-import org.jetbrains.intellij.platform.gradleplugin.ideProductInfo
 import org.jetbrains.intellij.platform.gradleplugin.model.PluginsCache
 import org.jetbrains.intellij.platform.gradleplugin.model.PluginsCachePlugin
 import org.jetbrains.intellij.platform.gradleplugin.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradleplugin.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.warn
 import java.io.File
 import java.io.Serializable
@@ -129,9 +129,10 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
             }
         }
 
-        fun resolveBundledPlugins(ideDir: Path, context: String?) = ideProductInfo(ideDir)
-            ?.bundledPlugins
-            ?.takeIf { it.isNotEmpty() }
+        fun resolveBundledPlugins(ideDir: Path, context: String?) = ideDir
+            .productInfo()
+            .bundledPlugins
+            .takeIf { it.isNotEmpty() }
             ?: fromDirectory(ideDir.resolve("plugins"), context)
                 .plugins
                 .keys
