@@ -115,7 +115,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Free arguments passed to the IntelliJ Plugin Verifier exactly as specified.
      *
-     * They can be used in addition to the arguments that are provided by DSL options.
+     * They can be used in addition to the arguments that are provided by dedicated options.
      */
     @get:Input
     @get:Optional
