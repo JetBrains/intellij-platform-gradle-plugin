@@ -21,6 +21,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_ULTIMATE
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RUSTROVER
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS
 import org.jetbrains.intellij.model.AndroidStudioReleases
@@ -303,6 +304,11 @@ abstract class IdeaDependencyManager @Inject constructor(
                 hasSources = (sources && releaseType != RELEASE_TYPE_SNAPSHOTS).ifFalse {
                     warn(context, "IDE sources are not available for Rider SNAPSHOTS")
                 },
+            )
+
+            type == PLATFORM_TYPE_RUSTROVER -> RemoteIdeaDependency(
+                group = "com.jetbrains.intellij.rustrover",
+                name = "RustRover",
             )
 
             type == PLATFORM_TYPE_GATEWAY -> RemoteIdeaDependency(

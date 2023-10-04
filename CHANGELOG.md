@@ -13,6 +13,7 @@
 - `RunPluginVerifierTask`: new `runPluginVerifier.verificationReportsFormats` property to control verifier output formats
 - `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with list of problems to be ignored in a report
 - `RunPluginVerifierTask`: new `runPluginVerifier.freeArgs` property to let pass to the IntelliJ Plugin Verifier custom arguments
+- Make RustRover (`RR` type) available for resolving as SDK.
 
 ### Fixed
 
