@@ -81,6 +81,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_INTELLIJ_COM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PHPSTORM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_PYCHARM
 import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RIDER
+import org.jetbrains.intellij.IntelliJPluginConstants.PLATFORM_TYPE_RUSTROVER
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
@@ -1031,6 +1032,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                         PLATFORM_TYPE_RIDER,
                         PLATFORM_TYPE_PYCHARM,
                         PLATFORM_TYPE_PHPSTORM,
+                        PLATFORM_TYPE_RUSTROVER,
                     )
 
                     when {
@@ -1051,6 +1053,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                                 PLATFORM_TYPE_RIDER -> "RIDER-"
                                 PLATFORM_TYPE_PYCHARM -> "PYCHARM-"
                                 PLATFORM_TYPE_PHPSTORM -> "PHPSTORM-"
+                                PLATFORM_TYPE_RUSTROVER -> "RUSTROVER-"
                                 else -> ""
                             }
                             prefix + version

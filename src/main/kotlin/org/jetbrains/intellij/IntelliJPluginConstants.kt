@@ -129,6 +129,7 @@ object IntelliJPluginConstants {
     const val PLATFORM_TYPE_PYCHARM = "PY"
     const val PLATFORM_TYPE_PYCHARM_COMMUNITY = "PC"
     const val PLATFORM_TYPE_RIDER = "RD"
+    const val PLATFORM_TYPE_RUSTROVER = "RR"
     const val PLATFORM_TYPE_FLEET = "FLIJ"
 
     val PLATFORM_TYPES = listOf(
@@ -142,6 +143,7 @@ object IntelliJPluginConstants {
         PLATFORM_TYPE_PYCHARM,
         PLATFORM_TYPE_PYCHARM_COMMUNITY,
         PLATFORM_TYPE_RIDER,
+        PLATFORM_TYPE_RUSTROVER,
         PLATFORM_TYPE_FLEET,
     )
 }

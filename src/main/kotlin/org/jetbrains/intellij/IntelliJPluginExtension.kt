@@ -105,6 +105,7 @@ abstract class IntelliJPluginExtension @Inject constructor(
      * - `PC` - PyCharm Community Edition
      * - `PS` - PhpStorm
      * - `RD` - Rider
+     * - `RR` - RustRover
      * - `GO` - GoLand
      * - `GW` - Gateway
      */
