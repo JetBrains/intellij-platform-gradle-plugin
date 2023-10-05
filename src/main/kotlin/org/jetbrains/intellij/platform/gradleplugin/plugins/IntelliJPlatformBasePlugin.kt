@@ -14,8 +14,8 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Conf
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_BASE_ID
-import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformCollectorTransformer
-import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyIntellijPlatformExtractTransformer
+import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyCollectorTransformer
+import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyProductInfoTransformer
 import org.jetbrains.intellij.platform.gradleplugin.dependencies.applyIntelliJPlatformSettings
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
@@ -42,7 +42,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform dependency"
                 }
 
-            val intellijPlatformLocalConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_LOCAL)
+            val intellijPlatformLocalConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE)
                 .apply {
                     isVisible = false
                     isCanBeConsumed = false
@@ -51,8 +51,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
                     attributes {
                         attribute(Attributes.extracted, true)
-                        attribute(Attributes.collected, false)
-                        attribute(Attributes.productInfo, false)
                     }
                 }
 
@@ -69,6 +67,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     }
 
                     extendsFrom(intellijPlatformConfiguration)
+                    extendsFrom(intellijPlatformLocalConfiguration)
                 }
 
             val intellijPlatformDependenciesConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_DEPENDENCIES)
@@ -119,11 +118,11 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 attribute(Attributes.extracted)
             }
 
-            applyIntellijPlatformExtractTransformer(
+            applyExtractorTransformer(
                 configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
             )
-            applyIntellijPlatformCollectorTransformer(
+            applyCollectorTransformer(
                 configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
                 configurations.getByName(Configurations.INTELLIJ_PLATFORM_SOURCES),

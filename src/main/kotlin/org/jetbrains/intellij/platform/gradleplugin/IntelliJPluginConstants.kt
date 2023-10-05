@@ -22,7 +22,7 @@ object IntelliJPluginConstants {
 
     object Configurations {
         const val INTELLIJ_PLATFORM = "intellijPlatform"
-        const val INTELLIJ_PLATFORM_LOCAL = "intellijPlatformLocal"
+        const val INTELLIJ_PLATFORM_LOCAL_INSTANCE = "intellijPlatformLocalInstance"
         const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
         const val INTELLIJ_PLATFORM_SOURCES = "intellijPlatformSources"

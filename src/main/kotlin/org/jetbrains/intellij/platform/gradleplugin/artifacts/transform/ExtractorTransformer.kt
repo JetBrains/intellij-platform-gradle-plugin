@@ -76,18 +76,21 @@ abstract class IntelliJPlatformExtractTransformer @Inject constructor(
     }
 }
 
-internal fun DependencyHandler.applyIntellijPlatformExtractTransformer(
+internal fun DependencyHandler.applyExtractorTransformer(
     compileClasspathConfiguration: Configuration,
     testCompileClasspathConfiguration: Configuration,
 ) {
     artifactTypes.maybeCreate(ZIP_TYPE)
-        .attributes.attribute(Attributes.extracted, false)
+        .attributes
+        .attribute(Attributes.extracted, false)
 
     compileClasspathConfiguration
-        .attributes.attribute(Attributes.extracted, true)
+        .attributes
+        .attribute(Attributes.extracted, true)
 
     testCompileClasspathConfiguration
-        .attributes.attribute(Attributes.extracted, true)
+        .attributes
+        .attribute(Attributes.extracted, true)
 
     registerTransform(IntelliJPlatformExtractTransformer::class) {
         from

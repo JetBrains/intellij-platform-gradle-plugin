@@ -8,6 +8,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.Sync
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
 
 @CacheableTask
@@ -24,7 +25,7 @@ abstract class DownloadAndroidStudioProductReleasesXmlTask : Sync() {
     abstract val releasesUrl: Property<String>
 
     init {
-        group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
+        group = PLUGIN_GROUP_NAME
         description = "Downloads XML files containing the Android Studio product release information."
     }
 }

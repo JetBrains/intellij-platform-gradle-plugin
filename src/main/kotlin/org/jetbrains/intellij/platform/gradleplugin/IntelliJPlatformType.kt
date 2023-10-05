@@ -8,63 +8,63 @@ enum class IntelliJPlatformType(val code: String, val groupId: String, val artif
     AndroidStudio(
         code = "AI",
         groupId = "com.google.android.studio",
-        artifactId = "android-studio"
+        artifactId = "android-studio",
     ),
     CLion(
         code = "CL",
         groupId = "com.jetbrains.intellij.clion",
-        artifactId = "clion"
+        artifactId = "clion",
     ),
     Fleet(
         code = "FL",
         groupId = "com.jetbrains.intellij.fleetBackend",
-        artifactId = "fleetBackend"
+        artifactId = "fleetBackend",
     ),
     Gateway(
         code = "GW",
-        groupId = "com.jetbrains.gateway",
-        artifactId = "JetBrainsGateway"
+        groupId = "com.jetbrains.intellij.gateway",
+        artifactId = "gateway",
     ),
     GoLand(
         code = "GO",
         groupId = "com.jetbrains.intellij.goland",
-        artifactId = "goland"
+        artifactId = "goland",
     ),
     IntellijIdeaCommunity(
         code = "IC",
         groupId = "com.jetbrains.intellij.idea",
-        artifactId = "ideaIC"
+        artifactId = "ideaIC",
     ),
     IntellijIdeaUltimate(
         code = "IU",
         groupId = "com.jetbrains.intellij.idea",
-        artifactId = "ideaIU"
+        artifactId = "ideaIU",
     ),
 
     //    JPS(
 //        code = "JPS",
 //        groupId = "",
-//        artifactId = ""
+//        artifactId = "",
 //    ),
     PhpStorm(
         code = "PS",
         groupId = "com.jetbrains.intellij.phpstorm",
-        artifactId = "phpstorm"
+        artifactId = "phpstorm",
     ),
     PyCharmProfessional(
         code = "PY",
         groupId = "com.jetbrains.intellij.pycharm",
-        artifactId = "pycharmPY"
+        artifactId = "pycharmPY",
     ),
     PyCharmCommunity(
         code = "PC",
         groupId = "com.jetbrains.intellij.pycharm",
-        artifactId = "pycharmPC"
+        artifactId = "pycharmPC",
     ),
     Rider(
         code = "RD",
         groupId = "com.jetbrains.intellij.rider",
-        artifactId = "riderRD"
+        artifactId = "riderRD",
     );
 
     companion object {

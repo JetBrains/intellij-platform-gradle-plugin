@@ -4,18 +4,18 @@ package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 
 /**
  * Assembles a plugin and prepares ZIP archive for deployment.
  *
  * @see [Zip]
  */
- @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
+@DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
 abstract class BuildPluginTask : Zip() {
 
     init {
-        group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
+        group = PLUGIN_GROUP_NAME
         description = "Assembles plugin and prepares ZIP archive for deployment."
     }
 }

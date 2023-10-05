@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradleplugin.repositories
 
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
@@ -15,7 +14,7 @@ import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME
 
-internal typealias ArtifactRepositoryAction = (ArtifactRepository.() -> Unit)
+internal typealias Action = (MavenArtifactRepository.() -> Unit)
 
 interface IntelliJPlatformRepositorySettings {
 
@@ -32,8 +31,6 @@ internal fun RepositoryHandler.applyIntelliJPlatformSettings(objects: ObjectFact
 
 internal val RepositoryHandler.intellijPlatformRepositorySettings: IntelliJPlatformRepositorySettings
     get() = (this as ExtensionAware).extensions.getByType<IntelliJPlatformRepositorySettings>()
-
-internal typealias Action = (MavenArtifactRepository.() -> Unit)
 
 internal fun RepositoryHandler.customRepository(
     name: String,

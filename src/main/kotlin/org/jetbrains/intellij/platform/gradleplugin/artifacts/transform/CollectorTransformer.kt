@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition.DIRECTORY_TYPE
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileSystemLocation
@@ -24,7 +25,7 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
 @DisableCachingByDefault(because = "Not worth caching")
-abstract class IntelliJPlatformCollectorTransformer : TransformAction<IntelliJPlatformCollectorTransformer.Parameters> {
+abstract class CollectorTransformer : TransformAction<CollectorTransformer.Parameters> {
 
     interface Parameters : TransformParameters {
 
@@ -42,9 +43,12 @@ abstract class IntelliJPlatformCollectorTransformer : TransformAction<IntelliJPl
         if (input.name.startsWith("org")) { // FIXME
             // Plugin dependency
             input.forEachDirectoryEntry {
-                it.resolve("lib").listDirectoryEntries("*.jar").forEach(outputs::file)
+                it.resolve("lib")
+                    .listDirectoryEntries("*.jar")
+                    .forEach { file -> outputs.file(file) }
             }
         } else {
+            // TODO: check if the given directory is IDEA — i.e. by checking if there's product-info.json file
             // IntelliJ Platform SDK dependency
             collectIntelliJPlatformDependencyJars(input).forEach {
                 outputs.file(it)
@@ -52,18 +56,25 @@ abstract class IntelliJPlatformCollectorTransformer : TransformAction<IntelliJPl
         }
 
         parameters.sourcesClasspath.forEach {
-            it.copyTo(outputs.file(it.name))
+//            it.copyTo(outputs.file("ideaIU-2022.3.3-sources.jar"))
         }
     }
 }
 
-internal fun DependencyHandler.applyIntellijPlatformCollectorTransformer(
+internal fun DependencyHandler.applyCollectorTransformer(
     compileClasspathConfiguration: Configuration,
     testCompileClasspathConfiguration: Configuration,
     intellijPlatformSources: Configuration,
 ) {
+    // ZIP archives fetched from the IntelliJ Maven repository
     artifactTypes.maybeCreate(ZIP_TYPE)
-        .attributes.attribute(Attributes.collected, false)
+        .attributes
+        .attribute(Attributes.collected, false)
+
+    // Local IDEs pointed with intellijPlatformLocal dependencies helper
+    artifactTypes.maybeCreate(DIRECTORY_TYPE)
+        .attributes
+        .attribute(Attributes.collected, false)
 
     compileClasspathConfiguration
         .attributes.attribute(Attributes.collected, true)
@@ -71,7 +82,7 @@ internal fun DependencyHandler.applyIntellijPlatformCollectorTransformer(
     testCompileClasspathConfiguration
         .attributes.attribute(Attributes.collected, true)
 
-    registerTransform(IntelliJPlatformCollectorTransformer::class) {
+    registerTransform(CollectorTransformer::class) {
         from
             .attribute(Attributes.extracted, true)
             .attribute(Attributes.collected, false)
@@ -79,8 +90,8 @@ internal fun DependencyHandler.applyIntellijPlatformCollectorTransformer(
             .attribute(Attributes.extracted, true)
             .attribute(Attributes.collected, true)
 
-        parameters {
-            sourcesClasspath.from(intellijPlatformSources)
-        }
+//        parameters {
+//            sourcesClasspath.from(intellijPlatformSources)
+//        }
     }
 }

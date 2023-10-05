@@ -5,6 +5,7 @@ package org.jetbrains.intellij.tasks
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import java.io.File
 
 @CacheableTask
@@ -22,7 +23,7 @@ abstract class DownloadIdeaProductReleasesXmlTask : Sync() {
     abstract val inputFile: Property<File>
 
     init {
-        group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
+        group = PLUGIN_GROUP_NAME
         description = "Downloads XML files containing the IntelliJ IDEA product release information."
     }
 }

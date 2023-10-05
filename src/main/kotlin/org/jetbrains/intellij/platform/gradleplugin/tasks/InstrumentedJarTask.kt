@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Jar
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 
 /**
  * Creates a JAR file with instrumented classes.
@@ -15,7 +15,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
 abstract class InstrumentedJarTask : Jar() {
 
     init {
-        group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
+        group = PLUGIN_GROUP_NAME
         description = "Assembles an instrumented JAR archive."
     }
 }

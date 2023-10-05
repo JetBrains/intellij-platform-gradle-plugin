@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
+import org.gradle.api.artifacts.type.ArtifactTypeDefinition
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
@@ -26,17 +27,20 @@ abstract class ProductInfoTransformer : TransformAction<TransformParameters.None
 
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.get().asPath
-
-        println("ProductInfoTransformer input = ${input}")
         val productInfo = input.resolveProductInfoPath()
-        println("productInfo = ${productInfo}")
 
         outputs.file(productInfo)
     }
 }
 
 internal fun DependencyHandler.applyProductInfoTransformer() {
+    // ZIP archives fetched from the IntelliJ Maven repository
     artifactTypes.maybeCreate(ZIP_TYPE)
+        .attributes
+        .attribute(Attributes.productInfo, false)
+
+    // Local IDEs pointed with intellijPlatformLocal dependencies helper
+    artifactTypes.maybeCreate(ArtifactTypeDefinition.DIRECTORY_TYPE)
         .attributes
         .attribute(Attributes.productInfo, false)
 

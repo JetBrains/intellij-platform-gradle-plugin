@@ -4,34 +4,32 @@ package org.jetbrains.intellij.platform.gradleplugin.dependencies
 
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Dependencies
-import org.jetbrains.intellij.platform.gradleplugin.asPath
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS_NAME
 import org.jetbrains.intellij.platform.gradleplugin.model.ProductInfo
-import kotlin.io.path.pathString
 
 internal typealias DependencyAction = (Dependency.(settings: IntelliJPlatformDependencySettings) -> Unit)
 
 interface IntelliJPlatformDependencySettings {
 
-    val ivyDirectory: Property<String>
+    val ivyDirectory: DirectoryProperty
 }
 
 internal fun DependencyHandler.applyIntelliJPlatformSettings(objects: ObjectFactory, providers: ProviderFactory, layout: ProjectLayout) {
     val settings = objects.newInstance(IntelliJPlatformDependencySettings::class)
 
-    settings.ivyDirectory.convention(layout.projectDirectory.asPath.resolve(".gradle").resolve("intellijPlatform").resolve("ivy").pathString)
+    settings.ivyDirectory.convention(layout.projectDirectory.dir(".gradle/intellijPlatform/ivy"))
 
-    (this as ExtensionAware).extensions.add(IntelliJPluginConstants.INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS_NAME, settings)
+    (this as ExtensionAware).extensions.add(INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS_NAME, settings)
 }
 
 internal val DependencyHandler.intellijPlatformDependencySettings: IntelliJPlatformDependencySettings
