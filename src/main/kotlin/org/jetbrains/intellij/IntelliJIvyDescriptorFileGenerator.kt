@@ -5,7 +5,6 @@ package org.jetbrains.intellij
 import org.gradle.api.publish.ivy.IvyArtifact
 import org.gradle.api.publish.ivy.IvyConfiguration
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
-import org.gradle.api.publish.ivy.internal.publisher.IvyPublicationIdentity
 import org.gradle.internal.xml.SimpleXmlWriter
 import org.gradle.internal.xml.XmlTransformer
 import org.jetbrains.intellij.dependency.IdePluginSourceZipFilesProvider
@@ -20,7 +19,7 @@ import java.nio.file.Path
 import java.text.SimpleDateFormat
 import java.util.*
 
-class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublicationIdentity) {
+class IntelliJIvyDescriptorFileGenerator(private val coordinates: IvyCoordinates) {
 
     private val ivyFileEncoding = "UTF-8"
     private val ivyDatePattern = "yyyyMMddHHmmss"
@@ -113,9 +112,9 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
                 attribute("xmlns:m", "https://ant.apache.org/ivy/maven")
             }
             startElement("info")
-                .attribute("organisation", projectIdentity.organisation)
-                .attribute("module", projectIdentity.module)
-                .attribute("revision", projectIdentity.revision)
+                .attribute("organisation", coordinates.organisation)
+                .attribute("module", coordinates.module)
+                .attribute("revision", coordinates.revision)
                 .attribute("publication", ivyDateFormat.format(Date()))
             endElement()
 
@@ -171,4 +170,10 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
             return this
         }
     }
+
+    data class IvyCoordinates(
+        val organisation: String,
+        val module: String,
+        val revision: String,
+    )
 }
