@@ -133,6 +133,20 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val verificationReportsDir: Property<String>
 
     /**
+     * The output formats of the verification reports.
+     *
+     * Accepted values:
+     * - `plain` for console output
+     * - `html`
+     * ` `markdown`
+     *
+     * Default value: [VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML]
+     */
+    @get:Input
+    @get:Optional
+    abstract val verificationReportsFormats: ListProperty<VerificationReportsFormats>
+
+    /**
      * The path to the directory where IDEs used for the verification will be downloaded.
      *
      * Default value: `System.getProperty("plugin.verifier.home.dir")/ides`, `System.getenv("XDG_CACHE_HOME")/pluginVerifier/ides`,
@@ -441,7 +455,15 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
      */
-    private fun requiresJava11() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 260)
+    private fun requiresJava11() = currentVersion.let(Version::parse) >= Version(1, 260)
+
+    /**
+     * Check that the Plugin Verifier supports the Verification reports output formats.
+     * This is available only in version 1.304 and later.
+     *
+     * The previous versions do not support the corresponding versions properly, leading to CLI argument parsing errors.
+     */
+    private fun supportsVerificationReportOutputFormats() = currentVersion.let(Version::parse) >= Version(1, 304)
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
@@ -468,7 +490,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
         if (offline.get()) {
             args.add("-offline")
         }
-
+        if (supportsVerificationReportOutputFormats()) {
+            args.add("-verification-reports-formats")
+            args.add(verificationReportsFormats.get().joinToString(","))
+        }
         return args
     }
 
@@ -493,7 +518,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return Plugin Verifier version
      */
-    internal fun resolveVerifierVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+    @get:Internal
+    internal val currentVersion by lazy {
+        verifierVersion.orNull?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+    }
 
     /**
      * Resolves the IDE type and version. If only `version` is provided, `type` is set to "IC".
@@ -679,5 +707,22 @@ abstract class RunPluginVerifierTask @Inject constructor(
             @JvmField
             val NONE: EnumSet<FailureLevel> = EnumSet.noneOf(FailureLevel::class.java)
         }
+    }
+
+    @Suppress("unused")
+    enum class VerificationReportsFormats {
+        PLAIN,
+        HTML,
+        MARKDOWN;
+
+        companion object {
+            @JvmField
+            val ALL: EnumSet<VerificationReportsFormats> = EnumSet.allOf(VerificationReportsFormats::class.java)
+
+            @JvmField
+            val NONE: EnumSet<VerificationReportsFormats> = EnumSet.noneOf(VerificationReportsFormats::class.java)
+        }
+
+        override fun toString() = name.lowercase()
     }
 }

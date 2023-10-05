@@ -3,10 +3,12 @@
 package org.jetbrains.intellij.tasks
 
 import org.apache.commons.io.FileUtils
+import org.gradle.kotlin.dsl.support.listFilesOrdered
 import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
+import org.junit.Assert.*
 import java.net.URL
 import kotlin.test.Test
 
@@ -132,6 +134,95 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             val directory = file("build/foo").canonicalPath
             assertContains("Verification reports directory: $directory", it.output)
+        }
+    }
+
+    @Test
+    fun `set verification reports output formats`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                verificationReportsFormats = [ "markdown", "plain" ]
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"
+                ideVersions = ["IC-2020.2.3"]
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles()
+            if (ideDirs.isEmpty()) {
+                fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val markdownReportFiles = ideVersionDir.listFilesOrdered { it.extension == "md" }
+            assertEquals(1, markdownReportFiles.size)
+        }
+    }
+
+    @Test
+    fun `set verification reports with empty set of output formats`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                verificationReportsFormats = []
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"
+                ideVersions = ["IC-2020.2.3"]
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles()
+            if (ideDirs.isEmpty()) {
+                fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            assertTrue(reportFiles.isEmpty())
+        }
+    }
+
+    @Test
+    fun `set verification reports with default settings`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"
+                ideVersions = ["IC-2020.2.3"]
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles()
+            if (ideDirs.isEmpty()) {
+                fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            assertTrue(reportFiles.isNotEmpty())
         }
     }
 
