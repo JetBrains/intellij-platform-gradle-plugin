@@ -455,7 +455,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
      */
-    private fun requiresJava11() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 260)
+    private fun requiresJava11() = currentVersion.let(Version::parse) >= Version(1, 260)
 
     /**
      * Check that the Plugin Verifier supports the Verification reports output formats.
@@ -463,7 +463,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * The previous versions do not support the corresponding versions properly, leading to CLI argument parsing errors.
      */
-    private fun supportsVerificationReportOutputFormats() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 304)
+    private fun supportsVerificationReportOutputFormats() = currentVersion.let(Version::parse) >= Version(1, 304)
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
@@ -518,7 +518,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return Plugin Verifier version
      */
-    internal fun resolveVerifierVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+    @get:Internal
+    internal val currentVersion by lazy {
+        verifierVersion.orNull?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+    }
 
     /**
      * Resolves the IDE type and version. If only `version` is provided, `type` is set to "IC".
