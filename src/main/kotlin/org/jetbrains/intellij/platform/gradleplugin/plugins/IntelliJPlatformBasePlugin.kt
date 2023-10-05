@@ -78,14 +78,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     description = "IntelliJ Platform Dependencies dependency"
                 }
 
-            maybeCreate(Configurations.INTELLIJ_PLATFORM_SOURCES)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "IntelliJ Platform Sources to be attached to the IntelliJ Platform dependency"
-                }
-
             fun Configuration.extend() = extendsFrom(
                 intellijPlatformConfiguration,
                 intellijPlatformLocalConfiguration,
@@ -125,7 +117,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             applyCollectorTransformer(
                 configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                configurations.getByName(Configurations.INTELLIJ_PLATFORM_SOURCES),
             )
             applyProductInfoTransformer()
         }

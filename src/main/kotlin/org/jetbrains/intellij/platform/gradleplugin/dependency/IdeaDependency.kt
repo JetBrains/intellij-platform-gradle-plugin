@@ -16,7 +16,6 @@ open class IdeaDependency(
     val version: String,
     val buildNumber: String,
     val classes: File,
-    val sources: File?,
     val withKotlin: Boolean,
     val pluginsRegistry: BuiltinPluginsRegistry,
     val extraDependencies: Collection<IdeaExtraDependency>,
@@ -54,9 +53,6 @@ open class IdeaDependency(
         if (withKotlin) {
             fqn += "-withKotlin"
         }
-        if (sources != null) {
-            fqn += "-withSources"
-        }
         return fqn
     }
 
@@ -71,7 +67,6 @@ open class IdeaDependency(
         if (version != other.version) return false
         if (buildNumber != other.buildNumber) return false
         if (classes != other.classes) return false
-        if (sources != other.sources) return false
         if (withKotlin != other.withKotlin) return false
         if (pluginsRegistry != other.pluginsRegistry) return false
         if (extraDependencies != other.extraDependencies) return false
@@ -87,7 +82,6 @@ open class IdeaDependency(
         result = 31 * result + version.hashCode()
         result = 31 * result + buildNumber.hashCode()
         result = 31 * result + classes.hashCode()
-        result = 31 * result + sources.hashCode()
         result = 31 * result + withKotlin.hashCode()
         result = 31 * result + pluginsRegistry.hashCode()
         result = 31 * result + extraDependencies.hashCode()

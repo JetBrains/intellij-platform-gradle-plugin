@@ -70,13 +70,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
     abstract val localPath: Property<String>
 
     /**
-     * The path to local archive with IDE sources.
-     *
-     * Default value: `null`
-     */
-    abstract val localSourcesPath: Property<String>
-
-    /**
      * Required.
      * The version of the IntelliJ Platform IDE that will be used to build the plugin.
      * Please see [Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html) topic in SDK docs for more details.

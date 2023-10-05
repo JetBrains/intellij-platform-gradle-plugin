@@ -10,11 +10,9 @@ import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.DIRECTORY_TYPE
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
-import org.gradle.api.tasks.CompileClasspath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
@@ -25,13 +23,7 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
 @DisableCachingByDefault(because = "Not worth caching")
-abstract class CollectorTransformer : TransformAction<CollectorTransformer.Parameters> {
-
-    interface Parameters : TransformParameters {
-
-        @get:CompileClasspath
-        val sourcesClasspath: ConfigurableFileCollection
-    }
+abstract class CollectorTransformer : TransformAction<TransformParameters.None> {
 
     @get:Classpath
     @get:InputArtifact
@@ -54,17 +46,12 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                 outputs.file(it)
             }
         }
-
-        parameters.sourcesClasspath.forEach {
-//            it.copyTo(outputs.file("ideaIU-2022.3.3-sources.jar"))
-        }
     }
 }
 
 internal fun DependencyHandler.applyCollectorTransformer(
     compileClasspathConfiguration: Configuration,
     testCompileClasspathConfiguration: Configuration,
-    intellijPlatformSources: Configuration,
 ) {
     // ZIP archives fetched from the IntelliJ Maven repository
     artifactTypes.maybeCreate(ZIP_TYPE)
@@ -89,9 +76,5 @@ internal fun DependencyHandler.applyCollectorTransformer(
         to
             .attribute(Attributes.extracted, true)
             .attribute(Attributes.collected, true)
-
-//        parameters {
-//            sourcesClasspath.from(intellijPlatformSources)
-//        }
     }
 }

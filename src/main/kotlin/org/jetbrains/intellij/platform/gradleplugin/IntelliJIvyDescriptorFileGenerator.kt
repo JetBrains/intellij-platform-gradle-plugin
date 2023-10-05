@@ -8,8 +8,6 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.api.publish.ivy.internal.publisher.IvyPublicationIdentity
 import org.gradle.internal.xml.SimpleXmlWriter
 import org.gradle.internal.xml.XmlTransformer
-import org.jetbrains.intellij.platform.gradleplugin.dependency.IdePluginSourceZipFilesProvider
-import org.jetbrains.intellij.platform.gradleplugin.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradleplugin.dependency.IntellijIvyArtifact
 import org.jetbrains.intellij.platform.gradleplugin.dependency.PluginDependency
 import java.io.File
@@ -53,38 +51,6 @@ class IntelliJIvyDescriptorFileGenerator(private val projectIdentity: IvyPublica
         plugin.metaInfDirectory?.let {
             addArtifact(IntellijIvyArtifact.createDirectoryDependency(it.toPath(), compileConfiguration.name, baseDir, groupId))
         }
-
-        return this
-    }
-
-    fun addSourceArtifacts(ideaDependency: IdeaDependency?, plugin: PluginDependency, baseDir: Path, groupId: String): IntelliJIvyDescriptorFileGenerator {
-        val sourcesConfiguration = DefaultIvyConfiguration("sources")
-        addConfiguration(sourcesConfiguration)
-        if (plugin.sourceJarFiles.isNotEmpty()) {
-            plugin.sourceJarFiles.forEach {
-                addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), sourcesConfiguration.name, baseDir, groupId))
-            }
-        } else {
-            ideaDependency
-                ?.sourceZipFiles
-                ?.map { it.toPath() }
-                ?.let { IdePluginSourceZipFilesProvider.getSourceZips(it, plugin.platformPluginId) }
-                ?.let { IntellijIvyArtifact.createZipDependency(it, sourcesConfiguration.name, ideaDependency.classes.toPath()) }
-                ?.let(::addArtifact)
-        }
-        // see: https://github.com/JetBrains/gradle-intellij-plugin/issues/153
-        ideaDependency
-            ?.sources
-            ?.takeIf { plugin.builtin }
-            ?.let {
-                val name = when(ideaDependency.name) {
-                    "pycharmPY", "pycharmPC" -> "pycharmPC"
-                    else -> "ideaIC"
-                }
-                val artifact = IntellijIvyArtifact(it.toPath(), name, "jar", "sources", "sources")
-                artifact.conf = sourcesConfiguration.name
-                addArtifact(artifact)
-            }
 
         return this
     }

@@ -75,23 +75,18 @@ internal fun DependencyHandlerScope.intellijPlatform(
 //            group = "com.jetbrains.intellij.rider",
 //            name = "riderRD",
 //            version = version,
-//        hasSources = (sources && releaseType != IntelliJPluginConstants.RELEASE_TYPE_SNAPSHOTS).ifFalse {
-//            warn(context, "IDE sources are not available for Rider SNAPSHOTS")
-//        },
 //        )
 //
 //        Gateway -> create(
 //            group = "com.jetbrains.gateway",
 //            name = "JetBrainsGateway",
 //            version = version,
-//        hasSources = false,
 //        )
 //
 //        AndroidStudio -> create(
 //            group = "com.google.android.studio",
 //            name = "android-studio",
 //            version = version,
-//        hasSources = false,
 //            ext = when {
 //                OperatingSystem.current().isLinux -> "tar.gz"
 //                else -> "zip"

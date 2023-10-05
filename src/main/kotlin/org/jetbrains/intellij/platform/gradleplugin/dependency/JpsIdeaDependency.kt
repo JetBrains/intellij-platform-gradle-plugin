@@ -8,7 +8,6 @@ class JpsIdeaDependency(
     version: String,
     buildNumber: String,
     classes: File,
-    sources: File?,
     withKotlin: Boolean,
     context: String?,
 ) : IdeaDependency(
@@ -16,7 +15,6 @@ class JpsIdeaDependency(
     version,
     buildNumber,
     classes,
-    sources,
     withKotlin,
     BuiltinPluginsRegistry(classes, context),
     emptyList(),

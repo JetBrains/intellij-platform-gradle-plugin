@@ -46,8 +46,7 @@ abstract class PluginDependencyManager @Inject constructor(
             } else {
                 info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.canonicalPath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
-                    val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}" +
-                            "-withSources".takeIf { ideaDependency.sources != null }.orEmpty()
+                    val builtinPluginVersion = "${ideaDependency.name}-${ideaDependency.buildNumber}"
                     return PluginDependencyImpl(it.name, dependency.id, builtinPluginVersion, it.toFile(), true)
                 }
             }
@@ -118,9 +117,6 @@ abstract class PluginDependencyManager @Inject constructor(
                     artifactPattern("$it/[artifact](.[ext])") // plugin sources delivered with IDE
                 }
                 artifactPattern("$cacheDirectoryPath(/[classifier])/[module]-[revision]/[artifact](.[ext])") // external zip plugins
-                if (ideaDependency.sources != null) {
-                    artifactPattern("${ideaDependency.sources.parent}/[artifact]-${ideaDependency.version}(-[classifier]).[ext]")
-                }
             }
         }
         if (!plugin.builtin && !plugin.maven) {
@@ -145,7 +141,6 @@ abstract class PluginDependencyManager @Inject constructor(
         IntelliJIvyDescriptorFileGenerator(identity)
             .addConfiguration(DefaultIvyConfiguration("default"))
             .addCompileArtifacts(plugin, baseDir, groupId)
-            .addSourceArtifacts(ideaDependency, plugin, baseDir, groupId)
             .writeTo(ivyFile)
     }
 

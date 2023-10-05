@@ -9,11 +9,10 @@ class LocalIdeaDependency(
     version: String,
     buildNumber: String,
     classes: File,
-    sources: File?,
     withKotlin: Boolean,
     builtinPluginsRegistry: BuiltinPluginsRegistry,
     extraDependencies: Collection<IdeaExtraDependency>,
-) : IdeaDependency(name, version, buildNumber, classes, sources, withKotlin, builtinPluginsRegistry, extraDependencies) {
+) : IdeaDependency(name, version, buildNumber, classes, withKotlin, builtinPluginsRegistry, extraDependencies) {
 
     override fun getIvyRepositoryDirectory() = when {
         version.endsWith(".SNAPSHOT") -> null

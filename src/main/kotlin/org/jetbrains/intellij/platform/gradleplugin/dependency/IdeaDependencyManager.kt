@@ -43,9 +43,6 @@ abstract class IdeaDependencyManager @Inject constructor(
             url = dependency.classes.toURI()
             ivyPattern("${ivyFile.parent}/[module]-[revision]$ivyFileSuffix.[ext]") // ivy xml
             artifactPattern("${dependency.classes.path}/[artifact].[ext]") // idea libs
-            if (dependency.sources != null) {
-                artifactPattern("${dependency.sources.parent}/[artifact]-[revision]-[classifier].[ext]")
-            }
         }
 
         dependencies.add(
@@ -64,7 +61,6 @@ abstract class IdeaDependencyManager @Inject constructor(
         version: String,
         buildNumber: String,
         classesDirectory: File,
-        sourcesDirectory: File?,
         project: Project,
         extraDependencies: Collection<IdeaExtraDependency>,
     ) = when (type) {
@@ -72,7 +68,6 @@ abstract class IdeaDependencyManager @Inject constructor(
 //            version,
 //            buildNumber,
 //            classesDirectory,
-//            sourcesDirectory,
 //            !hasKotlinDependency(project),
 //            context,
 //        )
@@ -85,7 +80,6 @@ abstract class IdeaDependencyManager @Inject constructor(
                     version,
                     buildNumber,
                     classesDirectory,
-                    sourcesDirectory,
                     !hasKotlinDependency(project),
                     pluginsRegistry,
                     extraDependencies,
@@ -96,39 +90,12 @@ abstract class IdeaDependencyManager @Inject constructor(
                     version,
                     buildNumber,
                     classesDirectory,
-                    sourcesDirectory,
                     withKotlin = !hasKotlinDependency(project),
                     pluginsRegistry = pluginsRegistry,
                     extraDependencies = extraDependencies,
                 )
             }
         }
-    }
-
-    private fun resolveSources(version: String, type: IntelliJPlatformType): File? {
-        info(context, "Adding IDE sources repository")
-        try {
-            val forPyCharm = type == PyCharmProfessional || type == PyCharmCommunity
-            val sourcesFiles = dependenciesDownloader.downloadFromRepository(context, {
-                create(
-                    group = if (forPyCharm) "com.jetbrains.intellij.pycharm" else "com.jetbrains.intellij.idea",
-                    name = if (forPyCharm) "pycharmPC" else "ideaIC",
-                    version = version,
-                    classifier = "sources",
-                    ext = "jar",
-                )
-            })
-            if (sourcesFiles.size == 1) {
-                val sourcesDirectory = sourcesFiles.first()
-                debug(context, "IDE sources jar: " + sourcesDirectory.path)
-                return sourcesDirectory
-            } else {
-                warn(context, "Cannot attach IDE sources. Found files: $sourcesFiles")
-            }
-        } catch (e: ResolveException) {
-            warn(context, "Cannot resolve IDE sources dependency", e)
-        }
-        return null
     }
 
     private fun unzipDependencyFile(
@@ -216,7 +183,6 @@ abstract class IdeaDependencyManager @Inject constructor(
             IntelliJIvyDescriptorFileGenerator(identity).apply {
                 addConfiguration(DefaultIvyConfiguration("default"))
                 addConfiguration(DefaultIvyConfiguration("compile"))
-                addConfiguration(DefaultIvyConfiguration("sources"))
 
                 dependency.jarFiles
                     .forEach { addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), "compile", dependency.classes.toPath())) }
@@ -224,17 +190,6 @@ abstract class IdeaDependencyManager @Inject constructor(
                 dependency.sourceZipFiles
                     .filter { it.nameWithoutExtension in sourceZipArtifacts }
                     .forEach { addArtifact(IntellijIvyArtifact.createZipDependency(it.toPath(), "sources", dependency.classes.toPath())) }
-
-                if (dependency.sources != null) {
-                    val name = when (dependency.name) {
-                        "pycharmPY", "pycharmPC" -> "pycharmPC"
-                        else -> "ideaIC"
-                    }
-                    IntellijIvyArtifact(dependency.sources.toPath(), name, "jar", "sources", "sources").apply {
-                        conf = "sources"
-                        addArtifact(this)
-                    }
-                }
 
                 writeTo(ivyFile)
             }
@@ -249,7 +204,7 @@ abstract class IdeaDependencyManager @Inject constructor(
             .any { "org.jetbrains.kotlin" == it.group && isKotlinRuntime(it.name) }
 
     @Deprecated("Use DependencyHandlerScope.intellijPlatform(type: IntelliJPlatformType, version: String, configurationName: String)")
-    fun resolveRemote(project: Project, version: String, type: String, sources: Boolean, extraDependencies: List<String>): IdeaDependency {
+    fun resolveRemote(project: Project, version: String, type: String, extraDependencies: List<String>): IdeaDependency {
         debug(context, "Adding IDE dependency")
 
         val type = IntelliJPlatformType.fromCode(type)
@@ -293,21 +248,16 @@ abstract class IdeaDependencyManager @Inject constructor(
             type == Rider -> RemoteIdeaDependency(
                 group = Rider.groupId,
                 name = Rider.artifactId,
-//                hasSources = (sources && releaseType != RELEASE_TYPE_SNAPSHOTS).ifFalse {
-//                    warn(context, "IDE sources are not available for Rider SNAPSHOTS")
-//                },
             )
 
             type == Gateway -> RemoteIdeaDependency(
                 group = Gateway.groupId,
                 name = Gateway.artifactId,
-                hasSources = false,
             )
 
             type == AndroidStudio -> RemoteIdeaDependency(
                 group = AndroidStudio.groupId,
                 name = AndroidStudio.artifactId,
-                hasSources = false,
                 artifactExtension = when {
                     OperatingSystem.current().isLinux -> "tar.gz"
                     else -> "zip"
@@ -378,10 +328,6 @@ abstract class IdeaDependencyManager @Inject constructor(
 
         info(context, "IDE dependency cache directory: $classesDirectory")
         val buildNumber = classesDirectory.productInfo().buildNumber
-        val sourcesDirectory = when {
-            remoteIdeaDependency.hasSources ?: sources -> resolveSources(version, type)
-            else -> null
-        }
         val resolvedExtraDependencies = resolveExtraDependencies(project, version, extraDependencies)
         return createDependency(
             remoteIdeaDependency.name,
@@ -389,13 +335,12 @@ abstract class IdeaDependencyManager @Inject constructor(
             version,
             buildNumber,
             classesDirectory.toFile(), // FIXME
-            sourcesDirectory,
             project,
             resolvedExtraDependencies,
         )
     }
 
-    fun resolveLocal(project: Project, localPath: String, localPathSources: String?): IdeaDependency {
+    fun resolveLocal(project: Project, localPath: String): IdeaDependency {
         debug(context, "Adding local IDE dependency")
         val ideaDir = Path.of(localPath).let {
             it.takeUnless { it.endsWith(".app") } ?: it.resolve("Contents")
@@ -405,11 +350,7 @@ abstract class IdeaDependencyManager @Inject constructor(
             throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
         val buildNumber = ideaDir.productInfo().buildNumber
-        val sources = when {
-            !localPathSources.isNullOrEmpty() -> File(localPathSources)
-            else -> null
-        }
-        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir.toFile(), sources, project, emptyList())
+        return createDependency("ideaLocal", null, buildNumber, buildNumber, ideaDir.toFile(), project, emptyList())
     }
 
     private fun getZipCacheDirectory(zipFile: File, project: Project, type: IntelliJPlatformType): File {
@@ -504,7 +445,6 @@ abstract class IdeaDependencyManager @Inject constructor(
     private data class RemoteIdeaDependency(
         val group: String,
         val name: String,
-        val hasSources: Boolean? = null,
         val artifactExtension: String = "zip",
         val postProcess: (Path) -> Unit = {},
     )

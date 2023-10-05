@@ -153,7 +153,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     .dir(DEFAULT_SANDBOX)
                     .map { it.asFile.canonicalPath }
             )
-            downloadSources.convention(!System.getenv().containsKey("CI"))
             configureDefaultDependencies.convention(true)
             type.convention(IntellijIdeaCommunity.toString())
         }
@@ -226,11 +225,9 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
     private fun prepareIdeaDependencyProvider(project: Project, extension: IntelliJPluginExtension) = project.provider {
         val configureDefaultDependencies = extension.configureDefaultDependencies.get()
-        val downloadSources = extension.downloadSources.get()
         val extraDependencies = extension.extraDependencies.get()
         val ideaDependencyCachePath = extension.ideaDependencyCachePath.orNull.orEmpty()
         val localPath = extension.localPath.orNull
-        val localSourcesPath = extension.localSourcesPath.orNull
         val type = extension.getVersionType().orNull
         val version = extension.getVersionNumber().orNull
 
@@ -250,12 +247,12 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
             version != null && type != null -> {
                 info(context, "Using IDE from remote repository")
-                dependencyManager.resolveRemote(project, version, type, downloadSources, extraDependencies)
+                dependencyManager.resolveRemote(project, version, type, extraDependencies)
             }
 
             localPath != null -> {
                 info(context, "Using path to locally installed IDE: $localPath")
-                dependencyManager.resolveLocal(project, localPath, localSourcesPath)
+                dependencyManager.resolveLocal(project, localPath)
             }
 
             else -> {

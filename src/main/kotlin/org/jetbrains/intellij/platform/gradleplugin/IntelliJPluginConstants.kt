@@ -25,7 +25,6 @@ object IntelliJPluginConstants {
         const val INTELLIJ_PLATFORM_LOCAL_INSTANCE = "intellijPlatformLocalInstance"
         const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
-        const val INTELLIJ_PLATFORM_SOURCES = "intellijPlatformSources"
         const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
 
         object Attributes {
