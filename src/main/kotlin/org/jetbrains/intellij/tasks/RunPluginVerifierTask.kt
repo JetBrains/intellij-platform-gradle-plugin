@@ -132,6 +132,16 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:Optional
     abstract val verificationReportsDir: Property<String>
 
+    /**
+     * The output formats of the verification reports.
+     *
+     * Accepted values:
+     * - `plain` for console output
+     * - `html`
+     * ` `markdown`
+     *
+     * Default value: `plain` and `html`.
+     */
     @get:Input
     @get:Optional
     abstract val verificationReportsFormats: ListProperty<String>
@@ -448,7 +458,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private fun requiresJava11() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 260)
 
     /**
-     * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
+     * Check that the Plugin Verifier supports the Verification reports output formats.
+     * This is available only in version 1.304 and later.
+     *
+     * The previous versions do not support the corresponding versions properly, leading to CLI argument parsing errors.
      */
     private fun supportsVerificationReportOutputFormats() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 304)
 
