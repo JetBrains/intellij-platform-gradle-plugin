@@ -140,11 +140,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * - `html`
      * ` `markdown`
      *
-     * Default value: `plain` and `html`.
+     * Default value: [VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML]
      */
     @get:Input
     @get:Optional
-    abstract val verificationReportsFormats: ListProperty<String>
+    abstract val verificationReportsFormats: ListProperty<VerificationReportsFormats>
 
     /**
      * The path to the directory where IDEs used for the verification will be downloaded.
@@ -707,5 +707,22 @@ abstract class RunPluginVerifierTask @Inject constructor(
             @JvmField
             val NONE: EnumSet<FailureLevel> = EnumSet.noneOf(FailureLevel::class.java)
         }
+    }
+
+    @Suppress("unused")
+    enum class VerificationReportsFormats {
+        PLAIN,
+        HTML,
+        MARKDOWN;
+
+        companion object {
+            @JvmField
+            val ALL: EnumSet<VerificationReportsFormats> = EnumSet.allOf(VerificationReportsFormats::class.java)
+
+            @JvmField
+            val NONE: EnumSet<VerificationReportsFormats> = EnumSet.noneOf(VerificationReportsFormats::class.java)
+        }
+
+        override fun toString() = name.lowercase()
     }
 }
