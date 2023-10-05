@@ -515,9 +515,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
             args.add(ignoredProblems.get().absolutePath)
         }
 
-        if (freeArgs.orNull != null) {
-            val freeArgs = freeArgs.get()
-            args.addAll(freeArgs)
+        freeArgs.orNull?.let {
+            args.addAll(it)
         }
 
         return args
