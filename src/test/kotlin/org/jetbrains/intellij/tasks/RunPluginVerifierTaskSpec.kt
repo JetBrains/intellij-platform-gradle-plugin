@@ -10,6 +10,10 @@ import org.jetbrains.intellij.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_N
 import org.jetbrains.intellij.IntelliJPluginSpecBase
 import org.junit.Assert.*
 import java.net.URL
+import java.util.*
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createTempFile
+import kotlin.io.path.writeLines
 import kotlin.test.Test
 
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
@@ -223,6 +227,32 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             val ideVersionDir = ideDirs.first()
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
             assertTrue(reportFiles.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun `set ignored problems file`() {
+        writeJavaFileWithPluginProblems(classNameSuffix = UUID.randomUUID().toString().replace("-", ""))
+        writePluginXmlFile()
+
+        val lines = listOf("MyName:1.0.0:Reference to a missing property.*")
+        val ignoredProblems = createTempFile("ignored-problems", ".txt")
+            .writeLines(lines)
+        val ignoredProblemsFilePath = ignoredProblems.absolutePathString()
+
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ignoredProblems = file("$ignoredProblemsFilePath")
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
+            assertContains("Compatible. 1 usage of scheduled for removal API and 1 usage of deprecated API. 1 usage of internal API", it.output)
+            assertNotContains("Reference to a missing property", it.output)
         }
     }
 
@@ -450,6 +480,31 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             
                 public static void main(@NotNull String[] strings) {
                     StringUtil.escapeXml("<foo>");
+                }
+            }
+            """.trimIndent()
+        )
+    }
+
+    private fun writeJavaFileWithPluginProblems(classNameSuffix: String) {
+        @Suppress("UnresolvedPropertyKey", "ResultOfMethodCallIgnored")
+        file("src/main/java/App$classNameSuffix.java").java(
+            """  
+            class App$classNameSuffix {
+                public static String message(@org.jetbrains.annotations.PropertyKey(resourceBundle = "messages.ActionsBundle") String key, Object... params) {
+                    return null;
+                }
+            
+                public static void main(String[] args) {
+                    App$classNameSuffix.message("somemessage", "someparam1");
+                
+                    System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theProject);
+                    
+                    com.intellij.openapi.project.ProjectCoreUtil util = new com.intellij.openapi.project.ProjectCoreUtil();
+                    System.out.println(util.theProject);
+                    
+                    System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
+                    com.intellij.openapi.components.ServiceManager.getService(String.class);
                 }
             }
             """.trimIndent()

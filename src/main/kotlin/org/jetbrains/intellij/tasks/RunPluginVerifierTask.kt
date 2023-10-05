@@ -264,6 +264,13 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:Optional
     abstract val subsystemsToCheck: Property<String>
 
+    /**
+     * A file that contains a list of problems that will be ignored in a report.
+     */
+    @get:Input
+    @get:Optional
+    abstract val ignoredProblems: Property<File>
+
     @get:Internal
     abstract val ideDir: Property<File>
 
@@ -494,6 +501,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
             args.add("-verification-reports-formats")
             args.add(verificationReportsFormats.get().joinToString(","))
         }
+        if (ignoredProblems.orNull != null) {
+            args.add("-ignored-problems")
+            args.add(ignoredProblems.get().absolutePath)
+        }
+
         return args
     }
 
