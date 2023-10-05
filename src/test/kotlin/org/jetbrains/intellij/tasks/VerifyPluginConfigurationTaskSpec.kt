@@ -127,6 +127,12 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not report too high patch number in Kotlin apiVersion`() {
+        gradleProperties.properties(
+            """
+            kotlin.incremental.useClasspathSnapshot = false
+            """.trimIndent()
+        )
+
         pluginXml.xml(
             """
             <idea-plugin>
@@ -184,6 +190,12 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not report too low patch number in Kotlin languageVersion`() {
+        gradleProperties.properties(
+            """
+            kotlin.incremental.useClasspathSnapshot = false
+            """.trimIndent()
+        )
+
         buildFile.groovy(
             """
             compileKotlin {
