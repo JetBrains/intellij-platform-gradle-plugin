@@ -5,9 +5,11 @@
 ### Added
 
 - Configure all tasks that extend task classes instead of just those created by the plugin
-- Make JbrResolver prefer Gradle javaToolchains by `JetBrains s.r.o`, if available. Only otherwise start fetching and running a new one.
+- Make `JbrResolver` prefer Gradle `javaToolchains` by `JetBrains` vendor, if already available.
 - Support for Kotlin Coroutines debugging
 - Detect and warn if project adds an explicit dependency on Kotlin Coroutines library
+- `RunPluginVerifierTask`: new `runPluginVerifier.verificationReportsFormats` property to control verifier output formats
+- `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with list of problems to be ignored in a report
 
 ### Changed
 
