@@ -31,7 +31,6 @@ class VersionTest {
         assertTrue(Version.parse("2021.1.2") > Version.parse("2021.1"))
         assertTrue(Version.parse("2021.1.2") > Version.parse("2021"))
         assertTrue(Version.parse("2021.1.2") > Version.parse("2020"))
-        assertTrue(Version.parse("2021.1.2") > Version.parse("2020"))
         assertEquals(Version.parse("2021.1.0-snapshot"), Version.parse("2021.1.0-SNAPSHOT"))
         assertTrue(Version.parse("2021.1.2-SNAPSHOT.2") > Version.parse("2021.1.2-SNAPSHOT.1"))
         assertTrue(Version.parse("2021.1.2") > Version.parse("2021.1.2-SNAPSHOT.1"))

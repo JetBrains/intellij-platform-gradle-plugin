@@ -12,6 +12,9 @@
 - `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with list of problems to be ignored in a report
 - `RunPluginVerifierTask`: new `runPluginVerifier.freeArgs` property to let pass to the IntelliJ Plugin Verifier custom arguments
 
+### Fixed
+- Misleading message about Kotlin API version [#1463](../../issues/1463)
+
 ### Changed
 
 - Disabled caching for `BuildPluginTask`
