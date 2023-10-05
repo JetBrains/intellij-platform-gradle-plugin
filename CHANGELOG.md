@@ -12,16 +12,14 @@
 - `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with list of problems to be ignored in a report
 - `RunPluginVerifierTask`: new `runPluginVerifier.freeArgs` property to let pass to the IntelliJ Plugin Verifier custom arguments
 
-### Fixed
-- Misleading message about Kotlin API version [#1463](../../issues/1463)
-
 ### Changed
 
 - Disabled caching for `BuildPluginTask`
 
 ### Fixed
 
-- `NoClassDefFoundError: org/gradle/api/publish/ivy/internal/publication/DefaultIvyPublicationIdentity` in Gradle 8.4
+- `NoClassDefFoundError: org/gradle/api/publish/ivy/internal/publication/DefaultIvyPublicationIdentity` in Gradle 8.4 [#1469](../../issues/1469)
+- Misleading message about Kotlin API version [#1463](../../issues/1463)
 
 ## [1.15.0] - 2023-07-07
 
