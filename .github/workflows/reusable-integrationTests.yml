@@ -17,7 +17,7 @@ jobs:
       matrix:
         gradleVersion:
           - "7.6"
-          - "8.3"
+          - "8.4"
         os:
           - windows-latest
           - ubuntu-latest
