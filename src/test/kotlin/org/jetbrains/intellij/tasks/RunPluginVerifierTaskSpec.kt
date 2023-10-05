@@ -8,7 +8,7 @@ import org.jetbrains.intellij.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.IntelliJPluginSpecBase
-import org.junit.Assert.*
+import org.junit.Assert
 import java.net.URL
 import java.util.*
 import kotlin.io.path.absolutePathString
@@ -163,11 +163,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             assertContains("Verification reports directory: $directory", buildResult.output)
             val ideDirs = reportsDirectory.listFiles()
             if (ideDirs.isEmpty()) {
-                fail("Verification reports directory not found")
+                Assert.fail("Verification reports directory not found")
             }
             val ideVersionDir = ideDirs.first()
             val markdownReportFiles = ideVersionDir.listFilesOrdered { it.extension == "md" }
-            assertEquals(1, markdownReportFiles.size)
+            Assert.assertEquals(1, markdownReportFiles.size)
         }
     }
 
@@ -193,11 +193,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             assertContains("Verification reports directory: $directory", buildResult.output)
             val ideDirs = reportsDirectory.listFiles()
             if (ideDirs.isEmpty()) {
-                fail("Verification reports directory not found")
+                Assert.fail("Verification reports directory not found")
             }
             val ideVersionDir = ideDirs.first()
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
-            assertTrue(reportFiles.isEmpty())
+            Assert.assertTrue(reportFiles.isEmpty())
         }
     }
 
@@ -222,11 +222,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             assertContains("Verification reports directory: $directory", buildResult.output)
             val ideDirs = reportsDirectory.listFiles()
             if (ideDirs.isEmpty()) {
-                fail("Verification reports directory not found")
+                Assert.fail("Verification reports directory not found")
             }
             val ideVersionDir = ideDirs.first()
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
-            assertTrue(reportFiles.isNotEmpty())
+            Assert.assertTrue(reportFiles.isNotEmpty())
         }
     }
 
@@ -456,6 +456,56 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    @Test
+    fun `pass on CLI arguments passed as free args`() {
+        writeJavaFileWithDeprecation()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["2022.2.3"]
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"                
+                freeArgs = [ "-verification-reports-formats", "plain" ] 
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles() ?: emptyArray()
+            if (ideDirs.isEmpty()) {
+                Assert.fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            Assert.assertTrue(reportFiles.isEmpty())
+        }
+    }
+
+    @Test
+    fun `pass on CLI arguments the internal API usage mode as a free arg`() {
+        writeJavaFileWithInternalApiUsage()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["2023.1"]
+                freeArgs = [ "-suppress-internal-api-usages", "jetbrains-plugins" ] 
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            assertNotContains("Internal API usages (2):", buildResult.output)
+        }
+    }
+
     private fun warmupGradle() {
         buildFile.groovy(
             """
@@ -505,6 +555,18 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
                     
                     System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
                     com.intellij.openapi.components.ServiceManager.getService(String.class);
+                }
+            }
+            """.trimIndent()
+        )
+    }
+
+    private fun writeJavaFileWithInternalApiUsage() {
+        file("src/main/java/App.java").java(
+            """  
+            class App {
+                public static void main(String[] args) {
+                    new com.intellij.DynamicBundle.LanguageBundleEP();
                 }
             }
             """.trimIndent()

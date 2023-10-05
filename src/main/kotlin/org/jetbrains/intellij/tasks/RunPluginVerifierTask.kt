@@ -113,6 +113,15 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val verifierPath: Property<String>
 
     /**
+     * Free arguments passed to the IntelliJ Plugin Verifier exactly as specified.
+     *
+     * They can be used in addition to the arguments that are provided by dedicated options.
+     */
+    @get:Input
+    @get:Optional
+    abstract val freeArgs: ListProperty<String>
+
+    /**
      * JAR or ZIP file of the plugin to verify.
      * If empty, the task will be skipped.
      *
@@ -504,6 +513,11 @@ abstract class RunPluginVerifierTask @Inject constructor(
         if (ignoredProblems.orNull != null) {
             args.add("-ignored-problems")
             args.add(ignoredProblems.get().absolutePath)
+        }
+
+        if (freeArgs.orNull != null) {
+            val freeArgs = freeArgs.get()
+            args.addAll(freeArgs)
         }
 
         return args
