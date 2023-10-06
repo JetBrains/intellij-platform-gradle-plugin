@@ -239,7 +239,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         val lines = listOf("MyName:1.0.0:Reference to a missing property.*")
         val ignoredProblems = createTempFile("ignored-problems", ".txt")
             .writeLines(lines)
-        val ignoredProblemsFilePath = ignoredProblems.absolutePathString()
+        val ignoredProblemsFilePath = adjustWindowsPath(ignoredProblems.absolutePathString())
 
         buildFile.groovy(
             """
