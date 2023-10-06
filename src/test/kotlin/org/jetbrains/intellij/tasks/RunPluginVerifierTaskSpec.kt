@@ -148,10 +148,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginXmlFile()
         buildFile.groovy(
             """
+            import org.jetbrains.intellij.tasks.RunPluginVerifierTask.VerificationReportsFormats
+            
             version = "1.0.0"
             
             runPluginVerifier {
-                verificationReportsFormats = [ "markdown", "plain" ]
+                verificationReportsFormats = [ VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN ]
                 verificationReportsDir = "${'$'}{project.buildDir}/foo"
                 ideVersions = ["IC-2020.2.3"]
             }
