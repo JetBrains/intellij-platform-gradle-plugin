@@ -113,6 +113,15 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val verifierPath: Property<String>
 
     /**
+     * Free arguments passed to the IntelliJ Plugin Verifier exactly as specified.
+     *
+     * They can be used in addition to the arguments that are provided by dedicated options.
+     */
+    @get:Input
+    @get:Optional
+    abstract val freeArgs: ListProperty<String>
+
+    /**
      * JAR or ZIP file of the plugin to verify.
      * If empty, the task will be skipped.
      *
@@ -131,6 +140,20 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:OutputDirectory
     @get:Optional
     abstract val verificationReportsDir: Property<String>
+
+    /**
+     * The output formats of the verification reports.
+     *
+     * Accepted values:
+     * - `plain` for console output
+     * - `html`
+     * ` `markdown`
+     *
+     * Default value: [VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML]
+     */
+    @get:Input
+    @get:Optional
+    abstract val verificationReportsFormats: ListProperty<VerificationReportsFormats>
 
     /**
      * The path to the directory where IDEs used for the verification will be downloaded.
@@ -249,6 +272,13 @@ abstract class RunPluginVerifierTask @Inject constructor(
     @get:Input
     @get:Optional
     abstract val subsystemsToCheck: Property<String>
+
+    /**
+     * A file that contains a list of problems that will be ignored in a report.
+     */
+    @get:Input
+    @get:Optional
+    abstract val ignoredProblems: Property<File>
 
     @get:Internal
     abstract val ideDir: Property<File>
@@ -441,7 +471,15 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
      */
-    private fun requiresJava11() = resolveVerifierVersion(verifierVersion.orNull).let(Version::parse) >= Version(1, 260)
+    private fun requiresJava11() = currentVersion.let(Version::parse) >= Version(1, 260)
+
+    /**
+     * Check that the Plugin Verifier supports the Verification reports output formats.
+     * This is available only in version 1.304 and later.
+     *
+     * The previous versions do not support the corresponding versions properly, leading to CLI argument parsing errors.
+     */
+    private fun supportsVerificationReportOutputFormats() = currentVersion.let(Version::parse) >= Version(1, 304)
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
@@ -468,6 +506,18 @@ abstract class RunPluginVerifierTask @Inject constructor(
         if (offline.get()) {
             args.add("-offline")
         }
+        if (supportsVerificationReportOutputFormats()) {
+            args.add("-verification-reports-formats")
+            args.add(verificationReportsFormats.get().joinToString(","))
+        }
+        if (ignoredProblems.orNull != null) {
+            args.add("-ignored-problems")
+            args.add(ignoredProblems.get().absolutePath)
+        }
+
+        freeArgs.orNull?.let {
+            args.addAll(it)
+        }
 
         return args
     }
@@ -476,15 +526,12 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
      * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
      *
-     * @TODO: Remove `forUseAtConfigurationTime` when Gradle 7+ is used
      * @return Plugin Verifier home directory
      */
-    @Suppress("DEPRECATION")
     private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir")
-        .forUseAtConfigurationTime()
         .map { Path.of(it) }
-        .orElse(providers.environmentVariable("XDG_CACHE_HOME").forUseAtConfigurationTime().map { Path.of(it).resolve("pluginVerifier") })
-        .orElse(providers.systemProperty("user.home").forUseAtConfigurationTime().map { Path.of(it).resolve(".cache/pluginVerifier") })
+        .orElse(providers.environmentVariable("XDG_CACHE_HOME").map { Path.of(it).resolve("pluginVerifier") })
+        .orElse(providers.systemProperty("user.home").map { Path.of(it).resolve(".cache/pluginVerifier") })
         .orElse(temporaryDir.toPath().resolve("pluginVerifier"))
 
     /**
@@ -493,7 +540,10 @@ abstract class RunPluginVerifierTask @Inject constructor(
      *
      * @return Plugin Verifier version
      */
-    internal fun resolveVerifierVersion(version: String?) = version?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+    @get:Internal
+    internal val currentVersion by lazy {
+        verifierVersion.orNull?.takeIf { it != VERSION_LATEST } ?: resolveLatestVersion()
+    }
 
     /**
      * Resolves the IDE type and version. If only `version` is provided, `type` is set to "IC".
@@ -680,5 +730,22 @@ abstract class RunPluginVerifierTask @Inject constructor(
             @JvmField
             val NONE: EnumSet<FailureLevel> = EnumSet.noneOf(FailureLevel::class.java)
         }
+    }
+
+    @Suppress("unused")
+    enum class VerificationReportsFormats {
+        PLAIN,
+        HTML,
+        MARKDOWN;
+
+        companion object {
+            @JvmField
+            val ALL: EnumSet<VerificationReportsFormats> = EnumSet.allOf(VerificationReportsFormats::class.java)
+
+            @JvmField
+            val NONE: EnumSet<VerificationReportsFormats> = EnumSet.noneOf(VerificationReportsFormats::class.java)
+        }
+
+        override fun toString() = name.lowercase()
     }
 }

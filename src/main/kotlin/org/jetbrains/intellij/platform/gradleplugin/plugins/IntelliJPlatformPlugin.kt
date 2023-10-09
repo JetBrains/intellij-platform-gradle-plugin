@@ -577,6 +577,12 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             verificationReportsDir.convention(
                 project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath }
             )
+            verificationReportsFormats.convention(
+                EnumSet.of(
+                    RunPluginVerifierTask.VerificationReportsFormats.PLAIN,
+                    RunPluginVerifierTask.VerificationReportsFormats.HTML,
+                )
+            )
             downloadDir.convention(ideDownloadDir().map {
                 it.toFile().invariantSeparatorsPath
             })
@@ -599,14 +605,13 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 listProductsReleasesTask.outputFile.asFile
             })
             verifierPath.convention(project.provider {
-                val resolvedVerifierVersion = resolveVerifierVersion(verifierVersion.orNull)
-                debug(context, "Using Verifier in '$resolvedVerifierVersion' version")
+                debug(context, "Using Verifier in '$currentVersion' version")
 
                 dependenciesDownloader.downloadFromRepository(taskContext, {
                     create(
                         group = "org.jetbrains.intellij.plugins",
                         name = "verifier-cli",
-                        version = resolvedVerifierVersion,
+                        version = currentVersion,
                         classifier = "all",
                         ext = "jar",
                     )

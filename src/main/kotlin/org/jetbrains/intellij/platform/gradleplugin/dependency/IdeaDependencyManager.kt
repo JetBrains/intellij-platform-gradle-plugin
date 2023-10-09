@@ -9,7 +9,6 @@ import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.ResolveException
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
-import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradleplugin.*
@@ -179,7 +178,7 @@ abstract class IdeaDependencyManager @Inject constructor(
         }
 
         if (directory == null || !ivyFile.exists()) {
-            val identity = DefaultIvyPublicationIdentity("com.jetbrains", dependency.name, dependency.version)
+            val identity = IntelliJIvyDescriptorFileGenerator.IvyCoordinates("com.jetbrains", dependency.name, dependency.version)
             IntelliJIvyDescriptorFileGenerator(identity).apply {
                 addConfiguration(DefaultIvyConfiguration("default"))
                 addConfiguration(DefaultIvyConfiguration("compile"))

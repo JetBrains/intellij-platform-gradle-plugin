@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.provider.Provider
 import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
-import org.gradle.api.publish.ivy.internal.publication.DefaultIvyPublicationIdentity
 import org.gradle.kotlin.dsl.create
 import org.gradle.tooling.BuildException
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJIvyDescriptorFileGenerator
@@ -137,7 +136,7 @@ abstract class PluginDependencyManager @Inject constructor(
         val pluginFqn = plugin.getFqn()
         val groupId = groupId(plugin.channel)
         val ivyFile = Path.of(cacheDirectoryPath).resolve(groupId).resolve("$pluginFqn.xml").takeUnless { it.exists() } ?: return
-        val identity = DefaultIvyPublicationIdentity(groupId, plugin.id, plugin.version)
+        val identity = IntelliJIvyDescriptorFileGenerator.IvyCoordinates(groupId, plugin.id, plugin.version)
         IntelliJIvyDescriptorFileGenerator(identity)
             .addConfiguration(DefaultIvyConfiguration("default"))
             .addCompileArtifacts(plugin, baseDir, groupId)

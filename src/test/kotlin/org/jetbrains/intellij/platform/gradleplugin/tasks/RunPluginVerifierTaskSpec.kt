@@ -3,11 +3,18 @@
 package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import org.apache.commons.io.FileUtils
+import org.gradle.kotlin.dsl.support.listFilesOrdered
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginSpecBase
+import org.junit.Assert
 import java.net.URL
+import java.util.*
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createTempFile
+import kotlin.io.path.writeLines
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
@@ -132,6 +139,123 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             val directory = file("build/foo").canonicalPath
             assertContains("Verification reports directory: $directory", it.output)
+        }
+    }
+
+    @Test
+    fun `set verification reports output formats`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            import org.jetbrains.intellij.tasks.RunPluginVerifierTask.VerificationReportsFormats
+            
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                verificationReportsFormats = [ VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN ]
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"
+                ideVersions = ["IC-2020.2.3"]
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles()
+            if (ideDirs.isEmpty()) {
+                Assert.fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val markdownReportFiles = ideVersionDir.listFilesOrdered { it.extension == "md" }
+            Assert.assertEquals(1, markdownReportFiles.size)
+        }
+    }
+
+    @Test
+    fun `set verification reports with empty set of output formats`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                verificationReportsFormats = []
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"
+                ideVersions = ["IC-2020.2.3"]
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles()
+            if (ideDirs.isEmpty()) {
+                Assert.fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            Assert.assertTrue(reportFiles.isEmpty())
+        }
+    }
+
+    @Test
+    fun `set verification reports with default settings`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"
+                ideVersions = ["IC-2020.2.3"]
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles()
+            if (ideDirs.isEmpty()) {
+                Assert.fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            Assert.assertTrue(reportFiles.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun `set ignored problems file`() {
+        writeJavaFileWithPluginProblems(classNameSuffix = UUID.randomUUID().toString().replace("-", ""))
+        writePluginXmlFile()
+
+        val lines = listOf("MyName:1.0.0:Reference to a missing property.*")
+        val ignoredProblems = createTempFile("ignored-problems", ".txt")
+            .writeLines(lines)
+        val ignoredProblemsFilePath = adjustWindowsPath(ignoredProblems.absolutePathString())
+
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ignoredProblems = file("$ignoredProblemsFilePath")
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
+            assertContains("Compatible. 1 usage of scheduled for removal API and 1 usage of deprecated API. 1 usage of internal API", it.output)
+            assertNotContains("Reference to a missing property", it.output)
         }
     }
 
@@ -333,6 +457,57 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         }
     }
 
+    @Test
+    @Ignore
+    fun `pass on CLI arguments passed as free args`() {
+        writeJavaFileWithDeprecation()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["2022.2.3"]
+                verificationReportsDir = "${'$'}{project.buildDir}/foo"                
+                freeArgs = [ "-verification-reports-formats", "plain" ] 
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            val reportsDirectory = file("build/foo")
+            val directory = reportsDirectory.canonicalPath
+            assertContains("Verification reports directory: $directory", buildResult.output)
+            val ideDirs = reportsDirectory.listFiles() ?: emptyArray()
+            if (ideDirs.isEmpty()) {
+                Assert.fail("Verification reports directory not found")
+            }
+            val ideVersionDir = ideDirs.first()
+            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            Assert.assertTrue(reportFiles.isEmpty())
+        }
+    }
+
+    @Test
+    fun `pass on CLI arguments the internal API usage mode as a free arg`() {
+        writeJavaFileWithInternalApiUsage()
+        writePluginXmlFile()
+        buildFile.groovy(
+            """
+            version = "1.0.0"
+            
+            runPluginVerifier {
+                ideVersions = ["2023.1"]
+                freeArgs = [ "-suppress-internal-api-usages", "jetbrains-plugins" ] 
+            }
+            """.trimIndent()
+        )
+
+        build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
+            assertNotContains("Internal API usages (2):", buildResult.output)
+        }
+    }
+
     private fun warmupGradle() {
         buildFile.groovy(
             """
@@ -357,6 +532,43 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             
                 public static void main(@NotNull String[] strings) {
                     StringUtil.escapeXml("<foo>");
+                }
+            }
+            """.trimIndent()
+        )
+    }
+
+    private fun writeJavaFileWithPluginProblems(classNameSuffix: String) {
+        @Suppress("UnresolvedPropertyKey", "ResultOfMethodCallIgnored")
+        file("src/main/java/App$classNameSuffix.java").java(
+            """  
+            class App$classNameSuffix {
+                public static String message(@org.jetbrains.annotations.PropertyKey(resourceBundle = "messages.ActionsBundle") String key, Object... params) {
+                    return null;
+                }
+            
+                public static void main(String[] args) {
+                    App$classNameSuffix.message("somemessage", "someparam1");
+                
+                    System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theProject);
+                    
+                    com.intellij.openapi.project.ProjectCoreUtil util = new com.intellij.openapi.project.ProjectCoreUtil();
+                    System.out.println(util.theProject);
+                    
+                    System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
+                    com.intellij.openapi.components.ServiceManager.getService(String.class);
+                }
+            }
+            """.trimIndent()
+        )
+    }
+
+    private fun writeJavaFileWithInternalApiUsage() {
+        file("src/main/java/App.java").java(
+            """  
+            class App {
+                public static void main(String[] args) {
+                    new com.intellij.DynamicBundle.LanguageBundleEP();
                 }
             }
             """.trimIndent()
