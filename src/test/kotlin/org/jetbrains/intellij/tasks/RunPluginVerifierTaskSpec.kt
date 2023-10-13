@@ -138,7 +138,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
             val directory = file("build/foo").canonicalPath
-            assertContains("Verification reports directory: $directory", it.output)
+            assertContains("Verification reports for MyName:1.0.0 saved to $directory", it.output)
         }
     }
 
@@ -163,7 +163,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", buildResult.output)
+            assertContains("Verification reports for MyName:1.0.0 saved to $directory", buildResult.output)
             val ideDirs = reportsDirectory.listFiles()
             if (ideDirs.isEmpty()) {
                 Assert.fail("Verification reports directory not found")
@@ -193,7 +193,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", buildResult.output)
+            assertContains("Verification reports for MyName:1.0.0 saved to $directory", buildResult.output)
             val ideDirs = reportsDirectory.listFiles()
             if (ideDirs.isEmpty()) {
                 Assert.fail("Verification reports directory not found")
@@ -222,7 +222,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", buildResult.output)
+            assertContains("Verification reports for MyName:1.0.0 saved to $directory", buildResult.output)
             val ideDirs = reportsDirectory.listFiles()
             if (ideDirs.isEmpty()) {
                 Assert.fail("Verification reports directory not found")
@@ -479,7 +479,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         build(RUN_PLUGIN_VERIFIER_TASK_NAME).let { buildResult ->
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", buildResult.output)
+            assertContains("Verification reports for MyName:1.0.0 saved to $directory", buildResult.output)
             val ideDirs = reportsDirectory.listFiles() ?: emptyArray()
             if (ideDirs.isEmpty()) {
                 Assert.fail("Verification reports directory not found")
