@@ -11,7 +11,7 @@ kotlinxSerializationJson = "1.6.1"
 retrofit = "2.9.0"
 
 # plugins
-dokka = "1.9.0"
+dokka = "1.9.10"
 gradlePluginPublish = "1.2.1"
 gradleChangelogPlugin = "2.2.0"
 
