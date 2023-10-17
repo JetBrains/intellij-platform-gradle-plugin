@@ -2,18 +2,14 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.tasks.base
 
-import org.gradle.api.GradleException
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradleplugin.*
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.GITHUB_REPOSITORY
-import org.jetbrains.intellij.platform.gradleplugin.jbr.JbrResolver
+import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.LaunchSystemArgumentProvider
 import java.io.File
 import java.nio.file.Path
 
@@ -34,73 +30,16 @@ abstract class RunIdeBase : JavaExec() {
     @get:Input
     abstract val ideDir: Property<File>
 
-    /**
-     * Custom JBR version to use for running the IDE.
-     *
-     * All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
-     *
-     * Accepted values:
-     * - `8u112b752.4`
-     * - `8u202b1483.24`
-     * - `11_0_2b159`
-     */
-    @get:Input
-    @get:Optional
-    abstract val jbrVersion: Property<String>
 
-    /**
-     * JetBrains Runtime variant to use when running the IDE with the plugin.
-     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases).
-     *
-     * Default value: `null`
-     *
-     * Acceptable values:
-     * - `jcef`
-     * - `sdk`
-     * - `fd`
-     * - `dcevm`
-     * - `nomod`
-     *
-     * Note: For `JBR 17`, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomod` variants are no longer available.
-     *
-     * **Accepted values:**
-     * - `8u112b752.4`
-     * - `8u202b1483.24`
-     * - `11_0_2b159`
-     *
-     * All JetBrains Java versions are available at JetBrains Space Packages and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
-     */
-    @get:Input
-    @get:Optional
-    abstract val jbrVariant: Property<String>
-
-    /**
-     * JetBrains Runtime architecture.
-     * By default, it's resolved based on the current OS and JRE architecture, see [JbrResolver.JbrArtifact.arch].
-     */
-    @get:Input
-    @get:Optional
-    abstract val jbrArch: Property<String>
-
-    /**
-     * Path to the `plugins` directory within the sandbox prepared with [PrepareSandboxTask].
-     * Provided to the `idea.plugins.path` system property.
-     *
-     * Default value: [PrepareSandboxTask.getDestinationDir]
-     */
-    @get:InputDirectory
-    @get:Classpath
-    abstract val pluginsDir: DirectoryProperty
-
-    /**
-     * Enables auto-reload of dynamic plugins.
-     * Dynamic plugins will be reloaded automatically when their JARs are modified.
-     * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.
-     * Enabled by default in 2020.2 and higher.
-     */
-    @get:Input
-    @get:Optional
-    abstract val autoReloadPlugins: Property<Boolean>
+//    /**
+//     * Enables auto-reload of dynamic plugins.
+//     * Dynamic plugins will be reloaded automatically when their JARs are modified.
+//     * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.
+//     * Enabled by default in 2020.2 and higher.
+//     */
+//    @get:Input
+//    @get:Optional
+//    abstract val autoReloadPlugins: Property<Boolean>
 
     /**
      * List of plugins required to be present when running the IDE.
@@ -109,23 +48,6 @@ abstract class RunIdeBase : JavaExec() {
     @get:Internal
     abstract val requiredPluginIds: ListProperty<String>
 
-    /**
-     * Path to the `config` directory within the sandbox prepared with [PrepareSandboxTask].
-     * Provided to the `idea.config.path` system property.
-     *
-     * Default value: [PrepareSandboxTask.configDir]
-     */
-    @get:Internal
-    abstract val configDir: Property<File>
-
-    /**
-     * Path to the `system` directory within the sandbox prepared with [PrepareSandboxTask].
-     * Provided to the `idea.system.path` system property.
-     *
-     * Default value: [IntelliJPluginExtension.sandboxDir]/system
-     */
-    @get:Internal
-    abstract val systemDir: Property<File>
 
     /**
      * The IDEA binary working directory.
@@ -186,8 +108,8 @@ abstract class RunIdeBase : JavaExec() {
                 classpath += objectFactory.fileCollection().from(it)
             }
 
-        classpath += getIdeaClasspath(ideDirPath)
-            .let { objectFactory.fileCollection().from(it) }
+//        classpath += getIdeaClasspath(ideDirPath)
+//            .let { objectFactory.fileCollection().from(it) }
     }
 
     /**
@@ -196,15 +118,15 @@ abstract class RunIdeBase : JavaExec() {
     private fun configureSystemProperties() {
         systemProperties(systemProperties)
 
-        jvmArgumentProviders.add(
-            LaunchSystemArgumentProvider(
-                ideDirPath,
-                configDir.get(),
-                systemDir.get(),
-                pluginsDir.get().asFile,
-                requiredPluginIds.get(),
-            )
-        )
+//        jvmArgumentProviders.add(
+//            LaunchSystemArgumentProvider(
+//                ideDirPath,
+//                configDir.get(),
+//                systemDir.get(),
+//                pluginsDir.get().asFile,
+//                requiredPluginIds.get(),
+//            )
+//        )
 
         val operatingSystem = OperatingSystem.current()
         val userDefinedSystemProperties = systemProperties
@@ -221,19 +143,12 @@ abstract class RunIdeBase : JavaExec() {
         systemPropertyIfNotDefined("idea.is.internal", true, userDefinedSystemProperties)
         systemPropertyIfNotDefined("jdk.module.illegalAccess.silent", true, userDefinedSystemProperties)
 
-        if (!userDefinedSystemProperties.containsKey("idea.auto.reload.plugins") && autoReloadPlugins.get()) {
-            systemProperty("idea.auto.reload.plugins", "true")
-        }
+//        if (!userDefinedSystemProperties.containsKey("idea.auto.reload.plugins") && autoReloadPlugins.get()) {
+//            systemProperty("idea.auto.reload.plugins", "true")
+//        }
 
         if (!systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = ideDir.get().toPath().productInfo().productCode
-                ?: throw TaskExecutionException(
-                    this,
-                    GradleException(
-                        "Cannot find IDE platform prefix. Please create a bug report at $GITHUB_REPOSITORY. " +
-                                "As a workaround specify `idea.platform.prefix` system property for task `${this.name}` manually."
-                    )
-                )
 
             systemProperty("idea.platform.prefix", prefix)
             info(context, "Using idea.platform.prefix=$prefix")

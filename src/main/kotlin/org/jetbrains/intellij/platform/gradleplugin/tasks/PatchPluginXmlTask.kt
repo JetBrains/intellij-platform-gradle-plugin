@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
+import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -12,7 +13,7 @@ import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
-import org.jetbrains.intellij.platform.gradleplugin.tasks.base.IdeVersionAwareTask
+import org.jetbrains.intellij.platform.gradleplugin.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradleplugin.transformXml
 import org.jetbrains.intellij.platform.gradleplugin.warn
 import java.io.File
@@ -26,7 +27,7 @@ import kotlin.io.path.inputStream
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
  */
 @CacheableTask
-abstract class PatchPluginXmlTask : IdeVersionAwareTask() {
+abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
 
     @get:SkipWhenEmpty
     @get:InputFile
@@ -147,10 +148,10 @@ abstract class PatchPluginXmlTask : IdeVersionAwareTask() {
         val inputPath = inputFile.get().toPath()
         val outputPath = outputFile.get().toPath()
 
-        val sinceBuildValue = sinceBuild.orNull ?: with(ideVersion) {
+        val sinceBuildValue = sinceBuild.orNull ?: with(platformVersion) {
             "$baselineVersion.$build"
         }
-        val untilBuildValue = untilBuild.orNull ?: with(ideVersion) {
+        val untilBuildValue = untilBuild.orNull ?: with(platformVersion) {
             "$baselineVersion.*"
         }
 

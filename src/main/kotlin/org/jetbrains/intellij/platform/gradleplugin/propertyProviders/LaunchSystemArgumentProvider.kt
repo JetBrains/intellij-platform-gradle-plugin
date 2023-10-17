@@ -2,20 +2,20 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.propertyProviders
 
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
-import org.jetbrains.intellij.platform.gradleplugin.productInfo
+import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
-import java.io.File
 import java.nio.file.Path
 
 class LaunchSystemArgumentProvider(
     @InputDirectory @PathSensitive(RELATIVE) val ideDirectory: Path,
-    @InputDirectory @PathSensitive(RELATIVE) val configDirectory: File,
-    @InputDirectory @PathSensitive(RELATIVE) val systemDirectory: File,
-    @InputDirectory @PathSensitive(RELATIVE) val pluginsDirectory: File,
+    @InputDirectory @PathSensitive(RELATIVE) val configDirectory: DirectoryProperty,
+    @InputDirectory @PathSensitive(RELATIVE) val systemDirectory: DirectoryProperty,
+    @InputDirectory @PathSensitive(RELATIVE) val pluginsDirectory: DirectoryProperty,
     private val requirePluginIds: List<String>,
 ) : CommandLineArgumentProvider {
 
@@ -28,10 +28,10 @@ class LaunchSystemArgumentProvider(
             .map { it.resolveIdeHomeVariable(ideDirectory) }
 
     override fun asArguments() = currentLaunchProperties + listOf(
-        "-Didea.config.path=${configDirectory.absolutePath}",
-        "-Didea.system.path=${systemDirectory.absolutePath}",
-        "-Didea.log.path=${systemDirectory.resolve("log").absolutePath}",
-        "-Didea.plugins.path=${pluginsDirectory.absolutePath}",
+        "-Didea.config.path=${configDirectory.asFile.get().absolutePath}",
+        "-Didea.system.path=${systemDirectory.asFile.get().absolutePath}",
+        "-Didea.log.path=${systemDirectory.asFile.get().resolve("log").absolutePath}",
+        "-Didea.plugins.path=${pluginsDirectory.asFile.get().absolutePath}",
         "-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}",
     )
 }

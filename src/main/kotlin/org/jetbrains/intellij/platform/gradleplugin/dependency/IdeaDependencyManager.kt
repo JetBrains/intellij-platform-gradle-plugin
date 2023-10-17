@@ -14,6 +14,7 @@ import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
+import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradleplugin.utils.DependenciesDownloader
 import java.io.File

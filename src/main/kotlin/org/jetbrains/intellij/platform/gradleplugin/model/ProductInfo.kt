@@ -2,14 +2,19 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.model
 
+import com.jetbrains.plugin.structure.base.utils.readText
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import org.gradle.api.GradleException
 import org.gradle.internal.os.OperatingSystem
+import java.nio.file.Path
+import kotlin.io.path.exists
+import kotlin.io.path.name
 
 @Serializable
 data class ProductInfo(
     val name: String? = null,
-    val version: String? = null,
+    val version: String = "",
     val versionSuffix: String? = null,
     val buildNumber: String = "",
     val productCode: String = "",
@@ -45,11 +50,7 @@ data class ProductInfo(
                 } == it.os && arch == it.arch
             } ?: throw GradleException("Could not find launch information for the current OS: $name ($arch)")
         }.run {
-            copy(
-                additionalJvmArguments = additionalJvmArguments.map {
-                    it.removePrefix("\"").removeSuffix("\"")
-                }
-            )
+            copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') })
         }
 }
 
@@ -75,3 +76,18 @@ data class CustomProperty(
 enum class OS {
     Linux, Windows, macOS
 }
+
+
+internal fun ProductInfo.getBootClasspath(ideDir: Path) =
+    currentLaunch
+        .bootClassPathJarNames
+        .map { "$ideDir/lib/$it" }
+
+internal fun Path.resolveProductInfoPath(name: String = "product-info.json") =
+    listOf(this, resolve(name), resolve("Resources").resolve(name))
+        .find { it.name == name && it.exists() }
+        ?: throw GradleException("Could not resolve $name file in: $this")
+
+private val json = Json { ignoreUnknownKeys = true }
+internal fun Path.productInfo() = resolveProductInfoPath()
+    .run { json.decodeFromString<ProductInfo>(readText()) }

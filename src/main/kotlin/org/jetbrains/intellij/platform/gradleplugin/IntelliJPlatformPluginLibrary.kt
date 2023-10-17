@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradleplugin
 
 import org.gradle.api.component.SoftwareComponent
 
-class IntelliJPluginLibrary : SoftwareComponent {
+class IntelliJPlatformPluginLibrary : SoftwareComponent {
 
-    override fun getName() = "intellij-plugin"
+    override fun getName() = "intellij-platform-plugin"
 }

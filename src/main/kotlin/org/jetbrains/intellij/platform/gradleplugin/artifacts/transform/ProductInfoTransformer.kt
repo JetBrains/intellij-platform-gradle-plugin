@@ -16,7 +16,7 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.asPath
-import org.jetbrains.intellij.platform.gradleplugin.resolveProductInfoPath
+import org.jetbrains.intellij.platform.gradleplugin.model.resolveProductInfoPath
 
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class ProductInfoTransformer : TransformAction<TransformParameters.None> {

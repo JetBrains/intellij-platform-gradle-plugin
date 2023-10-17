@@ -10,7 +10,7 @@ import org.jetbrains.intellij.platform.gradleplugin.debug
 import org.jetbrains.intellij.platform.gradleplugin.model.PluginsCache
 import org.jetbrains.intellij.platform.gradleplugin.model.PluginsCachePlugin
 import org.jetbrains.intellij.platform.gradleplugin.model.XmlExtractor
-import org.jetbrains.intellij.platform.gradleplugin.productInfo
+import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.warn
 import java.io.File
 import java.io.Serializable

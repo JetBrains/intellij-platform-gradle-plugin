@@ -24,7 +24,7 @@ import java.util.jar.Manifest
  * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up to date.
  */
 @UntrackedTask(because = "Should always be run to initialize the plugin")
-abstract class InitializeIntelliJPluginTask : DefaultTask() {
+abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
 
     @get:Internal
     abstract val offline: Property<Boolean>

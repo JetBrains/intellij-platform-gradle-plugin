@@ -11,8 +11,8 @@ const val TASK_NAME = "testJbrResolver"
 class JbrResolverTest : IntelliJPluginSpecBase() {
 
     private val operatingSystem = OperatingSystem.current()
-    private val platform = JbrResolver.JbrArtifact.platform(operatingSystem)
-    private val arch = JbrResolver.JbrArtifact.arch(true)
+    private val platform = ""//JetBrainsRuntimeResolver.JbrArtifact.platform(operatingSystem)
+    private val arch = ""//JetBrainsRuntimeResolver.JbrArtifact.arch(true)
 
     @Test
     fun `resolve 11_0_11b1536_2`() = testJbrResolving("11_0_11b1536.2", "jbr_jcef-11_0_11-$platform-$arch-b1536.2")
@@ -35,7 +35,7 @@ class JbrResolverTest : IntelliJPluginSpecBase() {
     private fun testJbrResolving(version: String, expected: String, variant: String? = null) {
         buildFile.groovy(
             """
-                                    runIde {
+            runIde {
                 jbrVersion = "$version"
                 ${"jbrVariant = \"$variant\"".takeIf { variant != null }.orEmpty()}
             }

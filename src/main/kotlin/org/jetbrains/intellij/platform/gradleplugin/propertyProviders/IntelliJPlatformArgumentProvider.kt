@@ -10,7 +10,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.platform.gradleplugin.productInfo
+import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradleplugin.utils.OpenedPackages
 import java.nio.file.Path
@@ -59,5 +59,5 @@ class IntelliJPlatformArgumentProvider(
 
     override fun asArguments() =
         (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace)
-            .filterNot { it.isNullOrBlank() }
+            .filterNot { it.isBlank() }
 }

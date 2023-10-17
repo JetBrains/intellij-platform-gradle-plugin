@@ -3,8 +3,8 @@
 package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PATCH_PLUGIN_XML_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
@@ -33,7 +33,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -67,7 +67,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -100,7 +100,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -135,7 +135,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -171,7 +171,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -207,7 +207,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -242,7 +242,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -277,7 +277,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -315,7 +315,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -354,7 +354,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -387,7 +387,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+        build(Tasks.PATCH_PLUGIN_XML).let {
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -419,9 +419,9 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME)
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
-            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":$PATCH_PLUGIN_XML_TASK_NAME")?.outcome)
+        build(Tasks.PATCH_PLUGIN_XML)
+        build(Tasks.PATCH_PLUGIN_XML).let {
+            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":${Tasks.PATCH_PLUGIN_XML}")?.outcome)
             assertFileContent(
                 patchedPluginXml.value,
                 """
@@ -451,7 +451,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME)
+        build(Tasks.PATCH_PLUGIN_XML)
 
         buildFile.groovy(
             """
@@ -461,8 +461,8 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PATCH_PLUGIN_XML_TASK_NAME).let {
-            assertNotEquals(TaskOutcome.UP_TO_DATE, it.task(":$PATCH_PLUGIN_XML_TASK_NAME")?.outcome)
+        build(Tasks.PATCH_PLUGIN_XML).let {
+            assertNotEquals(TaskOutcome.UP_TO_DATE, it.task(":${Tasks.PATCH_PLUGIN_XML}")?.outcome)
             assertFileContent(
                 patchedPluginXml.value,
                 """

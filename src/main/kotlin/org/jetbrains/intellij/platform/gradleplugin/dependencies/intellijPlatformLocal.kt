@@ -9,13 +9,14 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradleplugin.BuildException
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Dependencies
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradleplugin.Version
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.model.*
-import org.jetbrains.intellij.platform.gradleplugin.productInfo
 import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -88,3 +89,16 @@ val Project.intellijPlatformLocal: DependencyHandler.(String) -> Dependency?
 
         add(INTELLIJ_PLATFORM_LOCAL_INSTANCE, dependency)
     }
+
+
+internal fun DependencyHandler.create(
+    productInfo: ProductInfo,
+    settings: IntelliJPlatformDependencySettings = intellijPlatformDependencySettings,
+    action: DependencyAction = {},
+) = create(
+    group = Dependencies.INTELLIJ_PLATFORM_LOCAL_GROUP,
+    name = productInfo.productCode,
+    version = productInfo.version,
+).apply {
+    action(this, settings)
+}

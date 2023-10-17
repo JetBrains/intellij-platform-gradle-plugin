@@ -4,9 +4,9 @@ package org.jetbrains.intellij.platform.gradleplugin.tasks
 
 import org.apache.commons.io.FileUtils
 import org.gradle.kotlin.dsl.support.listFilesOrdered
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUILD_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginSpecBase
 import org.junit.Assert
 import java.net.URL
@@ -518,7 +518,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             }
             """.trimIndent()
         )
-        build(BUILD_PLUGIN_TASK_NAME)
+        build(Tasks.BUILD_PLUGIN)
     }
 
     private fun writeJavaFileWithDeprecation() {

@@ -13,8 +13,6 @@ import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
-import kotlinx.serialization.json.Json
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemLocation
@@ -33,7 +31,6 @@ import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_NAME
-import org.jetbrains.intellij.platform.gradleplugin.model.ProductInfo
 import org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformPlugin
 import java.io.File
 import java.io.StringWriter
@@ -100,20 +97,6 @@ internal fun String.resolveIdeHomeVariable(ideDir: Path) =
             }
     }
 
-fun getIdeaClasspath(ideDir: Path) = ideDir
-    .productInfo()
-    .currentLaunch
-    .bootClassPathJarNames
-    .map { "$ideDir/lib/$it" }
-
-internal fun Path.resolveProductInfoPath(name: String = "product-info.json") =
-    listOf(this, resolve(name), resolve("Resources").resolve(name))
-        .find { it.name == name && it.exists() }
-        ?: throw GradleException("Could not resolve $name file in: $this")
-
-private val json = Json { ignoreUnknownKeys = true }
-internal fun Path.productInfo() = resolveProductInfoPath()
-    .run { json.decodeFromString<ProductInfo>(readText()) }
 
 fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
     collectFiles(directory) { it.isJar() && filter.test(it) }
@@ -251,8 +234,3 @@ internal val <T> Property<T>.isSpecified
 
 internal val Project.sourceSets
     get() = extensions.getByName("sourceSets") as SourceSetContainer
-
-internal val Project.gradleIntelliJPlatform
-    get() = layout.projectDirectory.asPath
-        .resolve(".gradle")
-        .resolve("intellijPlatform")

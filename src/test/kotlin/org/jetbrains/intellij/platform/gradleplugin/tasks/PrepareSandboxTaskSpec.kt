@@ -2,10 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.tasks
 
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DEFAULT_SANDBOX
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PREPARE_SANDBOX_TASK_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PREPARE_TESTING_SANDBOX_TASK_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PREPARE_UI_TESTING_SANDBOX_TASK_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DEFAULT_SANDBOX_CONTAINER
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginSpecBase
 import java.io.File
 import java.nio.file.Files.createTempDirectory
@@ -17,7 +15,7 @@ import kotlin.test.assertTrue
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox get() = File(buildDirectory, DEFAULT_SANDBOX)
+    private val sandbox get() = File(buildDirectory, DEFAULT_SANDBOX_CONTAINER)
 
     @Test
     fun `prepare sandbox for two plugins`() {
@@ -81,7 +79,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -176,7 +174,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -227,7 +225,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -276,7 +274,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -351,7 +349,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_UI_TESTING_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_UI_TESTING_SANDBOX)
 
         assertTrue(
             collectPaths(sandbox).containsAll(
@@ -384,7 +382,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -415,7 +413,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -448,7 +446,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -521,7 +519,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         val sandbox = File(sandboxPath)
         assertEquals(
@@ -542,7 +540,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -561,10 +559,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertFileContent(
-            File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
+            File(buildDirectory, "$DEFAULT_SANDBOX_CONTAINER/config/options/updates.xml"),
             """
             <application>
               <component name="UpdatesConfigurable">
@@ -583,7 +581,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/$DEFAULT_SANDBOX_CONTAINER/config/options"), "updates.xml")
         updatesFile.xml(
             """
             <application>
@@ -594,10 +592,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertFileContent(
-            File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
+            File(buildDirectory, "$DEFAULT_SANDBOX_CONTAINER/config/options/updates.xml"),
             """
             <application>
               <component name="SomeOtherComponent">
@@ -619,7 +617,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/$DEFAULT_SANDBOX_CONTAINER/config/options"), "updates.xml")
         updatesFile.xml(
             """
             <application>
@@ -630,10 +628,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertFileContent(
-            File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
+            File(buildDirectory, "$DEFAULT_SANDBOX_CONTAINER/config/options/updates.xml"),
             """
             <application>
               <component name="UpdatesConfigurable">
@@ -653,7 +651,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/$DEFAULT_SANDBOX_CONTAINER/config/options"), "updates.xml")
 
         updatesFile.xml(
             """
@@ -665,10 +663,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertFileContent(
-            File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
+            File(buildDirectory, "$DEFAULT_SANDBOX_CONTAINER/config/options/updates.xml"),
             """
             <application>
               <component name="UpdatesConfigurable">
@@ -687,7 +685,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/$DEFAULT_SANDBOX_CONTAINER/config/options"), "updates.xml")
 
         updatesFile.xml(
             """
@@ -699,10 +697,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertFileContent(
-            File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
+            File(buildDirectory, "$DEFAULT_SANDBOX_CONTAINER/config/options/updates.xml"),
             """
             <application>
               <component name="UpdatesConfigurable">
@@ -721,14 +719,14 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/$DEFAULT_SANDBOX_CONTAINER/config/options"), "updates.xml")
 
         updatesFile.xml("")
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertFileContent(
-            File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
+            File(buildDirectory, "$DEFAULT_SANDBOX_CONTAINER/config/options/updates.xml"),
             """
             <application>
               <component name="UpdatesConfigurable">
@@ -747,7 +745,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val updatesFile = File(directory("build/$DEFAULT_SANDBOX/config/options"), "updates.xml")
+        val updatesFile = File(directory("build/$DEFAULT_SANDBOX_CONTAINER/config/options"), "updates.xml")
 
         updatesFile.xml(
             """
@@ -772,10 +770,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertFileContent(
-            File(buildDirectory, "$DEFAULT_SANDBOX/config/options/updates.xml"),
+            File(buildDirectory, "$DEFAULT_SANDBOX_CONTAINER/config/options/updates.xml"),
             """
             <application>
               <component name="UpdatesConfigurable">
@@ -813,7 +811,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         buildFile.groovy(
             """
@@ -821,7 +819,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -856,7 +854,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(PREPARE_SANDBOX_TASK_NAME)
+        build(Tasks.PREPARE_SANDBOX)
 
         assertEquals(
             setOf(
@@ -888,7 +886,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 pluginName = 'myPluginName'
             }
             
-            $PREPARE_TESTING_SANDBOX_TASK_NAME {
+            ${Tasks.PREPARE_TESTING_SANDBOX} {
                 from("additional")
             }
             """.trimIndent()

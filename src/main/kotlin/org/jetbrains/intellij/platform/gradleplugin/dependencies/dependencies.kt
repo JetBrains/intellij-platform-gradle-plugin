@@ -5,17 +5,13 @@ package org.jetbrains.intellij.platform.gradleplugin.dependencies
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.ProjectLayout
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
-import org.gradle.api.provider.ProviderFactory
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.newInstance
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Dependencies
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS_NAME
-import org.jetbrains.intellij.platform.gradleplugin.model.ProductInfo
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
+import org.jetbrains.kotlin.gradle.utils.projectCacheDir
 
 internal typealias DependencyAction = (Dependency.(settings: IntelliJPlatformDependencySettings) -> Unit)
 
@@ -24,39 +20,13 @@ interface IntelliJPlatformDependencySettings {
     val ivyDirectory: DirectoryProperty
 }
 
-internal fun DependencyHandler.applyIntelliJPlatformSettings(objects: ObjectFactory, providers: ProviderFactory, layout: ProjectLayout) {
+internal fun DependencyHandler.applyIntelliJPlatformSettings(objects: ObjectFactory, gradle: Gradle) {
     val settings = objects.newInstance(IntelliJPlatformDependencySettings::class)
 
-    settings.ivyDirectory.convention(layout.projectDirectory.dir(".gradle/intellijPlatform/ivy"))
+    settings.ivyDirectory.dir(gradle.projectCacheDir.resolve("intellijPlatform/ivy").path)
 
-    (this as ExtensionAware).extensions.add(INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS_NAME, settings)
+    (this as ExtensionAware).extensions.add(Extensions.INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS, settings)
 }
 
 internal val DependencyHandler.intellijPlatformDependencySettings: IntelliJPlatformDependencySettings
     get() = (this as ExtensionAware).extensions.getByType<IntelliJPlatformDependencySettings>()
-
-
-internal fun DependencyHandler.create(
-    type: IntelliJPlatformType,
-    version: String,
-    settings: IntelliJPlatformDependencySettings = intellijPlatformDependencySettings,
-    action: DependencyAction = {},
-) = create(
-    group = type.groupId,
-    name = type.artifactId,
-    version = version,
-).apply {
-    action(this, settings)
-}
-
-internal fun DependencyHandler.create(
-    productInfo: ProductInfo,
-    settings: IntelliJPlatformDependencySettings = intellijPlatformDependencySettings,
-    action: DependencyAction = {},
-) = create(
-    group = Dependencies.INTELLIJ_PLATFORM_LOCAL_GROUP,
-    name = productInfo.productCode,
-    version = productInfo.version,
-).apply {
-    action(this, settings)
-}

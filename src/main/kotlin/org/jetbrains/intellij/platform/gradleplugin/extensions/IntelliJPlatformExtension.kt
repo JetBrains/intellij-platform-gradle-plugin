@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.extensions
 
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.getByName
@@ -13,6 +14,15 @@ annotation class IntelliJPlatform
 @IntelliJPlatform
 interface IntelliJPlatformExtension : ExtensionAware {
 
+    /**
+     * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
+     *
+     * Default value: `true`
+     */
+    val instrumentCode: Property<Boolean>
+
+    val sandboxContainer: DirectoryProperty
+
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)
 
@@ -21,8 +31,10 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
         val productDescriptor
             get() = extensions.getByName<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
+
         val ideaVersion
             get() = extensions.getByName<IdeaVersion>(Extensions.IDEA_VERSION)
+
         val vendor
             get() = extensions.getByName<Vendor>(Extensions.VENDOR)
 

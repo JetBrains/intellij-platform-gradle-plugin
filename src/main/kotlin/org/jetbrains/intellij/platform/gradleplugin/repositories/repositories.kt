@@ -12,7 +12,7 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.maven
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
 
 internal typealias Action = (MavenArtifactRepository.() -> Unit)
 
@@ -26,7 +26,7 @@ internal fun RepositoryHandler.applyIntelliJPlatformSettings(objects: ObjectFact
 
     settings.useCacheRedirector.convention(BuildFeature.USE_CACHE_REDIRECTOR.getValue(providers))
 
-    (this as ExtensionAware).extensions.add(INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME, settings)
+    (this as ExtensionAware).extensions.add(Extensions.INTELLIJ_PLATFORM_REPOSITORY_SETTINGS, settings)
 }
 
 internal val RepositoryHandler.intellijPlatformRepositorySettings: IntelliJPlatformRepositorySettings

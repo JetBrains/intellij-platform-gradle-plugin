@@ -11,6 +11,7 @@ object IntelliJPluginConstants {
     const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
 
     const val PLUGIN_GROUP_NAME = "intellij"
+    const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
 
     object Extensions {
         const val IDEA_VERSION = "ideaVersion"
@@ -18,13 +19,20 @@ object IntelliJPluginConstants {
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
         const val PRODUCT_DESCRIPTOR = "productDescriptor"
         const val VENDOR = "vendor"
+
+        const val INTELLIJ_PLATFORM_REPOSITORY_SETTINGS = "intellijPlatformRepositorySettings"
+        const val INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS = "intellijPlatformDependencySettings"
     }
 
     object Configurations {
-        const val INTELLIJ_PLATFORM = "intellijPlatform"
+        const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
         const val INTELLIJ_PLATFORM_LOCAL_INSTANCE = "intellijPlatformLocalInstance"
+        const val INTELLIJ_PLATFORM = "intellijPlatform"
         const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
+        const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
+        const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
+        const val JETBRAINS_RUNTIME_LOCAL_INSTANCE = "jetbrainsRuntimeLocalInstance"
         const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
 
         object Attributes {
@@ -39,37 +47,44 @@ object IntelliJPluginConstants {
     }
 
     object Tasks {
+        const val BUILD_PLUGIN = "buildPlugin"
+        const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
+        const val INSTRUMENTED_JAR = "instrumentedJar"
+        const val PATCH_PLUGIN_XML = "patchPluginXml"
+        const val PREPARE_SANDBOX = "prepareSandbox"
+        const val PREPARE_TESTING_SANDBOX = "prepareTestingSandbox"
+        const val PREPARE_UI_TESTING_SANDBOX = "prepareUiTestingSandbox"
+        const val RUN_IDE = "runIde"
         const val SETUP_DEPENDENCIES = "setupDependencies"
     }
 
-    const val INTELLIJ_PLATFORM_REPOSITORY_SETTINGS_NAME = "intellijPlatformRepositorySettings"
-    const val INTELLIJ_PLATFORM_DEPENDENCY_SETTINGS_NAME = "intellijPlatformDependencySettings"
+    object Sandbox {
+        const val CONTAINER = "idea-sandbox"
+        const val CONFIG = "config"
+        const val PLUGINS = "plugins"
+        const val SYSTEM = "system"
+    }
 
-    @Deprecated("Check it")
-    const val DEFAULT_SANDBOX = "idea-sandbox"
+    object Locations {
+        const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
+        const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
+    }
 
-    const val BUILD_PLUGIN_TASK_NAME = "buildPlugin"
     const val BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
     const val DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME = "downloadAndroidStudioProductReleasesXml"
     const val DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME = "downloadIdeaProductReleasesXml"
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val DOWNLOAD_ZIP_SIGNER_TASK_NAME = "downloadZipSigner"
-    const val INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME = "initializeIntelliJPlugin"
     const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
-    const val INSTRUMENTED_JAR_TASK_NAME = "instrumentedJar"
     const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     const val LIST_BUNDLED_PLUGINS_TASK_NAME = "listBundledPlugins"
     const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
-    const val PATCH_PLUGIN_XML_TASK_NAME = "patchPluginXml"
-    const val PREPARE_SANDBOX_TASK_NAME = "prepareSandbox"
-    const val PREPARE_TESTING_SANDBOX_TASK_NAME = "prepareTestingSandbox"
-    const val PREPARE_UI_TESTING_SANDBOX_TASK_NAME = "prepareUiTestingSandbox"
     const val PRINT_BUNDLED_PLUGINS_TASK_NAME = "printBundledPlugins"
     const val PRINT_PRODUCTS_RELEASES_TASK_NAME = "printProductsReleases"
     const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
-    const val RUN_IDE_TASK_NAME = "runIde"
+
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
@@ -81,36 +96,36 @@ object IntelliJPluginConstants {
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
     val TASKS = listOf(
-        BUILD_PLUGIN_TASK_NAME,
-        BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
-        CLASSPATH_INDEX_CLEANUP_TASK_NAME,
-        DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME,
-        DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME,
-        DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
-        DOWNLOAD_ZIP_SIGNER_TASK_NAME,
-        INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME,
-        INSTRUMENT_CODE_TASK_NAME,
-        INSTRUMENTED_JAR_TASK_NAME,
-        INSTRUMENT_TEST_CODE_TASK_NAME,
-        JAR_SEARCHABLE_OPTIONS_TASK_NAME,
-        LIST_BUNDLED_PLUGINS_TASK_NAME,
-        LIST_PRODUCTS_RELEASES_TASK_NAME,
-        PATCH_PLUGIN_XML_TASK_NAME,
-        PREPARE_SANDBOX_TASK_NAME,
-        PREPARE_TESTING_SANDBOX_TASK_NAME,
-        PREPARE_UI_TESTING_SANDBOX_TASK_NAME,
-        PRINT_BUNDLED_PLUGINS_TASK_NAME,
-        PRINT_PRODUCTS_RELEASES_TASK_NAME,
-        PUBLISH_PLUGIN_TASK_NAME,
-        RUN_IDE_TASK_NAME,
-        RUN_IDE_FOR_UI_TESTS_TASK_NAME,
-        RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
-        RUN_PLUGIN_VERIFIER_TASK_NAME,
+//        Tasks.BUILD_PLUGIN,
+//        BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
+//        CLASSPATH_INDEX_CLEANUP_TASK_NAME,
+//        DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME,
+//        DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME,
+//        DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
+//        DOWNLOAD_ZIP_SIGNER_TASK_NAME,
+        Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN,
+//        INSTRUMENT_CODE_TASK_NAME,
+        Tasks.INSTRUMENTED_JAR,
+//        INSTRUMENT_TEST_CODE_TASK_NAME,
+//        JAR_SEARCHABLE_OPTIONS_TASK_NAME,
+//        LIST_BUNDLED_PLUGINS_TASK_NAME,
+//        LIST_PRODUCTS_RELEASES_TASK_NAME,
+        Tasks.PATCH_PLUGIN_XML,
+//        Tasks.PREPARE_SANDBOX,
+//        Tasks.PREPARE_TESTING_SANDBOX,
+//        Tasks.PREPARE_UI_TESTING_SANDBOX,
+//        PRINT_BUNDLED_PLUGINS_TASK_NAME,
+//        PRINT_PRODUCTS_RELEASES_TASK_NAME,
+//        PUBLISH_PLUGIN_TASK_NAME,
+        Tasks.RUN_IDE,
+//        RUN_IDE_FOR_UI_TESTS_TASK_NAME,
+//        RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
+//        RUN_PLUGIN_VERIFIER_TASK_NAME,
         Tasks.SETUP_DEPENDENCIES,
-        SIGN_PLUGIN_TASK_NAME,
-        VERIFY_PLUGIN_TASK_NAME,
-        VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
-        VERIFY_PLUGIN_SIGNATURE_TASK_NAME,
+//        SIGN_PLUGIN_TASK_NAME,
+//        VERIFY_PLUGIN_TASK_NAME,
+//        VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
+//        VERIFY_PLUGIN_SIGNATURE_TASK_NAME,
     )
 
     const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
@@ -139,7 +154,6 @@ object IntelliJPluginConstants {
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
     const val MINIMAL_SUPPORTED_GRADLE_VERSION = "8.0"
     const val MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION = "223"
-    const val JETBRAINS_JAVA_TOOLCHAIN_VENDOR_NAME = "JetBrains"
 
     const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"
     const val RELEASE_SUFFIX_EAP_CANDIDATE = "-EAP-CANDIDATE-SNAPSHOT"
@@ -149,12 +163,10 @@ object IntelliJPluginConstants {
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
     const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
     const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://jb.gg/android-studio-releases-list.xml"
-    const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
-    const val INTELLIJ_DEPENDENCIES = "$CACHE_REDIRECTOR/intellij-dependencies"
-    const val DEFAULT_INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository"
-    const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "$CACHE_REDIRECTOR/plugins.jetbrains.com/maven"
-    const val DEFAULT_JBR_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
-    const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
+    const val INTELLIJ_DEPENDENCIES = "${Locations.CACHE_REDIRECTOR}/intellij-dependencies"
+    const val DEFAULT_INTELLIJ_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository"
+    const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven"
+    const val PLUGIN_VERIFIER_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
     const val JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA =
         "$DEFAULT_INTELLIJ_REPOSITORY/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml"
     const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"

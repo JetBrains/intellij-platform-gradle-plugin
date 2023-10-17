@@ -21,12 +21,11 @@ import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.AndroidStudio
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.IntellijIdeaCommunity
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.CACHE_REDIRECTOR
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradleplugin.Version
-import org.jetbrains.intellij.platform.gradleplugin.jbr.JbrResolver
+import org.jetbrains.intellij.platform.gradleplugin.tasks.base.JetBrainsRuntimeAware
 import org.jetbrains.intellij.platform.gradleplugin.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradleplugin.utils.DependenciesDownloader
 import org.jetbrains.intellij.platform.gradleplugin.utils.LatestVersionResolver
@@ -40,6 +39,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import javax.inject.Inject
+import kotlin.io.path.pathString
 
 /**
  * Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IDE builds (see also [Verifying Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html)).
@@ -58,7 +58,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
     private val providers: ProviderFactory,
-) : DefaultTask() {
+) : DefaultTask(), JetBrainsRuntimeAware {
 
     /**
      * Defines the verification level at which the task should fail if any reported issue matches.
@@ -169,80 +169,6 @@ abstract class RunPluginVerifierTask @Inject constructor(
     abstract val downloadPath: Property<Path>
 
     /**
-     * Custom JBR version to use for running the IDE.
-     *
-     * All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
-     *
-     * Accepted values:
-     * - `8u112b752.4`
-     * - `8u202b1483.24`
-     * - `11_0_2b159`
-     */
-    @get:Input
-    @get:Optional
-    abstract val jbrVersion: Property<String>
-
-    /**
-     * JetBrains Runtime variant to use when running the IDE with the plugin.
-     * See [JetBrains Runtime Releases](https://github.com/JetBrains/JetBrainsRuntime/releases).
-     *
-     * Default value: `null`
-     *
-     * Acceptable values:
-     * - `jcef`
-     * - `sdk`
-     * - `fd`
-     * - `dcevm`
-     * - `nomod`
-     *
-     * Note: For `JBR 17`, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomod` variants are no longer available.
-     *
-     * **Accepted values:**
-     * - `8u112b752.4`
-     * - `8u202b1483.24`
-     * - `11_0_2b159`
-     *
-     * All JetBrains Java versions are available at JetBrains Space Packages, and [GitHub](https://github.com/JetBrains/JetBrainsRuntime/releases).
-     */
-    @get:Input
-    @get:Optional
-    abstract val jbrVariant: Property<String>
-
-    /**
-     * JetBrains Runtime architecture.
-     * By default, it's resolved based on the current OS and JRE architecture, see [JbrResolver.JbrArtifact.arch].
-     */
-    @get:Input
-    @get:Optional
-    abstract val jbrArch: Property<String>
-
-    /**
-     * URL of repository for downloading JetBrains Runtime.
-     */
-    @get:Input
-    @get:Optional
-    abstract val jreRepository: Property<String>
-
-    /**
-     * The path to directory containing JVM runtime, overrides [jbrVersion].
-     */
-    @get:Input
-    @get:Optional
-    abstract val runtimeDir: Property<String>
-
-    /**
-     * Resolves the Java Runtime directory.
-     * [runtimeDir] property is used if provided with the task configuration.
-     * Otherwise, [jbrVersion] is used for resolving the JBR.
-     * If it's not set, or it's impossible to resolve a valid version, built-in JBR will be used.
-     * As a last fallback, current JVM will be used.
-     *
-     * @return path to the Java Runtime directory
-     */
-    @get:Internal
-    abstract val resolvedRuntimeDir: Property<File>
-
-    /**
      * The list of classes prefixes from the external libraries.
      * The Plugin Verifier will not report `No such class` for classes of these packages.
      */
@@ -298,8 +224,6 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @TaskAction
     fun runPluginVerifier() {
-        validateRuntimeDir(resolvedRuntimeDir.get())
-
         val file = distributionFile.orNull?.asPath
         if (file == null || !file.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
@@ -421,59 +345,6 @@ abstract class RunPluginVerifierTask @Inject constructor(
             ?: throw InvalidUserDataException("Provided Plugin Verifier path doesn't exist: '$path'. Downloading Plugin Verifier: $verifierVersion")
 
     /**
-     * Resolves the Java Runtime directory.
-     * [runtimeDir] property is used if provided with the task configuration.
-     * Otherwise, [jbrVersion] is used for resolving the JBR.
-     * If it's not set, or it's impossible to resolve a valid version, built-in JBR will be used.
-     * As a last fallback, current JVM will be used.
-     *
-     * @return path to the Java Runtime directory
-     */
-    internal fun resolveRuntimeDir(jbrResolver: JbrResolver) =
-        jbrResolver.resolveRuntimeDir(
-            runtimeDir = runtimeDir.orNull,
-            jbrVersion = jbrVersion.orNull,
-            jbrVariant = jbrVariant.orNull,
-            jbrArch = jbrArch.orNull,
-            ideDir = ideDir.orNull,
-        ) ?: throw InvalidUserDataException(
-            when {
-                requiresJava11() -> "Java Runtime directory couldn't be resolved. Note: Plugin Verifier 1.260+ requires Java 11"
-                else -> "Java Runtime directory couldn't be resolved"
-            }
-        )
-
-    /**
-     * Verifies if the provided Java Runtime directory points to Java 11 when using Plugin Verifier 1.260+.
-     *
-     * @return Java Runtime directory points to Java 8 for Plugin Verifier versions < 1.260, or Java 11 for 1.260+.
-     */
-    private fun validateRuntimeDir(runtimeDirPath: File) = ByteArrayOutputStream().use { os ->
-        debug(context, "Plugin Verifier JRE verification: $runtimeDirPath")
-
-        if (!requiresJava11()) {
-            return true
-        }
-
-        execOperations.exec {
-            executable = runtimeDirPath.resolve("bin/java").absolutePath
-            args = listOf("-version")
-            errorOutput = os
-        }
-        val version = Version.parse(os.toString())
-        val result = version >= Version(11)
-
-        result.ifFalse {
-            throw GradleException("Plugin Verifier 1.260+ requires Java 11, but '$version' was provided with 'runtimeDir': $runtimeDirPath")
-        }
-    }
-
-    /**
-     * Checks the Plugin Verifier version, if 1.260+, require Java 11 to run.
-     */
-    private fun requiresJava11() = currentVersion.let(Version::parse) >= Version(1, 260)
-
-    /**
      * Check that the Plugin Verifier supports the Verification reports output formats.
      * This is available only in version 1.304 and later.
      *
@@ -489,7 +360,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private fun getOptions(): List<String> {
         val args = mutableListOf(
             "-verification-reports-dir", verificationReportsDir.get(),
-            "-runtime-dir", resolvedRuntimeDir.get().absolutePath,
+            "-runtime-dir", jetbrainsRuntimeDirectory.get().asPath.pathString,
         )
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {
@@ -559,11 +430,12 @@ abstract class RunPluginVerifierTask @Inject constructor(
     ): Path {
         debug(context, "Resolving IDE path for: $ideVersion")
         val (version, code) = ideVersion.trim().split('-', limit = 2).reversed() + null
-        val type = when(code) {
+        val type = when (code) {
             null -> run {
                 debug(context, "IDE type not specified, setting type to $IntellijIdeaCommunity")
                 IntellijIdeaCommunity
             }
+
             else -> IntelliJPlatformType.fromCode(code)
         }
 
@@ -624,7 +496,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
                         val redirectUrl = URL(getHeaderField("Location"))
                         disconnect()
                         debug(context, "Resolved IDE download URL: $url")
-                        return "$CACHE_REDIRECTOR/${redirectUrl.host}${redirectUrl.file}"
+                        return "${IntelliJPluginConstants.Locations.CACHE_REDIRECTOR}/${redirectUrl.host}${redirectUrl.file}"
                     } else {
                         debug(context, "IDE download URL has no redirection provided. Skipping")
                     }

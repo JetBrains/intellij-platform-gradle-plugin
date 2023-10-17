@@ -14,6 +14,7 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Conf
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_BASE_ID
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyProductInfoTransformer
@@ -34,12 +35,17 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         }
 
         with(configurations) {
-            val intellijPlatformConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM)
+            val intellijPlatformDependencyConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
                 .apply {
                     isVisible = false
                     isCanBeConsumed = false
                     isCanBeResolved = true
-                    description = "IntelliJ Platform dependency"
+                    description = "IntelliJ Platform dependency archive"
+
+                    attributes {
+//                        attribute(Attributes.artifactType, ArtifactType.INTELLIJ_PLATFORM)
+                        attribute(Attributes.extracted, false)
+                    }
                 }
 
             val intellijPlatformLocalConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE)
@@ -47,11 +53,25 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     isVisible = false
                     isCanBeConsumed = false
                     isCanBeResolved = true
-                    description = "IntelliJ Platform local IDE dependency"
+                    description = "IntelliJ Platform local instance"
 
                     attributes {
                         attribute(Attributes.extracted, true)
                     }
+                }
+
+            val intellijPlatformConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM)
+                .apply {
+                    isVisible = false
+                    isCanBeConsumed = false
+                    isCanBeResolved = true
+                    description = "IntelliJ Platform"
+
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                    }
+
+                    extendsFrom(intellijPlatformDependencyConfiguration, intellijPlatformLocalConfiguration)
                 }
 
             maybeCreate(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
@@ -59,15 +79,52 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     isVisible = false
                     isCanBeConsumed = false
                     isCanBeResolved = true
-                    description = "IntelliJ Platform dependency build number"
+                    description = "IntelliJ Platform product info"
 
                     attributes {
-                        attribute(Attributes.extracted, true)
                         attribute(Attributes.productInfo, true)
                     }
 
                     extendsFrom(intellijPlatformConfiguration)
-                    extendsFrom(intellijPlatformLocalConfiguration)
+                }
+
+            val jetbrainsRuntimeDependencyConfiguration = maybeCreate(Configurations.JETBRAINS_RUNTIME_DEPENDENCY)
+                .apply {
+                    isVisible = false
+                    isCanBeConsumed = false
+                    isCanBeResolved = true
+                    description = "JetBrains Runtime dependency archive"
+
+                    attributes {
+                        attribute(Attributes.extracted, false)
+                    }
+                }
+
+            val jetbrainsRuntimeLocalConfiguration = maybeCreate(Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE)
+                .apply {
+                    isVisible = false
+                    isCanBeConsumed = false
+                    isCanBeResolved = true
+                    description = "JetBrains Runtime local instance"
+
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                    }
+                }
+
+            maybeCreate(Configurations.JETBRAINS_RUNTIME)
+                .apply {
+                    isVisible = false
+                    isCanBeConsumed = false
+                    isCanBeResolved = true
+                    description = "JetBrains Runtime"
+
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                    }
+
+                    extendsFrom(jetbrainsRuntimeDependencyConfiguration)
+                    extendsFrom(jetbrainsRuntimeLocalConfiguration)
                 }
 
             val intellijPlatformDependenciesConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_DEPENDENCIES)
@@ -75,12 +132,11 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     isVisible = false
                     isCanBeConsumed = false
                     isCanBeResolved = true
-                    description = "IntelliJ Platform Dependencies dependency"
+                    description = "IntelliJ Platform extra dependencies"
                 }
 
             fun Configuration.extend() = extendsFrom(
                 intellijPlatformConfiguration,
-                intellijPlatformLocalConfiguration,
                 intellijPlatformDependenciesConfiguration,
             )
 
@@ -102,17 +158,19 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         }
 
         with(dependencies) {
-            applyIntelliJPlatformSettings(objects, providers, layout)
+            applyIntelliJPlatformSettings(objects, gradle)
 
             attributesSchema {
-                attribute(Attributes.productInfo)
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
+                attribute(Attributes.productInfo)
             }
 
             applyExtractorTransformer(
                 configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
+                configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY),
+                configurations.getByName(Configurations.JETBRAINS_RUNTIME_DEPENDENCY),
             )
             applyCollectorTransformer(
                 configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
@@ -123,6 +181,9 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
         with(IntelliJPluginConstants.Extensions) {
             this@configure.configureExtension<IntelliJPlatformExtension>(INTELLIJ_PLATFORM) {
+                instrumentCode.convention(true)
+                sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
+
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration>(PLUGIN_CONFIGURATION) {
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(PRODUCT_DESCRIPTOR)
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(IDEA_VERSION)
