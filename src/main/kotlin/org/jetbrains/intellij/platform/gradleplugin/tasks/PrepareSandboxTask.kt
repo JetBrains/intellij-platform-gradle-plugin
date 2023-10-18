@@ -7,10 +7,7 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Task
-import org.gradle.api.file.CopySpec
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.FileCollection
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.*
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -18,10 +15,14 @@ import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradleplugin.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradleplugin.dependency.PluginProjectDependency
 import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.notExists
 
 /**
  * Prepares sandbox directory with installed plugin and its dependencies.
@@ -40,10 +41,11 @@ abstract class PrepareSandboxTask : Sync() {
     /**
      * The directory with the plugin configuration.
      *
-     * Default value: [IntelliJPluginExtension.sandboxDir]/config
+     * Default value: [IntelliJPluginExtension.sandboxDir]
      */
-    @get:Input
-    abstract val configDir: Property<String>
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val sandboxDirectory: DirectoryProperty
 
     /**
      * The input plugin JAR file used to prepare the sandbox.
@@ -77,7 +79,7 @@ abstract class PrepareSandboxTask : Sync() {
      * Default sandbox destination directory.
      */
     @get:Internal
-    abstract val defaultDestinationDir: Property<File>
+    abstract val defaultDestinationDir: DirectoryProperty
 
     @get:InputFiles
     @get:Classpath
@@ -106,7 +108,7 @@ abstract class PrepareSandboxTask : Sync() {
 
     fun intoChild(destinationDir: Any): CopySpec = mainSpec.addChild().into(destinationDir)
 
-    override fun getDestinationDir(): File = defaultDestinationDir.get()
+    override fun getDestinationDir() = defaultDestinationDir.asFile.get()
 
     override fun configure(closure: Closure<*>): Task = super.configure(closure)
 
@@ -132,21 +134,14 @@ abstract class PrepareSandboxTask : Sync() {
     }
 
     private fun disableIdeUpdate() {
-        val optionsDir = Path.of(configDir.get())
-            .resolve("options")
-            .takeIf { it.createDir().exists() }
-            .ifNull { error(context, "Cannot disable update checking in host IDE") }
-            ?: return
-
-        val updatesConfig = optionsDir.resolve("updates.xml")
-            .also {
-                if (!it.exists()) {
-                    it.create()
+        val updatesConfig = sandboxDirectory.dir("${Sandbox.CONFIG}/options").asPath
+            .createDirectories()
+            .resolve("updates.xml")
+            .apply {
+                if (notExists()) {
+                    createFile()
                 }
             }
-            .takeIf(Path::exists)
-            .ifNull { error(context, "Cannot disable update checking in host IDE") }
-            ?: return
 
         if (updatesConfig.readText().trim().isEmpty()) {
             updatesConfig.writeText("<application/>")

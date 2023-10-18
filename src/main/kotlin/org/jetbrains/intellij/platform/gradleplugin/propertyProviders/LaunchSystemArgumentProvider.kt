@@ -7,15 +7,16 @@ import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
+import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import java.nio.file.Path
+import kotlin.io.path.pathString
 
 class LaunchSystemArgumentProvider(
     @InputDirectory @PathSensitive(RELATIVE) val ideDirectory: Path,
-    @InputDirectory @PathSensitive(RELATIVE) val configDirectory: DirectoryProperty,
-    @InputDirectory @PathSensitive(RELATIVE) val systemDirectory: DirectoryProperty,
-    @InputDirectory @PathSensitive(RELATIVE) val pluginsDirectory: DirectoryProperty,
+    @InputDirectory @PathSensitive(RELATIVE) val sandboxDirectory: DirectoryProperty,
     private val requirePluginIds: List<String>,
 ) : CommandLineArgumentProvider {
 
@@ -27,11 +28,17 @@ class LaunchSystemArgumentProvider(
             .filter { it.startsWith("-D") }
             .map { it.resolveIdeHomeVariable(ideDirectory) }
 
+    private fun resolveInSandboxDirectory(directoryName: String) = sandboxDirectory.map {
+        it.dir(directoryName).apply {
+            asFile.mkdirs()
+        }
+    }.asPath.pathString
+
     override fun asArguments() = currentLaunchProperties + listOf(
-        "-Didea.config.path=${configDirectory.asFile.get().absolutePath}",
-        "-Didea.system.path=${systemDirectory.asFile.get().absolutePath}",
-        "-Didea.log.path=${systemDirectory.asFile.get().resolve("log").absolutePath}",
-        "-Didea.plugins.path=${pluginsDirectory.asFile.get().absolutePath}",
+        "-Didea.config.path=${resolveInSandboxDirectory(Sandbox.CONFIG)}",
+        "-Didea.system.path=${resolveInSandboxDirectory(Sandbox.SYSTEM)}",
+        "-Didea.log.path=${resolveInSandboxDirectory(Sandbox.LOG)}",
+        "-Didea.plugins.path=${resolveInSandboxDirectory(Sandbox.PLUGINS)}",
         "-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}",
     )
 }

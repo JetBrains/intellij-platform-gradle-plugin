@@ -22,6 +22,7 @@ import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.getByName
@@ -44,6 +45,7 @@ import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
 import java.util.jar.Manifest
+import kotlin.io.path.absolute
 import kotlin.io.path.exists
 import kotlin.io.path.name
 
@@ -188,9 +190,6 @@ fun Boolean.ifFalse(block: () -> Unit): Boolean {
     return this
 }
 
-internal val FileSystemLocation.asPath
-    get() = asFile.toPath().toAbsolutePath()
-
 internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnection) {
     instanceFollowRedirects = false
     inputStream.use {
@@ -231,6 +230,22 @@ internal val <T> Property<T>.isSpecified
         is RegularFile -> value.asFile.exists()
         else -> true
     }
+
+
+internal val FileSystemLocation.asPath
+    get() = asFile.toPath().absolute()
+
+internal val <T : FileSystemLocation> Provider<T>.asFile
+    get() = get().asFile
+
+internal val <T : FileSystemLocation> Provider<T>.asPath
+    get() = get().asFile.toPath().absolute()
+
+internal val <T : FileSystemLocation> Provider<T>.asFileOrNull
+    get() = orNull?.asFile
+
+internal val <T : FileSystemLocation> Provider<T>.asPathOrNull
+    get() = orNull?.asFile?.toPath()?.absolute()
 
 internal val Project.sourceSets
     get() = extensions.getByName("sourceSets") as SourceSetContainer

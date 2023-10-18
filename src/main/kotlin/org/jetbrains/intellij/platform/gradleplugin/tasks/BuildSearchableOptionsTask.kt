@@ -9,9 +9,11 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradleplugin.warn
+import kotlin.io.path.pathString
 
 /**
  * Builds an index of UI components (searchable options) for the plugin.
@@ -59,7 +61,7 @@ abstract class BuildSearchableOptionsTask : RunIdeBase() {
             )
         }
 
-        args = args + listOf(outputDir.get().asFile.canonicalPath, "true")
+        args = args + listOf(outputDir.asPath.pathString, "true")
         super.exec()
     }
 

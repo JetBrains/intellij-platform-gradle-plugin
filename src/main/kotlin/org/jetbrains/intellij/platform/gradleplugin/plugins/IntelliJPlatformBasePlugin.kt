@@ -41,11 +41,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     isCanBeConsumed = false
                     isCanBeResolved = true
                     description = "IntelliJ Platform dependency archive"
-
-                    attributes {
-//                        attribute(Attributes.artifactType, ArtifactType.INTELLIJ_PLATFORM)
-                        attribute(Attributes.extracted, false)
-                    }
                 }
 
             val intellijPlatformLocalConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE)
@@ -54,10 +49,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     isCanBeConsumed = false
                     isCanBeResolved = true
                     description = "IntelliJ Platform local instance"
-
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
                 }
 
             val intellijPlatformConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM)
@@ -185,6 +176,8 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
 
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration>(PLUGIN_CONFIGURATION) {
+                    name.convention(project.name)
+                    
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(PRODUCT_DESCRIPTOR)
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(IDEA_VERSION)
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(VENDOR)

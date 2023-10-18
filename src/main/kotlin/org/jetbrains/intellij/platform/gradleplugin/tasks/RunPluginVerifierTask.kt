@@ -360,7 +360,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     private fun getOptions(): List<String> {
         val args = mutableListOf(
             "-verification-reports-dir", verificationReportsDir.get(),
-            "-runtime-dir", jetbrainsRuntimeDirectory.get().asPath.pathString,
+            "-runtime-dir", jetbrainsRuntimeDirectory.asPath.pathString,
         )
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {

@@ -38,43 +38,41 @@ val Project.intellijPlatformLocal: DependencyHandler.(String) -> Dependency?
         }
 
         val ivyFileName = "${productInfo.productCode}-${productInfo.version}.xml"
-        val dependency = create(productInfo) {
-            val targetFile = it.ivyDirectory.file(ivyFileName).get().asPath
-
-            if (targetFile.notExists()) {
-                targetFile.parent.createDirectories()
-                targetFile.createFile()
-
-                val extractor = XmlExtractor<IvyModule>()
-                val ivyModule = IvyModule(
-                    info = IvyModuleInfo(
-                        organisation = group,
-                        module = name,
-                        revision = version,
-                        publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
-                    ),
-                    configurations = mutableListOf(
-                        IvyModuleConfiguration(
-                            name = "default",
-                            visibility = "public",
+        val dependency = create(productInfo) { settings ->
+            settings.ivyDirectory.asPath
+                .resolve(ivyFileName)
+                .takeIf { it.notExists() }
+                ?.run {
+                    val extractor = XmlExtractor<IvyModule>()
+                    val ivyModule = IvyModule(
+                        info = IvyModuleInfo(
+                            organisation = group,
+                            module = name,
+                            revision = version,
+                            publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
                         ),
-                    ),
-                    publications = mutableListOf(
-                        IvyModulePublication(
-                            name = ideaDir.pathString,
-                            type = "directory",
-                            ext = null,
-                            conf = "default",
-                        )
-                    ),
-                )
-                extractor.marshal(ivyModule, targetFile)
-            }
+                        configurations = mutableListOf(
+                            IvyModuleConfiguration(
+                                name = "default",
+                                visibility = "public",
+                            ),
+                        ),
+                        publications = mutableListOf(
+                            IvyModulePublication(
+                                name = ideaDir.pathString,
+                                type = "directory",
+                                ext = null,
+                                conf = "default",
+                            )
+                        ),
+                    )
+                    extractor.marshal(ivyModule, createFile())
+                }
 
             this@intellijPlatformLocal.repositories.ivy {
-                val ivyDirectory = it.ivyDirectory.get().asFile
+                val ivyDirectory = settings.ivyDirectory.asPath
 
-                url = ivyDirectory.toURI()
+                url = ivyDirectory.toUri()
                 ivyPattern("$ivyDirectory/[module]-[revision].[ext]")
                 artifactPattern(ideaDir.absolutePathString())
 //                artifactPattern("$ivyDirectory/[artifact]")
@@ -89,7 +87,6 @@ val Project.intellijPlatformLocal: DependencyHandler.(String) -> Dependency?
 
         add(INTELLIJ_PLATFORM_LOCAL_INSTANCE, dependency)
     }
-
 
 internal fun DependencyHandler.create(
     productInfo: ProductInfo,

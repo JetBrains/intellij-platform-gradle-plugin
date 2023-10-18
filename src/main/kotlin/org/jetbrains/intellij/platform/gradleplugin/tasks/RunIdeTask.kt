@@ -86,7 +86,7 @@ abstract class RunIdeTask : JavaExec(), JetBrainsRuntimeAware, PlatformVersionAw
         super.exec()
     }
 
-    override fun getExecutable(): String = jetbrainsRuntimeExecutable.get().asPath.absolutePathString()
+    override fun getExecutable(): String = jetbrainsRuntimeExecutable.asPath.absolutePathString()
 
     /**
      * Prepares the classpath for the IDE based on the IDEA version.
@@ -117,9 +117,7 @@ abstract class RunIdeTask : JavaExec(), JetBrainsRuntimeAware, PlatformVersionAw
         jvmArgumentProviders.add(
             LaunchSystemArgumentProvider(
                 intellijPlatformDirectory,
-                configDirectory,
-                systemDirectory,
-                pluginsDirectory,
+                sandboxDirectory,
                 emptyList(),
 //                requiredPluginIds.get(),
             )

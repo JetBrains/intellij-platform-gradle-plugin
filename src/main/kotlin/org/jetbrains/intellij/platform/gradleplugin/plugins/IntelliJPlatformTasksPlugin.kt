@@ -3,19 +3,21 @@
 package org.jetbrains.intellij.platform.gradleplugin.plugins
 
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.internal.plugins.DefaultArtifactPublicationSet
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.attributes
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.SELF_UPDATE_CHECK
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_TASKS_ID
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.tasks.*
@@ -32,11 +34,11 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 
         with(tasks) {
             configureSetupDependenciesTask()
-//            configureBuildPluginTask()
+            configurePrepareSandboxTasks()
+            configureBuildPluginTask()
             configureInitializeIntelliJPlatformPluginTask()
             configurePatchPluginXmlTask()
             configureJarTasks()
-//            configurePrepareSandboxTasks()
 
             configureRunIdeTasks()
 
@@ -53,7 +55,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
     private fun TaskContainer.configureBuildPluginTask() =
         configureTask<BuildPluginTask>(Tasks.BUILD_PLUGIN) {
             val prepareSandboxTaskProvider = named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-            val jarSearchableOptionsTaskProvider = named<JarSearchableOptionsTask>(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+//            val jarSearchableOptionsTaskProvider = named<JarSearchableOptionsTask>(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
 
             archiveBaseName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
                 prepareSandboxTask.pluginName
@@ -64,11 +66,11 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                     prepareSandboxTask.destinationDir.resolve(it)
                 }
             })
-            from(jarSearchableOptionsTaskProvider.flatMap { jarSearchableOptionsTask ->
-                jarSearchableOptionsTask.archiveFile
-            }) {
-                into("lib")
-            }
+//            from(jarSearchableOptionsTaskProvider.flatMap { jarSearchableOptionsTask ->
+//                jarSearchableOptionsTask.archiveFile
+//            }) {
+//                into("lib")
+//            }
             into(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
                 prepareSandboxTask.pluginName
             })
@@ -76,10 +78,10 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             dependsOn(IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(Tasks.PREPARE_SANDBOX)
 
-            project.artifacts.add(Dependency.ARCHIVES_CONFIGURATION, this).let { publishArtifact ->
-                extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(publishArtifact)
-                project.components.add(IntelliJPlatformPluginLibrary())
-            }
+//            project.artifacts.add(Dependency.ARCHIVES_CONFIGURATION, this).let { publishArtifact ->
+//                extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(publishArtifact)
+//                project.components.add(IntelliJPlatformPluginLibrary())
+//            }
         }
 
     private fun TaskContainer.configureInitializeIntelliJPlatformPluginTask() =
@@ -173,8 +175,9 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 
     private fun TaskContainer.configurePrepareSandboxTasks() =
         configureTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TESTING_SANDBOX, Tasks.PREPARE_UI_TESTING_SANDBOX) {
-            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+//            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
             val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+            val jarTaskProvider = named<Jar>(JavaPlugin.JAR_TASK_NAME)
 
 //            val ideaDependencyJarFiles = ideaDependencyProvider.map {
 //                project.files(it.jarFiles)
@@ -182,9 +185,9 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             val pluginJarProvider = project.intelliJPlatformExtension.instrumentCode.flatMap { instrumentCode ->
                 when (instrumentCode) {
                     true -> named<Jar>(Tasks.INSTRUMENTED_JAR)
-                    false -> named<Jar>(JavaPlugin.JAR_TASK_NAME)
+                    false -> jarTaskProvider
                 }
-            }.flatMap { jarTask -> jarTask.archiveFile }
+            }.flatMap { it.archiveFile }
 
             testSuffix.convention(
                 when (name) {
@@ -204,18 +207,9 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 //                dependsOn(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 //            }
 
-//            pluginName.convention(extension.pluginName)
+            pluginName.convention(project.intelliJPlatformExtension.pluginConfiguration.name)
             pluginJar.convention(pluginJarProvider)
-//            defaultDestinationDir.convention(extension.sandboxDir.flatMap {
-//                testSuffix.map { testSuffixValue ->
-//                    project.file("$it/plugins$testSuffixValue")
-//                }
-//            })
-//            configDir.convention(extension.sandboxDir.flatMap {
-//                testSuffix.map { testSuffixValue ->
-//                    "$it/config$testSuffixValue"
-//                }
-//            })
+            defaultDestinationDir.convention(sandboxDirectory.dir(Sandbox.PLUGINS))
 //                librariesToIgnore.convention(ideaDependencyJarFiles)
 //                pluginDependencies.convention(project.provider {
 //                    extension.getPluginDependenciesList(project)
@@ -227,7 +221,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                     val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
                     val pluginDirectories = pluginDependencies.get().map { it.artifact }
 
-                    listOf(pluginJar.get().asFile) + files.filter { file ->
+                    listOf(pluginJar.asFile) + files.filter { file ->
                         !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
                             file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
                         })
@@ -238,7 +232,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                 }
 
             dependsOn(runtimeConfiguration)
-//            dependsOn(jarTaskProvider)
+            dependsOn(jarTaskProvider)
 //            dependsOn(instrumentedJarTaskProvider)
 
 //            project.afterEvaluate `{

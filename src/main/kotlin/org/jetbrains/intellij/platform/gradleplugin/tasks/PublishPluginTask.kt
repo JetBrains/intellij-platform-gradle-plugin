@@ -16,9 +16,9 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUG
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.info
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.utils.ToolboxEnterprisePluginRepositoryService
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
-import org.jetbrains.intellij.platform.gradleplugin.utils.ToolboxEnterprisePluginRepositoryService
 
 /**
  * Publishes plugin to the remote [JetBrains Marketplace](https://plugins.jetbrains.com) repository.
@@ -89,7 +89,7 @@ abstract class PublishPluginTask : DefaultTask() {
     fun publishPlugin() {
         validateInput()
 
-        val path = distributionFile.get().asPath
+        val path = distributionFile.asPath
         when (val creationResult = IdePluginManager.createManager().createPlugin(path)) {
             is PluginCreationSuccess -> {
                 if (creationResult.unacceptableWarnings.isNotEmpty()) {

@@ -207,7 +207,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             false -> emptyList()
         }
 
-        outputFile.get().asPath.outputStream().use { os ->
+        outputFile.asPath.outputStream().use { os ->
             (result + androidStudioResult)
                 .joinToString("\n")
                 .apply {

@@ -30,7 +30,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {
-        val input = inputArtifact.get().asPath
+        val input = inputArtifact.asPath
 
         if (input.name.startsWith("org")) { // FIXME
             // Plugin dependency

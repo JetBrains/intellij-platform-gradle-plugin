@@ -26,7 +26,7 @@ abstract class ProductInfoTransformer : TransformAction<TransformParameters.None
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {
-        val input = inputArtifact.get().asPath
+        val input = inputArtifact.asPath
         val productInfo = input.resolveProductInfoPath()
 
         outputs.file(productInfo)

@@ -83,7 +83,7 @@ abstract class JarSearchableOptionsTask : Jar() {
                     }
                 }
             }
-            inputDir.get().asPath
+            inputDir.asPath
         })
 
         this.eachFile { path = "search/$name" }

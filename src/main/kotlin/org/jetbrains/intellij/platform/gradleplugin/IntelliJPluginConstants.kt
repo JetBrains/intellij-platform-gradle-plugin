@@ -63,6 +63,7 @@ object IntelliJPluginConstants {
         const val CONFIG = "config"
         const val PLUGINS = "plugins"
         const val SYSTEM = "system"
+        const val LOG = "system/log"
     }
 
     object Locations {
@@ -96,7 +97,7 @@ object IntelliJPluginConstants {
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
     val TASKS = listOf(
-//        Tasks.BUILD_PLUGIN,
+        Tasks.BUILD_PLUGIN,
 //        BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
 //        CLASSPATH_INDEX_CLEANUP_TASK_NAME,
 //        DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME,
@@ -111,9 +112,9 @@ object IntelliJPluginConstants {
 //        LIST_BUNDLED_PLUGINS_TASK_NAME,
 //        LIST_PRODUCTS_RELEASES_TASK_NAME,
         Tasks.PATCH_PLUGIN_XML,
-//        Tasks.PREPARE_SANDBOX,
-//        Tasks.PREPARE_TESTING_SANDBOX,
-//        Tasks.PREPARE_UI_TESTING_SANDBOX,
+        Tasks.PREPARE_SANDBOX,
+        Tasks.PREPARE_TESTING_SANDBOX,
+        Tasks.PREPARE_UI_TESTING_SANDBOX,
 //        PRINT_BUNDLED_PLUGINS_TASK_NAME,
 //        PRINT_PRODUCTS_RELEASES_TASK_NAME,
 //        PUBLISH_PLUGIN_TASK_NAME,

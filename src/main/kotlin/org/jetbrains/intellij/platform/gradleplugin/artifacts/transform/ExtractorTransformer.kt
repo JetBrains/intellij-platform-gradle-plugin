@@ -20,6 +20,7 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradleplugin.asFile
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import java.io.File
 import java.io.File.separator
@@ -49,7 +50,7 @@ abstract class ExtractorTransformer @Inject constructor(
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {
-        val (file, path) = with(inputArtifact.get()) { asFile to asPath }
+        val (file, path) = with(inputArtifact) { asFile to asPath }
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
         val (groupId, artifactId, version) = path.pathString.split(separator).dropLast(2).takeLast(3)
         // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail

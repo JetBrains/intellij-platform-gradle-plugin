@@ -123,7 +123,7 @@ abstract class RunIdeBase : JavaExec() {
 //                ideDirPath,
 //                configDir.get(),
 //                systemDir.get(),
-//                pluginsDir.get().asFile,
+//                pluginsDir.asFile,
 //                requiredPluginIds.get(),
 //            )
 //        )

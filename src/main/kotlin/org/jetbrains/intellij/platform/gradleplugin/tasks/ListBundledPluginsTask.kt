@@ -54,7 +54,7 @@ abstract class ListBundledPluginsTask : DefaultTask() {
 
     @TaskAction
     fun listBundledPlugins() {
-        outputFile.get().asPath.outputStream().use { os ->
+        outputFile.asPath.outputStream().use { os ->
             BuiltinPluginsRegistry
                 .resolveBundledPlugins(ideDir.get().toPath(), context)
                 .joinToString("\n")

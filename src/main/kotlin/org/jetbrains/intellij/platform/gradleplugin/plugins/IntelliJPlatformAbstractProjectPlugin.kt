@@ -13,15 +13,17 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradleplugin.checkGradleVersion
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradleplugin.info
 import org.jetbrains.intellij.platform.gradleplugin.jbr.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.JetBrainsRuntimeAware
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.SandboxAware
+import kotlin.io.path.createDirectories
 
 abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plugin<Project> {
 
@@ -50,24 +52,19 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
                 }
 
                 if (this is SandboxAware) {
+                    val prepareSandboxTaskProvider = named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+
                     sandboxDirectory.convention(extension.sandboxContainer.map {
-                        it.dir("$platformType-$platformVersion")
-                    })
-                    configDirectory.convention(sandboxDirectory.map {
-                        it.dir(Sandbox.CONFIG).apply {
-                            asFile.mkdirs()
+                        it.dir("$platformType-$platformVersion").also { directory ->
+                            directory.asFile.toPath().createDirectories()
                         }
                     })
-                    pluginsDirectory.convention(sandboxDirectory.map {
-                        it.dir(Sandbox.PLUGINS).apply {
-                            asFile.mkdirs()
-                        }
-                    })
-                    systemDirectory.convention(sandboxDirectory.map {
-                        it.dir(Sandbox.SYSTEM).apply {
-                            asFile.mkdirs()
-                        }
-                    })
+
+                    prepareSandboxTaskProvider.configure {
+                        sandboxDirectory.convention(this@with.sandboxDirectory)
+                    }
+
+                    dependsOn(prepareSandboxTaskProvider)
                 }
 
                 if (this is JetBrainsRuntimeAware) {

@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradleplugin.plugins
 
 import com.jetbrains.plugin.structure.base.utils.extension
 import com.jetbrains.plugin.structure.base.utils.hasExtension
+import com.jetbrains.plugin.structure.base.utils.isDirectory
 import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
@@ -478,7 +479,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 //                    val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
 //                    val pluginDirectories = pluginDependencies.get().map { it.artifact }
 //
-//                    listOf(pluginJar.get().asFile) + files.filter { file ->
+//                    listOf(pluginJar.asFile) + files.filter { file ->
 //                        !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
 //                            file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
 //                        })
@@ -827,7 +828,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
             dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
             dependsOn(Tasks.PREPARE_SANDBOX)
-            onlyIf { inputDir.get().asFile.isDirectory }
+            onlyIf { inputDir.asPath.isDirectory }
         }
     }
 

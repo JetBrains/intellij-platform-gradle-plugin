@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradleplugin.logCategory
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.ZipSigningToolBase
 import java.util.*
 import javax.inject.Inject
+import kotlin.io.path.pathString
 
 /**
  * Signs the ZIP archive with the provided key using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
@@ -149,7 +150,7 @@ abstract class SignPluginTask @Inject constructor(
      */
     override fun collectArguments(): List<String> {
         val arguments = mutableListOf(
-            "-out", outputArchiveFile.get().asPath.toAbsolutePath().toString(),
+            "-out", outputArchiveFile.asPath.pathString,
         )
 
         privateKey.orNull?.let {
