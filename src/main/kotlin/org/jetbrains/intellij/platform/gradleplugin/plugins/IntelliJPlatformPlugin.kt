@@ -81,7 +81,6 @@ import org.jetbrains.intellij.platform.gradleplugin.model.MavenMetadata
 import org.jetbrains.intellij.platform.gradleplugin.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.performanceTest.ProfilerName
-import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.platform.gradleplugin.tasks.*
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradleplugin.utils.ArchiveUtils
@@ -112,10 +111,12 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         info(context, "Configuring plugin: org.jetbrains.intellij.platform")
 
         checkGradleVersion()
-        project.applyConfigurations()
         project.applyPlugins()
 
         return
+
+        project.applyConfigurations()
+
         archiveUtils = project.objects.newInstance()
         dependenciesDownloader = project.objects.newInstance(project.gradle.startParameter.isOffline)
 
@@ -123,7 +124,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         val extension = project.extensions.create<IntelliJPluginExtension>(INTELLIJ_PLATFORM, dependenciesDownloader).apply {
             version.convention(project.provider {
-                if (!localPath.isSpecified) {
+                if (!localPath.isSpecified()) {
                     throw GradleException("The value for the 'intellij.version' property was not specified, see: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#intellij-extension-version")
                 }
                 null
@@ -157,12 +158,12 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
     private fun configureTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
         info(context, "Configuring plugin")
-        project.tasks.withType<RunIdeBase> {
-            prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, Tasks.PREPARE_SANDBOX)
-        }
-        project.tasks.withType<RunIdeForUiTestTask> {
-            prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, Tasks.PREPARE_UI_TESTING_SANDBOX)
-        }
+//        project.tasks.withType<RunIdeBase> {
+//            prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, Tasks.PREPARE_SANDBOX)
+//        }
+//        project.tasks.withType<RunIdeForUiTestTask> {
+//            prepareConventionMappingsForRunIdeTask(project, extension, ideaDependencyProvider, Tasks.PREPARE_UI_TESTING_SANDBOX)
+//        }
 
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
@@ -1038,7 +1039,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         }
         val initializeIntellijPlatformPluginTaskProvider = project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
         val coroutinesJavaAgentPathProvider = initializeIntellijPlatformPluginTaskProvider.flatMap {
-            it.coroutinesJavaAgentPath
+            it.coroutinesJavaAgent
         }
 
         val testTasks = project.tasks.withType<Test>()
@@ -1143,7 +1144,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 //                    )
 //                )
 
-                jvmArgumentProviders.add(PluginPathArgumentProvider(pluginsDirectoryProvider.get()))
+//                jvmArgumentProviders.add(PluginPathArgumentProvider(pluginsDirectoryProvider.get()))
                 systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
             }
         }
@@ -1199,7 +1200,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     })
             )
 
-            onlyIf { (privateKey.isSpecified || privateKeyFile.isSpecified) && (certificateChain.isSpecified || certificateChainFile.isSpecified) }
+            onlyIf { (privateKey.isSpecified() || privateKeyFile.isSpecified()) && (certificateChain.isSpecified() || certificateChainFile.isSpecified()) }
             dependsOn(Tasks.BUILD_PLUGIN)
             dependsOn(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
         }

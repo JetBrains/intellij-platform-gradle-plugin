@@ -4,15 +4,15 @@ package org.jetbrains.intellij.platform.gradleplugin.plugins
 
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.tasks.ClasspathNormalizer
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.attributes
-import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.*
+import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.SELF_UPDATE_CHECK
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
@@ -20,6 +20,9 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUG
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.LaunchSystemArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.platform.gradleplugin.tasks.*
 import java.io.File
 import java.time.LocalDate
@@ -38,9 +41,9 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             configureBuildPluginTask()
             configureInitializeIntelliJPlatformPluginTask()
             configurePatchPluginXmlTask()
-            configureJarTasks()
-
-            configureRunIdeTasks()
+            configureJarTask()
+            configureTestIdeTask()
+            configureRunIdeTask()
 
             // Make all tasks depend on [INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME]
             (TASKS - Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN).forEach {
@@ -88,15 +91,19 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         configureTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
             offline.convention(project.gradle.startParameter.isOffline)
             selfUpdateCheck.convention(project.isBuildFeatureEnabled(SELF_UPDATE_CHECK))
-            selfUpdateLockPath.convention(project.provider {
-                temporaryDir.toPath().resolve(LocalDate.now().toString())
-            })
-            coroutinesJavaAgentPath.convention(project.provider {
-                temporaryDir.toPath().resolve("coroutines-javaagent.jar")
-            })
+            selfUpdateLock.convention(
+                project.layout.file(project.provider {
+                    temporaryDir.resolve(LocalDate.now().toString())
+                })
+            )
+            coroutinesJavaAgent.convention(
+                project.layout.file(project.provider {
+                    temporaryDir.resolve("coroutines-javaagent.jar")
+                })
+            )
 
             onlyIf {
-                !selfUpdateLockPath.get().exists() || !coroutinesJavaAgentPath.get().exists()
+                !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
             }
         }
 
@@ -138,7 +145,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             }
         }
 
-    private fun TaskContainer.configureJarTasks() =
+    private fun TaskContainer.configureJarTask() =
         configureTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {
             val gradleVersion = project.provider {
                 project.gradle.gradleVersion
@@ -248,13 +255,97 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 //            }`
         }
 
-    private fun TaskContainer.configureRunIdeTasks() =
-        configureTask<RunIdeTask>(Tasks.RUN_IDE) {
-            val initializeIntelliJPlatformPluginTaskProvider = named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
+    // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
+    //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
+    private fun TaskContainer.configureTestIdeTask() =
+        configureTask<TestIdeTask>(Tasks.TEST_IDE) {
+            val sandboxDirectoryProvider = named<PrepareSandboxTask>(Tasks.PREPARE_TESTING_SANDBOX).get().sandboxDirectory
 
-            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
-            coroutinesJavaAgentPath.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap {
-                it.coroutinesJavaAgentPath
-            })
+            enableAssertions = true
+
+            jvmArgumentProviders.addAll(
+                listOf(
+                    IntelliJPlatformArgumentProvider(intellijPlatformDirectory, coroutinesJavaAgentFile, this),
+                    LaunchSystemArgumentProvider(intellijPlatformDirectory, sandboxDirectory, emptyList()),
+                    PluginPathArgumentProvider(sandboxDirectory),
+                )
+            )
+
+            outputs
+                .dir(sandboxDirectoryProvider.dir(Sandbox.SYSTEM))
+                .withPropertyName("System directory")
+            inputs
+                .dir(sandboxDirectoryProvider.dir(Sandbox.CONFIG))
+                .withPropertyName("Config Directory")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+            inputs
+                .files(sandboxDirectoryProvider.dir(Sandbox.PLUGINS))
+                .withPropertyName("Plugins directory")
+                .withPathSensitivity(PathSensitivity.RELATIVE)
+                .withNormalizer(ClasspathNormalizer::class)
+
+//            systemProperty("idea.use.core.classloader.for.plugin.path", "true")
+//            systemProperty("idea.force.use.core.classloader", "true")
+//            systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
+            systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
+
+            dependsOn(sandboxDirectoryProvider)
+//            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+
+//            classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
+//            testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
+
+//            doFirst {
+//                classpath += ideaDependencyLibrariesProvider.get() +
+//                        ideaConfigurationFiles.get() +
+//                        ideaPluginsConfigurationFiles.get() +
+//                        ideaClasspathFiles.get()
+//            }
         }
+
+    // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
+    //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
+    private fun TaskContainer.configureRunIdeTask() =
+        configureTask<RunIdeTask>(Tasks.RUN_IDE) {
+            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+
+            mainClass.set("com.intellij.idea.Main")
+            enableAssertions = true
+
+            jvmArgumentProviders.addAll(
+                listOf(
+                    IntelliJPlatformArgumentProvider(intellijPlatformDirectory, coroutinesJavaAgentFile, this),
+                    LaunchSystemArgumentProvider(intellijPlatformDirectory, sandboxDirectory, emptyList()),
+                )
+            )
+
+            systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
+
+            systemPropertyDefault("idea.auto.reload.plugins", true)
+            systemPropertyDefault("idea.classpath.index.enabled", false)
+            systemPropertyDefault("idea.is.internal", true)
+            systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
+            systemPropertyDefault("idea.vendor.name", "JetBrains")
+            systemPropertyDefault("ide.no.platform.update", false)
+            systemPropertyDefault("jdk.module.illegalAccess.silent", true)
+
+            val os = OperatingSystem.current()
+            when {
+                os.isMacOsX -> {
+                    systemPropertyDefault("idea.smooth.progress", false)
+                    systemPropertyDefault("apple.laf.useScreenMenuBar", true)
+                    systemPropertyDefault("apple.awt.fileDialogForDirectories", true)
+                }
+
+                os.isUnix -> {
+                    systemPropertyDefault("sun.awt.disablegrab", true)
+                }
+            }
+        }
+
+    private fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
+        if (!systemProperties.containsKey(name)) {
+            systemProperty(name, defaultValue)
+        }
+    }
 }

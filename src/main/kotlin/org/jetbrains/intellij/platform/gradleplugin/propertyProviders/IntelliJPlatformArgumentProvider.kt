@@ -4,50 +4,57 @@ package org.jetbrains.intellij.platform.gradleplugin.propertyProviders
 
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.readLines
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradleplugin.utils.OpenedPackages
-import java.nio.file.Path
 
 class IntelliJPlatformArgumentProvider(
-    @InputDirectory @PathSensitive(RELATIVE) val ideDirectory: Path,
-    @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentPath: Path,
+    @InputDirectory @PathSensitive(RELATIVE) val intellijPlatformDirectory: DirectoryProperty,
+    @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
+    private val intellijPlatformPath
+        get() = intellijPlatformDirectory.asPath
+
+    private val productInfo by lazy {
+        intellijPlatformPath.productInfo()
+    }
+
     private val bootclasspath
-        get() = ideDirectory
+        get() = intellijPlatformPath
             .resolve("lib/boot.jar")
             .takeIf { it.exists() }
             ?.let { listOf("-Xbootclasspath/a:$it") }
             .orEmpty()
 
     private val vmOptions
-        get() = ideDirectory
-            .productInfo()
+        get() = productInfo
             .currentLaunch
             .vmOptionsFilePath
             ?.removePrefix("../")
-            ?.let { ideDirectory.resolve(it).readLines() }
+            ?.let { intellijPlatformPath.resolve(it).readLines() }
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
 
-    private val kotlinxCoroutinesJavaAgent = "-javaagent:$coroutinesJavaAgentPath"
+    private val kotlinxCoroutinesJavaAgent = "-javaagent:${coroutinesJavaAgentFile.asPath}"
 
     private val additionalJvmArguments
-        get() = ideDirectory
-            .productInfo()
+        get() = productInfo
             .currentLaunch
             .additionalJvmArguments
             .filterNot { it.startsWith("-D") }
             .takeIf { it.isNotEmpty() }
-            ?.map { it.resolveIdeHomeVariable(ideDirectory) }
+            ?.map { it.resolveIdeHomeVariable(intellijPlatformPath) }
             ?: OpenedPackages
 
     private val defaultHeapSpace = listOf("-Xmx512m", "-Xms256m")

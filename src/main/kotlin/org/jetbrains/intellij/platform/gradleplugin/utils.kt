@@ -223,13 +223,12 @@ internal fun getCurrentPluginVersion() = IntelliJPlatformPlugin::class.java
         }
     }.getOrNull()
 
-internal val <T> Property<T>.isSpecified
-    get() = isPresent && when (val value = orNull) {
-        null -> false
-        is String -> value.isNotEmpty()
-        is RegularFile -> value.asFile.exists()
-        else -> true
-    }
+fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
+    null -> false
+    is String -> value.isNotEmpty()
+    is RegularFile -> value.asFile.exists()
+    else -> true
+}
 
 
 internal val FileSystemLocation.asPath

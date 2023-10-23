@@ -9,7 +9,6 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
-import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPlatformArgumentProvider
 import java.io.File
 import java.nio.file.Path
 
@@ -83,8 +82,9 @@ abstract class RunIdeBase : JavaExec() {
      */
     @TaskAction
     override fun exec() {
+        throw Exception("OBSOLETE")
         workingDir = projectWorkingDir.get()
-        jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDir.get().toPath(), coroutinesJavaAgentPath.get(), this))
+//        jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDir.get().toPath(), coroutinesJavaAgentPath.get(), this))
         configureSystemProperties()
         configureClasspath()
 

@@ -11,22 +11,24 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sand
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
-import java.nio.file.Path
 import kotlin.io.path.pathString
 
 class LaunchSystemArgumentProvider(
-    @InputDirectory @PathSensitive(RELATIVE) val ideDirectory: Path,
+    @InputDirectory @PathSensitive(RELATIVE) val intellijPlatformDirectory: DirectoryProperty,
     @InputDirectory @PathSensitive(RELATIVE) val sandboxDirectory: DirectoryProperty,
     private val requirePluginIds: List<String>,
 ) : CommandLineArgumentProvider {
 
+    private val intellijPlatformPath
+        get() = intellijPlatformDirectory.asPath
+
     private val currentLaunchProperties
-        get() = ideDirectory
+        get() = intellijPlatformPath
             .productInfo()
             .currentLaunch
             .additionalJvmArguments
             .filter { it.startsWith("-D") }
-            .map { it.resolveIdeHomeVariable(ideDirectory) }
+            .map { it.resolveIdeHomeVariable(intellijPlatformPath) }
 
     private fun resolveInSandboxDirectory(directoryName: String) = sandboxDirectory.map {
         it.dir(directoryName).apply {

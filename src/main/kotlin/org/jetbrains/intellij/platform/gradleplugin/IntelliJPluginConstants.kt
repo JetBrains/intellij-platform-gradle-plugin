@@ -56,6 +56,7 @@ object IntelliJPluginConstants {
         const val PREPARE_UI_TESTING_SANDBOX = "prepareUiTestingSandbox"
         const val RUN_IDE = "runIde"
         const val SETUP_DEPENDENCIES = "setupDependencies"
+        const val TEST_IDE = "testIde"
     }
 
     object Sandbox {
@@ -124,6 +125,7 @@ object IntelliJPluginConstants {
 //        RUN_PLUGIN_VERIFIER_TASK_NAME,
         Tasks.SETUP_DEPENDENCIES,
 //        SIGN_PLUGIN_TASK_NAME,
+        Tasks.TEST_IDE,
 //        VERIFY_PLUGIN_TASK_NAME,
 //        VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
 //        VERIFY_PLUGIN_SIGNATURE_TASK_NAME,

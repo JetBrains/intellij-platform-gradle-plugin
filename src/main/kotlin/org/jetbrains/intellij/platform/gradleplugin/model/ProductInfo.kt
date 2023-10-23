@@ -77,7 +77,6 @@ enum class OS {
     Linux, Windows, macOS
 }
 
-
 internal fun ProductInfo.getBootClasspath(ideDir: Path) =
     currentLaunch
         .bootClassPathJarNames

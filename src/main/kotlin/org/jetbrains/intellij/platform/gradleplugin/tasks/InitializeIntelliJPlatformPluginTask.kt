@@ -6,6 +6,7 @@ import com.jetbrains.plugin.structure.base.utils.create
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
@@ -16,7 +17,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUG
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradleplugin.utils.LatestVersionResolver
-import java.nio.file.Path
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
 
@@ -33,10 +33,10 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
     abstract val selfUpdateCheck: Property<Boolean>
 
     @get:Internal
-    abstract val selfUpdateLockPath: Property<Path>
+    abstract val selfUpdateLock: RegularFileProperty
 
     @get:Internal
-    abstract val coroutinesJavaAgentPath: Property<Path>
+    abstract val coroutinesJavaAgent: RegularFileProperty
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -55,7 +55,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
      * Checks if the plugin is up-to-date.
      */
     private fun checkPluginVersion() {
-        if (!selfUpdateCheck.get() || selfUpdateLockPath.get().exists() || offline.get()) {
+        if (!selfUpdateCheck.get() || selfUpdateLock.asPath.exists() || offline.get()) {
             return
         }
 
@@ -68,7 +68,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
 
-            with(selfUpdateLockPath.get()) {
+            with(selfUpdateLock.asPath) {
                 if (!exists()) {
                     create()
                 }
@@ -82,7 +82,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
      * Creates a Java Agent file for the Coroutines library required to enable coroutines debugging.
      */
     private fun createCoroutinesJavaAgentFile() {
-        if (coroutinesJavaAgentPath.get().exists()) {
+        if (coroutinesJavaAgent.asPath.exists()) {
             return
         }
 
@@ -96,6 +96,6 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
             """.trimIndent().byteInputStream()
         )
 
-        JarOutputStream(coroutinesJavaAgentPath.get().outputStream(), manifest).close()
+        JarOutputStream(coroutinesJavaAgent.asPath.outputStream(), manifest).close()
     }
 }

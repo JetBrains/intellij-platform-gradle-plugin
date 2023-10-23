@@ -2,18 +2,26 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.propertyProviders
 
+import com.jetbrains.plugin.structure.base.utils.listFiles
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
+import org.jetbrains.intellij.platform.gradleplugin.asPath
 import java.io.File
 
 class PluginPathArgumentProvider(
-    @InputDirectory @PathSensitive(RELATIVE) val pluginsDirectory: File,
+    @InputDirectory @PathSensitive(RELATIVE) val sandboxDirectory: DirectoryProperty,
 ) : CommandLineArgumentProvider {
 
     private val paths
-        get() = pluginsDirectory.listFiles()?.joinToString("${File.pathSeparator},") { it.absolutePath }.orEmpty()
+        get() = sandboxDirectory.map {
+            it.dir(Sandbox.PLUGINS).apply {
+                asFile.mkdirs()
+            }
+        }.asPath.listFiles().joinToString("${File.pathSeparator},")
 
     override fun asArguments() = listOf(
         "-Dplugin.path=$paths",
