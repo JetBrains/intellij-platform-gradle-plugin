@@ -2,8 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.propertyProviders
 
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
@@ -14,13 +16,13 @@ import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import kotlin.io.path.pathString
 
 class LaunchSystemArgumentProvider(
-    @InputDirectory @PathSensitive(RELATIVE) val intellijPlatformDirectory: DirectoryProperty,
+    @InputFiles @PathSensitive(RELATIVE) val intellijPlatform: ConfigurableFileCollection,
     @InputDirectory @PathSensitive(RELATIVE) val sandboxDirectory: DirectoryProperty,
     private val requirePluginIds: List<String>,
 ) : CommandLineArgumentProvider {
 
     private val intellijPlatformPath
-        get() = intellijPlatformDirectory.asPath
+        get() = intellijPlatform.singleFile.toPath()
 
     private val currentLaunchProperties
         get() = intellijPlatformPath

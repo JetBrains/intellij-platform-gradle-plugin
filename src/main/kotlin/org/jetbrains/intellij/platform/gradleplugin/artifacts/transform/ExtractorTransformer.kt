@@ -20,9 +20,7 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradleplugin.asFile
 import org.jetbrains.intellij.platform.gradleplugin.asPath
-import java.io.File
 import java.io.File.separator
 import javax.inject.Inject
 import kotlin.io.path.name
@@ -50,30 +48,35 @@ abstract class ExtractorTransformer @Inject constructor(
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {
-        val (file, path) = with(inputArtifact) { asFile to asPath }
+        val path = inputArtifact.asPath
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
         val (groupId, artifactId, version) = path.pathString.split(separator).dropLast(2).takeLast(3)
         // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
 
-        val targetDirectory = when (file) {
-            in parameters.intellijPlatform -> {
-                IntelliJPlatformType.values().find { groupId == it.groupId && artifactId == it.artifactId }?.let { "$it-$version" }
-            }
-
-            in parameters.jetbrainsRuntime -> version
-
-            in emptyList<File>() -> {
+        val targetDirectory = listOf(
+            {
+                IntelliJPlatformType.values()
+                    .find { groupId == it.groupId && artifactId == it.artifactId }
+                    ?.let { "$it-$version" }
+            },
+            {
+                version
+                    .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
+            },
+            {
                 val marketplaceGroup = "com.jetbrains.plugins"
                 val channel = when {
                     groupId == marketplaceGroup -> ""
                     groupId.endsWith(".$marketplaceGroup") -> groupId.dropLast(marketplaceGroup.length + 1)
                     else -> null
-                } ?: return
-                "$artifactId-$version" + "@$channel".takeIf { channel.isNotEmpty() }.orEmpty()
-            }
-
-            else -> null
-        }?.let { outputs.dir(it) } ?: return
+                }
+//                "$artifactId-$version" + "@$channel".takeIf { channel.isNotEmpty() }.orEmpty()
+                null
+            },
+        )
+            .firstNotNullOfOrNull { it() }
+            ?.let { outputs.dir(it) }
+            ?: return
 
         when (extension) {
             ".zip", ".sit" -> {

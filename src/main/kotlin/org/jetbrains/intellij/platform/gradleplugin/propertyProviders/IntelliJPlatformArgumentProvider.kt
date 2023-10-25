@@ -4,27 +4,28 @@ package org.jetbrains.intellij.platform.gradleplugin.propertyProviders
 
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.readLines
-import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradleplugin.utils.OpenedPackages
 
 class IntelliJPlatformArgumentProvider(
-    @InputDirectory @PathSensitive(RELATIVE) val intellijPlatformDirectory: DirectoryProperty,
+    @InputFiles @PathSensitive(RELATIVE) val intellijPlatform: ConfigurableFileCollection,
     @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
     private val intellijPlatformPath
-        get() = intellijPlatformDirectory.asPath
+        get() = intellijPlatform.singleFile.toPath()
 
     private val productInfo by lazy {
         intellijPlatformPath.productInfo()
@@ -46,7 +47,13 @@ class IntelliJPlatformArgumentProvider(
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
 
-    private val kotlinxCoroutinesJavaAgent = "-javaagent:${coroutinesJavaAgentFile.asPath}"
+    private val kotlinxCoroutinesJavaAgent
+        get() = "-javaagent:${coroutinesJavaAgentFile.asPath}".takeIf {
+            IntelliJPlatformType.fromCode(productInfo.productCode) in listOf(
+                IntelliJPlatformType.IntellijIdeaCommunity,
+                IntelliJPlatformType.IntellijIdeaUltimate,
+            )
+        }
 
     private val additionalJvmArguments
         get() = productInfo
@@ -66,5 +73,5 @@ class IntelliJPlatformArgumentProvider(
 
     override fun asArguments() =
         (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace)
-            .filterNot { it.isBlank() }
+            .filterNot { it.isNullOrBlank() }
 }

@@ -8,7 +8,6 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradleplugin.asFile
 import org.jetbrains.intellij.platform.gradleplugin.asPath
 import org.jetbrains.intellij.platform.gradleplugin.model.getBootClasspath
 import org.jetbrains.intellij.platform.gradleplugin.or
@@ -25,7 +24,7 @@ import kotlin.io.path.absolutePathString
  * @see [JavaExec]
  */
 @UntrackedTask(because = "Should always run guest IDE")
-abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatformAware, JetBrainsRuntimeAware, PlatformVersionAware, SandboxAware {
+abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatformVersionAware, JetBrainsRuntimeAware, SandboxAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -37,7 +36,7 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
      */
     @TaskAction
     override fun exec() {
-        workingDir = intellijPlatformDirectory.dir("bin").asFile
+        workingDir = intelliJPlatform.singleFile
 
         configureClasspath()
 
@@ -62,7 +61,7 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
             }
 
         classpath += objectFactory.fileCollection().from(
-            productInfo.getBootClasspath(intellijPlatformDirectory.asPath)
+            customProductInfo.getBootClasspath(customIntelliJPlatformDirectory)
         )
     }
 

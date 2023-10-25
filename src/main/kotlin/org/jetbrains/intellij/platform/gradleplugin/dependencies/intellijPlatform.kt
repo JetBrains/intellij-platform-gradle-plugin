@@ -11,31 +11,82 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 
-internal fun DependencyHandler.intellijPlatform(
-    type: IntelliJPlatformType,
-    version: String,
-    configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
-) = add(configurationName, create(type, version))
-
-internal fun DependencyHandler.intellijPlatform(
-    type: IntelliJPlatformType,
+fun DependencyHandler.intellijPlatform(
+    typeProvider: Provider<IntelliJPlatformType>,
     versionProvider: Provider<String>,
     configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
-) = addProvider(configurationName, versionProvider.map { version -> create(type, version) })
+) = addProvider(configurationName, typeProvider.zip(versionProvider) { type, version ->
+    create(type, version)
+})
 
-internal fun DependencyHandler.intellijPlatform(
+fun DependencyHandler.intellijPlatform(
     typeProvider: Provider<IntelliJPlatformType>,
     version: String,
     configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
 ) = addProvider(configurationName, typeProvider.map { type -> create(type, version) })
 
-internal fun DependencyHandler.intellijPlatform(
-    typeProvider: Provider<IntelliJPlatformType>,
-    versionProvider: Provider<String>,
+fun DependencyHandler.intellijPlatform(
+    type: IntelliJPlatformType,
+    version: String,
     configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
-) = addProvider(configurationName, typeProvider.zip(versionProvider) { type, version -> create(type, version) })
+) = add(configurationName, create(type, version))
 
-internal fun DependencyHandler.create(
+fun DependencyHandler.intellijPlatform(
+    typeStringProvider: Provider<String>,
+    versionProvider: Provider<String>,
+) = intellijPlatform(typeStringProvider.map { IntelliJPlatformType.fromCode(it) }, versionProvider)
+
+fun DependencyHandler.intellijPlatform(
+    typeStringProvider: Provider<String>,
+    version: String,
+) = intellijPlatform(typeStringProvider.map { IntelliJPlatformType.fromCode(it) }, version)
+
+fun DependencyHandler.intellijPlatform(
+    type: IntelliJPlatformType,
+    versionProvider: Provider<String>,
+) = intellijPlatform(versionProvider.map { type }, versionProvider)
+
+fun DependencyHandler.intellijPlatform(
+    typeString: String,
+    versionProvider: Provider<String>,
+) = intellijPlatform(versionProvider.map { IntelliJPlatformType.fromCode(typeString) }, versionProvider)
+
+fun DependencyHandler.intellijPlatform(
+    typeString: String,
+    version: String,
+) = intellijPlatform(IntelliJPlatformType.fromCode(typeString), version)
+
+fun DependencyHandler.androidStudio(version: String) = intellijPlatform(AndroidStudio, version)
+fun DependencyHandler.androidStudio(version: Provider<String>) = intellijPlatform(AndroidStudio, version)
+
+fun DependencyHandler.clion(version: String) = intellijPlatform(CLion, version)
+fun DependencyHandler.clion(version: Provider<String>) = intellijPlatform(CLion, version)
+
+fun DependencyHandler.gateway(version: String) = intellijPlatform(Gateway, version)
+fun DependencyHandler.gateway(version: Provider<String>) = intellijPlatform(Gateway, version)
+
+fun DependencyHandler.goland(version: String) = intellijPlatform(GoLand, version)
+fun DependencyHandler.goland(version: Provider<String>) = intellijPlatform(GoLand, version)
+
+fun DependencyHandler.intellijIdeaCommunity(version: String) = intellijPlatform(IntellijIdeaCommunity, version)
+fun DependencyHandler.intellijIdeaCommunity(version: Provider<String>) = intellijPlatform(IntellijIdeaCommunity, version)
+
+fun DependencyHandler.intellijIdeaUltimate(version: String) = intellijPlatform(IntellijIdeaUltimate, version)
+fun DependencyHandler.intellijIdeaUltimate(version: Provider<String>) = intellijPlatform(IntellijIdeaUltimate, version)
+
+fun DependencyHandler.phpstorm(version: String) = intellijPlatform(PhpStorm, version)
+fun DependencyHandler.phpstorm(version: Provider<String>) = intellijPlatform(PhpStorm, version)
+
+fun DependencyHandler.pycharmProfessional(version: String) = intellijPlatform(PyCharmProfessional, version)
+fun DependencyHandler.pycharmProfessional(version: Provider<String>) = intellijPlatform(PyCharmProfessional, version)
+
+fun DependencyHandler.pycharmCommunity(version: String) = intellijPlatform(PyCharmCommunity, version)
+fun DependencyHandler.pycharmCommunity(version: Provider<String>) = intellijPlatform(PyCharmCommunity, version)
+
+fun DependencyHandler.rider(version: String) = intellijPlatform(Rider, version)
+fun DependencyHandler.rider(version: Provider<String>) = intellijPlatform(Rider, version)
+
+fun DependencyHandler.create(
     type: IntelliJPlatformType,
     version: String,
     settings: IntelliJPlatformDependencySettings = intellijPlatformDependencySettings,
@@ -48,6 +99,8 @@ internal fun DependencyHandler.create(
     action(this, settings)
 }
 
+// TODO: review the below rules if nothing is missing anymore
+//
 //    return when (type) {
 //        IntellijIdeaUltimate -> create(
 //            group = "com.jetbrains.intellij.idea",
@@ -113,39 +166,3 @@ internal fun DependencyHandler.create(
 //        }
 //    }
 //    }
-
-fun DependencyHandler.intellijPlatform(type: String, version: String) = intellijPlatform(IntelliJPlatformType.fromCode(type), version)
-fun DependencyHandler.intellijPlatform(type: Provider<String>, version: String) = intellijPlatform(type.map { IntelliJPlatformType.fromCode(it) }, version)
-fun DependencyHandler.intellijPlatform(type: String, version: Provider<String>) = intellijPlatform(IntelliJPlatformType.fromCode(type), version)
-fun DependencyHandler.intellijPlatform(type: Provider<String>, version: Provider<String>) =
-    intellijPlatform(type.map { IntelliJPlatformType.fromCode(it) }, version)
-
-fun DependencyHandler.androidStudio(version: String) = intellijPlatform(AndroidStudio, version)
-fun DependencyHandler.androidStudio(version: Provider<String>) = intellijPlatform(AndroidStudio, version)
-
-fun DependencyHandler.clion(version: String) = intellijPlatform(CLion, version)
-fun DependencyHandler.clion(version: Provider<String>) = intellijPlatform(CLion, version)
-
-fun DependencyHandler.gateway(version: String) = intellijPlatform(Gateway, version)
-fun DependencyHandler.gateway(version: Provider<String>) = intellijPlatform(Gateway, version)
-
-fun DependencyHandler.goland(version: String) = intellijPlatform(GoLand, version)
-fun DependencyHandler.goland(version: Provider<String>) = intellijPlatform(GoLand, version)
-
-fun DependencyHandler.intellijIdeaCommunity(version: String) = intellijPlatform(IntellijIdeaCommunity, version)
-fun DependencyHandler.intellijIdeaCommunity(version: Provider<String>) = intellijPlatform(IntellijIdeaCommunity, version)
-
-fun DependencyHandler.intellijIdeaUltimate(version: String) = intellijPlatform(IntellijIdeaUltimate, version)
-fun DependencyHandler.intellijIdeaUltimate(version: Provider<String>) = intellijPlatform(IntellijIdeaUltimate, version)
-
-fun DependencyHandler.phpstorm(version: String) = intellijPlatform(PhpStorm, version)
-fun DependencyHandler.phpstorm(version: Provider<String>) = intellijPlatform(PhpStorm, version)
-
-fun DependencyHandler.pycharmProfessional(version: String) = intellijPlatform(PyCharmProfessional, version)
-fun DependencyHandler.pycharmProfessional(version: Provider<String>) = intellijPlatform(PyCharmProfessional, version)
-
-fun DependencyHandler.pycharmCommunity(version: String) = intellijPlatform(PyCharmCommunity, version)
-fun DependencyHandler.pycharmCommunity(version: Provider<String>) = intellijPlatform(PyCharmCommunity, version)
-
-fun DependencyHandler.rider(version: String) = intellijPlatform(Rider, version)
-fun DependencyHandler.rider(version: Provider<String>) = intellijPlatform(Rider, version)

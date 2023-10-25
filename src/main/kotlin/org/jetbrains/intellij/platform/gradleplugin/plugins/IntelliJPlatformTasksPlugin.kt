@@ -11,11 +11,13 @@ import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.attributes
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withNormalizer
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature.SELF_UPDATE_CHECK
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_TASKS_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.TASKS
@@ -265,8 +267,8 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 
             jvmArgumentProviders.addAll(
                 listOf(
-                    IntelliJPlatformArgumentProvider(intellijPlatformDirectory, coroutinesJavaAgentFile, this),
-                    LaunchSystemArgumentProvider(intellijPlatformDirectory, sandboxDirectory, emptyList()),
+                    IntelliJPlatformArgumentProvider(customIntelliJPlatform, coroutinesJavaAgentFile, this),
+                    LaunchSystemArgumentProvider(customIntelliJPlatform, sandboxDirectory, emptyList()),
                     PluginPathArgumentProvider(sandboxDirectory),
                 )
             )
@@ -307,17 +309,24 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
     //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
     private fun TaskContainer.configureRunIdeTask() =
         configureTask<RunIdeTask>(Tasks.RUN_IDE) {
-            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+//            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
 
             mainClass.set("com.intellij.idea.Main")
             enableAssertions = true
 
             jvmArgumentProviders.addAll(
                 listOf(
-                    IntelliJPlatformArgumentProvider(intellijPlatformDirectory, coroutinesJavaAgentFile, this),
-                    LaunchSystemArgumentProvider(intellijPlatformDirectory, sandboxDirectory, emptyList()),
+                    IntelliJPlatformArgumentProvider(customIntelliJPlatform, coroutinesJavaAgentFile, this),
+                    LaunchSystemArgumentProvider(customIntelliJPlatform, sandboxDirectory, emptyList()),
                 )
             )
+
+//            classpath += intelliJPlatform.map {
+//
+//            }
+//                .map {
+//                    project.files(productInfo.getBootClasspath(intellijPlatformDirectory.asPath))
+//                }
 
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
 

@@ -22,7 +22,7 @@ import kotlin.io.path.absolutePathString
  * @see [JavaExec]
  */
 @UntrackedTask(because = "Should always run guest IDE")
-abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformAware, JetBrainsRuntimeAware, PlatformVersionAware, SandboxAware {
+abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformVersionAware, JetBrainsRuntimeAware, SandboxAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -33,12 +33,10 @@ abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformAwa
     override fun executeTests() {
         jvmArgumentProviders.addAll(
             listOf(
-                IntelliJPlatformArgumentProvider(intellijPlatformDirectory, coroutinesJavaAgentFile, this),
-                LaunchSystemArgumentProvider(intellijPlatformDirectory, sandboxDirectory, emptyList()),
+                IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
+                LaunchSystemArgumentProvider(intelliJPlatform, sandboxDirectory, emptyList()),
             )
         )
-
-//        jvmArgumentProviders.add(PluginPathArgumentProvider(pluginsDirectoryProvider.get()))
 
         super.executeTests()
     }

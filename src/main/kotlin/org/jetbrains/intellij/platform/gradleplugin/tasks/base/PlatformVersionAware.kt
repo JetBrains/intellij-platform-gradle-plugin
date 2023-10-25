@@ -16,6 +16,10 @@ interface PlatformVersionAware {
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    val intelliJPlatform: ConfigurableFileCollection
+
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     val intelliJPlatformProductInfo: ConfigurableFileCollection
 
     @get:Internal
