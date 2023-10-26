@@ -61,7 +61,7 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
             }
 
         classpath += objectFactory.fileCollection().from(
-            customProductInfo.getBootClasspath(customIntelliJPlatformDirectory)
+            productInfo.getBootClasspath(intelliJPlatform.single().toPath())
         )
     }
 

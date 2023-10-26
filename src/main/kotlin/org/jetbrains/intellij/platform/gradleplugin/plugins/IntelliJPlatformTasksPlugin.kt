@@ -267,8 +267,8 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 
             jvmArgumentProviders.addAll(
                 listOf(
-                    IntelliJPlatformArgumentProvider(customIntelliJPlatform, coroutinesJavaAgentFile, this),
-                    LaunchSystemArgumentProvider(customIntelliJPlatform, sandboxDirectory, emptyList()),
+                    IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
+                    LaunchSystemArgumentProvider(intelliJPlatform, sandboxDirectory, emptyList()),
                     PluginPathArgumentProvider(sandboxDirectory),
                 )
             )
@@ -316,8 +316,8 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 
             jvmArgumentProviders.addAll(
                 listOf(
-                    IntelliJPlatformArgumentProvider(customIntelliJPlatform, coroutinesJavaAgentFile, this),
-                    LaunchSystemArgumentProvider(customIntelliJPlatform, sandboxDirectory, emptyList()),
+                    IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
+                    LaunchSystemArgumentProvider(intelliJPlatform, sandboxDirectory, emptyList()),
                 )
             )
 

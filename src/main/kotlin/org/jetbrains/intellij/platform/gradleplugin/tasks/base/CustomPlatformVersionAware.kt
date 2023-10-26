@@ -2,31 +2,14 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.tasks.base
 
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradleplugin.model.ProductInfo
-import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 
 interface CustomPlatformVersionAware : PlatformVersionAware {
-
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    val customIntelliJPlatform: ConfigurableFileCollection
-
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    val customIntelliJPlatformProductInfo: ConfigurableFileCollection
-
-    @get:Internal
-    val customIntelliJPlatformDirectory
-        get() = customIntelliJPlatform.single().toPath()
-
-    @get:Internal
-    val customProductInfo: ProductInfo
-        get() = customIntelliJPlatformProductInfo.single().toPath().productInfo()
 
     @get:Input
     @get:Optional

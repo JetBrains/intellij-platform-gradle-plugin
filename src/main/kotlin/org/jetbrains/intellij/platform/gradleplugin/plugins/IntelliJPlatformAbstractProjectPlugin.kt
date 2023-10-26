@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.plugins
 
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -12,17 +13,15 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradleplugin.checkGradleVersion
 import org.jetbrains.intellij.platform.gradleplugin.dependencies.create
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradleplugin.info
-import org.jetbrains.intellij.platform.gradleplugin.isSpecified
 import org.jetbrains.intellij.platform.gradleplugin.jbr.JetBrainsRuntimeResolver
-import org.jetbrains.intellij.platform.gradleplugin.logCategory
+import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.tasks.InitializeIntelliJPlatformPluginTask
 import org.jetbrains.intellij.platform.gradleplugin.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.*
@@ -99,25 +98,26 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
 
                     extendsFrom(intellijPlatformConfiguration)
                 }
+                val baseIntellijPlatformProductInfoProvider = project.provider {
+                    project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO).single().toPath().productInfo()
+                }
 
-                type.convention(project.provider {
-                    platformType
+                type.convention(baseIntellijPlatformProductInfoProvider.map {
+                    IntelliJPlatformType.fromCode(it.productCode)
                 })
-                version.convention(project.provider {
-                    platformVersion.toString()
+                version.convention(baseIntellijPlatformProductInfoProvider.map {
+                    IdeVersion.createIdeVersion(it.version).toString()
                 })
-                customIntelliJPlatform.from(
-                    project.provider {
-                        when {
-                            type.isSpecified() || version.isSpecified() -> intellijPlatformConfiguration
-                            else -> intelliJPlatform
-                        }
+                intelliJPlatform.setFrom(project.provider {
+                    when {
+                        type.isSpecified() || version.isSpecified() -> intellijPlatformConfiguration
+                        else -> project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
                     }
-                )
-                customIntelliJPlatformProductInfo.from(project.provider {
+                })
+                intelliJPlatformProductInfo.setFrom(project.provider {
                     when {
                         type.isSpecified() || version.isSpecified() -> intellijPlatformProductInfoConfiguration
-                        else -> intelliJPlatformProductInfo
+                        else -> project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
                     }
                 })
             }

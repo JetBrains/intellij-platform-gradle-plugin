@@ -88,5 +88,5 @@ internal fun Path.resolveProductInfoPath(name: String = "product-info.json") =
         ?: throw GradleException("Could not resolve $name file in: $this")
 
 private val json = Json { ignoreUnknownKeys = true }
-internal fun Path.productInfo() = resolveProductInfoPath()
+fun Path.productInfo() = resolveProductInfoPath()
     .run { json.decodeFromString<ProductInfo>(readText()) }
