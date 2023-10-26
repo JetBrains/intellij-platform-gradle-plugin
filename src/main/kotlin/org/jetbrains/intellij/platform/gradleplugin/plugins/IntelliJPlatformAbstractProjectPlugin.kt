@@ -9,7 +9,6 @@ import org.gradle.api.Task
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.TaskContainer
-import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -24,6 +23,7 @@ import org.jetbrains.intellij.platform.gradleplugin.jbr.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 import org.jetbrains.intellij.platform.gradleplugin.tasks.InitializeIntelliJPlatformPluginTask
 import org.jetbrains.intellij.platform.gradleplugin.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.platform.gradleplugin.tasks.TestIdeTask
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.*
 import java.util.*
 import kotlin.io.path.createDirectories
@@ -138,14 +138,16 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
                 dependsOn(prepareSandboxTaskProvider)
             }
 
-            val jbrResolver = JetBrainsRuntimeResolver(
-                jetbrainsRuntimeConfiguration = project.configurations.getByName(Configurations.JETBRAINS_RUNTIME),
-                intellijPlatformConfiguration = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM),
-                javaToolchainSpec = project.extensions.getByType<JavaPluginExtension>().toolchain,
-                javaToolchainService = project.serviceOf<JavaToolchainService>(),
-            )
-
             if (this is JetBrainsRuntimeAware) {
+                jetbrainsRuntime = project.configurations.getByName(Configurations.JETBRAINS_RUNTIME)
+
+                val jbrResolver = JetBrainsRuntimeResolver(
+                    jetbrainsRuntime = jetbrainsRuntime,
+                    intellijPlatform = intelliJPlatform,
+                    javaToolchainSpec = project.extensions.getByType<JavaPluginExtension>().toolchain,
+                    javaToolchainService = project.serviceOf<JavaToolchainService>(),
+                )
+
                 jetbrainsRuntimeDirectory.convention(project.layout.dir(project.provider {
                     jbrResolver.resolveDirectory()?.toFile()
                 }))
@@ -154,10 +156,8 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
                 }))
             }
 
-            if (this is Test) {
-                executable(project.provider {
-                    jbrResolver.resolveExecutable()?.toFile()
-                })
+            if (this is TestIdeTask) {
+                executable(jetbrainsRuntimeExecutable)
             }
         }
 

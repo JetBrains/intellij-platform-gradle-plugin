@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradleplugin.jbr
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.listFiles
 import com.jetbrains.plugin.structure.base.utils.simpleName
-import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.jvm.toolchain.JavaToolchainService
@@ -20,8 +20,8 @@ import java.nio.file.Path
 import java.util.*
 
 class JetBrainsRuntimeResolver(
-    val jetbrainsRuntimeConfiguration: Configuration,
-    val intellijPlatformConfiguration: Configuration,
+    val jetbrainsRuntime: ConfigurableFileCollection,
+    val intellijPlatform: ConfigurableFileCollection,
     val javaToolchainSpec: JavaToolchainSpec,
     val javaToolchainService: JavaToolchainService,
     val context: String? = null,
@@ -38,7 +38,7 @@ class JetBrainsRuntimeResolver(
              * or [org.jetbrains.intellij.platform.gradleplugin.dependencies.jetbrainsRuntimeExplicit].
              */
             {
-                jetbrainsRuntimeConfiguration.singleOrNull()?.let { file ->
+                jetbrainsRuntime.singleOrNull()?.let { file ->
                     file.toPath().getJbrRoot()
                         .also { debug(context, "JetBrains Runtime specified with dependencies resolved as: $it") }
                         .ifNull { debug(context, "Cannot resolve JetBrains Runtime: $file") }
@@ -59,7 +59,7 @@ class JetBrainsRuntimeResolver(
                     }
             },
             {
-                intellijPlatformConfiguration.singleOrNull()?.let { file ->
+                intellijPlatform.singleOrNull()?.let { file ->
                     file.toPath().getJbrRoot()
                         .also { debug(context, "JetBrains Runtime bundled within IntelliJ Platform resolved as: $it") }
                         .ifNull { debug(context, "Cannot resolve JetBrains Runtime bundled within IntelliJ Platform: $file") }
