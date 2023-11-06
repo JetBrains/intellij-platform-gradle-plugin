@@ -36,9 +36,10 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
      */
     @TaskAction
     override fun exec() {
-        workingDir = intelliJPlatform.singleFile
-
+        assertPlatformVersion()
         configureClasspath()
+
+        workingDir = intelliJPlatform.singleFile
 
         super.exec()
     }

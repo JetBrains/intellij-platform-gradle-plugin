@@ -3,10 +3,10 @@
 package org.jetbrains.intellij.platform.gradleplugin.plugins
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.jvm.toolchain.JavaToolchainService
@@ -15,9 +15,8 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.platform.gradleplugin.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradleplugin.dependencies.create
+import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradleplugin.jbr.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
@@ -72,9 +71,9 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
                     isCanBeConsumed = false
                     isCanBeResolved = true
 
-                    dependencies.addLater(project.provider {
-                        project.dependencies.create(type.get(), version.get())
-                    })
+                    project.dependencies
+                        .the<IntelliJPlatformDependenciesExtension>()
+                        .create(type, version, configurationName = name)
                 }
                 val intellijPlatformConfiguration = project.configurations.create("${Configurations.INTELLIJ_PLATFORM}_$suffix") {
                     isVisible = false
@@ -98,34 +97,42 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
 
                     extendsFrom(intellijPlatformConfiguration)
                 }
-                val baseIntellijPlatformProductInfoProvider = project.provider {
-                    project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO).single().toPath().productInfo()
-                }
 
-                type.convention(baseIntellijPlatformProductInfoProvider.map {
-                    IntelliJPlatformType.fromCode(it.productCode)
+                type.convention(project.provider {
+                    val productInfo = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                        .singleOrNull()
+                        .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
+                        .toPath()
+                        .productInfo()
+                    IntelliJPlatformType.fromCode(productInfo.productCode)
                 })
-                version.convention(baseIntellijPlatformProductInfoProvider.map {
-                    IdeVersion.createIdeVersion(it.version).toString()
+                version.convention(project.provider {
+                    val productInfo = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                        .singleOrNull()
+                        .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
+                        .toPath()
+                        .productInfo()
+                    IdeVersion.createIdeVersion(productInfo.version).toString()
                 })
                 intelliJPlatform.setFrom(project.provider {
                     when {
                         type.isSpecified() || version.isSpecified() -> intellijPlatformConfiguration
-                        else -> project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+                        else -> emptyList()
                     }
                 })
                 intelliJPlatformProductInfo.setFrom(project.provider {
                     when {
                         type.isSpecified() || version.isSpecified() -> intellijPlatformProductInfoConfiguration
-                        else -> project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                        else -> emptyList()
                     }
                 })
             }
 
             if (this is SandboxAware) {
                 val prepareSandboxTaskProvider = named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+                val extension = project.the<IntelliJPlatformExtension>()
 
-                sandboxDirectory.convention(project.intelliJPlatformExtension.sandboxContainer.map {
+                sandboxDirectory.convention(extension.sandboxContainer.map {
                     it.dir("$platformType-$platformVersion").also { directory ->
                         directory.asFile.toPath().createDirectories()
                     }
@@ -163,15 +170,4 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
 
         withType<T>(configuration)
     }
-
-    protected inline fun <reified T : Any> Any.configureExtension(name: String, noinline configuration: T.() -> Unit = {}) {
-        info(context, "Configuring extension: $name")
-        with((this as ExtensionAware).extensions) {
-            val extension = findByName(name) as? T ?: create<T>(name)
-            extension.configuration()
-        }
-    }
-
-    protected val Project.intelliJPlatformExtension
-        get() = extensions.getByName<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM)
 }

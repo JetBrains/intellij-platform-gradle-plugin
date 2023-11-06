@@ -8,9 +8,6 @@ import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
 
-@DslMarker
-annotation class IntelliJPlatform
-
 @IntelliJPlatform
 interface IntelliJPlatformExtension : ExtensionAware {
 

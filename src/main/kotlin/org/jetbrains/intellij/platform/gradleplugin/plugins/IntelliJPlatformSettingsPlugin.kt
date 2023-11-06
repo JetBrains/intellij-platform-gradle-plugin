@@ -4,18 +4,19 @@ package org.jetbrains.intellij.platform.gradleplugin.plugins
 
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ProviderFactory
-import org.jetbrains.intellij.platform.gradleplugin.repositories.applyIntelliJPlatformSettings
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
+import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformRepositoriesExtension
 import javax.inject.Inject
 
-@Suppress("UnstableApiUsage", "unused")
+@Suppress("unused", "UnstableApiUsage")
 abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
-    private val objects: ObjectFactory,
     private val providers: ProviderFactory,
 ) : Plugin<Settings> {
 
     override fun apply(settings: Settings) {
-        settings.dependencyResolutionManagement.repositories.applyIntelliJPlatformSettings(objects, providers)
+        with(settings.dependencyResolutionManagement.repositories) {
+            configureExtension<IntelliJPlatformRepositoriesExtension>(Extensions.INTELLIJ_PLATFORM, this, providers)
+        }
     }
 }

@@ -8,8 +8,6 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradleplugin.asPath
-import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradleplugin.propertyProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradleplugin.tasks.base.*
 import kotlin.io.path.absolutePathString
 
@@ -31,12 +29,7 @@ abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformVer
 
     @TaskAction
     override fun executeTests() {
-        jvmArgumentProviders.addAll(
-            listOf(
-                IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
-                LaunchSystemArgumentProvider(intelliJPlatform, sandboxDirectory, emptyList()),
-            )
-        )
+        assertPlatformVersion()
 
         super.executeTests()
     }

@@ -149,10 +149,10 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
         val outputPath = outputFile.get().toPath()
 
         val sinceBuildValue = sinceBuild.orNull ?: with(platformVersion) {
-            "$baselineVersion.$build"
+            "$major.$minor"
         }
         val untilBuildValue = untilBuild.orNull ?: with(platformVersion) {
-            "$baselineVersion.*"
+            "$major.*"
         }
 
         inputPath.inputStream().use { inputStream ->

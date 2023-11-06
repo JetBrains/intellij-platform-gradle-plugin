@@ -2,13 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.tasks.base
 
-import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradleplugin.Version
 import org.jetbrains.intellij.platform.gradleplugin.model.ProductInfo
 import org.jetbrains.intellij.platform.gradleplugin.model.productInfo
 
@@ -27,14 +27,20 @@ interface PlatformVersionAware {
         get() = intelliJPlatformProductInfo.single().toPath().productInfo()
 
     @get:Internal
-    val platformBuild: IdeVersion
-        get() = IdeVersion.createIdeVersion(productInfo.buildNumber)
+    val platformBuild: Version
+        get() = Version.parse(productInfo.buildNumber)
 
     @get:Internal
-    val platformVersion: IdeVersion
-        get() = IdeVersion.createIdeVersion(productInfo.version)
+    val platformVersion: Version
+        get() = Version.parse(productInfo.version)
 
     @get:Internal
     val platformType: IntelliJPlatformType
         get() = IntelliJPlatformType.fromCode(productInfo.productCode)
+
+    fun assertPlatformVersion() {
+        if (platformBuild < Version(223)) {
+            throw IllegalArgumentException("The minimal supported IntelliJ Platform version is 2022.3 (233.0), which is higher than provided: $platformVersion ($platformBuild)")
+        }
+    }
 }

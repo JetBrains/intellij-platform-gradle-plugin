@@ -9,18 +9,18 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradleplugin.artifacts.transform.applyProductInfoTransformer
-import org.jetbrains.intellij.platform.gradleplugin.dependencies.applyIntelliJPlatformSettings
+import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradleplugin.repositories.applyIntelliJPlatformSettings
+import org.jetbrains.intellij.platform.gradleplugin.extensions.IntelliJPlatformRepositoriesExtension
 
 abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_BASE_ID) {
 
@@ -28,10 +28,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
         with(plugins) {
             apply(JavaPlugin::class)
-        }
-
-        with(repositories) {
-            applyIntelliJPlatformSettings(objects, providers)
         }
 
         with(configurations) {
@@ -63,6 +59,18 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     }
 
                     extendsFrom(intellijPlatformDependencyConfiguration, intellijPlatformLocalConfiguration)
+
+                    incoming.beforeResolve {
+                        if (dependencies.isEmpty()) {
+                            throw GradleException("No IntelliJ Platform dependency found")
+                        }
+
+                        val identifiers = IntelliJPlatformType.values().map { "${it.groupId}:${it.artifactId}" }
+                        val matched = dependencies.filter { identifiers.contains("${it.group}:${it.name}") }
+                        if (matched.size > 1) {
+                            throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
+                        }
+                    }
                 }
 
             maybeCreate(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
@@ -136,20 +144,10 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
                 getByName(Configurations.TEST_FIXTURES_COMPILE_ONLY).extend()
             }
-
-            val identifiers = IntelliJPlatformType.values().map { "${it.groupId}:${it.artifactId}" }
-            all {
-                incoming.beforeResolve {
-                    val matched = dependencies.filter { identifiers.contains("${it.group}:${it.name}") }
-                    if (matched.size > 1) {
-                        throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
-                    }
-                }
-            }
         }
 
         with(dependencies) {
-            applyIntelliJPlatformSettings(objects, gradle)
+//            applyIntelliJPlatformSettings(objects, gradle)
 
             attributesSchema {
                 attribute(Attributes.collected)
@@ -170,19 +168,21 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             applyProductInfoTransformer()
         }
 
-        with(IntelliJPluginConstants.Extensions) {
-            this@configure.configureExtension<IntelliJPlatformExtension>(INTELLIJ_PLATFORM) {
-                instrumentCode.convention(true)
-                sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
+        configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
+            instrumentCode.convention(true)
+            sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
 
-                configureExtension<IntelliJPlatformExtension.PluginConfiguration>(PLUGIN_CONFIGURATION) {
-                    name.convention(project.name)
-                    
-                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(PRODUCT_DESCRIPTOR)
-                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(IDEA_VERSION)
-                    configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(VENDOR)
-                }
+            configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
+                name.convention(project.name)
+                version.convention(this@configure.version.toString())
+
+                configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
+                configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION)
+                configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(Extensions.VENDOR)
             }
         }
+
+        dependencies.configureExtension<IntelliJPlatformDependenciesExtension>(Extensions.INTELLIJ_PLATFORM, repositories, dependencies, providers, gradle)
+        repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(Extensions.INTELLIJ_PLATFORM, repositories, providers)
     }
 }

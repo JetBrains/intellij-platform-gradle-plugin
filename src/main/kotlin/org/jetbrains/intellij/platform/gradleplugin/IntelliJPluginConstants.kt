@@ -12,6 +12,11 @@ object IntelliJPluginConstants {
 
     const val PLUGIN_GROUP_NAME = "intellij"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
+    const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
+    const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
+    const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
+    const val KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT = "kotlin.incremental.useClasspathSnapshot"
+    const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
     object Extensions {
         const val IDEA_VERSION = "ideaVersion"
@@ -57,6 +62,7 @@ object IntelliJPluginConstants {
         const val RUN_IDE = "runIde"
         const val SETUP_DEPENDENCIES = "setupDependencies"
         const val TEST_IDE = "testIde"
+        const val VERIFY_PLUGIN_CONFIGURATION = "verifyPluginConfiguration"
     }
 
     object Sandbox {
@@ -92,10 +98,7 @@ object IntelliJPluginConstants {
     const val RUN_PLUGIN_VERIFIER_TASK_NAME = "runPluginVerifier"
     const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
     const val VERIFY_PLUGIN_TASK_NAME = "verifyPlugin"
-    const val VERIFY_PLUGIN_CONFIGURATION_TASK_NAME = "verifyPluginConfiguration"
     const val VERIFY_PLUGIN_SIGNATURE_TASK_NAME = "verifyPluginSignature"
-
-    const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
     val TASKS = listOf(
         Tasks.BUILD_PLUGIN,
@@ -127,12 +130,10 @@ object IntelliJPluginConstants {
 //        SIGN_PLUGIN_TASK_NAME,
         Tasks.TEST_IDE,
 //        VERIFY_PLUGIN_TASK_NAME,
-//        VERIFY_PLUGIN_CONFIGURATION_TASK_NAME,
+        Tasks.VERIFY_PLUGIN_CONFIGURATION,
 //        VERIFY_PLUGIN_SIGNATURE_TASK_NAME,
     )
 
-    const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
-    const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
 
     const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
     const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"

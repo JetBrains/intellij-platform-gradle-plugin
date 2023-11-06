@@ -15,7 +15,8 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPlugin.*
+import org.gradle.api.plugins.JavaPlugin.JAR_TASK_NAME
+import org.gradle.api.plugins.JavaPlugin.PROCESS_RESOURCES_TASK_NAME
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.ClasspathNormalizer
@@ -23,7 +24,6 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
@@ -36,7 +36,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
@@ -53,7 +52,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INST
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.MARKETPLACE_HOST
@@ -72,7 +70,6 @@ import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SEAR
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERIFY_PLUGIN_CONFIGURATION_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradleplugin.IntelliJPluginConstants.VERSION_LATEST
@@ -90,8 +87,6 @@ import org.jetbrains.intellij.platform.gradleplugin.utils.mavenRepository
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.tasks.DownloadAndroidStudioProductReleasesXmlTask
 import org.jetbrains.intellij.tasks.DownloadIdeaProductReleasesXmlTask
-import org.jetbrains.kotlin.gradle.dsl.kotlinExtension
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.io.File
 import java.net.URL
 import java.nio.file.Path
@@ -180,18 +175,17 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         configureSignPluginTask(project)
         configurePublishPluginTask(project)
         configureProcessResources(project)
-        configureVerifyPluginConfigurationTask(project, ideaDependencyProvider)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
-        project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
-            project.tasks.withType<KotlinCompile> {
-                dependsOn(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-            }
-        }
-
-        project.tasks.withType<JavaCompile> {
-            dependsOn(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-        }
+//        project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
+////            project.tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+////                dependsOn(Tasks.VERIFY_PLUGIN_CONFIGURATION)
+////            }
+//        }
+//
+//        project.tasks.withType<JavaCompile> {
+//            dependsOn(Tasks.VERIFY_PLUGIN_CONFIGURATION)
+//        }
 
         project.afterEvaluate {
             configureProjectAfterEvaluate(this, extension, ideaDependencyProvider)
@@ -631,75 +625,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             )
 
             dependsOn(Tasks.PREPARE_SANDBOX)
-        }
-    }
-
-    private fun configureVerifyPluginConfigurationTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
-        info(context, "Configuring plugin configuration verification task")
-
-        val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-        val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME)
-        val compileJavaTaskProvider = project.tasks.named<JavaCompile>(COMPILE_JAVA_TASK_NAME)
-        val stdlibDefaultDependencyProvider = project.providers.gradleProperty("kotlin.stdlib.default.dependency").map {
-            it.toBoolean()
-        }
-        val incrementalUseClasspathSnapshot = project.providers.gradleProperty("kotlin.incremental.useClasspathSnapshot").map {
-            it.toBoolean()
-        }
-
-        val downloadDirProvider = runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
-            runPluginVerifierTask.downloadDir
-        }
-
-        project.tasks.register<VerifyPluginConfigurationTask>(VERIFY_PLUGIN_CONFIGURATION_TASK_NAME)
-        project.tasks.withType<VerifyPluginConfigurationTask> {
-            platformBuild.convention(ideaDependencyProvider.map {
-                it.buildNumber
-            })
-            platformVersion.convention(ideaDependencyProvider.map {
-                it.version
-            })
-//            pluginXmlFiles.convention(patchPluginXmlTaskProvider.flatMap { patchPluginXmlTask ->
-//                patchPluginXmlTask.outputFiles
-//            })
-            sourceCompatibility.convention(compileJavaTaskProvider.map {
-                it.sourceCompatibility
-            })
-            targetCompatibility.convention(compileJavaTaskProvider.map {
-                it.targetCompatibility
-            })
-            pluginVerifierDownloadDir.convention(downloadDirProvider)
-            kotlinxCoroutinesLibraryPresent.convention(project.provider {
-                listOf(IMPLEMENTATION_CONFIGURATION_NAME, COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->
-                    project.configurations.getByName(configurationName).dependencies.any {
-                        it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
-                    }
-                }
-            })
-
-            kotlinPluginAvailable.convention(project.provider {
-                project.pluginManager.hasPlugin(KOTLIN_GRADLE_PLUGIN_ID)
-            })
-            project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
-                val compileKotlinTaskProvider = project.tasks.named<KotlinCompile>(COMPILE_KOTLIN_TASK_NAME)
-
-                kotlinJvmTarget.convention(project.provider {
-                    compileKotlinTaskProvider.get().kotlinOptions.jvmTarget
-                })
-                kotlinApiVersion.convention(project.provider {
-                    compileKotlinTaskProvider.get().kotlinOptions.apiVersion
-                })
-                kotlinLanguageVersion.convention(project.provider {
-                    compileKotlinTaskProvider.get().kotlinOptions.languageVersion
-                })
-                kotlinVersion.convention(project.provider {
-                    project.kotlinExtension.coreLibrariesVersion
-                })
-                kotlinStdlibDefaultDependency.convention(stdlibDefaultDependencyProvider)
-                kotlinIncrementalUseClasspathSnapshot.convention(incrementalUseClasspathSnapshot)
-            }
-
-            dependsOn(Tasks.PATCH_PLUGIN_XML)
         }
     }
 
