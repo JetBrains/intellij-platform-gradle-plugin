@@ -217,7 +217,7 @@ gradlePlugin {
     plugins.create("intellijPlugin") {
         id = "org.jetbrains.intellij.platform"
         displayName = "IntelliJ Platform Gradle Plugin"
-        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformPlugin"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformPlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
@@ -225,7 +225,7 @@ gradlePlugin {
     plugins.create("intellijPluginBase") {
         id = "org.jetbrains.intellij.platform.base"
         displayName = "IntelliJ Platform Gradle Plugin (base)"
-        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformBasePlugin"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformBasePlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
@@ -233,7 +233,7 @@ gradlePlugin {
     plugins.create("intellijPluginSettings") {
         id = "org.jetbrains.intellij.platform.settings"
         displayName = "IntelliJ Platform Gradle Plugin (settings)"
-        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformSettingsPlugin"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformSettingsPlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
@@ -241,7 +241,7 @@ gradlePlugin {
     plugins.create("intellijPluginTasks") {
         id = "org.jetbrains.intellij.platform.tasks"
         displayName = "IntelliJ Platform Gradle Plugin (tasks)"
-        implementationClass = "org.jetbrains.intellij.platform.gradleplugin.plugins.IntelliJPlatformTasksPlugin"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformTasksPlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
