@@ -2,10 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradleplugin.extensions
 
+import org.gradle.api.Action
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.maven
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradleplugin.BuildFeature
 import javax.inject.Inject
 
@@ -63,3 +66,6 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         }
     }
 }
+
+fun RepositoryHandler.intellijPlatform(configure: Action<IntelliJPlatformRepositoriesExtension>) =
+    (this as ExtensionAware).the<IntelliJPlatformRepositoriesExtension>().apply(configure::execute)
