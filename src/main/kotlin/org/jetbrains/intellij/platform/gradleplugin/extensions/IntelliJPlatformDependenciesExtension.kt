@@ -161,7 +161,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: Provider<String>,
         channel: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
-        action: DependencyAction,
+        action: DependencyAction = {},
     ) = addIntelliJPlatformPlugin(id, version, channel, configurationName, action)
 
     fun plugin(
@@ -169,19 +169,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: String,
         channel: String = "",
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
-        action: DependencyAction,
+        action: DependencyAction = {},
     ) = plugin(providers.provider { id }, providers.provider { version }, providers.provider { channel }, configurationName, action)
 
     fun bundledPlugin(
         id: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
-        action: DependencyAction,
+        action: DependencyAction = {},
     ) = addIntelliJPlatformBundledPlugin(id, configurationName, action)
 
     fun bundledPlugin(
         id: String,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
-        action: DependencyAction,
+        action: DependencyAction = {},
     ) = bundledPlugin(providers.provider { id }, configurationName, action)
 
     private fun addIntelliJPlatformDependency(
@@ -309,7 +309,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: Provider<String>,
         channel: Provider<String>,
         configurationName: String,
-        action: DependencyAction,
+        action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
         providers.provider {
@@ -330,7 +330,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private fun addIntelliJPlatformBundledPlugin(
         id: Provider<String>,
         configurationName: String,
-        action: DependencyAction,
+        action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
         id.map {
