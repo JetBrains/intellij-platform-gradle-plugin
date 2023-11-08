@@ -6,22 +6,26 @@ import com.jetbrains.plugin.structure.base.utils.create
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.GITHUB_REPOSITORY
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
+import java.net.URL
+import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
 
 /**
- * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up to date.
+ * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up-to-date.
  */
 @UntrackedTask(because = "Should always be run to initialize the plugin")
 abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
@@ -37,6 +41,9 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
 
     @get:Internal
     abstract val coroutinesJavaAgent: RegularFileProperty
+
+    @get:Internal
+    abstract val pluginVersion: Property<String>
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -60,10 +67,8 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
         }
 
         try {
-            val version = getCurrentPluginVersion()
-                ?.let(Version::parse)
-                .or { Version() }
-            val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, GITHUB_REPOSITORY)
+            val version = Version.parse(pluginVersion.get())
+            val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, Locations.GITHUB_REPOSITORY)
             if (version < Version.parse(latestVersion)) {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
@@ -97,5 +102,46 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
         )
 
         JarOutputStream(coroutinesJavaAgent.asPath.outputStream(), manifest).close()
+    }
+
+    companion object {
+        fun register(project: Project) =
+            project.configureTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+                offline.convention(project.gradle.startParameter.isOffline)
+                selfUpdateCheck.convention(project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK))
+                selfUpdateLock.convention(
+                    project.layout.file(project.provider {
+                        temporaryDir.resolve(LocalDate.now().toString())
+                    })
+                )
+                coroutinesJavaAgent.convention(
+                    project.layout.file(project.provider {
+                        temporaryDir.resolve("coroutines-javaagent.jar")
+                    })
+                )
+                pluginVersion.convention(project.provider {
+                    InitializeIntelliJPlatformPluginTask::class.java
+                        .run { getResource("$simpleName.class") }
+                        .runCatching {
+                            val manifestPath = with(this?.path) {
+                                when {
+                                    this == null -> return@runCatching null
+                                    startsWith("jar:") -> this
+                                    startsWith("file:") -> "jar:$this"
+                                    else -> return@runCatching null
+                                }
+                            }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
+
+                            info(null, "Resolving $PLUGIN_NAME version with: $manifestPath")
+                            URL(manifestPath).openStream().use {
+                                Manifest(it).mainAttributes.getValue("Version")
+                            }
+                        }.getOrNull() ?: "0.0.0"
+                })
+
+                onlyIf {
+                    !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
+                }
+            }
     }
 }

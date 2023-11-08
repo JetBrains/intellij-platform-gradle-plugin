@@ -6,7 +6,9 @@ import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.copyTo
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.notExists
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -25,13 +27,13 @@ open class IntelliJPlatformIntegrationTestBase(
     }
 
     @AfterTest
+    @OptIn(ExperimentalPathApi::class)
     fun cleanup() {
         dir.deleteRecursively()
     }
 
     protected fun use(resourceName: String) {
         val resourcePath = Path.of("src", "integrationTest", "resources", resourceName)
-        val destinationPath = dir.toPath()
 
         if (resourcePath.notExists()) {
             throw IllegalArgumentException("Integration tests resource '$resourceName' not found in: $resourcePath")
@@ -39,7 +41,7 @@ open class IntelliJPlatformIntegrationTestBase(
 
         Files.walk(resourcePath)
             .forEach {
-                val destinationFile = destinationPath.resolve(resourcePath.relativize(it))
+                val destinationFile = dir.resolve(resourcePath.relativize(it))
                 it.copyTo(destinationFile, true)
             }
     }
@@ -81,7 +83,7 @@ open class IntelliJPlatformIntegrationTestBase(
      * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/`.
      */
     val buildDirectory
-        get() = dir.resolve("build").toPath()
+        get() = dir.resolve("build")
             .also {
                 assert(Files.exists(it)) { "Build directory does not exist: $it" }
             }

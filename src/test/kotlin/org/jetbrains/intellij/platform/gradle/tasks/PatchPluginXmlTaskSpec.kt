@@ -2,11 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
@@ -14,7 +14,7 @@ import kotlin.test.assertNotEquals
 @Suppress("PluginXmlValidity")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
-    private val patchedPluginXml = lazy { File(buildDirectory, PLUGIN_XML_DIR_NAME).listFiles()?.first() }
+    private val patchedPluginXml = lazy { buildDirectory.resolve(PLUGIN_XML_DIR_NAME).listFiles().first() }
 
     @Test
     fun `patch version and since until builds`() {

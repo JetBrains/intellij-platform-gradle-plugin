@@ -8,8 +8,8 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.maven
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import javax.inject.Inject
 
 internal typealias RepositoryAction = (MavenArtifactRepository.() -> Unit)
@@ -49,6 +49,13 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
+    fun pluginVerifier(action: RepositoryAction = {}) = createRepository(
+        name = "IntelliJ Plugin Verifier Repository",
+        url = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier",
+        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier",
+        action = action,
+    )
+
     private fun createRepository(
         name: String,
         url: String,
@@ -68,4 +75,4 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
 }
 
 fun RepositoryHandler.intellijPlatform(configure: Action<IntelliJPlatformRepositoriesExtension>) =
-    (this as ExtensionAware).the<IntelliJPlatformRepositoriesExtension>().apply(configure::execute)
+    (this as ExtensionAware).extensions.configure(Extensions.INTELLIJ_PLATFORM, configure)

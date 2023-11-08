@@ -8,6 +8,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import java.io.File
 
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class DownloadIdeaProductReleasesXmlTask : Sync() {
 

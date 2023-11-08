@@ -52,12 +52,9 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.LIST_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_VERIFIER_REPOSITORY
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PRINT_BUNDLED_PLUGINS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PRINT_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
@@ -65,13 +62,11 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SU
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.dependency.*
 import org.jetbrains.intellij.platform.gradle.model.MavenMetadata
@@ -89,7 +84,6 @@ import org.jetbrains.intellij.tasks.DownloadAndroidStudioProductReleasesXmlTask
 import org.jetbrains.intellij.tasks.DownloadIdeaProductReleasesXmlTask
 import java.io.File
 import java.net.URL
-import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
@@ -164,8 +158,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         configureInstrumentation(project, extension, ideaDependencyProvider)
         configureDownloadRobotServerPluginTask(project)
         configureListProductsReleasesTask(project, extension)
-        configureListBundledPluginsTask(project, ideaDependencyProvider)
-        configurePluginVerificationTask(project)
         configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
@@ -526,105 +518,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     }
                 }).first()
             })
-        }
-    }
-
-    private fun configureRunPluginVerifierTask(project: Project, extension: IntelliJPluginExtension) {
-        info(context, "Configuring run plugin verifier task")
-
-        val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME)
-        val runIdeTaskProvider = project.tasks.named<RunIdeTask>(Tasks.RUN_IDE)
-        val userHomeProvider = project.providers.systemProperty("user.home")
-
-        project.tasks.register<RunPluginVerifierTask>(RUN_PLUGIN_VERIFIER_TASK_NAME)
-        project.tasks.withType<RunPluginVerifierTask> {
-            val taskContext = logCategory()
-
-            failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
-            verifierVersion.convention(VERSION_LATEST)
-            distributionFile.convention(project.resolveBuildTaskOutput())
-            verificationReportsDir.convention(
-                project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath }
-            )
-            verificationReportsFormats.convention(
-                EnumSet.of(
-                    RunPluginVerifierTask.VerificationReportsFormats.PLAIN,
-                    RunPluginVerifierTask.VerificationReportsFormats.HTML,
-                )
-            )
-            downloadDir.convention(ideDownloadDir().map {
-                it.toFile().invariantSeparatorsPath
-            })
-            downloadPath.convention(userHomeProvider.map {
-                val userHomePath = Path.of(it)
-                with(downloadDir.get()) {
-                    when {
-                        startsWith("~/") -> userHomePath.resolve(removePrefix("~/"))
-                        equals("~") -> userHomePath
-                        else -> Path.of(this)
-                    }
-                }
-            })
-            teamCityOutputFormat.convention(false)
-            subsystemsToCheck.convention("all")
-//            ideDir.convention(runIdeTaskProvider.flatMap { runIdeTask ->
-//                runIdeTask.ideDir
-//            })
-            productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
-                listProductsReleasesTask.outputFile.asFile
-            })
-            verifierPath.convention(project.provider {
-                debug(context, "Using Verifier in '$currentVersion' version")
-
-                dependenciesDownloader.downloadFromRepository(taskContext, {
-                    create(
-                        group = "org.jetbrains.intellij.plugins",
-                        name = "verifier-cli",
-                        version = currentVersion,
-                        classifier = "all",
-                        ext = "jar",
-                    )
-                }, {
-                    mavenRepository(PLUGIN_VERIFIER_REPOSITORY)
-                }).first().canonicalPath
-            })
-            offline.convention(project.gradle.startParameter.isOffline)
-
-            dependsOn(Tasks.BUILD_PLUGIN)
-            dependsOn(VERIFY_PLUGIN_TASK_NAME)
-            dependsOn(LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-            val isIdeVersionsEmpty = localPaths.flatMap { localPaths ->
-                ideVersions.map { ideVersions ->
-                    localPaths.isEmpty() && ideVersions.isEmpty()
-                }
-            }
-            listProductsReleasesTaskProvider.get().onlyIf { isIdeVersionsEmpty.get() }
-        }
-    }
-
-    private fun configurePluginVerificationTask(project: Project) {
-        info(context, "Configuring plugin verification task")
-
-        val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-
-        project.tasks.register<VerifyPluginTask>(VERIFY_PLUGIN_TASK_NAME)
-        project.tasks.withType<VerifyPluginTask> {
-            ignoreFailures.convention(false)
-            ignoreUnacceptableWarnings.convention(false)
-            ignoreWarnings.convention(true)
-
-            pluginDir.convention(
-                project.layout.dir(
-                    prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-                        prepareSandboxTask.pluginName.map { pluginName ->
-                            prepareSandboxTask.destinationDir.resolve(pluginName)
-                        }
-                    }
-                )
-            )
-
-            dependsOn(Tasks.PREPARE_SANDBOX)
         }
     }
 
@@ -1183,7 +1076,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             )
 
             dependsOn(Tasks.BUILD_PLUGIN)
-            dependsOn(VERIFY_PLUGIN_TASK_NAME)
+            dependsOn(Tasks.VERIFY_PLUGIN)
             dependsOn(SIGN_PLUGIN_TASK_NAME)
             onlyIf { !isOffline }
         }
@@ -1257,29 +1150,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             })
 
             dependsOn(LIST_PRODUCTS_RELEASES_TASK_NAME)
-        }
-    }
-
-    private fun configureListBundledPluginsTask(project: Project, ideaDependencyProvider: Provider<IdeaDependency>) {
-        info(context, "Configuring list bundled plugins task")
-
-        val listBundledPluginsTaskProvider = project.tasks.register<ListBundledPluginsTask>(LIST_BUNDLED_PLUGINS_TASK_NAME)
-        project.tasks.withType<ListBundledPluginsTask> {
-            ideDir.convention(ideaDependencyProvider.map {
-                project.file(it.classes.path)
-            })
-            outputFile.convention(
-                project.layout.buildDirectory.file("$LIST_BUNDLED_PLUGINS_TASK_NAME.txt")
-            )
-        }
-
-        project.tasks.register<PrintBundledPluginsTask>(PRINT_BUNDLED_PLUGINS_TASK_NAME)
-        project.tasks.withType<PrintBundledPluginsTask> {
-            inputFile.convention(listBundledPluginsTaskProvider.flatMap { listBundledPluginsTask ->
-                listBundledPluginsTask.outputFile
-            })
-
-            dependsOn(LIST_BUNDLED_PLUGINS_TASK_NAME)
         }
     }
 

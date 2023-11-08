@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
-import java.io.File
+import kotlin.io.path.exists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -44,7 +44,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
         build(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
 
-        File(buildDirectory, "libsSearchableOptions").let {
+        buildDirectory.resolve("libsSearchableOptions").let {
             assertTrue(it.exists())
             assertEquals(setOf("/lib/searchableOptions.jar"), collectPaths(it))
         }

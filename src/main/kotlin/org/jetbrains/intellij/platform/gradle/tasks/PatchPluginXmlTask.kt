@@ -26,6 +26,7 @@ import kotlin.io.path.inputStream
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
 

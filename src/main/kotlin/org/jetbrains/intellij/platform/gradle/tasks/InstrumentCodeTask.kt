@@ -30,6 +30,7 @@ typealias IntelliJInstrumentCodeTask = InstrumentCodeTask
 /**
  * The following attributes help you to tune instrumenting behaviour in `instrumentCode { ... }` block.
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class InstrumentCodeTask : DefaultTask() {
 

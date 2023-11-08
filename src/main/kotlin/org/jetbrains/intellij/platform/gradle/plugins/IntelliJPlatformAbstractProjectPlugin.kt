@@ -16,9 +16,10 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.executableResolver.IntelliJPluginVerifierResolver
+import org.jetbrains.intellij.platform.gradle.executableResolver.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.jbr.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
@@ -42,6 +43,7 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
 
     protected abstract fun Project.configure()
 
+    @Deprecated("use Project.configureTask")
     protected inline fun <reified T : Task> TaskContainer.configureTask(vararg names: String, noinline configuration: T.() -> Unit = {}) {
         names.forEach { name ->
             info(context, "Configuring task: $name")
@@ -146,12 +148,10 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
             }
 
             if (this is JetBrainsRuntimeAware) {
-                jetbrainsRuntime = project.configurations.getByName(Configurations.JETBRAINS_RUNTIME)
-
                 val jbrResolver = JetBrainsRuntimeResolver(
-                    jetbrainsRuntime = jetbrainsRuntime,
+                    jetbrainsRuntime = project.configurations.getByName(Configurations.JETBRAINS_RUNTIME),
                     intellijPlatform = intelliJPlatform,
-                    javaToolchainSpec = project.extensions.getByType<JavaPluginExtension>().toolchain,
+                    javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
                     javaToolchainService = project.serviceOf<JavaToolchainService>(),
                 )
 
@@ -165,6 +165,21 @@ abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plu
 
             if (this is TestIdeTask) {
                 executable(jetbrainsRuntimeExecutable)
+            }
+
+            if (this is PluginVerifierAware) {
+                val extension = project.the<IntelliJPlatformExtension>()
+                val pluginVerifierResolver = IntelliJPluginVerifierResolver(
+                    intellijPluginVerifier = project.configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER),
+                    localPath = extension.pluginVerifier.path,
+                )
+
+                pluginVerifierDirectory.convention(project.layout.dir(project.provider {
+                    pluginVerifierResolver.resolveDirectory()?.toFile()
+                }))
+                pluginVerifierExecutable.convention(project.layout.file(project.provider {
+                    pluginVerifierResolver.resolveExecutable()?.toFile()
+                }))
             }
         }
 

@@ -6,35 +6,13 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 
-@Suppress("ComplexRedundantLet")
 class SetupDependenciesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
-    fun `idea dependency is available`() {
-        val testTaskName = "${Tasks.SETUP_DEPENDENCIES}Test"
+    fun `throw error when called`() {
+        build(Tasks.SETUP_DEPENDENCIES) {
 
-        buildFile.groovy(
-            """
-            def classes = providers.provider {
-                tasks.named('${Tasks.SETUP_DEPENDENCIES}').get().idea.get().classes
-            }
-            tasks.register('$testTaskName') {
-                doLast {
-                    println classes.get()
-                }
-                
-                dependsOn('${Tasks.SETUP_DEPENDENCIES}')
-            }
-            
-            """.trimIndent()
-        )
-
-        build(testTaskName).let {
-            assertContains("> Task :$testTaskName", it.output)
-            assertContains("ideaIC-2022.1.4", it.output)
-        }
-        build(testTaskName).let {
-            assertContains("Reusing configuration cache.", it.output)
+            assertContains("Task is scheduled for removal, see: [SDK Docs link]", output)
         }
     }
 }

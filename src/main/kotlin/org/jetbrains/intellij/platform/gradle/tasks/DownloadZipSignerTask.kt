@@ -19,6 +19,7 @@ import kotlin.io.path.copyTo
 /**
  * Resolves and downloads Marketplace ZIP Signer CLI tool used by the [SignPluginTask] task.
  */
+@Deprecated(message = "CHECK")
 @DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadZipSignerTask : DefaultTask() {
 

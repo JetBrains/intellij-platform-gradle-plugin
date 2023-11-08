@@ -9,11 +9,9 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.warn
-import kotlin.io.path.pathString
 
 /**
  * Builds an index of UI components (searchable options) for the plugin.
@@ -25,6 +23,7 @@ import kotlin.io.path.pathString
  * @see [RunIdeBase]
  * @see [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING]
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class BuildSearchableOptionsTask : RunIdeBase() {
 
@@ -61,7 +60,7 @@ abstract class BuildSearchableOptionsTask : RunIdeBase() {
             )
         }
 
-        args = args + listOf(outputDir.asPath.pathString, "true")
+//        args = args + listOf(outputDir.asPath.pathString, "true")
         super.exec()
     }
 

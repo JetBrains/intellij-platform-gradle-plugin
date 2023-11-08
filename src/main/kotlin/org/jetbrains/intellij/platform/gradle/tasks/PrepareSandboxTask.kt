@@ -27,6 +27,7 @@ import kotlin.io.path.notExists
 /**
  * Prepares sandbox directory with installed plugin and its dependencies.
  */
+@Deprecated(message = "CHECK")
 @DisableCachingByDefault(because = "Setting up configuration on local machine")
 abstract class PrepareSandboxTask : Sync() {
 

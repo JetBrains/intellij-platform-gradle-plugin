@@ -44,7 +44,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
-import java.util.jar.Manifest
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -205,23 +204,6 @@ internal fun checkGradleVersion() {
         throw PluginInstantiationException("$PLUGIN_NAME requires Gradle $MINIMAL_SUPPORTED_GRADLE_VERSION and higher")
     }
 }
-
-internal fun getCurrentPluginVersion() = IntelliJPlatformPlugin::class.java
-    .run { getResource("$simpleName.class") }
-    .runCatching {
-        val manifestPath = with(this?.path) {
-            when {
-                this == null -> return@runCatching null
-                startsWith("jar:") -> this
-                startsWith("file:") -> "jar:$this"
-                else -> return@runCatching null
-            }
-        }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
-        info(null, "Resolving IntelliJ Platform Gradle Plugin version with: $manifestPath")
-        URL(manifestPath).openStream().use {
-            Manifest(it).mainAttributes.getValue("Version")
-        }
-    }.getOrNull()
 
 fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     null -> false

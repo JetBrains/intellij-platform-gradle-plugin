@@ -23,6 +23,7 @@ import kotlin.io.path.absolutePathString
  * @see [RunIdeBase]
  * @see [JavaExec]
  */
+@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run guest IDE")
 abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatformVersionAware, JetBrainsRuntimeAware, SandboxAware {
 

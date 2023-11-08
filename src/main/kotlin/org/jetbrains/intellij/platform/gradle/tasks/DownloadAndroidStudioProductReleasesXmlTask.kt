@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.logCategory
 
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class DownloadAndroidStudioProductReleasesXmlTask : Sync() {
 

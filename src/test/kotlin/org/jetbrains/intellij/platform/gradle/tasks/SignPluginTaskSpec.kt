@@ -2,15 +2,16 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import java.io.File
+import kotlin.io.path.name
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-@Suppress("GroovyUnusedAssignment", "ComplexRedundantLet")
+@Suppress("GroovyUnusedAssignment")
 class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -193,10 +194,10 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
         build(SIGN_PLUGIN_TASK_NAME)
 
-        val distributionFolder = File(buildDirectory, "distributions")
-        assertTrue(distributionFolder.listFiles()?.asList()?.any {
-            it.name.equals("projectName-1.0.0-signed.zip")
-        } ?: false)
+        val distributionFolder = buildDirectory.resolve("distributions")
+        assertTrue(distributionFolder.listFiles().any {
+            it.name == "projectName-1.0.0-signed.zip"
+        })
     }
 
     @Test

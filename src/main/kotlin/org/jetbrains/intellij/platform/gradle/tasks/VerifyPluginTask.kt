@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.warn
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class VerifyPluginTask : DefaultTask() {
 

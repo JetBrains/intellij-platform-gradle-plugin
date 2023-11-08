@@ -16,9 +16,10 @@ import org.junit.AfterClass
 import org.junit.Assume.assumeFalse
 import java.io.File
 import java.nio.file.Path
+import kotlin.io.path.pathString
 import kotlin.test.*
 
-@Suppress("GroovyAssignabilityCheck", "ComplexRedundantLet")
+@Suppress("GroovyAssignabilityCheck")
 class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     companion object {
@@ -64,7 +65,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
 
         build(TEST_TASK_NAME, "--info").let {
-            val sandboxPath = adjustWindowsPath("${buildDirectory.canonicalPath}/idea-sandbox")
+            val sandboxPath = adjustWindowsPath("${buildDirectory.pathString}/idea-sandbox")
             val testCommand = parseCommand(it.output)
 
             assertPathParameters(testCommand, sandboxPath)
@@ -112,7 +113,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add local plugin to compile only classpath`() {
         val repositoryInstance = PluginRepositoryFactory.create(MARKETPLACE_HOST, null)
-        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir, null)
+        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null)
 
         buildFile.groovy(
             """
@@ -523,7 +524,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `custom sandbox directory`() {
         writeTestFile()
 
-        val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
+        val sandboxPath = adjustWindowsPath("${dir.pathString}/customSandbox")
         buildFile.xml(
             """
             intellij {
@@ -531,8 +532,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             }
             """.trimIndent()
         )
-        build(TEST_TASK_NAME, "--info").let {
-            assertPathParameters(parseCommand(it.output), sandboxPath)
+        build(TEST_TASK_NAME, "--info") {
+            assertPathParameters(parseCommand(output), sandboxPath)
         }
     }
 

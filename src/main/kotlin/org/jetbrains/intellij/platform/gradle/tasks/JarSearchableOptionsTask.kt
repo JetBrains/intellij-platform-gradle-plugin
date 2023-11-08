@@ -18,6 +18,7 @@ import java.nio.file.Path
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class JarSearchableOptionsTask : Jar() {
 

@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import java.nio.file.Files
+import kotlin.io.path.appendText
 import kotlin.test.Test
 
 class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(

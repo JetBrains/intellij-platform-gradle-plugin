@@ -17,8 +17,10 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Dependencies
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.Version
 import org.jetbrains.intellij.platform.gradle.model.*
+import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import org.jetbrains.kotlin.gradle.utils.projectCacheDir
 import java.net.URI
 import java.nio.file.Path
@@ -184,6 +186,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = bundledPlugin(providers.provider { id }, configurationName, action)
 
+    fun pluginVerifier(
+        version: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
+        action: DependencyAction = {},
+    ) = addPluginVerifier(version, configurationName, action)
+
+    fun pluginVerifier(
+        version: String = VERSION_LATEST,
+        configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
+        action: DependencyAction = {},
+    ) = pluginVerifier(providers.provider { version }, configurationName, action)
+
     private fun addIntelliJPlatformDependency(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
@@ -191,21 +205,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
-        typeProvider
-            .map {
-                when (it) {
-                    is IntelliJPlatformType -> it
-                    is String -> IntelliJPlatformType.fromCode(it)
-                    else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or IntelliJPlatformType")
-                }
+        typeProvider.map {
+            when (it) {
+                is IntelliJPlatformType -> it
+                is String -> IntelliJPlatformType.fromCode(it)
+                else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or IntelliJPlatformType")
             }
-            .zip(versionProvider) { type, version ->
-                dependencies.create(
-                    group = type.groupId,
-                    name = type.artifactId,
-                    version = version,
-                )
-            },
+        }.zip(versionProvider) { type, version ->
+            dependencies.create(
+                group = type.groupId,
+                name = type.artifactId,
+                version = version,
+            )
+        },
         action,
     )
 
@@ -238,35 +250,32 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val ivyFileName = "${productInfo.productCode}-${productInfo.version}.xml"
             val ivyDirectory = gradle.projectCacheDir.resolve("intellijPlatform/ivy").toPath()
 
-            ivyDirectory
-                .resolve(ivyFileName)
-                .takeUnless { it.exists() }
-                ?.run {
-                    val extractor = XmlExtractor<IvyModule>()
-                    val ivyModule = IvyModule(
-                        info = IvyModuleInfo(
-                            organisation = dependency.group,
-                            module = dependency.name,
-                            revision = dependency.version,
-                            publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
+            ivyDirectory.resolve(ivyFileName).takeUnless { it.exists() }?.run {
+                val extractor = XmlExtractor<IvyModule>()
+                val ivyModule = IvyModule(
+                    info = IvyModuleInfo(
+                        organisation = dependency.group,
+                        module = dependency.name,
+                        revision = dependency.version,
+                        publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
+                    ),
+                    configurations = mutableListOf(
+                        IvyModuleConfiguration(
+                            name = "default",
+                            visibility = "public",
                         ),
-                        configurations = mutableListOf(
-                            IvyModuleConfiguration(
-                                name = "default",
-                                visibility = "public",
-                            ),
-                        ),
-                        publications = mutableListOf(
-                            IvyModulePublication(
-                                name = ideaDir.pathString,
-                                type = "directory",
-                                ext = null,
-                                conf = "default",
-                            )
-                        ),
-                    )
-                    extractor.marshal(ivyModule, createFile())
-                }
+                    ),
+                    publications = mutableListOf(
+                        IvyModulePublication(
+                            name = ideaDir.pathString,
+                            type = "directory",
+                            ext = null,
+                            conf = "default",
+                        )
+                    ),
+                )
+                extractor.marshal(ivyModule, createFile())
+            }
 
             repositories.ivy {
                 url = ivyDirectory.toUri()
@@ -280,16 +289,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     private fun addJbrDependency(
-        explicitVersion: Provider<String>,
+        explicitVersionProvider: Provider<String>,
         configurationName: String,
         action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
-        explicitVersion.map { version ->
+        explicitVersionProvider.map { explicitVersion ->
             val dependency = dependencies.create(
                 group = "com.jetbrains",
                 name = "jbr",
-                version = version,
+                version = explicitVersion,
                 ext = "tar.gz",
             )
 
@@ -305,36 +314,65 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     private fun addIntelliJPlatformPlugin(
-        id: Provider<String>,
-        version: Provider<String>,
-        channel: Provider<String>,
+        idProvider: Provider<String>,
+        versionProvider: Provider<String>,
+        channelProvider: Provider<String>,
         configurationName: String,
         action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
         providers.provider {
-            val group = when (channel.orNull?.trim()) {
+            val channel = channelProvider.orNull?.trim()
+            val id = idProvider.get()
+            val version = versionProvider.get()
+
+            val group = when (channel) {
                 "default", "", null -> "com.jetbrains.plugins"
                 else -> "$channel.com.jetbrains.plugins"
             }
 
             dependencies.create(
                 group = group,
-                name = id.get(),
-                version = version.get(),
+                name = id,
+                version = version,
             )
         },
         action,
     )
 
     private fun addIntelliJPlatformBundledPlugin(
-        id: Provider<String>,
+        idProvider: Provider<String>,
         configurationName: String,
         action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
-        id.map {
+        idProvider.map { id ->
             TODO("To be implemented")
+        },
+        action,
+    )
+
+    private fun addPluginVerifier(
+        versionProvider: Provider<String>,
+        configurationName: String,
+        action: DependencyAction = {},
+    ) = dependencies.addProvider(
+        configurationName,
+        versionProvider.map { version ->
+            dependencies.create(
+                group = "org.jetbrains.intellij.plugins",
+                name = "verifier-cli",
+                version = when (version) {
+                    VERSION_LATEST -> LatestVersionResolver.fromMaven(
+                        "IntelliJ Plugin Verifier",
+                        "${Locations.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml",
+                    )
+
+                    else -> version
+                },
+                classifier = "all",
+                ext = "jar",
+            )
         },
         action,
     )

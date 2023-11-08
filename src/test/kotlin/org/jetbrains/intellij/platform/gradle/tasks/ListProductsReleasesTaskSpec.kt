@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import kotlin.io.path.readText
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals

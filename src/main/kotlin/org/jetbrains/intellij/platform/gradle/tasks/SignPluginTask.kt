@@ -31,6 +31,7 @@ import kotlin.io.path.pathString
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-signing.html">Plugin Signing</a>
  * @see <a href="https://github.com/JetBrains/marketplace-zip-signer">Marketplace ZIP Signer</a>
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class SignPluginTask @Inject constructor(
     objectFactory: ObjectFactory,

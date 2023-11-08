@@ -29,6 +29,7 @@ import javax.inject.Inject
  *
  * @see <a href="https://github.com/JetBrains/intellij-ui-test-robot">IntelliJ UI Test Robot</a>
  */
+@Deprecated(message = "CHECK")
 @DisableCachingByDefault(because = "Resolves value from remote source")
 abstract class DownloadRobotServerPluginTask @Inject constructor(
     objectFactory: ObjectFactory,

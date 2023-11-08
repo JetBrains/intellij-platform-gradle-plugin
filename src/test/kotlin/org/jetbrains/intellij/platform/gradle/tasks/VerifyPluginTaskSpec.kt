@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERIFY_PLUGIN_TASK_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 
@@ -27,7 +27,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(VERIFY_PLUGIN_TASK_NAME).let {
+        build(Tasks.VERIFY_PLUGIN).let {
             assertContains("Plugin name specified in plugin.xml should not contain the word 'plugin'", it.output)
         }
     }
@@ -54,7 +54,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
+        buildAndFail(Tasks.VERIFY_PLUGIN).let {
             assertContains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'", it.output)
         }
     }
@@ -77,7 +77,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
+        buildAndFail(Tasks.VERIFY_PLUGIN).let {
             assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
         }
     }
@@ -104,7 +104,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(VERIFY_PLUGIN_TASK_NAME).let {
+        build(Tasks.VERIFY_PLUGIN).let {
             assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
         }
     }
@@ -112,7 +112,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `fail on errors by default`() {
         pluginXml.delete()
-        buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
+        buildAndFail(Tasks.VERIFY_PLUGIN).let {
             assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
         }
     }
@@ -128,7 +128,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         pluginXml.delete()
-        build(VERIFY_PLUGIN_TASK_NAME).let {
+        build(Tasks.VERIFY_PLUGIN).let {
             assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
         }
     }
@@ -155,7 +155,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
+        buildAndFail(Tasks.VERIFY_PLUGIN).let {
             assertContains("<name> must not be equal to default value:", it.output)
         }
     }
@@ -182,7 +182,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(VERIFY_PLUGIN_TASK_NAME).let {
+        build(Tasks.VERIFY_PLUGIN).let {
             assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
         }
     }
@@ -210,7 +210,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(VERIFY_PLUGIN_TASK_NAME).let {
+        build(Tasks.VERIFY_PLUGIN).let {
             assertNotContains("Plugin verification", it.output)
         }
     }

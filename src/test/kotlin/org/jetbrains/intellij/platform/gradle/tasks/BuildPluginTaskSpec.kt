@@ -7,9 +7,10 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import java.io.File
 import java.util.jar.Manifest
 import java.util.zip.ZipFile
+import kotlin.io.path.exists
+import kotlin.io.path.pathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -63,10 +64,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zipFile = ZipFile(distribution)
+        val zipFile = ZipFile(distribution.toFile())
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -143,7 +144,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zipFile = ZipFile(distribution)
+        val zipFile = ZipFile(distribution.toFile())
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -195,7 +196,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val sandboxPath = adjustWindowsPath("${dir.canonicalPath}/customSandbox")
+        val sandboxPath = adjustWindowsPath("${dir.pathString}/customSandbox")
         buildFile.groovy(
             """
             version = '0.42.123'
@@ -218,7 +219,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
         assertEquals(
@@ -229,7 +230,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(ZipFile(distribution))
+            collectPaths(ZipFile(distribution.toFile()))
         )
     }
 
@@ -256,7 +257,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             setOf(
                 "projectName-0.42.123.zip",
             ),
-            File(buildDirectory, "distributions").list()?.toSet(),
+            buildDirectory.resolve("distributions").toFile().list()?.toSet(),
         )
     }
 
@@ -298,10 +299,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(ZipFile(distribution.toFile()), "myPluginName/lib/projectName-0.42.123.jar")
         assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
     }
 
@@ -343,10 +344,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution), "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = extractFile(ZipFile(distribution.toFile()), "myPluginName/lib/projectName-0.42.123.jar")
         assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
     }
 
@@ -376,10 +377,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zip = ZipFile(distribution)
+        val zip = ZipFile(distribution.toFile())
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -439,10 +440,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = File(buildDirectory, "distributions/myPluginName-0.42.123.zip")
+        val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zip = ZipFile(distribution)
+        val zip = ZipFile(distribution.toFile())
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -484,7 +485,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
-        val artifact = extractFile(ZipFile(archive), "projectName/lib/projectName-0.42.123.jar")
+        val artifact = extractFile(ZipFile(archive.toFile()), "projectName/lib/projectName-0.42.123.jar")
         fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
             assertNotNull(it)
 

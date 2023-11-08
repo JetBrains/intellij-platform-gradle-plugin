@@ -15,20 +15,21 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.BuildFeature.SELF_UPDATE_CHECK
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TASKS_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.propertyProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.propertyProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradle.propertyProviders.PluginPathArgumentProvider
+import org.jetbrains.intellij.platform.gradle.sourceSets
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import java.io.File
-import java.time.LocalDate
-import kotlin.io.path.exists
+import java.nio.file.Path
+import java.util.*
 
 abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_TASKS_ID) {
 
@@ -38,13 +39,18 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         }
 
         with(tasks) {
-            configureSetupDependenciesTask()
+            InitializeIntelliJPlatformPluginTask.register(project)
+            SetupDependenciesTask.register(project)
+            ListBundledPluginsTask.register(project)
+            PrintBundledPluginsTask.register(project)
+
             configurePrepareSandboxTasks()
+            configureBuildPluginTask()
             configurePatchPluginXmlTask()
+            configureRunPluginVerifierTask()
+            configureVerifyPluginTask()
             configureVerifyPluginConfigurationTask()
 
-            configureBuildPluginTask()
-            configureInitializeIntelliJPlatformPluginTask()
             configureJarTask()
             configureTestIdeTask()
             configureRunIdeTask()
@@ -55,9 +61,6 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             }
         }
     }
-
-    private fun TaskContainer.configureSetupDependenciesTask() =
-        configureTask<SetupDependenciesTask>(Tasks.SETUP_DEPENDENCIES)
 
     private fun TaskContainer.configurePrepareSandboxTasks() =
         configureTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TESTING_SANDBOX, Tasks.PREPARE_UI_TESTING_SANDBOX) {
@@ -103,20 +106,18 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 //                })
             runtimeClasspathFiles.convention(runtimeConfiguration)
 
-            intoChild(pluginName.map { "$it/lib" })
-                .from(runtimeClasspathFiles.map { files ->
-                    val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
-                    val pluginDirectories = pluginDependencies.get().map { it.artifact }
+            intoChild(pluginName.map { "$it/lib" }).from(runtimeClasspathFiles.map { files ->
+                val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
+                val pluginDirectories = pluginDependencies.get().map { it.artifact }
 
-                    listOf(pluginJar.asFile) + files.filter { file ->
-                        !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-                            file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
-                        })
-                    }
-                })
-                .eachFile {
-                    name = ensureName(file.toPath())
+                listOf(pluginJar.asFile) + files.filter { file ->
+                    !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
+                        file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
+                    })
                 }
+            }).eachFile {
+                name = ensureName(file.toPath())
+            }
 
             dependsOn(runtimeConfiguration)
             dependsOn(jarTaskProvider)
@@ -140,9 +141,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             val extension = project.the<IntelliJPlatformExtension>()
 
             inputFile.convention(project.provider {
-                project.sourceSets.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs
-                    .map { it.resolve("META-INF/plugin.xml") }
-                    .firstOrNull { it.exists() }
+                project.sourceSets.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.map { it.resolve("META-INF/plugin.xml") }.firstOrNull { it.exists() }
             })
             outputFile.convention(inputFile.map {
                 temporaryDir.resolve(it.name)
@@ -175,16 +174,35 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             }
         }
 
+    private fun TaskContainer.configureVerifyPluginTask() =
+        configureTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
+            ignoreFailures.convention(false)
+            ignoreUnacceptableWarnings.convention(false)
+            ignoreWarnings.convention(true)
+
+//            pluginDir.convention(
+//                project.layout.dir(
+//                    prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+//                        prepareSandboxTask.pluginName.map { pluginName ->
+//                            prepareSandboxTask.destinationDir.resolve(pluginName)
+//                        }
+//                    }
+//                )
+//            )
+
+//            dependsOn(Tasks.PREPARE_SANDBOX)
+        }
+
     private fun TaskContainer.configureVerifyPluginConfigurationTask() =
         configureTask<VerifyPluginConfigurationTask>(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
             info(context, "Configuring plugin configuration verification task")
 
             val patchPluginXmlTaskProvider = named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-//            val runPluginVerifierTaskProvider = named<RunPluginVerifierTask>(IntelliJPluginConstants.RUN_PLUGIN_VERIFIER_TASK_NAME)
+            val runPluginVerifierTaskProvider = named<RunPluginVerifierTask>(Tasks.RUN_PLUGIN_VERIFIER)
             val compileJavaTaskProvider = named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
-//            val downloadDirProvider = runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
-//                runPluginVerifierTask.downloadDir
-//            }
+            val downloadDirProvider = runPluginVerifierTaskProvider.flatMap { runPluginVerifierTask ->
+                runPluginVerifierTask.downloadDir
+            }
 //            pluginXmlFiles.convention(patchPluginXmlTaskProvider.flatMap { patchPluginXmlTask ->
 //                patchPluginXmlTask.outputFiles
 //            })
@@ -194,7 +212,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             targetCompatibility.convention(compileJavaTaskProvider.map {
                 it.targetCompatibility
             })
-//            pluginVerifierDownloadDir.convention(downloadDirProvider)
+            pluginVerifierDownloadDir.convention(downloadDirProvider)
             kotlinxCoroutinesLibraryPresent.convention(project.provider {
                 listOf(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->
                     project.configurations.getByName(configurationName).dependencies.any {
@@ -207,49 +225,31 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                 project.pluginManager.hasPlugin(IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID)
             })
             project.pluginManager.withPlugin(IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID) {
-                val kotlinOptionsProvider = project.tasks.named(IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME)
-                    .apply {
-                        configure {
-                            dependsOn(this@configureTask)
-                        }
+                val kotlinOptionsProvider = project.tasks.named(IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME).apply {
+                    configure {
+                        dependsOn(this@configureTask)
                     }
-                    .map {
-                        it
-                            .withGroovyBuilder { getProperty("kotlinOptions") }
-                            .withGroovyBuilder { getProperty("options") }
-                    }
+                }.map {
+                    it.withGroovyBuilder { getProperty("kotlinOptions") }.withGroovyBuilder { getProperty("options") }
+                }
 
                 kotlinJvmTarget.convention(kotlinOptionsProvider.flatMap {
-                    it
-                        .withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
-                        .map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
+                    it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }.map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
                         .map { value -> value as String }
                 })
                 kotlinApiVersion.convention(kotlinOptionsProvider.flatMap {
-                    it
-                        .withGroovyBuilder { getProperty("apiVersion") as Property<*> }
-                        .map { value -> value as String }
+                    it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }.map { value -> value as String }
                 })
                 kotlinLanguageVersion.convention(kotlinOptionsProvider.flatMap {
-                    it
-                        .withGroovyBuilder { getProperty("languageVersion") as Property<*> }
-                        .map { value -> value as String }
+                    it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }.map { value -> value as String }
                 })
                 kotlinVersion.convention(project.provider {
-                    project.extensions
-                        .getByName("kotlin")
-                        .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
+                    project.extensions.getByName("kotlin").withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
                 })
-                kotlinStdlibDefaultDependency.convention(
-                    project.providers
-                        .gradleProperty(IntelliJPluginConstants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME)
-                        .map { it.toBoolean() }
-                )
-                kotlinIncrementalUseClasspathSnapshot.convention(
-                    project.providers
-                        .gradleProperty(IntelliJPluginConstants.KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT)
-                        .map { it.toBoolean() }
-                )
+                kotlinStdlibDefaultDependency.convention(project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME)
+                    .map { it.toBoolean() })
+                kotlinIncrementalUseClasspathSnapshot.convention(project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT)
+                    .map { it.toBoolean() })
             }
 
             project.tasks.withType<JavaCompile> {
@@ -291,28 +291,10 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 //            }
         }
 
-    private fun TaskContainer.configureInitializeIntelliJPlatformPluginTask() =
-        configureTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-            offline.convention(project.gradle.startParameter.isOffline)
-            selfUpdateCheck.convention(project.isBuildFeatureEnabled(SELF_UPDATE_CHECK))
-            selfUpdateLock.convention(
-                project.layout.file(project.provider {
-                    temporaryDir.resolve(LocalDate.now().toString())
-                })
-            )
-            coroutinesJavaAgent.convention(
-                project.layout.file(project.provider {
-                    temporaryDir.resolve("coroutines-javaagent.jar")
-                })
-            )
-
-            onlyIf {
-                !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
-            }
-        }
-
     private fun TaskContainer.configureJarTask() =
         configureTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {
+            val initializeIntelliJPlatformPluginTaskProvider =
+                project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
             val gradleVersion = project.provider {
                 project.gradle.gradleVersion
             }
@@ -335,15 +317,20 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 
             exclude("**/classpath.index")
 
-            manifest.attributes(
-                "Created-By" to gradleVersion.map { version -> "Gradle $version" },
-                "Build-JVM" to Jvm.current(),
-                "Version" to projectVersion,
-                "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
-                "Build-Plugin-Version" to getCurrentPluginVersion().or("0.0.0"),
-                "Build-OS" to OperatingSystem.current(),
-                "Build-SDK" to buildSdk.get(),
-            )
+// TODO: make it lazy
+//            manifest.attributes(
+//                "Created-By" to gradleVersion.map { version -> "Gradle $version" },
+//                "Build-JVM" to Jvm.current(),
+//                "Version" to projectVersion,
+//                "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
+//                "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap {
+//                    it.pluginVersion
+//                }.get(), // FIXME
+//                "Build-OS" to OperatingSystem.current(),
+//                "Build-SDK" to buildSdk.get(),
+//            )
+
+            dependsOn(initializeIntelliJPlatformPluginTaskProvider)
         }
 
     // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
@@ -362,17 +349,9 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                 )
             )
 
-            outputs
-                .dir(sandboxDirectoryProvider.dir(Sandbox.SYSTEM))
-                .withPropertyName("System directory")
-            inputs
-                .dir(sandboxDirectoryProvider.dir(Sandbox.CONFIG))
-                .withPropertyName("Config Directory")
-                .withPathSensitivity(PathSensitivity.RELATIVE)
-            inputs
-                .files(sandboxDirectoryProvider.dir(Sandbox.PLUGINS))
-                .withPropertyName("Plugins directory")
-                .withPathSensitivity(PathSensitivity.RELATIVE)
+            outputs.dir(sandboxDirectoryProvider.dir(Sandbox.SYSTEM)).withPropertyName("System directory")
+            inputs.dir(sandboxDirectoryProvider.dir(Sandbox.CONFIG)).withPropertyName("Config Directory").withPathSensitivity(PathSensitivity.RELATIVE)
+            inputs.files(sandboxDirectoryProvider.dir(Sandbox.PLUGINS)).withPropertyName("Plugins directory").withPathSensitivity(PathSensitivity.RELATIVE)
                 .withNormalizer(ClasspathNormalizer::class)
 
 //            systemProperty("idea.use.core.classloader.for.plugin.path", "true")
@@ -439,6 +418,53 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                     systemPropertyDefault("sun.awt.disablegrab", true)
                 }
             }
+        }
+
+    private fun TaskContainer.configureRunPluginVerifierTask() =
+        configureTask<RunPluginVerifierTask>(Tasks.RUN_PLUGIN_VERIFIER) {
+//            val listProductsReleasesTaskProvider = named<ListProductsReleasesTask>(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+            val buildPluginTaskProvider = named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+            val userHomeProvider = project.providers.systemProperty("user.home")
+
+            failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
+            distributionFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+            verificationReportsDir.convention(project.layout.buildDirectory.dir("reports/pluginVerifier").map { it.asFile.canonicalPath })
+            verificationReportsFormats.convention(
+                EnumSet.of(
+                    RunPluginVerifierTask.VerificationReportsFormats.PLAIN,
+                    RunPluginVerifierTask.VerificationReportsFormats.HTML,
+                )
+            )
+            downloadDir.convention(ideDownloadDir().map {
+                it.toFile().invariantSeparatorsPath
+            })
+            downloadPath.convention(userHomeProvider.map {
+                val userHomePath = Path.of(it)
+                with(downloadDir.get()) {
+                    when {
+                        startsWith("~/") -> userHomePath.resolve(removePrefix("~/"))
+                        equals("~") -> userHomePath
+                        else -> Path.of(this)
+                    }
+                }
+            })
+            teamCityOutputFormat.convention(false)
+            subsystemsToCheck.convention("all")
+//            productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTask ->
+//                listProductsReleasesTask.outputFile.asFile
+//            })
+            offline.convention(project.gradle.startParameter.isOffline)
+
+            dependsOn(Tasks.BUILD_PLUGIN)
+            dependsOn(Tasks.VERIFY_PLUGIN)
+            dependsOn(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+
+            val isIdeVersionsEmpty = localPaths.flatMap { localPaths ->
+                ideVersions.map { ideVersions ->
+                    localPaths.isEmpty() && ideVersions.isEmpty()
+                }
+            }
+//            listProductsReleasesTaskProvider.get().onlyIf { isIdeVersionsEmpty.get() }
         }
 
     private fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {

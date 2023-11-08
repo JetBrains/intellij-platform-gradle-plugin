@@ -1,11 +1,11 @@
 // Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.jbr
+package org.jetbrains.intellij.platform.gradle.executableResolver
 
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.listFiles
 import com.jetbrains.plugin.structure.base.utils.simpleName
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.FileCollection
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.jvm.toolchain.JavaToolchainService
@@ -20,15 +20,23 @@ import java.nio.file.Path
 import java.util.*
 
 class JetBrainsRuntimeResolver(
-    val jetbrainsRuntime: ConfigurableFileCollection,
-    val intellijPlatform: ConfigurableFileCollection,
+    val jetbrainsRuntime: FileCollection,
+    val intellijPlatform: FileCollection,
     val javaToolchainSpec: JavaToolchainSpec,
     val javaToolchainService: JavaToolchainService,
     val context: String? = null,
-) {
-    fun resolveExecutable(validate: (executable: Path) -> Boolean = { true }) = resolveDirectory(validate)?.findJavaExecutable()
+) : ExecutableResolver {
 
-    fun resolveDirectory(validate: (executable: Path) -> Boolean = { true }): Path? {
+    override fun resolveExecutable() = resolveDirectory()?.getJbrRoot()?.let { root ->
+        root
+            .resolve("jre")
+            .takeIf { it.exists() }
+            .or(root)
+            .resolve("bin/java" + ".exe".takeIf { OperatingSystem.current().isWindows }.orEmpty())
+            .takeIf { it.exists() }
+    }
+
+    override fun resolveDirectory(): Path? {
         debug(context, "Resolving runtime directory.")
 
         return listOf(
@@ -72,7 +80,7 @@ class JetBrainsRuntimeResolver(
             },
         )
             .asSequence()
-            .mapNotNull { it()?.takeIf(validate) }
+            .mapNotNull { it() }
             .firstOrNull()
             ?.also { info(context, "Resolved JetBrains Runtime directory: $it") }
     }
@@ -92,15 +100,6 @@ class JetBrainsRuntimeResolver(
         }
         return null
     }
-}
-
-internal fun Path.findJavaExecutable() = getJbrRoot().let { root ->
-    root
-        .resolve("jre")
-        .takeIf { it.exists() }
-        .or(root)
-        .resolve("bin/java" + ".exe".takeIf { OperatingSystem.current().isWindows }.orEmpty())
-        .takeIf { it.exists() }
 }
 
 internal fun Path.getJbrRoot(): Path {

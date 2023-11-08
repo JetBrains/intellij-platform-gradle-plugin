@@ -15,6 +15,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
  * @see [RunIdeBase]
  * @see [JavaExec]
  */
+@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run IDE for UI tests")
 abstract class RunIdeForUiTestTask : RunIdeBase() {
 

@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
  *
  * @see [Zip]
  */
+@Deprecated(message = "CHECK")
 @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
 abstract class BuildPluginTask : Zip() {
 

@@ -3,14 +3,18 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Internal
+import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.logCategory
+
+/**
+ * TODO: Provide valid URL
+ */
+private const val message = "Task is scheduled for removal, see: [SDK Docs link]"
 
 /**
  * A deprecated method for setting up IntelliJ Platform dependencies.
@@ -23,25 +27,23 @@ import org.jetbrains.intellij.platform.gradle.logCategory
  * TODO: Link to SDK Docs
  */
 @DisableCachingByDefault(because = "No output state to track")
+@Deprecated(message = message)
 abstract class SetupDependenciesTask : DefaultTask() {
-
-    /**
-     * Reference to the resolved `idea` dependency.
-     * TODO: suggest alternative method for accessing IDEA dependency
-     */
-    @Deprecated(message = "setupDependencies.idea is no longer available")
-    @get:Internal
-    abstract val idea: Property<IdeaDependency>
 
     private val context = logCategory()
 
     init {
         group = PLUGIN_GROUP_NAME
-        description = "Deprecated task"
+        description = message
     }
 
     @TaskAction
     fun setupDependencies() {
-        error(context, "Task is deprecated now, see: [SDK Docs link]")
+        error(context, message)
+    }
+
+    companion object {
+        fun register(project: Project) =
+            project.configureTask<SetupDependenciesTask>(Tasks.SETUP_DEPENDENCIES)
     }
 }

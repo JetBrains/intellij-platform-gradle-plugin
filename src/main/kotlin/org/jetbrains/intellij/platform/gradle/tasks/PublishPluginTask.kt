@@ -30,6 +30,7 @@ import org.jetbrains.intellij.pluginRepository.model.StringPluginId
  *
  * See [Publishing Plugin With Gradle](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#publishing-plugin-with-gradle) tutorial for step-by-step instructions.
  */
+@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Output is stored remotely")
 abstract class PublishPluginTask : DefaultTask() {
 

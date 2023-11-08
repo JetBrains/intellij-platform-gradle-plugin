@@ -15,6 +15,7 @@ import java.nio.file.Path
 /**
  * Base task for running an IDE with the current plugin in various modes.
  */
+@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Runs an IDE which should happen every time this task is run.")
 abstract class RunIdeBase : JavaExec() {
 

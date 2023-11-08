@@ -82,7 +82,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     fun `paidPluginSearchableOptionsWarning is enabled`() {
         val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
 
-        dir.toPath().resolve("src/main/resources/META-INF/plugin.xml").also {
+        dir.resolve("src/main/resources/META-INF/plugin.xml").also {
             Files.createDirectories(it.parent)
             Files.deleteIfExists(it)
             Files.createFile(it)

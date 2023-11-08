@@ -10,9 +10,12 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IN
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import kotlin.io.path.createDirectories
+import kotlin.io.path.pathString
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -27,7 +30,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
 
     val gradleProperties get() = file("gradle.properties")
-    val buildFile get() = file("build.gradle")
+    val buildFile get() = file("build.gradle.kts")
     val settingsFile get() = file("settings.gradle")
     val pluginXml get() = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory get() = dir.resolve("build")
@@ -61,31 +64,46 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         buildFile.groovy(
             """
             plugins {
-                id 'java'
-                id 'org.jetbrains.intellij.platform'
-                id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
+                id("java")
+                id("org.jetbrains.intellij.platform")
+                id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
             }
-            sourceCompatibility = 11
-            targetCompatibility = 11
-            repositories {
-                mavenCentral()
-            }
-            intellij {
-                version = '$intellijVersion'
-                downloadSources = false
-                pluginsRepositories {
-                    maven('$pluginsRepository')
+
+            kotlin {
+                jvmToolchain {
+                    languageVersion = JavaLanguageVersion.of(17)
+                    vendor = JvmVendorSpec.JETBRAINS
                 }
-                instrumentCode = false
-            }
-            buildSearchableOptions {
-                enabled = false
             }
             
-            // Define tasks with a minimal set of tasks required to build a source set
-            sourceSets.all {
-                task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
+            repositories {
+                mavenCentral()
+                
+                intellijPlatform {
+                    releases()
+                }
             }
+            
+            dependencies {
+                intellijPlatform {
+                    intellijIdeaCommunity("$intellijVersion")
+                }
+            }
+            
+//            intellij {
+//                pluginsRepositories {
+//                    maven('$pluginsRepository')
+//                }
+//                instrumentCode = false
+//            }
+//            buildSearchableOptions {
+//                enabled = false
+//            }
+            
+            // Define tasks with a minimal set of tasks required to build a source set
+//            sourceSets.all {
+//                task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
+//            }
             """.trimIndent()
         )
 
@@ -124,7 +142,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             .filterNot { it.isEmpty() }
     }
 
-    protected fun directory(path: String) = File(dir, path).apply { mkdirs() }
+    protected fun directory(path: String) = dir.resolve(path).createDirectories()
 
     protected fun emptyZipFile(path: String): File {
         val split = path.split('/')
@@ -132,16 +150,16 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             split.size > 1 -> directory(split.dropLast(1).joinToString("/"))
             else -> dir
         }
-        val file = File(directory, split.last())
-        val outputStream = FileOutputStream(file)
+        val file = directory.resolve(split.last())
+        val outputStream = FileOutputStream(file.toFile())
         val zipOutputStream = ZipOutputStream(outputStream)
         zipOutputStream.close()
         outputStream.close()
-        return file
+        return file.toFile()
     }
 
     protected fun file(path: String) = path
-        .run { takeIf { startsWith('/') } ?: "${dir.path}/$this" }
+        .run { takeIf { startsWith('/') } ?: dir.resolve(this).pathString }
         .split('/')
         .run { File(dropLast(1).joinToString("/")) to last() }
         .apply { if (!first.exists()) first.mkdirs() }
@@ -222,6 +240,8 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
 
+    protected fun collectPaths(directory: Path) = collectPaths(directory.toFile())
+    
     protected fun collectPaths(directory: File): Set<String> {
         assert(directory.exists())
         return directory.walkTopDown().filterNot { it.isDirectory }.map {

@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -52,7 +51,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
         build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
+            collectPaths(buildDirectory.resolve("robotServerPlugin"))
                 .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-0.10.0.jar"))
         )
     }
@@ -98,7 +97,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
         build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
         assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
+            collectPaths(buildDirectory.resolve("robotServerPlugin"))
                 .containsAll(setOf("/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar"))
         )
     }
@@ -144,7 +143,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
         val resolvedVersion = DownloadRobotServerPluginTask.resolveLatestVersion()
         assertTrue(
-            collectPaths(File(buildDirectory, "robotServerPlugin"))
+            collectPaths(buildDirectory.resolve("robotServerPlugin"))
                 .containsAll(setOf("/robot-server-plugin/lib/instrumented-robot-server-plugin-$resolvedVersion.jar"))
         )
     }

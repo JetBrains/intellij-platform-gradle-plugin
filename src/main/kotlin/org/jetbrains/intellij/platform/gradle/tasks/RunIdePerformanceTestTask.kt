@@ -38,6 +38,7 @@ import java.nio.file.Paths
  * @see [RunIdeBase]
  * @see [JavaExec]
  */
+@Deprecated(message = "CHECK")
 @Incubating
 @UntrackedTask(because = "Should always run IDE for performance tests")
 abstract class RunIdePerformanceTestTask : RunIdeBase() {

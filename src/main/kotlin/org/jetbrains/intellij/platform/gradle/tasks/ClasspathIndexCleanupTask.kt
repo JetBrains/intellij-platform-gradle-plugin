@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.logCategory
  *
  * Task is enabled if [IntelliJPluginExtension.version] is set to `2022.1` or higher.
  */
+@Deprecated(message = "CHECK")
 @DisableCachingByDefault(because = "Deletion cannot be cached")
 abstract class ClasspathIndexCleanupTask : DefaultTask() {
 

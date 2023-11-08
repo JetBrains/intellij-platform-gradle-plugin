@@ -4,10 +4,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
+import kotlin.io.path.readText
 import kotlin.test.Ignore
 import kotlin.test.Test
 
-@Suppress("ComplexRedundantLet")
 class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test

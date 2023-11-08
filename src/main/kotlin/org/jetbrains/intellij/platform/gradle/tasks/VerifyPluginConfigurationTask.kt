@@ -15,7 +15,10 @@ import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.PlatformJavaVersions
 import org.jetbrains.intellij.platform.gradle.utils.PlatformKotlinVersions
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.*
 
 /**
  * Validates the plugin project configuration:
@@ -38,6 +41,7 @@ import javax.inject.Inject
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class VerifyPluginConfigurationTask @Inject constructor(
     private val providers: ProviderFactory,
@@ -140,30 +144,28 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinVersion = kotlinVersion.orNull?.let(Version::parse)
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
         val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
-//        val pluginVerifierDownloadPath = pluginVerifierDownloadDir.get().let(Path::of).toAbsolutePath()
-//        val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
+        val pluginVerifierDownloadPath = pluginVerifierDownloadDir.get().let(Path::of).toAbsolutePath()
+        val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
 
         sequence {
-            pluginXmlFiles.get()
-                .mapNotNull { parsePluginXml(it.toPath(), context) }
-                .forEach { plugin ->
-                    val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
-                    val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
-                    val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
+            pluginXmlFiles.get().mapNotNull { parsePluginXml(it.toPath(), context) }.forEach { plugin ->
+                val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
+                val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
+                val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
 
-                    if (sinceBuild.major < platformBuild.major) {
-                        yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
-                    }
-                    if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                        yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
-                    }
-                    if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                        yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
-                    }
-                    if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                        yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
-                    }
+                if (sinceBuild.major < platformBuild.major) {
+                    yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
                 }
+                if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
+                    yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
+                }
+                if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
+                    yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
+                }
+                if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
+                    yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
+                }
+            }
 
             if (platformBuild < Version(223)) {
                 yield("The minimal supported IntelliJ Platform version is 2022.3 (233.0), which is higher than provided: $platformVersion ($platformBuild)")
@@ -183,12 +185,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             if (kotlinPluginAvailable && kotlinStdlibDefaultDependency) {
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
             }
-            if (
-                kotlinPluginAvailable
-                && kotlinIncrementalUseClasspathSnapshot
-                && kotlinVersion >= Version(1, 8, 20)
-                && kotlinVersion < Version(1, 9)
-            ) {
+            if (kotlinPluginAvailable && kotlinIncrementalUseClasspathSnapshot && kotlinVersion >= Version(1, 8, 20) && kotlinVersion < Version(1, 9)) {
                 yield("The Kotlin plugin in version $kotlinVersion used with the IntelliJ Platform Gradle Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
             }
             if (kotlinxCoroutinesLibraryPresent) {
@@ -196,21 +193,18 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             }
         }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
             warn(
-                context,
-                listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
+                context, listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
             )
         }
 
-//        if (
-//            pluginVerifierDownloadPath != oldPluginVerifierDownloadPath
-//            && oldPluginVerifierDownloadPath.exists()
-//            && oldPluginVerifierDownloadPath.listFiles().isNotEmpty()
-//        ) {
-//            info(
-//                context,
-//                "The Plugin Verifier download directory is set to $pluginVerifierDownloadPath, but downloaded IDEs were also found in $oldPluginVerifierDownloadPath, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir",
-//            )
-//        }
+        with(oldPluginVerifierDownloadPath) {
+            if (this != pluginVerifierDownloadPath && exists() && Files.list(this).findAny().isPresent) {
+                info(
+                    context,
+                    "The Plugin Verifier download directory is set to $pluginVerifierDownloadPath, but downloaded IDEs were also found in $oldPluginVerifierDownloadPath, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir",
+                )
+            }
+        }
     }
 
     private fun getPlatformJavaVersion(buildNumber: Version) = PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value

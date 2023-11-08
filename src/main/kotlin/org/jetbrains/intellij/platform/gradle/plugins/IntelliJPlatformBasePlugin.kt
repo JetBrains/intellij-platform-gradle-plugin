@@ -15,6 +15,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyProductInfoTransformer
@@ -31,108 +32,89 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         }
 
         with(configurations) {
-            val intellijPlatformDependencyConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "IntelliJ Platform dependency archive"
+            val intellijPlatformDependencyConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+                description = "IntelliJ Platform dependency archive",
+            )
+
+            val intellijPlatformLocalConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
+                description = "IntelliJ Platform local instance",
+            )
+
+            val intellijPlatformConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM,
+                description = "IntelliJ Platform",
+            ) {
+                attributes {
+                    attribute(Attributes.extracted, true)
                 }
 
-            val intellijPlatformLocalConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "IntelliJ Platform local instance"
-                }
+                extendsFrom(intellijPlatformDependencyConfiguration, intellijPlatformLocalConfiguration)
 
-            val intellijPlatformConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "IntelliJ Platform"
-
-                    attributes {
-                        attribute(Attributes.extracted, true)
+                incoming.beforeResolve {
+                    if (dependencies.isEmpty()) {
+                        throw GradleException("No IntelliJ Platform dependency found")
                     }
 
-                    extendsFrom(intellijPlatformDependencyConfiguration, intellijPlatformLocalConfiguration)
-
-                    incoming.beforeResolve {
-                        if (dependencies.isEmpty()) {
-                            throw GradleException("No IntelliJ Platform dependency found")
-                        }
-
-                        val identifiers = IntelliJPlatformType.values().map { "${it.groupId}:${it.artifactId}" }
-                        val matched = dependencies.filter { identifiers.contains("${it.group}:${it.name}") }
-                        if (matched.size > 1) {
-                            throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
-                        }
+                    val identifiers = IntelliJPlatformType.values().map { "${it.groupId}:${it.artifactId}" }
+                    val matched = dependencies.filter { identifiers.contains("${it.group}:${it.name}") }
+                    if (matched.size > 1) {
+                        throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
                     }
                 }
+            }
 
-            maybeCreate(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "IntelliJ Platform product info"
-
-                    attributes {
-                        attribute(Attributes.productInfo, true)
-                    }
-
-                    extendsFrom(intellijPlatformConfiguration)
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO,
+                description = "IntelliJ Platform product info",
+            ) {
+                attributes {
+                    attribute(Attributes.productInfo, true)
                 }
 
-            val jetbrainsRuntimeDependencyConfiguration = maybeCreate(Configurations.JETBRAINS_RUNTIME_DEPENDENCY)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "JetBrains Runtime dependency archive"
+                extendsFrom(intellijPlatformConfiguration)
+            }
 
-                    attributes {
-                        attribute(Attributes.extracted, false)
-                    }
+            val jetbrainsRuntimeDependencyConfiguration = create(
+                name = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
+                description = "JetBrains Runtime dependency archive",
+            ) {
+                attributes {
+                    attribute(Attributes.extracted, false)
+                }
+            }
+
+            val jetbrainsRuntimeLocalConfiguration = create(
+                name = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE,
+                description = "JetBrains Runtime local instance"
+            ) {
+                attributes {
+                    attribute(Attributes.extracted, true)
+                }
+            }
+
+            create(
+                name = Configurations.JETBRAINS_RUNTIME,
+                description = "JetBrains Runtime",
+            ) {
+                attributes {
+                    attribute(Attributes.extracted, true)
                 }
 
-            val jetbrainsRuntimeLocalConfiguration = maybeCreate(Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "JetBrains Runtime local instance"
+                extendsFrom(jetbrainsRuntimeDependencyConfiguration)
+                extendsFrom(jetbrainsRuntimeLocalConfiguration)
+            }
 
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
-                }
+            create(
+                name = Configurations.INTELLIJ_PLUGIN_VERIFIER,
+                description = "IntelliJ Plugin Verifier",
+            )
 
-            maybeCreate(Configurations.JETBRAINS_RUNTIME)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "JetBrains Runtime"
-
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
-
-                    extendsFrom(jetbrainsRuntimeDependencyConfiguration)
-                    extendsFrom(jetbrainsRuntimeLocalConfiguration)
-                }
-
-            val intellijPlatformDependenciesConfiguration = maybeCreate(Configurations.INTELLIJ_PLATFORM_DEPENDENCIES)
-                .apply {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
-                    description = "IntelliJ Platform extra dependencies"
-                }
+            val intellijPlatformDependenciesConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+                description = "IntelliJ Platform extra dependencies",
+            )
 
             fun Configuration.extend() = extendsFrom(
                 intellijPlatformConfiguration,
@@ -147,8 +129,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         }
 
         with(dependencies) {
-//            applyIntelliJPlatformSettings(objects, gradle)
-
             attributesSchema {
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
@@ -179,6 +159,10 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION)
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(Extensions.VENDOR)
+            }
+
+            configureExtension<IntelliJPlatformExtension.PluginVerifier>(Extensions.PLUGIN_VERIFIER) {
+                version.convention(VERSION_LATEST)
             }
         }
 

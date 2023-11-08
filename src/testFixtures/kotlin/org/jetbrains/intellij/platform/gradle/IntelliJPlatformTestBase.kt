@@ -8,7 +8,9 @@ import org.gradle.testkit.runner.internal.DefaultGradleRunner
 import org.intellij.lang.annotations.Language
 import java.io.File
 import java.nio.file.Files.createTempDirectory
+import java.nio.file.Path
 import java.nio.file.Paths
+import kotlin.io.path.readText
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -24,11 +26,11 @@ abstract class IntelliJPlatformTestBase {
     val isCI get() = System.getProperty("test.ci").toBoolean()
 
     val gradleHome: String = System.getProperty("test.gradle.home")
-    var dir = createTempDirectory("tmp").toFile()
+    var dir = createTempDirectory("tmp")
 
     @BeforeTest
     open fun setup() {
-        dir = createTempDirectory("tmp").toFile()
+        dir = createTempDirectory("tmp")
     }
 
     protected fun build(
@@ -36,11 +38,13 @@ abstract class IntelliJPlatformTestBase {
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
         args: List<String> = emptyList(),
+        block: BuildResult.() -> Unit = {},
     ) = build(
         tasks = tasksList,
         projectProperties = projectProperties,
         systemProperties = systemProperties,
         args = args,
+        block = block,
     )
 
     protected fun buildAndFail(
@@ -48,12 +52,14 @@ abstract class IntelliJPlatformTestBase {
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
         args: List<String> = emptyList(),
+        block: BuildResult.() -> Unit = {},
     ) = build(
         fail = true,
         tasks = tasksList,
         projectProperties = projectProperties,
         systemProperties = systemProperties,
         args = args,
+        block = block,
     )
 
     protected fun build(
@@ -64,6 +70,7 @@ abstract class IntelliJPlatformTestBase {
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
         args: List<String> = emptyList(),
+        block: BuildResult.() -> Unit = {},
     ): BuildResult = builder(
         gradleVersion = gradleVersion,
         tasks = tasks,
@@ -82,6 +89,7 @@ abstract class IntelliJPlatformTestBase {
                 assertNotContains("Configuration cache problems found in this build.", it.output)
             }
         }
+        .also(block)
 
     private fun builder(
         gradleVersion: String,
@@ -91,13 +99,14 @@ abstract class IntelliJPlatformTestBase {
         args: List<String> = emptyList(),
     ) =
         GradleRunner.create()
-            .withProjectDir(dir)
+            .withProjectDir(dir.toFile())
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
 //            .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
             .withArguments(
+                "-Dorg.gradle.kotlin.dsl.scriptCompilationAvoidance=false", // workaround for https://github.com/gradle/gradle/issues/25412
                 *projectProperties
                     .run { this + mapOf("platformVersion" to System.getenv("PLATFORM_VERSION")).filterNot { it.value == null } }
                     .map { "-P${it.key}=${it.value}" }
@@ -118,7 +127,7 @@ abstract class IntelliJPlatformTestBase {
     private fun getPluginClasspath(): List<File> {
         //Get the default classpath
         val defaultClasspath = DefaultGradleRunner()
-            .withProjectDir(dir)
+            .withProjectDir(dir.toFile())
             .withPluginClasspath()
             .pluginClasspath
 
@@ -130,6 +139,7 @@ abstract class IntelliJPlatformTestBase {
         }
         return defaultClasspath
     }
+
     protected fun assertNotContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertFalse(
@@ -139,6 +149,9 @@ abstract class IntelliJPlatformTestBase {
             """.trimIndent()
         )
     }
+
+    protected fun assertFileContent(file: Path?, @Language("xml") expectedContent: String) =
+        assertEquals(expectedContent.trim(), file?.readText()?.replace("\r", "")?.trim())
 
     protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
         assertEquals(expectedContent.trim(), file?.readText()?.replace("\r", "")?.trim())

@@ -12,6 +12,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
  *
  * @see [ListProductsReleasesTask]
  */
+@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Prints the output produced by the listProductsReleases task")
 abstract class PrintProductsReleasesTask : DefaultTask() {
 

@@ -31,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
  *
  * @see [PrintProductsReleasesTask]
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class ListProductsReleasesTask : DefaultTask() {
 

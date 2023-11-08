@@ -2,76 +2,91 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import kotlin.io.path.readText
+import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ListBundledPluginsTaskSpec : IntelliJPluginSpecBase() {
 
-//    @Test
-//    fun `list plugins for 2020_1`() {
-//        buildFile.groovy(
-//            """
-//            intellij {
-//                version = "2020.1"
-//            }
-//            """.trimIndent()
-//        )
-//
-//        build(LIST_BUNDLED_PLUGINS_TASK_NAME)
-//
-//        val content = buildDirectory.resolve("$LIST_BUNDLED_PLUGINS_TASK_NAME.txt").readText()
-//        assertEquals(
-//            """
-//                org.jetbrains.idea.reposearch
-//                AntSupport
-//                ByteCodeViewer
-//                org.jetbrains.java.decompiler
-//                org.intellij.intelliLang
-//                org.jetbrains.debugger.streams
-//                Git4Idea
-//                com.intellij.tasks
-//                com.intellij.stats.completion
-//                com.intellij.laf.macos
-//                org.jetbrains.idea.eclipse
-//                org.jetbrains.plugins.javaFX
-//                XPathView
-//                org.jetbrains.plugins.gradle.maven
-//                JUnit
-//                org.intellij.plugins.markdown
-//                com.intellij.java-i18n
-//                org.jetbrains.idea.maven
-//                TestNG-J
-//                org.jetbrains.settingsRepository
-//                com.jetbrains.changeReminder
-//                com.intellij.properties.bundle.editor
-//                org.jetbrains.plugins.textmate
-//                com.jetbrains.filePrediction
-//                org.jetbrains.plugins.terminal
-//                com.intellij.java
-//                org.jetbrains.kotlin
-//                com.intellij.platform.images
-//                hg4idea
-//                com.intellij.gradle
-//                com.jetbrains.sh
-//                org.editorconfig.editorconfigjetbrains
-//                org.jetbrains.plugins.github
-//                com.intellij.properties
-//                org.jetbrains.plugins.gradle
-//                org.jetbrains.android
-//                com.intellij.laf.win10
-//                org.jetbrains.plugins.yaml
-//                tanvd.grazi
-//                Subversion
-//                DevKit
-//                com.intellij.copyright
-//                org.intellij.groovy
-//                com.intellij.uiDesigner
-//                XSLT-Debugger
-//                com.intellij.java.ide
-//                com.android.tools.idea.smali
-//                Coverage
-//                com.intellij.configurationScript
-//            """.trimIndent(),
-//            content,
-//        )
-//    }
+    @Test
+    fun `list bundled plugins`() {
+        build(Tasks.LIST_BUNDLED_PLUGINS)
+
+        val content = buildDirectory.resolve("${Tasks.LIST_BUNDLED_PLUGINS}.txt").readText()
+        assertEquals(
+            """
+            AntSupport
+            ByteCodeViewer
+            Coverage
+            DevKit
+            Git4Idea
+            JUnit
+            Lombook Plugin
+            PerforceDirectPlugin
+            Subversion
+            TestNG-J
+            XPathView
+            XSLT-Debugger
+            com.android.tools.design
+            com.android.tools.idea.smali
+            com.intellij
+            com.intellij.completion.ml.ranking
+            com.intellij.configurationScript
+            com.intellij.copyright
+            com.intellij.dev
+            com.intellij.gradle
+            com.intellij.java
+            com.intellij.java-i18n
+            com.intellij.java.ide
+            com.intellij.marketplace
+            com.intellij.platform.images
+            com.intellij.plugins.eclipsekeymap
+            com.intellij.plugins.netbeanskeymap
+            com.intellij.plugins.visualstudiokeymap
+            com.intellij.properties
+            com.intellij.searcheverywhere.ml
+            com.intellij.settingsSync
+            com.intellij.tasks
+            com.intellij.tracing.ide
+            com.intellij.uiDesigner
+            com.jetbrains.codeWithMe
+            com.jetbrains.packagesearch.intellij-plugin
+            com.jetbrains.projector.libs
+            com.jetbrains.sh
+            com.jetbrains.space
+            hg4idea
+            intellij.indexing.shared.core
+            intellij.webp
+            org.editorconfig.editorconfigjetbrains
+            org.intellij.groovy
+            org.intellij.intelliLang
+            org.intellij.plugins.markdown
+            org.intellij.qodana
+            org.jetbrains.android
+            org.jetbrains.debugger.streams
+            org.jetbrains.idea.eclipse
+            org.jetbrains.idea.gradle.dsl
+            org.jetbrains.idea.maven
+            org.jetbrains.idea.maven.model
+            org.jetbrains.idea.maven.server.api
+            org.jetbrains.idea.reposearch
+            org.jetbrains.java.decompiler
+            org.jetbrains.kotlin
+            org.jetbrains.plugins.github
+            org.jetbrains.plugins.gradle
+            org.jetbrains.plugins.gradle.dependency.updater
+            org.jetbrains.plugins.gradle.maven
+            org.jetbrains.plugins.javaFX
+            org.jetbrains.plugins.terminal
+            org.jetbrains.plugins.textmate
+            org.jetbrains.plugins.yaml
+            org.toml.lang
+            tanvd.grazi
+            training
+            """.trimIndent(),
+            content,
+        )
+    }
 }

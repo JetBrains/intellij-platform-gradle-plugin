@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
  *
  * @see [InstrumentCodeTask]
  */
+@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class InstrumentedJarTask : Jar() {
 

@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.getByName
@@ -22,6 +23,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)
+
+    val pluginVerifier
+        get() = extensions.getByName<PluginVerifier>(Extensions.PLUGIN_VERIFIER)
 
     @IntelliJPlatform
     interface PluginConfiguration : ExtensionAware {
@@ -181,5 +185,20 @@ interface IntelliJPlatformExtension : ExtensionAware {
              */
             val url: Property<String>
         }
+    }
+
+    @IntelliJPlatform
+    interface PluginVerifier {
+
+        /**
+         * Represents the version of the IntelliJ Plugin Verifier.
+         */
+        val version: Property<String>
+
+        /**
+         * A path to the local IntelliJ Plugin Verifier CLI tool to be used.
+         * Takes precedence over the [version].
+         */
+        val path: RegularFileProperty
     }
 }

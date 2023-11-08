@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle
 import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
-import java.io.File
 
 abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
 
@@ -64,7 +63,7 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
         }
         """.trimIndent()
 
-    fun getSearchableOptionsXml(jar: String) = File(getSearchableOptions(), "/$jar.jar/search/$jar.jar$SEARCHABLE_OPTIONS_SUFFIX")
+    fun getSearchableOptionsXml(jar: String) = getSearchableOptions().resolve("/$jar.jar/search/$jar.jar$SEARCHABLE_OPTIONS_SUFFIX")
 
-    private fun getSearchableOptions() = File(buildDirectory, SEARCHABLE_OPTIONS_DIR_NAME)
+    private fun getSearchableOptions() = buildDirectory.resolve(SEARCHABLE_OPTIONS_DIR_NAME)
 }

@@ -9,13 +9,13 @@ import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 
-interface JetBrainsRuntimeAware : PlatformVersionAware {
+interface PluginVerifierAware {
 
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    val jetbrainsRuntimeDirectory: DirectoryProperty
+    val pluginVerifierDirectory: DirectoryProperty
 
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    val jetbrainsRuntimeExecutable: RegularFileProperty
+    val pluginVerifierExecutable: RegularFileProperty
 }
