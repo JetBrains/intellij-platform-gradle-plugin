@@ -153,8 +153,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
 
             configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
-                name.convention(project.name)
-                version.convention(this@configure.version.toString())
+                name.convention(project.provider {
+                    project.name
+                })
+                version.convention(project.provider {
+                    project.version.toString()
+                })
 
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION)

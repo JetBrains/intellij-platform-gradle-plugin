@@ -13,7 +13,7 @@ class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
         build("build").let {
             it.output containsText ":patchPluginXml"
 
-            buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml"
+            buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml" // TODO: fix location
 
             patchedPluginXml containsText "<version>1.0.0</version>"
             patchedPluginXml containsText "<idea-version since-build=\"211\" until-build=\"213.*\" />"

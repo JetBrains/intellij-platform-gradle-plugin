@@ -61,12 +61,14 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             import java.util.*
             import org.jetbrains.intellij.platform.gradle.*
             import org.jetbrains.intellij.platform.gradle.tasks.*
-                        
+            
+            version = "1.0.0"
+            
             plugins {
                 id("java")
                 id("org.jetbrains.intellij.platform")
@@ -135,6 +137,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             }
             """.trimIndent(),
         tasks: String = "",
+        custom: String = "",
     ) {
         buildFile.writeText("")
         buildFile.groovy(
@@ -167,6 +170,8 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             tasks {
                 $tasks
             }
+            
+            $custom
             """.trimIndent()
         )
     }

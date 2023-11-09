@@ -7,7 +7,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.ClasspathNormalizer
 import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.SourceSet.MAIN_SOURCE_SET_NAME
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.compile.JavaCompile
@@ -20,18 +19,15 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TAS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.propertyProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.propertyProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradle.propertyProviders.PluginPathArgumentProvider
-import org.jetbrains.intellij.platform.gradle.sourceSets
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import java.io.File
 import java.nio.file.Path
 import java.util.*
-import kotlin.io.path.name
 
 abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_TASKS_ID) {
 
@@ -43,7 +39,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         with(tasks) {
             InitializeIntelliJPlatformPluginTask.register(project)
             SetupDependenciesTask.register(project)
-            configurePatchPluginXmlTask()
+            PatchPluginXmlTask.register(project)
             ListBundledPluginsTask.register(project)
             PrintBundledPluginsTask.register(project)
             DownloadAndroidStudioProductReleasesXmlTask.register(project)
@@ -140,52 +136,6 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 //                    }
 //                }
 //            }`
-        }
-
-    private fun TaskContainer.configurePatchPluginXmlTask() =
-        configureTask<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML) {
-            val extension = project.the<IntelliJPlatformExtension>()
-
-            inputFile.convention(project.layout.file(project.provider {
-                project.sourceSets.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.map { it.resolve("META-INF/plugin.xml") }.firstOrNull { it.exists() }
-            }))
-            outputFile.convention(project.layout.file(
-                inputFile.map { temporaryDir.resolve(it.asPath.name) }
-            ))
-
-            extension.pluginConfiguration.let {
-                pluginId.convention(it.id)
-                pluginName.convention(it.name)
-                pluginVersion.convention(it.version)
-                pluginDescription.convention(it.description)
-                changeNotes.convention(it.changeNotes)
-
-                it.productDescriptor.let { productDescriptor ->
-                    productDescriptorCode.convention(productDescriptor.code)
-                    productDescriptorReleaseDate.convention(productDescriptor.releaseDate)
-                    productDescriptorReleaseVersion.convention(productDescriptor.releaseVersion)
-                    productDescriptorOptional.convention(productDescriptor.optional)
-                }
-
-                it.ideaVersion.let { ideaVersion ->
-                    sinceBuild.convention(
-                        ideaVersion.sinceBuild.orElse(project.provider {
-                            with(platformVersion) { "$major.$minor" }
-                        })
-                    )
-                    untilBuild.convention(
-                        ideaVersion.untilBuild.orElse(project.provider {
-                            with(platformVersion) { "$major.*" }
-                        })
-                    )
-                }
-
-                it.vendor.let { vendor ->
-                    vendorName.convention(vendor.name)
-                    vendorEmail.convention(vendor.email)
-                    vendorUrl.convention(vendor.url)
-                }
-            }
         }
 
     private fun TaskContainer.configureVerifyPluginTask() =

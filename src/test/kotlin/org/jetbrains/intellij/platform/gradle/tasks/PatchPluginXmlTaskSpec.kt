@@ -2,188 +2,147 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.testkit.runner.TaskOutcome
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_XML_DIR_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 @Suppress("PluginXmlValidity")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
-    private val patchedPluginXml = lazy { buildDirectory.resolve(PLUGIN_XML_DIR_NAME).listFiles().first() }
+    private val patchedPluginXml = lazy { buildDirectory.resolve("tmp/${Tasks.PATCH_PLUGIN_XML}/plugin.xml") }
 
     @Test
     fun `patch version and since until builds`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
-            assertNotContains("will be overwritten", it.output)
+
+            assertNotContains("will be overwritten", output)
         }
     }
 
     @Test
     fun `patch description`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            patchPluginXml {
-                pluginDescription = 'Plugin pluginDescription'
+            intellijPlatform {
+                pluginConfiguration {
+                    description = "Plugin pluginDescription"
+                }
             }
             """.trimIndent()
         )
 
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
+                  <idea-version since-build="2022.3" until-build="2022.*" />
                   <description>Plugin pluginDescription</description>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertNotContains("will be overwritten", it.output)
+            assertNotContains("will be overwritten", output)
         }
     }
 
     @Test
     fun `patch patching preserves UTF-8 characters`() {
-        pluginXml.xml(
-            """
-            <idea-plugin someattr="\u2202" /> 
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin someattr=\"\\u2202\" />")
 
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin someattr="\u2202">
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertNotContains("will be overwritten", it.output)
+            assertNotContains("will be overwritten", output)
         }
     }
 
     @Test
     fun `patch change notes`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            patchPluginXml {
-                changeNotes = 'change notes'
+            intellijPlatform {
+                pluginConfiguration {
+                    changeNotes = "change notes"
+                }
             }
             """.trimIndent()
         )
 
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
+                  <idea-version since-build="2022.3" until-build="2022.*" />
                   <change-notes>change notes</change-notes>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertNotContains("will be overwritten", it.output)
+            assertNotContains("will be overwritten", output)
         }
     }
 
     @Test
     fun `patch id`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            patchPluginXml {
-                pluginId = 'my.plugin.id'
+            intellijPlatform {
+                pluginConfiguration {
+                    id = "my.plugin.id"
+                }
             }
             """.trimIndent()
         )
 
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
+                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                   <id>my.plugin.id</id>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertNotContains("will be overwritten", it.output)
+            assertNotContains("will be overwritten", output)
         }
     }
 
@@ -198,62 +157,21 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                   <id>my.plugin.id</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertNotContains("will be overwritten", it.output)
-        }
-    }
-
-    @Test
-    fun `same since and until builds`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
-
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-                sameSinceUntilBuild = true
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
-            assertFileContent(
-                patchedPluginXml.value,
-                """
-                <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.1532.*" />
-                </idea-plugin>
-                """.trimIndent()
-            )
-
-            assertNotContains("will be overwritten", it.output)
+            assertNotContains("will be overwritten", output)
         }
     }
 
@@ -262,35 +180,28 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin>
+              <name>projectName</name>
               <id>org.jetbrains.erlang</id>
               <vendor>JetBrains</vendor>
             </idea-plugin>
             """.trimIndent()
         )
 
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                   <id>org.jetbrains.erlang</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertNotContains("will be overwritten", it.output)
+            assertNotContains("will be overwritten", output)
         }
     }
 
@@ -306,66 +217,22 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*">my_version</idea-version>
+                  <name>projectName</name>
+                  <version>1.0.0</version>
+                  <idea-version since-build="2022.3" until-build="2022.*">my_version</idea-version>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertContains("attribute 'since-build=[1]' of 'idea-version' tag will be set to '141.1532'", it.output)
-            assertContains("attribute 'until-build=[2]' of 'idea-version' tag will be set to '141.*'", it.output)
-            assertContains("value of 'version[my_version]' tag will be set to '0.42.123'", it.output)
-        }
-    }
-
-    @Test
-    fun `take extension setting into account while patching`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <version>my_version</version>
-              <idea-version since-build='1' until-build='2'>my_version</idea-version>
-            </idea-plugin>
-            """.trimIndent()
-        )
-
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-                updateSinceUntilBuild = false 
-            }
-        """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
-            assertFileContent(
-                patchedPluginXml.value,
-                """
-                <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="1" until-build="2">my_version</idea-version>
-                </idea-plugin>
-                """.trimIndent()
-            )
-
-            assertNotContains("will be overwritten", it.output)
+            assertContains("Patching plugin.xml: attribute 'until-build=[2]' of 'idea-version' tag will be set to '2022.*'", output)
+            assertContains("Patching plugin.xml: attribute 'since-build=[1]' of 'idea-version' tag will be set to '2022.3'", output)
+            assertContains("Patching plugin.xml: value of 'version[my_version]' tag will be set to '1.0.0'", output)
         }
     }
 
@@ -379,98 +246,44 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            intellij {
-                version = '14.1.4'
-            }
-        """.trimIndent()
+            version = Project.DEFAULT_VERSION
+            """.trimIndent()
         )
 
-        build(Tasks.PATCH_PLUGIN_XML).let {
+        build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <name>projectName</name>
                   <version>0.10.0</version>
                 </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
 
-            assertNotContains("will be overwritten", it.output)
+            assertNotContains("will be overwritten", output)
         }
     }
 
     @Test
     fun `skip patch task if intellij version did not changed`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
-
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
         build(Tasks.PATCH_PLUGIN_XML)
-        build(Tasks.PATCH_PLUGIN_XML).let {
-            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":${Tasks.PATCH_PLUGIN_XML}")?.outcome)
+        build(Tasks.PATCH_PLUGIN_XML) {
+            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.PATCH_PLUGIN_XML}")?.outcome)
             assertFileContent(
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*" />
+                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                 </idea-plugin>
-                """.trimIndent()
-            )
-        }
-    }
-
-    @Test
-    fun `patch version and since until builds on intellij version changing`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
-
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            intellij {
-                version = '$intellijVersion'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML)
-
-        buildFile.groovy(
-            """
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.PATCH_PLUGIN_XML).let {
-            assertNotEquals(TaskOutcome.UP_TO_DATE, it.task(":${Tasks.PATCH_PLUGIN_XML}")?.outcome)
-            assertFileContent(
-                patchedPluginXml.value,
-                """
-                <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="141.1532" until-build="141.*" />
-                </idea-plugin>
-                """.trimIndent()
+                """.trimIndent(),
             )
         }
     }

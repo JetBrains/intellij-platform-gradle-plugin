@@ -9,16 +9,16 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.the
 import org.jdom2.Document
 import org.jdom2.Element
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.asPath
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.transformXml
-import org.jetbrains.intellij.platform.gradle.warn
 import kotlin.io.path.inputStream
+import kotlin.io.path.name
 
 /**
  * Patches `plugin.xml` files with values provided to the task.
@@ -27,7 +27,6 @@ import kotlin.io.path.inputStream
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
 
@@ -218,5 +217,54 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                 element.setAttribute(attributeName, value)
             }
         }
+    }
+
+    companion object {
+        fun register(project: Project) =
+            project.configureTask<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML) {
+                val extension = project.the<IntelliJPlatformExtension>()
+
+                inputFile.convention(project.layout.file(project.provider {
+                    project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).resources.srcDirs.map { it.resolve("META-INF/plugin.xml") }
+                        .firstOrNull { it.exists() }
+                }))
+                outputFile.convention(project.layout.file(
+                    inputFile.map { temporaryDir.resolve(it.asPath.name) }
+                ))
+
+                extension.pluginConfiguration.let {
+                    pluginId.convention(it.id)
+                    pluginName.convention(it.name)
+                    pluginVersion.convention(it.version)
+                    pluginDescription.convention(it.description)
+                    changeNotes.convention(it.changeNotes)
+
+                    it.productDescriptor.let { productDescriptor ->
+                        productDescriptorCode.convention(productDescriptor.code)
+                        productDescriptorReleaseDate.convention(productDescriptor.releaseDate)
+                        productDescriptorReleaseVersion.convention(productDescriptor.releaseVersion)
+                        productDescriptorOptional.convention(productDescriptor.optional)
+                    }
+
+                    it.ideaVersion.let { ideaVersion ->
+                        sinceBuild.convention(
+                            ideaVersion.sinceBuild.orElse(project.provider {
+                                with(platformVersion) { "$major.$minor" }
+                            })
+                        )
+                        untilBuild.convention(
+                            ideaVersion.untilBuild.orElse(project.provider {
+                                with(platformVersion) { "$major.*" }
+                            })
+                        )
+                    }
+
+                    it.vendor.let { vendor ->
+                        vendorName.convention(vendor.name)
+                        vendorEmail.convention(vendor.email)
+                        vendorUrl.convention(vendor.url)
+                    }
+                }
+            }
     }
 }

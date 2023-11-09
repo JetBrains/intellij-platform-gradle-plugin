@@ -101,7 +101,7 @@ open class IntelliJPlatformIntegrationTestBase(
      */
     val patchedPluginXml
         get() = buildDirectory
-            .resolve("patchedPluginXmlFiles/plugin.xml")
+            .resolve("patchedPluginXmlFiles/plugin.xml") // TODO: fix location
             .also {
                 assert(Files.exists(it)) { "plugin.xml file does not exist: $it" }
             }
