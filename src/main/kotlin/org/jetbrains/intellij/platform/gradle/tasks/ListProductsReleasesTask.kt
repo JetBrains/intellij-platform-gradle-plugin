@@ -4,18 +4,24 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.AndroidStudio
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.model.ProductsReleases
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
+import java.util.*
 
 /**
  * List all available IntelliJ-based IDE releases with their updates.
@@ -31,9 +37,8 @@ import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
  *
  * @see [PrintProductsReleasesTask]
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
-abstract class ListProductsReleasesTask : DefaultTask() {
+abstract class ListProductsReleasesTask : DefaultTask(), PlatformVersionAware {
 
     /**
      * Path to the products releases update files. By default, one is downloaded from [IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL].
@@ -64,7 +69,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
      */
     @get:Input
     @get:Optional
-    abstract val types: ListProperty<String>
+    abstract val types: ListProperty<IntelliJPlatformType>
 
     /**
      * Lower boundary of the listed results in marketing product version format, like `2020.2.1`.
@@ -144,12 +149,9 @@ abstract class ListProductsReleasesTask : DefaultTask() {
                 untilBuild.orNull
                     .takeUnless { it.isNullOrBlank() || sinceVersion.isPresent }
             }
-            ?.replace("*", "9999")
+            ?.replace("*", "99999")
             ?.run(Version::parse)
 
-        val types = types.get().mapNotNull {
-            IntelliJPlatformType.fromCode(it)
-        }
         val channels = releaseChannels.get()
 
         fun testVersion(version: Version?, build: Version?): Boolean {
@@ -167,7 +169,11 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
         val result = releases.map(ProductsReleases::products).flatten().asSequence()
             .flatMap { product -> product.codes.map { it to product }.asSequence() }
-            .filter { (type) -> types.contains(IntelliJPlatformType.fromCode(type)) }
+            .filter { (type) ->
+                runCatching { IntelliJPlatformType.fromCode(type) }
+                    .map { types.get().contains(it) }
+                    .getOrElse { false }
+            }
             .flatMap { (type, product) -> product.channels.map { type to it }.asSequence() }
             .filter { (_, channel) -> channels.contains(Channel.valueOf(channel.status.uppercase())) }
             .flatMap { (type, channel) ->
@@ -185,7 +191,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
             .distinct()
             .toList()
 
-        val androidStudioResult = when (types.contains(AndroidStudio)) {
+        val androidStudioResult = when (types.get().contains(AndroidStudio)) {
             true -> androidStudioReleases.flatMap { release ->
                 release.items
                     .asSequence()
@@ -221,5 +227,40 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
     enum class Channel {
         EAP, MILESTONE, BETA, RELEASE, CANARY, PATCH, RC,
+    }
+
+    companion object {
+        fun register(project: Project) =
+            project.configureTask<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES) {
+                val downloadIdeaProductReleasesXmlTaskProvider =
+                    project.tasks.named<DownloadIdeaProductReleasesXmlTask>(Tasks.DOWNLOAD_IDEA_PRODUCT_RELEASES_XML)
+                val downloadAndroidStudioProductReleasesXmlTaskProvider =
+                    project.tasks.named<DownloadAndroidStudioProductReleasesXmlTask>(Tasks.DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML)
+                val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+
+                ideaProductReleasesUpdateFiles.from(downloadIdeaProductReleasesXmlTaskProvider.map {
+                    it.outputs.files.asFileTree
+                })
+                androidStudioProductReleasesUpdateFiles.from(downloadAndroidStudioProductReleasesXmlTaskProvider.map {
+                    it.outputs.files.asFileTree
+                })
+                outputFile.convention(
+                    project.layout.buildDirectory.file("${Tasks.LIST_PRODUCTS_RELEASES}.txt")
+                )
+                types.convention(project.provider {
+                    listOf(platformType)
+                })
+                sinceBuild.convention(patchPluginXmlTaskProvider.flatMap {
+                    it.sinceBuild
+                })
+                untilBuild.convention(patchPluginXmlTaskProvider.flatMap {
+                    it.untilBuild
+                })
+                releaseChannels.convention(EnumSet.allOf(Channel::class.java))
+
+                dependsOn(downloadIdeaProductReleasesXmlTaskProvider)
+                dependsOn(downloadAndroidStudioProductReleasesXmlTaskProvider)
+                dependsOn(patchPluginXmlTaskProvider)
+            }
     }
 }

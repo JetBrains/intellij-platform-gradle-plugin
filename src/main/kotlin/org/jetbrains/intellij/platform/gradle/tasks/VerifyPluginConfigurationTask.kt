@@ -148,7 +148,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
 
         sequence {
-            pluginXmlFiles.get().mapNotNull { parsePluginXml(it.toPath(), context) }.forEach { plugin ->
+            pluginXmlFiles.get().mapNotNull { parsePluginXml(it.toPath()) }.forEach { plugin ->
                 val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
                 val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
                 val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }

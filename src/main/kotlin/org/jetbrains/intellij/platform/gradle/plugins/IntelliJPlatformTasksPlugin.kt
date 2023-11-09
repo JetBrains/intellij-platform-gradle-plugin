@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TAS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.propertyProviders.IntelliJPlatformArgumentProvider
@@ -30,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import java.io.File
 import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.name
 
 abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_TASKS_ID) {
 
@@ -41,12 +43,16 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         with(tasks) {
             InitializeIntelliJPlatformPluginTask.register(project)
             SetupDependenciesTask.register(project)
+            configurePatchPluginXmlTask()
             ListBundledPluginsTask.register(project)
             PrintBundledPluginsTask.register(project)
+            DownloadAndroidStudioProductReleasesXmlTask.register(project)
+            DownloadIdeaProductReleasesXmlTask.register(project)
+            ListProductsReleasesTask.register(project)
+            PrintProductsReleasesTask.register(project)
 
             configurePrepareSandboxTasks()
             configureBuildPluginTask()
-            configurePatchPluginXmlTask()
             configureRunPluginVerifierTask()
             configureVerifyPluginTask()
             configureVerifyPluginConfigurationTask()
@@ -140,12 +146,12 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         configureTask<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML) {
             val extension = project.the<IntelliJPlatformExtension>()
 
-            inputFile.convention(project.provider {
+            inputFile.convention(project.layout.file(project.provider {
                 project.sourceSets.getByName(MAIN_SOURCE_SET_NAME).resources.srcDirs.map { it.resolve("META-INF/plugin.xml") }.firstOrNull { it.exists() }
-            })
-            outputFile.convention(inputFile.map {
-                temporaryDir.resolve(it.name)
-            })
+            }))
+            outputFile.convention(project.layout.file(
+                inputFile.map { temporaryDir.resolve(it.asPath.name) }
+            ))
 
             extension.pluginConfiguration.let {
                 pluginId.convention(it.id)
@@ -162,8 +168,16 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                 }
 
                 it.ideaVersion.let { ideaVersion ->
-                    sinceBuild.convention(ideaVersion.sinceBuild)
-                    untilBuild.convention(ideaVersion.untilBuild)
+                    sinceBuild.convention(
+                        ideaVersion.sinceBuild.orElse(project.provider {
+                            with(platformVersion) { "$major.$minor" }
+                        })
+                    )
+                    untilBuild.convention(
+                        ideaVersion.untilBuild.orElse(project.provider {
+                            with(platformVersion) { "$major.*" }
+                        })
+                    )
                 }
 
                 it.vendor.let { vendor ->
@@ -246,10 +260,10 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                 kotlinVersion.convention(project.provider {
                     project.extensions.getByName("kotlin").withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
                 })
-                kotlinStdlibDefaultDependency.convention(project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME)
-                    .map { it.toBoolean() })
-                kotlinIncrementalUseClasspathSnapshot.convention(project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT)
-                    .map { it.toBoolean() })
+                kotlinStdlibDefaultDependency.convention(
+                    project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME).map { it.toBoolean() })
+                kotlinIncrementalUseClasspathSnapshot.convention(
+                    project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT).map { it.toBoolean() })
             }
 
             project.tasks.withType<JavaCompile> {
@@ -457,7 +471,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
 
             dependsOn(Tasks.BUILD_PLUGIN)
             dependsOn(Tasks.VERIFY_PLUGIN)
-            dependsOn(IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME)
+            dependsOn(Tasks.LIST_PRODUCTS_RELEASES)
 
             val isIdeVersionsEmpty = localPaths.flatMap { localPaths ->
                 ideVersions.map { ideVersions ->

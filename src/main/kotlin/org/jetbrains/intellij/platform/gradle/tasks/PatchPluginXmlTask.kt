@@ -5,18 +5,19 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.transformXml
 import org.jetbrains.intellij.platform.gradle.warn
-import java.io.File
 import kotlin.io.path.inputStream
 
 /**
@@ -33,10 +34,10 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
     @get:SkipWhenEmpty
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val inputFile: Property<File>
+    abstract val inputFile: RegularFileProperty
 
     @get:OutputFile
-    abstract val outputFile: Property<File>
+    abstract val outputFile: RegularFileProperty
 
     /**
      * @see [IntelliJPlatformExtension.PluginConfiguration.id]
@@ -146,8 +147,8 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
     @TaskAction
     fun patchPluginXml() {
 
-        val inputPath = inputFile.get().toPath()
-        val outputPath = outputFile.get().toPath()
+        val inputPath = inputFile.asPath
+        val outputPath = outputFile.asPath
 
         val sinceBuildValue = sinceBuild.orNull ?: with(platformVersion) {
             "$major.$minor"

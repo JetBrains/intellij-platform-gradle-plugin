@@ -53,14 +53,18 @@ object IntelliJPluginConstants {
 
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin" // TODO: check
+        const val DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML = "downloadAndroidStudioProductReleasesXml"
+        const val DOWNLOAD_IDEA_PRODUCT_RELEASES_XML = "downloadIdeaProductReleasesXml"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
         const val LIST_BUNDLED_PLUGINS = "listBundledPlugins"
+        const val LIST_PRODUCTS_RELEASES = "listProductsReleases"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
         const val PREPARE_SANDBOX = "prepareSandbox" // TODO: check
         const val PREPARE_TESTING_SANDBOX = "prepareTestingSandbox" // TODO: check
         const val PREPARE_UI_TESTING_SANDBOX = "prepareUiTestingSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
+        const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val RUN_IDE = "runIde" // TODO: check
         const val RUN_PLUGIN_VERIFIER = "runPluginVerifier" // TODO: check
         const val SETUP_DEPENDENCIES = "setupDependencies"
@@ -78,23 +82,21 @@ object IntelliJPluginConstants {
     }
 
     object Locations {
+        const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://jb.gg/android-studio-releases-list.xml"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
+        const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
     }
 
     const val BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
-    const val DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME = "downloadAndroidStudioProductReleasesXml"
-    const val DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME = "downloadIdeaProductReleasesXml"
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val DOWNLOAD_ZIP_SIGNER_TASK_NAME = "downloadZipSigner"
     const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
     const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
-    const val LIST_PRODUCTS_RELEASES_TASK_NAME = "listProductsReleases"
-    const val PRINT_PRODUCTS_RELEASES_TASK_NAME = "printProductsReleases"
     const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
@@ -116,7 +118,6 @@ object IntelliJPluginConstants {
 //        INSTRUMENT_TEST_CODE_TASK_NAME,
 //        JAR_SEARCHABLE_OPTIONS_TASK_NAME,
         Tasks.LIST_BUNDLED_PLUGINS,
-//        LIST_PRODUCTS_RELEASES_TASK_NAME,
         Tasks.PATCH_PLUGIN_XML,
         Tasks.PREPARE_SANDBOX,
         Tasks.PREPARE_TESTING_SANDBOX,
@@ -167,8 +168,6 @@ object IntelliJPluginConstants {
     const val RELEASE_SUFFIX_CUSTOM_SNAPSHOT = "-CUSTOM-SNAPSHOT"
 
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
-    const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
-    const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://jb.gg/android-studio-releases-list.xml"
     const val INTELLIJ_DEPENDENCIES = "${Locations.CACHE_REDIRECTOR}/intellij-dependencies"
     const val DEFAULT_INTELLIJ_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository"
     const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven"

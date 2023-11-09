@@ -9,6 +9,8 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.asPath
+import kotlin.io.path.readText
 
 /**
  * Prints the output produced by the [ListBundledPluginsTask] task.
@@ -31,15 +33,15 @@ abstract class PrintBundledPluginsTask : DefaultTask() {
     }
 
     @TaskAction
-    fun printBundledPlugins() = println(inputFile.asFile.get().readText())
+    fun printBundledPlugins() = println(inputFile.asPath.readText())
 
     companion object {
         fun register(project: Project) =
             project.configureTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS) {
                 val listBundledPluginsTaskProvider = project.tasks.named<ListBundledPluginsTask>(Tasks.LIST_BUNDLED_PLUGINS)
 
-                inputFile.convention(listBundledPluginsTaskProvider.flatMap { listBundledPluginsTask ->
-                    listBundledPluginsTask.outputFile
+                inputFile.convention(listBundledPluginsTaskProvider.flatMap {
+                    it.outputFile
                 })
 
                 dependsOn(listBundledPluginsTaskProvider)

@@ -24,8 +24,8 @@ import kotlin.test.assertTrue
 abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val intellijVersion = System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() }
-        ?: throw GradleException("'test.intellij.version' isn't provided")
+    val intellijVersion =
+        System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() } ?: throw GradleException("'test.intellij.version' isn't provided")
     val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
 
@@ -41,7 +41,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
         if (gradleScan) {
             settingsFile.groovy(
-                """
+                """                    
                 plugins {
                     id("com.gradle.enterprise") version("3.12.6")
                 }
@@ -63,12 +63,16 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
         buildFile.groovy(
             """
+            import java.util.*
+            import org.jetbrains.intellij.platform.gradle.*
+            import org.jetbrains.intellij.platform.gradle.tasks.*
+                        
             plugins {
                 id("java")
                 id("org.jetbrains.intellij.platform")
                 id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
             }
-
+            
             kotlin {
                 jvmToolchain {
                     languageVersion = JavaLanguageVersion.of(17)
@@ -90,20 +94,20 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                 }
             }
             
-//            intellij {
-//                pluginsRepositories {
-//                    maven('$pluginsRepository')
-//                }
-//                instrumentCode = false
-//            }
-//            buildSearchableOptions {
-//                enabled = false
-//            }
-            
-            // Define tasks with a minimal set of tasks required to build a source set
-//            sourceSets.all {
-//                task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
-//            }
+            //            intellij {
+            //                pluginsRepositories {
+            //                    maven('$pluginsRepository')
+            //                }
+            //                instrumentCode = false
+            //            }
+            //            buildSearchableOptions {
+            //                enabled = false
+            //            }
+                        
+                        // Define tasks with a minimal set of tasks required to build a source set
+            //            sourceSets.all {
+            //                task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
+            //            }
             """.trimIndent()
         )
 
@@ -111,6 +115,58 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             """
             kotlin.stdlib.default.dependency = false
             org.jetbrains.intellij.buildFeature.selfUpdateCheck = false
+            """.trimIndent()
+        )
+    }
+
+    fun buildFile(
+        repositories: String =
+            """
+            mavenCentral()
+            
+            intellijPlatform {
+                releases()
+            }
+            """.trimIndent(),
+        dependencies: String =
+            """
+            intellijPlatform {
+                intellijIdeaCommunity("$intellijVersion")
+            }
+            """.trimIndent(),
+        tasks: String = "",
+    ) {
+        buildFile.writeText("")
+        buildFile.groovy(
+            """
+            import java.util.*
+            import org.jetbrains.intellij.platform.gradle.*
+            import org.jetbrains.intellij.platform.gradle.tasks.*
+            
+            plugins {
+                id("java")
+                id("org.jetbrains.intellij.platform")
+                id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
+            }
+            
+            kotlin {
+                jvmToolchain {
+                    languageVersion = JavaLanguageVersion.of(17)
+                    vendor = JvmVendorSpec.JETBRAINS
+                }
+            }
+            
+            repositories {
+                $repositories
+            }
+            
+            dependencies {
+                $dependencies
+            }
+            
+            tasks {
+                $tasks
+            }
             """.trimIndent()
         )
     }
@@ -138,8 +194,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
-        drop(start).takeWhile { !it.startsWith('-') }.dropLast(1).map { it.substringBefore(' ') }
-            .filterNot { it.isEmpty() }
+        drop(start).takeWhile { !it.startsWith('-') }.dropLast(1).map { it.substringBefore(' ') }.filterNot { it.isEmpty() }
     }
 
     protected fun directory(path: String) = dir.resolve(path).createDirectories()
@@ -158,13 +213,9 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         return file.toFile()
     }
 
-    protected fun file(path: String) = path
-        .run { takeIf { startsWith('/') } ?: dir.resolve(this).pathString }
-        .split('/')
-        .run { File(dropLast(1).joinToString("/")) to last() }
-        .apply { if (!first.exists()) first.mkdirs() }
-        .run { File(first, second) }
-        .apply { createNewFile() }
+    protected fun file(path: String) =
+        path.run { takeIf { startsWith('/') } ?: dir.resolve(this).pathString }.split('/').run { File(dropLast(1).joinToString("/")) to last() }
+            .apply { if (!first.exists()) first.mkdirs() }.run { File(first, second) }.apply { createNewFile() }
 
     protected fun writeJavaFile() = file("src/main/java/App.java").java(
         """
@@ -211,37 +262,29 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     protected fun assertContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertTrue(
-            actual.contains(expected),
-            """
+            actual.contains(expected), """
             expected:<$expected> but was:<$actual>
             """.trimIndent()
         )
     }
 
     @Suppress("SameParameterValue")
-    protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) =
-        assertEquals(expectedContent, fileText(zip, path))
+    protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) = assertEquals(expectedContent, fileText(zip, path))
 
     @Suppress("SameParameterValue")
-    protected fun extractFile(zipFile: ZipFile, path: String): File =
-        File.createTempFile("gradle-test", "").apply {
-            deleteOnExit()
-            FileUtils.copyInputStreamToFile(zipFile.getInputStream(zipFile.getEntry(path)), this)
-        }
+    protected fun extractFile(zipFile: ZipFile, path: String): File = File.createTempFile("gradle-test", "").apply {
+        deleteOnExit()
+        FileUtils.copyInputStreamToFile(zipFile.getInputStream(zipFile.getEntry(path)), this)
+    }
 
-    protected fun fileText(zipFile: ZipFile, path: String) = zipFile
-        .getInputStream(zipFile.getEntry(path))
-        .use {
-            it.bufferedReader()
-                .use(BufferedReader::readText)
-                .replace("\r", "")
-                .trim()
-        }
+    protected fun fileText(zipFile: ZipFile, path: String) = zipFile.getInputStream(zipFile.getEntry(path)).use {
+        it.bufferedReader().use(BufferedReader::readText).replace("\r", "").trim()
+    }
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
 
     protected fun collectPaths(directory: Path) = collectPaths(directory.toFile())
-    
+
     protected fun collectPaths(directory: File): Set<String> {
         assert(directory.exists())
         return directory.walkTopDown().filterNot { it.isDirectory }.map {

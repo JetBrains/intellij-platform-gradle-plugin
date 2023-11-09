@@ -169,3 +169,11 @@ internal inline fun <reified T : Task> Project.configureTask(vararg names: Strin
 
     tasks.withType<T>(configuration)
 }
+
+// TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
+internal fun Project.resolveResourceFromUrl(url: String) =
+    resources.text
+        .fromUri(url)
+        .runCatching { asFile("UTF-8") }
+        .onFailure { logger.error("Cannot resolve product releases", it) }
+        .getOrDefault("<products />")

@@ -58,13 +58,13 @@ internal fun sourcePluginXmlFiles(project: Project) = project
     .map { it.resolve("META-INF/plugin.xml") }
     .filter { it.exists() && it.length > 0 }
 
-internal fun parsePluginXml(pluginXml: Path, logCategory: String?) = runCatching {
+internal fun parsePluginXml(pluginXml: Path) = runCatching {
     pluginXml.inputStream().use {
         val document = JDOMUtil.loadDocument(it)
         PluginBeanExtractor.extractPluginBean(document)
     }
 }.getOrElse {
-    warn(logCategory, "Cannot read: $pluginXml. Skipping", it)
+    logger.warn("Cannot read: $pluginXml. Skipping", it)
     null
 }
 

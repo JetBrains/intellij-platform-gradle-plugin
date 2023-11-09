@@ -3,16 +3,20 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.asPath
+import kotlin.io.path.readText
 
 /**
  * Prints the output produced by the [ListProductsReleasesTask] task.
  *
  * @see [ListProductsReleasesTask]
  */
-@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Prints the output produced by the listProductsReleases task")
 abstract class PrintProductsReleasesTask : DefaultTask() {
 
@@ -29,5 +33,18 @@ abstract class PrintProductsReleasesTask : DefaultTask() {
     }
 
     @TaskAction
-    fun printProductsReleases() = println(inputFile.asFile.get().readText())
+    fun printProductsReleases() = println(inputFile.asPath.readText())
+
+    companion object {
+        fun register(project: Project) =
+            project.configureTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
+                val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES)
+
+                inputFile.convention(listProductsReleasesTaskProvider.flatMap {
+                    it.outputFile
+                })
+
+                dependsOn(listProductsReleasesTaskProvider)
+            }
+    }
 }

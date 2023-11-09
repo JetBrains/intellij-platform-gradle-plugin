@@ -12,7 +12,7 @@ import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
 import org.gradle.kotlin.dsl.create
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.repositoryVersion
@@ -128,5 +128,5 @@ internal fun DependenciesDownloader.getAndroidStudioReleases(context: String?) =
         ext = "xml",
     )
 }, {
-    ivyRepository(ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
+    ivyRepository(Locations.ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
 }).firstOrNull()?.toPath()

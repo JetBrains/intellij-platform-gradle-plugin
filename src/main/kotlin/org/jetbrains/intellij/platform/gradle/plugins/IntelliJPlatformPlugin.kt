@@ -33,18 +33,14 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.platform.gradle.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.ANDROID_STUDIO_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions.INTELLIJ_PLATFORM
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_PRODUCTS_RELEASES_URL
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
@@ -52,10 +48,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.LIST_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PRINT_PRODUCTS_RELEASES_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
@@ -80,13 +74,10 @@ import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
 import org.jetbrains.intellij.platform.gradle.utils.ivyRepository
 import org.jetbrains.intellij.platform.gradle.utils.mavenRepository
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
-import org.jetbrains.intellij.tasks.DownloadAndroidStudioProductReleasesXmlTask
-import org.jetbrains.intellij.tasks.DownloadIdeaProductReleasesXmlTask
 import java.io.File
 import java.net.URL
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.*
 
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
@@ -157,7 +148,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
         configureDownloadRobotServerPluginTask(project)
-        configureListProductsReleasesTask(project, extension)
         configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
@@ -303,7 +293,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
         if (!hasJavaPluginDependency && File(ideaDependency.classes, "plugins/java").exists()) {
             sourcePluginXmlFiles(project).forEach { path ->
-                parsePluginXml(path, context)?.dependencies?.forEach {
+                parsePluginXml(path)?.dependencies?.forEach {
                     if (it.dependencyId == "com.intellij.modules.java") {
                         throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add Java plugin to Gradle dependencies (https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html#java)")
                     }
@@ -575,8 +565,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         project.tasks.withType<BuildSearchableOptionsTask> {
             outputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
             showPaidPluginWarning.convention(project.isBuildFeatureEnabled(PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
-                it && sourcePluginXmlFiles(project).any {
-                    parsePluginXml(it, context)?.productDescriptor != null
+                it && sourcePluginXmlFiles(project).any { file ->
+                    parsePluginXml(file)?.productDescriptor != null
                 }
             })
 
@@ -593,7 +583,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         val taskContext = logCategory()
         val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(prepareSandBoxTaskName)
         val initializeIntelliJPlatformPluginTaskProvider = project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, taskContext)?.id }
+        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it)?.id }
 
 //        ideDir.convention(ideaDependencyProvider.map {
 //            project.file(it.classes.path)
@@ -861,7 +851,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         }
 
         val testTasks = project.tasks.withType<Test>()
-        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it, context)?.id }
+        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it)?.id }
         val buildNumberProvider = ideaDependencyProvider.map {
             it.buildNumber
         }
@@ -1079,77 +1069,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             dependsOn(Tasks.VERIFY_PLUGIN)
             dependsOn(SIGN_PLUGIN_TASK_NAME)
             onlyIf { !isOffline }
-        }
-    }
-
-    private fun configureListProductsReleasesTask(project: Project, extension: IntelliJPluginExtension) {
-        info(context, "Configuring list products task")
-
-        val resolveReleasesUrl = { url: String ->
-            // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
-            project.resources.text
-                .fromUri(url)
-                .runCatching { asFile("UTF-8") }
-                .onFailure { error(context, "Cannot resolve product releases", it) }
-                .getOrDefault("<products />")
-        }
-
-        val patchPluginXmlTaskProvider =
-            project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-        val downloadIdeaProductReleasesXmlTaskProvider =
-            project.tasks.register<DownloadIdeaProductReleasesXmlTask>(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)
-        val downloadAndroidStudioProductReleasesXmlTaskProvider =
-            project.tasks.register<DownloadAndroidStudioProductReleasesXmlTask>(DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME)
-        val listProductsReleasesTaskProvider =
-            project.tasks.register<ListProductsReleasesTask>(LIST_PRODUCTS_RELEASES_TASK_NAME)
-
-        project.tasks.withType<DownloadIdeaProductReleasesXmlTask> {
-            releasesUrl.convention(IDEA_PRODUCTS_RELEASES_URL)
-
-            from(releasesUrl.map(resolveReleasesUrl)) {
-                rename { "idea_product_releases.xml" }
-            }
-            into(temporaryDir)
-        }
-
-        project.tasks.withType<DownloadAndroidStudioProductReleasesXmlTask> {
-            releasesUrl.convention(ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
-
-            from(releasesUrl.map(resolveReleasesUrl)) {
-                rename { "android_studio_product_releases.xml" }
-            }
-            into(temporaryDir)
-        }
-
-        project.tasks.withType<ListProductsReleasesTask> {
-            ideaProductReleasesUpdateFiles
-                .from(downloadIdeaProductReleasesXmlTaskProvider.map {
-                    it.outputs.files.asFileTree
-                })
-            androidStudioProductReleasesUpdateFiles
-                .from(downloadAndroidStudioProductReleasesXmlTaskProvider.map {
-                    it.outputs.files.asFileTree
-                })
-            outputFile.convention(
-                project.layout.buildDirectory.file("$LIST_PRODUCTS_RELEASES_TASK_NAME.txt")
-            )
-            types.convention(extension.type.map { listOf(it) })
-//            sinceBuild.convention(patchPluginXmlTaskProvider.flatMap { it.sinceBuild })
-//            untilBuild.convention(patchPluginXmlTaskProvider.flatMap { it.untilBuild })
-            releaseChannels.convention(EnumSet.allOf(ListProductsReleasesTask.Channel::class.java))
-
-            dependsOn(DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME)
-            dependsOn(DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME)
-            dependsOn(Tasks.PATCH_PLUGIN_XML)
-        }
-
-        project.tasks.register<PrintProductsReleasesTask>(PRINT_PRODUCTS_RELEASES_TASK_NAME)
-        project.tasks.withType<PrintProductsReleasesTask> {
-            inputFile.convention(listProductsReleasesTaskProvider.flatMap { listProductsReleasesTaskProvider ->
-                listProductsReleasesTaskProvider.outputFile
-            })
-
-            dependsOn(LIST_PRODUCTS_RELEASES_TASK_NAME)
         }
     }
 
