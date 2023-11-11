@@ -44,6 +44,6 @@ abstract class SetupDependenciesTask : DefaultTask() {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<SetupDependenciesTask>(Tasks.SETUP_DEPENDENCIES)
+            project.registerTask<SetupDependenciesTask>(Tasks.SETUP_DEPENDENCIES)
     }
 }

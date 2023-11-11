@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
 import kotlin.io.path.exists
 import kotlin.test.Test
@@ -22,8 +22,8 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             """.trimIndent()
         )
 
-        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME).let {
-            assertContains("$JAR_SEARCHABLE_OPTIONS_TASK_NAME SKIPPED", it.output)
+        build(Tasks.JAR_SEARCHABLE_OPTIONS).let {
+            assertContains("${Tasks.JAR_SEARCHABLE_OPTIONS} SKIPPED", it.output)
         }
     }
 
@@ -42,7 +42,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         )
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        build(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
+        build(Tasks.JAR_SEARCHABLE_OPTIONS)
 
         buildDirectory.resolve("libsSearchableOptions").let {
             assertTrue(it.exists())

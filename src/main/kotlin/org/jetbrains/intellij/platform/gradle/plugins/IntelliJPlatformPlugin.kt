@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.plugins
 
 import com.jetbrains.plugin.structure.base.utils.extension
 import com.jetbrains.plugin.structure.base.utils.hasExtension
-import com.jetbrains.plugin.structure.base.utils.isDirectory
 import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
@@ -30,10 +29,7 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
-import org.jetbrains.intellij.platform.gradle.BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
@@ -46,7 +42,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAR_SEARCHABLE_OPTIONS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
@@ -56,7 +51,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SU
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -148,11 +142,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
         configureDownloadRobotServerPluginTask(project)
-        configureRunIdeTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
-        configureBuildSearchableOptionsTask(project)
-        configureJarSearchableOptionsTask(project)
         configureDownloadZipSignerTask(project)
         configureSignPluginTask(project)
         configurePublishPluginTask(project)
@@ -511,16 +502,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         }
     }
 
-    private fun configureRunIdeTask(project: Project) {
-        info(context, "Configuring run IDE task")
-
-        project.tasks.register<RunIdeTask>(Tasks.RUN_IDE)
-        project.tasks.withType<RunIdeTask> {
-            dependsOn(Tasks.PREPARE_SANDBOX)
-            finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
-        }
-    }
-
     private fun configureRunIdePerformanceTestTask(project: Project, extension: IntelliJPluginExtension) {
         info(context, "Configuring run IDE performance test task")
 
@@ -555,22 +536,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         project.tasks.withType<RunIdeForUiTestTask> {
             dependsOn(Tasks.PREPARE_UI_TESTING_SANDBOX)
             finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
-        }
-    }
-
-    private fun configureBuildSearchableOptionsTask(project: Project) {
-        info(context, "Configuring build searchable options task")
-
-        project.tasks.register<BuildSearchableOptionsTask>(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-        project.tasks.withType<BuildSearchableOptionsTask> {
-            outputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
-            showPaidPluginWarning.convention(project.isBuildFeatureEnabled(PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
-                it && sourcePluginXmlFiles(project).any { file ->
-                    parsePluginXml(file)?.productDescriptor != null
-                }
-            })
-
-            dependsOn(Tasks.PREPARE_SANDBOX)
         }
     }
 
@@ -615,30 +580,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 //        coroutinesJavaAgentPath.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap {
 //            it.coroutinesJavaAgentPath
 //        })
-    }
-
-    private fun configureJarSearchableOptionsTask(project: Project) {
-        info(context, "Configuring jar searchable options task")
-
-        val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-
-        project.tasks.register<JarSearchableOptionsTask>(JAR_SEARCHABLE_OPTIONS_TASK_NAME)
-        project.tasks.withType<JarSearchableOptionsTask> {
-            inputDir.convention(project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIR_NAME))
-            pluginName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-                prepareSandboxTask.pluginName
-            })
-            sandboxDir.convention(prepareSandboxTaskProvider.map { prepareSandboxTask ->
-                prepareSandboxTask.destinationDir.canonicalPath
-            })
-            archiveBaseName.convention("lib/$SEARCHABLE_OPTIONS_DIR_NAME")
-            destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
-            noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(NO_SEARCHABLE_OPTIONS_WARNING))
-
-            dependsOn(BUILD_SEARCHABLE_OPTIONS_TASK_NAME)
-            dependsOn(Tasks.PREPARE_SANDBOX)
-            onlyIf { inputDir.asPath.isDirectory }
-        }
     }
 
     private fun configureInstrumentation(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {

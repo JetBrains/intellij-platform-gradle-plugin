@@ -30,7 +30,7 @@ abstract class DownloadIdeaProductReleasesXmlTask : Sync() {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<DownloadIdeaProductReleasesXmlTask>(Tasks.DOWNLOAD_IDEA_PRODUCT_RELEASES_XML) {
+            project.registerTask<DownloadIdeaProductReleasesXmlTask>(Tasks.DOWNLOAD_IDEA_PRODUCT_RELEASES_XML) {
                 releasesUrl.convention(Locations.IDEA_PRODUCTS_RELEASES_URL)
 
                 from(releasesUrl.map {

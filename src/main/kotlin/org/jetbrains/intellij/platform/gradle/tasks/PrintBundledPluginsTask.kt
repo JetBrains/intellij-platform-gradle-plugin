@@ -37,7 +37,7 @@ abstract class PrintBundledPluginsTask : DefaultTask() {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS) {
+            project.registerTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS) {
                 val listBundledPluginsTaskProvider = project.tasks.named<ListBundledPluginsTask>(Tasks.LIST_BUNDLED_PLUGINS)
 
                 inputFile.convention(listBundledPluginsTaskProvider.flatMap {

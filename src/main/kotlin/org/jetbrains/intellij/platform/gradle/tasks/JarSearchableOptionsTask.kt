@@ -2,17 +2,19 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.base.utils.isDirectory
 import com.jetbrains.plugin.structure.base.utils.listFiles
 import com.jetbrains.plugin.structure.base.utils.simpleName
+import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
-import org.jetbrains.intellij.platform.gradle.asPath
-import org.jetbrains.intellij.platform.gradle.logCategory
-import org.jetbrains.intellij.platform.gradle.warn
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import java.nio.file.Path
 
 /**
@@ -108,5 +110,28 @@ abstract class JarSearchableOptionsTask : Jar() {
                 )
             }
         }
+    }
+
+    companion object {
+        fun register(project: Project) =
+            project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
+                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+
+                inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
+                pluginName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+                    prepareSandboxTask.pluginName
+                })
+                sandboxDir.convention(prepareSandboxTaskProvider.map { prepareSandboxTask ->
+                    prepareSandboxTask.destinationDir.canonicalPath
+                })
+                archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+                destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
+                noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))
+
+                onlyIf { inputDir.asPath.isDirectory }
+
+                dependsOn(Tasks.BUILD_SEARCHABLE_OPTIONS)
+                dependsOn(prepareSandboxTaskProvider)
+            }
     }
 }

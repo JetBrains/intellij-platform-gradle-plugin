@@ -2,16 +2,17 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
-import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.logCategory
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
-import org.jetbrains.intellij.platform.gradle.warn
+import kotlin.io.path.pathString
 
 /**
  * Builds an index of UI components (searchable options) for the plugin.
@@ -25,7 +26,12 @@ import org.jetbrains.intellij.platform.gradle.warn
  */
 @Deprecated(message = "CHECK")
 @CacheableTask
-abstract class BuildSearchableOptionsTask : RunIdeBase() {
+abstract class BuildSearchableOptionsTask : RunIdeTask() {
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Builds an index of UI components (searchable options) for the plugin."
+    }
 
     /**
      * The directory where the searchable options will be generated.
@@ -40,14 +46,7 @@ abstract class BuildSearchableOptionsTask : RunIdeBase() {
     @get:Internal
     abstract val showPaidPluginWarning: Property<Boolean>
 
-    private val traverseUIArgs = listOf("traverseUI")
     private val context = logCategory()
-
-    init {
-        group = PLUGIN_GROUP_NAME
-        description = "Builds an index of UI components (searchable options) for the plugin."
-        args = traverseUIArgs
-    }
 
     override fun exec() {
         if (showPaidPluginWarning.get()) {
@@ -60,13 +59,20 @@ abstract class BuildSearchableOptionsTask : RunIdeBase() {
             )
         }
 
-//        args = args + listOf(outputDir.asPath.pathString, "true")
+        args = args + listOf("traverseUI", outputDir.asPath.pathString, "true")
+
         super.exec()
     }
 
-    override fun setArgs(applicationArgs: List<String>?) =
-        super.setArgs(traverseUIArgs.union(applicationArgs?.toList().orEmpty()))
-
-    override fun setArgs(applicationArgs: MutableIterable<*>?) =
-        super.setArgs(traverseUIArgs.union(applicationArgs?.toList().orEmpty()))
+    companion object {
+        fun register(project: Project) =
+            project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
+                outputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
+                showPaidPluginWarning.convention(project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
+                    it && sourcePluginXmlFiles(project).any { file ->
+                        parsePluginXml(file)?.productDescriptor != null
+                    }
+                })
+            }
+    }
 }

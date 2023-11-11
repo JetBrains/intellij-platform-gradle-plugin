@@ -22,13 +22,18 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier in specified version`() {
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
-            
-            runPluginVerifier {
-                ideVersions = ["2020.2.3"]
-                verifierVersion = "1.255"
+            repositories {
+                intellijPlatform.pluginVerifier()
+            }
+            dependencies {
+                intellijPlatform.pluginVerifier()
+            }
+            intellijPlatform {
+                pluginVerifier {
+                    ideVersions = ["2020.2.3"]
+                }
             }
             """.trimIndent()
         )
@@ -41,7 +46,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier fails on old version lower than 1_255`() {
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -65,7 +70,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -85,7 +90,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `test plugin against two IDEs`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -105,7 +110,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `test plugin against Android Studio`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -124,7 +129,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports directory`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -145,7 +150,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports output formats`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             import org.jetbrains.intellij.tasks.RunPluginVerifierTask.VerificationReportsFormats
             
@@ -177,7 +182,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports with empty set of output formats`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -207,7 +212,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports with default settings`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -242,7 +247,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             .writeLines(lines)
         val ignoredProblemsFilePath = adjustWindowsPath(ignoredProblems.absolutePathString())
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -264,7 +269,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginXmlFile()
 
         val resource = resolveResourcePath("products-releases/idea-releases.xml")
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             import org.jetbrains.intellij.platform.gradle.tasks.ListProductsReleasesTask.Channel
             
@@ -290,7 +295,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writeJavaFile()
         writePluginXmlFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -310,7 +315,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on verifyPlugin task`() {
         writeJavaFile()
         pluginXml.delete()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             """.trimIndent()
@@ -326,7 +331,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
             
@@ -349,7 +354,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -369,7 +374,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on incorrect ideVersion`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
                                     version = "1.0.0"
             
@@ -388,7 +393,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
             
@@ -411,15 +416,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
-            
-            version = "1.0.0"
-            
-            runPluginVerifier {
-                ideVersions = ["2020.2.3"]
-                failureLevel = FailureLevel.NONE
+            tasks {
+                runPluginVerifier {
+                    ideVersions = listOf("2020.2.3")
+                    failureLevel = RunPluginVerifierTask.FailureLevel.NONE
+                }
             }
             """.trimIndent()
         )
@@ -434,7 +437,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `run plugin verifier in offline mode`() {
         writePluginXmlFile()
         warmupGradle()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -461,7 +464,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on CLI arguments passed as free args`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -491,7 +494,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on CLI arguments the internal API usage mode as a free arg`() {
         writeJavaFileWithInternalApiUsage()
         writePluginXmlFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             
@@ -508,7 +511,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun warmupGradle() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             version = "1.0.0"
             

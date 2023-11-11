@@ -2,12 +2,17 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
+import org.jetbrains.intellij.platform.gradle.tasks.ListProductsReleasesTask
+import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
+import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
 
 @IntelliJPlatform
 interface IntelliJPlatformExtension : ExtensionAware {
@@ -191,14 +196,93 @@ interface IntelliJPlatformExtension : ExtensionAware {
     interface PluginVerifier {
 
         /**
-         * Represents the version of the IntelliJ Plugin Verifier.
-         */
-        val version: Property<String>
-
-        /**
          * A path to the local IntelliJ Plugin Verifier CLI tool to be used.
          * Takes precedence over the [version].
          */
-        val path: RegularFileProperty
+        val cliPath: RegularFileProperty
+
+        /**
+         * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
+         * Check the available build versions on [IntelliJ Platform Builds list](https://jb.gg/intellij-platform-builds-list).
+         *
+         * Default value: output of the [ListProductsReleasesTask] task
+         */
+        val ideVersions: ListProperty<String>
+
+        /**
+         * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
+         */
+        val idePaths: ConfigurableFileCollection
+
+        /**
+         * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
+         * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
+         */
+        val homeDirectory: DirectoryProperty
+
+        /**
+         * The path to the directory where IDEs used for the verification will be downloaded.
+         *
+         * Default value: `System.getProperty("plugin.verifier.home.dir")/ides`, `System.getenv("XDG_CACHE_HOME")/pluginVerifier/ides`,
+         * `System.getProperty("user.home")/.cache/pluginVerifier/ides` or system temporary directory.
+         */
+        val downloadDirectory: DirectoryProperty
+
+        /**
+         * Defines the verification level at which the task should fail if any reported issue matches.
+         * Can be set as [FailureLevel] enum or [EnumSet<FailureLevel>].
+         *
+         * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
+         */
+        val failureLevel: ListProperty<FailureLevel>
+
+        /**
+         * The path to the directory where verification reports will be saved.
+         *
+         * Default value: `${project.buildDir}/reports/pluginVerifier`
+         */
+        val verificationReportsDirectory: DirectoryProperty
+
+        /**
+         * The output formats of the verification reports.
+         *
+         * Accepted values:
+         * - `plain` for console output
+         * - `html`
+         * ` `markdown`
+         *
+         * Default value: [VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML]
+         */
+        val verificationReportsFormats: ListProperty<VerificationReportsFormats>
+
+        /**
+         * The list of classes prefixes from the external libraries.
+         * The Plugin Verifier will not report `No such class` for classes of these packages.
+         */
+        val externalPrefixes: ListProperty<String>
+
+        /**
+         * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
+         *
+         * Default value: `false`
+         */
+        val teamCityOutputFormat: Property<Boolean>
+
+        /**
+         * Specifies which subsystems of IDE should be checked.
+         *
+         * Default value: `all`
+         *
+         * Acceptable values:**
+         * - `all`
+         * - `android-only`
+         * - `without-android`
+         */
+        val subsystemsToCheck: Property<String>
+
+        /**
+         * A file that contains a list of problems that will be ignored in a report.
+         */
+        val ignoredProblemsFile: RegularFileProperty
     }
 }

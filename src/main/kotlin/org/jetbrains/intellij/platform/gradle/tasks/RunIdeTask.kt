@@ -2,15 +2,17 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
-import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.getBootClasspath
-import org.jetbrains.intellij.platform.gradle.or
+import org.jetbrains.intellij.platform.gradle.propertyProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.platform.gradle.propertyProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.base.*
 import java.io.File
 import kotlin.io.path.absolutePathString
@@ -45,22 +47,15 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
         super.exec()
     }
 
-    override fun getExecutable(): String = jetbrainsRuntimeExecutable.asPath.absolutePathString()
+    override fun getExecutable() = jetbrainsRuntimeExecutable.asPath.absolutePathString()
 
     /**
      * Prepares the classpath for the IDE based on the IDEA version.
      */
     private fun configureClasspath() {
-        executable
-            .takeUnless(String?::isNullOrEmpty)
-            ?.let {
-                resolveToolsJar(it)
-                    .takeIf(File::exists)
-                    .or(Jvm.current().toolsJar)
-            }
-            ?.let {
-                classpath += objectFactory.fileCollection().from(it)
-            }
+        classpath += objectFactory.fileCollection().from(
+            resolveToolsJar(executable)
+        )
 
         classpath += objectFactory.fileCollection().from(
             productInfo.getBootClasspath(intelliJPlatform.single().toPath())
@@ -77,5 +72,57 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
             else -> "../lib/tools.jar"
         }
         return File(binDir, path)
+    }
+
+    companion object {
+        // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
+        //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
+        fun register(project: Project) =
+            project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
+//            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+
+                mainClass.set("com.intellij.idea.Main")
+                enableAssertions = true
+
+                jvmArgumentProviders.addAll(
+                    listOf(
+                        IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
+                        LaunchSystemArgumentProvider(intelliJPlatform, sandboxDirectory, emptyList()),
+                    )
+                )
+
+//            classpath += intelliJPlatform.map {
+//
+//            }
+//                .map {
+//                    project.files(productInfo.getBootClasspath(intellijPlatformDirectory.asPath))
+//                }
+
+
+                systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
+
+                systemPropertyDefault("idea.auto.reload.plugins", true)
+                systemPropertyDefault("idea.classpath.index.enabled", false)
+                systemPropertyDefault("idea.is.internal", true)
+                systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
+                systemPropertyDefault("idea.vendor.name", "JetBrains")
+                systemPropertyDefault("ide.no.platform.update", false)
+                systemPropertyDefault("jdk.module.illegalAccess.silent", true)
+
+                val os = OperatingSystem.current()
+                when {
+                    os.isMacOsX -> {
+                        systemPropertyDefault("idea.smooth.progress", false)
+                        systemPropertyDefault("apple.laf.useScreenMenuBar", true)
+                        systemPropertyDefault("apple.awt.fileDialogForDirectories", true)
+                    }
+
+                    os.isUnix -> {
+                        systemPropertyDefault("sun.awt.disablegrab", true)
+                    }
+                }
+
+//            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+            }
     }
 }

@@ -4,11 +4,17 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
+import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withGroovyBuilder
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
@@ -36,7 +42,7 @@ import kotlin.io.path.*
  *
  * Read more about controlling this behavior on [Kotlin Standard Library](https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library).
  *
- * An old default [RunPluginVerifierTask.downloadDir] path contains downloaded IDEs but another default is in use. Links to the [FAQ section](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#the-plugin-verifier-download-directory-is-set-to-but-downloaded-ides-were-also-found-in)
+ * An old default [RunPluginVerifierTask.downloadDirectory] path contains downloaded IDEs but another default is in use. Links to the [FAQ section](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#the-plugin-verifier-download-directory-is-set-to-but-downloaded-ides-were-also-found-in)
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
@@ -112,10 +118,10 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
 
     /**
      * The path to the directory where IDEs used for the verification will be downloaded.
-     * Value propagated with [RunPluginVerifierTask.downloadDir].
+     * Value propagated with [RunPluginVerifierTask.downloadDirectory].
      */
     @get:Internal
-    abstract val pluginVerifierDownloadDir: Property<String>
+    abstract val pluginVerifierDownloadDirectory: DirectoryProperty
 
     /**
      * This variable represents whether the Kotlin Coroutines library is added explicitly to the project dependencies.
@@ -144,8 +150,8 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinVersion = kotlinVersion.orNull?.let(Version::parse)
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
         val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
-        val pluginVerifierDownloadPath = pluginVerifierDownloadDir.get().let(Path::of).toAbsolutePath()
-        val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
+        val pluginVerifierDownloadPath = pluginVerifierDownloadDirectory.asPath
+        val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { Path.of(it) }.get().resolve("pluginVerifier/ides")
 
         sequence {
             pluginXmlFiles.get().mapNotNull { parsePluginXml(it.toPath()) }.forEach { plugin ->
@@ -214,4 +220,72 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
     private operator fun JavaVersion?.compareTo(other: JavaVersion?) = other?.let { this?.compareTo(it) } ?: 0
 
     private operator fun Version?.compareTo(other: Version?) = other?.let { this?.compareTo(it) } ?: 0
+
+    companion object {
+        fun register(project: Project) =
+            project.registerTask<VerifyPluginConfigurationTask>(IntelliJPluginConstants.Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+                info(context, "Configuring plugin configuration verification task")
+
+                val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.Tasks.PATCH_PLUGIN_XML)
+                val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(IntelliJPluginConstants.Tasks.RUN_PLUGIN_VERIFIER)
+                val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
+//            pluginXmlFiles.convention(patchPluginXmlTaskProvider.flatMap { patchPluginXmlTask ->
+//                patchPluginXmlTask.outputFiles
+//            })
+                sourceCompatibility.convention(compileJavaTaskProvider.map {
+                    it.sourceCompatibility
+                })
+                targetCompatibility.convention(compileJavaTaskProvider.map {
+                    it.targetCompatibility
+                })
+                pluginVerifierDownloadDirectory.convention(runPluginVerifierTaskProvider.flatMap {
+                    it.downloadDirectory
+                })
+                kotlinxCoroutinesLibraryPresent.convention(project.provider {
+                    listOf(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->
+                        project.configurations.getByName(configurationName).dependencies.any {
+                            it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
+                        }
+                    }
+                })
+
+                kotlinPluginAvailable.convention(project.provider {
+                    project.pluginManager.hasPlugin(IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID)
+                })
+                project.pluginManager.withPlugin(IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID) {
+                    val kotlinOptionsProvider = project.tasks.named(IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME).apply {
+                        configure {
+                            dependsOn(this@registerTask)
+                        }
+                    }.map {
+                        it.withGroovyBuilder { getProperty("kotlinOptions") }.withGroovyBuilder { getProperty("options") }
+                    }
+
+                    kotlinJvmTarget.convention(kotlinOptionsProvider.flatMap {
+                        it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
+                            .map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
+                            .map { value -> value as String }
+                    })
+                    kotlinApiVersion.convention(kotlinOptionsProvider.flatMap {
+                        it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }.map { value -> value as String }
+                    })
+                    kotlinLanguageVersion.convention(kotlinOptionsProvider.flatMap {
+                        it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }.map { value -> value as String }
+                    })
+                    kotlinVersion.convention(project.provider {
+                        project.extensions.getByName("kotlin").withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
+                    })
+                    kotlinStdlibDefaultDependency.convention(
+                        project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME).map { it.toBoolean() })
+                    kotlinIncrementalUseClasspathSnapshot.convention(
+                        project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT).map { it.toBoolean() })
+                }
+
+                project.tasks.withType<JavaCompile> {
+                    dependsOn(this@registerTask)
+                }
+
+                dependsOn(patchPluginXmlTaskProvider)
+            }
+    }
 }

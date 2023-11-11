@@ -46,7 +46,7 @@ abstract class ListBundledPluginsTask : DefaultTask(), PlatformVersionAware {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<ListBundledPluginsTask>(Tasks.LIST_BUNDLED_PLUGINS) {
+            project.registerTask<ListBundledPluginsTask>(Tasks.LIST_BUNDLED_PLUGINS) {
                 outputFile.convention(
                     project.layout.buildDirectory.file("${Tasks.LIST_BUNDLED_PLUGINS}.txt")
                 )

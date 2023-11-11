@@ -6,18 +6,27 @@ import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.*
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.jvm.Jvm
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
 import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradle.dependency.PluginProjectDependency
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
@@ -29,7 +38,7 @@ import kotlin.io.path.notExists
  */
 @Deprecated(message = "CHECK")
 @DisableCachingByDefault(because = "Setting up configuration on local machine")
-abstract class PrepareSandboxTask : Sync() {
+abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
     /**
      * The name of the plugin.
@@ -38,15 +47,6 @@ abstract class PrepareSandboxTask : Sync() {
      */
     @get:Input
     abstract val pluginName: Property<String>
-
-    /**
-     * The directory with the plugin configuration.
-     *
-     * Default value: [IntelliJPluginExtension.sandboxDir]
-     */
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val sandboxDirectory: DirectoryProperty
 
     /**
      * The input plugin JAR file used to prepare the sandbox.
@@ -92,7 +92,6 @@ abstract class PrepareSandboxTask : Sync() {
     @get:Internal
     abstract val testSuffix: Property<String>
 
-    private val context = logCategory()
     private val usedNames = mutableMapOf<String, Path>()
 
     init {
@@ -104,6 +103,9 @@ abstract class PrepareSandboxTask : Sync() {
     @TaskAction
     override fun copy() {
         disableIdeUpdate()
+
+        println("PrepareSandboxTask [$name] destinationDir = ${destinationDir}")
+
         super.copy()
     }
 
@@ -187,5 +189,83 @@ abstract class PrepareSandboxTask : Sync() {
         }
 
         return name
+    }
+
+    companion object {
+        fun register(project: Project) =
+            project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TESTING_SANDBOX, Tasks.PREPARE_UI_TESTING_SANDBOX) {
+//            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+                val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+                val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+                val extension = project.the<IntelliJPlatformExtension>()
+
+//            val ideaDependencyJarFiles = ideaDependencyProvider.map {
+//                project.files(it.jarFiles)
+//            }
+                val pluginJarProvider = extension.instrumentCode.flatMap { instrumentCode ->
+                    when (instrumentCode) {
+                        true -> project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
+                        false -> jarTaskProvider
+                    }
+                }.flatMap { it.archiveFile }
+
+                testSuffix.convention(
+                    when (name) {
+                        Tasks.PREPARE_TESTING_SANDBOX -> "-test"
+                        Tasks.PREPARE_UI_TESTING_SANDBOX -> "-uiTest"
+                        Tasks.PREPARE_SANDBOX -> ""
+                        else -> ""
+                    }
+                )
+
+//            project.tasks.register<PrepareSandboxTask>() {
+//                PREPARE_UI_TESTING_SANDBOX
+//                from(downloadPluginTaskProvider.flatMap { downloadPluginTask ->
+//                    downloadPluginTask.outputDir
+//                })
+//
+//                dependsOn(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+//            }
+
+                pluginName.convention(extension.pluginConfiguration.name)
+                pluginJar.convention(pluginJarProvider)
+                defaultDestinationDir.convention(sandboxDirectory.dir(Sandbox.PLUGINS))
+//                librariesToIgnore.convention(ideaDependencyJarFiles)
+//                pluginDependencies.convention(project.provider {
+//                    extension.getPluginDependenciesList(project)
+//                })
+                runtimeClasspathFiles.convention(runtimeConfiguration)
+
+                intoChild(pluginName.map { "$it/lib" })
+                    .from(runtimeClasspathFiles.map { files ->
+                        val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
+                        val pluginDirectories = pluginDependencies.get().map { it.artifact }
+
+                        listOf(pluginJar.asFile.get()) + files.filter { file ->
+                            !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
+                                file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
+                            })
+                        }
+                    })
+                    .eachFile {
+                        name = ensureName(file.toPath())
+                    }
+
+                dependsOn(runtimeConfiguration)
+                dependsOn(jarTaskProvider)
+//            dependsOn(instrumentedJarTaskProvider)
+
+//            project.afterEvaluate `{
+//                extension.plugins.get().filterIsInstance<Project>().forEach { dependency ->
+//                    if (dependency.state.executed) {
+//                        configureProjectPluginTasksDependency(dependency, this@withType)
+//                    } else {
+//                        dependency.afterEvaluate {
+//                            configureProjectPluginTasksDependency(dependency, this@withType)
+//                        }
+//                    }
+//                }
+//            }`
+            }
     }
 }

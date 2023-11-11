@@ -8,13 +8,18 @@ import com.jetbrains.plugin.structure.base.plugin.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.error
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.logCategory
+import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
 import org.jetbrains.intellij.platform.gradle.warn
 
 /**
@@ -24,7 +29,7 @@ import org.jetbrains.intellij.platform.gradle.warn
  */
 @Deprecated(message = "CHECK")
 @CacheableTask
-abstract class VerifyPluginTask : DefaultTask() {
+abstract class VerifyPluginTask : DefaultTask(), SandboxAware {
 
     /**
      * Specifies whether the build should fail when the verifications performed by this task fail.
@@ -57,7 +62,7 @@ abstract class VerifyPluginTask : DefaultTask() {
      */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val pluginDir: DirectoryProperty
+    abstract val pluginDirectory: DirectoryProperty
 
     private val context = logCategory()
 
@@ -68,7 +73,8 @@ abstract class VerifyPluginTask : DefaultTask() {
 
     @TaskAction
     fun verifyPlugin() {
-        val creationResult = pluginDir.get().let { IdePluginManager.createManager().createPlugin(it.asPath) }
+        val creationResult = IdePluginManager.createManager().createPlugin(pluginDirectory.asPath)
+
         when (creationResult) {
             is PluginCreationSuccess -> {
                 creationResult.warnings.forEach {
@@ -95,5 +101,27 @@ abstract class VerifyPluginTask : DefaultTask() {
         if (failBuild && !ignoreFailures.get()) {
             throw GradleException("Plugin verification failed.")
         }
+    }
+
+    companion object {
+        fun register(project: Project) =
+            project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
+                val extension = project.the<IntelliJPlatformExtension>()
+
+                ignoreFailures.convention(false)
+                ignoreUnacceptableWarnings.convention(false)
+                ignoreWarnings.convention(true)
+
+//                pluginDirectory.convention(
+//                    project.layout.dir(
+//                        prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
+//                            prepareSandboxTask.pluginName.map { pluginName ->
+//                                prepareSandboxTask.destinationDir.resolve(pluginName)
+//                            }
+//                        }
+//                    )
+//                )
+                pluginDirectory.convention(sandboxDirectory.dir(extension.pluginConfiguration.name))
+            }
     }
 }

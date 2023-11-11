@@ -231,7 +231,7 @@ abstract class ListProductsReleasesTask : DefaultTask(), PlatformVersionAware {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES) {
+            project.registerTask<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES) {
                 val downloadIdeaProductReleasesXmlTaskProvider =
                     project.tasks.named<DownloadIdeaProductReleasesXmlTask>(Tasks.DOWNLOAD_IDEA_PRODUCT_RELEASES_XML)
                 val downloadAndroidStudioProductReleasesXmlTaskProvider =

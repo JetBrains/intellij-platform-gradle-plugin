@@ -106,7 +106,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+            project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
                 offline.convention(project.gradle.startParameter.isOffline)
                 selfUpdateCheck.convention(project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK))
                 selfUpdateLock.convention(

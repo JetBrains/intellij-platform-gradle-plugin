@@ -203,7 +203,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
         when {
             attributeName == null -> {
                 val existingValue = element.text
-                if (existingValue.isNotEmpty()) {
+                if (existingValue.isNotEmpty() && existingValue != value) {
                     warn(context, "Patching plugin.xml: value of '$tagName[$existingValue]' tag will be set to '$value'")
                 }
                 element.text = value
@@ -221,7 +221,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML) {
+            project.registerTask<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML) {
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 inputFile.convention(project.layout.file(project.provider {

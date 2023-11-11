@@ -10,7 +10,8 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -18,21 +19,20 @@ import org.jetbrains.intellij.platform.gradle.executableResolver.IntelliJPluginV
 import org.jetbrains.intellij.platform.gradle.executableResolver.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.info
-import org.jetbrains.intellij.platform.gradle.isSpecified
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.base.*
-import org.jetbrains.intellij.platform.gradle.throwIfNull
 import java.util.*
 import kotlin.io.path.createDirectories
 
-internal inline fun <reified T : Task> Project.configureTask(vararg names: String, noinline configuration: T.() -> Unit = {}) {
+internal inline fun <reified T : Task> Project.registerTask(vararg names: String, noinline configuration: T.() -> Unit = {}) {
     names.forEach { name ->
         info(null, "Configuring task: $name")
         tasks.maybeCreate<T>(name)
     }
 
     tasks.withType<T> {
+        val extension = project.the<IntelliJPlatformExtension>()
+
         if (this is PlatformVersionAware) {
             intelliJPlatform = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
             intelliJPlatformProductInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
@@ -49,6 +49,22 @@ internal inline fun <reified T : Task> Project.configureTask(vararg names: Strin
         }
 
         if (this is CustomPlatformVersionAware) {
+            val defaultTypeProvider = provider {
+                val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                    .singleOrNull()
+                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
+                    .toPath()
+                    .productInfo()
+                IntelliJPlatformType.fromCode(productInfo.productCode)
+            }
+            val defaultVersionProvider = provider {
+                val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                    .singleOrNull()
+                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
+                    .toPath()
+                    .productInfo()
+                IdeVersion.createIdeVersion(productInfo.version).toString()
+            }
             val suffix = UUID.randomUUID().toString().substring(0, 8)
             val intellijPlatformDependencyConfiguration =
                 configurations.create("${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix") {
@@ -56,9 +72,9 @@ internal inline fun <reified T : Task> Project.configureTask(vararg names: Strin
                     isCanBeConsumed = false
                     isCanBeResolved = true
 
-                    this@configureTask.dependencies
+                    this@registerTask.dependencies
                         .the<IntelliJPlatformDependenciesExtension>()
-                        .create(type, version, configurationName = name)
+                        .create(type.orElse(defaultTypeProvider), version.orElse(defaultVersionProvider), configurationName = name)
                 }
             val intellijPlatformConfiguration = configurations.create("${Configurations.INTELLIJ_PLATFORM}_$suffix") {
                 isVisible = false
@@ -84,51 +100,41 @@ internal inline fun <reified T : Task> Project.configureTask(vararg names: Strin
                     extendsFrom(intellijPlatformConfiguration)
                 }
 
-            type.convention(provider {
-                val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-                    .singleOrNull()
-                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
-                    .toPath()
-                    .productInfo()
-                IntelliJPlatformType.fromCode(productInfo.productCode)
-            })
-            version.convention(provider {
-                val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-                    .singleOrNull()
-                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
-                    .toPath()
-                    .productInfo()
-                IdeVersion.createIdeVersion(productInfo.version).toString()
-            })
             intelliJPlatform.setFrom(provider {
                 when {
                     type.isSpecified() || version.isSpecified() -> intellijPlatformConfiguration
-                    else -> emptyList()
+                    else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM)
                 }
             })
             intelliJPlatformProductInfo.setFrom(provider {
                 when {
                     type.isSpecified() || version.isSpecified() -> intellijPlatformProductInfoConfiguration
-                    else -> emptyList()
+                    else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
                 }
             })
+
+            val sandboxDirectoryProvider = extension.sandboxContainer.map {
+                it.dir("$platformType-$platformVersion").also { directory ->
+                    directory.asPath.createDirectories()
+                }
+            }
+
+            tasks.create<PrepareSandboxTask>("${Tasks.PREPARE_SANDBOX}_$suffix") {
+                this@withType.dependsOn(this)
+                sandboxDirectory.convention(sandboxDirectoryProvider)
+            }
         }
 
         if (this is SandboxAware) {
-            val prepareSandboxTaskProvider = tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-            val extension = the<IntelliJPlatformExtension>()
-
-            sandboxDirectory.convention(extension.sandboxContainer.map {
+            val sandboxDirectoryProvider = extension.sandboxContainer.map {
                 it.dir("$platformType-$platformVersion").also { directory ->
-                    directory.asFile.toPath().createDirectories()
+                    directory.asPath.createDirectories()
                 }
-            })
-
-            prepareSandboxTaskProvider.configure {
-                sandboxDirectory.convention(this@withType.sandboxDirectory)
             }
 
-            dependsOn(prepareSandboxTaskProvider)
+            if (this !is PrepareSandboxTask) {
+                sandboxDirectory.convention(sandboxDirectoryProvider)
+            }
         }
 
         if (this is JetBrainsRuntimeAware) {
@@ -136,7 +142,7 @@ internal inline fun <reified T : Task> Project.configureTask(vararg names: Strin
                 jetbrainsRuntime = configurations.getByName(Configurations.JETBRAINS_RUNTIME),
                 intellijPlatform = intelliJPlatform,
                 javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
-                javaToolchainService = serviceOf<JavaToolchainService>(),
+                javaToolchainService = project.serviceOf<JavaToolchainService>(),
             )
 
             jetbrainsRuntimeDirectory.convention(layout.dir(provider {
@@ -152,10 +158,9 @@ internal inline fun <reified T : Task> Project.configureTask(vararg names: Strin
         }
 
         if (this is PluginVerifierAware) {
-            val extension = the<IntelliJPlatformExtension>()
             val pluginVerifierResolver = IntelliJPluginVerifierResolver(
                 intellijPluginVerifier = configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER),
-                localPath = extension.pluginVerifier.path,
+                localPath = extension.pluginVerifier.cliPath,
             )
 
             pluginVerifierDirectory.convention(layout.dir(provider {
@@ -177,3 +182,9 @@ internal fun Project.resolveResourceFromUrl(url: String) =
         .runCatching { asFile("UTF-8") }
         .onFailure { logger.error("Cannot resolve product releases", it) }
         .getOrDefault("<products />")
+
+internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
+    if (!systemProperties.containsKey(name)) {
+        systemProperty(name, defaultValue)
+    }
+}

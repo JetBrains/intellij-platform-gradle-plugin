@@ -37,7 +37,7 @@ abstract class PrintProductsReleasesTask : DefaultTask() {
 
     companion object {
         fun register(project: Project) =
-            project.configureTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
+            project.registerTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
                 val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES)
 
                 inputFile.convention(listProductsReleasesTaskProvider.flatMap {

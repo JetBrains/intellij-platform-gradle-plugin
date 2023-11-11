@@ -6,15 +6,19 @@ import com.jetbrains.plugin.structure.base.utils.*
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.newInstance
+import org.gradle.kotlin.dsl.the
 import org.gradle.process.ExecOperations
 import org.gradle.process.internal.ExecException
 import org.jetbrains.intellij.platform.gradle.*
@@ -22,6 +26,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.AndroidStudio
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.base.JetBrainsRuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.base.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.utils.ArchiveUtils
@@ -29,7 +35,6 @@ import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.ivyRepository
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.URL
@@ -56,7 +61,6 @@ import kotlin.io.path.pathString
 abstract class RunPluginVerifierTask @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val execOperations: ExecOperations,
-    private val providers: ProviderFactory,
 ) : DefaultTask(), JetBrainsRuntimeAware, PluginVerifierAware {
 
     /**
@@ -74,7 +78,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    abstract val productsReleasesFile: Property<File>
+    abstract val productsReleasesFile: RegularFileProperty
 
     /**
      * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
@@ -90,7 +94,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
      */
     @get:Input
-    abstract val localPaths: ListProperty<File>
+    abstract val idePaths: ConfigurableFileCollection
 
 //    /**
 //     * Returns the version of the IntelliJ Plugin Verifier that will be used.
@@ -138,7 +142,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:OutputDirectory
     @get:Optional
-    abstract val verificationReportsDir: Property<String>
+    abstract val verificationReportsDirectory: DirectoryProperty
 
     /**
      * The output formats of the verification reports.
@@ -162,7 +166,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    abstract val downloadDir: Property<String>
+    abstract val downloadDirectory: DirectoryProperty
 
     @get:Internal
     abstract val downloadPath: Property<Path>
@@ -203,7 +207,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     @get:Input
     @get:Optional
-    abstract val ignoredProblems: Property<File>
+    abstract val ignoredProblemsFile: RegularFileProperty
 
     @get:Internal
     abstract val offline: Property<Boolean>
@@ -265,11 +269,12 @@ abstract class RunPluginVerifierTask @Inject constructor(
         val dependenciesDownloader = objectFactory.newInstance<DependenciesDownloader>(offline.get())
         val archiveUtils = objectFactory.newInstance<ArchiveUtils>()
 
-        val idePaths = ideVersions.map { ideVersions ->
+        val localPaths = idePaths.map { it.toPath() }
+        val resolvedPaths = ideVersions.map { ideVersions ->
             ideVersions
                 .ifEmpty {
                     when {
-                        localPaths.get().isEmpty() -> productsReleasesFile.get().takeIf(File::exists)?.readLines()
+                        idePaths.isEmpty -> productsReleasesFile.asPath.readLines()
                         else -> null
                     }
                 }
@@ -319,11 +324,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
                     }
                 }
         }.get()
-        val userPaths = localPaths.get().map { it.toPath() }
 
-        return (idePaths + userPaths).map {
-            it.toAbsolutePath().toString()
-        }
+        return (resolvedPaths + localPaths).map { it.pathString }
     }
 
     /**
@@ -333,7 +335,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
-            "-verification-reports-dir", verificationReportsDir.get(),
+            "-verification-reports-dir", verificationReportsDirectory.asPath.pathString,
             "-runtime-dir", jetbrainsRuntimeDirectory.asPath.pathString,
         )
 
@@ -355,9 +357,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
         args.add("-verification-reports-formats")
         args.add(verificationReportsFormats.get().joinToString(","))
 
-        if (ignoredProblems.orNull != null) {
+        if (ignoredProblemsFile.orNull != null) {
             args.add("-ignored-problems")
-            args.add(ignoredProblems.get().absolutePath)
+            args.add(ignoredProblemsFile.asPath.pathString)
         }
 
         freeArgs.orNull?.let {
@@ -366,18 +368,6 @@ abstract class RunPluginVerifierTask @Inject constructor(
 
         return args
     }
-
-    /**
-     * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
-     * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
-     *
-     * @return Plugin Verifier home directory
-     */
-    private fun verifierHomeDir() = providers.systemProperty("plugin.verifier.home.dir")
-        .map { Path.of(it) }
-        .orElse(providers.environmentVariable("XDG_CACHE_HOME").map { Path.of(it).resolve("pluginVerifier") })
-        .orElse(providers.systemProperty("user.home").map { Path.of(it).resolve(".cache/pluginVerifier") })
-        .orElse(temporaryDir.toPath().resolve("pluginVerifier"))
 
     /**
      * Resolves the IDE type and version. If only `version` is provided, `type` is set to "IC".
@@ -491,20 +481,56 @@ abstract class RunPluginVerifierTask @Inject constructor(
         else -> "version"
     }
 
-    /**
-     * Provides target directory used for storing downloaded IDEs.
-     * Path is compatible with the Plugin Verifier approach.
-     *
-     * @return directory for downloaded IDEs
-     */
-    internal fun ideDownloadDir() = verifierHomeDir().map { it.resolve("ides").createDir() }
-
     companion object {
         private const val METADATA_URL = "${Locations.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"
         private const val IDEA_DOWNLOAD_URL = "https://data.services.jetbrains.com/products/download"
         private const val ANDROID_STUDIO_DOWNLOAD_URL = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
 
         fun resolveLatestVersion() = LatestVersionResolver.fromMaven("Plugin Verifier", METADATA_URL)
+
+        fun register(project: Project) =
+            project.registerTask<RunPluginVerifierTask>(Tasks.RUN_PLUGIN_VERIFIER) {
+                val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES)
+                val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+                val userHomeProvider = project.providers.systemProperty("user.home")
+                val extension = project.the<IntelliJPlatformExtension>()
+
+                downloadDirectory.convention(extension.pluginVerifier.downloadDirectory)
+                downloadPath.convention(userHomeProvider.map {
+                    val userHomePath = Path.of(it)
+                    with(downloadDirectory.asPath.pathString) {
+                        when {
+                            startsWith("~/") -> userHomePath.resolve(removePrefix("~/"))
+                            equals("~") -> userHomePath
+                            else -> Path.of(this)
+                        }
+                    }
+                })
+                failureLevel.convention(extension.pluginVerifier.failureLevel)
+                distributionFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+                verificationReportsDirectory.convention(extension.pluginVerifier.verificationReportsDirectory)
+                verificationReportsFormats.convention(extension.pluginVerifier.verificationReportsFormats)
+                externalPrefixes.convention(extension.pluginVerifier.externalPrefixes)
+                teamCityOutputFormat.convention(extension.pluginVerifier.teamCityOutputFormat)
+                subsystemsToCheck.convention(extension.pluginVerifier.subsystemsToCheck)
+                productsReleasesFile.convention(listProductsReleasesTaskProvider.flatMap {
+                    it.outputFile
+                })
+                ignoredProblemsFile.convention(extension.pluginVerifier.ignoredProblemsFile)
+                offline.convention(project.gradle.startParameter.isOffline)
+
+                dependsOn(Tasks.BUILD_PLUGIN)
+                dependsOn(Tasks.VERIFY_PLUGIN)
+                dependsOn(Tasks.LIST_PRODUCTS_RELEASES)
+
+                val isIdeVersionsEmpty = ideVersions.map {
+                    it.isEmpty() && idePaths.isEmpty
+                }
+
+                listProductsReleasesTaskProvider.configure {
+                    onlyIf { isIdeVersionsEmpty.get() }
+                }
+            }
     }
 
     @Suppress("unused")

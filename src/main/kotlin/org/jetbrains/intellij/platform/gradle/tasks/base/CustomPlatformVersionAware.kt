@@ -4,9 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.base
 
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 interface CustomPlatformVersionAware : PlatformVersionAware {
@@ -20,6 +18,7 @@ interface CustomPlatformVersionAware : PlatformVersionAware {
     val version: Property<String>
 
     @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     val localPath: DirectoryProperty
 }

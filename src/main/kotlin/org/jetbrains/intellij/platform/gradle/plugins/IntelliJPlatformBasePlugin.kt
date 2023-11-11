@@ -15,13 +15,15 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyProductInfoTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
+import java.nio.file.Path
+import java.util.*
 
 abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_BASE_ID) {
 
@@ -166,7 +168,29 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             }
 
             configureExtension<IntelliJPlatformExtension.PluginVerifier>(Extensions.PLUGIN_VERIFIER) {
-                version.convention(VERSION_LATEST)
+                homeDirectory.convention(
+                    providers.systemProperty("plugin.verifier.home.dir")
+                        .flatMap { layout.dir(provider { Path.of(it).toFile() }) }
+                        .orElse(layout.dir(providers.environmentVariable("XDG_CACHE_HOME").map {
+                            Path.of(it).resolve("pluginVerifier").toFile()
+                        }))
+                        .orElse(layout.dir(providers.systemProperty("user.home").map {
+                            Path.of(it).resolve(".cache/pluginVerifier").toFile()
+                        }))
+                        .orElse(project.layout.buildDirectory.dir("tmp/pluginVerifier"))
+                )
+                downloadDirectory.convention(homeDirectory.dir("ides"))
+                failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
+                verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
+                verificationReportsFormats.convention(
+                    EnumSet.of(
+                        RunPluginVerifierTask.VerificationReportsFormats.PLAIN,
+                        RunPluginVerifierTask.VerificationReportsFormats.HTML,
+                    )
+                )
+                teamCityOutputFormat.convention(false)
+                subsystemsToCheck.convention("all")
+
             }
         }
 

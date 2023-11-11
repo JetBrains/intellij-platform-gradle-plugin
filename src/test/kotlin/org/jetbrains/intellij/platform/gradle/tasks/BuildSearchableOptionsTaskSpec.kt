@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.BUILD_SEARCHABLE_OPTIONS_TASK_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
 import kotlin.io.path.readText
 import kotlin.test.Ignore
@@ -20,8 +20,8 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             """.trimIndent()
         )
 
-        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME).let {
-            assertContains("$BUILD_SEARCHABLE_OPTIONS_TASK_NAME SKIPPED", it.output)
+        build(Tasks.BUILD_SEARCHABLE_OPTIONS).let {
+            assertContains("${Tasks.BUILD_SEARCHABLE_OPTIONS} SKIPPED", it.output)
         }
     }
 
@@ -43,7 +43,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        build(BUILD_SEARCHABLE_OPTIONS_TASK_NAME).let {
+        build(Tasks.BUILD_SEARCHABLE_OPTIONS).let {
             assertContains("Starting searchable options index builder", it.output)
             assertContains("Searchable options index builder completed", it.output)
         }

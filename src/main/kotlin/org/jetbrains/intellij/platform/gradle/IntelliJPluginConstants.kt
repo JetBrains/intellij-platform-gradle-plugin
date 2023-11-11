@@ -53,10 +53,12 @@ object IntelliJPluginConstants {
 
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin" // TODO: check
+        const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML = "downloadAndroidStudioProductReleasesXml"
         const val DOWNLOAD_IDEA_PRODUCT_RELEASES_XML = "downloadIdeaProductReleasesXml"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
+        const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val LIST_BUNDLED_PLUGINS = "listBundledPlugins"
         const val LIST_PRODUCTS_RELEASES = "listProductsReleases"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
@@ -90,13 +92,11 @@ object IntelliJPluginConstants {
         const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
     }
 
-    const val BUILD_SEARCHABLE_OPTIONS_TASK_NAME = "buildSearchableOptions"
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val DOWNLOAD_ZIP_SIGNER_TASK_NAME = "downloadZipSigner"
     const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
-    const val JAR_SEARCHABLE_OPTIONS_TASK_NAME = "jarSearchableOptions"
     const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
