@@ -17,11 +17,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `use patched plugin xml files`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
@@ -37,11 +33,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not break incremental processing`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
@@ -55,11 +47,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `update resources on updated patched xml files`() {
-        pluginXml.xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        pluginXml.xml("<idea-plugin />")
 
         buildFile.groovy(
             """

@@ -104,8 +104,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     override fun copy() {
         disableIdeUpdate()
 
-        println("PrepareSandboxTask [$name] destinationDir = ${destinationDir}")
-
         super.copy()
     }
 
@@ -194,6 +192,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     companion object {
         fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TESTING_SANDBOX, Tasks.PREPARE_UI_TESTING_SANDBOX) {
+
 //            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
                 val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
                 val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)

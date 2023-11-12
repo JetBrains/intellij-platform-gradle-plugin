@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import org.apache.commons.io.FileUtils
 import org.gradle.api.GradleException
 import org.gradle.api.internal.project.ProjectInternal
 import org.intellij.lang.annotations.Language
@@ -10,10 +9,13 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IN
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
+import kotlin.io.path.appendText
 import kotlin.io.path.createDirectories
 import kotlin.io.path.pathString
 import kotlin.test.BeforeTest
@@ -262,6 +264,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
+    // TODO: Use Path.invariantSeparatorsPathString instead?
     fun adjustWindowsPath(s: String) = s.replace("\\", "/")
 
     protected fun assertContains(expected: String, actual: String) {
@@ -276,11 +279,12 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     @Suppress("SameParameterValue")
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) = assertEquals(expectedContent, fileText(zip, path))
 
-    @Suppress("SameParameterValue")
-    protected fun extractFile(zipFile: ZipFile, path: String): File = File.createTempFile("gradle-test", "").apply {
-        deleteOnExit()
-        FileUtils.copyInputStreamToFile(zipFile.getInputStream(zipFile.getEntry(path)), this)
+    protected fun ZipFile.extract(path: String) = Files.createTempFile("gradle-test", "").apply {
+        Files.newOutputStream(this, StandardOpenOption.DELETE_ON_CLOSE)
+        Files.copy(getInputStream(getEntry(path)), this)
     }
+
+    protected fun Path.toZip() = ZipFile(toFile())
 
     protected fun fileText(zipFile: ZipFile, path: String) = zipFile.getInputStream(zipFile.getEntry(path)).use {
         it.bufferedReader().use(BufferedReader::readText).replace("\r", "").trim()
@@ -308,6 +312,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
+    fun Path.xml(@Language("XML") content: String) = appendText(content)
     fun File.xml(@Language("XML") content: String) = append(content)
 
     fun File.groovy(@Language("Groovy") content: String) = append(content)

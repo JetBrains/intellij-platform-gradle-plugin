@@ -8,7 +8,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAM
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import java.util.jar.Manifest
-import java.util.zip.ZipFile
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.test.Test
@@ -23,17 +22,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `build plugin distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
             """
@@ -67,7 +58,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zipFile = ZipFile(distribution.toFile())
+        val zip = distribution.toZip()
+
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -76,10 +68,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(zipFile)
+            collectPaths(zip)
         )
 
-        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
+        val jar = zip.extract("myPluginName/lib/projectName-0.42.123.jar").toZip()
         assertEquals(
             setOf(
                 "App.class",
@@ -89,7 +81,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "META-INF/other.xml",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(jar)
+            collectPaths(zip)
         )
 
         assertEquals(
@@ -144,7 +136,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zipFile = ZipFile(distribution.toFile())
+        val zip = distribution.toZip()
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -152,10 +144,10 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(zipFile),
+            collectPaths(zip),
         )
 
-        val jar = ZipFile(extractFile(zipFile, "myPluginName/lib/projectName-0.42.123.jar"))
+        val jar = zip.extract("myPluginName/lib/projectName-0.42.123.jar").toZip()
         assertEquals(
             setOf(
                 "App.class",
@@ -174,17 +166,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `use custom sandbox for distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
 
-        file("src/main/resources/META-INF/nonIncluded.xml").xml(
-            """
-            <idea-plugin />
-            """.trimIndent()
-        )
+        file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
             """
@@ -221,6 +205,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
+        val zip = distribution.toZip()
 
         assertEquals(
             setOf(
@@ -230,7 +215,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
                 "myPluginName/lib/projectName-0.42.123.jar",
                 "myPluginName/lib/searchableOptions-0.42.123.jar",
             ),
-            collectPaths(ZipFile(distribution.toFile()))
+            collectPaths(zip)
         )
     }
 
@@ -302,8 +287,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution.toFile()), "myPluginName/lib/projectName-0.42.123.jar")
-        assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
+        val zip = distribution.toZip()
+        val jar = zip.extract("myPluginName/lib/projectName-0.42.123.jar").toZip()
+        assertTrue(collectPaths(jar).contains("App.class"))
     }
 
     @Test
@@ -347,8 +333,9 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val jar = extractFile(ZipFile(distribution.toFile()), "myPluginName/lib/projectName-0.42.123.jar")
-        assertTrue(collectPaths(ZipFile(jar)).contains("App.class"))
+        val zip = distribution.toZip()
+        val jar = zip.extract("myPluginName/lib/projectName-0.42.123.jar").toZip()
+        assertTrue(collectPaths(jar).contains("App.class"))
     }
 
     @Test
@@ -380,7 +367,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zip = ZipFile(distribution.toFile())
+        val zip = distribution.toZip()
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -391,14 +378,14 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(zip)
         )
 
-        val jar = extractFile(zip, "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = zip.extract("myPluginName/lib/projectName-0.42.123.jar").toZip()
         assertEquals(
             setOf(
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar))
+            collectPaths(jar)
         )
     }
 
@@ -443,7 +430,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         val distribution = buildDirectory.resolve("distributions/myPluginName-0.42.123.zip")
         assertTrue(distribution.exists())
 
-        val zip = ZipFile(distribution.toFile())
+        val zip = distribution.toZip()
         assertEquals(
             setOf(
                 "myPluginName/",
@@ -454,14 +441,14 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(zip)
         )
 
-        val jar = extractFile(zip, "myPluginName/lib/projectName-0.42.123.jar")
+        val jar = zip.extract("myPluginName/lib/projectName-0.42.123.jar").toZip()
         assertEquals(
             setOf(
                 "META-INF/",
                 "META-INF/MANIFEST.MF",
                 "META-INF/plugin.xml",
             ),
-            collectPaths(ZipFile(jar))
+            collectPaths(jar)
         )
     }
 
@@ -485,8 +472,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-0.42.123.zip")
-        val artifact = extractFile(ZipFile(archive.toFile()), "projectName/lib/projectName-0.42.123.jar")
-        fileText(ZipFile(artifact), "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
+        val artifact = archive.toZip().extract("projectName/lib/projectName-0.42.123.jar").toZip()
+        fileText(artifact, "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
             assertNotNull(it)
 
             assertEquals("1.0", it.getValue("Manifest-Version"))

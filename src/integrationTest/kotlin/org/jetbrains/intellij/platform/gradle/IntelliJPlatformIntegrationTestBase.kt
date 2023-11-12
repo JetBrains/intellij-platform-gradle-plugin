@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
-import java.util.zip.ZipFile
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.copyTo
 import kotlin.io.path.deleteRecursively
@@ -186,7 +185,7 @@ open class IntelliJPlatformIntegrationTestBase(
         assert(fs.getPath(path).let(Files::exists)) { "expect archive '$this' contains file '$path'" }
     }
 
-    infix fun Path.readEntry(path: String) = ZipFile(toFile()).use { zip ->
+    infix fun Path.readEntry(path: String) = ZipFile(this).use { zip ->
         val entry = zip.getEntry(path)
         zip.getInputStream(entry).bufferedReader().use { it.readText() }
     }
