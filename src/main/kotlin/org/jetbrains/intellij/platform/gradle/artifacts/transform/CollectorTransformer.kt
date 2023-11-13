@@ -64,10 +64,12 @@ internal fun DependencyHandler.applyCollectorTransformer(
         .attribute(Attributes.collected, false)
 
     compileClasspathConfiguration
-        .attributes.attribute(Attributes.collected, true)
+        .attributes
+        .attribute(Attributes.collected, true)
 
     testCompileClasspathConfiguration
-        .attributes.attribute(Attributes.collected, true)
+        .attributes
+        .attribute(Attributes.collected, true)
 
     registerTransform(CollectorTransformer::class) {
         from

@@ -17,6 +17,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginExtension
@@ -230,3 +231,6 @@ internal val <T : FileSystemLocation> Provider<T>.asPathOrNull
 
 internal val Project.sourceSets
     get() = extensions.getByName("sourceSets") as SourceSetContainer
+
+val Gradle.projectCacheDir
+    get() = startParameter.projectCacheDir ?: this.rootProject.projectDir.resolve(".gradle")

@@ -11,17 +11,14 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
-import org.jetbrains.intellij.platform.gradle.BuildException
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Dependencies
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
-import org.jetbrains.intellij.platform.gradle.Version
 import org.jetbrains.intellij.platform.gradle.model.*
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
-import org.jetbrains.kotlin.gradle.utils.projectCacheDir
+import java.io.File
 import java.net.URI
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -113,7 +110,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun rider(version: Provider<String>) = create(IntelliJPlatformType.Rider, version)
 
     fun local(
-        localPath: Provider<String>,
+        localPath: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
         action: DependencyAction = {},
     ) = addIntelliJPlatformLocalDependency(localPath, configurationName, action)
@@ -123,6 +120,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
         action: DependencyAction = {},
     ) = local(providers.provider { localPath }, configurationName, action)
+
+    fun local(
+        localPath: File,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
+        action: DependencyAction = {},
+    ) = local(providers.provider { localPath.absolutePath }, configurationName, action)
 
     fun jetbrainsRuntime(
         explicitVersion: Provider<String>,
@@ -222,13 +225,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     private fun addIntelliJPlatformLocalDependency(
-        localPathProvider: Provider<String>,
+        localPathProvider: Provider<*>,
         configurationName: String,
         action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
         localPathProvider.map { localPath ->
-            val ideaDir = Path.of(localPath).let {
+            val ideaDir = when (localPath) {
+                is String -> localPath
+                is File -> localPath.absolutePath
+                else -> throw IllegalArgumentException("Invalid argument type: ${localPath.javaClass}. Supported types: String or File")
+            }.let {
+                Path.of(it)
+            }.let {
                 it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents")
             }
 
@@ -274,7 +283,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                         )
                     ),
                 )
-                extractor.marshal(ivyModule, createFile())
+
+                parent.createDirectories()
+                createFile()
+                extractor.marshal(ivyModule, this)
             }
 
             repositories.ivy {
