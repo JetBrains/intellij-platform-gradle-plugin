@@ -46,12 +46,14 @@ internal fun DependencyHandler.applyProductInfoTransformer() {
 
     registerTransform(ProductInfoTransformer::class) {
         from
-            .attribute(Attributes.extracted, true)
+            .attribute(Attributes.bundledPlugins, false)
             .attribute(Attributes.collected, false)
+            .attribute(Attributes.extracted, true)
             .attribute(Attributes.productInfo, false)
         to
-            .attribute(Attributes.extracted, true)
+            .attribute(Attributes.bundledPlugins, false)
             .attribute(Attributes.collected, false)
+            .attribute(Attributes.extracted, true)
             .attribute(Attributes.productInfo, true)
     }
 }

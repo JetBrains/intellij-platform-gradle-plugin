@@ -253,13 +253,14 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy(
             """
-            version = '0.42.123'
-            intellij {
-                pluginName = 'myPluginName'
-                plugins = ['copyright']
+            intellijPlatform {
+                pluginConfiguration {
+                    name = "myPluginName"
+                }
             }
             dependencies {
-                implementation 'joda-time:joda-time:2.8.1'
+                implementation("joda-time:joda-time:2.8.1")
+                intellijPlatform.bundledPlugin("copyright")
             }
             """.trimIndent()
         )
@@ -762,11 +763,11 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.123'
-
+            
             intellij {
                 pluginName = 'myPluginName'
             }
-
+            
             dependencies {
                 implementation 'joda-time:joda-time:2.8.1'
                 implementation fileTree('one')

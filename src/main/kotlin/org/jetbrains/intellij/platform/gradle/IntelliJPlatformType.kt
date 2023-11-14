@@ -42,10 +42,10 @@ enum class IntelliJPlatformType(val code: String, val groupId: String, val artif
     ),
 
     //    JPS(
-//        code = "JPS",
-//        groupId = "",
-//        artifactId = "",
-//    ),
+    //        code = "JPS",
+    //        groupId = "",
+    //        artifactId = "",
+    //    ),
     PhpStorm(
         code = "PS",
         groupId = "com.jetbrains.intellij.phpstorm",

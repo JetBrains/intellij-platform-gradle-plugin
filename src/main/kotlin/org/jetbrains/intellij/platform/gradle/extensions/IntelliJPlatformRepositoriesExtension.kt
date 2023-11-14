@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.Action
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.maven
@@ -12,7 +12,7 @@ import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import javax.inject.Inject
 
-internal typealias RepositoryAction = (MavenArtifactRepository.() -> Unit)
+internal typealias RepositoryAction = (ArtifactRepository.() -> Unit)
 
 @Suppress("unused")
 @IntelliJPlatform
@@ -55,6 +55,12 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier",
         action = action,
     )
+
+    fun ivy(action: RepositoryAction = {}) = repositories.ivy {
+        ivyPattern(".gradle/intellijPlatform/ivy/[organization]-[module]-[revision].[ext]")
+        artifactPattern("/[artifact]")
+        action()
+    }
 
     private fun createRepository(
         name: String,

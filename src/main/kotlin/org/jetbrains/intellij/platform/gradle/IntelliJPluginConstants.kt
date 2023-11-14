@@ -32,8 +32,9 @@ object IntelliJPluginConstants {
         const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
         const val INTELLIJ_PLATFORM_LOCAL_INSTANCE = "intellijPlatformLocalInstance"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
-        const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
+        const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS = "intellijPlatformBundledPlugins"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
+        const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
@@ -41,14 +42,11 @@ object IntelliJPluginConstants {
         const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
 
         object Attributes {
-            val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
+            val bundledPlugins = Attribute.of("intellijPlatformBundledPlugins", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
+            val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
             val productInfo = Attribute.of("intellijPlatformProductInfo", Boolean::class.javaObjectType)
         }
-    }
-
-    object Dependencies {
-        const val INTELLIJ_PLATFORM_LOCAL_GROUP = "intellijPlatformLocal"
     }
 
     object Tasks {
@@ -138,7 +136,6 @@ object IntelliJPluginConstants {
     )
 
 
-    const val PLUGIN_XML_DIR_NAME = "patchedPluginXmlFiles"
     const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
     const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
 

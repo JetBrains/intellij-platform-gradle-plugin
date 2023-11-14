@@ -120,9 +120,16 @@ internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
     return (baseFiles + antFiles)
 }
 
+@Deprecated(message = "Use Logger")
 fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
+
+@Deprecated(message = "Use Logger")
 fun warn(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.WARN, logCategory, message, e)
+
+@Deprecated(message = "Use Logger")
 fun info(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.INFO, logCategory, message, e)
+
+@Deprecated(message = "Use Logger")
 fun debug(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.DEBUG, logCategory, message, e)
 
 private val logger = Logging.getLogger(IntelliJPlatformPlugin::class.java)

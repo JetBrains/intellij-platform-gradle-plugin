@@ -3,7 +3,9 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.GradleException
+import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.invocation.Gradle
@@ -13,10 +15,14 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Dependencies
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
-import org.jetbrains.intellij.platform.gradle.model.*
+import org.jetbrains.intellij.platform.gradle.model.IvyModule
+import org.jetbrains.intellij.platform.gradle.model.IvyModule.*
+import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
+import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.io.File
 import java.net.URI
@@ -25,12 +31,14 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import kotlin.io.path.*
+import kotlin.math.absoluteValue
 
 internal typealias DependencyAction = (Dependency.() -> Unit)
 
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
+    private val configurations: ConfigurationContainer,
     private val repositories: RepositoryHandler,
     private val dependencies: DependencyHandler,
     private val providers: ProviderFactory,
@@ -231,7 +239,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = dependencies.addProvider(
         configurationName,
         localPathProvider.map { localPath ->
-            val ideaDir = when (localPath) {
+            val artifactPath = when (localPath) {
                 is String -> localPath
                 is File -> localPath.absolutePath
                 else -> throw IllegalArgumentException("Invalid argument type: ${localPath.javaClass}. Supported types: String or File")
@@ -241,61 +249,29 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents")
             }
 
-            if (!ideaDir.exists() || !ideaDir.isDirectory()) {
+            if (!artifactPath.exists() || !artifactPath.isDirectory()) {
                 throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory")
             }
 
-            val productInfo = ideaDir.productInfo()
-            if (Version.parse(productInfo.buildNumber) < Version.parse(IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION)) {
-                throw GradleException("The minimal supported IDE version is ${IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION}+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
+            val productInfo = artifactPath.productInfo()
+            val type = IntelliJPlatformType.fromCode(productInfo.productCode)
+            if (Version.parse(productInfo.buildNumber) < Version.parse(MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION)) {
+                throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
             }
+            val path = artifactPath.pathString
+            val version = "${productInfo.version}:local+${path.hashCode()}"
 
-            val dependency = dependencies.create(
-                group = Dependencies.INTELLIJ_PLATFORM_LOCAL_GROUP,
-                name = productInfo.productCode,
-                version = productInfo.version,
-            )
-
-            val ivyFileName = "${productInfo.productCode}-${productInfo.version}.xml"
-            val ivyDirectory = gradle.projectCacheDir.resolve("intellijPlatform/ivy").toPath()
-
-            ivyDirectory.resolve(ivyFileName).takeUnless { it.exists() }?.run {
-                val extractor = XmlExtractor<IvyModule>()
-                val ivyModule = IvyModule(
-                    info = IvyModuleInfo(
-                        organisation = dependency.group,
-                        module = dependency.name,
-                        revision = dependency.version,
-                        publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
-                    ),
-                    configurations = mutableListOf(
-                        IvyModuleConfiguration(
-                            name = "default",
-                            visibility = "public",
-                        ),
-                    ),
-                    publications = mutableListOf(
-                        IvyModulePublication(
-                            name = ideaDir.pathString,
-                            type = "directory",
-                            ext = null,
-                            conf = "default",
-                        )
-                    ),
+            dependencies.create(
+                group = type.groupId,
+                name = type.artifactId,
+                version = version,
+            ).also {
+                it.createIvyDependency(
+                    publications = listOf(
+                        Publication(path, "directory", null, "default")
+                    )
                 )
-
-                parent.createDirectories()
-                createFile()
-                extractor.marshal(ivyModule, this)
             }
-
-            repositories.ivy {
-                url = ivyDirectory.toUri()
-                ivyPattern("$ivyDirectory/[module]-[revision].[ext]")
-                artifactPattern(ideaDir.absolutePathString())
-            }
-
-            dependency
         },
         action,
     )
@@ -359,7 +335,23 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = dependencies.addProvider(
         configurationName,
         idProvider.map { id ->
-            TODO("To be implemented")
+            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).single().toPath().productInfo()
+            val type = IntelliJPlatformType.fromCode(productInfo.productCode)
+
+            val bundledPlugins = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS).single().toPath().bundledPlugins()
+            val bundledPlugin = bundledPlugins.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
+            val artifactPath = bundledPlugin.let { Path.of(it.path) }
+            val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+
+            dependencies.create(
+                group = type.groupId,
+                name = "${type.artifactId}:${productInfo.version}",
+                version = "$id:bundled+${artifactPath.hashCode().absoluteValue}",
+            ).also {
+                it.createIvyDependency(publications = jars.map { jar ->
+                    Publication(jar.pathString, "jar", "jar", "default")
+                })
+            }
         },
         action,
     )
@@ -388,6 +380,33 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         },
         action,
     )
+
+    private fun ExternalModuleDependency.createIvyDependency(publications: List<Publication>) {
+        val ivyDirectory = gradle.projectCacheDir.resolve("intellijPlatform/ivy").toPath()
+        val ivyFileName = "$group-$name-$version.xml"
+        val ivyFile = ivyDirectory.resolve(ivyFileName).takeUnless { it.exists() } ?: return
+
+        val extractor = XmlExtractor<IvyModule>()
+        val ivyModule = IvyModule(
+            info = Info(
+                organisation = group,
+                module = name,
+                revision = version,
+                publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
+            ),
+            configurations = listOf(
+                Configuration(
+                    name = "default",
+                    visibility = "public",
+                ),
+            ),
+            publications = publications,
+        )
+
+        ivyFile.parent.createDirectories()
+        ivyFile.createFile()
+        extractor.marshal(ivyModule, ivyFile)
+    }
 }
 
 // TODO: cleanup JBR helper functions:

@@ -15,6 +15,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyProductInfoTransformer
@@ -65,6 +66,17 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                         throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
                     }
                 }
+            }
+
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
+                description = "IntelliJ Platform bundled plugins",
+            ) {
+                attributes {
+                    attribute(Attributes.bundledPlugins, true)
+                }
+
+                extendsFrom(intellijPlatformConfiguration)
             }
 
             create(
@@ -132,6 +144,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
         with(dependencies) {
             attributesSchema {
+                attribute(Attributes.bundledPlugins)
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
                 attribute(Attributes.productInfo)
@@ -148,6 +161,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
             )
             applyProductInfoTransformer()
+            applyBundledPluginsTransformer()
         }
 
         configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
@@ -194,7 +208,18 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             }
         }
 
-        dependencies.configureExtension<IntelliJPlatformDependenciesExtension>(Extensions.INTELLIJ_PLATFORM, repositories, dependencies, providers, gradle)
-        repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(Extensions.INTELLIJ_PLATFORM, repositories, providers)
+        dependencies.configureExtension<IntelliJPlatformDependenciesExtension>(
+            Extensions.INTELLIJ_PLATFORM,
+            configurations,
+            repositories,
+            dependencies,
+            providers,
+            gradle,
+        )
+        repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(
+            Extensions.INTELLIJ_PLATFORM,
+            repositories,
+            providers,
+        )
     }
 }

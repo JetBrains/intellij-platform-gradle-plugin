@@ -65,9 +65,24 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     .productInfo()
                 IdeVersion.createIdeVersion(productInfo.version).toString()
             }
+// TODO: test
+//            val productInfoProvider = provider {
+//                configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+//                    .singleOrNull()
+//                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
+//                    .toPath()
+//                    .productInfo()
+//            }
+//            val defaultTypeProvider = productInfoProvider.map {
+//                IntelliJPlatformType.fromCode(it.productCode)
+//            }
+//            val defaultVersionProvider = productInfoProvider.map {
+//                IdeVersion.createIdeVersion(it.version).toString()
+//            }
             val suffix = UUID.randomUUID().toString().substring(0, 8)
             val intellijPlatformDependencyConfiguration =
                 configurations.create("${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix") {
+                    // TODO: use ConfigurationContainer.create
                     isVisible = false
                     isCanBeConsumed = false
                     isCanBeResolved = true
