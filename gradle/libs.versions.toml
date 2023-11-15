@@ -1,6 +1,6 @@
 [versions]
 # libraries
-annotations = "24.0.1"
+annotations = "24.1.0"
 ddPlist = "1.27"
 gradleIdeaExt = "1.1.7"
 intellijStructure = "3.262"
