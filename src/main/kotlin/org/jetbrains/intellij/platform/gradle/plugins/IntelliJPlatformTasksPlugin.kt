@@ -3,10 +3,12 @@
 package org.jetbrains.intellij.platform.gradle.plugins
 
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.named
+import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TASKS_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -40,6 +42,8 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             TestIdeTask::register,
         ).forEach { it.invoke(project) }
 
+        configureProcessResourcesTask()
+
         configureJarTask()
 
         with(tasks) {
@@ -51,6 +55,18 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             }
         }
     }
+
+    private fun Project.configureProcessResourcesTask() =
+        project.registerTask<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
+            val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+
+            from(patchPluginXmlTaskProvider) {
+                duplicatesStrategy = DuplicatesStrategy.INCLUDE
+                into("META-INF")
+            }
+
+            dependsOn(patchPluginXmlTaskProvider)
+        }
 
     private fun Project.configureJarTask() =
         project.registerTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {

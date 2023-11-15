@@ -17,6 +17,7 @@ import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.appendText
 import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
 import kotlin.io.path.pathString
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -26,14 +27,20 @@ import kotlin.test.assertTrue
 abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-    val intellijVersion =
-        System.getProperty("test.intellij.version").takeUnless { it.isNullOrEmpty() } ?: throw GradleException("'test.intellij.version' isn't provided")
-    val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version").takeUnless { it.isNullOrEmpty() }
+
+    val intellijType = System.getProperty("test.intellij.type")
+        .takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.intellij.type' isn't provided")
+    val intellijVersion = System.getProperty("test.intellij.version")
+        .takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.intellij.version' isn't provided")
+    val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version")
+        .takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
 
     val gradleProperties get() = file("gradle.properties")
     val buildFile get() = file("build.gradle.kts")
-    val settingsFile get() = file("settings.gradle")
+    val settingsFile get() = file("settings.gradle.kts")
     val pluginXml get() = file("src/main/resources/META-INF/plugin.xml")
     val buildDirectory get() = dir.resolve("build")
 
@@ -45,7 +52,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             settingsFile.groovy(
                 """                    
                 plugins {
-                    id("com.gradle.enterprise") version("3.12.6")
+                    id("com.gradle.enterprise") version "3.12.6"
                 }
                 gradleEnterprise {
                     buildScan {
@@ -57,9 +64,9 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                 """.trimIndent()
             )
         }
-        settingsFile.groovy(
+        settingsFile.kotlin(
             """
-            rootProject.name = 'projectName'
+            rootProject.name = "projectName"
             """.trimIndent()
         )
 
@@ -88,13 +95,14 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                 mavenCentral()
                 
                 intellijPlatform {
+                    ivy()
                     releases()
                 }
             }
             
             dependencies {
                 intellijPlatform {
-                    intellijIdeaCommunity("$intellijVersion")
+                    create("$intellijType", "$intellijVersion")
                 }
             }
             
@@ -118,7 +126,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
-            org.jetbrains.intellij.buildFeature.selfUpdateCheck = false
+            org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = false
             """.trimIndent()
         )
     }
@@ -312,7 +320,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
-    fun Path.xml(@Language("XML") content: String) = appendText(content)
+    fun Path.xml(@Language("XML") content: String) = append(content)
     fun File.xml(@Language("XML") content: String) = append(content)
 
     fun File.groovy(@Language("Groovy") content: String) = append(content)
@@ -322,6 +330,12 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     fun File.kotlin(@Language("kotlin") content: String) = append(content)
 
     fun File.properties(@Language("Properties") content: String) = append(content)
+
+    private fun Path.append(content: String) = apply {
+        parent.createDirectories()
+        createFile()
+        appendText(content)
+    }
 
     private fun File.append(content: String) = appendText(content.trimIndent() + "\n")
 }

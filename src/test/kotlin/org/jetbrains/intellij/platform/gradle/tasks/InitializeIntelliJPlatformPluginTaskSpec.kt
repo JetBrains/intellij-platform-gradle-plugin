@@ -54,7 +54,7 @@ class InitializeIntelliJPlatformPluginTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
-                    selfUpdateLock.set(file("${file.name}"))
+                    selfUpdateLock = file("${file.name}")
                 }
             }
             """.trimIndent()
@@ -75,7 +75,7 @@ class InitializeIntelliJPlatformPluginTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
-                    coroutinesJavaAgent.set(file("${file.name}"))
+                    coroutinesJavaAgent = file("${file.name}")
                 }
             }
             """.trimIndent()

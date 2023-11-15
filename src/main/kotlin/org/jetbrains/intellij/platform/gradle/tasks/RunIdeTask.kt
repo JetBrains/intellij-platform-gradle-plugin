@@ -87,7 +87,14 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
                 jvmArgumentProviders.addAll(
                     listOf(
                         IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
-                        LaunchSystemArgumentProvider(intelliJPlatform, sandboxDirectory, emptyList()),
+                        LaunchSystemArgumentProvider(
+                            intelliJPlatform,
+                            sandboxConfigDirectory,
+                            sandboxPluginsDirectory,
+                            sandboxSystemDirectory,
+                            sandboxLogDirectory,
+                            emptyList(),
+                        ),
                     )
                 )
 

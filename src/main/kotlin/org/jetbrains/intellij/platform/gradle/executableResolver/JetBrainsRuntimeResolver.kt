@@ -27,7 +27,7 @@ class JetBrainsRuntimeResolver(
     val context: String? = null,
 ) : ExecutableResolver {
 
-    override fun resolveExecutable() = resolveDirectory()?.getJbrRoot()?.let { root ->
+    override fun resolveExecutable() = directory?.getJbrRoot()?.let { root ->
         root
             .resolve("jre")
             .takeIf { it.exists() }
@@ -36,10 +36,12 @@ class JetBrainsRuntimeResolver(
             .takeIf { it.exists() }
     }
 
-    override fun resolveDirectory(): Path? {
+    override fun resolveDirectory() = directory
+
+    private val directory by lazy {
         debug(context, "Resolving runtime directory.")
 
-        return listOf(
+        listOf(
             /**
              * Use JetBrains Runtime provided via [IntelliJPluginConstants.Configurations.JETBRAINS_RUNTIME_DEPENDENCY] configuration.
              * To add a custom JetBrains Runtime, use [org.jetbrains.intellij.platform.gradle.dependencies.jetbrainsRuntime]

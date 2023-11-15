@@ -7,7 +7,6 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.Task
 import org.gradle.api.file.*
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.ListProperty
@@ -21,7 +20,6 @@ import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradle.dependency.PluginProjectDependency
@@ -86,12 +84,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     @get:Classpath
     abstract val runtimeClasspathFiles: Property<FileCollection>
 
-    /**
-     * Represents the suffix used for test-related configuration.
-     */
-    @get:Internal
-    abstract val testSuffix: Property<String>
-
     private val usedNames = mutableMapOf<String, Path>()
 
     init {
@@ -107,11 +99,11 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
         super.copy()
     }
 
-    fun intoChild(destinationDir: Any): CopySpec = mainSpec.addChild().into(destinationDir)
+    fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
 
     override fun getDestinationDir() = defaultDestinationDir.asFile.get()
 
-    override fun configure(closure: Closure<*>): Task = super.configure(closure)
+    override fun configure(closure: Closure<*>) = super.configure(closure)
 
     fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
         from(pluginDependency.artifact) {
@@ -135,7 +127,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     }
 
     private fun disableIdeUpdate() {
-        val updatesConfig = sandboxDirectory.dir("${Sandbox.CONFIG}/options").asPath
+        val updatesConfig = sandboxConfigDirectory
+            .asPath
+            .resolve("options")
             .createDirectories()
             .resolve("updates.xml")
             .apply {
@@ -208,15 +202,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                     }
                 }.flatMap { it.archiveFile }
 
-                testSuffix.convention(
-                    when (name) {
-                        Tasks.PREPARE_TESTING_SANDBOX -> "-test"
-                        Tasks.PREPARE_UI_TESTING_SANDBOX -> "-uiTest"
-                        Tasks.PREPARE_SANDBOX -> ""
-                        else -> ""
-                    }
-                )
-
 //            project.tasks.register<PrepareSandboxTask>() {
 //                PREPARE_UI_TESTING_SANDBOX
 //                from(downloadPluginTaskProvider.flatMap { downloadPluginTask ->
@@ -228,7 +213,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
                 pluginName.convention(extension.pluginConfiguration.name)
                 pluginJar.convention(pluginJarProvider)
-                defaultDestinationDir.convention(sandboxDirectory.dir(Sandbox.PLUGINS))
+                defaultDestinationDir.convention(sandboxPluginsDirectory)
 //                librariesToIgnore.convention(ideaDependencyJarFiles)
 //                pluginDependencies.convention(project.provider {
 //                    extension.getPluginDependenciesList(project)

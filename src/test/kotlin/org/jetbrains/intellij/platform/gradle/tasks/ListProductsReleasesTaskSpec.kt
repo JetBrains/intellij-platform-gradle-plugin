@@ -52,7 +52,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 listProductsReleases {
-                    sinceVersion.set("231")
+                    sinceVersion = "231"
                 }
             }
             """.trimIndent()
@@ -75,8 +75,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 listProductsReleases {
-                    sinceVersion.set("2020.3")
-                    untilVersion.set("2021.2.1")
+                    sinceVersion = "2020.3"
+                    untilVersion = "2021.2.1"
                 }
             }
             """.trimIndent()
@@ -99,8 +99,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 patchPluginXml {
-                    sinceBuild.set("2020.3")
-                    untilBuild.set("2021.2.1")
+                    sinceBuild = "2020.3"
+                    untilBuild = "2021.2.1"
                 }
             }
             """.trimIndent()
@@ -123,8 +123,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             tasks =
             """
             patchPluginXml {
-                sinceBuild.set("222")
-                untilBuild.set("232.*")
+                sinceBuild = "222"
+                untilBuild = "232.*"
             }
             """.trimIndent(),
         )
@@ -167,8 +167,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 listProductsReleases {
-                    sinceVersion.set("2023.1")
-                    releaseChannels.set(EnumSet.of(ListProductsReleasesTask.Channel.RELEASE))
+                    sinceVersion = "2023.1"
+                    releaseChannels = EnumSet.of(ListProductsReleasesTask.Channel.RELEASE)
                 }
             }
             """.trimIndent()
@@ -190,8 +190,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 listProductsReleases {
-                    sinceVersion.set("2023.1")
-                    types.addAll(listOf("IU", "PS", "PY").map { IntelliJPlatformType.fromCode(it) })
+                    sinceVersion = "2023.1"
+                    types = listOf("IU", "PS", "PY").map { IntelliJPlatformType.fromCode(it) }
                 }
             }
             """.trimIndent()
@@ -223,8 +223,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
                     enabled = false                
                 }
                 listProductsReleases {
-                    sinceVersion.set("2023.1")
-                    types.addAll(listOf("IU", "PS", "PY").map { IntelliJPlatformType.fromCode(it) })
+                    sinceVersion = "2023.1"
+                    types = listOf("IU", "PS", "PY").map { IntelliJPlatformType.fromCode(it) }
                     ideaProductReleasesUpdateFiles.from("$ideaReleasesPath")
                 }
             }
@@ -276,8 +276,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             """
             tasks {
                 listProductsReleases {
-                    types.add(IntelliJPlatformType.AndroidStudio)
-                    releaseChannels.set(EnumSet.of(ListProductsReleasesTask.Channel.RELEASE))
+                    types = listOf(IntelliJPlatformType.AndroidStudio)
+                    releaseChannels = EnumSet.of(ListProductsReleasesTask.Channel.RELEASE)
                 }
             }
             """.trimIndent()

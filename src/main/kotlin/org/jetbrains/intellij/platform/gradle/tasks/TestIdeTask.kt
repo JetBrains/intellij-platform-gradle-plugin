@@ -7,8 +7,8 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withNormalizer
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.propertyProviders.IntelliJPlatformArgumentProvider
@@ -48,24 +48,29 @@ abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformVer
         //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
         fun register(project: Project) =
             project.registerTask<TestIdeTask>(Tasks.TEST_IDE) {
-                val sandboxDirectoryProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TESTING_SANDBOX).get().sandboxDirectory
-
                 enableAssertions = true
 
                 jvmArgumentProviders.addAll(
                     listOf(
                         IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
-                        LaunchSystemArgumentProvider(intelliJPlatform, sandboxDirectory, emptyList()),
-                        PluginPathArgumentProvider(sandboxDirectory),
+                        LaunchSystemArgumentProvider(
+                            intelliJPlatform,
+                            sandboxConfigDirectory,
+                            sandboxPluginsDirectory,
+                            sandboxSystemDirectory,
+                            sandboxLogDirectory,
+                            emptyList(),
+                        ),
+                        PluginPathArgumentProvider(sandboxPluginsDirectory),
                     )
                 )
 
-                outputs.dir(sandboxDirectoryProvider.dir(IntelliJPluginConstants.Sandbox.SYSTEM))
+                outputs.dir(sandboxSystemDirectory)
                     .withPropertyName("System directory")
-                inputs.dir(sandboxDirectoryProvider.dir(IntelliJPluginConstants.Sandbox.CONFIG))
+                inputs.dir(sandboxConfigDirectory)
                     .withPropertyName("Config Directory")
                     .withPathSensitivity(PathSensitivity.RELATIVE)
-                inputs.files(sandboxDirectoryProvider.dir(IntelliJPluginConstants.Sandbox.PLUGINS))
+                inputs.files(sandboxPluginsDirectory)
                     .withPropertyName("Plugins directory")
                     .withPathSensitivity(PathSensitivity.RELATIVE)
                     .withNormalizer(ClasspathNormalizer::class)
@@ -75,7 +80,9 @@ abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformVer
 //            systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
                 systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
 
-                dependsOn(sandboxDirectoryProvider)
+                project.tasks.named<Test>(TEST_TASK_NAME).configure {
+                    finalizedBy(this@registerTask)
+                }
 //            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
 //            classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath

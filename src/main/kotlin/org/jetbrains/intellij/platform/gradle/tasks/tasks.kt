@@ -128,16 +128,28 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 }
             })
 
-            val sandboxDirectoryProvider = extension.sandboxContainer.map {
-                it.dir("$platformType-$platformVersion").also { directory ->
-                    directory.asPath.createDirectories()
-                }
-            }
+//            val sandboxDirectoryProvider = extension.sandboxContainer.map {
+//                it.dir("$platformType-$platformVersion").also { directory ->
+//                    directory.asPath.createDirectories()
+//                }
+//            }
 
-            tasks.create<PrepareSandboxTask>("${Tasks.PREPARE_SANDBOX}_$suffix") {
-                this@withType.dependsOn(this)
-                sandboxDirectory.convention(sandboxDirectoryProvider)
-            }
+//            tasks.create<PrepareSandboxTask>("${Tasks.PREPARE_SANDBOX}_$suffix") {
+//                this@withType.dependsOn(this)
+//                sandboxDirectory.convention(sandboxDirectoryProvider)
+//            }
+
+            val isBuiltInTask = name in listOf(Tasks.RUN_IDE, Tasks.TEST_IDE, Tasks.TEST_UI_IDE)
+            val prepareSandboxTaskName = when (this) {
+                is RunIdeTask -> Tasks.PREPARE_SANDBOX
+                is TestIdeTask -> Tasks.PREPARE_TESTING_SANDBOX
+//                is TestUiIdeTask -> Tasks.PREPARE_UI_TESTING_SANDBOX
+                else -> Tasks.PREPARE_SANDBOX
+            } + "_$suffix".takeUnless { isBuiltInTask }.orEmpty()
+
+
+            val prepareSandboxTask = tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName)
+            dependsOn(prepareSandboxTask)
         }
 
         if (this is SandboxAware) {
@@ -147,9 +159,19 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 }
             }
 
-            if (this !is PrepareSandboxTask) {
-                sandboxDirectory.convention(sandboxDirectoryProvider)
-            }
+            sandboxSuffix.convention(
+                when {
+                    this is PrepareSandboxTask -> when (name.substringBefore("_")) {
+                        Tasks.PREPARE_TESTING_SANDBOX -> "-test"
+                        Tasks.PREPARE_UI_TESTING_SANDBOX -> "-uiTest"
+                        Tasks.PREPARE_SANDBOX -> ""
+                        else -> ""
+                    }
+
+                    else -> ""
+                }
+            )
+            sandboxDirectory.convention(sandboxDirectoryProvider)
         }
 
         if (this is JetBrainsRuntimeAware) {

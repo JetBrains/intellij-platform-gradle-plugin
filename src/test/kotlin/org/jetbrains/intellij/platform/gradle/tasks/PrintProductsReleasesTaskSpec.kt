@@ -27,7 +27,7 @@ class PrintProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
             tasks =
             """
             patchPluginXml {
-                untilBuild.set("232.*")
+                untilBuild = "232.*"
             }
             """.trimIndent()
         )

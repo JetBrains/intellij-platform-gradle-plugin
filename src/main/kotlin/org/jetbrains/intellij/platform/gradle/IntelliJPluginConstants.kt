@@ -17,6 +17,7 @@ object IntelliJPluginConstants {
     const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
     const val KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT = "kotlin.incremental.useClasspathSnapshot"
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
+    const val TEST_TASK_NAME = "test"
     const val VERSION_LATEST = "latest"
 
     object Extensions {
@@ -69,6 +70,7 @@ object IntelliJPluginConstants {
         const val RUN_PLUGIN_VERIFIER = "runPluginVerifier" // TODO: check
         const val SETUP_DEPENDENCIES = "setupDependencies"
         const val TEST_IDE = "testIde" // TODO: check
+        const val TEST_UI_IDE = "testUiIde" // TODO: check
         const val VERIFY_PLUGIN = "verifyPlugin" // TODO: check
         const val VERIFY_PLUGIN_CONFIGURATION = "verifyPluginConfiguration" // TODO: check
     }
@@ -78,7 +80,6 @@ object IntelliJPluginConstants {
         const val CONFIG = "config"
         const val PLUGINS = "plugins"
         const val SYSTEM = "system"
-        const val LOG = "system/log"
     }
 
     object Locations {

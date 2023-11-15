@@ -8,12 +8,11 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.io.path.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("")
+    private val sandbox get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijType-$intellijVersion")
 
     @Test
     fun `prepare sandbox for two plugins`() {
@@ -32,44 +31,59 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = '0.42.123'
-            
-            intellij {
-                pluginName = 'myPluginName'
-                plugins = [project('nestedProject')]
+            dependencies {
+                implementation(project("nestedProject"))
+            }
+
+            intellijPlatform {
+                pluginConfiguration {
+                    name = "myPluginName"
+                }
             }
             """.trimIndent()
         )
 
-        file("settings.gradle").groovy(
+        settingsFile.kotlin(
             """
-            include 'nestedProject'
+            include("nestedProject")
             """.trimIndent()
         )
 
-        file("nestedProject/build.gradle").groovy(
+        file("nestedProject/build.gradle.kts").kotlin(
             """
-            repositories { mavenCentral() }
-            apply plugin: 'org.jetbrains.intellij.platform'
-            version = '0.42.123'
-            
-            compileJava {
-                sourceCompatibility = '1.8'
-                targetCompatibility = '1.8'
+//            apply(plugin = "org.jetbrains.intellij.platform")
+            plugins {
+                id("org.jetbrains.intellij.platform")
             }
             
-            intellij {
-                version = '$intellijVersion'
-                downloadSources = false
-                pluginName = 'myNestedPluginName'
+            version = "1.0.0"
+            
+            repositories { 
+                mavenCentral()
+                
+                intellijPlatform {
+                    releases()
+                }
+            }
+            
+            dependencies {
+                intellijPlatform {
+                    create("$intellijType", "$intellijVersion")
+                }
+            }
+            
+            intellijPlatform {
                 instrumentCode = false
+                pluginConfiguration {
+                    name = "myNestedPluginName"
+                }
             }
             """.trimIndent()
         )
 
-        file("nestedProject/src/main/java/NestedAppFile.java").groovy(
+        file("nestedProject/src/main/java/NestedAppFile.java").java(
             """
             class NestedAppFile {}
             """.trimIndent()
@@ -82,13 +96,18 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         assertEquals(
             setOf(
                 "/config/options/updates.xml",
-                "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
+                "/plugins/myPluginName/lib/projectName-1.0.0.jar",
+                "/plugins/myPluginName/lib/nestedProject-1.0.0.jar",
+
+                // OLD:
+                "/config/options/updates.xml",
+                "/plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar",
+                "/plugins/myPluginName/lib/projectName-1.0.0.jar",
             ),
             collectPaths(sandbox),
         )
 
-        val jar = sandbox.resolve("/plugins/myPluginName/lib/projectName-0.42.123.jar").toZip()
+        val jar = sandbox.resolve("/plugins/myPluginName/lib/projectName-1.0.0.jar").toZip()
         assertEquals(
             setOf(
                 "META-INF/",
@@ -99,7 +118,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(jar),
         )
 
-        val nestedProjectJar = sandbox.resolve("/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar").toZip()
+        val nestedProjectJar = sandbox.resolve("/plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar").toZip()
         assertEquals(
             setOf(
                 "META-INF/",
@@ -128,39 +147,26 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            allprojects {
-                repositories { mavenCentral() }
-                version = '0.42.123'
-                apply plugin: 'org.jetbrains.intellij.platform'
-                intellij {
-                    downloadSources = false
-                    version = "$intellijVersion"
-                }
+            dependencies {
+                implementation(project(":nestedProject"))
             }
-            project(':') {
-                intellij {
-                    pluginName = 'myPluginName'
-                    plugins = [project(':nestedProject')]
-                }
-            }
-            project(':nestedProject') {
-                compileJava {
-                    sourceCompatibility = '1.8'
-                    targetCompatibility = '1.8'
-                }
-                intellij {
-                    pluginName = 'myNestedPluginName'
+            
+            project(":nestedProject") {
+                intellijPlatform {
                     instrumentCode = false
+                    pluginConfiguration {
+                        name = "myNestedPluginName"            
+                    }
                 }
             }
             """.trimIndent()
         )
 
-        file("settings.gradle").groovy(
+        settingsFile.groovy(
             """
-            include 'nestedProject'
+            include("nestedProject")
             """.trimIndent()
         )
 
@@ -176,14 +182,14 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar",
+                "/plugins/myPluginName/lib/projectName-1.0.0.jar",
+                "/plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar",
                 "/config/options/updates.xml",
             ),
             collectPaths(sandbox),
         )
 
-        val jar = sandbox.resolve("/plugins/myPluginName/lib/projectName-0.42.123.jar").toZip()
+        val jar = sandbox.resolve("/plugins/myPluginName/lib/projectName-1.0.0.jar").toZip()
         assertEquals(
             setOf(
                 "META-INF/",
@@ -194,7 +200,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(jar),
         )
 
-        val nestedProjectJar = sandbox.resolve("/plugins/myNestedPluginName/lib/nestedProject-0.42.123.jar").toZip()
+        val nestedProjectJar = sandbox.resolve("/plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar").toZip()
         assertEquals(
             setOf(
                 "META-INF/",
@@ -210,15 +216,18 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `prepare sandbox task without plugin_xml`() {
         writeJavaFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = '0.42.123'
-            intellij {
-                pluginName = 'myPluginName'
-                plugins = ['copyright']
+            intellijPlatform {
+                pluginConfiguration {
+                    name = "myPluginName"
+                }
             }
             dependencies {
-                implementation 'joda-time:joda-time:2.8.1'
+                implementation("joda-time:joda-time:2.8.1")
+                intellijPlatform {
+                    bundledPlugin("com.intellij.copyright")
+                }
             }
             """.trimIndent()
         )
@@ -227,9 +236,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
                 "/config/options/updates.xml",
+                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
+                "/plugins/myPluginName/lib/projectName-1.0.0.jar",
             ),
             collectPaths(sandbox),
         )
@@ -238,9 +247,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `prepare sandbox task`() {
         writeJavaFile()
-
         file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-
         file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
@@ -251,7 +258,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellijPlatform {
                 pluginConfiguration {
@@ -260,7 +267,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             }
             dependencies {
                 implementation("joda-time:joda-time:2.8.1")
-                intellijPlatform.bundledPlugin("copyright")
+                intellijPlatform {
+                    bundledPlugin("com.intellij.copyright")
+                }
             }
             """.trimIndent()
         )
@@ -269,14 +278,14 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
-                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
                 "/config/options/updates.xml",
+                "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
+                "/plugins/myPluginName/lib/projectName-1.0.0.jar",
             ),
             collectPaths(sandbox),
         )
 
-        val jar = sandbox.resolve("/plugins/myPluginName/lib/projectName-0.42.123.jar").toZip()
+        val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-1.0.0.jar").toZip()
         assertEquals(
             setOf(
                 "META-INF/",
@@ -289,13 +298,16 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(jar),
         )
 
+        println("sandbox = ${sandbox}")
+        println("buildFile = ${buildFile}")
         assertZipContent(
             jar,
             "META-INF/plugin.xml",
             """
             <idea-plugin>
-              <version>0.42.123</version>
-              <idea-version since-build="221.6008" until-build="221.*" />
+              <idea-version since-build="2022.3" until-build="2022.*" />
+              <version>1.0.0</version>
+              <name>myPluginName</name>
               <depends config-file="other.xml" />
             </idea-plugin>
             """.trimIndent()
@@ -318,31 +330,29 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = '0.42.123'
-            intellij {
-                pluginName = 'myPluginName'
-                plugins = ['copyright']
-            }
-            downloadRobotServerPlugin.version = '0.11.1'
             dependencies {
-                implementation 'joda-time:joda-time:2.8.1'
+                implementation("joda-time:joda-time:2.8.1")
+
+                intellijPlatform {
+                    bundledPlugin("com.intellij.copyright")
+                }
             }
+//            downloadRobotServerPlugin.version = '0.11.1'
             """.trimIndent()
         )
 
         build(Tasks.PREPARE_UI_TESTING_SANDBOX)
 
-        assertTrue(
-            collectPaths(sandbox).containsAll(
-                setOf(
-                    "/plugins-uiTest/myPluginName/lib/projectName-0.42.123.jar",
-                    "/plugins-uiTest/myPluginName/lib/joda-time-2.8.1.jar",
-                    "/config-uiTest/options/updates.xml",
-                    "/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
-                )
-            )
+        assertEquals(
+            setOf(
+                "/config-uiTest/options/updates.xml",
+                "/plugins-uiTest/projectName/lib/joda-time-2.8.1.jar",
+                "/plugins-uiTest/projectName/lib/projectName-1.0.0.jar",
+                "/plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
+            ),
+            collectPaths(sandbox),
         )
     }
 
@@ -471,10 +481,10 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         val sandboxPath = adjustWindowsPath(customSandbox.pathString)
         buildFile.groovy(
             """
-            version = '0.42.123'
+            version = '1.0.0'
             intellij {
                 pluginName = 'myPluginName'
-                plugins = ['copyright']
+                plugins = ['com.intellij.copyright']
                 sandboxDir = '$sandboxPath'
             }
             dependencies {
@@ -487,7 +497,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
+                "/plugins/myPluginName/lib/projectName-1.0.0.jar",
                 "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
                 "/config/options/updates.xml",
             ),
@@ -503,8 +513,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/projectName/lib/projectName.jar",
                 "/config/options/updates.xml",
+                "/plugins/projectName/lib/projectName-1.0.0.jar",
             ),
             collectPaths(sandbox),
         )
@@ -652,8 +662,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `disable ide update with updates_xml empty`() {
         pluginXml.xml("<idea-plugin />")
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml")
-        updatesFile.xml("")
+        val updatesFile = sandbox.resolve("config/options/updates.xml").xml("")
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -730,7 +739,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy(
             """
-            version = '0.42.123'
+            version = '1.0.0'
             """.trimIndent()
         )
 
@@ -762,7 +771,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.groovy(
             """
-            version = '0.42.123'
+            version = '1.0.0'
             
             intellij {
                 pluginName = 'myPluginName'
@@ -781,7 +790,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins/myPluginName/lib/projectName-0.42.123.jar",
+                "/plugins/myPluginName/lib/projectName-1.0.0.jar",
                 "/plugins/myPluginName/lib/joda-time-2.8.1.jar",
                 "/plugins/myPluginName/lib/core.jar",
                 "/plugins/myPluginName/lib/core_1.jar",
@@ -799,14 +808,12 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            intellij {
-                pluginName = 'myPluginName'
-            }
-
-            ${Tasks.PREPARE_TESTING_SANDBOX} {
-                from("additional")
+            tasks {
+                ${Tasks.PREPARE_TESTING_SANDBOX} {
+                    from("additional")
+                }
             }
             """.trimIndent()
         )
@@ -815,7 +822,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         assertEquals(
             setOf(
-                "/plugins-test/myPluginName/lib/projectName.jar",
+                "/plugins-test/projectName/lib/projectName-1.0.0.jar",
                 "/plugins-test/some-file",
                 "/config-test/options/updates.xml",
             ),

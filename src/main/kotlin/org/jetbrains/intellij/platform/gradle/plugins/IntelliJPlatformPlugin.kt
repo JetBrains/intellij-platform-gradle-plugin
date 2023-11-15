@@ -15,19 +15,14 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.JAR_TASK_NAME
-import org.gradle.api.plugins.JavaPlugin.PROCESS_RESOURCES_TASK_NAME
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.ClasspathNormalizer
-import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
-import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
-import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
@@ -40,7 +35,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_PLUGI
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_TEST_CODE_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MARKETPLACE_HOST
@@ -147,7 +141,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         configureDownloadZipSignerTask(project)
         configureSignPluginTask(project)
         configurePublishPluginTask(project)
-        configureProcessResources(project)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
 //        project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
@@ -276,8 +269,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 }
             }
         }
-
-        configureTestTasks(project, extension, ideaDependencyProvider)
     }
 
     private fun verifyJavaPluginDependency(project: Project, ideaDependency: IdeaDependency, plugins: List<Any>) {
@@ -774,131 +765,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
     }
 
-    private fun configureTestTasks(project: Project, extension: IntelliJPluginExtension, ideaDependencyProvider: Provider<IdeaDependency>) {
-        info(context, "Configuring tests tasks")
-//        val runIdeTaskProvider = project.tasks.named<RunIdeTask>(Tasks.RUN_IDE)
-        val prepareTestingSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TESTING_SANDBOX)
-        val instrumentedCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE_TASK_NAME)
-        val instrumentedTestCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_TEST_CODE_TASK_NAME)
-        val instrumentedCodeOutputsProvider = project.provider {
-            project.files(instrumentedCodeTaskProvider.map { it.outputDir.asFile })
-        }
-        val instrumentedTestCodeOutputsProvider = project.provider {
-            project.files(instrumentedTestCodeTaskProvider.map { it.outputDir.asFile })
-        }
-        val initializeIntellijPlatformPluginTaskProvider = project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-        val coroutinesJavaAgentPathProvider = initializeIntellijPlatformPluginTaskProvider.flatMap {
-            it.coroutinesJavaAgent
-        }
-
-        val testTasks = project.tasks.withType<Test>()
-        val pluginIds = sourcePluginXmlFiles(project).mapNotNull { parsePluginXml(it)?.id }
-        val buildNumberProvider = ideaDependencyProvider.map {
-            it.buildNumber
-        }
-//        val ideDirProvider = runIdeTaskProvider.flatMap { runIdeTask ->
-//            runIdeTask.ideDir.map { it.toPath() }
-//        }
-//        val jbrArchProvider = runIdeTaskProvider.flatMap { runIdeTask ->
-//            runIdeTask.jbrArch
-//        }
-//        val jbrVersionProvider = runIdeTaskProvider.flatMap { runIdeTask ->
-//            runIdeTask.jbrVersion
-//        }
-//        val jbrVariantProvider = runIdeTaskProvider.flatMap { runIdeTask ->
-//            runIdeTask.jbrVariant
-//        }
-
-        val ideaDependencyLibrariesProvider = ideaDependencyProvider
-            .map { it.classes }
-            .map { project.files("$it/lib/resources.jar", "$it/lib/idea.jar", "$it/lib/app.jar") }
-
-        val sandboxDirProvider = extension.sandboxDir.map {
-            project.file(it)
-        }
-        val configDirectoryProvider = sandboxDirProvider.map {
-            it.resolve("config-test").apply { mkdirs() }
-        }
-        val systemDirectoryProvider = sandboxDirProvider.map {
-            it.resolve("system-test").apply { mkdirs() }
-        }
-        val pluginsDirectoryProvider = prepareTestingSandboxTaskProvider.map { prepareSandboxTask ->
-            prepareSandboxTask.destinationDir.apply { mkdirs() }
-        }
-
-        val ideaConfigurationFiles = project.provider {
-            project.files(project.configurations.getByName(IDEA_CONFIGURATION_NAME).resolve())
-        }
-        val ideaPluginsConfigurationFiles = project.provider {
-            project.files(project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).resolve())
-        }
-//        val ideaClasspathFiles = ideDirProvider.map {
-//            project.files(getIdeaClasspath(it))
-//        }
-
-        testTasks.configureEach {
-            enableAssertions = true
-
-            // appClassLoader should be used for user's plugins. Otherwise, classes it won't be possible to use
-            // its classes of application components or services in tests: class loaders will be different for
-            // classes references by test code and for classes loaded by the platform (pico container).
-            //
-            // The proper way to handle that is to substitute Gradle's test class-loader and teach it
-            // to understand PluginClassLoaders. Unfortunately, I couldn't find a way to do that.
-            systemProperty("idea.use.core.classloader.for.plugin.path", "true")
-            systemProperty("idea.force.use.core.classloader", "true")
-            // the same as previous setting appClassLoader but outdated. Works for part of 203 builds.
-            systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
-
-            outputs.dir(systemDirectoryProvider)
-                .withPropertyName("System directory")
-            inputs.dir(configDirectoryProvider)
-                .withPropertyName("Config Directory")
-                .withPathSensitivity(PathSensitivity.RELATIVE)
-            inputs.files(pluginsDirectoryProvider)
-                .withPropertyName("Plugins directory")
-                .withPathSensitivity(PathSensitivity.RELATIVE)
-                .withNormalizer(ClasspathNormalizer::class)
-
-            dependsOn(Tasks.PREPARE_TESTING_SANDBOX)
-            finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
-
-//            jbrResolver.resolveRuntime(
-//                jbrVersion = jbrVersionProvider.orNull,
-//                jbrVariant = jbrVariantProvider.orNull,
-//                jbrArch = jbrArchProvider.orNull,
-//                ideDir = ideDirProvider.map { it.toFile() }.orNull,
-//            )?.let {
-//                executable = it.toString()
-//            }
-
-            classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
-            testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
-//            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(ideDirProvider.get(), coroutinesJavaAgentPathProvider.get(), this))
-
-            doFirst {
-//                classpath += ideaDependencyLibrariesProvider.get() +
-//                        ideaConfigurationFiles.get() +
-//                        ideaPluginsConfigurationFiles.get() +
-//                        ideaClasspathFiles.get()
-
-
-//                jvmArgumentProviders.add(
-//                    LaunchSystemArgumentProvider(
-//                        ideDirProvider.get(),
-//                        configDirectoryProvider.get(),
-//                        systemDirectoryProvider.get(),
-//                        pluginsDirectoryProvider.get(),
-//                        pluginIds,
-//                    )
-//                )
-
-//                jvmArgumentProviders.add(PluginPathArgumentProvider(pluginsDirectoryProvider.get()))
-                systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
-            }
-        }
-    }
-
     private fun configureDownloadZipSignerTask(project: Project) {
         project.tasks.register<DownloadZipSignerTask>(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
         project.tasks.withType<DownloadZipSignerTask> {
@@ -1010,18 +876,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             dependsOn(Tasks.VERIFY_PLUGIN)
             dependsOn(SIGN_PLUGIN_TASK_NAME)
             onlyIf { !isOffline }
-        }
-    }
-
-    private fun configureProcessResources(project: Project) {
-        info(context, "Configuring resources task")
-        val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-
-        project.tasks.named<ProcessResources>(PROCESS_RESOURCES_TASK_NAME) {
-            from(patchPluginXmlTaskProvider) {
-                duplicatesStrategy = DuplicatesStrategy.INCLUDE
-                into("META-INF")
-            }
         }
     }
 
