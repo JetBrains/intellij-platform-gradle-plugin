@@ -8,7 +8,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
 
-@Suppress("PluginXmlCapitalization", "PluginXmlValidity", "ComplexRedundantLet")
+@Suppress("PluginXmlCapitalization", "PluginXmlValidity")
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
@@ -41,17 +41,21 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertNotContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertNotContains(HEADER, output)
         }
     }
 
     @Test
     fun `report too low since-build`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            patchPluginXml {
-                sinceBuild = "211"
+            intellijPlatform {
+                pluginConfiguration {
+                    ideaVersion {
+                        sinceBuild = "211"
+                    }
+                }
             }
             """.trimIndent()
         )
@@ -67,61 +71,65 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
-            assertContains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 221.", it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 223.", output)
         }
     }
 
     @Test
     fun `report too low Java sourceCompatibility`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            sourceCompatibility = 1.8
+            java {
+                sourceCompatibility = JavaVersion.VERSION_1_8
+            }
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies sourceCompatibility=1.8 but IntelliJ Platform 2022.1.4 requires sourceCompatibility=11.",
-                it.output
+                "- The Java configuration specifies sourceCompatibility=1.8 but IntelliJ Platform 2022.3.3 requires sourceCompatibility=17.",
+                output
             )
         }
     }
 
     @Test
     fun `report too high Java targetCompatibility`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            targetCompatibility = 17
+            java {
+                targetCompatibility = JavaVersion.VERSION_19
+            }
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies targetCompatibility=17 but IntelliJ Platform 2022.1.4 requires targetCompatibility=11.",
-                it.output
+                "- The Java configuration specifies targetCompatibility=19 but IntelliJ Platform 2022.3.3 requires targetCompatibility=17.",
+                output
             )
         }
     }
 
     @Test
     fun `report too high Kotlin jvmTarget`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            compileKotlin {
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
                 kotlinOptions {
-                    jvmTarget = "17"
+                    jvmTarget = "19"
                 }
             }
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
-            assertContains("- The Kotlin configuration specifies jvmTarget=17 but IntelliJ Platform 2022.1.4 requires jvmTarget=11.", it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains("- The Kotlin configuration specifies jvmTarget=19 but IntelliJ Platform 2022.3.3 requires jvmTarget=17.", output)
         }
     }
 
@@ -144,9 +152,9 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            compileKotlin {
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
                 kotlinOptions {
                     apiVersion = "1.6"
                 }
@@ -154,8 +162,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertNotContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertNotContains(HEADER, output)
         }
     }
 
@@ -172,9 +180,9 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            compileKotlin {
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
                 kotlinOptions {
                     apiVersion = "1.9"
                 }
@@ -182,9 +190,9 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
-            assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='221.6008' property requires apiVersion=1.6.", it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='223.8836' property requires apiVersion=1.7.", output)
         }
     }
 
@@ -196,26 +204,26 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            compileKotlin {
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
                 kotlinOptions {
-                    languageVersion = "1.6"
+                    languageVersion = "1.7"
                 }
             }
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertNotContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertNotContains(HEADER, output)
         }
     }
 
     @Test
     fun `report too low Kotlin languageVersion`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            compileKotlin {
+            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
                 kotlinOptions {
                     languageVersion = "1.3"
                 }
@@ -223,11 +231,11 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2022.1.4 requires languageVersion=1.6.",
-                it.output
+                "- The Kotlin configuration specifies languageVersion=1.3 but IntelliJ Platform 2022.3.3 requires languageVersion=1.7.",
+                output
             )
         }
     }
@@ -237,11 +245,11 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         // kotlin.stdlib.default.dependency gets unset
         gradleProperties.writeText("")
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
             assertContains(
                 "- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib",
-                it.output
+                output
             )
         }
 
@@ -252,8 +260,8 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build("clean", Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertNotContains(HEADER, it.output)
+        build("clean", Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertNotContains(HEADER, output)
         }
 
         gradleProperties.properties(
@@ -262,14 +270,14 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build("clean", Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertNotContains(HEADER, it.output)
+        build("clean", Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertNotContains(HEADER, output)
         }
     }
 
     @Test
     fun `report kotlinx-coroutines dependency`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             dependencies {
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.1")
@@ -277,11 +285,11 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN_CONFIGURATION).let {
-            assertContains(HEADER, it.output)
+        build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            assertContains(HEADER, output)
             assertContains(
                 "- The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.",
-                it.output
+                output
             )
         }
     }

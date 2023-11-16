@@ -249,12 +249,12 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                     it.ideaVersion.let { ideaVersion ->
                         sinceBuild.convention(
                             ideaVersion.sinceBuild.orElse(project.provider {
-                                with(platformVersion) { "$major.$minor" }
+                                with(platformBuild) { "$major.$minor" }
                             })
                         )
                         untilBuild.convention(
                             ideaVersion.untilBuild.orElse(project.provider {
-                                with(platformVersion) { "$major.*" }
+                                with(platformBuild) { "$major.*" }
                             })
                         )
                     }

@@ -6,8 +6,8 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
@@ -17,10 +17,10 @@ import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.PlatformJavaVersions
 import org.jetbrains.intellij.platform.gradle.utils.PlatformKotlinVersions
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -47,7 +47,6 @@ import kotlin.io.path.*
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class VerifyPluginConfigurationTask @Inject constructor(
     private val providers: ProviderFactory,
@@ -58,9 +57,10 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
      *
      * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
      */
-    @get:InputFiles
+    @get:Optional
+    @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val pluginXmlFiles: ListProperty<File>
+    abstract val pluginXmlFile: RegularFileProperty
 
     /**
      * [JavaCompile.sourceCompatibility] property defined in the build script.
@@ -154,8 +154,8 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { Path.of(it) }.get().resolve("pluginVerifier/ides")
 
         sequence {
-            pluginXmlFiles.get().mapNotNull { parsePluginXml(it.toPath()) }.forEach { plugin ->
-                val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
+            pluginXmlFile.orNull?.let { parsePluginXml(it.asPath) }?.let {
+                val sinceBuild = it.ideaVersion.sinceBuild.let(Version::parse)
                 val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
                 val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
 
@@ -223,15 +223,17 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
 
     companion object {
         fun register(project: Project) =
-            project.registerTask<VerifyPluginConfigurationTask>(IntelliJPluginConstants.Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            project.registerTask<VerifyPluginConfigurationTask>(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
                 info(context, "Configuring plugin configuration verification task")
 
-                val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(IntelliJPluginConstants.Tasks.PATCH_PLUGIN_XML)
-                val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(IntelliJPluginConstants.Tasks.RUN_PLUGIN_VERIFIER)
+                val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+                val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(Tasks.RUN_PLUGIN_VERIFIER)
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
-//            pluginXmlFiles.convention(patchPluginXmlTaskProvider.flatMap { patchPluginXmlTask ->
-//                patchPluginXmlTask.outputFiles
-//            })
+
+                pluginXmlFile.convention(patchPluginXmlTaskProvider.flatMap {
+                    it.outputFile
+                })
+
                 sourceCompatibility.convention(compileJavaTaskProvider.map {
                     it.sourceCompatibility
                 })
@@ -267,10 +269,14 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
                             .map { value -> value as String }
                     })
                     kotlinApiVersion.convention(kotlinOptionsProvider.flatMap {
-                        it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }.map { value -> value as String }
+                        it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }
+                            .map { apiVersion -> apiVersion.withGroovyBuilder { getProperty("version") } }
+                            .map { value -> value as String }
                     })
                     kotlinLanguageVersion.convention(kotlinOptionsProvider.flatMap {
-                        it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }.map { value -> value as String }
+                        it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }
+                            .map { languageVersion -> languageVersion.withGroovyBuilder { getProperty("version") } }
+                            .map { value -> value as String }
                     })
                     kotlinVersion.convention(project.provider {
                         project.extensions.getByName("kotlin").withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
