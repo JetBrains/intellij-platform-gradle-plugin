@@ -15,6 +15,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
@@ -173,7 +174,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         id: Provider<String>,
         version: Provider<String>,
         channel: Provider<String>,
-        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGINS,
         action: DependencyAction = {},
     ) = addIntelliJPlatformPlugin(id, version, channel, configurationName, action)
 
@@ -181,19 +182,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         id: String,
         version: String,
         channel: String = "",
-        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGINS,
         action: DependencyAction = {},
     ) = plugin(providers.provider { id }, providers.provider { version }, providers.provider { channel }, configurationName, action)
 
     fun bundledPlugin(
         id: Provider<String>,
-        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
     ) = addIntelliJPlatformBundledPlugin(id, configurationName, action)
 
     fun bundledPlugin(
         id: String,
-        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
     ) = bundledPlugin(providers.provider { id }, configurationName, action)
 
@@ -315,8 +316,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val version = versionProvider.get()
 
             val group = when (channel) {
-                "default", "", null -> "com.jetbrains.plugins"
-                else -> "$channel.com.jetbrains.plugins"
+                "default", "", null -> JETBRAINS_MARKETPLACE_MAVEN_GROUP
+                else -> "$channel.$JETBRAINS_MARKETPLACE_MAVEN_GROUP"
             }
 
             dependencies.create(
@@ -335,11 +336,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = dependencies.addProvider(
         configurationName,
         idProvider.map { id ->
-            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).single().toPath().productInfo()
+            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO).single().toPath().productInfo()
             val type = IntelliJPlatformType.fromCode(productInfo.productCode)
-
-            val bundledPlugins = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS).single().toPath().bundledPlugins()
-            val bundledPlugin = bundledPlugins.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
+            val bundledPluginsList = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST).single().toPath().bundledPlugins()
+            val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
             val artifactPath = bundledPlugin.let { Path.of(it.path) }
             val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
 

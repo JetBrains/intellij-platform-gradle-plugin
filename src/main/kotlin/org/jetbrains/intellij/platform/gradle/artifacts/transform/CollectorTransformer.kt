@@ -16,6 +16,7 @@ import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.collectIntelliJPlatformDependencyJars
 import kotlin.io.path.forEachDirectoryEntry
@@ -32,12 +33,12 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.asPath
 
-        if (input.name.startsWith("org")) { // FIXME
+        if (input.name.startsWith(JETBRAINS_MARKETPLACE_MAVEN_GROUP)) {
             // Plugin dependency
-            input.forEachDirectoryEntry {
-                it.resolve("lib")
+            input.forEachDirectoryEntry { entry ->
+                entry.resolve("lib")
                     .listDirectoryEntries("*.jar")
-                    .forEach { file -> outputs.file(file) }
+                    .forEach { outputs.file(it) }
             }
         } else {
             // TODO: check if the given directory is IDEA — i.e. by checking if there's product-info.json file

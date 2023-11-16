@@ -13,12 +13,12 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.internal.jvm.Jvm
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency
@@ -70,9 +70,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
      *
      * Default value: [IntelliJPluginExtension.getPluginDependenciesList]
      */
-    @get:Input
-    @get:Optional
-    abstract val pluginDependencies: ListProperty<PluginDependency>
+    @get:InputFiles
+    @get:Classpath
+    abstract val pluginsClasspath: ConfigurableFileCollection
 
     /**
      * Default sandbox destination directory.
@@ -82,7 +82,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
     @get:InputFiles
     @get:Classpath
-    abstract val runtimeClasspathFiles: Property<FileCollection>
+    abstract val runtimeClasspath: ConfigurableFileCollection
 
     private val usedNames = mutableMapOf<String, Path>()
 
@@ -189,6 +189,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
 //            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
                 val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
+                val intellijPlatformPluginsConfiguration = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED)
                 val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
                 val extension = project.the<IntelliJPlatformExtension>()
 
@@ -215,26 +216,27 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                 pluginJar.convention(pluginJarProvider)
                 defaultDestinationDir.convention(sandboxPluginsDirectory)
 //                librariesToIgnore.convention(ideaDependencyJarFiles)
-//                pluginDependencies.convention(project.provider {
-//                    extension.getPluginDependenciesList(project)
-//                })
-                runtimeClasspathFiles.convention(runtimeConfiguration)
+                pluginsClasspath.from(intellijPlatformPluginsConfiguration)
+                runtimeClasspath.from(runtimeConfiguration)
 
                 intoChild(pluginName.map { "$it/lib" })
-                    .from(runtimeClasspathFiles.map { files ->
-                        val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
-                        val pluginDirectories = pluginDependencies.get().map { it.artifact }
-
-                        listOf(pluginJar.asFile.get()) + files.filter { file ->
-                            !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-                                file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
-                            })
-                        }
-                    })
+//                    .from(runtimeClasspath.filter { file ->
+//                        val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
+//                        val pluginDirectories = pluginDependencies.files
+//
+//                        !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
+//                            file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
+//                        })
+//                    })
+                    .from(runtimeClasspath)
+                    .from(pluginJar)
                     .eachFile {
                         name = ensureName(file.toPath())
                     }
 
+                from(pluginsClasspath)
+
+                dependsOn(intellijPlatformPluginsConfiguration)
                 dependsOn(runtimeConfiguration)
                 dependsOn(jarTaskProvider)
 //            dependsOn(instrumentedJarTaskProvider)

@@ -15,7 +15,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyProductInfoTransformer
@@ -68,12 +68,32 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 }
             }
 
-            create(
-                name = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
-                description = "IntelliJ Platform bundled plugins",
+            val intellijPlatformPluginsConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGINS,
+                description = "IntelliJ Platform plugins",
+            )
+            val intellijPlatformPluginsConfigurationExtracted = create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED,
+                description = "IntelliJ Platform plugins extracted",
             ) {
                 attributes {
-                    attribute(Attributes.bundledPlugins, true)
+                    attribute(Attributes.extracted, true)
+                }
+
+                extendsFrom(intellijPlatformPluginsConfiguration)
+            }
+
+            val intellijPlatformBundledPluginsConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
+                description = "IntelliJ Platform bundled plugins",
+            )
+
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST,
+                description = "IntelliJ Platform bundled plugins list",
+            ) {
+                attributes {
+                    attribute(Attributes.bundledPluginsList, true)
                 }
 
                 extendsFrom(intellijPlatformConfiguration)
@@ -128,7 +148,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             val intellijPlatformDependenciesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
                 description = "IntelliJ Platform extra dependencies",
-            )
+            ) {
+                extendsFrom(
+                    intellijPlatformPluginsConfigurationExtracted,
+                    intellijPlatformBundledPluginsConfiguration,
+                )
+            }
 
             fun Configuration.extend() = extendsFrom(
                 intellijPlatformConfiguration,
@@ -144,7 +169,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
         with(dependencies) {
             attributesSchema {
-                attribute(Attributes.bundledPlugins)
+                attribute(Attributes.bundledPluginsList)
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
                 attribute(Attributes.productInfo)
@@ -161,7 +186,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
             )
             applyProductInfoTransformer()
-            applyBundledPluginsTransformer()
+            applyBundledPluginsListTransformer()
         }
 
         configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {

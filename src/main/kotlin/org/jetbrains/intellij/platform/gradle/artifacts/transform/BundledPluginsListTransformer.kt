@@ -32,7 +32,7 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
 
 @DisableCachingByDefault(because = "Not worth caching")
-abstract class BundledPluginsTransformer : TransformAction<TransformParameters.None> {
+abstract class BundledPluginsListTransformer : TransformAction<TransformParameters.None> {
 
     @get:Classpath
     @get:InputArtifact
@@ -83,25 +83,25 @@ abstract class BundledPluginsTransformer : TransformAction<TransformParameters.N
     }
 }
 
-internal fun DependencyHandler.applyBundledPluginsTransformer() {
+internal fun DependencyHandler.applyBundledPluginsListTransformer() {
     // ZIP archives fetched from the IntelliJ Maven repository
     artifactTypes.maybeCreate(ZIP_TYPE)
         .attributes
-        .attribute(Attributes.bundledPlugins, false)
+        .attribute(Attributes.bundledPluginsList, false)
 
     // Local IDEs pointed with intellijPlatformLocal dependencies helper
     artifactTypes.maybeCreate(ArtifactTypeDefinition.DIRECTORY_TYPE)
         .attributes
-        .attribute(Attributes.bundledPlugins, false)
+        .attribute(Attributes.bundledPluginsList, false)
 
-    registerTransform(BundledPluginsTransformer::class) {
+    registerTransform(BundledPluginsListTransformer::class) {
         from
             .attribute(Attributes.extracted, true)
             .attribute(Attributes.collected, false)
-            .attribute(Attributes.bundledPlugins, false)
+            .attribute(Attributes.bundledPluginsList, false)
         to
             .attribute(Attributes.extracted, true)
             .attribute(Attributes.collected, false)
-            .attribute(Attributes.bundledPlugins, true)
+            .attribute(Attributes.bundledPluginsList, true)
     }
 }

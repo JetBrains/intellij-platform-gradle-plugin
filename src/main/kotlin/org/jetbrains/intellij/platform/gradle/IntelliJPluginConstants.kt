@@ -12,6 +12,7 @@ object IntelliJPluginConstants {
 
     const val PLUGIN_GROUP_NAME = "intellij"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
+    const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
     const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
     const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
     const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
@@ -33,7 +34,10 @@ object IntelliJPluginConstants {
         const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
         const val INTELLIJ_PLATFORM_LOCAL_INSTANCE = "intellijPlatformLocalInstance"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
+        const val INTELLIJ_PLATFORM_PLUGINS = "intellijPlatformPlugins"
+        const val INTELLIJ_PLATFORM_PLUGINS_EXTRACTED = "intellijPlatformPluginsExtracted"
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS = "intellijPlatformBundledPlugins"
+        const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST = "intellijPlatformBundledPluginsList"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
         const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
@@ -43,7 +47,7 @@ object IntelliJPluginConstants {
         const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
 
         object Attributes {
-            val bundledPlugins = Attribute.of("intellijPlatformBundledPlugins", Boolean::class.javaObjectType)
+            val bundledPluginsList = Attribute.of("intellijPlatformBundledPluginsList", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
             val productInfo = Attribute.of("intellijPlatformProductInfo", Boolean::class.javaObjectType)

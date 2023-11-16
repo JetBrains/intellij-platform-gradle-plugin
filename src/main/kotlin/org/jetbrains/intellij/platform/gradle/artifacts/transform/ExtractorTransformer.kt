@@ -20,6 +20,7 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.asPath
 import java.io.File.separator
 import javax.inject.Inject
@@ -64,14 +65,13 @@ abstract class ExtractorTransformer @Inject constructor(
                     .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
             },
             {
-                val marketplaceGroup = "com.jetbrains.plugins"
                 val channel = when {
-                    groupId == marketplaceGroup -> ""
-                    groupId.endsWith(".$marketplaceGroup") -> groupId.dropLast(marketplaceGroup.length + 1)
+                    groupId == JETBRAINS_MARKETPLACE_MAVEN_GROUP -> ""
+                    groupId.endsWith(".$JETBRAINS_MARKETPLACE_MAVEN_GROUP") -> groupId.dropLast(JETBRAINS_MARKETPLACE_MAVEN_GROUP.length + 1)
                     else -> null
                 }
-//                "$artifactId-$version" + "@$channel".takeIf { channel.isNotEmpty() }.orEmpty()
-                null
+
+                "$groupId-$artifactId-$version" + "@$channel".takeUnless { channel.isNullOrEmpty() }.orEmpty()
             },
         )
             .firstNotNullOfOrNull { it() }
