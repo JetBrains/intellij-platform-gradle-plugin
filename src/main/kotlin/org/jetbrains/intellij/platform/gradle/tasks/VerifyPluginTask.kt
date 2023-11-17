@@ -27,7 +27,6 @@ import org.jetbrains.intellij.platform.gradle.warn
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class VerifyPluginTask : DefaultTask(), SandboxAware {
 
@@ -96,8 +95,8 @@ abstract class VerifyPluginTask : DefaultTask(), SandboxAware {
             else -> error(context, creationResult.toString())
         }
         val failBuild = creationResult !is PluginCreationSuccess
-                || !ignoreUnacceptableWarnings.get() && creationResult.unacceptableWarnings.isNotEmpty()
-                || !ignoreWarnings.get() && creationResult.warnings.isNotEmpty()
+                || (!ignoreUnacceptableWarnings.get() && creationResult.unacceptableWarnings.isNotEmpty())
+                || (!ignoreWarnings.get() && creationResult.warnings.isNotEmpty())
         if (failBuild && !ignoreFailures.get()) {
             throw GradleException("Plugin verification failed.")
         }
@@ -112,16 +111,9 @@ abstract class VerifyPluginTask : DefaultTask(), SandboxAware {
                 ignoreUnacceptableWarnings.convention(false)
                 ignoreWarnings.convention(true)
 
-//                pluginDirectory.convention(
-//                    project.layout.dir(
-//                        prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-//                            prepareSandboxTask.pluginName.map { pluginName ->
-//                                prepareSandboxTask.destinationDir.resolve(pluginName)
-//                            }
-//                        }
-//                    )
-//                )
-                pluginDirectory.convention(sandboxDirectory.dir(extension.pluginConfiguration.name))
+                pluginDirectory.convention(sandboxPluginsDirectory.flatMap {
+                    it.dir(extension.pluginConfiguration.name)
+                })
             }
     }
 }

@@ -6,40 +6,48 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 
-@Suppress("PluginXmlCapitalization", "PluginXmlValidity", "ComplexRedundantLet")
 class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not fail on warning by default`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version '1.0'
+            intellijPlatform {
+                pluginConfiguration {
+                    name = "intellijtest"
+                }
+            }
             """.trimIndent()
         )
 
         pluginXml.xml(
             """
             <idea-plugin>
-                <name>PluginName</name>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
             </idea-plugin>
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN).let {
-            assertContains("Plugin name specified in plugin.xml should not contain the word 'plugin'", it.output)
+        build(Tasks.VERIFY_PLUGIN) {
+            assertContains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'", output)
         }
     }
 
     @Test
     fun `fail on warning if option is disabled`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version '1.0'
+            intellijPlatform {
+                pluginConfiguration {
+                    name = "intellijtest"
+                }
+            }
             
-            verifyPlugin {
-                ignoreWarnings = false
+            tasks {
+                verifyPlugin {
+                    ignoreWarnings = false
+                }
             }
             """.trimIndent()
         )
@@ -47,26 +55,19 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin version="2">
-                <name>intellijtest</name>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>Zolotov</vendor>
             </idea-plugin>
             """.trimIndent()
         )
 
-        buildAndFail(Tasks.VERIFY_PLUGIN).let {
-            assertContains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'", it.output)
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            assertContains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'", output)
         }
     }
 
     @Test
     fun `fail on unacceptable warnings by default`() {
-        buildFile.groovy(
-            """
-            version '1.0'
-            """.trimIndent()
-        )
-
         pluginXml.xml(
             """
             <idea-plugin>
@@ -77,19 +78,19 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(Tasks.VERIFY_PLUGIN).let {
-            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", output)
         }
     }
 
     @Test
     fun `do not fail on unacceptable warnings if option is enabled`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version '1.0'
-            
-            verifyPlugin {
-                ignoreUnacceptableWarnings = true
+            tasks {
+                verifyPlugin {
+                    ignoreUnacceptableWarnings = true
+                }
             }
             """.trimIndent()
         )
@@ -104,43 +105,51 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN).let {
-            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
+        build(Tasks.VERIFY_PLUGIN) {
+            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", output)
         }
     }
 
     @Test
     fun `fail on errors by default`() {
         pluginXml.delete()
-        buildAndFail(Tasks.VERIFY_PLUGIN).let {
-            assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            assertContains("Plugin descriptor 'plugin.xml' is not found", output)
         }
     }
 
     @Test
     fun `do not fail on errors if option is enabled`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            verifyPlugin {
-                ignoreFailures = true
+            tasks {
+                verifyPlugin {
+                    ignoreFailures = true
+                }
             }
             """.trimIndent()
         )
 
         pluginXml.delete()
-        build(Tasks.VERIFY_PLUGIN).let {
-            assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
+        build(Tasks.VERIFY_PLUGIN) {
+            assertContains("Plugin descriptor 'plugin.xml' is not found", output)
         }
     }
 
     @Test
     fun `fail on errors if ignore unacceptable warnings option is enabled`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version '1.0'
-            
-            verifyPlugin {
-                ignoreUnacceptableWarnings = true
+            intellijPlatform {
+                pluginConfiguration {
+                    name = "Plugin display name here"
+                }
+            }
+
+            tasks {
+                verifyPlugin {
+                    ignoreUnacceptableWarnings = true
+                }
             }
             """.trimIndent()
         )
@@ -155,19 +164,19 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(Tasks.VERIFY_PLUGIN).let {
-            assertContains("<name> must not be equal to default value:", it.output)
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            assertContains("<name> must not be equal to default value:", output)
         }
     }
 
     @Test
     fun `do not fail on unacceptable warnings if ignoreFailures option is enabled`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version '1.0'
-            
-            verifyPlugin {
-                ignoreFailures = true
+            tasks {
+                verifyPlugin {
+                    ignoreFailures = true
+                }
             }
             """.trimIndent()
         )
@@ -182,19 +191,19 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN).let {
-            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
+        build(Tasks.VERIFY_PLUGIN) {
+            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", output)
         }
     }
 
     @Test
     fun `do not fail if there are no errors and warnings`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version '1.0'
-            
-            verifyPlugin { 
-                ignoreWarnings = false 
+            tasks {
+                verifyPlugin { 
+                    ignoreWarnings = false 
+                }
             }
             """.trimIndent()
         )
@@ -210,8 +219,8 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.VERIFY_PLUGIN).let {
-            assertNotContains("Plugin verification", it.output)
+        build(Tasks.VERIFY_PLUGIN) {
+            assertNotContains("Plugin verification", output)
         }
     }
 }

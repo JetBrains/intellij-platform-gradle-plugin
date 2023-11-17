@@ -32,6 +32,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
 
     tasks.withType<T> {
         val extension = project.the<IntelliJPlatformExtension>()
+        val suffix = UUID.randomUUID().toString().substring(0, 8)
 
         if (this is PlatformVersionAware) {
             intelliJPlatform = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
@@ -79,7 +80,6 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
 //            val defaultVersionProvider = productInfoProvider.map {
 //                IdeVersion.createIdeVersion(it.version).toString()
 //            }
-            val suffix = UUID.randomUUID().toString().substring(0, 8)
             val intellijPlatformDependencyConfiguration =
                 configurations.create("${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix") {
                     // TODO: use ConfigurationContainer.create
@@ -127,29 +127,6 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
                 }
             })
-
-//            val sandboxDirectoryProvider = extension.sandboxContainer.map {
-//                it.dir("$platformType-$platformVersion").also { directory ->
-//                    directory.asPath.createDirectories()
-//                }
-//            }
-
-//            tasks.create<PrepareSandboxTask>("${Tasks.PREPARE_SANDBOX}_$suffix") {
-//                this@withType.dependsOn(this)
-//                sandboxDirectory.convention(sandboxDirectoryProvider)
-//            }
-
-            val isBuiltInTask = name in listOf(Tasks.RUN_IDE, Tasks.TEST_IDE, Tasks.TEST_UI_IDE)
-            val prepareSandboxTaskName = when (this) {
-                is RunIdeTask -> Tasks.PREPARE_SANDBOX
-                is TestIdeTask -> Tasks.PREPARE_TESTING_SANDBOX
-//                is TestUiIdeTask -> Tasks.PREPARE_UI_TESTING_SANDBOX
-                else -> Tasks.PREPARE_SANDBOX
-            } + "_$suffix".takeUnless { isBuiltInTask }.orEmpty()
-
-
-            val prepareSandboxTask = tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName)
-            dependsOn(prepareSandboxTask)
         }
 
         if (this is SandboxAware) {
@@ -172,6 +149,19 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 }
             )
             sandboxDirectory.convention(sandboxDirectoryProvider)
+
+            if (this !is PrepareSandboxTask) {
+                val isBuiltInTask = name in listOf(Tasks.RUN_IDE, Tasks.TEST_IDE, Tasks.TEST_UI_IDE)
+                val prepareSandboxTaskName = when (this) {
+                    is RunIdeTask -> Tasks.PREPARE_SANDBOX
+                    is TestIdeTask -> Tasks.PREPARE_TESTING_SANDBOX
+//                is TestUiIdeTask -> Tasks.PREPARE_UI_TESTING_SANDBOX
+                    else -> Tasks.PREPARE_SANDBOX
+                } + "_$suffix".takeUnless { isBuiltInTask }.orEmpty()
+
+                val prepareSandboxTask = tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName)
+                dependsOn(prepareSandboxTask)
+            }
         }
 
         if (this is JetBrainsRuntimeAware) {
