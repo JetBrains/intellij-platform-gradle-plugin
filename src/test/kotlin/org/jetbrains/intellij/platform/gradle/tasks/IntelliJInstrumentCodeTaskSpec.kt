@@ -25,8 +25,8 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        build("buildSourceSet", "--info").let {
-            assertContains("Added @NotNull assertions to 1 files", it.output)
+        build("buildSourceSet", "--info") {
+            assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
 
@@ -43,8 +43,8 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
         )
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        build("buildTestSourceSet", "--info").let {
-            assertContains("Added @NotNull assertions to 1 files", it.output)
+        build("buildTestSourceSet", "--info") {
+            assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
 
@@ -60,15 +60,15 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         writeJavaFile()
 
-        build("buildSourceSet", "--info").let {
-            assertNotContains("Added @NotNull", it.output)
+        build("buildSourceSet", "--info") {
+            assertNotContains("Added @NotNull", output)
         }
     }
 
     @Test
     fun `do not instrument code on empty source sets`() {
-        build("buildSourceSet", "--info").let {
-            assertNotContains("Compiling forms and instrumenting code", it.output)
+        build("buildSourceSet", "--info") {
+            assertNotContains("Compiling forms and instrumenting code", output)
         }
     }
 
@@ -109,8 +109,8 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        build("buildSourceSet", "--info").let {
-            assertContains("Compiling forms and instrumenting code", it.output)
+        build("buildSourceSet", "--info") {
+            assertContains("Compiling forms and instrumenting code", output)
         }
     }
 
@@ -121,8 +121,8 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
         build("buildSourceSet")
 
-        build("buildSourceSet").let {
-            assertEquals(TaskOutcome.UP_TO_DATE, it.task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
+        build("buildSourceSet") {
+            assertEquals(TaskOutcome.UP_TO_DATE, task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
         }
     }
 }

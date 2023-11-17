@@ -37,10 +37,10 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).let {
+        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
             assertEquals(
                 TaskOutcome.UP_TO_DATE,
-                it.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
+                task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
             )
         }
     }
@@ -63,10 +63,10 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME).let {
+        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
             assertNotEquals(
                 TaskOutcome.UP_TO_DATE,
-                it.task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
+                task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
             )
 
             assertFileContent(

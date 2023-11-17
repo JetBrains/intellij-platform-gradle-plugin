@@ -34,9 +34,9 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(DOWNLOAD_ZIP_SIGNER_TASK_NAME, "--info").let {
-            assertContains("marketplace-zip-signer-cli.jar", it.output)
-            assertContains("version:latest", it.output)
+        build(DOWNLOAD_ZIP_SIGNER_TASK_NAME, "--info") {
+            assertContains("marketplace-zip-signer-cli.jar", output)
+            assertContains("version:latest", output)
         }
     }
 
@@ -56,8 +56,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(SIGN_PLUGIN_TASK_NAME, "--info").let {
-            assertContains("marketplace-zip-signer-cli.jar", it.output)
+        build(SIGN_PLUGIN_TASK_NAME, "--info") {
+            assertContains("marketplace-zip-signer-cli.jar", output)
         }
     }
 
@@ -140,8 +140,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(SIGN_PLUGIN_TASK_NAME, "--info").let {
-            assertContains("marketplace-zip-signer-cli.jar", it.output)
+        build(SIGN_PLUGIN_TASK_NAME, "--info") {
+            assertContains("marketplace-zip-signer-cli.jar", output)
         }
     }
 
@@ -153,8 +153,8 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(SIGN_PLUGIN_TASK_NAME).let {
-            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", it.output)
+        build(SIGN_PLUGIN_TASK_NAME) {
+            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", output)
         }
     }
 
@@ -208,9 +208,9 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(VERIFY_PLUGIN_SIGNATURE_TASK_NAME).let {
-            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", it.output)
-            assertContains("Task :$VERIFY_PLUGIN_SIGNATURE_TASK_NAME SKIPPED", it.output)
+        build(VERIFY_PLUGIN_SIGNATURE_TASK_NAME) {
+            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", output)
+            assertContains("Task :$VERIFY_PLUGIN_SIGNATURE_TASK_NAME SKIPPED", output)
         }
     }
 

@@ -50,9 +50,9 @@ class JbrResolverTest : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(TASK_NAME).let {
-            assertContains(expected, it.output)
-            assertNotContains("Error when resolving dependency", it.output)
+        build(TASK_NAME) {
+            assertContains(expected, output)
+            assertNotContains("Error when resolving dependency", output)
         }
     }
 }

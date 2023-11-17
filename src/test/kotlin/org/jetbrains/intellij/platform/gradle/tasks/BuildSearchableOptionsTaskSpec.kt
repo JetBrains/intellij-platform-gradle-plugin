@@ -20,8 +20,8 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.BUILD_SEARCHABLE_OPTIONS).let {
-            assertContains("${Tasks.BUILD_SEARCHABLE_OPTIONS} SKIPPED", it.output)
+        build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
+            assertContains("${Tasks.BUILD_SEARCHABLE_OPTIONS} SKIPPED", output)
         }
     }
 
@@ -43,9 +43,9 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
         getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
 
-        build(Tasks.BUILD_SEARCHABLE_OPTIONS).let {
-            assertContains("Starting searchable options index builder", it.output)
-            assertContains("Searchable options index builder completed", it.output)
+        build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
+            assertContains("Starting searchable options index builder", output)
+            assertContains("Searchable options index builder completed", output)
         }
 
         getSearchableOptionsXml("projectName").readText().let {

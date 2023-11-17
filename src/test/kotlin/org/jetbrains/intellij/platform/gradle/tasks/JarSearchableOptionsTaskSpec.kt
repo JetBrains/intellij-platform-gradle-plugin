@@ -22,8 +22,8 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.JAR_SEARCHABLE_OPTIONS).let {
-            assertContains("${Tasks.JAR_SEARCHABLE_OPTIONS} SKIPPED", it.output)
+        build(Tasks.JAR_SEARCHABLE_OPTIONS) {
+            assertContains("${Tasks.JAR_SEARCHABLE_OPTIONS} SKIPPED", output)
         }
     }
 

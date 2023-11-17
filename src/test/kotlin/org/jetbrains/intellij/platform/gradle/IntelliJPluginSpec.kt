@@ -64,9 +64,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         writeTestFile()
 
-        build(TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info") {
             val sandboxPath = adjustWindowsPath("${buildDirectory.pathString}/idea-sandbox")
-            val testCommand = parseCommand(it.output)
+            val testCommand = parseCommand(output)
 
             assertPathParameters(testCommand, sandboxPath)
             assertEquals(testCommand.properties.get("idea.required.plugins.id"), "")
@@ -491,10 +491,10 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(TEST_TASK_NAME, "--info").let {
+        build(TEST_TASK_NAME, "--info") {
             assertEquals(
                 "com.intellij.mytestid",
-                parseCommand(it.output).properties["idea.required.plugins.id"],
+                parseCommand(output).properties["idea.required.plugins.id"],
             )
         }
     }
@@ -512,8 +512,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(TEST_TASK_NAME, "--info").let {
-            parseCommand(it.output).let { properties ->
+        build(TEST_TASK_NAME, "--info") {
+            parseCommand(output).let { properties ->
                 assertEquals("200m", properties.xms)
                 assertEquals("500m", properties.xmx)
             }
