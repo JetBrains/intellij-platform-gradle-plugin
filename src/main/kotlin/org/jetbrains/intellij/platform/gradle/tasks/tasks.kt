@@ -151,7 +151,13 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             sandboxDirectory.convention(sandboxDirectoryProvider)
 
             if (this !is PrepareSandboxTask) {
-                val isBuiltInTask = name in listOf(Tasks.RUN_IDE, Tasks.TEST_IDE, Tasks.TEST_UI_IDE)
+                val isBuiltInTask = name in listOf(
+                    Tasks.BUILD_SEARCHABLE_OPTIONS,
+                    Tasks.RUN_IDE,
+                    Tasks.TEST_IDE,
+                    Tasks.TEST_UI_IDE,
+                    Tasks.VERIFY_PLUGIN,
+                )
                 val prepareSandboxTaskName = when (this) {
                     is RunIdeTask -> Tasks.PREPARE_SANDBOX
                     is TestIdeTask -> Tasks.PREPARE_TESTING_SANDBOX

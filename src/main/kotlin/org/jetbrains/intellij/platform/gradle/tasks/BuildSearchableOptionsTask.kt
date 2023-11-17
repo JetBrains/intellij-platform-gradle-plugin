@@ -8,6 +8,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -67,12 +68,19 @@ abstract class BuildSearchableOptionsTask : RunIdeTask() {
     companion object {
         fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
+                val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+                val pluginXmlProvider = patchPluginXmlTaskProvider.flatMap {
+                    it.outputFile
+                }
+
                 outputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
-                showPaidPluginWarning.convention(project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
-                    it && sourcePluginXmlFiles(project).any { file ->
-                        parsePluginXml(file)?.productDescriptor != null
+                showPaidPluginWarning.convention(
+                    project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).zip(pluginXmlProvider) { enabled, file ->
+                        enabled && parsePluginXml(file.asPath)?.productDescriptor != null
                     }
-                })
+                )
+
+                dependsOn(patchPluginXmlTaskProvider)
             }
     }
 }

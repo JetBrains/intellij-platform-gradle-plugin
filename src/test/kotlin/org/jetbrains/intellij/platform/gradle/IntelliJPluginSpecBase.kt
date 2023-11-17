@@ -105,15 +105,18 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                     create("$intellijType", "$intellijVersion")
                 }
             }
-            
+                        
+            tasks {
+                buildSearchableOptions {
+                    enabled = false
+                }
+            }            
+                        
             //            intellij {
             //                pluginsRepositories {
             //                    maven('$pluginsRepository')
             //                }
             //                instrumentCode = false
-            //            }
-            //            buildSearchableOptions {
-            //                enabled = false
             //            }
                         
                         // Define tasks with a minimal set of tasks required to build a source set

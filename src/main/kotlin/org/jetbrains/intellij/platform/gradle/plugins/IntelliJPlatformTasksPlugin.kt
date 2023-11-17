@@ -6,9 +6,13 @@ import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.internal.jvm.Jvm
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.attributes
 import org.gradle.kotlin.dsl.named
 import org.gradle.language.jvm.tasks.ProcessResources
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TASKS_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -72,41 +76,26 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         project.registerTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {
             val initializeIntelliJPlatformPluginTaskProvider =
                 project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-            val gradleVersion = project.provider {
-                project.gradle.gradleVersion
-            }
-            val projectVersion = project.provider {
-                project.version
-            }
-            val buildSdk = project.provider {
-//                extension.localPath.flatMap {
-//                    ideaDependencyProvider.map { ideaDependency ->
-//                        ideaDependency.classes.toPath().let {
-//                            // Fall back on build number if product-info.json is not present, this is the case for recent versions of Android Studio.
-//                            it.productInfo().run { "$productCode-$projectVersion" }
-//                        }
-//                    }
-//                }.orElse(extension.getVersionType().zip(extension.getVersionNumber()) { type, version ->
-//                    "$type-$version"
-//                })
-                ""
-            }
+            val verifyPluginConfigurationTaskProvider =
+                project.tasks.named<VerifyPluginConfigurationTask>(Tasks.VERIFY_PLUGIN_CONFIGURATION)
 
             exclude("**/classpath.index")
 
-// TODO: make it lazy
-//            manifest.attributes(
-//                "Created-By" to gradleVersion.map { version -> "Gradle $version" },
-//                "Build-JVM" to Jvm.current(),
-//                "Version" to projectVersion,
-//                "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
-//                "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap {
-//                    it.pluginVersion
-//                }.get(), // FIXME
-//                "Build-OS" to OperatingSystem.current(),
-//                "Build-SDK" to buildSdk.get(),
-//            )
+            manifest.attributes(
+                "Created-By" to project.provider { "Gradle ${project.gradle.gradleVersion}" },
+                "Version" to project.provider { project.version },
+                "Build-JVM" to Jvm.current(),
+                "Build-OS" to OperatingSystem.current(),
+                "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
+                "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion },
+                "Platform-Type" to verifyPluginConfigurationTaskProvider.map { it.platformType },
+                "Platform-Version" to verifyPluginConfigurationTaskProvider.map { it.platformVersion },
+                "Platform-Build" to verifyPluginConfigurationTaskProvider.map { it.platformBuild },
+                "Kotlin-Stdlib-Bundled" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinStdlibDefaultDependency },
+                "Kotlin-Version" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinVersion },
+            )
 
             dependsOn(initializeIntelliJPlatformPluginTaskProvider)
+            dependsOn(verifyPluginConfigurationTaskProvider)
         }
 }
