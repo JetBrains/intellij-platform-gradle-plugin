@@ -28,23 +28,17 @@ abstract class BuildPluginTask : Zip() {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
 
-                archiveBaseName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-                    prepareSandboxTask.pluginName
-                })
+                archiveBaseName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
 
-                from(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-                    prepareSandboxTask.pluginName.map {
-                        prepareSandboxTask.destinationDir.resolve(it)
+                from(prepareSandboxTaskProvider.flatMap {
+                    it.pluginName.map { pluginName ->
+                        it.destinationDir.resolve(pluginName)
                     }
                 })
-                from(jarSearchableOptionsTaskProvider.flatMap { jarSearchableOptionsTask ->
-                    jarSearchableOptionsTask.archiveFile
-                }) {
+                from(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }) {
                     into("lib")
                 }
-                into(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-                    prepareSandboxTask.pluginName
-                })
+                into(prepareSandboxTaskProvider.flatMap { it.pluginName })
 
                 dependsOn(jarSearchableOptionsTaskProvider)
                 dependsOn(prepareSandboxTaskProvider)

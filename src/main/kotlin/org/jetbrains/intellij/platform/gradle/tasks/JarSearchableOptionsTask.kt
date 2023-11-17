@@ -118,12 +118,8 @@ abstract class JarSearchableOptionsTask : Jar() {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
 
                 inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
-                pluginName.convention(prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-                    prepareSandboxTask.pluginName
-                })
-                sandboxDir.convention(prepareSandboxTaskProvider.map { prepareSandboxTask ->
-                    prepareSandboxTask.destinationDir.canonicalPath
-                })
+                pluginName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
+                sandboxDir.convention(prepareSandboxTaskProvider.map { it.destinationDir.canonicalPath })
                 archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
                 noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))

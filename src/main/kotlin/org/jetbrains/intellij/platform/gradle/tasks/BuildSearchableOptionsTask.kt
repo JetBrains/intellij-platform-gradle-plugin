@@ -25,7 +25,6 @@ import kotlin.io.path.pathString
  * @see [RunIdeBase]
  * @see [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING]
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class BuildSearchableOptionsTask : RunIdeTask() {
 
@@ -69,9 +68,7 @@ abstract class BuildSearchableOptionsTask : RunIdeTask() {
         fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-                val pluginXmlProvider = patchPluginXmlTaskProvider.flatMap {
-                    it.outputFile
-                }
+                val pluginXmlProvider = patchPluginXmlTaskProvider.flatMap { it.outputFile }
 
                 outputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
                 showPaidPluginWarning.convention(

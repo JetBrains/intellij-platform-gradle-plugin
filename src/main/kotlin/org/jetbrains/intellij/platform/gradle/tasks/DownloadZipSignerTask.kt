@@ -12,6 +12,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.nio.file.Path
 import kotlin.io.path.copyTo
@@ -52,7 +53,7 @@ abstract class DownloadZipSignerTask : DefaultTask() {
 
     @TaskAction
     fun downloadZipSigner() {
-        Path.of(cliPath.get()).copyTo(cli.asFile.get().toPath(), true)
+        Path.of(cliPath.get()).copyTo(cli.asPath, true)
     }
 
     /**

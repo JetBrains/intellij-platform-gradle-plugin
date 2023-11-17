@@ -334,9 +334,9 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         dependencies.add(project.dependencies.create(dependency))
 
         val prepareSandboxTaskProvider = dependency.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-        val dependencyDirectory = prepareSandboxTaskProvider.flatMap { prepareSandboxTask ->
-            prepareSandboxTask.pluginName.map { pluginName ->
-                prepareSandboxTask.destinationDir.resolve(pluginName)
+        val dependencyDirectory = prepareSandboxTaskProvider.flatMap {
+            it.pluginName.map { pluginName ->
+                it.destinationDir.resolve(pluginName)
             }
         }
 

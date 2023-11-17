@@ -196,8 +196,8 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 //            val ideaDependencyJarFiles = ideaDependencyProvider.map {
 //                project.files(it.jarFiles)
 //            }
-                val pluginJarProvider = extension.instrumentCode.flatMap { instrumentCode ->
-                    when (instrumentCode) {
+                val pluginJarProvider = extension.instrumentCode.flatMap {
+                    when (it) {
                         true -> project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                         false -> jarTaskProvider
                     }

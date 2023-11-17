@@ -225,7 +225,10 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 inputFile.convention(project.layout.file(project.provider {
-                    project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).resources.srcDirs.map { it.resolve("META-INF/plugin.xml") }
+                    project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                        .resources
+                        .srcDirs
+                        .map { it.resolve("META-INF/plugin.xml") }
                         .firstOrNull { it.exists() }
                 }))
                 outputFile.convention(project.layout.file(
