@@ -7,7 +7,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@Suppress("ComplexRedundantLet", "RedundantSuppression")
 class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest

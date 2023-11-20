@@ -10,7 +10,6 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
     private val sandbox get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijType-$intellijVersion")

@@ -8,7 +8,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("ComplexRedundantLet")
 class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
     @Test

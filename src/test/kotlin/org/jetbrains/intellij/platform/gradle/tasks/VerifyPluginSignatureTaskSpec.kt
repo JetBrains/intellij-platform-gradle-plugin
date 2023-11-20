@@ -6,7 +6,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 
-@Suppress("GroovyUnusedAssignment")
 class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
 
     private val tripleQuote = "\"\"\""

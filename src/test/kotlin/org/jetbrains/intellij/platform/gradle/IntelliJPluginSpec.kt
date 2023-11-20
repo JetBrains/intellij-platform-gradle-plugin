@@ -19,7 +19,6 @@ import java.nio.file.Path
 import kotlin.io.path.pathString
 import kotlin.test.*
 
-@Suppress("GroovyAssignabilityCheck")
 class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     companion object {

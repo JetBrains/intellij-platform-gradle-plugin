@@ -12,7 +12,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.test.*
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest
@@ -52,6 +51,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             """
             dependencies {
                 implementation("joda-time:joda-time:2.8.1")
+                
                 intellijPlatform {
                     bundledPlugin("com.intellij.copyright")
                 }
@@ -380,11 +380,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        buildFile.kotlin(
-            """
-            version = "1.0.1"
-            """.trimIndent()
-        )
+        buildFile.kotlin("version = \"1.0.1\"")
 
         build(Tasks.BUILD_PLUGIN)
 

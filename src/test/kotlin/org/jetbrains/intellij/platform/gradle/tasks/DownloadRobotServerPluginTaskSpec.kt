@@ -7,7 +7,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -29,6 +28,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.groovy(
             """
             version = '0.42.123'
+            
             intellij {
                 pluginName = 'myPluginName'
                 plugins = ['copyright']

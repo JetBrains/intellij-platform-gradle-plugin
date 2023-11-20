@@ -23,7 +23,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@Suppress("GroovyUnusedAssignment")
 abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)

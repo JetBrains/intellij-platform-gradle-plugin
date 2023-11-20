@@ -10,7 +10,6 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity", "ComplexRedundantLet")
 class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
 
     private val outputPluginXml = lazy { buildDirectory.resolve("resources/main/META-INF/").listFiles().first() }

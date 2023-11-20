@@ -8,7 +8,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import java.io.File
 import kotlin.test.Test
 
-@Suppress("PluginXmlCapitalization", "PluginXmlValidity")
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @BeforeTest

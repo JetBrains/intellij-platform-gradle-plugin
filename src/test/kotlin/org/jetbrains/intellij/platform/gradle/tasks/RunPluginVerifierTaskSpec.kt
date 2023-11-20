@@ -15,8 +15,9 @@ import kotlin.io.path.createTempFile
 import kotlin.io.path.writeLines
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
-@Suppress("GroovyUnusedAssignment", "PluginXmlValidity")
 class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
@@ -166,13 +167,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
             assertContains("Verification reports directory: $directory", output)
-            val ideDirs = reportsDirectory.listFiles()
-            if (ideDirs.isEmpty()) {
-                Assert.fail("Verification reports directory not found")
-            }
-            val ideVersionDir = ideDirs.first()
+
+            val ideVersionDir = reportsDirectory.listFiles()?.firstOrNull()
+            assertNotNull(ideVersionDir, "Verification reports directory not found")
+
             val markdownReportFiles = ideVersionDir.listFilesOrdered { it.extension == "md" }
-            Assert.assertEquals(1, markdownReportFiles.size)
+            assertEquals(1, markdownReportFiles.size)
         }
     }
 
@@ -196,11 +196,10 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
             assertContains("Verification reports directory: $directory", output)
-            val ideDirs = reportsDirectory.listFiles()
-            if (ideDirs.isEmpty()) {
-                Assert.fail("Verification reports directory not found")
-            }
-            val ideVersionDir = ideDirs.first()
+
+            val ideVersionDir = reportsDirectory.listFiles()?.firstOrNull()
+            assertNotNull(ideVersionDir, "Verification reports directory not found")
+
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
             Assert.assertTrue(reportFiles.isEmpty())
         }
@@ -225,11 +224,10 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
             assertContains("Verification reports directory: $directory", output)
-            val ideDirs = reportsDirectory.listFiles()
-            if (ideDirs.isEmpty()) {
-                Assert.fail("Verification reports directory not found")
-            }
-            val ideVersionDir = ideDirs.first()
+
+            val ideVersionDir = reportsDirectory.listFiles()?.firstOrNull()
+            assertNotNull(ideVersionDir, "Verification reports directory not found")
+
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
             Assert.assertTrue(reportFiles.isNotEmpty())
         }

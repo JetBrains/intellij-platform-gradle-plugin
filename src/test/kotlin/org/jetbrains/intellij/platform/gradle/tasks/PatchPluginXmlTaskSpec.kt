@@ -8,7 +8,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Suppress("PluginXmlValidity")
 class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
 
     private val patchedPluginXml = lazy { buildDirectory.resolve("tmp/${Tasks.PATCH_PLUGIN_XML}/plugin.xml") }
