@@ -32,6 +32,9 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
     init {
         group = PLUGIN_GROUP_NAME
         description = "Runs the IDE instance with the developed plugin installed."
+
+        mainClass.set("com.intellij.idea.Main")
+        enableAssertions = true
     }
 
     /**
@@ -80,9 +83,6 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
         fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
 //            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
-
-                mainClass.set("com.intellij.idea.Main")
-                enableAssertions = true
 
                 jvmArgumentProviders.addAll(
                     listOf(

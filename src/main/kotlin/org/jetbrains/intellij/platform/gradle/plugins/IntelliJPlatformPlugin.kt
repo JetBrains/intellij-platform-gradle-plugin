@@ -2,9 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins
 
-import com.jetbrains.plugin.structure.base.utils.extension
 import com.jetbrains.plugin.structure.base.utils.hasExtension
-import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -28,7 +26,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions.INTELLIJ_PLATFORM
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
@@ -45,10 +42,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SU
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.dependency.*
 import org.jetbrains.intellij.platform.gradle.model.MavenMetadata
@@ -59,7 +54,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
-import org.jetbrains.intellij.platform.gradle.utils.ivyRepository
 import org.jetbrains.intellij.platform.gradle.utils.mavenRepository
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
@@ -138,8 +132,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         configureDownloadRobotServerPluginTask(project)
         configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
-        configureDownloadZipSignerTask(project)
-        configureSignPluginTask(project)
         configurePublishPluginTask(project)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
@@ -765,94 +757,10 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
     }
 
-    private fun configureDownloadZipSignerTask(project: Project) {
-        project.tasks.register<DownloadZipSignerTask>(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
-        project.tasks.withType<DownloadZipSignerTask> {
-            val taskContext = logCategory()
-
-            version.convention(VERSION_LATEST)
-            cliPath.convention(version.map {
-                val resolvedCliVersion = resolveCliVersion(version.orNull)
-                val url = resolveCliUrl(resolvedCliVersion)
-                debug(taskContext, "Using Marketplace ZIP Signer CLI in '$resolvedCliVersion' version")
-
-                dependenciesDownloader.downloadFromRepository(taskContext, {
-                    create(
-                        group = "org.jetbrains",
-                        name = "marketplace-zip-signer-cli",
-                        version = resolvedCliVersion,
-                        ext = "jar",
-                    )
-                }, {
-                    ivyRepository(url)
-                }).first().absolutePath
-            })
-            cli.convention(project.layout.buildDirectory.file("tools/marketplace-zip-signer-cli.jar"))
-        }
-    }
-
-    private fun configureSignPluginTask(project: Project) {
-        info(context, "Configuring sign plugin task")
-
-        val signPluginTaskProvider = project.tasks.register<SignPluginTask>(SIGN_PLUGIN_TASK_NAME)
-        val buildPluginTaskProvider = project.tasks.named<Zip>(Tasks.BUILD_PLUGIN)
-        val downloadZipSignerTaskProvider = project.tasks.named<DownloadZipSignerTask>(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
-        val cliPathProvider = downloadZipSignerTaskProvider.flatMap { downloadZipSignerTask ->
-            downloadZipSignerTask.cli.map {
-                it.asPath.toString()
-            }
-        }
-
-        project.tasks.withType<SignPluginTask> {
-            inputArchiveFile.convention(project.resolveBuildTaskOutput())
-            cliPath.convention(cliPathProvider)
-            outputArchiveFile.convention(
-                project.layout.file(
-                    buildPluginTaskProvider.flatMap { buildPluginTask ->
-                        buildPluginTask.archiveFile
-                            .map { it.asPath }
-                            .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
-                    })
-            )
-
-            onlyIf { (privateKey.isSpecified() || privateKeyFile.isSpecified()) && (certificateChain.isSpecified() || certificateChainFile.isSpecified()) }
-            dependsOn(Tasks.BUILD_PLUGIN)
-            dependsOn(DOWNLOAD_ZIP_SIGNER_TASK_NAME)
-        }
-
-        project.tasks.register<VerifyPluginSignatureTask>(VERIFY_PLUGIN_SIGNATURE_TASK_NAME)
-        project.tasks.withType<VerifyPluginSignatureTask> {
-            inputArchiveFile.convention(signPluginTaskProvider.flatMap { signPluginTask ->
-                signPluginTask.outputArchiveFile
-            })
-            cliPath.convention(signPluginTaskProvider.flatMap { signPluginTask ->
-                signPluginTask.cliPath
-            })
-            certificateChainFile.convention(
-                signPluginTaskProvider.flatMap { signPluginTask ->
-                    signPluginTask.certificateChainFile
-                }.orElse(
-                    // workaround due to https://github.com/JetBrains/marketplace-zip-signer/issues/142
-                    signPluginTaskProvider.flatMap { signPluginTask ->
-                        signPluginTask.certificateChain.map { content ->
-                            temporaryDir.resolve("certificate-chain.pem").also {
-                                it.writeText(content)
-                            }
-                        }
-                    }.let {
-                        project.layout.file(it)
-                    }
-                )
-            )
-
-            dependsOn(SIGN_PLUGIN_TASK_NAME)
-        }
-    }
-
     private fun configurePublishPluginTask(project: Project) {
         info(context, "Configuring publish plugin task")
 
-        val signPluginTaskProvider = project.tasks.named<SignPluginTask>(SIGN_PLUGIN_TASK_NAME)
+        val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
 
         project.tasks.register<PublishPluginTask>(PUBLISH_PLUGIN_TASK_NAME)
         project.tasks.withType<PublishPluginTask> {
@@ -874,7 +782,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
             dependsOn(Tasks.BUILD_PLUGIN)
             dependsOn(Tasks.VERIFY_PLUGIN)
-            dependsOn(SIGN_PLUGIN_TASK_NAME)
+            dependsOn(Tasks.SIGN_PLUGIN)
             onlyIf { !isOffline }
         }
     }

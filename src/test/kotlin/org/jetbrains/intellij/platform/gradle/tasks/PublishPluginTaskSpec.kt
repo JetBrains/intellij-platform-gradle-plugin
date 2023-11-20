@@ -37,8 +37,8 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(PUBLISH_PLUGIN_TASK_NAME).let {
-            assertContains("token property must be specified for plugin publishing", it.output)
+        buildAndFail(PUBLISH_PLUGIN_TASK_NAME) {
+            assertContains("token property must be specified for plugin publishing", output)
         }
     }
 }

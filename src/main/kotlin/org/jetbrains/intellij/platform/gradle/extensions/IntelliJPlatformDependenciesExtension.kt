@@ -210,6 +210,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = pluginVerifier(providers.provider { version }, configurationName, action)
 
+    fun zipSigner(
+        version: Provider<String>,
+        configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
+        action: DependencyAction = {},
+    ) = addZipSigner(version, configurationName, action)
+
+    fun zipSigner(
+        version: String = VERSION_LATEST,
+        configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
+        action: DependencyAction = {},
+    ) = zipSigner(providers.provider { version }, configurationName, action)
+
     private fun addIntelliJPlatformDependency(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
@@ -375,6 +387,27 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                     else -> version
                 },
                 classifier = "all",
+                ext = "jar",
+            )
+        },
+        action,
+    )
+
+    private fun addZipSigner(
+        versionProvider: Provider<String>,
+        configurationName: String,
+        action: DependencyAction = {},
+    ) = dependencies.addProvider(
+        configurationName,
+        versionProvider.map { version ->
+            dependencies.create(
+                group = "org.jetbrains",
+                name = "marketplace-zip-signer-cli",
+                version = when (version) {
+                    VERSION_LATEST -> LatestVersionResolver.fromGitHub("Marketplace ZIP Signer", Locations.ZIP_SIGNER_REPOSITORY)
+                    else -> version
+                },
+                classifier = "cli",
                 ext = "jar",
             )
         },

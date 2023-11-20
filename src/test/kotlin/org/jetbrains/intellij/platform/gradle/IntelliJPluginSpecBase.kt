@@ -312,13 +312,13 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         }.toSet()
     }
 
-    protected fun resolveResourcePath(path: String) = path.let {
+    protected fun resource(path: String) = path.let {
         javaClass.classLoader.getResource(it)?.let { url ->
             Paths.get(url.toURI()).toAbsolutePath().toString().replace('\\', '/')
         }
     }
 
-    protected fun resolveResourceContent(path: String) = resolveResourcePath(path)?.let { File(it).readText() }
+    protected fun resourceContent(path: String) = resource(path)?.let { File(it).readText() }
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517

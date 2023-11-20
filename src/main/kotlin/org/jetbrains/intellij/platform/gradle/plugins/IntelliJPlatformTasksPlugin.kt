@@ -39,8 +39,10 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             BuildSearchableOptionsTask::register,
             JarSearchableOptionsTask::register,
             BuildPluginTask::register,
+            SignPluginTask::register,
             RunPluginVerifierTask::register,
             VerifyPluginConfigurationTask::register,
+            VerifyPluginSignatureTask::register,
             VerifyPluginTask::register,
             RunIdeTask::register,
             TestIdeTask::register,
@@ -78,12 +80,14 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                 project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
             val verifyPluginConfigurationTaskProvider =
                 project.tasks.named<VerifyPluginConfigurationTask>(Tasks.VERIFY_PLUGIN_CONFIGURATION)
+            val gradleVersionProvider = project.provider { project.gradle.gradleVersion }
+            val versionProvider = project.provider { project.version }
 
             exclude("**/classpath.index")
 
             manifest.attributes(
-                "Created-By" to project.provider { "Gradle ${project.gradle.gradleVersion}" },
-                "Version" to project.provider { project.version },
+                "Created-By" to project.provider { "Gradle $gradleVersionProvider" },
+                "Version" to project.provider { versionProvider },
                 "Build-JVM" to Jvm.current(),
                 "Build-OS" to OperatingSystem.current(),
                 "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,

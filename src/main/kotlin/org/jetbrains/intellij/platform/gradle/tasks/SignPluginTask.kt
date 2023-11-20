@@ -2,21 +2,28 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.base.utils.exists
+import com.jetbrains.plugin.structure.base.utils.extension
+import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import org.gradle.api.InvalidUserDataException
+import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.process.ExecOperations
+import org.gradle.api.tasks.bundling.Zip
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.debug
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.isSpecified
 import org.jetbrains.intellij.platform.gradle.logCategory
-import org.jetbrains.intellij.platform.gradle.tasks.base.ZipSigningToolBase
+import org.jetbrains.intellij.platform.gradle.tasks.base.SigningAware
 import java.util.*
-import javax.inject.Inject
-import kotlin.io.path.pathString
+import kotlin.io.path.absolutePathString
 
 /**
  * Signs the ZIP archive with the provided key using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
@@ -31,12 +38,25 @@ import kotlin.io.path.pathString
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-signing.html">Plugin Signing</a>
  * @see <a href="https://github.com/JetBrains/marketplace-zip-signer">Marketplace ZIP Signer</a>
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
-abstract class SignPluginTask @Inject constructor(
-    objectFactory: ObjectFactory,
-    execOperations: ExecOperations,
-) : ZipSigningToolBase(objectFactory, execOperations) {
+abstract class SignPluginTask : JavaExec(), SigningAware {
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
+
+        mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
+        args = listOf("sign")
+    }
+
+    /**
+     * Input, unsigned ZIP archive file.
+     * Refers to `in` CLI option.
+     */
+    @get:InputFile
+    @get:SkipWhenEmpty
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val inputArchiveFile: RegularFileProperty
 
     /**
      * Output, signed ZIP archive file.
@@ -133,87 +153,134 @@ abstract class SignPluginTask @Inject constructor(
 
     private val context = logCategory()
 
-    init {
-        group = PLUGIN_GROUP_NAME
-        description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
-    }
-
     @TaskAction
-    fun signPlugin() {
-        executeZipSigningTool("sign")
-    }
+    override fun exec() {
+        val cliPath = zipSignerExecutable.asPath
 
+        debug(context, "Marketplace ZIP Signer CLI path: $cliPath")
+
+        classpath = objectFactory.fileCollection().from(cliPath)
+        args(arguments.toList())
+
+        super.exec()
+    }
 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with all available CLI options
      */
-    override fun collectArguments(): List<String> {
-        val arguments = mutableListOf(
-            "-out", outputArchiveFile.asPath.pathString,
-        )
+    private val arguments = sequence {
+        val file = inputArchiveFile.orNull
+            ?.run {
+                asPath
+                    .takeIf { it.exists() }
+                    ?: throw InvalidUserDataException("Plugin file does not exist: $this")
+            } ?: throw InvalidUserDataException("Input archive file is not provided.")
+
+        debug(context, "Distribution file: $file")
+
+        yield("-in")
+        yield(file.absolutePathString())
+
+        yield("-out")
+        yield(outputArchiveFile.asPath.absolutePathString())
 
         privateKey.orNull?.let {
-            arguments.add("-key")
-
-            Base64.getDecoder()
-                .runCatching { decode(it.trim()).let(::String) }
-                .getOrDefault(it)
-                .let(arguments::add)
+            yield("-key")
+            yield(
+                Base64.getDecoder()
+                    .runCatching { decode(it.trim()).let(::String) }
+                    .getOrDefault(it)
+            )
 
             debug(context, "Using private key passed as content")
         }
             ?: privateKeyFile.orNull?.let {
-                arguments.add("-key-file")
-                arguments.add(it.asPath.toAbsolutePath().toString())
+                yield("-key-file")
+                yield(it.asPath.absolutePathString())
                 debug(context, "Using private key passed as file")
             }
             ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
 
         certificateChain.orNull?.let {
-            arguments.add("-cert")
-
-            Base64.getDecoder()
-                .runCatching { decode(it.trim()).let(::String) }
-                .getOrDefault(it)
-                .let(arguments::add)
+            yield("-cert")
+            yield(
+                Base64.getDecoder()
+                    .runCatching { decode(it.trim()).let(::String) }
+                    .getOrDefault(it)
+            )
 
             debug(context, "Using certificate chain passed as content")
         }
             ?: certificateChainFile.orNull?.let {
-                arguments.add("-cert-file")
-                arguments.add(it.asPath.toAbsolutePath().toString())
+                yield("-cert-file")
+                yield(it.asPath.absolutePathString())
                 debug(context, "Using certificate chain passed as file")
             }
             ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
 
         password.orNull?.let {
-            arguments.add("-key-pass")
-            arguments.add(it)
+            yield("-key-pass")
+            yield(it)
             debug(context, "Using private key password")
         }
         keyStore.orNull?.let {
-            arguments.add("-ks")
-            arguments.add(it)
+            yield("-ks")
+            yield(it)
         }
         keyStorePassword.orNull?.let {
-            arguments.add("-ks-pass")
-            arguments.add(it)
+            yield("-ks-pass")
+            yield(it)
         }
         keyStoreKeyAlias.orNull?.let {
-            arguments.add("-ks-key-alias")
-            arguments.add(it)
+            yield("-ks-key-alias")
+            yield(it)
         }
         keyStoreType.orNull?.let {
-            arguments.add("-ks-type")
-            arguments.add(it)
+            yield("-ks-type")
+            yield(it)
         }
         keyStoreProviderName.orNull?.let {
-            arguments.add("-ks-provider-name")
-            arguments.add(it)
+            yield("-ks-provider-name")
+            yield(it)
         }
+    }
 
-        return arguments + super.collectArguments()
+    companion object {
+        fun register(project: Project) =
+            project.registerTask<SignPluginTask>(Tasks.SIGN_PLUGIN) {
+                val buildPluginTaskProvider = project.tasks.named<Zip>(Tasks.BUILD_PLUGIN)
+                val extension = project.the<IntelliJPlatformExtension>()
+
+                inputArchiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+                outputArchiveFile.convention(
+                    project.layout.file(
+                        buildPluginTaskProvider.flatMap { buildPluginTask ->
+                            buildPluginTask.archiveFile
+                                .map { it.asPath }
+                                .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
+                        })
+                )
+                extension.signing.let {
+                    keyStore.convention(it.keyStore)
+                    keyStorePassword.convention(it.keyStorePassword)
+                    keyStoreKeyAlias.convention(it.keyStoreKeyAlias)
+                    keyStoreType.convention(it.keyStoreType)
+                    keyStoreProviderName.convention(it.keyStoreProviderName)
+                    privateKey.convention(it.privateKey)
+                    privateKeyFile.convention(it.privateKeyFile)
+                    password.convention(it.password)
+                    certificateChain.convention(it.certificateChain)
+                    certificateChainFile.convention(it.certificateChainFile)
+                }
+
+                onlyIf {
+                    (privateKey.isSpecified() || privateKeyFile.isSpecified())
+                            && (certificateChain.isSpecified() || certificateChainFile.isSpecified())
+                }
+
+                dependsOn(buildPluginTaskProvider)
+            }
     }
 }

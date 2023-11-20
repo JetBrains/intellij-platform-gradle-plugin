@@ -24,6 +24,8 @@ interface IntelliJPlatformExtension : ExtensionAware {
      */
     val instrumentCode: Property<Boolean>
 
+    val buildSearchableOptions: Property<Boolean>
+
     val sandboxContainer: DirectoryProperty
 
     val pluginConfiguration
@@ -31,6 +33,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
     val pluginVerifier
         get() = extensions.getByName<PluginVerifier>(Extensions.PLUGIN_VERIFIER)
+
+    val signing
+        get() = extensions.getByName<Signing>(Extensions.SIGNING)
 
     @IntelliJPlatform
     interface PluginConfiguration : ExtensionAware {
@@ -197,7 +202,6 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
         /**
          * A path to the local IntelliJ Plugin Verifier CLI tool to be used.
-         * Takes precedence over the [version].
          */
         val cliPath: RegularFileProperty
 
@@ -284,5 +288,76 @@ interface IntelliJPlatformExtension : ExtensionAware {
          * A file that contains a list of problems that will be ignored in a report.
          */
         val ignoredProblemsFile: RegularFileProperty
+    }
+
+    @IntelliJPlatform
+    interface Signing {
+
+        /**
+         * A path to the local Marketplace ZIP Signer CLI tool to be used.
+         */
+        val cliPath: RegularFileProperty
+
+        /**
+         * KeyStore file path.
+         * Refers to `ks` CLI option.
+         */
+        val keyStore: Property<String>
+
+        /**
+         * KeyStore password.
+         * Refers to `ks-pass` CLI option.
+         */
+        val keyStorePassword: Property<String>
+
+        /**
+         * KeyStore key alias.
+         * Refers to `ks-key-alias` CLI option.
+         */
+        val keyStoreKeyAlias: Property<String>
+
+        /**
+         * KeyStore type.
+         * Refers to `ks-type` CLI option.
+         */
+        val keyStoreType: Property<String>
+
+        /**
+         * JCA KeyStore Provider name.
+         * Refers to `ks-provider-name` CLI option.
+         */
+        val keyStoreProviderName: Property<String>
+
+        /**
+         * Encoded private key in the PEM format.
+         * Refers to `key` CLI option.
+         */
+        val privateKey: Property<String>
+
+        /**
+         * A file with an encoded private key in the PEM format.
+         * Refers to `key-file` CLI option.
+         */
+        val privateKeyFile: RegularFileProperty
+
+        /**
+         * Password required to decrypt the private key.
+         * Refers to `key-pass` CLI option.
+         */
+        val password: Property<String>
+
+        /**
+         * A string containing X509 certificates.
+         * The first certificate from the chain will be used as a certificate authority (CA).
+         * Refers to `cert` CLI option.
+         */
+        val certificateChain: Property<String>
+
+        /**
+         * Path to the file containing X509 certificates.
+         * The first certificate from the chain will be used as a certificate authority (CA).
+         * Refers to `cert-file` CLI option.
+         */
+        val certificateChainFile: RegularFileProperty
     }
 }

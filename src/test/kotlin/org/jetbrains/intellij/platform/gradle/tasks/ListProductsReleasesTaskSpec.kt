@@ -11,9 +11,9 @@ import kotlin.test.assertEquals
 
 class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
 
-    private val ideaReleasesPath = resolveResourcePath("products-releases/idea-releases.xml")
+    private val ideaReleasesPath = resource("products-releases/idea-releases.xml")
 
-    private val androidStudioReleasesPath = resolveResourcePath("products-releases/android-studio-products-releases.xml")
+    private val androidStudioReleasesPath = resource("products-releases/android-studio-products-releases.xml")
 
     private val outputFile
         get() = buildDirectory.resolve("${Tasks.LIST_PRODUCTS_RELEASES}.txt")

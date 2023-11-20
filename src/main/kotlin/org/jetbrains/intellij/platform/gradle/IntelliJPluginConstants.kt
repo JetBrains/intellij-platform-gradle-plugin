@@ -27,6 +27,7 @@ object IntelliJPluginConstants {
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
         const val PLUGIN_VERIFIER = "pluginVerifier"
         const val PRODUCT_DESCRIPTOR = "productDescriptor"
+        const val SIGNING = "signing"
         const val VENDOR = "vendor"
     }
 
@@ -41,6 +42,7 @@ object IntelliJPluginConstants {
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
         const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
+        const val MARKETPLACE_ZIP_SIGNER = "marketplaceZipSigner"
         const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
         const val JETBRAINS_RUNTIME_LOCAL_INSTANCE = "jetbrainsRuntimeLocalInstance"
@@ -73,10 +75,12 @@ object IntelliJPluginConstants {
         const val RUN_IDE = "runIde" // TODO: check
         const val RUN_PLUGIN_VERIFIER = "runPluginVerifier" // TODO: check
         const val SETUP_DEPENDENCIES = "setupDependencies"
+        const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE = "testIde" // TODO: check
         const val TEST_UI_IDE = "testUiIde" // TODO: check
         const val VERIFY_PLUGIN = "verifyPlugin" // TODO: check
         const val VERIFY_PLUGIN_CONFIGURATION = "verifyPluginConfiguration" // TODO: check
+        const val VERIFY_PLUGIN_SIGNATURE = "verifyPluginSignature"
     }
 
     object Sandbox {
@@ -93,19 +97,17 @@ object IntelliJPluginConstants {
         const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
+        const val ZIP_SIGNER_REPOSITORY = "https://github.com/JetBrains/marketplace-zip-signer"
     }
 
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
-    const val DOWNLOAD_ZIP_SIGNER_TASK_NAME = "downloadZipSigner"
     const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
     const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
-    const val SIGN_PLUGIN_TASK_NAME = "signPlugin"
-    const val VERIFY_PLUGIN_SIGNATURE_TASK_NAME = "verifyPluginSignature"
 
     val TASKS = listOf(
         Tasks.BUILD_PLUGIN,
@@ -114,7 +116,6 @@ object IntelliJPluginConstants {
 //        DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME,
 //        DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME,
 //        DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
-//        DOWNLOAD_ZIP_SIGNER_TASK_NAME,
         Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN,
 //        INSTRUMENT_CODE_TASK_NAME,
         Tasks.INSTRUMENTED_JAR,
@@ -133,11 +134,11 @@ object IntelliJPluginConstants {
 //        RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
         Tasks.RUN_PLUGIN_VERIFIER,
         Tasks.SETUP_DEPENDENCIES,
-//        SIGN_PLUGIN_TASK_NAME,
+        Tasks.SIGN_PLUGIN,
         Tasks.TEST_IDE,
         Tasks.VERIFY_PLUGIN,
         Tasks.VERIFY_PLUGIN_CONFIGURATION,
-//        VERIFY_PLUGIN_SIGNATURE_TASK_NAME,
+        Tasks.VERIFY_PLUGIN_SIGNATURE,
     )
 
 

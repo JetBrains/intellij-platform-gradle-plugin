@@ -65,31 +65,6 @@ abstract class JarSearchableOptionsTask : Jar() {
         group = PLUGIN_GROUP_NAME
         description = "Creates a JAR file with searchable options to be distributed with the plugin."
 
-        val pluginJarFiles = mutableSetOf<String>()
-
-        this.from({
-            include {
-                when {
-                    it.isDirectory -> true
-                    else -> {
-                        if (it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) && pluginJarFiles.isEmpty()) {
-                            Path.of(sandboxDir.get())
-                                .resolve(pluginName.get())
-                                .resolve("lib")
-                                .listFiles()
-                                .map(Path::simpleName)
-                                .let(pluginJarFiles::addAll)
-                        }
-                        it.name
-                            .replace(SEARCHABLE_OPTIONS_SUFFIX, "")
-                            .let(pluginJarFiles::contains)
-                    }
-                }
-            }
-            inputDir.asPath
-        })
-
-        this.eachFile { path = "search/$name" }
         includeEmptyDirs = false
     }
 
@@ -116,18 +91,47 @@ abstract class JarSearchableOptionsTask : Jar() {
         fun register(project: Project) =
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+                val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
+                val buildSearchableOptionsDidWork = buildSearchableOptionsTaskProvider.map { it.didWork }
 
                 inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
                 pluginName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
                 sandboxDir.convention(prepareSandboxTaskProvider.map { it.destinationDir.canonicalPath })
                 archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
-                destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions"))
+                destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions")) // TODO: check if necessary, if so — use temp
                 noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))
 
-                onlyIf { inputDir.asPath.isDirectory }
+                val pluginJarFiles = mutableSetOf<String>()
+                from({
+                    include {
+                        when {
+                            it.isDirectory -> true
+                            else -> {
+                                if (it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) && pluginJarFiles.isEmpty()) {
+                                    Path.of(sandboxDir.get())
+                                        .resolve(pluginName.get())
+                                        .resolve("lib")
+                                        .listFiles()
+                                        .map(Path::simpleName)
+                                        .let(pluginJarFiles::addAll)
+                                }
+                                it.name
+                                    .replace(SEARCHABLE_OPTIONS_SUFFIX, "")
+                                    .let(pluginJarFiles::contains)
+                            }
+                        }
+                    }
+                    inputDir.asPath
+                })
 
-                dependsOn(Tasks.BUILD_SEARCHABLE_OPTIONS)
+                eachFile { path = "search/$name" }
+
+                onlyIf {
+                    buildSearchableOptionsDidWork.get() && inputDir.asPath.isDirectory
+                }
+
                 dependsOn(prepareSandboxTaskProvider)
+                dependsOn(buildSearchableOptionsTaskProvider)
             }
     }
 }

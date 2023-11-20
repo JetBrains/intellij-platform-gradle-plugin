@@ -10,6 +10,8 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.maven
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import java.net.URI
 import javax.inject.Inject
 
 internal typealias RepositoryAction = (ArtifactRepository.() -> Unit)
@@ -49,6 +51,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
+    // TODO: migrate to Maven Central
     fun pluginVerifier(action: RepositoryAction = {}) = createRepository(
         name = "IntelliJ Plugin Verifier Repository",
         url = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier",
@@ -56,6 +59,16 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
+    // TODO: migrate to Maven Central
+    fun zipSigner(action: RepositoryAction = {}) = createIvyRepository(
+        name = "JetBrains Marketplace ZIP Signer Repository",
+        url = Locations.ZIP_SIGNER_REPOSITORY,
+        pattern = "/releases/download/[revision]/marketplace-zip-signer-cli.jar",
+        action = action,
+    )
+
+    // TODO: check the case when marketplace() is higher on the list — most likely it takes the precedence over ivy and fails on built-in java plugin
+    // TODO: check if the bundled plugin hash matters — if it has to be different every time as always extract transformer is called, so previous dir may no longer exist
     fun ivy(action: RepositoryAction = {}) = repositories.ivy {
         ivyPattern(".gradle/intellijPlatform/ivy/[organization]-[module]-[revision].[ext]")
         artifactPattern("/[artifact]")
@@ -77,6 +90,19 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
             this.name = name
             action()
         }
+    }
+
+    private fun createIvyRepository(
+        name: String,
+        url: String,
+        pattern: String = "",
+        action: RepositoryAction = {},
+    ) = repositories.ivy {
+        this.name = name
+        this.url = URI(url)
+        patternLayout { artifact(pattern) }
+        metadataSources { artifact() }
+        action()
     }
 }
 

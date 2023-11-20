@@ -3,9 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.base.utils.listFiles
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ZIP_SIGNER_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SIGN_PLUGIN_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERIFY_PLUGIN_SIGNATURE_TASK_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.io.path.name
 import kotlin.test.Test
@@ -14,158 +12,210 @@ import kotlin.test.assertTrue
 @Suppress("GroovyUnusedAssignment")
 class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
+    private val tripleQuote = "\"\"\""
+
     @Test
     fun `run Marketplace ZIP Signer in the latest version`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
-            
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
             }
             
-            downloadZipSigner {
-                doLast {
-                    println cli.get()     
-                    println "version:" + version.get()
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
+            
+            intellijPlatform {
+                signing {
+                    certificateChainFile = file("${resource("certificates/cert.crt")}")
+                    privateKeyFile = file("${resource("certificates/cert.key")}")
                 }
             }
             """.trimIndent()
         )
 
-        build(DOWNLOAD_ZIP_SIGNER_TASK_NAME, "--info") {
-            assertContains("marketplace-zip-signer-cli.jar", output)
-            assertContains("version:latest", output)
+        build(Tasks.SIGN_PLUGIN, "--info") {
+            assertContains("/org.jetbrains/marketplace-zip-signer-cli/", output)
         }
     }
 
     @Test
     fun `run Marketplace ZIP Signer in specified version using certificateChainFile and privateKeyFile`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
             }
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
+            
+            dependencies {
+                intellijPlatform {
+                    zipSigner("0.1.7")
+                }            
+            }
+            
+            intellijPlatform {
+                signing {
+                    certificateChainFile = file("${resource("certificates/cert.crt")}")
+                    privateKeyFile = file("${resource("certificates/cert.key")}")
+                }
             }
             """.trimIndent()
         )
 
-        build(SIGN_PLUGIN_TASK_NAME, "--info") {
-            assertContains("marketplace-zip-signer-cli.jar", output)
+        build(Tasks.SIGN_PLUGIN, "--info") {
+            assertContains("marketplace-zip-signer-cli-0.1.7-cli.jar", output)
         }
     }
 
     @Test
     fun `fail on signing without password provided`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
             }
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates-password/chain.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates-password/private_encrypted.pem")}")
+            
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
+            
+            intellijPlatform {
+                signing {
+                    certificateChainFile = file("${resource("certificates-password/chain.crt")}")
+                    privateKeyFile = file("${resource("certificates-password/private_encrypted.pem")}")
+                }
             }
             """.trimIndent()
         )
 
-        buildAndFail(SIGN_PLUGIN_TASK_NAME).let {
-            assertContains("Can't read private key. Password is missing", it.output)
+        buildAndFail(Tasks.SIGN_PLUGIN) {
+            assertContains("Can't read private key. Password is missing", output)
         }
     }
 
     @Test
     fun `fail on signing with incorrect password provided`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
             }
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates-password/chain.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates-password/private_encrypted.pem")}")
-                password = "incorrect"
+            
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
+            
+            intellijPlatform {
+                signing {
+                    certificateChainFile = file("${resource("certificates-password/chain.crt")}")
+                    privateKeyFile = file("${resource("certificates-password/private_encrypted.pem")}")
+                    password = "incorrect"
+                }
             }
             """.trimIndent()
         )
 
-        buildAndFail(SIGN_PLUGIN_TASK_NAME).let {
-            assertContains("unable to read encrypted data", it.output)
+        buildAndFail(Tasks.SIGN_PLUGIN) {
+            assertContains("unable to read encrypted data", output)
         }
     }
 
     @Test
     fun `sign plugin with password provided`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
             }
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates-password/chain.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates-password/private_encrypted.pem")}")
-                password = "foobar"
+            
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
+            
+            intellijPlatform {
+                signing {
+                    certificateChainFile = file("${resource("certificates-password/chain.crt")}")
+                    privateKeyFile = file("${resource("certificates-password/private_encrypted.pem")}")
+                    password = "foobar"
+                }
             }
             """.trimIndent()
         )
 
-        build(SIGN_PLUGIN_TASK_NAME)
+        build(Tasks.SIGN_PLUGIN)
     }
 
     @Test
     fun `run Marketplace ZIP Signer in specified version using certificateChain and privateKey`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
             }
-            signPlugin {
-                certificateChain = ${"\"\"\""}${resolveResourceContent("certificates/cert.crt")}${"\"\"\""}
-                privateKey = ${"\"\"\""}${resolveResourceContent("certificates/cert.key")}${"\"\"\""}
+            
+            dependencies {
+                intellijPlatform {
+                    zipSigner("0.1.7")
+                }            
+            }
+            
+            intellijPlatform {
+                signing {
+                    certificateChain = $tripleQuote${resourceContent("certificates/cert.crt")}$tripleQuote
+                    privateKey = $tripleQuote${resourceContent("certificates/cert.key")}$tripleQuote
+                    password = "incorrect"
+                }
             }
             """.trimIndent()
         )
 
-        build(SIGN_PLUGIN_TASK_NAME, "--info") {
-            assertContains("marketplace-zip-signer-cli.jar", output)
+        build(Tasks.SIGN_PLUGIN, "--info") {
+            assertContains("marketplace-zip-signer-cli-0.1.7-cli.jar", output)
         }
     }
 
     @Test
     fun `skip Marketplace ZIP Signer task if no key and certificateChain were provided`() {
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            """.trimIndent()
-        )
-
-        build(SIGN_PLUGIN_TASK_NAME) {
-            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", output)
+        build(Tasks.SIGN_PLUGIN) {
+            assertContains("Task :${Tasks.SIGN_PLUGIN} SKIPPED", output)
         }
     }
 
     @Test
     fun `run Marketplace ZIP Signer and fail on invalid version`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
             
-            downloadZipSigner {
-                version = "0.0.1"
+            dependencies {
+                intellijPlatform {
+                    zipSigner("0.0.1")
+                }            
             }
             """.trimIndent()
         )
@@ -174,122 +224,42 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             gradleVersion = gradleVersion,
             fail = true,
             assertValidConfigurationCache = false,
-            SIGN_PLUGIN_TASK_NAME,
-        ).let {
-            assertContains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1.", it.output)
+            Tasks.SIGN_PLUGIN,
+        ) {
+            assertContains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1.", output)
         }
     }
 
     @Test
     fun `output file contains version when specified in build file`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            version = "1.0.0"
+            repositories {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
             
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
+            
+            intellijPlatform {
+                signing {
+                    certificateChainFile = file("${resource("certificates/cert.crt")}")
+                    privateKeyFile = file("${resource("certificates/cert.key")}")
+                }
             }
             """.trimIndent()
         )
-        build(SIGN_PLUGIN_TASK_NAME)
+
+        build(Tasks.SIGN_PLUGIN)
 
         val distributionFolder = buildDirectory.resolve("distributions")
         assertTrue(distributionFolder.listFiles().any {
             it.name == "projectName-1.0.0-signed.zip"
         })
-    }
-
-    @Test
-    fun `skip plugin signature verification task if plugin signing is not configured`() {
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            """.trimIndent()
-        )
-
-        build(VERIFY_PLUGIN_SIGNATURE_TASK_NAME) {
-            assertContains("Task :$SIGN_PLUGIN_TASK_NAME SKIPPED", output)
-            assertContains("Task :$VERIFY_PLUGIN_SIGNATURE_TASK_NAME SKIPPED", output)
-        }
-    }
-
-    @Test
-    fun `verify plugin signature with certificateChainFile`() {
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates/cert.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates/cert.key")}")
-            }
-            """.trimIndent()
-        )
-        build(VERIFY_PLUGIN_SIGNATURE_TASK_NAME)
-    }
-
-    @Test
-    fun `verify plugin signature with certificateChain`() {
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
-            }
-            signPlugin {
-                certificateChain = ${"\"\"\""}${resolveResourceContent("certificates/cert.crt")}${"\"\"\""}
-                privateKey = ${"\"\"\""}${resolveResourceContent("certificates/cert.key")}${"\"\"\""}
-            }
-            """.trimIndent()
-        )
-
-        build(VERIFY_PLUGIN_SIGNATURE_TASK_NAME)
-    }
-
-    @Test
-    fun `verify plugin signed with password provided`() {
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
-            }
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates-password/chain.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates-password/private_encrypted.pem")}")
-                password = "foobar"
-            }
-            """.trimIndent()
-        )
-
-        build(VERIFY_PLUGIN_SIGNATURE_TASK_NAME)
-    }
-
-    @Test
-    fun `verify unsigned plugin archive`() {
-        buildFile.groovy(
-            """
-            version = "1.0.0"
-            
-            downloadZipSigner {
-                version = "0.1.7"
-            }
-            signPlugin {
-                certificateChainFile = file("${resolveResourcePath("certificates-password/chain.crt")}")
-                privateKeyFile = file("${resolveResourcePath("certificates-password/private_encrypted.pem")}")
-                password = "foobar"
-            }
-            verifyPluginSignature {
-                inputArchiveFile = buildPlugin.archiveFile
-            }
-            """.trimIndent()
-        )
-
-        buildAndFail(VERIFY_PLUGIN_SIGNATURE_TASK_NAME).let {
-            assertContains("Provided zip archive is not signed", it.output)
-        }
     }
 }

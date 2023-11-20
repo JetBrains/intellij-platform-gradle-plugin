@@ -145,6 +145,11 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 description = "IntelliJ Plugin Verifier",
             )
 
+            create(
+                name = Configurations.MARKETPLACE_ZIP_SIGNER,
+                description = "Marketplace ZIP Signer",
+            )
+
             val intellijPlatformDependenciesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
                 description = "IntelliJ Platform extra dependencies",
@@ -229,8 +234,9 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 )
                 teamCityOutputFormat.convention(false)
                 subsystemsToCheck.convention("all")
-
             }
+
+            configureExtension<IntelliJPlatformExtension.Signing>(Extensions.SIGNING)
         }
 
         dependencies.configureExtension<IntelliJPlatformDependenciesExtension>(

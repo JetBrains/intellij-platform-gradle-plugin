@@ -136,7 +136,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download plugin from custom repository`() {
-        val resource = resolveResourcePath("custom-repo/updatePlugins.xml")
+        val resource = resource("custom-repo/updatePlugins.xml")
 
         buildFile.groovy(
             """
@@ -158,7 +158,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download plugin from custom repository 2`() {
-        val resource = resolveResourcePath("custom-repo-2/plugins.xml")
+        val resource = resource("custom-repo-2/plugins.xml")
 
         buildFile.groovy(
             """
@@ -181,7 +181,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
     @Test
     fun `download plugin from custom repository with query`() {
         assumeFalse(OperatingSystem.current().isWindows)
-        val resource = resolveResourcePath("custom-repo-2/plugins.xml")
+        val resource = resource("custom-repo-2/plugins.xml")
 
         buildFile.groovy(
             """
@@ -203,7 +203,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download plugin from custom repository without xml`() {
-        val resource = resolveResourcePath("custom-repo")
+        val resource = resource("custom-repo")
 
         buildFile.groovy(
             """
@@ -225,7 +225,7 @@ class DownloadIntelliJPluginsSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `download plugin from custom repository without xml with query`() {
-        val resource = resolveResourcePath("custom-repo")
+        val resource = resource("custom-repo")
 
         buildFile.groovy(
             """

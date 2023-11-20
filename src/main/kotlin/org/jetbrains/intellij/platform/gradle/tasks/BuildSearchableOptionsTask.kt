@@ -9,9 +9,11 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import kotlin.io.path.pathString
 
@@ -69,6 +71,7 @@ abstract class BuildSearchableOptionsTask : RunIdeTask() {
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
                 val pluginXmlProvider = patchPluginXmlTaskProvider.flatMap { it.outputFile }
+                val extension = project.the<IntelliJPlatformExtension>()
 
                 outputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
                 showPaidPluginWarning.convention(
@@ -76,6 +79,10 @@ abstract class BuildSearchableOptionsTask : RunIdeTask() {
                         enabled && parsePluginXml(file.asPath)?.productDescriptor != null
                     }
                 )
+
+                onlyIf {
+                    extension.buildSearchableOptions.get()
+                }
 
                 dependsOn(patchPluginXmlTaskProvider)
             }

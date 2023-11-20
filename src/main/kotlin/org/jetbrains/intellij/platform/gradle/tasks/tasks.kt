@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurat
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.executableResolver.IntelliJPluginVerifierResolver
 import org.jetbrains.intellij.platform.gradle.executableResolver.JetBrainsRuntimeResolver
+import org.jetbrains.intellij.platform.gradle.executableResolver.MarketplaceZipSignerResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.productInfo
@@ -201,6 +202,20 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             }))
             pluginVerifierExecutable.convention(layout.file(provider {
                 pluginVerifierResolver.resolveExecutable()?.toFile()
+            }))
+        }
+
+        if (this is SigningAware) {
+            val marketplaceZipSignerResolver = MarketplaceZipSignerResolver(
+                marketplaceZipSigner = configurations.getByName(Configurations.MARKETPLACE_ZIP_SIGNER),
+                localPath = extension.signing.cliPath,
+            )
+
+            zipSignerDirectory.convention(layout.dir(provider {
+                marketplaceZipSignerResolver.resolveDirectory()?.toFile()
+            }))
+            zipSignerExecutable.convention(layout.file(provider {
+                marketplaceZipSignerResolver.resolveExecutable()?.toFile()
             }))
         }
     }
