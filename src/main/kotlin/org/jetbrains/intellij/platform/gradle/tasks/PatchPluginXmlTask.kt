@@ -30,8 +30,8 @@ import kotlin.io.path.name
 @CacheableTask
 abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
 
-    @get:SkipWhenEmpty
     @get:InputFile
+    @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputFile: RegularFileProperty
 

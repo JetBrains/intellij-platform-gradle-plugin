@@ -9,7 +9,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.*
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
@@ -25,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradle.dependency.PluginProjectDependency
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
-import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
@@ -61,9 +59,10 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
      *
      * Default value: [org.jetbrains.intellij.dependency.IdeaDependency.jarFiles] of [SetupDependenciesTask.idea]
      */
-    @get:Input
+    @get:InputFiles
     @get:Optional
-    abstract val librariesToIgnore: ListProperty<File>
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val librariesToIgnore: ConfigurableFileCollection
 
     /**
      * List of dependencies on external plugins.

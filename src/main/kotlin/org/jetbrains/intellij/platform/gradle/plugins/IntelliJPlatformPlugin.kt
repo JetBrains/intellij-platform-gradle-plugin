@@ -490,7 +490,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         project.tasks.register<RunIdePerformanceTestTask>(RUN_IDE_PERFORMANCE_TEST_TASK_NAME)
         project.tasks.withType<RunIdePerformanceTestTask> {
-            artifactsDir.convention(extension.type.flatMap { type ->
+            artifactsDirectory.convention(extension.type.flatMap { type ->
                 extension.version.flatMap { version ->
                     project.layout.buildDirectory.dir(
                         "reports/performance-test/$type$version-${project.version}-${

@@ -103,6 +103,8 @@ abstract class InstrumentCodeTask : DefaultTask() {
 
     /**
      * The classpath for Java instrumentation compiler.
+     *
+     * // TODO ConfigurableFilesCollection
      */
     @get:Input
     abstract val compilerClassPathFromMaven: ListProperty<File>

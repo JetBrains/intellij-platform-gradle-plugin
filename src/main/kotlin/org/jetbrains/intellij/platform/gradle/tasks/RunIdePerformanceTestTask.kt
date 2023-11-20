@@ -6,12 +6,11 @@ import com.jetbrains.plugin.structure.base.utils.createDir
 import com.jetbrains.plugin.structure.base.utils.extension
 import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import org.gradle.api.Incubating
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.UntrackedTask
+import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.logCategory
@@ -23,8 +22,6 @@ import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPe
 import org.jetbrains.intellij.platform.gradle.propertyProviders.PerformanceTestArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
 
 /**
  * Runs performance tests on the IDE with the developed plugin installed.
@@ -46,15 +43,17 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
     /**
      * Path to directory with test projects and '.ijperf' files.
      */
-    @get:Input
-    abstract val testDataDir: Property<String>
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val testDataDirectory: DirectoryProperty
 
     /**
      * Path to the directory where performance test artifacts (IDE logs, snapshots, screenshots, etc.) will be stored.
      * If the directory doesn't exist, it will be created.
      */
-    @get:Input
-    abstract val artifactsDir: Property<String>
+    @get:InputDirectory
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val artifactsDirectory: DirectoryProperty
 
     /**
      * Name of the profiler which will be used during execution.
@@ -77,8 +76,8 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
 
     @TaskAction
     override fun exec() {
-        val dir = Paths.get(artifactsDir.get()).createDir()
-        val testData = Path.of(testDataDir.get())
+        val dir = artifactsDirectory.asPath
+        val testData = testDataDirectory.asPath
         val testExecutionResults = mutableListOf<PerformanceTestResult>()
 
         Files.walk(testData, 1)
@@ -89,7 +88,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
                 val testArtifactsDirPath = dir.resolve(testName).createDir()
 
                 // Passing to the IDE project to open
-                args = listOf("${testDataDir.get()}/${testScript.projectName}")
+                args = listOf("${testDataDirectory.get()}/${testScript.projectName}")
 
                 jvmArgumentProviders.add(
                     PerformanceTestArgumentProvider(

@@ -63,7 +63,7 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
      */
     @get:InputFile
     @get:Optional
-    @get:PathSensitive(PathSensitivity.ABSOLUTE)
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val certificateChainFile: RegularFileProperty
 
     private val context = logCategory()

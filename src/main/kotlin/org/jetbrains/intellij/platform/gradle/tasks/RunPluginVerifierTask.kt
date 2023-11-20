@@ -76,8 +76,9 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * A fallback file with a list of the releases generated with [ListProductsReleasesTask].
      * Used if [ideVersions] is not provided.
      */
-    @get:Input
+    @get:InputFile
     @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val productsReleasesFile: RegularFileProperty
 
     /**
@@ -93,7 +94,8 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
      */
-    @get:Input
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val idePaths: ConfigurableFileCollection
 
 //    /**
@@ -164,11 +166,13 @@ abstract class RunPluginVerifierTask @Inject constructor(
      * Default value: `System.getProperty("plugin.verifier.home.dir")/ides`, `System.getenv("XDG_CACHE_HOME")/pluginVerifier/ides`,
      * `System.getProperty("user.home")/.cache/pluginVerifier/ides` or system temporary directory.
      */
-    @get:Input
+    @get:InputDirectory
     @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val downloadDirectory: DirectoryProperty
 
     @get:Internal
+    @Deprecated("Rely only on downloadDirectory")
     abstract val downloadPath: Property<Path>
 
     /**
@@ -205,7 +209,7 @@ abstract class RunPluginVerifierTask @Inject constructor(
     /**
      * A file that contains a list of problems that will be ignored in a report.
      */
-    @get:Input
+    @get:InputFiles
     @get:Optional
     abstract val ignoredProblemsFile: RegularFileProperty
 

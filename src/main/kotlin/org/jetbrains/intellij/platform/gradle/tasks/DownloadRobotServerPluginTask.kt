@@ -4,11 +4,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
@@ -19,7 +18,6 @@ import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
-import java.io.File
 import javax.inject.Inject
 
 /**
@@ -49,7 +47,8 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
      * Default value: Maven cache
      */
     @get:Input
-    abstract val pluginArchive: Property<File>
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val pluginArchive: RegularFileProperty
 
     /**
      * Location of the extracted archive.
@@ -69,7 +68,7 @@ abstract class DownloadRobotServerPluginTask @Inject constructor(
 
     @TaskAction
     fun downloadRobotServerPlugin() {
-        val archive = pluginArchive.get().toPath()
+        val archive = pluginArchive.asPath
         val target = outputDir.asPath
         archiveUtils.extract(archive, target, context)
     }

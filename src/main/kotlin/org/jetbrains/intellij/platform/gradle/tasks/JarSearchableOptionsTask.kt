@@ -15,14 +15,14 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
 import java.nio.file.Path
 
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
-abstract class JarSearchableOptionsTask : Jar() {
+abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
 
     /**
      * The output directory where the JAR file will be created.
@@ -30,8 +30,8 @@ abstract class JarSearchableOptionsTask : Jar() {
      * Default value: `build/searchableOptions`
      */
     @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputDir: DirectoryProperty
 
     /**
@@ -39,18 +39,8 @@ abstract class JarSearchableOptionsTask : Jar() {
      *
      * Default value: [org.jetbrains.intellij.platform.gradle.IntelliJPluginExtension.pluginName]
      */
-    @get:Input
-    @get:Optional
+    @get:Internal
     abstract val pluginName: Property<String>
-
-    /**
-     * The sandbox output directory.
-     *
-     * Default value: [PrepareSandboxTask.getDestinationDir]
-     */
-    @get:Input
-    @get:Optional
-    abstract val sandboxDir: Property<String>
 
     /**
      * Emit warning if no searchable options are found.
@@ -93,14 +83,14 @@ abstract class JarSearchableOptionsTask : Jar() {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsDidWork = buildSearchableOptionsTaskProvider.map { it.didWork }
-
+                
                 inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
                 pluginName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
-                sandboxDir.convention(prepareSandboxTaskProvider.map { it.destinationDir.canonicalPath })
                 archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions")) // TODO: check if necessary, if so — use temp
                 noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))
 
+                // TODO Test it!!!
                 val pluginJarFiles = mutableSetOf<String>()
                 from({
                     include {
@@ -108,7 +98,8 @@ abstract class JarSearchableOptionsTask : Jar() {
                             it.isDirectory -> true
                             else -> {
                                 if (it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) && pluginJarFiles.isEmpty()) {
-                                    Path.of(sandboxDir.get())
+                                    sandboxPluginsDirectory
+                                        .asPath
                                         .resolve(pluginName.get())
                                         .resolve("lib")
                                         .listFiles()
