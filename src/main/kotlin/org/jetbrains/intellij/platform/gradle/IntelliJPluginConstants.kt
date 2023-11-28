@@ -10,7 +10,7 @@ object IntelliJPluginConstants {
     const val PLUGIN_BASE_ID = "$PLUGIN_ID.base"
     const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
 
-    const val PLUGIN_GROUP_NAME = "intellij"
+    const val PLUGIN_GROUP_NAME = "intellijPlatform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
     const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
@@ -22,6 +22,7 @@ object IntelliJPluginConstants {
     const val VERSION_LATEST = "latest"
 
     object Extensions {
+        const val IDES = "ides"
         const val IDEA_VERSION = "ideaVersion"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
@@ -42,6 +43,9 @@ object IntelliJPluginConstants {
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
         const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
+        const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"
+        const val INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY = "intellijPluginVerifierIdesDependency"
+        const val INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE = "intellijPluginVerifierIdesLocalInstance"
         const val MARKETPLACE_ZIP_SIGNER = "marketplaceZipSigner"
         const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
@@ -52,11 +56,13 @@ object IntelliJPluginConstants {
             val bundledPluginsList = Attribute.of("intellijPlatformBundledPluginsList", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
+            val binaryReleaseExtracted = Attribute.of("intellijPlatformPluginVerifierIdeExtracted", Boolean::class.javaObjectType)
             val productInfo = Attribute.of("intellijPlatformProductInfo", Boolean::class.javaObjectType)
         }
     }
 
     object Tasks {
+        const val APPLY_RECOMMENDED_PLUGIN_VERIFIER_IDES = "applyRecommendedPluginVerifierIdes"
         const val BUILD_PLUGIN = "buildPlugin" // TODO: check
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML = "downloadAndroidStudioProductReleasesXml"
@@ -91,10 +97,14 @@ object IntelliJPluginConstants {
     }
 
     object Locations {
-        const val ANDROID_STUDIO_PRODUCTS_RELEASES_URL = "https://jb.gg/android-studio-releases-list.xml"
+        const val ANDROID_STUDIO_BINARY_RELEASES = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
+        const val ANDROID_STUDIO_PRODUCTS_RELEASES_LIST = "https://jb.gg/android-studio-releases-list.xml"
+        const val DOWNLOAD = "https://download.jetbrains.com"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
-        const val IDEA_PRODUCTS_RELEASES_URL = "https://www.jetbrains.com/updates/updates.xml"
+        const val IDEA_PRODUCTS_BINARY_RELEASES = "https://data.services.jetbrains.com/products/"
+        const val IDEA_PRODUCTS_RELEASES_LIST = "https://www.jetbrains.com/updates/updates.xml"
+        const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
         const val ZIP_SIGNER_REPOSITORY = "https://github.com/JetBrains/marketplace-zip-signer"
@@ -171,7 +181,6 @@ object IntelliJPluginConstants {
     const val RELEASE_SUFFIX_CUSTOM_SNAPSHOT = "-CUSTOM-SNAPSHOT"
 
     const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
-    const val INTELLIJ_DEPENDENCIES = "${Locations.CACHE_REDIRECTOR}/intellij-dependencies"
     const val DEFAULT_INTELLIJ_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository"
     const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven"
     const val JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA =

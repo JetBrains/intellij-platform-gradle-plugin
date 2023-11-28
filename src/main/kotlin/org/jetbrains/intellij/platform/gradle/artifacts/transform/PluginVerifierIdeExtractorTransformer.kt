@@ -9,10 +9,7 @@ import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.FileSystemLocation
-import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.file.*
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Internal
@@ -20,7 +17,6 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.asPath
 import java.io.File.separator
 import javax.inject.Inject
@@ -28,20 +24,19 @@ import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 
-// TODO: Allow for providing custom IDE dir?
 @DisableCachingByDefault(because = "Not worth caching")
-abstract class ExtractorTransformer @Inject constructor(
+abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
-) : TransformAction<ExtractorTransformer.Parameters> {
+) : TransformAction<PluginVerifierIdeExtractorTransformer.Parameters> {
 
     interface Parameters : TransformParameters {
 
         @get:Internal
-        val intellijPlatform: ConfigurableFileCollection
+        val downloadDirectory: DirectoryProperty
 
         @get:Internal
-        val jetbrainsRuntime: ConfigurableFileCollection
+        val binaryReleaseDependencies: ConfigurableFileCollection
     }
 
     @get:Classpath
@@ -54,29 +49,12 @@ abstract class ExtractorTransformer @Inject constructor(
         val (groupId, artifactId, version) = path.pathString.split(separator).dropLast(2).takeLast(3)
         // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
 
-        val targetDirectory = listOf(
-            {
-                IntelliJPlatformType.values()
-                    .find { groupId == it.dependency.group && artifactId == it.dependency.name }
-                    ?.let { "$it-$version" }
-            },
-            {
-                version
-                    .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
-            },
-            {
-                val channel = when {
-                    groupId == JETBRAINS_MARKETPLACE_MAVEN_GROUP -> ""
-                    groupId.endsWith(".$JETBRAINS_MARKETPLACE_MAVEN_GROUP") -> groupId.dropLast(JETBRAINS_MARKETPLACE_MAVEN_GROUP.length + 1)
-                    else -> null
-                }
+        val type = IntelliJPlatformType.values().find {
+            it.binary?.run { group == groupId && name == artifactId } == true
+        } ?: return
 
-                "$groupId-$artifactId-$version" + "@$channel".takeUnless { channel.isNullOrEmpty() }.orEmpty()
-            },
-        )
-            .firstNotNullOfOrNull { it() }
-            ?.let { outputs.dir(it) }
-            ?: return
+        val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath
+        outputs.file("path.txt").writeText(targetDirectory.pathString)
 
         when (extension) {
             ".zip", ".sit" -> {
@@ -90,6 +68,10 @@ abstract class ExtractorTransformer @Inject constructor(
                 fileSystemOperations.copy {
                     from(archiveOperations.tarTree(path))
                     into(targetDirectory)
+                    includeEmptyDirs = false
+                    eachFile {
+                        this.path = this.path.split('/', limit = 2).last()
+                    }
                 }
             }
 
@@ -98,37 +80,28 @@ abstract class ExtractorTransformer @Inject constructor(
     }
 }
 
-internal fun DependencyHandler.applyExtractorTransformer(
-    compileClasspathConfiguration: Configuration,
-    testCompileClasspathConfiguration: Configuration,
-    intellijPlatformDependencyConfiguration: Configuration,
-    jetbrainsRuntimeDependencyConfiguration: Configuration,
+internal fun DependencyHandler.applyPluginVerifierIdeExtractorTransformer(
+    intellijPluginVerifierIdesDependencyConfiguration: Configuration,
+    downloadDirectoryProvider: Provider<Directory>,
 ) {
     artifactTypes.maybeCreate(ZIP_TYPE)
         .attributes
-        .attribute(Attributes.extracted, false)
+        .attribute(Attributes.binaryReleaseExtracted, false)
 
     artifactTypes.maybeCreate("tar.gz")
         .attributes
-        .attribute(Attributes.extracted, false)
+        .attribute(Attributes.binaryReleaseExtracted, false)
 
-    compileClasspathConfiguration
-        .attributes
-        .attribute(Attributes.extracted, true)
-
-    testCompileClasspathConfiguration
-        .attributes
-        .attribute(Attributes.extracted, true)
-
-    registerTransform(ExtractorTransformer::class) {
+    registerTransform(PluginVerifierIdeExtractorTransformer::class) {
         from
-            .attribute(Attributes.extracted, false)
+            .attribute(Attributes.binaryReleaseExtracted, false)
+
         to
-            .attribute(Attributes.extracted, true)
+            .attribute(Attributes.binaryReleaseExtracted, true)
 
         parameters {
-            intellijPlatform.from(intellijPlatformDependencyConfiguration)
-            jetbrainsRuntime.from(jetbrainsRuntimeDependencyConfiguration)
+            binaryReleaseDependencies.from(intellijPluginVerifierIdesDependencyConfiguration)
+            downloadDirectory.convention(downloadDirectoryProvider)
         }
     }
 }

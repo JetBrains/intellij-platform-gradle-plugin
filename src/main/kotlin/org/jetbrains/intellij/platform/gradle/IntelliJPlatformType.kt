@@ -4,41 +4,46 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.GradleException
 
-enum class IntelliJPlatformType(val code: String, val groupId: String, val artifactId: String) {
+enum class IntelliJPlatformType(
+    val code: String,
+    val dependency: Coordinates,
+    val binary: Coordinates?,
+    val unavailable: Boolean = false,
+) {
     AndroidStudio(
         code = "AI",
-        groupId = "com.google.android.studio",
-        artifactId = "android-studio",
+        dependency = Coordinates("com.google.android.studio", "android-studio"),
+        binary = Coordinates("com.google.android.studio", "android-studio"),
     ),
     CLion(
         code = "CL",
-        groupId = "com.jetbrains.intellij.clion",
-        artifactId = "clion",
+        dependency = Coordinates("com.jetbrains.intellij.clion", "clion"),
+        binary = Coordinates("cpp", "CLion"),
     ),
     Fleet(
         code = "FLIJ",
-        groupId = "com.jetbrains.intellij.fleetBackend",
-        artifactId = "fleetBackend",
+        dependency = Coordinates("com.jetbrains.intellij.fleetBackend", "fleetBackend"),
+        binary = null,
     ),
     Gateway(
         code = "GW",
-        groupId = "com.jetbrains.intellij.gateway",
-        artifactId = "gateway",
+        dependency = Coordinates("com.jetbrains.intellij.gateway", "gateway"),
+        binary = Coordinates("idea/gateway", "JetBrainsGateway"),
     ),
     GoLand(
         code = "GO",
-        groupId = "com.jetbrains.intellij.goland",
-        artifactId = "goland",
+        dependency = Coordinates("com.jetbrains.intellij.goland", "goland"),
+        binary = Coordinates("go", "goland"),
     ),
     IntellijIdeaCommunity(
         code = "IC",
-        groupId = "com.jetbrains.intellij.idea",
-        artifactId = "ideaIC",
+        dependency = Coordinates("com.jetbrains.intellij.idea", "ideaIC"),
+        binary = Coordinates("idea", "ideaIC"),
     ),
     IntellijIdeaUltimate(
         code = "IU",
-        groupId = "com.jetbrains.intellij.idea",
-        artifactId = "ideaIU",
+        dependency = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
+        binary = Coordinates("idea", "ideaIU"),
     ),
 
     //    JPS(
@@ -48,24 +53,31 @@ enum class IntelliJPlatformType(val code: String, val groupId: String, val artif
     //    ),
     PhpStorm(
         code = "PS",
-        groupId = "com.jetbrains.intellij.phpstorm",
-        artifactId = "phpstorm",
+        dependency = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
+        binary = Coordinates("webide", "PhpStorm"),
     ),
     PyCharmProfessional(
         code = "PY",
-        groupId = "com.jetbrains.intellij.pycharm",
-        artifactId = "pycharmPY",
+        dependency = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPY"),
+        binary = Coordinates("python", "pycharm-professional"),
     ),
     PyCharmCommunity(
         code = "PC",
-        groupId = "com.jetbrains.intellij.pycharm",
-        artifactId = "pycharmPC",
+        dependency = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPC"),
+        binary = Coordinates("python", "pycharm-community"),
     ),
     Rider(
         code = "RD",
-        groupId = "com.jetbrains.intellij.rider",
-        artifactId = "riderRD",
-    );
+        dependency = Coordinates("com.jetbrains.intellij.rider", "riderRD"),
+        binary = Coordinates("rider", "JetBrains.Rider"),
+    ),
+    Writerside(
+        code = "WRS",
+        dependency = Coordinates("com.jetbrains.intellij.idea", "writerside"),
+        binary = null,
+        unavailable = true,
+    ),
+    ;
 
     companion object {
         private val map = values().associateBy(IntelliJPlatformType::code)
@@ -75,4 +87,6 @@ enum class IntelliJPlatformType(val code: String, val groupId: String, val artif
     }
 
     override fun toString() = code
+
+    data class Coordinates(val group: String, val name: String)
 }

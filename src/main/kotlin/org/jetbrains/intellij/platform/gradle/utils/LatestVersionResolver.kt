@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.utils
 
 import org.gradle.api.GradleException
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.debug
 import org.jetbrains.intellij.platform.gradle.model.MavenMetadata
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
@@ -12,6 +13,21 @@ import java.net.URL
 class LatestVersionResolver {
 
     companion object {
+        fun pluginVerifier() = fromMaven(
+            "IntelliJ Plugin Verifier",
+            "${Locations.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml",
+        )
+
+        fun robotServerPlugin() = fromMaven(
+            "Robot Server Plugin",
+            "${Locations.INTELLIJ_DEPENDENCIES_REPOSITORY}/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml",
+        )
+
+        fun zipSigner() = fromGitHub(
+            "Marketplace ZIP Signer",
+            Locations.ZIP_SIGNER_REPOSITORY,
+        )
+
         fun fromMaven(subject: String, url: String): String {
             debug(message = "Resolving latest $subject version")
             return URL(url).openStream().use {

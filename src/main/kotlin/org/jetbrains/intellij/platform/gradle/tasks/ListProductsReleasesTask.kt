@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -22,6 +23,7 @@ import org.jetbrains.intellij.platform.gradle.model.ProductsReleases
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import java.util.*
+import kotlin.io.path.createFile
 
 /**
  * List all available IntelliJ-based IDE releases with their updates.
@@ -245,7 +247,13 @@ abstract class ListProductsReleasesTask : DefaultTask(), PlatformVersionAware {
                     it.outputs.files.asFileTree
                 })
                 outputFile.convention(
-                    project.layout.buildDirectory.file("${Tasks.LIST_PRODUCTS_RELEASES}.txt")
+                    project.layout.buildDirectory.file("${Tasks.LIST_PRODUCTS_RELEASES}.txt").also {
+                        with(it.asPath) {
+                            if (!exists()) {
+                                createFile()
+                            }
+                        }
+                    }
                 )
                 types.convention(project.provider {
                     listOf(platformType)

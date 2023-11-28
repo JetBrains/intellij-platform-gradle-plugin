@@ -211,53 +211,53 @@ abstract class IdeaDependencyManager @Inject constructor(
 
         val remoteIdeaDependency = when {
             type == IntellijIdeaUltimate -> RemoteIdeaDependency(
-                group = IntellijIdeaUltimate.groupId,
-                name = IntellijIdeaUltimate.artifactId,
+                group = IntellijIdeaUltimate.dependency.group,
+                name = IntellijIdeaUltimate.dependency.name,
             )
 
             type == IntellijIdeaCommunity -> RemoteIdeaDependency(
-                group = IntellijIdeaCommunity.groupId,
-                name = IntellijIdeaCommunity.artifactId,
+                group = IntellijIdeaCommunity.dependency.group,
+                name = IntellijIdeaCommunity.dependency.name,
             )
 
             type == CLion -> RemoteIdeaDependency(
-                group = CLion.groupId,
-                name = CLion.artifactId,
+                group = CLion.dependency.group,
+                name = CLion.dependency.name,
             )
 
             type == PyCharmProfessional -> RemoteIdeaDependency(
-                group = PyCharmProfessional.groupId,
-                name = PyCharmProfessional.artifactId,
+                group = PyCharmProfessional.dependency.group,
+                name = PyCharmProfessional.dependency.name,
             )
 
             type == PyCharmCommunity -> RemoteIdeaDependency(
-                group = PyCharmCommunity.groupId,
-                name = PyCharmCommunity.artifactId,
+                group = PyCharmCommunity.dependency.group,
+                name = PyCharmCommunity.dependency.name,
             )
 
             type == GoLand -> RemoteIdeaDependency(
-                group = GoLand.groupId,
-                name = GoLand.artifactId,
+                group = GoLand.dependency.group,
+                name = GoLand.dependency.name,
             )
 
             type == PhpStorm -> RemoteIdeaDependency(
-                group = PhpStorm.groupId,
-                name = PhpStorm.artifactId,
+                group = PhpStorm.dependency.group,
+                name = PhpStorm.dependency.name,
             )
 
             type == Rider -> RemoteIdeaDependency(
-                group = Rider.groupId,
-                name = Rider.artifactId,
+                group = Rider.dependency.group,
+                name = Rider.dependency.name,
             )
 
             type == Gateway -> RemoteIdeaDependency(
-                group = Gateway.groupId,
-                name = Gateway.artifactId,
+                group = Gateway.dependency.group,
+                name = Gateway.dependency.name,
             )
 
             type == AndroidStudio -> RemoteIdeaDependency(
-                group = AndroidStudio.groupId,
-                name = AndroidStudio.artifactId,
+                group = AndroidStudio.dependency.group,
+                name = AndroidStudio.dependency.name,
                 artifactExtension = when {
                     OperatingSystem.current().isLinux -> "tar.gz"
                     else -> "zip"
@@ -270,8 +270,8 @@ abstract class IdeaDependencyManager @Inject constructor(
             }
 
             type == Fleet -> RemoteIdeaDependency(
-                group = Fleet.groupId,
-                name = Fleet.artifactId,
+                group = Fleet.dependency.group,
+                name = Fleet.dependency.name,
             )
 
             else -> throw BuildException(

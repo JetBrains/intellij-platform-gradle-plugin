@@ -2,18 +2,39 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.GradleException
+import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.tasks.TaskContainer
+import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
-import org.jetbrains.intellij.platform.gradle.tasks.ListProductsReleasesTask
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Version
+import org.jetbrains.intellij.platform.gradle.asPath
+import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
+import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.tasks.ApplyRecommendedPluginVerifierIdesTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
+import java.io.File
+import javax.inject.Inject
+import kotlin.io.path.exists
+import kotlin.io.path.pathString
+import kotlin.math.absoluteValue
 
+@Suppress("unused")
 @IntelliJPlatform
 interface IntelliJPlatformExtension : ExtensionAware {
 
@@ -198,25 +219,30 @@ interface IntelliJPlatformExtension : ExtensionAware {
     }
 
     @IntelliJPlatform
-    interface PluginVerifier {
+    interface PluginVerifier : ExtensionAware {
+
+        val ides
+            get() = extensions.getByName<Ides>(Extensions.IDES)
 
         /**
          * A path to the local IntelliJ Plugin Verifier CLI tool to be used.
          */
         val cliPath: RegularFileProperty
 
-        /**
-         * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
-         * Check the available build versions on [IntelliJ Platform Builds list](https://jb.gg/intellij-platform-builds-list).
-         *
-         * Default value: output of the [ListProductsReleasesTask] task
-         */
-        val ideVersions: ListProperty<String>
+        val freeArgs: ListProperty<String>
 
-        /**
-         * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
-         */
-        val idePaths: ConfigurableFileCollection
+//        /**
+//         * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
+//         * Check the available build versions on [IntelliJ Platform Builds list](https://jb.gg/intellij-platform-builds-list).
+//         *
+//         * Default value: output of the [ListProductsReleasesTask] task
+//         */
+//        val ideVersions: ListProperty<String>
+//
+//        /**
+//         * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
+//         */
+//        val idePaths: ConfigurableFileCollection
 
         /**
          * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
@@ -288,6 +314,92 @@ interface IntelliJPlatformExtension : ExtensionAware {
          * A file that contains a list of problems that will be ignored in a report.
          */
         val ignoredProblemsFile: RegularFileProperty
+
+        @IntelliJPlatform
+        abstract class Ides @Inject constructor(
+            private val dependencies: DependencyHandler,
+            private val providers: ProviderFactory,
+            private val tasks: TaskContainer,
+            private val gradle: Gradle,
+            private val downloadDirectory: DirectoryProperty,
+        ) {
+
+            fun ide(type: Provider<*>, version: Provider<String>) = dependencies.addProvider(
+                Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                type
+                    .map {
+                        when (it) {
+                            is IntelliJPlatformType -> it
+                            is String -> IntelliJPlatformType.fromCode(it)
+                            else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or IntelliJPlatformType")
+                        }
+                    }
+                    .zip(version) { typeValue, versionValue ->
+                        typeValue.binary ?: return@zip null
+
+                        downloadDirectory
+                            .dir("${typeValue}-${versionValue}")
+                            .asPath
+                            .takeIf { it.exists() }
+                            ?.let {
+                                // IDE is already present in the [downloadDirectory], use as [localIde]
+                                localIde(it.pathString)
+                                return@zip null
+                            }
+
+                        dependencies.create(
+                            group = typeValue.binary.group,
+                            name = typeValue.binary.name,
+                            version = versionValue,
+                            ext = "tar.gz",
+                        )
+                    }
+            )
+
+            fun ide(type: IntelliJPlatformType, version: String) = ide(providers.provider { type }, providers.provider { version })
+
+            fun ide(type: String, version: String) = ide(IntelliJPlatformType.fromCode(type), version)
+
+            fun ide(definition: String) = definition.split('-').let {
+                when {
+                    it.size == 2 -> ide(it.first(), it.last())
+                    else -> ide(IntelliJPlatformType.IntellijIdeaCommunity, it.first())
+                }
+            }
+
+            fun localIde(localPath: Provider<String>) = dependencies.addProvider(
+                Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                localPath.map {
+                    val artifactPath = resolveArtifactPath(it)
+                    val productInfo = artifactPath.productInfo()
+
+                    val type = IntelliJPlatformType.fromCode(productInfo.productCode)
+                    if (Version.parse(productInfo.buildNumber) < Version.parse(MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION)) {
+                        throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
+                    }
+                    val path = artifactPath.pathString
+                    val version = "${productInfo.version}:local+${path.hashCode().absoluteValue}"
+
+                    dependencies.create(
+                        group = PLUGIN_GROUP_NAME,
+                        name = "${type.dependency.group}:${type.dependency.name}",
+                        version = version,
+                    ).apply {
+                        createIvyDependency(gradle, listOf(Publication(path, "directory", null, "default")))
+                    }
+                }
+            )
+
+            fun localIde(localPath: String) = localIde(providers.provider { localPath })
+
+            fun localIde(localPath: File) = localIde(providers.provider { localPath.absolutePath })
+
+            fun recommended() {
+                tasks.withType<ApplyRecommendedPluginVerifierIdesTask> {
+                    apply.set(true)
+                }
+            }
+        }
     }
 
     @IntelliJPlatform

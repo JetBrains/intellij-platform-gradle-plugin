@@ -152,13 +152,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             sandboxDirectory.convention(sandboxDirectoryProvider)
 
             if (this !is PrepareSandboxTask) {
-                val isBuiltInTask = name in listOf(
-                    Tasks.BUILD_SEARCHABLE_OPTIONS,
-                    Tasks.RUN_IDE,
-                    Tasks.TEST_IDE,
-                    Tasks.TEST_UI_IDE,
-                    Tasks.VERIFY_PLUGIN,
-                )
+                val isBuiltInTask = Tasks::class.java.declaredFields.any { it.get(null) == name }
                 val prepareSandboxTaskName = when (this) {
                     is RunIdeTask -> Tasks.PREPARE_SANDBOX
                     is TestIdeTask -> Tasks.PREPARE_TESTING_SANDBOX
@@ -192,6 +186,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         }
 
         if (this is PluginVerifierAware) {
+            // TODO: test if no PV dependency is added to the project
             val pluginVerifierResolver = IntelliJPluginVerifierResolver(
                 intellijPluginVerifier = configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER),
                 localPath = extension.pluginVerifier.cliPath,
@@ -206,6 +201,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         }
 
         if (this is SigningAware) {
+            // TODO: test if no ZIP Signer dependency is added to the project
             val marketplaceZipSignerResolver = MarketplaceZipSignerResolver(
                 marketplaceZipSigner = configurations.getByName(Configurations.MARKETPLACE_ZIP_SIGNER),
                 localPath = extension.signing.cliPath,

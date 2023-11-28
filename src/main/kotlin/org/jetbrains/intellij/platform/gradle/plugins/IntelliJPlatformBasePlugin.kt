@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
@@ -15,10 +16,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyProductInfoTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -60,7 +58,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                         throw GradleException("No IntelliJ Platform dependency found")
                     }
 
-                    val identifiers = IntelliJPlatformType.values().map { "${it.groupId}:${it.artifactId}" }
+                    val identifiers = IntelliJPlatformType.values().map { it.dependency }.map { "${it.group}:${it.name}" }
                     val matched = dependencies.filter { identifiers.contains("${it.group}:${it.name}") }
                     if (matched.size > 1) {
                         throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
@@ -145,6 +143,36 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 description = "IntelliJ Plugin Verifier",
             )
 
+            val intellijPluginVerifierIdesDependencyConfiguration = create(
+                name = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                description = "IntelliJ Plugin Verifier IDE dependencies",
+            ) {
+                attributes {
+                    attribute(Attributes.binaryReleaseExtracted, false)
+                }
+            }
+            val intellijPluginVerifierIdesLocalConfiguration = create(
+                name = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                description = "IntelliJ Plugin Verifier IDE local",
+            ) {
+                attributes {
+                    attribute(Attributes.binaryReleaseExtracted, true)
+                }
+            }
+
+            create(
+                name = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
+                description = "IntelliJ Plugin Verifier IDEs",
+            ) {
+                attributes {
+                    attribute(Attributes.binaryReleaseExtracted, true)
+                }
+
+                extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
+                extendsFrom(intellijPluginVerifierIdesLocalConfiguration)
+            }
+
+
             create(
                 name = Configurations.MARKETPLACE_ZIP_SIGNER,
                 description = "Marketplace ZIP Signer",
@@ -192,6 +220,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             )
             applyProductInfoTransformer()
             applyBundledPluginsListTransformer()
+            applyPluginVerifierIdeExtractorTransformer(
+                configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
+                providers.provider {
+                    project.the<IntelliJPlatformExtension>().pluginVerifier.downloadDirectory.get()
+                },
+            )
         }
 
         configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
@@ -234,6 +268,15 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 )
                 teamCityOutputFormat.convention(false)
                 subsystemsToCheck.convention("all")
+
+                configureExtension<IntelliJPlatformExtension.PluginVerifier.Ides>(
+                    Extensions.IDES,
+                    dependencies,
+                    providers,
+                    tasks,
+                    gradle,
+                    downloadDirectory,
+                )
             }
 
             configureExtension<IntelliJPlatformExtension.Signing>(Extensions.SIGNING)
@@ -247,6 +290,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             providers,
             gradle,
         )
+
         repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(
             Extensions.INTELLIJ_PLATFORM,
             repositories,

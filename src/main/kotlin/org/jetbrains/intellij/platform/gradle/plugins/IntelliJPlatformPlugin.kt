@@ -25,14 +25,12 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions.INTELLIJ_PLATFORM
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INTELLIJ_DEPENDENCIES
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MARKETPLACE_HOST
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
@@ -41,15 +39,12 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SU
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_FOR_UI_TESTS_TASK_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RUN_IDE_PERFORMANCE_TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.dependency.*
 import org.jetbrains.intellij.platform.gradle.model.MavenMetadata
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.utils.ArchiveUtils
@@ -58,8 +53,6 @@ import org.jetbrains.intellij.platform.gradle.utils.mavenRepository
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
 import java.net.URL
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
@@ -129,8 +122,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
-        configureDownloadRobotServerPluginTask(project)
-        configureRunIdePerformanceTestTask(project, extension)
+//        configureDownloadRobotServerPluginTask(project)
+//        configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
         configurePublishPluginTask(project)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
@@ -458,52 +451,52 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 //        }
 //    }
 
-    private fun configureDownloadRobotServerPluginTask(project: Project) {
-        info(context, "Configuring robot-server download Task")
+//    private fun configureDownloadRobotServerPluginTask(project: Project) {
+//        info(context, "Configuring robot-server download Task")
+//
+//        project.tasks.register<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+//        project.tasks.withType<DownloadRobotServerPluginTask> {
+//            val taskContext = logCategory()
+//
+//            version.convention(VERSION_LATEST)
+//            outputDir.convention(project.layout.buildDirectory.dir("robotServerPlugin"))
+//            pluginArchive.convention(project.provider {
+//                val resolvedVersion = resolveRobotServerPluginVersion(version.orNull)
+//                val (group, name) = getDependency(resolvedVersion).split(':')
+//                dependenciesDownloader.downloadFromRepository(taskContext, {
+//                    create(
+//                        group = group,
+//                        name = name,
+//                        version = resolvedVersion,
+//                    )
+//                }, {
+//                    mavenRepository(INTELLIJ_DEPENDENCIES) {
+//                        content { includeGroup(group) }
+//                    }
+//                }).first()
+//            })
+//        }
+//    }
 
-        project.tasks.register<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-        project.tasks.withType<DownloadRobotServerPluginTask> {
-            val taskContext = logCategory()
-
-            version.convention(VERSION_LATEST)
-            outputDir.convention(project.layout.buildDirectory.dir("robotServerPlugin"))
-            pluginArchive.convention(project.provider {
-                val resolvedVersion = resolveRobotServerPluginVersion(version.orNull)
-                val (group, name) = getDependency(resolvedVersion).split(':')
-                dependenciesDownloader.downloadFromRepository(taskContext, {
-                    create(
-                        group = group,
-                        name = name,
-                        version = resolvedVersion,
-                    )
-                }, {
-                    mavenRepository(INTELLIJ_DEPENDENCIES) {
-                        content { includeGroup(group) }
-                    }
-                }).first()
-            })
-        }
-    }
-
-    private fun configureRunIdePerformanceTestTask(project: Project, extension: IntelliJPluginExtension) {
-        info(context, "Configuring run IDE performance test task")
-
-        project.tasks.register<RunIdePerformanceTestTask>(RUN_IDE_PERFORMANCE_TEST_TASK_NAME)
-        project.tasks.withType<RunIdePerformanceTestTask> {
-            artifactsDirectory.convention(extension.type.flatMap { type ->
-                extension.version.flatMap { version ->
-                    project.layout.buildDirectory.dir(
-                        "reports/performance-test/$type$version-${project.version}-${
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
-                        }"
-                    ).map { it.toString() }
-                }
-            })
-            profilerName.convention(ProfilerName.ASYNC)
-
-            finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
-        }
-    }
+//    private fun configureRunIdePerformanceTestTask(project: Project, extension: IntelliJPluginExtension) {
+//        info(context, "Configuring run IDE performance test task")
+//
+//        project.tasks.register<RunIdePerformanceTestTask>(RUN_IDE_PERFORMANCE_TEST_TASK_NAME)
+//        project.tasks.withType<RunIdePerformanceTestTask> {
+//            artifactsDirectory.convention(extension.type.flatMap { type ->
+//                extension.version.flatMap { version ->
+//                    project.layout.buildDirectory.dir(
+//                        "reports/performance-test/$type$version-${project.version}-${
+//                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
+//                        }"
+//                    ).map { it.toString() }
+//                }
+//            })
+//            profilerName.convention(ProfilerName.ASYNC)
+//
+//            finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+//        }
+//    }
 
     private fun resolveLatestPluginUpdate(pluginId: String, buildNumber: String, channel: String = "") =
         PluginRepositoryFactory.create(MARKETPLACE_HOST)
@@ -649,7 +642,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                                 )
                             }, {
                                 setOf(
-                                    INTELLIJ_DEPENDENCIES,
+                                    IntelliJPluginConstants.Locations.INTELLIJ_DEPENDENCIES_REPOSITORY,
                                 ).map(::mavenRepository)
                             }, true).takeIf { it.isNotEmpty() }
                         }

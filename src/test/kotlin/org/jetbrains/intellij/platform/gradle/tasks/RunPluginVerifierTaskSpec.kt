@@ -2,59 +2,54 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.apache.commons.io.FileUtils
 import org.gradle.kotlin.dsl.support.listFilesOrdered
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import org.junit.Assert
-import java.net.URL
+import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.util.*
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempFile
+import kotlin.io.path.pathString
 import kotlin.io.path.writeLines
-import kotlin.test.Ignore
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
+import kotlin.test.*
 
 class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
+    fun `warn about no IDE picked for verification`() {
+        writePluginVerifierDependency()
+
+        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
+            assertContains("No IDE selected for verification with the IntelliJ Plugin Verifier", output)
+        }
+    }
+
+    @Test
+    fun `warn about too low IDE version`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde(version = "2020.2.3")
+
+        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
+            assertContains("The minimal supported IDE version is 223+, the provided version is too low: 2020.2.3 (202.7660.26)", output)
+        }
+    }
+
+    @Test
     fun `run plugin verifier in specified version`() {
         writePluginXmlFile()
-        buildFile.kotlin(
-            """
-            repositories {
-                intellijPlatform.pluginVerifier()
-            }
-            dependencies {
-                intellijPlatform.pluginVerifier()
-            }
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions = ["2020.2.3"]
-                }
-            }
-            """.trimIndent()
-        )
+        writePluginVerifierDependency("1.304")
+        writePluginVerifierIde()
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Starting the IntelliJ Plugin Verifier 1.255", output)
+            assertContains("Starting the IntelliJ Plugin Verifier 1.304", output)
         }
     }
 
     @Test
     fun `run plugin verifier fails on old version lower than 1_255`() {
         writePluginXmlFile()
-        buildFile.kotlin(
-            """
-            runPluginVerifier {
-                ideVersions = ["2020.2.3"]
-                verifierVersion = "1.254"
-            }
-            """.trimIndent()
-        )
+        writePluginVerifierDependency("1.254")
+        writePluginVerifierIde()
 
         build(
             gradleVersion = gradleVersion,
@@ -69,18 +64,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
-                }
-            }
-            """.trimIndent()
-        )
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            val version = RunPluginVerifierTask.resolveLatestVersion()
+            val version = LatestVersionResolver.pluginVerifier()
             assertContains("Starting the IntelliJ Plugin Verifier $version", output)
         }
     }
@@ -89,19 +77,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `test plugin against two IDEs`() {
         writeJavaFile()
         writePluginXmlFile()
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions = listOf("IC-2020.2.3", "PS-2020.1.3")
-                }
-            }
-            """.trimIndent()
-        )
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+        writePluginVerifierIde("PS", "2022.3")
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Plugin MyName:1.0.0 against IC-202.7660.26: Compatible", output)
-            assertContains("Plugin MyName:1.0.0 against PS-201.8538.41: Compatible", output)
+            assertContains("Plugin projectName:1.0.0 against IC-223.8836.14: Compatible", output)
+            assertContains("Plugin projectName:1.0.0 against PS-223.7571.212: Compatible", output)
         }
     }
 
@@ -109,18 +91,21 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `test plugin against Android Studio`() {
         writeJavaFile()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde("AI", "2022.3.1.18")
+
         buildFile.kotlin(
             """
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions = listOf("AI-2021.1.1.15")
+            repositories {
+                intellijPlatform {
+                    binaryReleasesAndroidStudio()
                 }
             }
             """.trimIndent()
         )
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Plugin MyName:1.0.0 against AI-211.7628.21.2111.7824002: Compatible", output)
+            assertContains("Plugin projectName:1.0.0 against AI-223.8836.35.2231.10406996: Compatible", output)
         }
     }
 
@@ -128,12 +113,14 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports directory`() {
         writeJavaFile()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("IC-2020.2.3")
-                    verificationReportsDirectory = project.buildDir.dir("foo")
+                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                 }
             }
             """.trimIndent()
@@ -149,19 +136,21 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports output formats`() {
         writeJavaFile()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
-            import org.jetbrains.intellij.tasks.RunPluginVerifierTask.VerificationReportsFormats
-            
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
-                    verificationReportsDirectory = project.buildDir.dir("foo")
-                    verificationReportsFormats = [ VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN ]
+                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+                    verificationReportsFormats = listOf(VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN)
                 }
             }
             """.trimIndent()
         )
+
+        println("buildFile = ${buildFile}")
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
             val reportsDirectory = file("build/foo")
@@ -180,13 +169,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports with empty set of output formats`() {
         writeJavaFile()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
                     verificationReportsFormats.empty()
-                    verificationReportsDirectory = project.buildDir.dir("foo")
+                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                 }
             }
             """.trimIndent()
@@ -201,7 +192,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             assertNotNull(ideVersionDir, "Verification reports directory not found")
 
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
-            Assert.assertTrue(reportFiles.isEmpty())
+            assertTrue(reportFiles.isEmpty())
         }
     }
 
@@ -209,12 +200,14 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set verification reports with default settings`() {
         writeJavaFile()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
-                    verificationReportsDirectory = project.buildDir.dir("foo")
+                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                 }
             }
             """.trimIndent()
@@ -229,7 +222,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             assertNotNull(ideVersionDir, "Verification reports directory not found")
 
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
-            Assert.assertTrue(reportFiles.isNotEmpty())
+            assertTrue(reportFiles.isNotEmpty())
         }
     }
 
@@ -237,17 +230,18 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `set ignored problems file`() {
         writeJavaFileWithPluginProblems(classNameSuffix = UUID.randomUUID().toString().replace("-", ""))
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
 
-        val lines = listOf("MyName:1.0.0:Reference to a missing property.*")
-        val ignoredProblems = createTempFile("ignored-problems", ".txt")
-            .writeLines(lines)
-        val ignoredProblemsFilePath = adjustWindowsPath(ignoredProblems.absolutePathString())
+        val lines = listOf("projectName:1.0.0:Reference to a missing property.*")
+        val ignoredProblems = createTempFile("ignored-problems", ".txt").writeLines(lines)
+        val ignoredProblemsFilePath = adjustWindowsPath(ignoredProblems.pathString)
 
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ignoredProblems = file("$ignoredProblemsFilePath")
+                    ignoredProblemsFile = file("$ignoredProblemsFilePath")
                 }
             }
             """.trimIndent()
@@ -263,15 +257,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `use ListProductsReleasesTask output on missing ideVersions property`() {
         writeJavaFile()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
 
         val resource = resource("products-releases/idea-releases.xml")
         buildFile.kotlin(
             """
-            import org.jetbrains.intellij.platform.gradle.tasks.ListProductsReleasesTask.Channel
-            
             tasks {
                 listProductsReleases {
-                    ideaProductReleasesUpdateFiles.setFrom(['${resource}'])
+                    ideaProductReleasesUpdateFiles.from("$resource")
                     sinceVersion = "2020.2"
                     untilVersion = "2020.2.3"
                     releaseChannels = EnumSet.of(Channel.RELEASE)
@@ -287,34 +281,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `do not use ListProductsReleasesTask output on empty array passed to ideVersions property`() {
-        writeJavaFile()
-        writePluginXmlFile()
-
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions.empty()
-                    localPaths = listOf(file("/tmp"))
-                }
-            }
-            """.trimIndent()
-        )
-
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("> Task :listProductsReleases SKIPPED", output)
-        }
-    }
-
-    @Test
     fun `fail on verifyPlugin task`() {
         writeJavaFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         pluginXml.delete()
 
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Plugin descriptor 'plugin.xml' is not found", output)
-            assertContains("Task :verifyPlugin FAILED", output)
+        build(Tasks.RUN_PLUGIN_VERIFIER) {
+            assertContains("The plugin descriptor 'plugin.xml' is not found.", output)
         }
     }
 
@@ -322,14 +297,14 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
-            import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
-
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
-                    failureLevel = [FailureLevel.DEPRECATED_API_USAGES]
+                    failureLevel = listOf(FailureLevel.DEPRECATED_API_USAGES)
                 }
             }
             """.trimIndent()
@@ -345,15 +320,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
-                }
-            }
-            """.trimIndent()
-        )
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
             assertContains("Deprecated API usages", output)
@@ -365,18 +333,22 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on incorrect ideVersion`() {
         writeJavaFile()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("foo", "foo", "", "foo")
+                    ides {
+                        ide("foo")
+                    }
                 }
             }
             """.trimIndent()
         )
 
         buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("IDE 'foo' cannot be downloaded.", output)
+            assertContains("Could not find idea:ideaIC:foo.", output)
         }
     }
 
@@ -384,13 +356,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
-            """
-            import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
-            
+            """            
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
                     failureLevel = FailureLevel.ALL
                 }
             }
@@ -407,11 +379,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
             tasks {
                 runPluginVerifier {
-                    ideVersions = listOf("2020.2.3")
                     failureLevel = RunPluginVerifierTask.FailureLevel.NONE
                 }
             }
@@ -427,26 +401,15 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier in offline mode`() {
         writePluginXmlFile()
-        warmupGradle()
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
-                    verifierPath = project.buildDir.file("pluginVerifier.jar")
-                }
-            }
-            """.trimIndent()
-        )
+        writePluginVerifierIde()
+        build(Tasks.BUILD_PLUGIN)
 
-        val version = RunPluginVerifierTask.resolveLatestVersion()
-        URL("${Locations.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/$version/verifier-cli-$version-all.jar")
-            .openStream().use {
-                FileUtils.copyInputStreamToFile(it, file("build/pluginVerifier.jar"))
-            }
+        writePluginVerifierDependency()
+        writePluginVerifierIde(version = "2022.3.1")
 
         buildAndFail(Tasks.RUN_PLUGIN_VERIFIER, "--offline") {
-            assertContains("Cannot download", output)
+            assertContains("Could not resolve idea:ideaIC:2022.3.1", output)
+            assertContains("No cached version of idea:ideaIC:2022.3.1 available for offline mode.", output)
         }
     }
 
@@ -455,12 +418,14 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on CLI arguments passed as free args`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
-                    verificationReportsDirectory = project.buildDir.dir("foo")
+                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                     freeArgs = listOf("-verification-reports-formats", "plain") 
                 }
             }
@@ -471,13 +436,14 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             val reportsDirectory = file("build/foo")
             val directory = reportsDirectory.canonicalPath
             assertContains("Verification reports directory: $directory", output)
+
             val ideDirs = reportsDirectory.listFiles() ?: emptyArray()
             if (ideDirs.isEmpty()) {
-                Assert.fail("Verification reports directory not found")
+                fail("Verification reports directory not found")
             }
             val ideVersionDir = ideDirs.first()
             val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
-            Assert.assertTrue(reportFiles.isEmpty())
+            assertTrue(reportFiles.isEmpty())
         }
     }
 
@@ -485,11 +451,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `pass on CLI arguments the internal API usage mode as a free arg`() {
         writeJavaFileWithInternalApiUsage()
         writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ideVersions = listOf("2023.1")
                     freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins") 
                 }
             }
@@ -501,17 +469,36 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         }
     }
 
-    private fun warmupGradle() {
+    private fun writePluginVerifierDependency(version: String? = null) {
         buildFile.kotlin(
             """
-            intellijPlatform {
-                pluginVerifier {
-                    ideVersions = listOf("2020.2.3")
+            repositories {
+                intellijPlatform {
+                    binaryReleases()
+                    pluginVerifier()
+                }
+            }
+            dependencies {
+                intellijPlatform {
+                    pluginVerifier(${version?.let { "\"$it\"" }.orEmpty()})
                 }
             }
             """.trimIndent()
         )
-        build(Tasks.BUILD_PLUGIN)
+    }
+
+    private fun writePluginVerifierIde(type: String = intellijType, version: String = intellijVersion) {
+        buildFile.kotlin(
+            """
+            intellijPlatform {
+                pluginVerifier {
+                    ides {
+                        ide("$type", "$version")
+                    }
+                }
+            }
+            """.trimIndent()
+        )
     }
 
     private fun writeJavaFileWithDeprecation() {

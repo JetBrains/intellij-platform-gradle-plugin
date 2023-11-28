@@ -128,5 +128,5 @@ internal fun DependenciesDownloader.getAndroidStudioReleases(context: String?) =
         ext = "xml",
     )
 }, {
-    ivyRepository(Locations.ANDROID_STUDIO_PRODUCTS_RELEASES_URL)
+    ivyRepository(Locations.ANDROID_STUDIO_PRODUCTS_RELEASES_LIST)
 }).firstOrNull()?.toPath()

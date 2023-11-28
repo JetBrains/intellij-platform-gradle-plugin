@@ -102,21 +102,21 @@ class JetBrainsRuntimeResolver(
         }
         return null
     }
-}
 
-internal fun Path.getJbrRoot(): Path {
-    val jbr = listFiles().firstOrNull { it.simpleName.startsWith("jbr") }?.takeIf { it.exists() }
+    private fun Path.getJbrRoot(): Path {
+        val jbr = listFiles().firstOrNull { it.simpleName.startsWith("jbr") }?.takeIf { it.exists() }
 
-    return when {
-        OperatingSystem.current().isMacOsX -> when {
-            endsWith("Contents/Home") -> this
-            jbr != null -> jbr.resolve("Contents/Home")
-            else -> resolve("jdk/Contents/Home")
-        }
+        return when {
+            OperatingSystem.current().isMacOsX -> when {
+                endsWith("Contents/Home") -> this
+                jbr != null -> jbr.resolve("Contents/Home")
+                else -> resolve("jdk/Contents/Home")
+            }
 
-        else -> when {
-            jbr != null -> jbr
-            else -> this
+            else -> when {
+                jbr != null -> jbr
+                else -> this
+            }
         }
     }
 }

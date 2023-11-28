@@ -40,6 +40,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             JarSearchableOptionsTask::register,
             BuildPluginTask::register,
             SignPluginTask::register,
+            ApplyRecommendedPluginVerifierIdesTask::register,
             RunPluginVerifierTask::register,
             VerifyPluginConfigurationTask::register,
             VerifyPluginSignatureTask::register,

@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -117,7 +118,7 @@ class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
         build(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 
-        val resolvedVersion = DownloadRobotServerPluginTask.resolveLatestVersion()
+        val resolvedVersion = LatestVersionResolver.robotServerPlugin()
         assertTrue(
             collectPaths(buildDirectory.resolve("robotServerPlugin"))
                 .containsAll(setOf("/robot-server-plugin/lib/instrumented-robot-server-plugin-$resolvedVersion.jar"))

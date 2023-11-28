@@ -9,8 +9,10 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.maven
 import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import java.net.URI
 import javax.inject.Inject
 
@@ -51,6 +53,13 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
+    fun jetbrainsRuntime(action: RepositoryAction = {}) = createIvyRepository(
+        name = "JetBrains Runtime",
+        url = Locations.JETBRAINS_RUNTIME_REPOSITORY,
+        pattern = "[revision].tar.gz",
+        action = action,
+    )
+
     // TODO: migrate to Maven Central
     fun pluginVerifier(action: RepositoryAction = {}) = createRepository(
         name = "IntelliJ Plugin Verifier Repository",
@@ -67,11 +76,69 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
+    fun binaryReleasesAndroidStudio(action: RepositoryAction = {}) = createIvyRepository(
+        name = "Android Studio Binary Releases",
+        url = Locations.ANDROID_STUDIO_BINARY_RELEASES,
+        pattern = "/[revision]/android-studio-[revision]-linux.tar.gz",
+        action = {
+            repositories.exclusiveContent {
+                forRepositories(this@createIvyRepository)
+                filter {
+                    IntelliJPlatformType.AndroidStudio.binary?.let {
+                        includeModule(it.group, it.name)
+                    }
+                }
+            }
+            action()
+        },
+    )
+
+    fun binaryReleases(action: RepositoryAction = {}) = createIvyRepository(
+        name = "IntelliJ IDEA Binary Releases",
+        url = Locations.DOWNLOAD,
+        pattern = "[organization]/[module]-[revision].[ext]",
+        action = {
+            repositories.exclusiveContent {
+                forRepositories(this@createIvyRepository)
+                filter {
+                    IntelliJPlatformType.values()
+                        .filter { it != IntelliJPlatformType.AndroidStudio }
+                        .mapNotNull { it.binary }
+                        .forEach {
+                            includeModule(it.group, it.name)
+                        }
+                }
+            }
+            action()
+        },
+    )
+
     // TODO: check the case when marketplace() is higher on the list — most likely it takes the precedence over ivy and fails on built-in java plugin
+    //       see https://stackoverflow.com/questions/23023069/gradle-download-and-unzip-file-from-url/34327202#34327202 and exclusiveContent
     // TODO: check if the bundled plugin hash matters — if it has to be different every time as always extract transformer is called, so previous dir may no longer exist
     fun ivy(action: RepositoryAction = {}) = repositories.ivy {
         ivyPattern(".gradle/intellijPlatform/ivy/[organization]-[module]-[revision].[ext]")
         artifactPattern("/[artifact]")
+    }.apply {
+        repositories.exclusiveContent {
+            forRepositories(this@apply)
+            filter {
+                includeGroup(PLUGIN_GROUP_NAME)
+//                IntelliJPlatformType.values()
+//                    .forEach { type ->
+//                        type.dependency.let {
+//                            includeModule(it.group, it.name)
+//                            includeGroupByRegex("${it.group}-${it.name}".replace(".", "\\.") + ".*")
+//                        }
+//                        type.binary?.let {
+//                            if (type.dependency != it) {
+//                                includeModule(it.group, it.name)
+//                                includeGroupByRegex("${it.group}-${it.name}".replace(".", "\\.") + ".*")
+//                            }
+//                        }
+//                    }
+            }
+        }
         action()
     }
 

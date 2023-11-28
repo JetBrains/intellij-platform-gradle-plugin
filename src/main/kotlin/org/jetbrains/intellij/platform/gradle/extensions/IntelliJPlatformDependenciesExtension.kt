@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
-import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.invocation.Gradle
@@ -13,25 +12,23 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
-import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
-import org.jetbrains.intellij.platform.gradle.model.IvyModule
-import org.jetbrains.intellij.platform.gradle.model.IvyModule.*
-import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.Version
+import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.io.File
-import java.net.URI
 import java.nio.file.Path
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import kotlin.io.path.*
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
 internal typealias DependencyAction = (Dependency.() -> Unit)
@@ -237,8 +234,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             }
         }.zip(versionProvider) { type, version ->
             dependencies.create(
-                group = type.groupId,
-                name = type.artifactId,
+                group = type.dependency.group,
+                name = type.dependency.name,
                 version = version,
             )
         },
@@ -252,38 +249,22 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = dependencies.addProvider(
         configurationName,
         localPathProvider.map { localPath ->
-            val artifactPath = when (localPath) {
-                is String -> localPath
-                is File -> localPath.absolutePath
-                else -> throw IllegalArgumentException("Invalid argument type: ${localPath.javaClass}. Supported types: String or File")
-            }.let {
-                Path.of(it)
-            }.let {
-                it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents")
-            }
-
-            if (!artifactPath.exists() || !artifactPath.isDirectory()) {
-                throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory")
-            }
-
+            val artifactPath = resolveArtifactPath(localPath)
             val productInfo = artifactPath.productInfo()
+
             val type = IntelliJPlatformType.fromCode(productInfo.productCode)
             if (Version.parse(productInfo.buildNumber) < Version.parse(MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION)) {
                 throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
             }
             val path = artifactPath.pathString
-            val version = "${productInfo.version}:local+${path.hashCode()}"
+            val version = "${productInfo.version}:local+${path.hashCode().absoluteValue}"
 
             dependencies.create(
-                group = type.groupId,
-                name = type.artifactId,
+                group = PLUGIN_GROUP_NAME,
+                name = "${type.dependency.group}:${type.dependency.name}",
                 version = version,
-            ).also {
-                it.createIvyDependency(
-                    publications = listOf(
-                        Publication(path, "directory", null, "default")
-                    )
-                )
+            ).apply {
+                createIvyDependency(gradle, listOf(Publication(path, "directory", null, "default")))
             }
         },
         action,
@@ -295,21 +276,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
-        explicitVersionProvider.map { explicitVersion ->
-            val dependency = dependencies.create(
+        explicitVersionProvider.map {
+            dependencies.create(
                 group = "com.jetbrains",
                 name = "jbr",
-                version = explicitVersion,
+                version = it,
                 ext = "tar.gz",
             )
-
-            repositories.ivy {
-                url = URI(Locations.JETBRAINS_RUNTIME_REPOSITORY)
-                patternLayout { artifact("[revision].tar.gz") }
-                metadataSources { artifact() }
-            }
-
-            dependency
         },
         action,
     )
@@ -354,15 +327,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
             val artifactPath = bundledPlugin.let { Path.of(it.path) }
             val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+            val path = artifactPath.pathString
 
             dependencies.create(
-                group = type.groupId,
-                name = "${type.artifactId}:${productInfo.version}",
-                version = "$id:bundled+${artifactPath.hashCode().absoluteValue}",
-            ).also {
-                it.createIvyDependency(publications = jars.map { jar ->
-                    Publication(jar.pathString, "jar", "jar", "default")
-                })
+                group = PLUGIN_GROUP_NAME,
+                name = "${type.dependency.group}:${type.dependency.name}:${productInfo.version}",
+                version = "$id:bundled+${path.hashCode().absoluteValue}",
+            ).apply {
+                createIvyDependency(gradle, jars.map { Publication(it.pathString, "jar", "jar", "default") })
             }
         },
         action,
@@ -379,11 +351,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 group = "org.jetbrains.intellij.plugins",
                 name = "verifier-cli",
                 version = when (version) {
-                    VERSION_LATEST -> LatestVersionResolver.fromMaven(
-                        "IntelliJ Plugin Verifier",
-                        "${Locations.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml",
-                    )
-
+                    VERSION_LATEST -> LatestVersionResolver.pluginVerifier()
                     else -> version
                 },
                 classifier = "all",
@@ -404,7 +372,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 group = "org.jetbrains",
                 name = "marketplace-zip-signer-cli",
                 version = when (version) {
-                    VERSION_LATEST -> LatestVersionResolver.fromGitHub("Marketplace ZIP Signer", Locations.ZIP_SIGNER_REPOSITORY)
+                    VERSION_LATEST -> LatestVersionResolver.zipSigner()
                     else -> version
                 },
                 classifier = "cli",
@@ -414,32 +382,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action,
     )
 
-    private fun ExternalModuleDependency.createIvyDependency(publications: List<Publication>) {
-        val ivyDirectory = gradle.projectCacheDir.resolve("intellijPlatform/ivy").toPath()
-        val ivyFileName = "$group-$name-$version.xml"
-        val ivyFile = ivyDirectory.resolve(ivyFileName).takeUnless { it.exists() } ?: return
 
-        val extractor = XmlExtractor<IvyModule>()
-        val ivyModule = IvyModule(
-            info = Info(
-                organisation = group,
-                module = name,
-                revision = version,
-                publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
-            ),
-            configurations = listOf(
-                Configuration(
-                    name = "default",
-                    visibility = "public",
-                ),
-            ),
-            publications = publications,
-        )
-
-        ivyFile.parent.createDirectories()
-        ivyFile.createFile()
-        extractor.marshal(ivyModule, ivyFile)
-    }
 }
 
 // TODO: cleanup JBR helper functions:

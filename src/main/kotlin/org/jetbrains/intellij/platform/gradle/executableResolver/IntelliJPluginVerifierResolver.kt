@@ -4,10 +4,7 @@ package org.jetbrains.intellij.platform.gradle.executableResolver
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
-import org.jetbrains.intellij.platform.gradle.asPath
-import org.jetbrains.intellij.platform.gradle.debug
-import org.jetbrains.intellij.platform.gradle.ifNull
-import org.jetbrains.intellij.platform.gradle.info
+import org.jetbrains.intellij.platform.gradle.*
 import java.nio.file.Path
 import kotlin.io.path.exists
 
@@ -17,7 +14,7 @@ class IntelliJPluginVerifierResolver(
     val context: String? = null,
 ) : ExecutableResolver {
 
-    override fun resolveExecutable(): Path? {
+    override fun resolveExecutable(): Path {
         debug(context, "Resolving runtime directory.")
 
         return listOf(
@@ -31,7 +28,7 @@ class IntelliJPluginVerifierResolver(
             },
             {
                 intellijPluginVerifier.singleOrNull()?.let { file ->
-                    file.toPath().getJbrRoot()
+                    file.toPath()
                         .also { debug(context, "Plugin Verifier specified with dependencies resolved as: $it") }
                         .ifNull { debug(context, "Cannot resolve Plugin Verifier: $file") }
                 }
@@ -41,7 +38,8 @@ class IntelliJPluginVerifierResolver(
             .mapNotNull { it() }
             .firstOrNull()
             ?.also { info(context, "Resolved IntelliJ Plugin Verifier: $it") }
+            .throwIfNull { Exception("No Plugin Verifier executable found") } // TODO: suggest adding missing dependency
     }
 
-    override fun resolveDirectory() = resolveExecutable()?.parent
+    override fun resolveDirectory() = resolveExecutable().parent
 }
