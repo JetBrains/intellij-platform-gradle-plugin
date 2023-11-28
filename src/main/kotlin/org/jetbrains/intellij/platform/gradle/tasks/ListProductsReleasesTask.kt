@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
@@ -24,6 +22,8 @@ import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import java.util.*
 import kotlin.io.path.createFile
+import kotlin.io.path.exists
+import kotlin.io.path.outputStream
 
 /**
  * List all available IntelliJ-based IDE releases with their updates.

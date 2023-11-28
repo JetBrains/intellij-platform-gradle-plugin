@@ -2,11 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.performanceTest.parsers
 
-import com.jetbrains.plugin.structure.base.utils.forEachLine
 import org.jetbrains.intellij.platform.gradle.model.PerformanceTestScript
 import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.TimeUnit
+import kotlin.io.path.forEachLine
 
 class SimpleIJPerformanceParser(private val path: Path) {
 

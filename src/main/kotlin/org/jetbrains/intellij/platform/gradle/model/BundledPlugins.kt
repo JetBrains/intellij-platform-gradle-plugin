@@ -2,13 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.model
 
-import com.jetbrains.plugin.structure.base.utils.readText
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.gradle.api.GradleException
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.name
+import kotlin.io.path.readText
 
 @Serializable
 data class BundledPlugins(

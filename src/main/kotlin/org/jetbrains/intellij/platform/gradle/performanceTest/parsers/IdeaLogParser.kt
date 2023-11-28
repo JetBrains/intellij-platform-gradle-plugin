@@ -2,14 +2,14 @@
 
 package org.jetbrains.intellij.platform.gradle.performanceTest.parsers
 
-import com.jetbrains.plugin.structure.base.utils.forEachLine
 import org.jetbrains.intellij.platform.gradle.model.PerformanceTestStatistic
-import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.forEachLine
 
 class IdeaLogParser(private val logPath: String) {
 
     fun getTestStatistic() = PerformanceTestStatistic.Builder().apply {
-        Path.of(logPath).forEachLine {
+        Path(logPath).forEachLine {
             with(it) {
                 when {
                     contains("##teamcity[buildStatisticValue") -> {

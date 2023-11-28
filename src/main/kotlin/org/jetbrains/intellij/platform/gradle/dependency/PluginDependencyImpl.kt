@@ -2,10 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.dependency
 
-import com.jetbrains.plugin.structure.base.utils.isJar
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.jetbrains.intellij.platform.gradle.collectJars
 import java.io.File
+import kotlin.io.path.extension
 
 class PluginDependencyImpl(
     override val id: String,
@@ -26,7 +26,7 @@ class PluginDependencyImpl(
     var untilBuild: String? = null
 
     init {
-        if (artifact.toPath().isJar()) {
+        if (artifact.toPath().extension == "jar") {
             jarFiles = listOf(artifact)
         }
         if (artifact.isDirectory) {

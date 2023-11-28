@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.dependency
 
-import com.jetbrains.plugin.structure.base.utils.*
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
@@ -20,6 +19,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Inject
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.extension
 import kotlin.io.path.isDirectory
 import kotlin.io.path.name
 
@@ -54,10 +54,10 @@ abstract class PluginDependencyManager @Inject constructor(
         pluginsRepositories.forEach { repository ->
             repository.resolve(project, dependency, context)?.let {
                 val file = it.toPath() // TODO: migrate to Path
-                return when {
-                    file.isZip() -> zippedPluginDependency(file, dependency)
-                    file.isJar() -> externalPluginDependency(file, dependency.channel, true)
-                    else -> throw BuildException("Invalid type of downloaded plugin: ${file.simpleName}", null)
+                return when (file.extension) {
+                    "zip" -> zippedPluginDependency(file, dependency)
+                    "jar" -> externalPluginDependency(file, dependency.channel, true)
+                    else -> throw BuildException("Invalid type of downloaded plugin: ${file.name}", null)
                 }
             }
         }
@@ -69,7 +69,7 @@ abstract class PluginDependencyManager @Inject constructor(
     }
 
     fun register(project: Project, plugin: PluginDependency, dependencies: DependencySet) {
-        if (plugin.maven && plugin.artifact.toPath().isJar()) {
+        if (plugin.maven && plugin.artifact.toPath().extension == "jar") {
             dependencies.add(plugin.notation.toDependency(project))
             return
         }
@@ -144,7 +144,7 @@ abstract class PluginDependencyManager @Inject constructor(
     }
 
     private fun externalPluginDependency(artifact: Path, channel: String? = null, maven: Boolean = false): PluginDependency? {
-        if (!artifact.isJar() && !artifact.isDirectory()) {
+        if (!artifact.extension == "jar" && !artifact.isDirectory()) {
             warn(context, "Cannot create plugin from file '$artifact' - only directories or jars are supported")
         }
         return createPlugin(artifact, true, context)?.let {

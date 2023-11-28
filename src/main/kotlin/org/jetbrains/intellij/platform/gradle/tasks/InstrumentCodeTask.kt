@@ -4,7 +4,8 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.*
+import com.jetbrains.plugin.structure.base.utils.deleteLogged
+import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import groovy.lang.Closure
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.ConfigurableFileCollection
@@ -23,6 +24,7 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import kotlin.io.path.*
 
 @Deprecated("Use 'InstrumentCodeTask' instead", ReplaceWith("InstrumentCodeTask"), DeprecationLevel.ERROR)
 typealias IntelliJInstrumentCodeTask = InstrumentCodeTask
@@ -138,7 +140,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
             .toPath()
             .also {
                 it.deleteQuietly()
-                it.createDir()
+                it.createDirectories()
             }
 
         inputChanges.getFileChanges(formsDirs).forEach { change ->
@@ -158,9 +160,9 @@ abstract class InstrumentCodeTask : DefaultTask() {
             val instrumentedClassPath = temporaryDirPath
                 .resolve(compiledClassRelativePath)
                 .also {
-                    it
-                        .exists()
-                        .ifFalse(it::create)
+                    if (!it.exists()) {
+                        it.createDirectories()
+                    }
                 }
 
             Files.copy(compiledClassPath, instrumentedClassPath, StandardCopyOption.REPLACE_EXISTING)
@@ -182,7 +184,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
                 }
 
                 else -> temporaryDirPath.resolve(relativePath).apply {
-                    createParentDirs()
+                    parent.createDirectories()
                     Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
                 }
             }
@@ -190,11 +192,11 @@ abstract class InstrumentCodeTask : DefaultTask() {
 
         instrumentCode(instrumentNotNull) {
             Files.walk(temporaryDirPath)
-                .filter { !it.isDirectory }
+                .filter { !it.isDirectory() }
                 .forEach { path ->
                     val relativePath = temporaryDirPath.relativize(path)
                     outputDirPath.resolve(relativePath).apply {
-                        createParentDirs()
+                        parent.createDirectories()
                         Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
                     }
                 }
@@ -206,7 +208,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
         ?.let(File::toPath)
         ?.takeIf(Path::exists)
         ?.let { path ->
-            ideaDependency.get().classes.toPath().resolve("lib").listFiles().filter {
+            ideaDependency.get().classes.toPath().resolve("lib").listDirectoryEntries().filter {
                 listOf(
                     "jdom.jar",
                     "asm-all.jar",
@@ -215,7 +217,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
                     "forms-*.jar",
                 ).any { pattern ->
                     val (first, last) = pattern.split('*') + listOf("")
-                    it.simpleName.startsWith(first) && (last.isEmpty() || it.simpleName.endsWith(last))
+                    it.name.startsWith(first) && (last.isEmpty() || it.name.endsWith(last))
                 }
             } + listOf(path)
         }

@@ -2,9 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.executableResolver
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.listFiles
-import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.file.FileCollection
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
@@ -18,6 +15,9 @@ import java.io.FileReader
 import java.io.IOException
 import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.exists
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 
 class JetBrainsRuntimeResolver(
     val jetbrainsRuntime: FileCollection,
@@ -104,7 +104,7 @@ class JetBrainsRuntimeResolver(
     }
 
     private fun Path.getJbrRoot(): Path {
-        val jbr = listFiles().firstOrNull { it.simpleName.startsWith("jbr") }?.takeIf { it.exists() }
+        val jbr = listDirectoryEntries().firstOrNull { it.name.startsWith("jbr") }?.takeIf { it.exists() }
 
         return when {
             OperatingSystem.current().isMacOsX -> when {

@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -27,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.base.PluginVerifierAware
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
 /**

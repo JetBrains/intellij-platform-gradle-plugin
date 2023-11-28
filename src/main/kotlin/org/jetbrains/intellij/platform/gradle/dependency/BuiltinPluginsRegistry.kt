@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.dependency
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.createPlugin
 import org.jetbrains.intellij.platform.gradle.debug
@@ -15,7 +13,9 @@ import org.jetbrains.intellij.platform.gradle.warn
 import java.io.File
 import java.io.Serializable
 import java.nio.file.Path
+import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
 class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val context: String?) : Serializable {
@@ -24,7 +24,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     private val directoryNameMapping = mutableMapOf<String, String>()
 
     private fun fillFromCache(extractor: XmlExtractor<PluginsCache>): Boolean {
-        val cache = cacheFile().takeIf(Path::exists) ?: return false
+        val cache = cacheFile().takeIf { it.exists() } ?: return false
 
         debug(context, "Builtin registry cache is found. Loading from: $cache")
         return try {
@@ -42,7 +42,7 @@ class BuiltinPluginsRegistry(private val pluginsDirectory: File, private val con
     private fun fillFromDirectory() {
         pluginsDirectory
             .toPath()
-            .listFiles()
+            .listDirectoryEntries()
             .filter { it.isDirectory() }
             .forEach(::add)
         debug(context, "Builtin registry populated with ${plugins.size} plugins")

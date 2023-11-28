@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins
 
-import com.jetbrains.plugin.structure.base.utils.hasExtension
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -53,6 +52,7 @@ import org.jetbrains.intellij.platform.gradle.utils.mavenRepository
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
 import java.net.URL
+import kotlin.io.path.extension
 
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
@@ -583,7 +583,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                 })
                 formsDirs.from(project.provider {
                     sourceDirs.asFileTree.filter {
-                        it.toPath().hasExtension("form")
+                        it.toPath().extension == "form"
                     }
                 })
                 classesDirs.from(project.provider {

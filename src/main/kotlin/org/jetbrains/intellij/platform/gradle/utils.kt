@@ -8,7 +8,6 @@ package org.jetbrains.intellij.platform.gradle
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.plugin.PluginProblem
-import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
@@ -45,9 +44,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 import java.util.function.Predicate
-import kotlin.io.path.absolute
-import kotlin.io.path.exists
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 internal fun sourcePluginXmlFiles(project: Project) = project
     .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
@@ -57,7 +54,7 @@ internal fun sourcePluginXmlFiles(project: Project) = project
     .filterNotNull()
     .map(File::toPath)
     .map { it.resolve("META-INF/plugin.xml") }
-    .filter { it.exists() && it.length > 0 }
+    .filter { it.exists() && it.fileSize() > 0 }
 
 internal fun parsePluginXml(pluginXml: Path) = runCatching {
     pluginXml.inputStream().use {
@@ -101,19 +98,19 @@ internal fun String.resolveIdeHomeVariable(ideDir: Path) =
 
 
 fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
-    collectFiles(directory) { it.isJar() && filter.test(it) }
+    collectFiles(directory) { it.extension == "jar" && filter.test(it) }
 
 fun collectZips(directory: Path, filter: Predicate<Path> = Predicate { true }) =
-    collectFiles(directory) { it.isZip() && filter.test(it) }
+    collectFiles(directory) { it.extension == "zip" && filter.test(it) }
 
 private fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
-    .takeIf { it.isDirectory }
-    ?.listFiles()
+    .takeIf { it.isDirectory() }
+    ?.listDirectoryEntries()
     .orEmpty()
     .filter { filter.test(it) }
 
 internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
-    val lib = parent.resolve("lib").takeIf { it.exists() && it.isDirectory } ?: return emptyList()
+    val lib = parent.resolve("lib").takeIf { it.exists() && it.isDirectory() } ?: return emptyList()
     val baseFiles = collectJars(lib) { it.name !in listOf("junit.jar") }.sorted()
     val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
 
@@ -189,13 +186,6 @@ fun <T> T?.or(block: () -> T): T = this ?: block()
 fun <T> T?.ifNull(block: () -> Unit): T? = this ?: block().let { null }
 
 fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
-
-fun Boolean.ifFalse(block: () -> Unit): Boolean {
-    if (!this) {
-        block()
-    }
-    return this
-}
 
 internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnection) {
     instanceFollowRedirects = false

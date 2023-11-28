@@ -2,9 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.createDir
-import com.jetbrains.plugin.structure.base.utils.extension
-import com.jetbrains.plugin.structure.base.utils.nameWithoutExtension
 import org.gradle.api.Incubating
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -22,6 +19,9 @@ import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPe
 import org.jetbrains.intellij.platform.gradle.propertyProviders.PerformanceTestArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import java.nio.file.Files
+import kotlin.io.path.createDirectories
+import kotlin.io.path.extension
+import kotlin.io.path.nameWithoutExtension
 
 /**
  * Runs performance tests on the IDE with the developed plugin installed.
@@ -85,7 +85,7 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
             .forEach { scriptPath ->
                 val testName = scriptPath.nameWithoutExtension
                 val testScript = SimpleIJPerformanceParser(scriptPath).parse()
-                val testArtifactsDirPath = dir.resolve(testName).createDir()
+                val testArtifactsDirPath = dir.resolve(testName).createDirectories()
 
                 // Passing to the IDE project to open
                 args = listOf("${testDataDirectory.get()}/${testScript.projectName}")

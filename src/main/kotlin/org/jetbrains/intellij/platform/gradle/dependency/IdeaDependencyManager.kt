@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.dependency
 
-import com.jetbrains.plugin.structure.base.utils.*
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.DependencySet
@@ -23,6 +22,7 @@ import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
 import javax.inject.Inject
+import kotlin.io.path.*
 
 @Suppress("BooleanMethodIsAlwaysInverted")
 abstract class IdeaDependencyManager @Inject constructor(
@@ -37,7 +37,7 @@ abstract class IdeaDependencyManager @Inject constructor(
 
     fun register(project: Project, dependency: IdeaDependency, dependencies: DependencySet) {
         val ivyFile = getOrCreateIvyXml(dependency)
-        val ivyFileSuffix = ivyFile.simpleName.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
+        val ivyFileSuffix = ivyFile.name.substring("${dependency.name}-${dependency.version}".length).removeSuffix(".xml")
 
         project.repositories.ivy {
             url = dependency.classes.toURI()
@@ -342,11 +342,11 @@ abstract class IdeaDependencyManager @Inject constructor(
 
     fun resolveLocal(project: Project, localPath: String): IdeaDependency {
         debug(context, "Adding local IDE dependency")
-        val ideaDir = Path.of(localPath).let {
+        val ideaDir = Path(localPath).let {
             it.takeUnless { it.endsWith(".app") } ?: it.resolve("Contents")
         }
 
-        if (!ideaDir.exists() || !ideaDir.isDirectory) {
+        if (!ideaDir.exists() || !ideaDir.isDirectory()) {
             throw BuildException("Specified localPath '$localPath' doesn't exist or is not a directory", null)
         }
         val buildNumber = ideaDir.productInfo().buildNumber
@@ -403,7 +403,7 @@ abstract class IdeaDependencyManager @Inject constructor(
                 val dependency = dependencyFile.toPath()
 
                 return when {
-                    dependency.isZip() -> {
+                    dependency.extension == "zip" -> {
                         val cacheDirectory = getZipCacheDirectory(dependencyFile, project, IntellijIdeaCommunity)
                         debug(context, "IDE extra dependency '$name': " + cacheDirectory.path)
                         unzipDependencyFile(

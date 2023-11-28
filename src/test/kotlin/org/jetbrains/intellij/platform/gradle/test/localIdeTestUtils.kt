@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.test
 
-import com.jetbrains.plugin.structure.base.utils.createDir
-import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
 import java.io.File
@@ -12,6 +10,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
 
 /**
  * Downloads and extracts IDE for the tests using local IDE installation. IDEs are downloaded from [DEFAULT_INTELLIJ_REPOSITORY].
@@ -27,7 +27,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
         return localIdeDirPathString
     }
     if (!localIdesPath.exists()) {
-        localIdesPath.createDir()
+        localIdesPath.createDirectories()
     }
 
     URL("$DEFAULT_INTELLIJ_REPOSITORY/releases/$releasePath").openStream().use {

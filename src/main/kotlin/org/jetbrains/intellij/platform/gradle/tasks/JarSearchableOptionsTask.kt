@@ -2,9 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.isDirectory
-import com.jetbrains.plugin.structure.base.utils.listFiles
-import com.jetbrains.plugin.structure.base.utils.simpleName
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -16,7 +13,9 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
-import java.nio.file.Path
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
@@ -83,7 +82,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsDidWork = buildSearchableOptionsTaskProvider.map { it.didWork }
-                
+
                 inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
                 pluginName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
                 archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
@@ -102,8 +101,8 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                                         .asPath
                                         .resolve(pluginName.get())
                                         .resolve("lib")
-                                        .listFiles()
-                                        .map(Path::simpleName)
+                                        .listDirectoryEntries()
+                                        .map { it.name }
                                         .let(pluginJarFiles::addAll)
                                 }
                                 it.name
@@ -118,7 +117,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                 eachFile { path = "search/$name" }
 
                 onlyIf {
-                    buildSearchableOptionsDidWork.get() && inputDir.asPath.isDirectory
+                    buildSearchableOptionsDidWork.get() && inputDir.asPath.isDirectory()
                 }
 
                 dependsOn(prepareSandboxTaskProvider)

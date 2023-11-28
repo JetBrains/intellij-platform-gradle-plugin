@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
-import com.jetbrains.plugin.structure.base.utils.*
+import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.jetbrains.intellij.platform.gradle.debug
@@ -10,6 +10,10 @@ import java.nio.file.Path
 import java.util.function.BiConsumer
 import java.util.function.Predicate
 import javax.inject.Inject
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.exists
+import kotlin.io.path.name
 
 abstract class ArchiveUtils @Inject constructor(
     private val archiveOperations: ArchiveOperations,
@@ -23,14 +27,14 @@ abstract class ArchiveUtils @Inject constructor(
         isUpToDate: Predicate<Path>? = null,
         markUpToDate: BiConsumer<Path, Path>? = null,
     ): Path {
-        val name = archive.simpleName
+        val name = archive.name
         val markerFile = targetDirectory.resolve("markerFile")
         if (markerFile.exists() && (isUpToDate == null || isUpToDate.test(markerFile))) {
             return targetDirectory
         }
 
         targetDirectory.deleteQuietly()
-        targetDirectory.createDir()
+        targetDirectory.createDirectories()
 
         debug(context, "Extracting: $name")
 
@@ -54,7 +58,7 @@ abstract class ArchiveUtils @Inject constructor(
 
         debug(context, "Extracted: $name")
 
-        markerFile.create()
+        markerFile.createFile()
         markUpToDate?.accept(targetDirectory, markerFile)
         return targetDirectory
     }

@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
@@ -25,9 +24,7 @@ import org.jetbrains.intellij.platform.gradle.dependency.PluginProjectDependency
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
 import java.nio.file.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.notExists
+import kotlin.io.path.*
 
 /**
  * Prepares sandbox directory with installed plugin and its dependencies.
@@ -171,7 +168,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     }
 
     fun ensureName(path: Path): String {
-        var name = path.simpleName
+        var name = path.name
         var index = 1
         var previousPath = usedNames.putIfAbsent(name, path)
         while (previousPath != null && previousPath != path) {

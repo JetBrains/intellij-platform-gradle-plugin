@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.model
 
-import com.jetbrains.plugin.structure.base.utils.inputStream
-import com.jetbrains.plugin.structure.base.utils.outputStream
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.jetbrains.intellij.platform.gradle.transformXml
 import org.jetbrains.intellij.platform.gradle.warn
@@ -11,6 +9,8 @@ import java.io.InputStream
 import java.nio.file.Path
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBException
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
 
 class XmlExtractor<T>(private val context: String? = null) {
 

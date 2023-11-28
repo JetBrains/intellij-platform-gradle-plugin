@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -18,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.SigningAware
 import java.util.*
 import kotlin.io.path.absolutePathString
+import kotlin.io.path.exists
 
 /**
  * Validates the signature of the plugin archive file using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.

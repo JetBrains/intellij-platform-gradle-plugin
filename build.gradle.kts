@@ -92,9 +92,7 @@ tasks {
         val testGradleHome = properties("testGradleUserHome")
             .map { File(it) }
             .getOrElse(
-                layout.buildDirectory.asFile
-                    .map { it.resolve("testGradleHome") }
-                    .get()
+                layout.buildDirectory.asFile.map { it.resolve("testGradleHome") }.get()
             )
 
         doFirst {

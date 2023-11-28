@@ -2,9 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.create
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.outputStream
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -23,6 +20,9 @@ import java.net.URL
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
+import kotlin.io.path.createFile
+import kotlin.io.path.exists
+import kotlin.io.path.outputStream
 
 /**
  * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up-to-date.
@@ -75,7 +75,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
 
             with(selfUpdateLock.asPath) {
                 if (!exists()) {
-                    create()
+                    createFile()
                 }
             }
         } catch (e: Exception) {

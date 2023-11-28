@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.propertyProviders
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.readLines
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.InputFile
@@ -17,6 +15,8 @@ import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradle.utils.OpenedPackages
+import kotlin.io.path.exists
+import kotlin.io.path.readLines
 
 class IntelliJPlatformArgumentProvider(
     @InputFiles @PathSensitive(RELATIVE) val intellijPlatform: ConfigurableFileCollection,

@@ -2,9 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -258,7 +258,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.SIGN_PLUGIN)
 
         val distributionFolder = buildDirectory.resolve("distributions")
-        assertTrue(distributionFolder.listFiles().any {
+        assertTrue(distributionFolder.listDirectoryEntries().any {
             it.name == "projectName-1.0.0-signed.zip"
         })
     }
