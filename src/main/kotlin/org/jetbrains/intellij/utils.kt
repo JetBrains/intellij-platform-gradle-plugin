@@ -9,7 +9,7 @@ import com.dd.plist.NSDictionary
 import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
-import com.jetbrains.plugin.structure.base.plugin.PluginProblem
+import com.jetbrains.plugin.structure.base.problems.PluginProblem
 import com.jetbrains.plugin.structure.base.utils.*
 import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
@@ -320,4 +320,3 @@ internal val <T> Property<T>.isSpecified: Boolean
         is RegularFile -> value.asFile.exists()
         else -> true
     }
-
