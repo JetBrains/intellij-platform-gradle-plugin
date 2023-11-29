@@ -21,8 +21,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
-import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.Path
 
 abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_BASE_ID) {
 
@@ -248,12 +248,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             configureExtension<IntelliJPlatformExtension.PluginVerifier>(Extensions.PLUGIN_VERIFIER) {
                 homeDirectory.convention(
                     providers.systemProperty("plugin.verifier.home.dir")
-                        .flatMap { layout.dir(provider { Path.of(it).toFile() }) }
+                        .flatMap { layout.dir(provider { Path(it).toFile() }) }
                         .orElse(layout.dir(providers.environmentVariable("XDG_CACHE_HOME").map {
-                            Path.of(it).resolve("pluginVerifier").toFile()
+                            Path(it, "pluginVerifier").toFile()
                         }))
                         .orElse(layout.dir(providers.systemProperty("user.home").map {
-                            Path.of(it).resolve(".cache/pluginVerifier").toFile()
+                            Path(it, ".cache/pluginVerifier").toFile()
                         }))
                         .orElse(project.layout.buildDirectory.dir("tmp/pluginVerifier"))
                 )

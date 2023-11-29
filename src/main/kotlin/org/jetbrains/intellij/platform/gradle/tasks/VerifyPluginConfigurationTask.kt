@@ -22,7 +22,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.PlatformJavaVersions
 import org.jetbrains.intellij.platform.gradle.utils.PlatformKotlinVersions
 import java.nio.file.Files
-import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.*
 
@@ -151,7 +150,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
         val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
         val pluginVerifierDownloadPath = pluginVerifierDownloadDirectory.asPath
-        val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { Path.of(it) }.get().resolve("pluginVerifier/ides")
+        val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { Path(it) }.get().resolve("pluginVerifier/ides")
 
         sequence {
             pluginXmlFile.orNull?.let { parsePluginXml(it.asPath) }?.let {

@@ -10,6 +10,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
+import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 
@@ -23,7 +24,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
     val fileName = releasePath.substringAfterLast('/')
     val localIdeZipPath = localIdesPath.resolve(fileName)
     val localIdeDirPathString = localIdeZipPath.toString().removeSuffix(".zip")
-    if (Path.of(localIdeDirPathString).exists()) {
+    if (Path(localIdeDirPathString).exists()) {
         return localIdeDirPathString
     }
     if (!localIdesPath.exists()) {

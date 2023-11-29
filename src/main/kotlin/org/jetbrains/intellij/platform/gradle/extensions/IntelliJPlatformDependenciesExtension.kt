@@ -25,8 +25,8 @@ import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.io.File
-import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
@@ -325,8 +325,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val type = IntelliJPlatformType.fromCode(productInfo.productCode)
             val bundledPluginsList = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST).single().toPath().bundledPlugins()
             val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
-            val artifactPath = bundledPlugin.let { Path.of(it.path) }
-            val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+            val artifactPath = Path(bundledPlugin.path)
+            val jars = artifactPath.listDirectoryEntries("lib/*.jar")
             val path = artifactPath.pathString
 
             dependencies.create(

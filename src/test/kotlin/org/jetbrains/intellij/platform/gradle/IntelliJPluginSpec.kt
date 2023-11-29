@@ -15,7 +15,7 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.AfterClass
 import org.junit.Assume.assumeFalse
 import java.io.File
-import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlin.io.path.pathString
 import kotlin.test.*
 
@@ -26,7 +26,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         @AfterClass
         fun `clean up dependencies`() {
             val isCI = System.getProperty("test.ci").toBoolean()
-            val gradleHome = Path.of(System.getProperty("test.gradle.home"))
+            val gradleHome = Path(System.getProperty("test.gradle.home"))
 
             if (!isCI) {
                 listOf(
@@ -310,7 +310,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add bundled zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
-            Path.of(gradleHome).parent.resolve("local-ides"),
+            Path(gradleHome).parent.resolve("local-ides"),
             "com/jetbrains/intellij/goland/goland/2022.1/goland-2022.1.zip"
         )
         buildFile.writeText("")
@@ -337,7 +337,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
 
         if (isCI) {
-            Path.of(localPath).forceDeleteIfExists()
+            Path(localPath).forceDeleteIfExists()
         }
     }
 
@@ -345,7 +345,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add external zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
-            Path.of(gradleHome).parent.resolve("local-ides"),
+            Path(gradleHome).parent.resolve("local-ides"),
             "com/jetbrains/intellij/idea/ideaIC/2022.1.4/ideaIC-2022.1.4.zip"
         )
 
@@ -373,7 +373,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
 
         if (isCI) {
-            Path.of(localPath).forceDeleteIfExists()
+            Path(localPath).forceDeleteIfExists()
         }
     }
 
@@ -424,7 +424,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add bundled zip plugin source artifacts from IDE_ROOT-lib-src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
-            Path.of(gradleHome).parent.resolve("local-ides"),
+            Path(gradleHome).parent.resolve("local-ides"),
             "com/jetbrains/intellij/idea/ideaIU/2022.1.4/ideaIU-2022.1.4.zip"
         )
         buildFile.writeText("")
@@ -450,7 +450,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         }
 
         if (isCI) {
-            Path.of(localPath).forceDeleteIfExists()
+            Path(localPath).forceDeleteIfExists()
         }
     }
 

@@ -90,7 +90,7 @@ internal fun String.resolveIdeHomeVariable(ideDir: Path) =
             .let { entry ->
                 val (_, value) = entry.split("=")
                 when {
-                    Path.of(value).exists() -> entry
+                    Path(value).exists() -> entry
                     else -> entry.replace("/Contents", "")
                 }
             }

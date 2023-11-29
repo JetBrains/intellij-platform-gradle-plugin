@@ -5,10 +5,8 @@ package org.jetbrains.intellij.platform.gradle
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.copyTo
-import kotlin.io.path.deleteRecursively
-import kotlin.io.path.notExists
+import java.util.zip.ZipFile
+import kotlin.io.path.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
@@ -32,7 +30,7 @@ open class IntelliJPlatformIntegrationTestBase(
     }
 
     protected fun use(resourceName: String) {
-        val resourcePath = Path.of("src", "integrationTest", "resources", resourceName)
+        val resourcePath = Path("src", "integrationTest", "resources", resourceName)
 
         if (resourcePath.notExists()) {
             throw IllegalArgumentException("Integration tests resource '$resourceName' not found in: $resourcePath")
@@ -128,7 +126,7 @@ open class IntelliJPlatformIntegrationTestBase(
      * Path to the Gradle user home directory., e.g., `/Users/hsz/.gradle`.
      */
     val gradleUserHomeDirectory
-        get() = Path.of(System.getProperty("test.gradle.home"))
+        get() = Path(System.getProperty("test.gradle.home"))
 
     /**
      * Path to the Gradle cache directory.,
@@ -185,7 +183,7 @@ open class IntelliJPlatformIntegrationTestBase(
         assert(fs.getPath(path).let(Files::exists)) { "expect archive '$this' contains file '$path'" }
     }
 
-    infix fun Path.readEntry(path: String) = ZipFile(this).use { zip ->
+    infix fun Path.readEntry(path: String) = ZipFile(pathString).use { zip ->
         val entry = zip.getEntry(path)
         zip.getInputStream(entry).bufferedReader().use { it.readText() }
     }

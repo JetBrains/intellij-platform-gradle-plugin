@@ -18,10 +18,7 @@ import java.io.File
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.inject.Inject
-import kotlin.io.path.absolutePathString
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 abstract class PluginDependencyManager @Inject constructor(
     gradleHomePath: String,
@@ -41,7 +38,7 @@ abstract class PluginDependencyManager @Inject constructor(
 
         if (dependency.version.isNullOrEmpty() && dependency.channel.isNullOrEmpty()) {
             if (Paths.get(dependency.id).isAbsolute) {
-                return externalPluginDependency(Path.of(dependency.id))
+                return externalPluginDependency(Path(dependency.id))
             } else {
                 info(context, "Looking for builtin '${dependency.id}' in: ${ideaDependency.classes.canonicalPath}")
                 ideaDependency.pluginsRegistry.findPlugin(dependency.id)?.let {
@@ -102,7 +99,7 @@ abstract class PluginDependencyManager @Inject constructor(
     }
 
     private fun findSingleDirectory(dir: Path) =
-        dir.listFiles().singleOrNull { it.isDirectory() } ?: throw BuildException("Single directory expected in: $dir", null)
+        dir.listDirectoryEntries().singleOrNull { it.isDirectory() } ?: throw BuildException("Single directory expected in: $dir", null)
 
     private fun registerRepositoryIfNeeded(project: Project, plugin: PluginDependency) {
         val ideaDependency = ideaDependencyProvider.get() // TODO fix
@@ -120,7 +117,7 @@ abstract class PluginDependencyManager @Inject constructor(
         }
         if (!plugin.builtin && !plugin.maven) {
             val artifactParent = plugin.artifact.toPath().parent
-            if (artifactParent.parent != Path.of(cacheDirectoryPath) && pluginSources.add(artifactParent.absolutePathString())) {
+            if (artifactParent.parent != Path(cacheDirectoryPath) && pluginSources.add(artifactParent.absolutePathString())) {
                 ivyArtifactRepository?.artifactPattern("$artifactParent/[artifact](.[ext])")  // local plugins
             }
         }
@@ -135,7 +132,7 @@ abstract class PluginDependencyManager @Inject constructor(
         }
         val pluginFqn = plugin.getFqn()
         val groupId = groupId(plugin.channel)
-        val ivyFile = Path.of(cacheDirectoryPath).resolve(groupId).resolve("$pluginFqn.xml").takeUnless { it.exists() } ?: return
+        val ivyFile = Path(cacheDirectoryPath, groupId, "$pluginFqn.xml").takeUnless { it.exists() } ?: return
         val identity = IntelliJIvyDescriptorFileGenerator.IvyCoordinates(groupId, plugin.id, plugin.version)
         IntelliJIvyDescriptorFileGenerator(identity)
             .addConfiguration(DefaultIvyConfiguration("default"))
@@ -144,7 +141,7 @@ abstract class PluginDependencyManager @Inject constructor(
     }
 
     private fun externalPluginDependency(artifact: Path, channel: String? = null, maven: Boolean = false): PluginDependency? {
-        if (!artifact.extension == "jar" && !artifact.isDirectory()) {
+        if (artifact.extension != "jar" && !artifact.isDirectory()) {
             warn(context, "Cannot create plugin from file '$artifact' - only directories or jars are supported")
         }
         return createPlugin(artifact, true, context)?.let {
