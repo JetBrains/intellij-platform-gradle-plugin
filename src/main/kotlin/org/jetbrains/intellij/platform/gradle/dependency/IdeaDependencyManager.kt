@@ -250,6 +250,11 @@ abstract class IdeaDependencyManager @Inject constructor(
                 name = Rider.dependency.name,
             )
 
+            type == RustRover -> RemoteIdeaDependency(
+                group = RustRover.dependency.group,
+                name = RustRover.dependency.name,
+            )
+
             type == Gateway -> RemoteIdeaDependency(
                 group = Gateway.dependency.group,
                 name = Gateway.dependency.name,

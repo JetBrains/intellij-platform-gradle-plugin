@@ -8,6 +8,7 @@
 - Added `IntelliJPlatformCollectorTransformer` and `IntelliJPlatformExtractTransformer` for handling IntelliJ Platform dependency archives
 - Added `jetbrainsAnnotations` dependency helper for adding JetBrains Annotations dependency
 - Added general `intellijPlatform` along with product-specific dependency helpers for adding IntelliJ Platform dependency
+- Make RustRover (`RR` type) available for resolving as SDK.
 
 ### Changed
 

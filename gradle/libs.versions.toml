@@ -1,12 +1,12 @@
 [versions]
 # libraries
-annotations = "24.0.1"
+annotations = "24.1.0"
 gradleIdeaExt = "1.1.7"
 intellijStructure = "3.262"
 intellijPluginRepositoryRestClient = "2.0.38"
-jacksonDatabind = "2.15.2"
+jacksonDatabind = "2.16.0"
 jaxbApi = "2.4.0-b180830.0359"
-kotlinxSerializationJson = "1.6.0"
+kotlinxSerializationJson = "1.6.1"
 retrofit = "2.9.0"
 
 # plugins

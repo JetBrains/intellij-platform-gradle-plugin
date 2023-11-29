@@ -602,7 +602,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                         IntelliJPlatformType.fromCode(it)
                     }
                     val localPath = extension.localPath.orNull.orEmpty()
-                    val types = listOf(CLion, Rider, PyCharmProfessional, PhpStorm)
+                    val types = listOf(CLion, Rider, PyCharmProfessional, PhpStorm, RustRover)
 
                     when {
                         localPath.isNotBlank() || !version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> {
@@ -621,6 +621,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                                 Rider -> "RIDER-"
                                 PyCharmProfessional -> "PYCHARM-"
                                 PhpStorm -> "PHPSTORM-"
+                                RustRover -> "RUSTROVER-"
                                 else -> ""
                             }
                             prefix + version

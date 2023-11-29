@@ -71,6 +71,11 @@ enum class IntelliJPlatformType(
         dependency = Coordinates("com.jetbrains.intellij.rider", "riderRD"),
         binary = Coordinates("rider", "JetBrains.Rider"),
     ),
+    RustRover(
+        code = "RR",
+        dependency = Coordinates("com.jetbrains.intellij.rustrover", "RustRover"),
+        binary = null,
+    ),
     Writerside(
         code = "WRS",
         dependency = Coordinates("com.jetbrains.intellij.idea", "writerside"),
