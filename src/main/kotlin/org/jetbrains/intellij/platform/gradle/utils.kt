@@ -7,7 +7,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
-import com.jetbrains.plugin.structure.base.plugin.PluginProblem
+import com.jetbrains.plugin.structure.base.problems.PluginProblem
 import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
@@ -209,7 +209,6 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     is RegularFile -> value.asFile.exists()
     else -> true
 }
-
 
 internal val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()

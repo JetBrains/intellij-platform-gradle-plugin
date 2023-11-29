@@ -2,7 +2,7 @@
 # libraries
 annotations = "24.1.0"
 gradleIdeaExt = "1.1.7"
-intellijStructure = "3.262"
+intellijStructure = "3.265"
 intellijPluginRepositoryRestClient = "2.0.38"
 jacksonDatabind = "2.16.0"
 jaxbApi = "2.4.0-b180830.0359"
@@ -10,7 +10,7 @@ kotlinxSerializationJson = "1.6.1"
 retrofit = "2.9.0"
 
 # plugins
-dokka = "1.9.0"
+dokka = "1.9.10"
 gradlePluginPublish = "1.2.1"
 gradleChangelogPlugin = "2.2.0"
 

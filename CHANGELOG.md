@@ -9,6 +9,7 @@
 - Added `jetbrainsAnnotations` dependency helper for adding JetBrains Annotations dependency
 - Added general `intellijPlatform` along with product-specific dependency helpers for adding IntelliJ Platform dependency
 - Make RustRover (`RR` type) available for resolving as SDK.
+- Fixed `RunPluginVerifierTask.FailureLevel.NOT_DYNAMIC` presence check [#1485](../../issues/1485)
 
 ### Changed
 

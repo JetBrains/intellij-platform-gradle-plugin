@@ -339,8 +339,8 @@ abstract class RunPluginVerifierTask() : JavaExec(), JetBrainsRuntimeAware, Plug
             "Provided plugin artifact is not valid."
         ),
         NOT_DYNAMIC(
-            "Plugin cannot be loaded/unloaded without IDE restart",
-            "Plugin cannot be loaded/unloaded without IDE restart."
+            "Plugin probably cannot be enabled or disabled without IDE restart",
+            "Plugin probably cannot be enabled or disabled without IDE restart."
         );
 
         companion object {
