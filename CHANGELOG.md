@@ -2,6 +2,11 @@
 
 ## [next]
 
+### Added
+
+- Make RustRover (`RR` type) available for resolving as SDK.
+- Fixed `RunPluginVerifierTask.FailureLevel.NOT_DYNAMIC` presence check [#1485](../../issues/1485)
+
 ## [1.16.0] - 2023-10-06
 
 ### Added
@@ -13,7 +18,6 @@
 - `RunPluginVerifierTask`: new `runPluginVerifier.verificationReportsFormats` property to control verifier output formats
 - `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with list of problems to be ignored in a report
 - `RunPluginVerifierTask`: new `runPluginVerifier.freeArgs` property to let pass to the IntelliJ Plugin Verifier custom arguments
-- Make RustRover (`RR` type) available for resolving as SDK.
 
 ### Fixed
 
