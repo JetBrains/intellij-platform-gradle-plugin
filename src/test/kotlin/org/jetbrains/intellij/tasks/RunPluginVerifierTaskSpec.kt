@@ -318,7 +318,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(RUN_PLUGIN_VERIFIER_TASK_NAME).let {
-            assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
+            assertContains("The plugin descriptor 'plugin.xml' is not found.", it.output)
             assertContains("Task :verifyPlugin FAILED", it.output)
         }
     }

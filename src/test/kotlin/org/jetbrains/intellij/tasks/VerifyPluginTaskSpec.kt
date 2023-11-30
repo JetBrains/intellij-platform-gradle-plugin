@@ -27,8 +27,8 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Plugin name specified in plugin.xml should not contain the word 'plugin'", it.output)
+        buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
+            assertContains("The plugin name should not contain the word 'plugin'.", it.output)
         }
     }
 
@@ -55,7 +55,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Plugin name specified in plugin.xml should not contain the word 'IntelliJ'", it.output)
+            assertContains("The plugin name should not contain the word 'IntelliJ'.", it.output)
         }
     }
 
@@ -78,7 +78,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
+            assertContains("Invalid plugin descriptor 'description'. The plugin description is shorter than 40 characters and/or the plugin description contains non-Latin characters.", it.output)
         }
     }
 
@@ -105,7 +105,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
+            assertContains("Invalid plugin descriptor 'description'. The plugin description is shorter than 40 characters and/or the plugin description contains non-Latin characters.", it.output)
         }
     }
 
@@ -113,7 +113,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on errors by default`() {
         pluginXml.delete()
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
+            assertContains("The plugin descriptor 'plugin.xml' is not found.", it.output)
         }
     }
 
@@ -129,7 +129,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.delete()
         build(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Plugin descriptor 'plugin.xml' is not found", it.output)
+            assertContains("The plugin descriptor 'plugin.xml' is not found.", it.output)
         }
     }
 
@@ -156,7 +156,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("<name> must not be equal to default value:", it.output)
+            assertContains("Please ensure that <name> is not equal to the default value 'Plugin display name here'.", it.output)
         }
     }
 
@@ -183,7 +183,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(VERIFY_PLUGIN_TASK_NAME).let {
-            assertContains("Invalid plugin descriptor 'description': Please provide a long-enough English description.", it.output)
+            assertContains("Invalid plugin descriptor 'description'. The plugin description is shorter than 40 characters and/or the plugin description contains non-Latin characters.", it.output)
         }
     }
 
