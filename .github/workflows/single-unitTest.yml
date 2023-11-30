@@ -10,7 +10,7 @@ on:
         description: "Gradle Version"
         required: true
         type: string
-        default: "8.4"
+        default: "8.5"
       os:
         description: "Operation System"
         required: true
