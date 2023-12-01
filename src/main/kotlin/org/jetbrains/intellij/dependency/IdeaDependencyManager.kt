@@ -235,10 +235,6 @@ abstract class IdeaDependencyManager @Inject constructor(
                 dependency.jarFiles
                     .forEach { addArtifact(IntellijIvyArtifact.createJarDependency(it.toPath(), "compile", dependency.classes.toPath())) }
 
-                dependency.sourceZipFiles
-                    .filter { it.nameWithoutExtension in sourceZipArtifacts }
-                    .forEach { addArtifact(IntellijIvyArtifact.createZipDependency(it.toPath(), "sources", dependency.classes.toPath())) }
-
                 if (dependency.sources != null) {
                     val name = when {
                         isDependencyOnPyCharm(dependency) -> "pycharmPC"
@@ -249,6 +245,10 @@ abstract class IdeaDependencyManager @Inject constructor(
                         addArtifact(this)
                     }
                 }
+
+                dependency.sourceZipFiles
+                    .filter { it.nameWithoutExtension in sourceZipArtifacts }
+                    .forEach { addArtifact(IntellijIvyArtifact.createZipDependency(it.toPath(), "sources", dependency.classes.toPath())) }
 
                 writeTo(ivyFile)
             }

@@ -7,6 +7,10 @@
 - Make RustRover (`RR` type) available for resolving as SDK.
 - Fixed `RunPluginVerifierTask.FailureLevel.NOT_DYNAMIC` presence check [#1485](../../issues/1485)
 
+### Fixed
+
+- Attach IntelliJ SDK sources before LSP API sources [#1490](../../issues/1490)
+
 ## [1.16.0] - 2023-10-06
 
 ### Added
