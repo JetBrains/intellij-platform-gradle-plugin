@@ -17,7 +17,7 @@ jobs:
       matrix:
         gradleVersion:
           - "8.0"
-          - "8.4"
+          - "8.5"
         os:
           - windows-latest
           - ubuntu-latest
@@ -29,7 +29,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: zulu
           java-version: 11
