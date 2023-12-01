@@ -2,14 +2,16 @@
 
 ## [next]
 
+## [1.16.1] - 2023-12-01
+
 ### Added
 
 - Make RustRover (`RR` type) available for resolving as SDK.
-- Fixed `RunPluginVerifierTask.FailureLevel.NOT_DYNAMIC` presence check [#1485](../../issues/1485)
 
 ### Fixed
 
 - Attach IntelliJ SDK sources before LSP API sources [#1490](../../issues/1490)
+- Fixed `RunPluginVerifierTask.FailureLevel.NOT_DYNAMIC` presence check [#1485](../../issues/1485)
 
 ## [1.16.0] - 2023-10-06
 
@@ -937,7 +939,8 @@
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.0...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.1...HEAD
+[1.16.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.15.0...v1.16.0
 [1.15.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.2...v1.15.0
 [1.14.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.1...v1.14.2
