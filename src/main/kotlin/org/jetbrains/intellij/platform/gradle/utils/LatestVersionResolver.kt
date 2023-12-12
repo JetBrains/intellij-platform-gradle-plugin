@@ -23,9 +23,9 @@ class LatestVersionResolver {
             "${Locations.INTELLIJ_DEPENDENCIES_REPOSITORY}/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml",
         )
 
-        fun zipSigner() = fromGitHub(
+        fun zipSigner() = fromMaven(
             "Marketplace ZIP Signer",
-            Locations.ZIP_SIGNER_REPOSITORY,
+            "${Locations.MAVEN_REPOSITORY}/org/jetbrains/marketplace-zip-signer/maven-metadata.xml",
         )
 
         fun fromMaven(subject: String, url: String): String {

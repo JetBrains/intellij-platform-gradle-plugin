@@ -370,7 +370,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider.map { version ->
             dependencies.create(
                 group = "org.jetbrains",
-                name = "marketplace-zip-signer-cli",
+                name = "marketplace-zip-signer",
                 version = when (version) {
                     VERSION_LATEST -> LatestVersionResolver.zipSigner()
                     else -> version
@@ -381,8 +381,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         },
         action,
     )
-
-
 }
 
 // TODO: cleanup JBR helper functions:

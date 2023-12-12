@@ -68,14 +68,6 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
-    // TODO: migrate to Maven Central
-    fun zipSigner(action: RepositoryAction = {}) = createIvyRepository(
-        name = "JetBrains Marketplace ZIP Signer Repository",
-        url = Locations.ZIP_SIGNER_REPOSITORY,
-        pattern = "/releases/download/[revision]/marketplace-zip-signer-cli.jar",
-        action = action,
-    )
-
     fun binaryReleasesAndroidStudio(action: RepositoryAction = {}) = createIvyRepository(
         name = "Android Studio Binary Releases",
         url = Locations.ANDROID_STUDIO_BINARY_RELEASES,

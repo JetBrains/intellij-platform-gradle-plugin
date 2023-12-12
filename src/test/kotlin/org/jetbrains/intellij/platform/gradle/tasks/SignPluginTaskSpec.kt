@@ -18,12 +18,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `run Marketplace ZIP Signer in the latest version`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()
@@ -40,7 +34,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.SIGN_PLUGIN, "--info") {
-            assertContains("/org.jetbrains/marketplace-zip-signer-cli/", output)
+            assertContains("/org.jetbrains/marketplace-zip-signer/", output)
         }
     }
 
@@ -48,15 +42,9 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `run Marketplace ZIP Signer in specified version using certificateChainFile and privateKeyFile`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
-                    zipSigner("0.1.7")
+                    zipSigner("0.1.21")
                 }            
             }
             
@@ -70,7 +58,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.SIGN_PLUGIN, "--info") {
-            assertContains("marketplace-zip-signer-cli-0.1.7-cli.jar", output)
+            assertContains("marketplace-zip-signer-0.1.21-cli.jar", output)
         }
     }
 
@@ -78,12 +66,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on signing without password provided`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()
@@ -108,12 +90,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `fail on signing with incorrect password provided`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()
@@ -139,12 +115,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `sign plugin with password provided`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()
@@ -168,15 +138,9 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `run Marketplace ZIP Signer in specified version using certificateChain and privateKey`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
-                    zipSigner("0.1.7")
+                    zipSigner("0.1.21")
                 }            
             }
             
@@ -191,7 +155,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.SIGN_PLUGIN, "--info") {
-            assertContains("marketplace-zip-signer-cli-0.1.7-cli.jar", output)
+            assertContains("marketplace-zip-signer-0.1.21-cli.jar", output)
         }
     }
 
@@ -206,12 +170,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `run Marketplace ZIP Signer and fail on invalid version`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner("0.0.1")
@@ -226,7 +184,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             assertValidConfigurationCache = false,
             Tasks.SIGN_PLUGIN,
         ) {
-            assertContains("Could not find org.jetbrains:marketplace-zip-signer-cli:0.0.1.", output)
+            assertContains("Could not find org.jetbrains:marketplace-zip-signer:0.0.1.", output)
         }
     }
 
@@ -234,12 +192,6 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `output file contains version when specified in build file`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()

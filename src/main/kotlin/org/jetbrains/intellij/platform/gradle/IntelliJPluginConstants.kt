@@ -102,12 +102,11 @@ object IntelliJPluginConstants {
         const val DOWNLOAD = "https://download.jetbrains.com"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
-        const val IDEA_PRODUCTS_BINARY_RELEASES = "https://data.services.jetbrains.com/products/"
         const val IDEA_PRODUCTS_RELEASES_LIST = "https://www.jetbrains.com/updates/updates.xml"
         const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
+        const val MAVEN_REPOSITORY = "https://repo1.maven.org/maven2"
         const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
-        const val ZIP_SIGNER_REPOSITORY = "https://github.com/JetBrains/marketplace-zip-signer"
     }
 
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
