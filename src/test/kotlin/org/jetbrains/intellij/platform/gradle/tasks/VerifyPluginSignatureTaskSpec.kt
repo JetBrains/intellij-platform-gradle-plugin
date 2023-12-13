@@ -22,12 +22,6 @@ class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
     fun `verify plugin signature with certificateChainFile`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()
@@ -50,12 +44,6 @@ class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
     fun `verify plugin signature with certificateChain`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()
@@ -78,12 +66,6 @@ class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
     fun `verify plugin signed with password provided`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
                     zipSigner()
@@ -107,15 +89,9 @@ class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
     fun `verify unsigned plugin archive`() {
         buildFile.kotlin(
             """
-            repositories {
-                intellijPlatform {
-                    zipSigner()
-                }            
-            }
-            
             dependencies {
                 intellijPlatform {
-                    zipSigner("0.1.7")
+                    zipSigner("0.1.21")
                 }            
             }
             
