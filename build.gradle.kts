@@ -95,10 +95,6 @@ tasks {
                 layout.buildDirectory.asFile.map { it.resolve("testGradleHome") }.get()
             )
 
-        doFirst {
-            testGradleHome.mkdir()
-        }
-
         systemProperties["test.gradle.home"] = testGradleHome
         systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
         systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
@@ -169,9 +165,6 @@ testing {
                                     .get()
                             )
 
-                        doFirst {
-                            testGradleHome.mkdir()
-                        }
                         systemProperties["test.gradle.home"] = testGradleHome
                         systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
                         systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
@@ -190,15 +183,15 @@ testing {
     }
 }
 
-val dokkaHtml by tasks.getting(DokkaTask::class)
+val dokkaHtml by tasks.existing(DokkaTask::class)
 val javadocJar by tasks.registering(Jar::class) {
     dependsOn(dokkaHtml)
     archiveClassifier.set("javadoc")
-    from(dokkaHtml.outputDirectory)
+    from(dokkaHtml.map { it.outputDirectory })
     patchManifest()
 }
 
-val sourcesJar = tasks.register<Jar>("sourcesJar") {
+val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier.set("sources")
     from(sourceSets.main.get().allSource)
     patchManifest()
