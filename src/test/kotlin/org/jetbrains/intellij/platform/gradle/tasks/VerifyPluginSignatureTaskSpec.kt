@@ -2,9 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
 
@@ -13,8 +15,8 @@ class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `skip plugin signature verification task if plugin signing is not configured`() {
         build(Tasks.VERIFY_PLUGIN_SIGNATURE) {
-            assertContains("Task :${Tasks.SIGN_PLUGIN} SKIPPED", output)
-            assertContains("Task :${Tasks.VERIFY_PLUGIN_SIGNATURE} NO-SOURCE", output)
+            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
+            assertEquals(TaskOutcome.NO_SOURCE, task(":${Tasks.VERIFY_PLUGIN_SIGNATURE}")?.outcome)
         }
     }
 

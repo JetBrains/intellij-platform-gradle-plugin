@@ -2,11 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
 import kotlin.io.path.readText
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
@@ -21,7 +23,7 @@ class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
         )
 
         build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-            assertContains("${Tasks.BUILD_SEARCHABLE_OPTIONS} SKIPPED", output)
+            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.BUILD_SEARCHABLE_OPTIONS}")?.outcome)
         }
     }
 

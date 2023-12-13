@@ -2,11 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment")
@@ -162,7 +164,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `skip Marketplace ZIP Signer task if no key and certificateChain were provided`() {
         build(Tasks.SIGN_PLUGIN) {
-            assertContains("Task :${Tasks.SIGN_PLUGIN} SKIPPED", output)
+            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
         }
     }
 
