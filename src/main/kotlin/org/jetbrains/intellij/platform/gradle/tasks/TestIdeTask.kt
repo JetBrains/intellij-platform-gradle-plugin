@@ -10,10 +10,10 @@ import org.gradle.kotlin.dsl.withNormalizer
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.LaunchSystemArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.platform.gradle.asPath
-import org.jetbrains.intellij.platform.gradle.propertyProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradle.propertyProviders.LaunchSystemArgumentProvider
-import org.jetbrains.intellij.platform.gradle.propertyProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.base.*
 import kotlin.io.path.absolutePathString
 

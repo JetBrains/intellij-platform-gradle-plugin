@@ -9,10 +9,10 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.getBootClasspath
-import org.jetbrains.intellij.platform.gradle.propertyProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradle.propertyProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.base.*
 import java.io.File
 import kotlin.io.path.absolutePathString

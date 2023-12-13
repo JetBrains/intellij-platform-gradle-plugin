@@ -7,6 +7,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.argumentProviders.PerformanceTestArgumentProvider
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.info
@@ -16,7 +17,6 @@ import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPerformanceParser
-import org.jetbrains.intellij.platform.gradle.propertyProviders.PerformanceTestArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import java.nio.file.Files
 import kotlin.io.path.createDirectories
