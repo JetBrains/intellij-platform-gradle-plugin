@@ -61,8 +61,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.LIST_PRODUCTS_RELEASES)
         assertEquals(
             """
-            IC-2023.3
-            IC-2023.2.4
+            IC-2023.3.1
+            IC-2023.2.5
             IC-2023.1.5
             """.trimIndent(),
             outputFile.readText(),
@@ -132,7 +132,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.LIST_PRODUCTS_RELEASES)
         assertEquals(
             """
-            IC-2023.2.4
+            IC-2023.2.5
             IC-2023.1.5
             IC-2022.3.3
             IC-2022.2.5
@@ -177,7 +177,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.LIST_PRODUCTS_RELEASES)
         assertEquals(
             """
-            IC-2023.2.4
+            IC-2023.3.1
+            IC-2023.2.5
             IC-2023.1.5
             """.trimIndent(),
             outputFile.readText(),
@@ -200,14 +201,14 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.LIST_PRODUCTS_RELEASES)
         assertEquals(
             """
-            IU-2023.3
-            IU-2023.2.4
+            IU-2023.3.1
+            IU-2023.2.5
             IU-2023.1.5
-            PS-2023.3
-            PS-2023.2.3
+            PS-2023.3.1
+            PS-2023.2.4
             PS-2023.1.4
-            PY-2023.3
-            PY-2023.2.4
+            PY-2023.3.1
+            PY-2023.2.5
             PY-2023.1.4
             """.trimIndent(),
             outputFile.readText(),
@@ -263,7 +264,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.LIST_PRODUCTS_RELEASES)
         assertEquals(
             """
-            AI-2022.3.1.20
+            AI-2022.3.1.22
             AI-2023.1.1.1
             """.trimIndent(),
             outputFile.readText(),
