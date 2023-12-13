@@ -331,7 +331,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                         when (it) {
                             is IntelliJPlatformType -> it
                             is String -> IntelliJPlatformType.fromCode(it)
-                            else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or IntelliJPlatformType")
+                            else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or ${IntelliJPlatformType::class.java}")
                         }
                     }
                     .zip(version) { typeValue, versionValue ->
