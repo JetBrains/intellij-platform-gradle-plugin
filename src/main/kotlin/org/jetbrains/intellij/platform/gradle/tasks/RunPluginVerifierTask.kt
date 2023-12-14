@@ -260,7 +260,6 @@ abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, Plugin
             project.registerTask<RunPluginVerifierTask>(Tasks.RUN_PLUGIN_VERIFIER) {
                 val intellijPluginVerifierIdesConfiguration = project.configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES)
 
-                val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES)
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()
 
@@ -282,7 +281,6 @@ abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, Plugin
                 offline.convention(project.gradle.startParameter.isOffline)
 
                 dependsOn(buildPluginTaskProvider)
-                dependsOn(listProductsReleasesTaskProvider)
 //                dependsOn(Tasks.VERIFY_PLUGIN)
             }
     }

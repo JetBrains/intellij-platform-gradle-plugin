@@ -62,22 +62,17 @@ object IntelliJPluginConstants {
     }
 
     object Tasks {
-        const val APPLY_RECOMMENDED_PLUGIN_VERIFIER_IDES = "applyRecommendedPluginVerifierIdes"
         const val BUILD_PLUGIN = "buildPlugin" // TODO: check
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
-        const val DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML = "downloadAndroidStudioProductReleasesXml"
-        const val DOWNLOAD_IDEA_PRODUCT_RELEASES_XML = "downloadIdeaProductReleasesXml"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val LIST_BUNDLED_PLUGINS = "listBundledPlugins"
-        const val LIST_PRODUCTS_RELEASES = "listProductsReleases"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
         const val PREPARE_SANDBOX = "prepareSandbox" // TODO: check
         const val PREPARE_TESTING_SANDBOX = "prepareTestingSandbox" // TODO: check
         const val PREPARE_UI_TESTING_SANDBOX = "prepareUiTestingSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
-        const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val RUN_IDE = "runIde" // TODO: check
         const val RUN_PLUGIN_VERIFIER = "runPluginVerifier" // TODO: check
         const val SETUP_DEPENDENCIES = "setupDependencies"
