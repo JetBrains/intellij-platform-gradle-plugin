@@ -235,21 +235,21 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                     inputFile.map { temporaryDir.resolve(it.asPath.name) }
                 ))
 
-                extension.pluginConfiguration.let {
-                    pluginId.convention(it.id)
-                    pluginName.convention(it.name)
-                    pluginVersion.convention(it.version)
-                    pluginDescription.convention(it.description)
-                    changeNotes.convention(it.changeNotes)
+                extension.pluginConfiguration.let { pluginConfiguration ->
+                    pluginId.convention(pluginConfiguration.id)
+                    pluginName.convention(pluginConfiguration.name)
+                    pluginVersion.convention(pluginConfiguration.version)
+                    pluginDescription.convention(pluginConfiguration.description)
+                    changeNotes.convention(pluginConfiguration.changeNotes)
 
-                    it.productDescriptor.let { productDescriptor ->
+                    pluginConfiguration.productDescriptor.let { productDescriptor ->
                         productDescriptorCode.convention(productDescriptor.code)
                         productDescriptorReleaseDate.convention(productDescriptor.releaseDate)
                         productDescriptorReleaseVersion.convention(productDescriptor.releaseVersion)
                         productDescriptorOptional.convention(productDescriptor.optional)
                     }
 
-                    it.ideaVersion.let { ideaVersion ->
+                    pluginConfiguration.ideaVersion.let { ideaVersion ->
                         sinceBuild.convention(
                             ideaVersion.sinceBuild.orElse(project.provider {
                                 with(platformBuild) { "$major.$minor" }
@@ -262,7 +262,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                         )
                     }
 
-                    it.vendor.let { vendor ->
+                    pluginConfiguration.vendor.let { vendor ->
                         vendorName.convention(vendor.name)
                         vendorEmail.convention(vendor.email)
                         vendorUrl.convention(vendor.url)

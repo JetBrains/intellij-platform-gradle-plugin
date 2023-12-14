@@ -17,7 +17,7 @@ abstract class DownloadIdeaProductReleasesXmlTask : Sync() {
 
     /**
      * Represents the property that holds the URL for releases.
-     * Default value: [Locations.IDEA_PRODUCTS_RELEASES_LIST]
+     * Default value: [Locations.PRODUCTS_RELEASES_JETBRAINS_IDES]
      */
     @get:Input
     @get:Optional
@@ -31,7 +31,7 @@ abstract class DownloadIdeaProductReleasesXmlTask : Sync() {
     companion object {
         fun register(project: Project) =
             project.registerTask<DownloadIdeaProductReleasesXmlTask>(Tasks.DOWNLOAD_IDEA_PRODUCT_RELEASES_XML) {
-                releasesUrl.convention(Locations.IDEA_PRODUCTS_RELEASES_LIST)
+                releasesUrl.convention(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES)
 
                 from(releasesUrl.map {
                     project.resolveResourceFromUrl(it)

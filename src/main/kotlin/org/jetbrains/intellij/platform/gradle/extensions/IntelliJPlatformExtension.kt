@@ -15,7 +15,6 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
@@ -25,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.Version
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.tasks.ApplyRecommendedPluginVerifierIdesTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
 import java.io.File
@@ -34,7 +32,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
-@Suppress("unused")
+@Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 interface IntelliJPlatformExtension : ExtensionAware {
 
@@ -322,6 +320,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
             private val tasks: TaskContainer,
             private val gradle: Gradle,
             private val downloadDirectory: DirectoryProperty,
+            private val productReleases: Provider<List<String>>,
         ) {
 
             fun ide(type: Provider<*>, version: Provider<String>) = dependencies.addProvider(
@@ -394,11 +393,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
             fun localIde(localPath: File) = localIde(providers.provider { localPath.absolutePath })
 
-            fun recommended() {
-                tasks.withType<ApplyRecommendedPluginVerifierIdesTask> {
-                    apply.set(true)
-                }
-            }
+            fun recommended() = productReleases.get().map { ide(it) }
         }
     }
 

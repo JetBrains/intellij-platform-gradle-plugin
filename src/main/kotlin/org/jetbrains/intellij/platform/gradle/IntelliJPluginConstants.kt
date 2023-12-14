@@ -98,14 +98,14 @@ object IntelliJPluginConstants {
 
     object Locations {
         const val ANDROID_STUDIO_BINARY_RELEASES = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
-        const val ANDROID_STUDIO_PRODUCTS_RELEASES_LIST = "https://jb.gg/android-studio-releases-list.xml"
         const val DOWNLOAD = "https://download.jetbrains.com"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
-        const val IDEA_PRODUCTS_RELEASES_LIST = "https://www.jetbrains.com/updates/updates.xml"
         const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val MAVEN_REPOSITORY = "https://repo1.maven.org/maven2"
+        const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
+        const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
         const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
     }
 

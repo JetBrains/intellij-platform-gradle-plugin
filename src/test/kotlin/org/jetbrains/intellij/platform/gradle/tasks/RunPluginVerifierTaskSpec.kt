@@ -330,7 +330,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `fail on incorrect ideVersion`() {
+    fun `fail on incorrect ide version`() {
         writeJavaFile()
         writePluginXmlFile()
         writePluginVerifierDependency()
@@ -348,6 +348,29 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
+            assertContains("Could not find idea:ideaIC:foo.", output)
+        }
+    }
+
+    @Test
+    fun `pass on recommended ides`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+
+        buildFile.kotlin(
+            """
+            intellijPlatform {
+                pluginVerifier {
+                    ides {
+                        recommended()
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.RUN_PLUGIN_VERIFIER) {
             assertContains("Could not find idea:ideaIC:foo.", output)
         }
     }

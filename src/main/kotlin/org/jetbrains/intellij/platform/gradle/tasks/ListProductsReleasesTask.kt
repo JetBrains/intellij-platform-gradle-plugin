@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.AndroidStudio
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
-import org.jetbrains.intellij.platform.gradle.model.ProductsReleases
+import org.jetbrains.intellij.platform.gradle.model.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import java.util.*
@@ -129,7 +129,7 @@ abstract class ListProductsReleasesTask : DefaultTask(), PlatformVersionAware {
 
     @TaskAction
     fun listProductsReleases() {
-        val releases = XmlExtractor<ProductsReleases>(context).let { extractor ->
+        val releases = XmlExtractor<JetBrainsIdesReleases>(context).let { extractor ->
             ideaProductReleasesUpdateFiles
                 .files
                 .map { it.toPath() }
@@ -169,7 +169,7 @@ abstract class ListProductsReleasesTask : DefaultTask(), PlatformVersionAware {
             return a != null && b != null && a >= since && (until == null || b <= until)
         }
 
-        val result = releases.map(ProductsReleases::products).flatten().asSequence()
+        val result = releases.map(JetBrainsIdesReleases::products).flatten().asSequence()
             .flatMap { product -> product.codes.map { it to product }.asSequence() }
             .filter { (type) ->
                 runCatching { IntelliJPlatformType.fromCode(type) }

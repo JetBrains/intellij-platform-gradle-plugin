@@ -87,6 +87,7 @@ enum class IntelliJPlatformType(
     companion object {
         private val map = values().associateBy(IntelliJPlatformType::code)
 
+        @Throws(GradleException::class)
         fun fromCode(code: String) = map[code]
             ?: throw GradleException("Specified type '$code' is unknown. Supported values: ${values().joinToString()}")
     }

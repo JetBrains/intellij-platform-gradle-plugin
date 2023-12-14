@@ -17,7 +17,7 @@ abstract class DownloadAndroidStudioProductReleasesXmlTask : Sync() {
 
     /**
      * Represents the property that holds the URL for releases.
-     * Default value: [Locations.ANDROID_STUDIO_PRODUCTS_RELEASES_LIST]
+     * Default value: [Locations.PRODUCTS_RELEASES_ANDROID_STUDIO]
      */
     @get:Input
     @get:Optional
@@ -31,7 +31,7 @@ abstract class DownloadAndroidStudioProductReleasesXmlTask : Sync() {
     companion object {
         fun register(project: Project) =
             project.registerTask<DownloadAndroidStudioProductReleasesXmlTask>(Tasks.DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML) {
-                releasesUrl.convention(Locations.ANDROID_STUDIO_PRODUCTS_RELEASES_LIST)
+                releasesUrl.convention(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
 
                 from(releasesUrl.map {
                     project.resolveResourceFromUrl(it)

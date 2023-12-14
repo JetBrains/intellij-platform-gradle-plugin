@@ -230,3 +230,7 @@ internal val Project.sourceSets
 
 val Gradle.projectCacheDir
     get() = startParameter.projectCacheDir ?: this.rootProject.projectDir.resolve(".gradle")
+
+internal fun String.toVersion() = Version.parse(this)
+
+internal fun String.toIntelliJPlatformType() = IntelliJPlatformType.fromCode(this)

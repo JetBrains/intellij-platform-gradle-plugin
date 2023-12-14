@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlElement
 import javax.xml.bind.annotation.XmlRootElement
 
 @XmlRootElement(name = "products")
-data class ProductsReleases(
+data class JetBrainsIdesReleases(
 
     @set:XmlElement(name = "product")
     var products: List<Product> = mutableListOf(),

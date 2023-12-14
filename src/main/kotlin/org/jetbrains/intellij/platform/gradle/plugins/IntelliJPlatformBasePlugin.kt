@@ -8,19 +8,26 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.model.ProductRelease
+import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
+import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.toVersion
 import java.util.*
 import kotlin.io.path.Path
 
@@ -229,19 +236,25 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         }
 
         configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
+            val productInfoValueProvider = providers.of(ProductInfoValueSource::class.java) {
+                with(parameters) {
+                    productInfoConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                }
+            }
+
             instrumentCode.convention(true)
             sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
 
             configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
-                name.convention(project.provider {
-                    project.name
-                })
-                version.convention(project.provider {
-                    project.version.toString()
-                })
+                name.convention(project.provider { project.name })
+                version.convention(project.provider { project.version.toString() })
 
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
-                configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION)
+                configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION) {
+                    val buildVersion = productInfoValueProvider.map { it.buildNumber.toVersion() }
+                    sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
+                    untilBuild.convention(buildVersion.map { "${it.major}.*" })
+                }
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(Extensions.VENDOR)
             }
 
@@ -269,6 +282,27 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 teamCityOutputFormat.convention(false)
                 subsystemsToCheck.convention("all")
 
+                val productReleasesValueProvider = providers.of(ProductReleasesValueSource::class.java) {
+                    fun String.resolve() = resources.text
+                        .fromUri(this)
+                        .runCatching { asFile("UTF-8") }
+                        .onFailure { logger.error("Cannot resolve product releases", it) }
+                        .getOrThrow()
+
+                    with(parameters) {
+                        jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())
+                        androidStudio.set(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO.resolve())
+                        channels.set(ProductRelease.Channel.values().toList())
+
+                        val extension = project.the<IntelliJPlatformExtension>()
+                        extension.pluginConfiguration.ideaVersion.let { ideaVersion ->
+                            sinceBuild.set(ideaVersion.sinceBuild)
+                            untilBuild.set(ideaVersion.untilBuild)
+                            type.set(productInfoValueProvider.map { it.productCode.toIntelliJPlatformType() })
+                        }
+                    }
+                }
+
                 configureExtension<IntelliJPlatformExtension.PluginVerifier.Ides>(
                     Extensions.IDES,
                     dependencies,
@@ -276,6 +310,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     tasks,
                     gradle,
                     downloadDirectory,
+                    productReleasesValueProvider,
                 )
             }
 

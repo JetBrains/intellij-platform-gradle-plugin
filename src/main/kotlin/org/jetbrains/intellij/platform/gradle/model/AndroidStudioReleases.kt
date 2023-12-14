@@ -32,10 +32,10 @@ data class Item(
     var channel: String = "",
 
     @set:XmlElement
-    var platformBuild: String? = null,
+    var platformBuild: String = "",
 
     @set:XmlElement
-    var platformVersion: String? = null,
+    var platformVersion: String = "",
 
     @set:XmlElement
     var date: String = "",

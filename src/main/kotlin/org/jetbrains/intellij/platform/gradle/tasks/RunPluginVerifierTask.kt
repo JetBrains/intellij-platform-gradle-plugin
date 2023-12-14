@@ -42,7 +42,7 @@ import kotlin.io.path.pathString
  * @see <a href="https://github.com/JetBrains/intellij-plugin-verifier">IntelliJ Plugin Verifier</a>
  */
 @UntrackedTask(because = "Should always run Plugin Verifier")
-abstract class RunPluginVerifierTask() : JavaExec(), JetBrainsRuntimeAware, PluginVerifierAware {
+abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, PluginVerifierAware {
 
     init {
         group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
@@ -261,15 +261,11 @@ abstract class RunPluginVerifierTask() : JavaExec(), JetBrainsRuntimeAware, Plug
                 val intellijPluginVerifierIdesConfiguration = project.configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES)
 
                 val listProductsReleasesTaskProvider = project.tasks.named<ListProductsReleasesTask>(Tasks.LIST_PRODUCTS_RELEASES)
-                val applyRecommendedPluginVerifierIdesTaskProvider =
-                    project.tasks.named<ApplyRecommendedPluginVerifierIdesTask>(Tasks.APPLY_RECOMMENDED_PLUGIN_VERIFIER_IDES)
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 extension.pluginVerifier.let {
                     ides.from(intellijPluginVerifierIdesConfiguration)
-//                    ideVersions.convention(it.ideVersions)
-//                    idePaths.from(it.idePaths)
                     downloadDirectory.convention(it.downloadDirectory)
                     freeArgs.convention(it.freeArgs)
                 }
@@ -287,7 +283,6 @@ abstract class RunPluginVerifierTask() : JavaExec(), JetBrainsRuntimeAware, Plug
 
                 dependsOn(buildPluginTaskProvider)
                 dependsOn(listProductsReleasesTaskProvider)
-                dependsOn(applyRecommendedPluginVerifierIdesTaskProvider)
 //                dependsOn(Tasks.VERIFY_PLUGIN)
             }
     }
