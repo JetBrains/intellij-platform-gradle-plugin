@@ -20,6 +20,7 @@ import java.net.URL
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
+import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.io.path.outputStream
@@ -75,6 +76,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
 
             with(selfUpdateLock.asPath) {
                 if (!exists()) {
+                    parent.createDirectories()
                     createFile()
                 }
             }
