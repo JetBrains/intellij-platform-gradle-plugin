@@ -17,7 +17,7 @@ import kotlin.test.assertFalse
 
 abstract class IntelliJPlatformTestBase {
 
-    var debugEnabled = true
+    var debugEnabled = !(System.getenv("CI") ?: "false").toBoolean()
     val gradleDefault = System.getProperty("test.gradle.default")
     val gradleScan = System.getProperty("test.gradle.scan").toBoolean()
     val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
@@ -103,7 +103,7 @@ abstract class IntelliJPlatformTestBase {
             .withGradleVersion(gradleVersion)
             .forwardOutput()
             .withPluginClasspath()
-//            .withDebug(debugEnabled)
+            .withDebug(debugEnabled)
             .withTestKitDir(File(gradleHome))
             .withArguments(
                 "-Dorg.gradle.kotlin.dsl.scriptCompilationAvoidance=false", // workaround for https://github.com/gradle/gradle/issues/25412
