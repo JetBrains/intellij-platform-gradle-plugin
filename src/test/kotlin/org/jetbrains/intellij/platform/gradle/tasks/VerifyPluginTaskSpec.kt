@@ -25,12 +25,13 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
                 <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                 <vendor>JetBrains</vendor>
+                <depends>com.intellij.modules.lang</depends>
             </idea-plugin>
             """.trimIndent()
         )
 
         build(Tasks.VERIFY_PLUGIN) {
-            assertContains("The plugin name should not contain the word 'plugin'.", output)
+            assertContains("Invalid plugin descriptor 'plugin.xml'. The plugin name should not contain the word 'IntelliJ'.", output)
         }
     }
 
@@ -145,7 +146,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
                     name = "Plugin display name here"
                 }
             }
-
+            
             tasks {
                 verifyPlugin {
                     ignoreUnacceptableWarnings = true

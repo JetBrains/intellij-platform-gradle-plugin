@@ -254,33 +254,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `use ListProductsReleasesTask output on missing ideVersions property`() {
-        writeJavaFile()
-        writePluginXmlFile()
-        writePluginVerifierDependency()
-        writePluginVerifierIde()
-
-        val resource = resource("products-releases/idea-releases.xml")
-        buildFile.kotlin(
-            """
-            tasks {
-                listProductsReleases {
-                    ideaProductReleasesUpdateFiles.from("$resource")
-                    sinceVersion = "2020.2"
-                    untilVersion = "2020.2.3"
-                    releaseChannels = EnumSet.of(Channel.RELEASE)
-                }
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("> Task :listProductsReleases", output)
-            assertContains("Starting the IntelliJ Plugin Verifier", output)
-        }
-    }
-
-    @Test
     fun `fail on verifyPlugin task`() {
         writeJavaFile()
         writePluginVerifierDependency()
