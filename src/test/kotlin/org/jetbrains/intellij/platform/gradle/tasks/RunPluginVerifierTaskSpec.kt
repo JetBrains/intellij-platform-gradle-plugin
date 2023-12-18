@@ -344,7 +344,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Could not find idea:ideaIC:foo.", output)
+            assertContains("Reading IDE", output)
+            assertContains("pluginVerifier/ides/IC-2022.3.3", output)
         }
     }
 
