@@ -128,7 +128,7 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
             project.registerTask<VerifyPluginSignatureTask>(Tasks.VERIFY_PLUGIN_SIGNATURE) {
                 val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
 
-                inputArchiveFile.convention(signPluginTaskProvider.flatMap { it.outputArchiveFile })
+                inputArchiveFile.convention(signPluginTaskProvider.flatMap { it.signedArchiveFile })
                 certificateChainFile.convention(
                     signPluginTaskProvider
                         .flatMap { it.certificateChainFile }

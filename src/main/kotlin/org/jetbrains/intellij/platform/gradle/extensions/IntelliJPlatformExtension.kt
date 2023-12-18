@@ -53,6 +53,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
     val pluginVerifier
         get() = extensions.getByName<PluginVerifier>(Extensions.PLUGIN_VERIFIER)
 
+    val publishing
+        get() = extensions.getByName<Publishing>(Extensions.PUBLISHING)
+
     val signing
         get() = extensions.getByName<Signing>(Extensions.SIGNING)
 
@@ -395,6 +398,18 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
             fun recommended() = productReleases.get().map { ide(it) }
         }
+    }
+
+    @IntelliJPlatform
+    interface Publishing {
+
+        val host: Property<String>
+
+        val token: Property<String>
+
+        val channel: Property<String>
+
+        val toolboxEnterprise: Property<Boolean>
     }
 
     @IntelliJPlatform

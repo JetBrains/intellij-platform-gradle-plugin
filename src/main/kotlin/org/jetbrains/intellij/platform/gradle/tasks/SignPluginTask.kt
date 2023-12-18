@@ -56,7 +56,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     @get:InputFile
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val inputArchiveFile: RegularFileProperty
+    abstract val archiveFile: RegularFileProperty
 
     /**
      * Output, signed ZIP archive file.
@@ -65,7 +65,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
      * Predefined with the name of the ZIP archive file with `-signed` name suffix attached.
      */
     @get:OutputFile
-    abstract val outputArchiveFile: RegularFileProperty
+    abstract val signedArchiveFile: RegularFileProperty
 
     /**
      * KeyStore file path.
@@ -171,7 +171,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
      * @return array with all available CLI options
      */
     private val arguments = sequence {
-        val file = inputArchiveFile.orNull
+        val file = archiveFile.orNull
             ?.run {
                 asPath
                     .takeIf { it.exists() }
@@ -184,7 +184,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         yield(file.absolutePathString())
 
         yield("-out")
-        yield(outputArchiveFile.asPath.absolutePathString())
+        yield(signedArchiveFile.asPath.absolutePathString())
 
         privateKey.orNull?.let {
             yield("-key")
@@ -253,8 +253,8 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                 val buildPluginTaskProvider = project.tasks.named<Zip>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()
 
-                inputArchiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-                outputArchiveFile.convention(
+                archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+                signedArchiveFile.convention(
                     project.layout.file(
                         buildPluginTaskProvider.flatMap { buildPluginTask ->
                             buildPluginTask.archiveFile

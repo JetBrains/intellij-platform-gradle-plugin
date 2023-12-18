@@ -8,12 +8,17 @@ import com.jetbrains.plugin.structure.base.problems.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.asPath
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.utils.ToolboxEnterprisePluginRepositoryService
@@ -30,7 +35,6 @@ import org.jetbrains.intellij.pluginRepository.model.StringPluginId
  *
  * See [Publishing Plugin With Gradle](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#publishing-plugin-with-gradle) tutorial for step-by-step instructions.
  */
-@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Output is stored remotely")
 abstract class PublishPluginTask : DefaultTask() {
 
@@ -42,7 +46,7 @@ abstract class PublishPluginTask : DefaultTask() {
     @get:InputFile
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val distributionFile: RegularFileProperty
+    abstract val archiveFile: RegularFileProperty
 
     /**
      * URL host of a plugin repository.
@@ -88,9 +92,11 @@ abstract class PublishPluginTask : DefaultTask() {
 
     @TaskAction
     fun publishPlugin() {
-        validateInput()
+        if (token.orNull.isNullOrEmpty()) {
+            throw TaskExecutionException(this, GradleException("token property must be specified for plugin publishing"))
+        }
 
-        val path = distributionFile.asPath
+        val path = archiveFile.asPath
         when (val creationResult = IdePluginManager.createManager().createPlugin(path)) {
             is PluginCreationSuccess -> {
                 if (creationResult.unacceptableWarnings.isNotEmpty()) {
@@ -130,9 +136,35 @@ abstract class PublishPluginTask : DefaultTask() {
         }
     }
 
-    private fun validateInput() {
-        if (token.orNull.isNullOrEmpty()) {
-            throw TaskExecutionException(this, GradleException("token property must be specified for plugin publishing"))
-        }
+    companion object {
+        fun register(project: Project) =
+            project.registerTask<PublishPluginTask>(Tasks.PUBLISH_PLUGIN) {
+                val extension = project.the<IntelliJPlatformExtension>()
+                val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+                val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
+
+                val isOffline = project.gradle.startParameter.isOffline
+
+                token.convention(extension.publishing.token)
+                host.convention(extension.publishing.host)
+                toolboxEnterprise.convention(extension.publishing.toolboxEnterprise)
+                channels.convention(extension.publishing.channel.map { listOf(it) })
+
+                archiveFile.convention(
+                    signPluginTaskProvider
+                        .map { it.didWork }
+                        .flatMap { signed ->
+                            when {
+                                signed -> signPluginTaskProvider.flatMap { it.signedArchiveFile }
+                                else -> buildPluginTaskProvider.flatMap { it.archiveFile }
+                            }
+                        }
+                )
+
+                dependsOn(buildPluginTaskProvider)
+                dependsOn(signPluginTaskProvider)
+                onlyIf { !isOffline }
+            }
+
     }
 }

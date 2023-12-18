@@ -40,6 +40,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             VerifyPluginConfigurationTask::register,
             VerifyPluginSignatureTask::register,
             VerifyPluginTask::register,
+            PublishPluginTask::register,
             RunIdeTask::register,
             TestIdeTask::register,
         ).forEach { it.invoke(project) }

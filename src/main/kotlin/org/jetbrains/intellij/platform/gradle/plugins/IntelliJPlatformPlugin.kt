@@ -31,9 +31,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MARKETPLACE_HOST
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PUBLISH_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
@@ -125,7 +124,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 //        configureDownloadRobotServerPluginTask(project)
 //        configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
-        configurePublishPluginTask(project)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
 
 //        project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
@@ -499,7 +497,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 //    }
 
     private fun resolveLatestPluginUpdate(pluginId: String, buildNumber: String, channel: String = "") =
-        PluginRepositoryFactory.create(MARKETPLACE_HOST)
+        PluginRepositoryFactory.create(Locations.MARKETPLACE)
             .pluginManager
             .searchCompatibleUpdates(listOf(pluginId), buildNumber, channel)
             .firstOrNull()
@@ -643,7 +641,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                                 )
                             }, {
                                 setOf(
-                                    IntelliJPluginConstants.Locations.INTELLIJ_DEPENDENCIES_REPOSITORY,
+                                    Locations.INTELLIJ_DEPENDENCIES_REPOSITORY,
                                 ).map(::mavenRepository)
                             }, true).takeIf { it.isNotEmpty() }
                         }
@@ -749,36 +747,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         }
 
         project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
-    }
-
-    private fun configurePublishPluginTask(project: Project) {
-        info(context, "Configuring publish plugin task")
-
-        val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
-
-        project.tasks.register<PublishPluginTask>(PUBLISH_PLUGIN_TASK_NAME)
-        project.tasks.withType<PublishPluginTask> {
-            val isOffline = project.gradle.startParameter.isOffline
-
-            host.convention(MARKETPLACE_HOST)
-            toolboxEnterprise.convention(false)
-            channels.convention(listOf("default"))
-
-            distributionFile.convention(
-                signPluginTaskProvider
-                    .flatMap { signPluginTask ->
-                        when (signPluginTask.didWork) {
-                            true -> signPluginTask.outputArchiveFile
-                            else -> project.resolveBuildTaskOutput()
-                        }
-                    }
-            )
-
-            dependsOn(Tasks.BUILD_PLUGIN)
-            dependsOn(Tasks.VERIFY_PLUGIN)
-            dependsOn(Tasks.SIGN_PLUGIN)
-            onlyIf { !isOffline }
-        }
     }
 
     private fun configurePluginDependencies(

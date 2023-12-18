@@ -28,6 +28,7 @@ object IntelliJPluginConstants {
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
         const val PLUGIN_VERIFIER = "pluginVerifier"
         const val PRODUCT_DESCRIPTOR = "productDescriptor"
+        const val PUBLISHING = "publishing"
         const val SIGNING = "signing"
         const val VENDOR = "vendor"
     }
@@ -73,6 +74,7 @@ object IntelliJPluginConstants {
         const val PREPARE_TESTING_SANDBOX = "prepareTestingSandbox" // TODO: check
         const val PREPARE_UI_TESTING_SANDBOX = "prepareUiTestingSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
+        const val PUBLISH_PLUGIN = "publishPlugin"
         const val RUN_IDE = "runIde" // TODO: check
         const val RUN_PLUGIN_VERIFIER = "runPluginVerifier" // TODO: check
         const val SETUP_DEPENDENCIES = "setupDependencies"
@@ -99,6 +101,7 @@ object IntelliJPluginConstants {
         const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val MAVEN_REPOSITORY = "https://repo1.maven.org/maven2"
+        const val MARKETPLACE = "https://plugins.jetbrains.com"
         const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
         const val PLUGIN_VERIFIER_REPOSITORY = "$CACHE_REDIRECTOR/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier"
@@ -108,7 +111,6 @@ object IntelliJPluginConstants {
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
-    const val PUBLISH_PLUGIN_TASK_NAME = "publishPlugin"
 
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"

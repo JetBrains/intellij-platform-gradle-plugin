@@ -315,6 +315,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             }
 
             configureExtension<IntelliJPlatformExtension.Signing>(Extensions.SIGNING)
+
+            configureExtension<IntelliJPlatformExtension.Publishing>(Extensions.PUBLISHING) {
+                host.convention(Locations.MARKETPLACE)
+                toolboxEnterprise.convention(false)
+                channel.convention("default")
+            }
         }
 
         dependencies.configureExtension<IntelliJPlatformDependenciesExtension>(
