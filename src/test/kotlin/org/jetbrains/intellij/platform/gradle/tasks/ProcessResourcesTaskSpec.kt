@@ -24,7 +24,9 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
             outputPluginXml.value,
             """
             <idea-plugin>
-              <idea-version since-build="221.6008" until-build="221.*" />
+              <idea-version since-build="223.8836" until-build="223.*" />
+              <version>1.0.0</version>
+              <name>projectName</name>
             </idea-plugin>
             """.trimIndent()
         )
@@ -37,10 +39,7 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
-            assertEquals(
-                TaskOutcome.UP_TO_DATE,
-                task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
-            )
+            assertEquals(TaskOutcome.UP_TO_DATE, task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome)
         }
     }
 
@@ -48,32 +47,30 @@ class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
     fun `update resources on updated patched xml files`() {
         pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
-            """
-            version = '0.42.123'
-            """.trimIndent()
-        )
-
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            patchPluginXml { sinceBuild = 'Oh' }
+            intellijPlatform {
+                pluginConfiguration {
+                    ideaVersion {
+                        sinceBuild = "Oh"
+                    }
+                }
+            }
             """.trimIndent()
         )
 
         build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
-            assertNotEquals(
-                TaskOutcome.UP_TO_DATE,
-                task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome,
-            )
+            assertNotEquals(TaskOutcome.UP_TO_DATE, task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome)
 
             assertFileContent(
                 outputPluginXml.value,
                 """
                 <idea-plugin>
-                  <version>0.42.123</version>
-                  <idea-version since-build="Oh" until-build="221.*" />
+                  <idea-version since-build="Oh" until-build="223.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent()
             )
