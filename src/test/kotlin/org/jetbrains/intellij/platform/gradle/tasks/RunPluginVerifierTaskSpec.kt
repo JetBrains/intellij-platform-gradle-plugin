@@ -472,7 +472,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             repositories {
                 intellijPlatform {
                     binaryReleases()
-                    pluginVerifier()
                 }
             }
             dependencies {

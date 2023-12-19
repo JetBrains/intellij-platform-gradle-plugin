@@ -15,7 +15,7 @@ class LatestVersionResolver {
     companion object {
         fun pluginVerifier() = fromMaven(
             "IntelliJ Plugin Verifier",
-            "${Locations.PLUGIN_VERIFIER_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml",
+            "${Locations.MAVEN_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml",
         )
 
         fun robotServerPlugin() = fromMaven(

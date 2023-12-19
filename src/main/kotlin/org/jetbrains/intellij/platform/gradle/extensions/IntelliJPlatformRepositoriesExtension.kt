@@ -60,14 +60,6 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
-    // TODO: migrate to Maven Central
-    fun pluginVerifier(action: RepositoryAction = {}) = createRepository(
-        name = "IntelliJ Plugin Verifier Repository",
-        url = "https://packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier",
-        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/packages.jetbrains.team/maven/p/intellij-plugin-verifier/intellij-plugin-verifier",
-        action = action,
-    )
-
     fun binaryReleasesAndroidStudio(action: RepositoryAction = {}) = createIvyRepository(
         name = "Android Studio Binary Releases",
         url = Locations.ANDROID_STUDIO_BINARY_RELEASES,
