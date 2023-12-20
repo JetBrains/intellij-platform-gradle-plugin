@@ -63,7 +63,7 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
         }
         """.trimIndent()
 
-    fun getSearchableOptionsXml(jar: String) = getSearchableOptions().resolve("/$jar.jar/search/$jar.jar$SEARCHABLE_OPTIONS_SUFFIX")
+    fun getSearchableOptionsXml(jar: String) = getSearchableOptions().resolve("$jar.jar/search/$jar.jar$SEARCHABLE_OPTIONS_SUFFIX")
 
     private fun getSearchableOptions() = buildDirectory.resolve(SEARCHABLE_OPTIONS_DIR_NAME)
 }

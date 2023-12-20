@@ -5,16 +5,19 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.*
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.model.getBootClasspath
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
+import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
+import java.io.File
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.pathString
 
 /**
@@ -28,7 +31,7 @@ import kotlin.io.path.pathString
  * @see [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING]
  */
 @CacheableTask
-abstract class BuildSearchableOptionsTask : RunIdeTask() {
+abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -50,6 +53,10 @@ abstract class BuildSearchableOptionsTask : RunIdeTask() {
 
     private val context = logCategory()
 
+    /**
+     * Executes the task, configures and runs the IDE.
+     */
+    @TaskAction
     override fun exec() {
         if (showPaidPluginWarning.get()) {
             warn(
@@ -61,9 +68,40 @@ abstract class BuildSearchableOptionsTask : RunIdeTask() {
             )
         }
 
+        assertPlatformVersion()
+        configureClasspath()
+
+        workingDir = intelliJPlatform.singleFile
         args = args + listOf("traverseUI", outputDir.asPath.pathString, "true")
 
         super.exec()
+    }
+
+    override fun getExecutable() = jetbrainsRuntimeExecutable.asPath.absolutePathString()
+
+    /**
+     * Prepares the classpath for the IDE based on the IDEA version.
+     */
+    private fun configureClasspath() {
+        classpath += objectFactory.fileCollection().from(
+            resolveToolsJar(executable)
+        )
+
+        classpath += objectFactory.fileCollection().from(
+            productInfo.get().getBootClasspath(intelliJPlatform.single().toPath())
+        )
+    }
+
+    /**
+     * Resolves the path to the `tools.jar` library.
+     */
+    private fun resolveToolsJar(javaExec: String): File {
+        val binDir = File(javaExec).parent
+        val path = when {
+            OperatingSystem.current().isMacOsX -> "../../lib/tools.jar"
+            else -> "../lib/tools.jar"
+        }
+        return File(binDir, path)
     }
 
     companion object {
@@ -80,11 +118,14 @@ abstract class BuildSearchableOptionsTask : RunIdeTask() {
                     }
                 )
 
+                dependsOn(patchPluginXmlTaskProvider)
+
+//                inputs.property("intellijPlatform.buildSearchableOptions", extension.buildSearchableOptions)
+//                outputs.dir(outputDir)
+
                 onlyIf {
                     extension.buildSearchableOptions.get()
                 }
-
-                dependsOn(patchPluginXmlTaskProvider)
             }
     }
 }

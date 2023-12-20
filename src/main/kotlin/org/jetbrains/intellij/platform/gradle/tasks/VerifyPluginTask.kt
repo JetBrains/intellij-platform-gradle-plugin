@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.warn
  * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
+ * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @CacheableTask
 abstract class VerifyPluginTask : DefaultTask(), SandboxAware {

@@ -145,18 +145,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
 
     @TaskAction
     fun patchPluginXml() {
-
-        val inputPath = inputFile.asPath
-        val outputPath = outputFile.asPath
-
-        val sinceBuildValue = sinceBuild.orNull ?: with(platformVersion) {
-            "$major.$minor"
-        }
-        val untilBuildValue = untilBuild.orNull ?: with(platformVersion) {
-            "$major.*"
-        }
-
-        inputPath.inputStream().use { inputStream ->
+        inputFile.asPath.inputStream().use { inputStream ->
             val document = JDOMUtil.loadDocument(inputStream)
 
             with(document) {
@@ -171,15 +160,15 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                 patch(productDescriptorReleaseVersion, "product-descriptor", "release-version")
                 patch(productDescriptorOptional.map { it.toString() }, "product-descriptor", "optional")
 
-                patch(sinceBuildValue, "idea-version", "since-build")
-                patch(untilBuildValue, "idea-version", "until-build")
+                patch(sinceBuild, "idea-version", "since-build")
+                patch(untilBuild, "idea-version", "until-build")
 
                 patch(vendorName, "vendor")
                 patch(vendorEmail, "vendor", "email")
                 patch(vendorUrl, "vendor", "url")
             }
 
-            transformXml(document, outputPath)
+            transformXml(document, outputFile.asPath)
         }
     }
 
@@ -250,16 +239,8 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                     }
 
                     pluginConfiguration.ideaVersion.let { ideaVersion ->
-                        sinceBuild.convention(
-                            ideaVersion.sinceBuild.orElse(project.provider {
-                                with(platformBuild) { "$major.$minor" }
-                            })
-                        )
-                        untilBuild.convention(
-                            ideaVersion.untilBuild.orElse(project.provider {
-                                with(platformBuild) { "$major.*" }
-                            })
-                        )
+                        sinceBuild.convention(ideaVersion.sinceBuild)
+                        untilBuild.convention(ideaVersion.untilBuild)
                     }
 
                     pluginConfiguration.vendor.let { vendor ->

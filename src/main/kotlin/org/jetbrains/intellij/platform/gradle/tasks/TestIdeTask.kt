@@ -3,18 +3,18 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.JavaExec
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withNormalizer
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.LaunchSystemArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.PluginPathArgumentProvider
 import org.jetbrains.intellij.platform.gradle.asPath
-import org.jetbrains.intellij.platform.gradle.tasks.base.*
+import org.jetbrains.intellij.platform.gradle.tasks.base.CustomPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
+import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
 import kotlin.io.path.absolutePathString
 
 /**
@@ -27,7 +27,7 @@ import kotlin.io.path.absolutePathString
  */
 @Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run guest IDE")
-abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformVersionAware, JetBrainsRuntimeAware, SandboxAware {
+abstract class TestIdeTask : Test(), RunnableIdeAware, CustomPlatformVersionAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -41,44 +41,17 @@ abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomPlatformVer
         super.executeTests()
     }
 
-    override fun getExecutable(): String = jetbrainsRuntimeExecutable.asPath.absolutePathString()
+    override fun getExecutable() = jetbrainsRuntimeExecutable.asPath.absolutePathString()
 
     companion object {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
         //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
         fun register(project: Project) =
             project.registerTask<TestIdeTask>(Tasks.TEST_IDE) {
-                enableAssertions = true
-
-                jvmArgumentProviders.addAll(
-                    listOf(
-                        IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
-                        LaunchSystemArgumentProvider(
-                            intelliJPlatform,
-                            sandboxConfigDirectory,
-                            sandboxPluginsDirectory,
-                            sandboxSystemDirectory,
-                            sandboxLogDirectory,
-                            emptyList(),
-                        ),
-                        PluginPathArgumentProvider(sandboxPluginsDirectory),
-                    )
-                )
-
-                outputs.dir(sandboxSystemDirectory)
-                    .withPropertyName("System directory")
-                inputs.dir(sandboxConfigDirectory)
-                    .withPropertyName("Config Directory")
-                    .withPathSensitivity(PathSensitivity.RELATIVE)
-                inputs.files(sandboxPluginsDirectory)
-                    .withPropertyName("Plugins directory")
-                    .withPathSensitivity(PathSensitivity.RELATIVE)
-                    .withNormalizer(ClasspathNormalizer::class)
 
 //            systemProperty("idea.use.core.classloader.for.plugin.path", "true")
 //            systemProperty("idea.force.use.core.classloader", "true")
 //            systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
-                systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
 
                 project.tasks.named<Test>(TEST_TASK_NAME).configure {
                     finalizedBy(this@registerTask)

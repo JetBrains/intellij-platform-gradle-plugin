@@ -13,7 +13,6 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
-import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
@@ -30,7 +29,7 @@ import kotlin.io.path.*
  * Prepares sandbox directory with installed plugin and its dependencies.
  */
 @Deprecated(message = "CHECK")
-@DisableCachingByDefault(because = "Setting up configuration on local machine")
+@CacheableTask
 abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
     /**
@@ -186,6 +185,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 //            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
                 val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
                 val intellijPlatformPluginsConfiguration = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED)
+//                val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
                 val extension = project.the<IntelliJPlatformExtension>()
 
@@ -233,9 +233,15 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                 from(pluginsClasspath)
 
                 dependsOn(intellijPlatformPluginsConfiguration)
-                dependsOn(runtimeConfiguration)
                 dependsOn(jarTaskProvider)
-//            dependsOn(instrumentedJarTaskProvider)
+//                dependsOn(instrumentedJarTaskProvider)
+                dependsOn(runtimeConfiguration)
+
+                inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
+//                inputs.file(jarTaskProvider.map { it.archiveFile })
+//                inputs.file(instrumentedJarTaskProvider.map { it.archiveFile })
+                inputs.files(runtimeConfiguration)
+                outputs.dir(defaultDestinationDir)
 
 //            project.afterEvaluate `{
 //                extension.plugins.get().filterIsInstance<Project>().forEach { dependency ->

@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
 import kotlin.io.path.exists
@@ -13,30 +12,12 @@ import kotlin.test.assertTrue
 class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
-    fun `skip jarring searchable options using IDEA prior 2019_1`() {
-        buildFile.groovy(
-            """
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.JAR_SEARCHABLE_OPTIONS) {
-            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.JAR_SEARCHABLE_OPTIONS}")?.outcome)
-        }
-    }
-
-    @Test
     fun `jar searchable options produces archive`() {
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
         buildFile.groovy(
             """
-            intellij {
-                version = '$intellijVersion'
-            }
-            buildSearchableOptions {
-                enabled = true
+            intellijPlatform {
+                buildSearchableOptions = true
             }
             """.trimIndent()
         )
@@ -46,7 +27,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
         buildDirectory.resolve("libsSearchableOptions").let {
             assertTrue(it.exists())
-            assertEquals(setOf("/lib/searchableOptions.jar"), collectPaths(it))
+            assertEquals(setOf("/lib/searchableOptions-1.0.0.jar"), collectPaths(it))
         }
     }
 }

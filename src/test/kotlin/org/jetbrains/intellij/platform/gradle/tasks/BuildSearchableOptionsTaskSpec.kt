@@ -2,57 +2,45 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
 import kotlin.io.path.readText
-import kotlin.test.Ignore
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
     @Test
-    fun `skip building searchable options using IDEA prior 2019_1`() {
-        buildFile.groovy(
-            """
-            intellij {
-                version = '14.1.4'
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.BUILD_SEARCHABLE_OPTIONS}")?.outcome)
-        }
-    }
-
-    @Ignore
-    @Test
     fun `build searchable options produces XML`() {
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
 
-        buildFile.groovy(
+        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
+
+        buildFile.kotlin(
             """
-            intellij {
-                version = '$intellijVersion'
-            }
-            buildSearchableOptions {
-                enabled = true
+            intellijPlatform {
+                buildSearchableOptions = true
             }
             """.trimIndent()
         )
 
-        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
-
         build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-            assertContains("Starting searchable options index builder", output)
             assertContains("Searchable options index builder completed", output)
         }
 
-        getSearchableOptionsXml("projectName").readText().let {
+        getSearchableOptionsXml("projectName-1.0.0").readText().let {
             assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", it)
             assertContains("hit=\"Label for Test Searchable Configurable\"", it)
         }
+    }
+
+    @Test
+    fun `skip build searchable options if disabled via extension`() {
+        buildFile.kotlin(
+            """
+            intellijPlatform {
+                buildSearchableOptions = false
+            }
+            """.trimIndent()
+        )
     }
 }

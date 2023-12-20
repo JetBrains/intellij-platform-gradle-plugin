@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.utils
 
 import org.gradle.api.GradleException
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.debug
 import org.jetbrains.intellij.platform.gradle.model.MavenMetadata
@@ -27,6 +28,13 @@ class LatestVersionResolver {
             "Marketplace ZIP Signer",
             "${Locations.MAVEN_REPOSITORY}/org/jetbrains/marketplace-zip-signer/maven-metadata.xml",
         )
+
+        // TODO: use when 2.0 published to GPP
+//        fun plugin() = fromMaven(
+//            "IntelliJ Platform Gradle Plugin",
+//            "${Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY}/org/jetbrains/intellij/platform/intellij-platform-gradle-plugin/maven-metadata.xml",
+//        )
+        fun plugin() = fromGitHub(IntelliJPluginConstants.PLUGIN_NAME, Locations.GITHUB_REPOSITORY)
 
         fun fromMaven(subject: String, url: String): String {
             debug(message = "Resolving latest $subject version")

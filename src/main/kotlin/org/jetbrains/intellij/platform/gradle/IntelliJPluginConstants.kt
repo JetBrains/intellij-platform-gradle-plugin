@@ -91,6 +91,7 @@ object IntelliJPluginConstants {
         const val CONFIG = "config"
         const val PLUGINS = "plugins"
         const val SYSTEM = "system"
+        const val LOG = "log"
     }
 
     object Locations {
@@ -100,6 +101,7 @@ object IntelliJPluginConstants {
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
         const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
+        const val MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY = "https://plugins.gradle.org/m2"
         const val MAVEN_REPOSITORY = "https://repo1.maven.org/maven2"
         const val MARKETPLACE = "https://plugins.jetbrains.com"
         const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"

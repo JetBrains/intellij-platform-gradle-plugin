@@ -106,23 +106,9 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                 }
             }
                         
-            tasks {
-                buildSearchableOptions {
-                    enabled = false
-                }
-            }            
-                        
-            //            intellij {
-            //                pluginsRepositories {
-            //                    maven('$pluginsRepository')
-            //                }
-            //                instrumentCode = false
-            //            }
-                        
-                        // Define tasks with a minimal set of tasks required to build a source set
-            //            sourceSets.all {
-            //                task(it.getTaskName('build', 'SourceSet'), dependsOn: it.output)
-            //            }
+            intellijPlatform {
+                buildSearchableOptions = false
+            }
             """.trimIndent()
         )
 

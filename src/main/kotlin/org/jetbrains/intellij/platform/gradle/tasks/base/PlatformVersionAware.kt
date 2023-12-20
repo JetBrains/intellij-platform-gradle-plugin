@@ -3,14 +3,14 @@
 package org.jetbrains.intellij.platform.gradle.tasks.base
 
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.Version
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
-import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.toVersion
 
 interface PlatformVersionAware {
 
@@ -18,29 +18,16 @@ interface PlatformVersionAware {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     val intelliJPlatform: ConfigurableFileCollection
 
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    val intelliJPlatformProductInfo: ConfigurableFileCollection
-
     @get:Internal
-    val productInfo: ProductInfo
-        get() = intelliJPlatformProductInfo.single().toPath().productInfo()
-
-    @get:Internal
-    val platformBuild: Version
-        get() = Version.parse(productInfo.buildNumber)
-
-    @get:Internal
-    val platformVersion: Version
-        get() = Version.parse(productInfo.version)
-
-    @get:Internal
-    val platformType: IntelliJPlatformType
-        get() = IntelliJPlatformType.fromCode(productInfo.productCode)
-
+    val productInfo: Property<ProductInfo>
+    
+    @Throws(IllegalArgumentException::class)
     fun assertPlatformVersion() {
-        if (platformBuild < Version(223)) {
-            throw IllegalArgumentException("The minimal supported IntelliJ Platform version is 2022.3 (233.0), which is higher than provided: $platformVersion ($platformBuild)")
+        val build = productInfo.map { it.buildNumber.toVersion() }.get()
+        val version = productInfo.map { it.version.toVersion() }.get()
+
+        if (build < Version(223)) {
+            throw IllegalArgumentException("The minimal supported IntelliJ Platform version is 2022.3 (233.0), which is higher than provided: $version ($build)")
         }
     }
 }

@@ -9,7 +9,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
-import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.named
@@ -21,8 +20,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.PlatformJavaVersions
 import org.jetbrains.intellij.platform.gradle.utils.PlatformKotlinVersions
-import java.nio.file.Files
-import javax.inject.Inject
 import kotlin.io.path.*
 
 /**
@@ -45,11 +42,11 @@ import kotlin.io.path.*
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
+ *
+ * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @CacheableTask
-abstract class VerifyPluginConfigurationTask @Inject constructor(
-    private val providers: ProviderFactory,
-) : DefaultTask(), PlatformVersionAware {
+abstract class VerifyPluginConfigurationTask : DefaultTask(), PlatformVersionAware {
 
     /**
      * The location of the built plugin file which will be used for verification.
@@ -60,6 +57,9 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginXmlFile: RegularFileProperty
+
+    @get:OutputDirectory
+    abstract val reportDirectory: DirectoryProperty
 
     /**
      * [JavaCompile.sourceCompatibility] property defined in the build script.
@@ -116,13 +116,6 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
     abstract val kotlinIncrementalUseClasspathSnapshot: Property<Boolean>
 
     /**
-     * The path to the directory where IDEs used for the verification will be downloaded.
-     * Value propagated with [RunPluginVerifierTask.downloadDirectory].
-     */
-    @get:Internal
-    abstract val pluginVerifierDownloadDirectory: DirectoryProperty
-
-    /**
      * This variable represents whether the Kotlin Coroutines library is added explicitly to the project dependencies.
      */
     @get:Internal
@@ -137,6 +130,8 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
 
     @TaskAction
     fun verifyPluginConfiguration() {
+        val platformBuild = productInfo.map { it.buildNumber.toVersion() }.get()
+        val platformVersion = productInfo.map { it.version.toVersion() }.get()
         val platformJavaVersion = platformBuild.let(::getPlatformJavaVersion)
         val sourceCompatibilityJavaVersion = sourceCompatibility.get().let(JavaVersion::toVersion)
         val targetCompatibilityJavaVersion = targetCompatibility.get().let(JavaVersion::toVersion)
@@ -149,8 +144,6 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val kotlinVersion = kotlinVersion.orNull?.let(Version::parse)
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
         val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
-        val pluginVerifierDownloadPath = pluginVerifierDownloadDirectory.asPath
-        val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { Path(it) }.get().resolve("pluginVerifier/ides")
 
         sequence {
             pluginXmlFile.orNull?.let { parsePluginXml(it.asPath) }?.let {
@@ -173,7 +166,7 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             }
 
             if (platformBuild < Version(223)) {
-                yield("The minimal supported IntelliJ Platform version is 2022.3 (233.0), which is higher than provided: $platformVersion ($platformBuild)")
+                yield("The minimal supported IntelliJ Platform version is 2022.3 (223.0), which is higher than provided: $platformVersion ($platformBuild)")
             }
             if (platformJavaVersion > sourceCompatibilityJavaVersion) {
                 yield("The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.")
@@ -196,20 +189,18 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
             if (kotlinxCoroutinesLibraryPresent) {
                 yield("The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.")
             }
-        }.joinToString("\n") { "- $it" }.takeIf(String::isNotEmpty)?.let {
-            warn(
-                context, listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
-            )
         }
-
-        with(oldPluginVerifierDownloadPath) {
-            if (this != pluginVerifierDownloadPath && exists() && Files.list(this).findAny().isPresent) {
-                info(
+            .joinToString("\n") { "- $it" }
+            .takeIf(String::isNotEmpty)
+            ?.also {
+                warn(
                     context,
-                    "The Plugin Verifier download directory is set to $pluginVerifierDownloadPath, but downloaded IDEs were also found in $oldPluginVerifierDownloadPath, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir",
+                    listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
                 )
             }
-        }
+            .also {
+                reportDirectory.file("report.txt").asPath.writeText(it.orEmpty())
+            }
     }
 
     private fun getPlatformJavaVersion(buildNumber: Version) = PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
@@ -226,9 +217,9 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
                 info(context, "Configuring plugin configuration verification task")
 
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-                val runPluginVerifierTaskProvider = project.tasks.named<RunPluginVerifierTask>(Tasks.RUN_PLUGIN_VERIFIER)
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
 
+                reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
                 pluginXmlFile.convention(patchPluginXmlTaskProvider.flatMap {
                     it.outputFile
                 })
@@ -238,9 +229,6 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
                 })
                 targetCompatibility.convention(compileJavaTaskProvider.map {
                     it.targetCompatibility
-                })
-                pluginVerifierDownloadDirectory.convention(runPluginVerifierTaskProvider.flatMap {
-                    it.downloadDirectory
                 })
                 kotlinxCoroutinesLibraryPresent.convention(project.provider {
                     listOf(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->

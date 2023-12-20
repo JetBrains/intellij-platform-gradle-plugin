@@ -6,21 +6,27 @@ import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.Directory
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.executableResolver.IntelliJPluginVerifierResolver
 import org.jetbrains.intellij.platform.gradle.executableResolver.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradle.executableResolver.MarketplaceZipSignerResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.base.*
 import java.util.*
 import kotlin.io.path.createDirectories
@@ -37,7 +43,10 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
 
         if (this is PlatformVersionAware) {
             intelliJPlatform = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
-            intelliJPlatformProductInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+
+            productInfo.set(providers.of(ProductInfoValueSource::class) {
+                parameters.productInfoConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+            })
         }
 
         if (this is CoroutinesJavaAgentAware) {
@@ -122,8 +131,9 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM)
                 }
             })
-            intelliJPlatformProductInfo.setFrom(provider {
-                when {
+
+            productInfo.set(providers.of(ProductInfoValueSource::class) {
+                parameters.productInfoConfiguration = when {
                     type.isSpecified() || version.isSpecified() -> intellijPlatformProductInfoConfiguration
                     else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
                 }
@@ -131,9 +141,11 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         }
 
         if (this is SandboxAware) {
-            val sandboxDirectoryProvider = extension.sandboxContainer.map {
-                it.dir("$platformType-$platformVersion").also { directory ->
-                    directory.asPath.createDirectories()
+            val sandboxDirectoryProvider = extension.sandboxContainer.flatMap { container ->
+                productInfo.map {
+                    container
+                        .dir("${it.productCode}-${it.version}")
+                        .apply { asPath.createDirectories() }
                 }
             }
 
@@ -150,6 +162,18 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 }
             )
             sandboxDirectory.convention(sandboxDirectoryProvider)
+            sandboxConfigDirectory.convention(sandboxDirectory.map {
+                it.dir(Sandbox.CONFIG).apply { asPath.createDirectories() }
+            })
+            sandboxPluginsDirectory.convention(sandboxDirectory.map {
+                it.dir(Sandbox.PLUGINS).apply { asPath.createDirectories() }
+            })
+            sandboxSystemDirectory.convention(sandboxDirectory.map {
+                it.dir(Sandbox.SYSTEM).apply { asPath.createDirectories() }
+            })
+            sandboxLogDirectory.convention(sandboxDirectory.map {
+                it.dir("log").apply { asPath.createDirectories() }
+            })
 
             if (this !is PrepareSandboxTask) {
                 val isBuiltInTask = Tasks::class.java.declaredFields.any { it.get(null) == name }
@@ -193,10 +217,10 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             )
 
             pluginVerifierDirectory.convention(layout.dir(provider {
-                pluginVerifierResolver.resolveDirectory()?.toFile()
+                pluginVerifierResolver.resolveDirectory().toFile()
             }))
             pluginVerifierExecutable.convention(layout.file(provider {
-                pluginVerifierResolver.resolveExecutable()?.toFile()
+                pluginVerifierResolver.resolveExecutable().toFile()
             }))
         }
 
@@ -213,6 +237,36 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             zipSignerExecutable.convention(layout.file(provider {
                 marketplaceZipSignerResolver.resolveExecutable()?.toFile()
             }))
+        }
+
+        if (this is RunnableIdeAware) {
+            enableAssertions = true
+
+            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this))
+
+            if (this !is BuildSearchableOptionsTask) {
+                jvmArgumentProviders.add(SandboxArgumentProvider(
+                    sandboxConfigDirectory,
+                    sandboxPluginsDirectory,
+                    sandboxSystemDirectory,
+                    sandboxLogDirectory,
+                ))
+            }
+//                outputs.dir(sandboxSystemDirectory)
+//                    .withPropertyName("System directory")
+//                inputs.dir(sandboxConfigDirectory)
+//                    .withPropertyName("Config Directory")
+//                    .withPathSensitivity(PathSensitivity.RELATIVE)
+//                inputs.files(sandboxPluginsDirectory)
+//                    .withPropertyName("Plugins directory")
+//                    .withPathSensitivity(PathSensitivity.RELATIVE)
+//                    .withNormalizer(ClasspathNormalizer::class)
+
+            systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
+
+            if (this is JavaExecSpec) {
+                mainClass.set("com.intellij.idea.Main")
+            }
         }
     }
 
@@ -232,3 +286,5 @@ internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: A
         systemProperty(name, defaultValue)
     }
 }
+
+internal fun Directory.create() = also { asPath.createDirectories() }

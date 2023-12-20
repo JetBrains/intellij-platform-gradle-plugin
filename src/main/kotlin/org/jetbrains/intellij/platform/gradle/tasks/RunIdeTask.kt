@@ -9,11 +9,11 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.LaunchSystemArgumentProvider
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.getBootClasspath
-import org.jetbrains.intellij.platform.gradle.tasks.base.*
+import org.jetbrains.intellij.platform.gradle.tasks.base.CustomPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
+import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
 import java.io.File
 import kotlin.io.path.absolutePathString
 
@@ -27,14 +27,11 @@ import kotlin.io.path.absolutePathString
  */
 @Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run guest IDE")
-abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatformVersionAware, JetBrainsRuntimeAware, SandboxAware {
+abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionAware {
 
     init {
         group = PLUGIN_GROUP_NAME
         description = "Runs the IDE instance with the developed plugin installed."
-
-        mainClass.set("com.intellij.idea.Main")
-        enableAssertions = true
     }
 
     /**
@@ -61,7 +58,7 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
         )
 
         classpath += objectFactory.fileCollection().from(
-            productInfo.getBootClasspath(intelliJPlatform.single().toPath())
+            productInfo.get().getBootClasspath(intelliJPlatform.single().toPath())
         )
     }
 
@@ -79,24 +76,10 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
 
     companion object {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
-        //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
+        //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/prop  erty.html
         fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
 //            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
-
-                jvmArgumentProviders.addAll(
-                    listOf(
-                        IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this),
-                        LaunchSystemArgumentProvider(
-                            intelliJPlatform,
-                            sandboxConfigDirectory,
-                            sandboxPluginsDirectory,
-                            sandboxSystemDirectory,
-                            sandboxLogDirectory,
-                            emptyList(),
-                        ),
-                    )
-                )
 
 //            classpath += intelliJPlatform.map {
 //
@@ -104,9 +87,6 @@ abstract class RunIdeTask : JavaExec(), CoroutinesJavaAgentAware, CustomPlatform
 //                .map {
 //                    project.files(productInfo.getBootClasspath(intellijPlatformDirectory.asPath))
 //                }
-
-
-                systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
 
                 systemPropertyDefault("idea.auto.reload.plugins", true)
                 systemPropertyDefault("idea.classpath.index.enabled", false)

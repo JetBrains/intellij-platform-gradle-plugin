@@ -243,6 +243,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             }
 
             instrumentCode.convention(true)
+            buildSearchableOptions.convention(true)
             sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
 
             configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {

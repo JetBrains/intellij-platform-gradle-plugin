@@ -438,7 +438,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             assertEquals(intellijVersion, it.getValue("Platform-Version"))
             assertEquals("223.8836.41", it.getValue("Platform-Build"))
             assertEquals("false", it.getValue("Kotlin-Stdlib-Bundled"))
-            assertEquals("null", it.getValue("Kotlin-Version"))
+            assertEquals(null, it.getValue("Kotlin-Version"))
         }
     }
 }

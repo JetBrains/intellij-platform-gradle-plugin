@@ -13,7 +13,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
-import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
@@ -102,8 +101,8 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                                         .resolve(pluginName.get())
                                         .resolve("lib")
                                         .listDirectoryEntries()
-                                        .map { it.name }
-                                        .let(pluginJarFiles::addAll)
+                                        .map { path -> path.name }
+                                        .let { pluginJarFiles.addAll(it) }
                                 }
                                 it.name
                                     .replace(SEARCHABLE_OPTIONS_SUFFIX, "")
@@ -116,9 +115,12 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
 
                 eachFile { path = "search/$name" }
 
-                onlyIf {
-                    buildSearchableOptionsDidWork.get() && inputDir.asPath.isDirectory()
-                }
+//                onlyIf {
+//                    buildSearchableOptionsDidWork.get() && inputDir.asPath.isDirectory()
+//                }
+
+                inputs.dir(buildSearchableOptionsTaskProvider.map { it.outputDir })
+                outputs.dir(destinationDirectory)
 
                 dependsOn(prepareSandboxTaskProvider)
                 dependsOn(buildSearchableOptionsTaskProvider)

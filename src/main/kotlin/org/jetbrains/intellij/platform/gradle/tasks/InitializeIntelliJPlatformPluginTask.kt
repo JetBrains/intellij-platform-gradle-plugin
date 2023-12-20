@@ -15,6 +15,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.net.URL
 import java.time.LocalDate
@@ -29,7 +30,7 @@ import kotlin.io.path.outputStream
  * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up-to-date.
  */
 @UntrackedTask(because = "Should always be run to initialize the plugin")
-abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
+abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), PlatformVersionAware {
 
     @get:Internal
     abstract val offline: Property<Boolean>
@@ -69,7 +70,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask() {
 
         try {
             val version = Version.parse(pluginVersion.get())
-            val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, Locations.GITHUB_REPOSITORY)
+            val latestVersion = LatestVersionResolver.plugin()
             if (version < Version.parse(latestVersion)) {
                 warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }

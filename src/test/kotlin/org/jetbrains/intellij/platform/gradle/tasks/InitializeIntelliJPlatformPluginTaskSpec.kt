@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -19,8 +18,14 @@ class InitializeIntelliJPlatformPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `report outdated plugin`() {
+        gradleProperties.properties(
+            """
+            org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = true
+            """.trimIndent()
+        )
+
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-            val latestVersion = LatestVersionResolver.fromGitHub(PLUGIN_NAME, Locations.GITHUB_REPOSITORY)
+            val latestVersion = LatestVersionResolver.plugin()
 
             assertContains("$PLUGIN_NAME is outdated: 0.0.0. Update `$PLUGIN_ID` to: $latestVersion", output)
         }

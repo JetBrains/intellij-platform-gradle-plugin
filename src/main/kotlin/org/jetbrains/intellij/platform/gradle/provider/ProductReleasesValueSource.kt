@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.model.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease
+import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 
 abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductReleasesValueSource.Parameters> {
@@ -21,7 +22,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val sinceBuild: Property<String>
         val untilBuild: Property<String>
         val type: Property<IntelliJPlatformType>
-        val channels: ListProperty<ProductRelease.Channel>
+        val channels: ListProperty<Channel>
     }
 
     override fun obtain(): List<String>? = with(parameters) {
@@ -35,7 +36,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                             channelEntry.builds.forEach { build ->
                                 product.codes.forEach codes@{ code ->
                                     val type = runCatching { IntelliJPlatformType.fromCode(code) }.getOrElse { return@codes }
-                                    val channel = runCatching { ProductRelease.Channel.valueOf(channelEntry.status.uppercase()) }.getOrElse { return@channel }
+                                    val channel = runCatching { Channel.valueOf(channelEntry.status.uppercase()) }.getOrElse { return@channel }
 
                                     yield(
                                         ProductRelease(
@@ -58,7 +59,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .fetch(androidStudio.asPath)
             .or { AndroidStudioReleases() }
             .items.mapNotNull { item ->
-                val channel = runCatching { ProductRelease.Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null
+                val channel = runCatching { Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null
 
                 ProductRelease(
                     name = item.name,
@@ -79,16 +80,29 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } ?: true)
         }
 
+        val a = (jetbrainsIdesReleases + androidStudioReleases)
+            .filter { it.type == type.get() }
+            .filter { it.channel in channels.get() }
+            .filter { it.testVersion() }
+
+
         (jetbrainsIdesReleases + androidStudioReleases)
             .filter { it.type == type.get() }
             .filter { it.channel in channels.get() }
             .filter { it.testVersion() }
             .groupBy { "${it.type.code}-${it.version.major}.${it.version.minor}" }
             .values
-            .map { it.maxBy { entry -> entry.version.patch } }
+            .map { releases ->
+                releases.maxBy {
+                    when (it.channel) {
+                        Channel.RELEASE -> Int.MAX_VALUE// promote release
+                        else -> it.version.patch
+                    }
+                }
+            }
             .map {
                 "${it.type.code}-" + when (it.channel) {
-                    ProductRelease.Channel.RELEASE -> with(it.version) {
+                    Channel.RELEASE -> with(it.version) {
                         "$major.$minor" + (".$patch".takeIf { patch > 0 }.orEmpty())
                     }
 

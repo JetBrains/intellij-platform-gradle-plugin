@@ -22,6 +22,7 @@ class IntelliJPlatformArgumentProvider(
     @InputFiles @PathSensitive(RELATIVE) val intellijPlatform: ConfigurableFileCollection,
     @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
     private val options: JavaForkOptions,
+//    private val requirePluginIds: List<String> = emptyList(), TODO: see #87
 ) : CommandLineArgumentProvider {
 
     private val intellijPlatformPath
@@ -55,6 +56,14 @@ class IntelliJPlatformArgumentProvider(
             )
         }
 
+    private val currentLaunchProperties
+        get() = intellijPlatformPath
+            .productInfo()
+            .currentLaunch
+            .additionalJvmArguments
+            .filter { it.startsWith("-D") }
+            .map { it.resolveIdeHomeVariable(intellijPlatformPath) }
+
     private val additionalJvmArguments
         get() = productInfo
             .currentLaunch
@@ -72,6 +81,9 @@ class IntelliJPlatformArgumentProvider(
         )
 
     override fun asArguments() =
-        (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace)
+        (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + currentLaunchProperties + additionalJvmArguments + heapSpace)
             .filterNot { it.isNullOrBlank() }
+
+    // TODO: check if necessary:
+    //       + listOf("-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}",)
 }
