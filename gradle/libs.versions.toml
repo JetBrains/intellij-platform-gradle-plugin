@@ -3,7 +3,7 @@
 annotations = "24.1.0"
 ddPlist = "1.27"
 gradleIdeaExt = "1.1.7"
-intellijStructure = "3.265"
+intellijStructure = "3.266"
 intellijPluginRepositoryRestClient = "2.0.38"
 jacksonDatabind = "2.16.0"
 jaxbApi = "2.4.0-b180830.0359"
