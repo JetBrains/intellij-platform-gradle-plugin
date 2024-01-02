@@ -5,20 +5,20 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import java.io.File
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 import kotlin.test.Test
 
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
+    @OptIn(ExperimentalPathApi::class)
     @BeforeTest
     override fun setup() {
         super.setup()
 
         gradleArguments.add("-Duser.home=$gradleHome")
-        File(gradleHome).resolve(".pluginVerifier/ides").run {
+        Path(gradleHome).resolve(".pluginVerifier/ides").run {
             deleteRecursively()
-            mkdirs()
+            createDirectories()
         }
     }
 

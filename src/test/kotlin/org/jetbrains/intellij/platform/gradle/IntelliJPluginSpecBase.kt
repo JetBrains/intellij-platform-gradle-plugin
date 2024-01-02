@@ -204,7 +204,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     protected fun directory(path: String) = dir.resolve(path).createDirectories()
 
-    protected fun emptyZipFile(path: String): File {
+    protected fun emptyZipFile(path: String): Path {
         val split = path.split('/')
         val directory = when {
             split.size > 1 -> directory(split.dropLast(1).joinToString("/"))
@@ -215,7 +215,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         val zipOutputStream = ZipOutputStream(outputStream)
         zipOutputStream.close()
         outputStream.close()
-        return file.toFile()
+        return file
     }
 
     protected fun Path.ensureExists() = apply {
@@ -307,7 +307,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         }
     }
 
-    protected fun resourceContent(path: String) = resource(path)?.let { File(it).readText() }
+    protected fun resourceContent(path: String) = resource(path)?.let { Path(it).readText() }
 
     // Methods can be simplified, when following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517

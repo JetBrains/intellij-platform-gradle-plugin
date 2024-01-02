@@ -14,12 +14,8 @@ import org.jetbrains.intellij.platform.gradle.test.createLocalIdeIfNotExists
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.AfterClass
 import org.junit.Assume.assumeFalse
-import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.pathString
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 import kotlin.test.*
 
 @Ignore
@@ -75,8 +71,8 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             assertPathParameters(testCommand, sandboxPath)
             assertEquals(testCommand.properties.get("idea.required.plugins.id"), "")
 
-            assertEquals("boot.jar", File(testCommand.xclasspath).name)
-            assertEquals("lib", File(testCommand.xclasspath).parentFile.name)
+            assertEquals("boot.jar", Path(testCommand.xclasspath).name)
+            assertEquals("lib", Path(testCommand.xclasspath).parent.name)
             assertEquals("256m", testCommand.xms)
             assertEquals("512m", testCommand.xmx)
         }
