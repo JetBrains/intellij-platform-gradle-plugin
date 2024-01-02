@@ -60,7 +60,15 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                 """.trimIndent()
             )
         }
-        settingsFile.kotlin(" rootProject.name = \"projectName\"")
+        settingsFile.kotlin(
+            """
+            rootProject.name = "projectName"
+            
+            plugins {
+                id("org.gradle.toolchains.foojay-resolver-convention") version "0.7.0"
+            }
+            """.trimIndent()
+        )
 
         buildFile.kotlin(
             """
@@ -68,7 +76,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             import org.jetbrains.intellij.platform.gradle.*
             import org.jetbrains.intellij.platform.gradle.tasks.*
             import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.*
-
+            
             version = "1.0.0"
             
             plugins {
@@ -286,14 +294,12 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()
 
-    protected fun collectPaths(directory: Path) = collectPaths(directory.toFile())
-
-    protected fun collectPaths(directory: File): Set<String> {
-        assert(directory.exists())
-        return directory.walkTopDown().filterNot { it.isDirectory }.map {
-            adjustWindowsPath(it.canonicalPath.substring(directory.canonicalPath.length))
-        }.toSet()
-    }
+    @OptIn(ExperimentalPathApi::class)
+    protected fun collectPaths(directory: Path) = directory
+        .walk()
+        .filterNot { it.isDirectory() }
+        .map { it.relativeTo(directory).pathString }
+        .toSet()
 
     protected fun resource(path: String) = path.let {
         javaClass.classLoader.getResource(it)?.let { url ->
