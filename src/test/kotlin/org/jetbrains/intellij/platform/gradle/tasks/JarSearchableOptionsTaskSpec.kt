@@ -27,7 +27,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
 
         buildDirectory.resolve("libsSearchableOptions").let {
             assertTrue(it.exists())
-            assertEquals(setOf("/lib/searchableOptions-1.0.0.jar"), collectPaths(it))
+            assertEquals(setOf("lib/searchableOptions-1.0.0.jar"), collectPaths(it))
         }
     }
 }
