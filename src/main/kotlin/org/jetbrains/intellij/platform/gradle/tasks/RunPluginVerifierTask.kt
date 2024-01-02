@@ -157,7 +157,8 @@ abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, Plugin
     /**
      * A file that contains a list of problems that will be ignored in a report.
      */
-    @get:InputFiles
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     abstract val ignoredProblemsFile: RegularFileProperty
 

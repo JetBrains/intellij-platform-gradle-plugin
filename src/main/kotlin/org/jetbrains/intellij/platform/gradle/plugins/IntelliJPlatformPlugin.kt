@@ -121,7 +121,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         configureClassPathIndexCleanupTask(project, ideaDependencyProvider)
         configureInstrumentation(project, extension, ideaDependencyProvider)
-//        configureDownloadRobotServerPluginTask(project)
 //        configureRunIdePerformanceTestTask(project, extension)
         configureRunIdeForUiTestsTask(project)
         assert(!project.state.executed) { "afterEvaluate is a no-op for an executed project" }
