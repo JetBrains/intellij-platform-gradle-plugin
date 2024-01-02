@@ -2,14 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.gradle.kotlin.dsl.support.listFilesOrdered
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.util.*
-import kotlin.io.path.createTempFile
-import kotlin.io.path.pathString
-import kotlin.io.path.writeLines
+import kotlin.io.path.*
 import kotlin.test.*
 
 class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
@@ -127,8 +124,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            val directory = file("build/foo").canonicalPath
-            assertContains("Verification reports directory: $directory", output)
+            val directory = buildDirectory.resolve("foo")
+            assertContains("Verification reports directory: ${directory.toRealPath()}", output)
         }
     }
 
@@ -153,14 +150,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         println("buildFile = ${buildFile}")
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            val reportsDirectory = file("build/foo")
-            val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", output)
+            val reportsDirectory = buildDirectory.resolve("foo")
+            assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
-            val ideVersionDir = reportsDirectory.listFiles()?.firstOrNull()
+            val ideVersionDir = reportsDirectory.listDirectoryEntries().firstOrNull()
             assertNotNull(ideVersionDir, "Verification reports directory not found")
 
-            val markdownReportFiles = ideVersionDir.listFilesOrdered { it.extension == "md" }
+            val markdownReportFiles = ideVersionDir.listDirectoryEntries("*.md")
             assertEquals(1, markdownReportFiles.size)
         }
     }
@@ -184,14 +180,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            val reportsDirectory = file("build/foo")
-            val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", output)
+            val reportsDirectory = buildDirectory.resolve("foo")
+            assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
-            val ideVersionDir = reportsDirectory.listFiles()?.firstOrNull()
+            val ideVersionDir = reportsDirectory.listDirectoryEntries().firstOrNull()
             assertNotNull(ideVersionDir, "Verification reports directory not found")
 
-            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            val reportFiles = ideVersionDir.listDirectoryEntries("*.{md,html}")
             assertTrue(reportFiles.isEmpty())
         }
     }
@@ -214,14 +209,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            val reportsDirectory = file("build/foo")
-            val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", output)
+            val reportsDirectory = buildDirectory.resolve("foo")
+            assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
-            val ideVersionDir = reportsDirectory.listFiles()?.firstOrNull()
+            val ideVersionDir = reportsDirectory.listDirectoryEntries().firstOrNull()
             assertNotNull(ideVersionDir, "Verification reports directory not found")
 
-            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            val reportFiles = ideVersionDir.listDirectoryEntries("*.{md,html}")
             assertTrue(reportFiles.isNotEmpty())
         }
     }
@@ -259,7 +253,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        pluginXml.delete()
+        pluginXml.deleteIfExists()
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
             assertContains("The plugin descriptor 'plugin.xml' is not found.", output)
@@ -430,16 +424,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            val reportsDirectory = file("build/foo")
-            val directory = reportsDirectory.canonicalPath
-            assertContains("Verification reports directory: $directory", output)
+            val reportsDirectory = buildDirectory.resolve("foo")
+            assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
-            val ideDirs = reportsDirectory.listFiles() ?: emptyArray()
-            if (ideDirs.isEmpty()) {
-                fail("Verification reports directory not found")
-            }
-            val ideVersionDir = ideDirs.first()
-            val reportFiles = ideVersionDir.listFilesOrdered { listOf("md", "html").contains(it.extension) }
+            val ideVersionDir = reportsDirectory.listDirectoryEntries().firstOrNull()
+            assertNotNull(ideVersionDir, "Verification reports directory not found")
+
+            val reportFiles = ideVersionDir.listDirectoryEntries("*.{md,html}")
             assertTrue(reportFiles.isEmpty())
         }
     }
@@ -498,7 +489,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun writeJavaFileWithDeprecation() {
-        file("src/main/java/App.java").java(
+        dir.resolve("src/main/java/App.java").java(
             """  
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
@@ -516,7 +507,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
     private fun writeJavaFileWithPluginProblems(classNameSuffix: String) {
         @Suppress("UnresolvedPropertyKey", "ResultOfMethodCallIgnored")
-        file("src/main/java/App$classNameSuffix.java").java(
+        dir.resolve("src/main/java/App$classNameSuffix.java").java(
             """  
             class App$classNameSuffix {
                 public static String message(@org.jetbrains.annotations.PropertyKey(resourceBundle = "messages.ActionsBundle") String key, Object... params) {
@@ -540,7 +531,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     private fun writeJavaFileWithInternalApiUsage() {
-        file("src/main/java/App.java").java(
+        dir.resolve("src/main/java/App.java").java(
             """  
             class App {
                 public static void main(String[] args) {

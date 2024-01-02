@@ -6,6 +6,7 @@ import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import java.io.File
+import kotlin.io.path.writeText
 import kotlin.test.Test
 
 class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {

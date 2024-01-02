@@ -15,10 +15,7 @@ import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
-import kotlin.io.path.appendText
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.pathString
+import kotlin.io.path.*
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -37,10 +34,10 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         .takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
 
-    val gradleProperties get() = file("gradle.properties")
-    val buildFile get() = file("build.gradle.kts")
-    val settingsFile get() = file("settings.gradle.kts")
-    val pluginXml get() = file("src/main/resources/META-INF/plugin.xml")
+    val gradleProperties get() = dir.resolve("gradle.properties")
+    val buildFile get() = dir.resolve("build.gradle.kts")
+    val settingsFile get() = dir.resolve("settings.gradle.kts")
+    val pluginXml get() = dir.resolve("src/main/resources/META-INF/plugin.xml")
     val buildDirectory get() = dir.resolve("build")
 
     @BeforeTest
@@ -63,11 +60,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                 """.trimIndent()
             )
         }
-        settingsFile.kotlin(
-            """
-            rootProject.name = "projectName"
-            """.trimIndent()
-        )
+        settingsFile.kotlin(" rootProject.name = \"projectName\"")
 
         buildFile.kotlin(
             """
@@ -175,7 +168,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         )
     }
 
-    fun writeTestFile() = file("src/test/java/AppTest.java").java(
+    fun writeTestFile() = dir.resolve("src/test/java/AppTest.java").java(
         """
         import java.lang.String;
         import org.junit.Test;
@@ -217,11 +210,14 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         return file.toFile()
     }
 
-    protected fun file(path: String) =
-        path.run { takeIf { startsWith('/') } ?: dir.resolve(this).pathString }.split('/').run { File(dropLast(1).joinToString("/")) to last() }
-            .apply { if (!first.exists()) first.mkdirs() }.run { File(first, second) }.apply { createNewFile() }
+    protected fun Path.ensureExists() = apply {
+        parent.createDirectories()
+        if (!exists()) {
+            createFile()
+        }
+    }
 
-    protected fun writeJavaFile() = file("src/main/java/App.java").java(
+    protected fun writeJavaFile() = dir.resolve("src/main/java/App.java").ensureExists().java(
         """
         import java.lang.String;
         import java.util.Arrays;
@@ -235,7 +231,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    protected fun writeKotlinFile() = file("src/main/kotlin/App.kt").kotlin(
+    protected fun writeKotlinFile() = dir.resolve("src/main/kotlin/App.kt").ensureExists().kotlin(
         """
         object App {
             @JvmStatic
@@ -246,7 +242,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    protected fun writeKotlinUIFile() = file("src/main/kotlin/pack/AppKt.kt").kotlin(
+    protected fun writeKotlinUIFile() = dir.resolve("src/main/kotlin/pack/AppKt.kt").ensureExists().kotlin(
         """
         package pack
         
@@ -267,7 +263,8 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     protected fun assertContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertTrue(
-            actual.contains(expected), """
+            actual.contains(expected),
+            """
             expected:<$expected> but was:<$actual>
             """.trimIndent()
         )
@@ -310,19 +307,12 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     // https://youtrack.jetbrains.com/issue/KT-24517
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun Path.xml(@Language("XML") content: String) = append(content)
-    fun File.xml(@Language("XML") content: String) = append(content)
 
-    fun File.java(@Language("Java") content: String) = append(content)
+    fun Path.java(@Language("Java") content: String) = append(content)
 
-    fun File.kotlin(@Language("kotlin") content: String) = append(content)
+    fun Path.kotlin(@Language("kotlin") content: String) = append(content)
 
-    fun File.properties(@Language("Properties") content: String) = append(content)
+    fun Path.properties(@Language("Properties") content: String) = append(content)
 
-    private fun Path.append(content: String) = apply {
-        parent.createDirectories()
-        createFile()
-        appendText(content)
-    }
-
-    private fun File.append(content: String) = appendText(content.trimIndent() + "\n")
+    private fun Path.append(content: String) = ensureExists().also { appendText(content + "\n") }
 }

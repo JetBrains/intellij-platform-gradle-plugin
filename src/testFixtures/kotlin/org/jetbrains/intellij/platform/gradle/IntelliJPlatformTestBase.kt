@@ -4,12 +4,10 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.gradle.testkit.runner.internal.DefaultGradleRunner
 import org.intellij.lang.annotations.Language
-import java.io.File
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
-import java.nio.file.Paths
+import kotlin.io.path.Path
 import kotlin.io.path.readText
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -104,7 +102,7 @@ abstract class IntelliJPlatformTestBase {
             .forwardOutput()
             .withPluginClasspath()
             .withDebug(debugEnabled)
-            .withTestKitDir(File(gradleHome))
+            .withTestKitDir(Path(gradleHome).toFile())
             .withArguments(
                 "-Dorg.gradle.kotlin.dsl.scriptCompilationAvoidance=false", // workaround for https://github.com/gradle/gradle/issues/25412
                 *projectProperties
@@ -124,22 +122,6 @@ abstract class IntelliJPlatformTestBase {
                 *args.toTypedArray(),
             )//, "-Dorg.gradle.debug=true")
 
-    private fun getPluginClasspath(): List<File> {
-        //Get the default classpath
-        val defaultClasspath = DefaultGradleRunner()
-            .withProjectDir(dir.toFile())
-            .withPluginClasspath()
-            .pluginClasspath
-
-        //Replace the Gradle classpath with the IntelliJ one
-        if (System.getProperty("IntelliJClasspath") != null) {
-            return defaultClasspath
-                .filterNot { it.absolutePath.contains("classes") }
-                .plus(Paths.get("./out/production/classes").toFile())
-        }
-        return defaultClasspath
-    }
-
     protected fun assertNotContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertFalse(
@@ -150,11 +132,8 @@ abstract class IntelliJPlatformTestBase {
         )
     }
 
-    protected fun assertFileContent(file: Path?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trim(), file?.readText()?.replace("\r", "")?.trim())
-
-    protected fun assertFileContent(file: File?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trim(), file?.readText()?.replace("\r", "")?.trim())
+    protected fun assertFileContent(path: Path?, @Language("xml") expectedContent: String) =
+        assertEquals(expectedContent.trim(), path?.readText()?.replace("\r", "")?.trim())
 
     protected val BuildResult.safeOutput: String
         get() = output.replace("\r", "")

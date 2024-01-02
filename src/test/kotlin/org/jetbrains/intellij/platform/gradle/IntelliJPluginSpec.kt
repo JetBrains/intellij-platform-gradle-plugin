@@ -15,8 +15,11 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.AfterClass
 import org.junit.Assume.assumeFalse
 import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 import kotlin.test.*
 
 @Ignore
@@ -194,7 +197,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
         buildFile.kotlin(
             """
-            intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
+            intellij2.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
             """.trimIndent()
         )
 
@@ -580,7 +583,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         return buildAndGetClassPaths("printMainCompileClassPath", "printMainRuntimeClassPath")
     }
 
-    private fun File.appendPrintMainClassPathsTasks() {
+    private fun Path.appendPrintMainClassPathsTasks() {
         this.kotlin(
             """
             def runtimeOnly = project.provider { sourceSets.main.runtimeClasspath.asPath }
@@ -606,7 +609,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun File.appendPrintClassPathsTasks(sourceSetName: String) {
+    private fun Path.appendPrintClassPathsTasks(sourceSetName: String) {
         this.kotlin(
             """
             def runtimeOnly = project.provider { sourceSets.$sourceSetName.runtimeClasspath.asPath }
@@ -661,7 +664,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         return build("printPluginSourceArtifacts")
     }
 
-    private fun File.appendPrintPluginSourceArtifactsTask(pluginComponentId: String) {
+    private fun Path.appendPrintPluginSourceArtifactsTask(pluginComponentId: String) {
         this.kotlin(
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult

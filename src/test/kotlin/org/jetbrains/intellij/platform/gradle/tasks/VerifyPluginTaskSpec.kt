@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import kotlin.io.path.deleteIfExists
 import kotlin.test.Test
 
 class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
@@ -113,7 +114,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `fail on errors by default`() {
-        pluginXml.delete()
+        pluginXml.deleteIfExists()
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("The plugin descriptor 'plugin.xml' is not found.", output)
         }
@@ -131,7 +132,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        pluginXml.delete()
+        pluginXml.deleteIfExists()
         build(Tasks.VERIFY_PLUGIN) {
             assertContains("The plugin descriptor 'plugin.xml' is not found.", output)
         }

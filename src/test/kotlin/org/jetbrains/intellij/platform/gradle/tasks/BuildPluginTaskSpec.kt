@@ -33,9 +33,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `build plugin distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
             """
@@ -158,9 +157,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `use custom sandbox for distribution`() {
         writeJavaFile()
 
-        file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
             """
@@ -229,7 +227,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `can compile classes that depends on external plugins`() {
-        file("src/main/java/App.java").java(
+        dir.resolve("src/main/java/App.java").java(
             """
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;
@@ -280,7 +278,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `can compile classes that depend on external plugin with classes directory`() {
-        file("src/main/java/App.java").java(
+        dir.resolve("src/main/java/App.java").java(
             """
             import java.lang.String;
             import org.jetbrains.annotations.NotNull;

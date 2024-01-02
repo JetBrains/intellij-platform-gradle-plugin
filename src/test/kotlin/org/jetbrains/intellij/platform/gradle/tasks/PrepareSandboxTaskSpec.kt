@@ -46,13 +46,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        settingsFile.kotlin(
-            """
-            include("nestedProject")
-            """.trimIndent()
-        )
+        settingsFile.kotlin("include(\"nestedProject\")")
 
-        file("nestedProject/build.gradle.kts").kotlin(
+        dir.resolve("nestedProject/build.gradle.kts").kotlin(
             """
             plugins {
                 id("org.jetbrains.intellij.platform")
@@ -83,13 +79,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        file("nestedProject/src/main/java/NestedAppFile.java").java(
-            """
-            class NestedAppFile {}
-            """.trimIndent()
-        )
-
-        file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
+        dir.resolve("nestedProject/src/main/java/NestedAppFile.java").java("class NestedAppFile {}")
+        dir.resolve("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -165,19 +156,9 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        settingsFile.kotlin(
-            """
-            include("nestedProject")
-            """.trimIndent()
-        )
-
-        file("nestedProject/src/main/java/NestedAppFile.java").java(
-            """
-            class NestedAppFile {}
-            """.trimIndent()
-        )
-
-        file("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
+        settingsFile.kotlin("include(\"nestedProject\")")
+        dir.resolve("nestedProject/src/main/java/NestedAppFile.java").java("class NestedAppFile {}")
+        dir.resolve("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -248,8 +229,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `prepare sandbox task`() {
         writeJavaFile()
-        file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
             """
@@ -317,10 +298,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     @Ignore
     fun `prepare ui tests sandbox task`() {
         writeJavaFile()
-
-        file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
             """
@@ -479,8 +458,8 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `prepare custom sandbox task`() {
         writeJavaFile()
-        file("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-        file("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
 
         pluginXml.xml(
             """
@@ -617,8 +596,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `disable ide update without value attribute`() {
         pluginXml.xml("<idea-plugin />")
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml")
-        updatesFile.xml(
+        val updatesFile = sandbox.resolve("config/options/updates.xml").xml(
             """
             <application>
                 <component name="UpdatesConfigurable">
@@ -646,8 +624,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `disable ide update`() {
         pluginXml.xml("<idea-plugin />")
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml")
-        updatesFile.xml(
+        val updatesFile = sandbox.resolve("config/options/updates.xml").xml(
             """
             <application>
                 <component name="UpdatesConfigurable">
@@ -695,8 +672,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     fun `disable ide update with complex updates_xml`() {
         pluginXml.xml("<idea-plugin />")
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml")
-        updatesFile.xml(
+        val updatesFile = sandbox.resolve("config/options/updates.xml").xml(
             """
             <application>
                 <component name="UpdatesConfigurable">
@@ -805,7 +781,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `prepareTestingSandbox runs before test`() {
         writeJavaFile()
-        file("additional/some-file")
+        dir.resolve("additional/some-file").ensureExists()
 
         pluginXml.xml("<idea-plugin />")
 

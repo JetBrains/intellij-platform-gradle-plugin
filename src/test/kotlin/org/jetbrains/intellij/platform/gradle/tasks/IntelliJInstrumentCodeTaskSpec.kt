@@ -92,7 +92,7 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        file("src/main/kotlin/pack/AppKt.form").xml(
+        dir.resolve("src/main/kotlin/pack/AppKt.form").xml(
             """
             <?xml version="1.0" encoding="UTF-8"?>
             <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="pack.AppKt">
