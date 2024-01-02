@@ -30,7 +30,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `fail publishing if token is missing`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellijPlatform {
                 publishing {}
@@ -45,7 +45,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `fail publishing when token is not valid`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellijPlatform {
                 publishing {
@@ -62,7 +62,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `use signed artifact for publication`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             dependencies {
                 intellijPlatform {
@@ -89,7 +89,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `use unsigned artifact for publication if no signing is configured`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellijPlatform {
                 publishing {

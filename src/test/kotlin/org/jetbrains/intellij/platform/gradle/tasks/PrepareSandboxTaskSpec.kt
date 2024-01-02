@@ -165,7 +165,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        settingsFile.groovy(
+        settingsFile.kotlin(
             """
             include("nestedProject")
             """.trimIndent()
@@ -395,7 +395,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             repositories {
                 intellijPlatform {
@@ -431,7 +431,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.xml("<idea-plugin />")
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 plugins = ['${adjustWindowsPath(plugin.pathString)}']
@@ -776,7 +776,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         emptyZipFile("three/core.jar")
         writeJavaFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             dependencies {
                 implementation("joda-time:joda-time:2.8.1")

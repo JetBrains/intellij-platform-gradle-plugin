@@ -55,7 +55,7 @@ class InitializeIntelliJPlatformPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `skip version check is disabled with existing lock file`() {
         val file = dir.resolve("lockFile").createFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             tasks {
                 ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
@@ -76,7 +76,7 @@ class InitializeIntelliJPlatformPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `creates coroutines-javaagent file`() {
         val file = dir.resolve("coroutines-javaagent.jar")
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             tasks {
                 ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {

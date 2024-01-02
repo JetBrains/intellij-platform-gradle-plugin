@@ -14,7 +14,7 @@ class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
     @Test
     fun `jar searchable options produces archive`() {
         pluginXml.xml(getPluginXmlWithSearchableConfigurable())
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellijPlatform {
                 buildSearchableOptions = true

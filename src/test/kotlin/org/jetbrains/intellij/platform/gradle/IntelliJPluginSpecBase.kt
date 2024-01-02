@@ -48,7 +48,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         super.setup()
 
         if (gradleScan) {
-            settingsFile.groovy(
+            settingsFile.kotlin(
                 """                    
                 plugins {
                     id("com.gradle.enterprise") version "3.12.6"
@@ -139,7 +139,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         custom: String = "",
     ) {
         buildFile.writeText("")
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             import java.util.*
             import org.jetbrains.intellij.platform.gradle.*
@@ -311,8 +311,6 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun Path.xml(@Language("XML") content: String) = append(content)
     fun File.xml(@Language("XML") content: String) = append(content)
-
-    fun File.groovy(@Language("Groovy") content: String) = append(content)
 
     fun File.java(@Language("Java") content: String) = append(content)
 

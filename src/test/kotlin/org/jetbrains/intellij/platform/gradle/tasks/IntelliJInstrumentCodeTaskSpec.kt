@@ -15,9 +15,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `instrument code with nullability annotations`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            intellij {
+            intellijPlatform {
                 instrumentCode = true
             }
             """.trimIndent()
@@ -36,9 +36,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
     fun `instrument tests with nullability annotations`() {
         writeTestFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            intellij {
+            intellijPlatform {
                 instrumentCode = true
             }
             """.trimIndent()
@@ -52,9 +52,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not instrument code if option is set to false`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            intellij {
+            intellijPlatform {
                 instrumentCode = false
             }
             """.trimIndent()
@@ -78,9 +78,9 @@ class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
     fun `instrument kotlin forms`() {
         writeKotlinUIFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
-            intellij {
+            intellijPlatform {
                 instrumentCode = true
             }
             """.trimIndent()

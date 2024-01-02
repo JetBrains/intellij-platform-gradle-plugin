@@ -55,7 +55,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `patch test tasks`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 version = '14.1.4' 
@@ -83,7 +83,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `use compile only classpath for non-builtin plugins if Gradle lte 2_12`() {
         writeTestFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
             """.trimIndent()
@@ -99,7 +99,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `add external zip-plugins to compile only classpath`() {
         writeTestFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij.plugins = ['org.intellij.plugins.markdown:$testMarkdownPluginVersion']
             """.trimIndent()
@@ -116,7 +116,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         val repositoryInstance = PluginRepositoryFactory.create(Locations.MARKETPLACE, null)
         val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null)
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
             """.trimIndent()
@@ -129,7 +129,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add builtin plugin dependencies to classpath`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij.plugins = ['com.jetbrains.changeReminder']
             """.trimIndent()
@@ -151,7 +151,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `use test compile classpath for non-builtin plugins if Gradle lte 2_12`() {
         writeTestFile()
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij.plugins = ['copyright', 'org.jetbrains.postfixCompletion:0.8-beta']
             """.trimIndent()
@@ -168,15 +168,15 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
         val originalBuildFile = buildFile.readText()
         buildFile.writeText("")
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             plugins {
                 id "java-test-fixtures"
             }
             """.trimIndent()
         )
-        buildFile.groovy(originalBuildFile)
-        buildFile.groovy(
+        buildFile.kotlin(originalBuildFile)
+        buildFile.kotlin(
             """
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
             """.trimIndent()
@@ -192,7 +192,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `resolve plugins in Gradle lte 4_3`() {
         writeTestFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij.plugins = ['org.jetbrains.postfixCompletion:0.8-beta', 'copyright']
             """.trimIndent()
@@ -208,7 +208,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `resolve bundled plugin by its id`() {
         writeTestFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij.plugins = ['com.intellij.copyright']
             """.trimIndent()
@@ -221,7 +221,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled zip plugin source artifacts from src directory when downloadSources = true`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 type = 'GO'
@@ -245,7 +245,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled zip plugin source artifacts from src directory when downloadSources = false`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 type = 'GO'
@@ -267,7 +267,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add external zip plugin source artifacts from src directory when downloadSources = true`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 type = 'IC'
@@ -289,7 +289,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add external zip plugin source artifacts from src directory when downloadSources = false`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 type = 'IC'
@@ -316,7 +316,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             "com/jetbrains/intellij/goland/goland/2022.1/goland-2022.1.zip"
         )
         buildFile.writeText("")
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             plugins {
                 id 'java'
@@ -352,7 +352,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         )
 
         buildFile.writeText("")
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             plugins {
                 id 'java'
@@ -381,7 +381,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled plugin source artifacts from IDE_ROOT-lib-src directory when downloadSources = true`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 type = 'IU'
@@ -403,7 +403,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `add bundled plugin source artifacts from IDE_ROOT-lib-src directory when downloadSources = false`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 type = 'IU'
@@ -430,7 +430,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
             "com/jetbrains/intellij/idea/ideaIU/2022.1.4/ideaIU-2022.1.4.zip"
         )
         buildFile.writeText("")
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             plugins {
                 id 'java'
@@ -458,7 +458,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `does not add zip plugin source artifacts from IDE_ROOT-lib-src directory when sources not provided`() {
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             intellij {
                 type = 'GO'
@@ -504,7 +504,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `do not update existing jvm arguments in test tasks`() {
         writeTestFile()
 
-        buildFile.groovy(
+        buildFile.kotlin(
             """
             test {
                 minHeapSize = "200m"
@@ -581,7 +581,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     private fun File.appendPrintMainClassPathsTasks() {
-        this.groovy(
+        this.kotlin(
             """
             def runtimeOnly = project.provider { sourceSets.main.runtimeClasspath.asPath }
             def implementation = project.provider { sourceSets.main.compileClasspath.asPath }
@@ -607,7 +607,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     private fun File.appendPrintClassPathsTasks(sourceSetName: String) {
-        this.groovy(
+        this.kotlin(
             """
             def runtimeOnly = project.provider { sourceSets.$sourceSetName.runtimeClasspath.asPath }
             def implementation = project.provider { sourceSets.$sourceSetName.compileClasspath.asPath }
@@ -662,7 +662,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     }
 
     private fun File.appendPrintPluginSourceArtifactsTask(pluginComponentId: String) {
-        this.groovy(
+        this.kotlin(
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
                 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
