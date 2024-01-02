@@ -241,7 +241,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 //                inputs.file(jarTaskProvider.map { it.archiveFile })
 //                inputs.file(instrumentedJarTaskProvider.map { it.archiveFile })
                 inputs.files(runtimeConfiguration)
-                outputs.dir(defaultDestinationDir)
+//                outputs.dir(defaultDestinationDir)
 
 //            project.afterEvaluate `{
 //                extension.plugins.get().filterIsInstance<Project>().forEach { dependency ->

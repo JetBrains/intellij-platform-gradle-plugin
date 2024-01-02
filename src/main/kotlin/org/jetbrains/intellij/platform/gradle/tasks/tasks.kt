@@ -7,7 +7,9 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.provider.Provider
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -162,18 +164,23 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 }
             )
             sandboxDirectory.convention(sandboxDirectoryProvider)
-            sandboxConfigDirectory.convention(sandboxDirectory.map {
-                it.dir(Sandbox.CONFIG).apply { asPath.createDirectories() }
-            })
-            sandboxPluginsDirectory.convention(sandboxDirectory.map {
-                it.dir(Sandbox.PLUGINS).apply { asPath.createDirectories() }
-            })
-            sandboxSystemDirectory.convention(sandboxDirectory.map {
-                it.dir(Sandbox.SYSTEM).apply { asPath.createDirectories() }
-            })
-            sandboxLogDirectory.convention(sandboxDirectory.map {
-                it.dir("log").apply { asPath.createDirectories() }
-            })
+            sandboxConfigDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.CONFIG)
+            sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
+            sandboxSystemDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.SYSTEM)
+            sandboxLogDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.LOG)
+
+//            sandboxConfigDirectory.convention(sandboxDirectory.zip(sandboxSuffix) { container, sandboxSuffix ->
+//                container.dir(Sandbox.CONFIG + sandboxSuffix).apply { asPath.createDirectories() }
+//            })
+//            sandboxPluginsDirectory.convention(sandboxDirectory.zip(sandboxSuffix) { container, sandboxSuffix ->
+//                container.dir(Sandbox.PLUGINS + sandboxSuffix).apply { asPath.createDirectories() }
+//            })
+//            sandboxSystemDirectory.convention(sandboxDirectory.zip(sandboxSuffix) { container, sandboxSuffix ->
+//                container.dir(Sandbox.SYSTEM + sandboxSuffix).apply { asPath.createDirectories() }
+//            })
+//            sandboxLogDirectory.convention(sandboxDirectory.zip(sandboxSuffix) { container, sandboxSuffix ->
+//                container.dir(Sandbox.LOG + sandboxSuffix).apply { asPath.createDirectories() }
+//            })
 
             if (this !is PrepareSandboxTask) {
                 val isBuiltInTask = Tasks::class.java.declaredFields.any { it.get(null) == name }
@@ -244,14 +251,16 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
 
             jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this))
 
-            if (this !is BuildSearchableOptionsTask) {
-                jvmArgumentProviders.add(SandboxArgumentProvider(
+            jvmArgumentProviders.add(
+                SandboxArgumentProvider(
                     sandboxConfigDirectory,
                     sandboxPluginsDirectory,
                     sandboxSystemDirectory,
                     sandboxLogDirectory,
-                ))
-            }
+                )
+            )
+
+
 //                outputs.dir(sandboxSystemDirectory)
 //                    .withPropertyName("System directory")
 //                inputs.dir(sandboxConfigDirectory)
@@ -288,3 +297,10 @@ internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: A
 }
 
 internal fun Directory.create() = also { asPath.createDirectories() }
+
+
+internal fun DirectoryProperty.configureSandbox(directory: DirectoryProperty, suffix: Provider<String>, path: String) {
+    this.convention(directory.zip(suffix) { container, sfx ->
+        container.dir(path + sfx).apply { asPath.createDirectories() }
+    })
+}

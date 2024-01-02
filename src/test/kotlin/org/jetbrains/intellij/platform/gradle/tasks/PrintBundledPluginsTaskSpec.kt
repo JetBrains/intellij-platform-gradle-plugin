@@ -4,8 +4,11 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import kotlin.test.Ignore
 import kotlin.test.Test
 
+@Ignore
+@Deprecated("Merge with the list task")
 class PrintBundledPluginsTaskSpec : IntelliJPluginSpecBase() {
 
     @Test

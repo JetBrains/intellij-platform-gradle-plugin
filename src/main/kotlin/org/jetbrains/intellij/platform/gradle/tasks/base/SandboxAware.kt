@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.base
 
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.Internal
 
 interface SandboxAware : PlatformVersionAware {
 
@@ -17,17 +17,15 @@ interface SandboxAware : PlatformVersionAware {
     @get:Internal
     val sandboxDirectory: DirectoryProperty
 
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Internal
     val sandboxConfigDirectory: DirectoryProperty
 
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Internal
     val sandboxPluginsDirectory: DirectoryProperty
 
-    @get:OutputDirectory
+    @get:Internal
     val sandboxSystemDirectory: DirectoryProperty
 
-    @get:OutputDirectory
+    @get:Internal
     val sandboxLogDirectory: DirectoryProperty
 }

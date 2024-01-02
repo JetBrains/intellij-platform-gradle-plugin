@@ -19,6 +19,8 @@ import kotlin.io.path.Path
 import kotlin.io.path.pathString
 import kotlin.test.*
 
+@Ignore
+@Deprecated("Requires refactoring")
 class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     companion object {

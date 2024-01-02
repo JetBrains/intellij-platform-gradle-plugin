@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
 import org.jetbrains.intellij.platform.gradle.warn
+import kotlin.io.path.exists
 
 /**
  * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.

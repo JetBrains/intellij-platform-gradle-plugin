@@ -13,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
+import kotlin.io.path.createDirectories
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
@@ -82,7 +83,10 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsDidWork = buildSearchableOptionsTaskProvider.map { it.didWork }
 
-                inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME))
+                inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).map {
+                    it.asPath.createDirectories()
+                    it
+                })
                 pluginName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
                 archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions")) // TODO: check if necessary, if so — use temp

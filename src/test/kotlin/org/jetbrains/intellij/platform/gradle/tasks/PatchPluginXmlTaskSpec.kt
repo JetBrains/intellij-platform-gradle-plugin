@@ -21,7 +21,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
                   <name>projectName</name>
                 </idea-plugin>
@@ -51,7 +51,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <description>Plugin pluginDescription</description>
                   <version>1.0.0</version>
                   <name>projectName</name>
@@ -72,7 +72,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin someattr="\u2202">
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
                   <name>projectName</name>
                 </idea-plugin>
@@ -102,7 +102,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <change-notes>change notes</change-notes>
                   <version>1.0.0</version>
                   <name>projectName</name>
@@ -133,7 +133,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
                   <name>projectName</name>
                   <id>my.plugin.id</id>
@@ -161,7 +161,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
                   <name>projectName</name>
                   <id>my.plugin.id</id>
@@ -191,7 +191,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
                   <name>projectName</name>
                   <id>org.jetbrains.erlang</id>
@@ -223,14 +223,14 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <name>projectName</name>
                   <version>1.0.0</version>
-                  <idea-version since-build="2022.3" until-build="2022.*">my_version</idea-version>
+                  <idea-version since-build="223.8836" until-build="223.*">my_version</idea-version>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
                 """.trimIndent(),
             )
 
-            assertContains("Patching plugin.xml: attribute 'until-build=[2]' of 'idea-version' tag will be set to '2022.*'", output)
-            assertContains("Patching plugin.xml: attribute 'since-build=[1]' of 'idea-version' tag will be set to '2022.3'", output)
+            assertContains("Patching plugin.xml: attribute 'until-build=[2]' of 'idea-version' tag will be set to '223.*'", output)
+            assertContains("Patching plugin.xml: attribute 'since-build=[1]' of 'idea-version' tag will be set to '223.8836'", output)
             assertContains("Patching plugin.xml: value of 'version[my_version]' tag will be set to '1.0.0'", output)
         }
     }
@@ -256,7 +256,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <name>projectName</name>
                   <version>0.10.0</version>
                 </idea-plugin>
@@ -278,7 +278,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <idea-version since-build="2022.3" until-build="2022.*" />
+                  <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
                   <name>projectName</name>
                 </idea-plugin>

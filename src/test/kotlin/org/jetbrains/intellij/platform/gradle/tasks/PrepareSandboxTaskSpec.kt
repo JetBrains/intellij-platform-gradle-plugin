@@ -299,14 +299,12 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             collectPaths(jar),
         )
 
-        println("sandbox = ${sandbox}")
-        println("buildFile = ${buildFile}")
         assertZipContent(
             jar,
             "META-INF/plugin.xml",
             """
             <idea-plugin>
-              <idea-version since-build="2022.3" until-build="2022.*" />
+              <idea-version since-build="223.8836" until-build="223.*" />
               <version>1.0.0</version>
               <name>myPluginName</name>
               <depends config-file="other.xml" />

@@ -5,9 +5,12 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
+@Ignore
+@Deprecated("Task is obsolete")
 class DownloadRobotServerPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test

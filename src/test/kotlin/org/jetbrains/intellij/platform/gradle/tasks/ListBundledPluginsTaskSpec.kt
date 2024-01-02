@@ -88,5 +88,7 @@ class ListBundledPluginsTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent(),
             content,
         )
+
+        // TODO: should print the content to the stdout as well
     }
 }

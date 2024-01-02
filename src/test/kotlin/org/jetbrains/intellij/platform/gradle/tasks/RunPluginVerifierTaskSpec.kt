@@ -37,11 +37,11 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `run plugin verifier in specified version`() {
         writePluginXmlFile()
-        writePluginVerifierDependency("1.304")
+        writePluginVerifierDependency("1.307")
         writePluginVerifierIde()
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Starting the IntelliJ Plugin Verifier 1.304", output)
+            assertContains("Starting the IntelliJ Plugin Verifier 1.307", output)
         }
     }
 
