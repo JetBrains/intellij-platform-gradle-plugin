@@ -1,7 +1,7 @@
-val intellijVersionProperty = project.property("intellijVersion").toString()
-val sinceBuildProperty = project.property("sinceBuild").toString()
-val languageVersionProperty = project.property("languageVersion").toString()
-val downloadDirProperty = project.property("downloadDir").toString()
+val intellijVersionProperty = providers.gradleProperty("intellijVersion")
+val sinceBuildProperty = providers.gradleProperty("sinceBuild")
+val languageVersionProperty = providers.gradleProperty("languageVersion").map { JavaLanguageVersion.of(it) }
+val downloadDirectoryProperty = providers.gradleProperty("downloadDirectory").map { file(it) }
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -10,28 +10,34 @@ plugins {
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        releases()
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        intellijIdeaCommunity(intellijVersionProperty)
+    }
 }
 
 kotlin {
     jvmToolchain {
-        languageVersion.set(JavaLanguageVersion.of(languageVersionProperty))
+        languageVersion = languageVersionProperty
     }
 }
 
-intellij {
-    version.set(intellijVersionProperty)
-}
+intellijPlatform {
+    buildSearchableOptions = false
 
-tasks {
-    buildSearchableOptions {
-        enabled = false
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = sinceBuildProperty
+        }
     }
 
-    patchPluginXml {
-        sinceBuild.set(sinceBuildProperty)
-    }
-
-    runPluginVerifier {
-        downloadDir.set(downloadDirProperty)
+    pluginVerifier {
+        downloadDirectory = downloadDirectoryProperty
     }
 }
