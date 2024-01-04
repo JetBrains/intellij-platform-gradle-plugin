@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import java.nio.file.Files
+import kotlin.io.path.*
 import kotlin.test.Test
 
 class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -13,26 +13,26 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
     @Test
     fun `skip instrumentCode task if disabled`() {
-        build("build", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)).let {
-            it.output containsText "> Task :instrumentCode SKIPPED"
+        build("build", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)) {
+            output containsText "> Task :instrumentCode SKIPPED"
 
             buildDirectory containsFile "libs/test-1.0.0.jar"
             buildDirectory notContainsFile "libs/instrumented-test-1.0.0.jar"
 
-            buildDirectory.resolve("classes/java/main").run {
-                resolve("ExampleAction.class").run {
-                    assert(Files.exists(this))
-                    assert(Files.size(this) == 625L)
+            buildDirectory.resolve("classes/java/main").let {
+                it.resolve("ExampleAction.class").let { file ->
+                    assert(file.exists())
+                    assert(file.fileSize() == 625L)
                 }
-                resolve("Main.class").run {
-                    assert(Files.exists(this))
-                    assert(Files.size(this) == 658L)
+                it.resolve("Main.class").let { file ->
+                    assert(file.exists())
+                    assert(file.fileSize() == 658L)
                 }
             }
-            buildDirectory.resolve("classes/kotlin/main").run {
-                resolve("MainKt.class").run {
-                    assert(Files.exists(this))
-                    assert(Files.size(this) == 957L)
+            buildDirectory.resolve("classes/kotlin/main").let {
+                it.resolve("MainKt.class").let { file ->
+                    assert(file.exists())
+                    assert(file.fileSize() == 957L)
                 }
             }
 
@@ -50,37 +50,32 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
                 jar containsFileInArchive "MainKt.class"
                 assert((jar readEntry "MainKt.class").length == 955)
-
-                buildDirectory.resolve("instrumented").run {
-                    assert(!Files.exists(this))
-                }
             }
 
-            buildDirectory.resolve("instrumented").run {
-                assert(!Files.exists(this))
-            }
+            assert(buildDirectory.resolve("instrumented").notExists())
         }
     }
 
     @Test
     fun `produce instrumented artifact when instrumentation is enabled`() {
-        build("buildPlugin", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)).let {
-            it.output notContainsText "> Task :instrumentCode SKIPPED"
+        build("buildPlugin", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)) {
+            output notContainsText "> Task :instrumentCode SKIPPED"
 
             buildDirectory containsFile "libs/test-1.0.0.jar"
             buildDirectory containsFile "libs/instrumented-test-1.0.0.jar"
 
-            buildDirectory.resolve("instrumented/instrumentCode").run {
-                resolve("ExampleAction.class").run {
-                    assert(Files.exists(this))
-                    assert(Files.size(this) == 1028L)
+            buildDirectory.resolve("instrumented/instrumentCode").let {
+                it.resolve("ExampleAction.class").let { file ->
+                    assert(file.exists())
+                    assert(file.fileSize() == 1028L)
                 }
-                resolve("Main.class").run {
-                    assert(Files.exists(this))
-                    assert(Files.size(this) == 1015L)
+                it.resolve("Main.class").let { file ->
+                    assert(file.exists())
+                    assert(file.fileSize() == 1015L)
                 }
-                resolve("MainKt.class").run {
-                    assert(Files.exists(this))
+                it.resolve("MainKt.class").let { file ->
+                    assert(file.exists())
+                    assert(file.fileSize() == 1015L)
                 }
             }
 
@@ -100,36 +95,37 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 assert((jar readEntry "MainKt.class").length == 955)
             }
 
-            buildDirectory.resolve("instrumented").run {
-                assert(Files.isDirectory(this))
-                assert(Files.list(this).toArray().isNotEmpty())
+            buildDirectory.resolve("instrumented").let {
+                assert(it.isDirectory())
+                assert(it.listDirectoryEntries().isNotEmpty())
             }
         }
     }
 
     @Test
     fun `run tests and print nulls when instrumentation is disabled`() {
-        build("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)).let {
-            it.safeOutput containsText """
+        build("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)) {
+            safeOutput containsText """
                 InstrumentationTests > fooTest STANDARD_OUT
                     null
             """.trimIndent()
 
-            it.safeOutput containsText """
+            safeOutput containsText """
                 InstrumentationTests > test STANDARD_OUT
                     null
             """.trimIndent()
         }
     }
+
     @Test
     fun `run tests and throw unmet assertion exceptions when instrumentation is enabled`() {
-        buildAndFail("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)).let {
-            it.safeOutput containsText """
+        buildAndFail("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)) {
+            safeOutput containsText """
                 InstrumentationTests > fooTest FAILED
                     java.lang.IllegalArgumentException at InstrumentationTests.java:12
             """.trimIndent()
 
-            it.safeOutput containsText """
+            safeOutput containsText """
                 InstrumentationTests > test FAILED
                     java.lang.IllegalArgumentException at InstrumentationTests.java:7
             """.trimIndent()

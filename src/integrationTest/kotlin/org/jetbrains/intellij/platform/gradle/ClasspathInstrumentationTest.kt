@@ -2,9 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import java.nio.file.Files
+import kotlin.io.path.exists
 import kotlin.test.Test
-
 
 class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "classpath",
@@ -12,8 +11,8 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `dependencies should not contain IDEA if setupDependencies not called`() {
-        build("dependencies").let {
-            it.safeLogs containsText """
+        build("dependencies") {
+            safeLogs containsText """
                 \--- org.jetbrains:markdown:0.3.1
                      \--- org.jetbrains:markdown-jvm:0.3.1
                           +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
@@ -26,8 +25,8 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `dependencies should contain IDEA after calling setupDependencies`() {
-        build("setupDependencies", "dependencies").let {
-            it.safeLogs containsText """
+        build("setupDependencies", "dependencies") {
+            safeLogs containsText """
                 +--- org.jetbrains:markdown:0.3.1
                 |    \--- org.jetbrains:markdown-jvm:0.3.1
                 |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
@@ -38,17 +37,17 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
                 \--- com.jetbrains:ideaIC:2022.1
             """.trimIndent()
 
-            it.safeOutput containsText """
+            safeOutput containsText """
                 implementation - Implementation only dependencies for null/main. (n)
                 \--- org.jetbrains:markdown:0.3.1 (n)
             """.trimIndent()
 
-            it.safeOutput containsText """
+            safeOutput containsText """
                 z10_intellijDefaultDependencies
                 \--- org.jetbrains:annotations:24.0.1
             """.trimIndent()
 
-            it.safeOutput containsText """
+            safeOutput containsText """
                 z90_intellij
                 \--- com.jetbrains:ideaIC:2022.1
             """.trimIndent()
@@ -57,16 +56,15 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `jacoco should work`() {
-        build("build").let {
-            buildDirectory.resolve("jacoco/test.exec").let { jacocoTestExec ->
-                assert(Files.exists(jacocoTestExec)) { "expect that $jacocoTestExec exists" }
+        build("build") {
+            buildDirectory.resolve("jacoco/test.exec").let {
+                assert(it.exists()) { "expect that $it exists" }
             }
 
-            buildDirectory.resolve("reports/jacoco.xml").let { jacocoXml ->
-                assert(Files.exists(jacocoXml))  { "expect that $jacocoXml exists" }
+            buildDirectory.resolve("reports/jacoco.xml").let {
+                assert(it.exists())  { "expect that $it exists" }
 
-
-                jacocoXml containsText """
+                it containsText """
                     <method name="getRandomNumber" desc="()I" line="7">
                         <counter type="INSTRUCTION" missed="0" covered="2"/>
                         <counter type="LINE" missed="0" covered="1"/>

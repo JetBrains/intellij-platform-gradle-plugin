@@ -24,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.JetBrainsRuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.base.PluginVerifierAware
 import java.io.ByteArrayOutputStream
-import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
@@ -118,10 +117,6 @@ abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, Plugin
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val downloadDirectory: DirectoryProperty
-
-    @get:Internal
-    @Deprecated("Rely only on downloadDirectory")
-    abstract val downloadPath: Property<Path>
 
     /**
      * The list of classes prefixes from the external libraries.

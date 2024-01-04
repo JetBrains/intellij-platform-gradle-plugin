@@ -7,7 +7,6 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import java.io.BufferedReader
-import java.io.File
 import java.io.FileOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
@@ -218,14 +217,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         return file
     }
 
-    protected fun Path.ensureExists() = apply {
-        parent.createDirectories()
-        if (!exists()) {
-            createFile()
-        }
-    }
-
-    protected fun writeJavaFile() = dir.resolve("src/main/java/App.java").ensureExists().java(
+    protected fun writeJavaFile() = dir.resolve("src/main/java/App.java").ensureFileExists().java(
         """
         import java.lang.String;
         import java.util.Arrays;
@@ -239,7 +231,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    protected fun writeKotlinFile() = dir.resolve("src/main/kotlin/App.kt").ensureExists().kotlin(
+    protected fun writeKotlinFile() = dir.resolve("src/main/kotlin/App.kt").ensureFileExists().kotlin(
         """
         object App {
             @JvmStatic
@@ -250,7 +242,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    protected fun writeKotlinUIFile() = dir.resolve("src/main/kotlin/pack/AppKt.kt").ensureExists().kotlin(
+    protected fun writeKotlinUIFile() = dir.resolve("src/main/kotlin/pack/AppKt.kt").ensureFileExists().kotlin(
         """
         package pack
         
@@ -320,5 +312,5 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     fun Path.properties(@Language("Properties") content: String) = append(content)
 
-    private fun Path.append(content: String) = ensureExists().also { appendText(content + "\n") }
+    private fun Path.append(content: String) = ensureFileExists().also { appendText(content + "\n") }
 }

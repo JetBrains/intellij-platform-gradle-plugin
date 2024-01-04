@@ -10,7 +10,7 @@ class AttachingPluginSourcesFromIdeDistIntegrationTest : IntelliJPlatformIntegra
 
     @Test
     fun `attach plugin sources`() {
-        build("buildPlugin").let {
+        build("buildPlugin") {
             val cssPluginIvyFileName = "CSS-ideaIU-IU-212.5712.43-withSources-3.xml"
 
             pluginsCacheDirectory containsFile cssPluginIvyFileName

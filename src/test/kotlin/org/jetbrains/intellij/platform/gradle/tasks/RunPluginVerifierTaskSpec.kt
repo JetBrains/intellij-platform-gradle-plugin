@@ -21,17 +21,6 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
-    fun `warn about too low IDE version`() {
-        writePluginXmlFile()
-        writePluginVerifierDependency()
-        writePluginVerifierIde(version = "2020.2.3")
-
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("The minimal supported IDE version is 223+, the provided version is too low: 2020.2.3 (202.7660.26)", output)
-        }
-    }
-
-    @Test
     fun `run plugin verifier in specified version`() {
         writePluginXmlFile()
         writePluginVerifierDependency("1.307")
@@ -79,7 +68,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierIde("PS", "2022.3")
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Plugin projectName:1.0.0 against IC-223.8836.14: Compatible", output)
+            assertContains("Plugin projectName:1.0.0 against IC-223.8836.41: Compatible", output)
             assertContains("Plugin projectName:1.0.0 against PS-223.7571.212: Compatible", output)
         }
     }

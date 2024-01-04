@@ -27,7 +27,7 @@ interface PlatformVersionAware {
         val version = productInfo.map { it.version.toVersion() }.get()
 
         if (build < Version(223)) {
-            throw IllegalArgumentException("The minimal supported IntelliJ Platform version is 2022.3 (233.0), which is higher than provided: $version ($build)")
+            throw IllegalArgumentException("The minimal supported IntelliJ Platform version is 2022.3 (223.0), which is higher than provided: $version ($build)")
         }
     }
 }

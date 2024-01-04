@@ -10,10 +10,10 @@ class ThrowingExceptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test throwing exceptions`() {
-        buildAndFail("buildPlugin").let {
-            it.output containsText "FAILURE: Build failed with an exception."
-            it.output containsText " > Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present."
-            it.output containsText "BUILD FAILED"
+        buildAndFail("buildPlugin") {
+            output containsText "FAILURE: Build failed with an exception."
+            output containsText " > Both 'intellij.localPath' and 'intellij.version' are specified, but one of these is allowed to be present."
+            output containsText "BUILD FAILED"
         }
     }
 }

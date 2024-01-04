@@ -14,8 +14,7 @@ internal inline fun <reified T : Any> Any.configureExtension(name: String, varar
     }
 }
 
-// TODO: remove inline
-internal inline fun ConfigurationContainer.create(name: String, description: String, noinline configuration: Configuration.() -> Unit = {}) =
+internal fun ConfigurationContainer.create(name: String, description: String, configuration: Configuration.() -> Unit = {}) =
     maybeCreate(name).apply {
         isVisible = false
         isCanBeConsumed = false

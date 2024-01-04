@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.test
 
-import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_INTELLIJ_REPOSITORY
 import java.io.File
 import java.net.URL
@@ -10,9 +9,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.zip.ZipFile
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
+import kotlin.io.path.*
 
 /**
  * Downloads and extracts IDE for the tests using local IDE installation. IDEs are downloaded from [DEFAULT_INTELLIJ_REPOSITORY].
@@ -22,27 +19,26 @@ import kotlin.io.path.exists
  */
 fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String {
     val fileName = releasePath.substringAfterLast('/')
-    val localIdeZipPath = localIdesPath.resolve(fileName)
+    val localIdeZipPath = localIdesPath.resolve(fileName).apply {
+        parent.createDirectories()
+    }
     val localIdeDirPathString = localIdeZipPath.toString().removeSuffix(".zip")
     if (Path(localIdeDirPathString).exists()) {
         return localIdeDirPathString
-    }
-    if (!localIdesPath.exists()) {
-        localIdesPath.createDirectories()
     }
 
     URL("$DEFAULT_INTELLIJ_REPOSITORY/releases/$releasePath").openStream().use {
         Files.copy(it, localIdeZipPath, StandardCopyOption.REPLACE_EXISTING)
     }
-    localIdeZipPath.toFile().unzip()
-    localIdeZipPath.forceDeleteIfExists()
+    localIdeZipPath.unzip()
+    localIdeZipPath.deleteIfExists()
 
     return localIdeDirPathString
 }
 
-private fun File.unzip() {
-    val unzipDirPath = this.path.removeSuffix(".zip")
-    ZipFile(this).use { zip ->
+private fun Path.unzip() {
+    val unzipDirPath = pathString.removeSuffix(".zip")
+    ZipFile(toFile()).use { zip ->
         zip
             .entries()
             .asSequence()

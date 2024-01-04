@@ -2,7 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import java.nio.file.Files
+import kotlin.io.path.deleteIfExists
+import kotlin.io.path.writeText
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -23,8 +24,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 flag to false,
             ),
             args = defaultArgs,
-        ).let {
-            it.output containsText "Build feature is disabled: $flag"
+        ) {
+            output containsText "Build feature is disabled: $flag"
         }
     }
 
@@ -40,8 +41,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 flag to false,
             ),
             args = defaultArgs,
-        ).let {
-            it.output containsText "Build feature is disabled: $flag"
+        ) {
+            output containsText "Build feature is disabled: $flag"
         }
     }
 
@@ -56,8 +57,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 flag to true,
             ),
             args = defaultArgs,
-        ).let {
-            it.output containsText "No searchable options found."
+        ) {
+            output containsText "No searchable options found."
         }
     }
 
@@ -72,8 +73,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 flag to false,
             ),
             args = defaultArgs,
-        ).let {
-            it.output containsText "Build feature is disabled: $flag"
+        ) {
+            output containsText "Build feature is disabled: $flag"
         }
     }
 
@@ -83,11 +84,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
         val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
 
         dir.resolve("src/main/resources/META-INF/plugin.xml").also {
-            Files.createDirectories(it.parent)
-            Files.deleteIfExists(it)
-            Files.createFile(it)
-            Files.writeString(
-                it,
+            it.deleteIfExists()
+            it.ensureFileExists().writeText(
                 """
                 <idea-plugin>
                     <id>test</id>
@@ -106,8 +104,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 flag to true,
             ),
             args = defaultArgs,
-        ).let {
-            it.output containsText "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin."
+        ) {
+            output containsText "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin."
         }
     }
 }

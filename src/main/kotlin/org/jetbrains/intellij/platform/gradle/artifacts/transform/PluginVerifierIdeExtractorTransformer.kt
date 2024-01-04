@@ -54,6 +54,7 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
         } ?: return
 
         val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath
+        println("targetDirectory.pathString = ${targetDirectory.pathString}")
         outputs.file("path.txt").writeText(targetDirectory.pathString)
 
         when (extension) {

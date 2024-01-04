@@ -10,7 +10,7 @@ class AttachingPluginBundledSourcesIntegrationTest : IntelliJPlatformIntegration
 
     @Test
     fun `attach bundled plugin sources`() {
-        build("buildPlugin").let {
+        build("buildPlugin") {
             val goPluginIvyFileName = "go-goland-GO-212.5457.54-withSources-3.xml"
 
             pluginsCacheDirectory containsFile goPluginIvyFileName

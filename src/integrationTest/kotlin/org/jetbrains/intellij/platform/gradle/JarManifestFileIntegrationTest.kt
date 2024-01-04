@@ -10,7 +10,7 @@ class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test manifest file`() {
-        build("assemble").let {
+        build("assemble") {
             pluginJar containsFileInArchive "META-INF/MANIFEST.MF"
             with(pluginJar readEntry "META-INF/MANIFEST.MF") {
                 this containsText "Version: 1.0.0"

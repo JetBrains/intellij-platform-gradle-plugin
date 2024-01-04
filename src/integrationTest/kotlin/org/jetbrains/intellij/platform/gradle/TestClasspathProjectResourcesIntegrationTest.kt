@@ -11,17 +11,19 @@ class TestClasspathProjectResourcesIntegrationTest : IntelliJPlatformIntegration
 
     @Test
     fun `verify classpath entries`() {
-        build("test").let {
-            val classpathEntries = it.output
-                .lines()
-                .filter { line -> line.startsWith("test-classpath-project-resources: Test classpath entry:") }
+        build("test") {
+            val classpathEntries = output.lines().filter { it.startsWith("test-classpath-project-resources: Test classpath entry:") }
 
-            val testResourcesEntryIndex = classpathEntries
-                .indexOfFirst { entry -> entry.contains("/build/resources/test".replace("/", File.separator)) }
-            val powerMockDependencyEntryIndex = classpathEntries
-                .indexOfFirst { entry -> entry.contains("powermock") }
-            val firstIdeJarEntryIndex = classpathEntries
-                .indexOfFirst { entry -> entry.contains("/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/".replace("/", File.separator)) }
+            // TODO: don't use [File.separator]
+            val testResourcesEntryIndex = classpathEntries.indexOfFirst {
+                it.contains("/build/resources/test".replace("/", File.separator))
+            }
+            val powerMockDependencyEntryIndex = classpathEntries.indexOfFirst {
+                it.contains("powermock")
+            }
+            val firstIdeJarEntryIndex = classpathEntries.indexOfFirst {
+                it.contains("/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/".replace("/", File.separator))
+            }
 
             assert(testResourcesEntryIndex < powerMockDependencyEntryIndex)
             assert(testResourcesEntryIndex < firstIdeJarEntryIndex)

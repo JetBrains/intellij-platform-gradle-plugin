@@ -781,7 +781,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `prepareTestingSandbox runs before test`() {
         writeJavaFile()
-        dir.resolve("additional/some-file").ensureExists()
+        dir.resolve("additional/some-file").ensureFileExists()
 
         pluginXml.xml("<idea-plugin />")
 

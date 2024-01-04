@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
-import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.jetbrains.intellij.platform.gradle.debug
@@ -10,16 +9,14 @@ import java.nio.file.Path
 import java.util.function.BiConsumer
 import java.util.function.Predicate
 import javax.inject.Inject
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.exists
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 abstract class ArchiveUtils @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
 ) {
 
+    @OptIn(ExperimentalPathApi::class)
     fun extract(
         archive: Path,
         targetDirectory: Path,
@@ -33,7 +30,7 @@ abstract class ArchiveUtils @Inject constructor(
             return targetDirectory
         }
 
-        targetDirectory.deleteQuietly()
+        targetDirectory.deleteRecursively()
         targetDirectory.createDirectories()
 
         debug(context, "Extracting: $name")

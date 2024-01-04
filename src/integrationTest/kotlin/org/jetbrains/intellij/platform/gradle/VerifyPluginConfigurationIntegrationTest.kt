@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import java.nio.file.Files
+import kotlin.io.path.deleteIfExists
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -13,7 +13,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
 
     private val issuesFoundSentence = "[gradle-intellij-plugin :verifyPluginConfiguration] The following plugin configuration issues were found:"
 
-    private val userHome = dir.resolve("home").toPath()
+    private val userHome = dir.resolve("home")
     private val defaultSystemProperties = mapOf(
         "user.home" to userHome,
     )
@@ -31,8 +31,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             "verifyPluginConfiguration",
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties,
-        ).let {
-            it.output notContainsText issuesFoundSentence
+        ) {
+            output notContainsText issuesFoundSentence
         }
     }
 
@@ -43,9 +43,9 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             "verifyPluginConfiguration",
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("languageVersion" to "11"),
-        ).let {
-            it.output containsText issuesFoundSentence
-            it.output containsText "- The Java configuration specifies sourceCompatibility=11 but IntelliJ Platform 2022.2 requires sourceCompatibility=17."
+        ) {
+            output containsText issuesFoundSentence
+            output containsText "- The Java configuration specifies sourceCompatibility=11 but IntelliJ Platform 2022.2 requires sourceCompatibility=17."
         }
     }
 
@@ -56,20 +56,19 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             "verifyPluginConfiguration",
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("sinceBuild" to "203"),
-        ).let {
-            it.output containsText issuesFoundSentence
-            it.output containsText "- The 'since-build' property is lower than the target IntelliJ Platform major version: 203 < 222."
-            it.output containsText "- The Java configuration specifies targetCompatibility=17 but since-build='203' property requires targetCompatibility=11."
+        ) {
+            output containsText issuesFoundSentence
+            output containsText "- The 'since-build' property is lower than the target IntelliJ Platform major version: 203 < 222."
+            output containsText "- The Java configuration specifies targetCompatibility=17 but since-build='203' property requires targetCompatibility=11."
         }
     }
 
     @Test
     fun `should report existing Plugin Verifier download directory`() {
-        val ides = userHome.resolve(".pluginVerifier/ides").also {
-            Files.deleteIfExists(it.resolve("foo"))
-        }.also {
-            Files.createDirectories(it)
-            Files.createFile(it.resolve("foo"))
+        val ides = userHome.resolve(".pluginVerifier/ides")
+        ides.resolve("foo").apply {
+            deleteIfExists()
+            ensureFileExists()
         }
         val downloadDir = dir.resolve("home")
 
@@ -79,8 +78,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("downloadDir" to downloadDir),
             args = listOf("--info"),
-        ).let {
-            it.output containsText "The Plugin Verifier download directory is set to $downloadDir, but downloaded IDEs were also found in $ides, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir"
+        ) {
+            output containsText "The Plugin Verifier download directory is set to $downloadDir, but downloaded IDEs were also found in $ides, see: https://jb.gg/intellij-platform-plugin-verifier-old-download-dir"
         }
     }
 }

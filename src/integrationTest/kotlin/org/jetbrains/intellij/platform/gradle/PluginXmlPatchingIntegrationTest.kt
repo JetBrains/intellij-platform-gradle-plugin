@@ -10,8 +10,8 @@ class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `patch plugin_xml`() {
-        build("build").let {
-            it.output containsText ":patchPluginXml"
+        build("build") {
+            output containsText ":patchPluginXml"
 
             buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml" // TODO: fix location
 

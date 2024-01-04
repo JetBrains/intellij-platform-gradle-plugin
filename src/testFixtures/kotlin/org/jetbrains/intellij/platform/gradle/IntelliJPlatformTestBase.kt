@@ -7,8 +7,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.readText
+import kotlin.io.path.*
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -140,4 +139,11 @@ abstract class IntelliJPlatformTestBase {
 
     protected val BuildResult.safeLogs: String
         get() = safeOutput.lineSequence().filterNot { it.startsWith("[gradle-intellij-plugin") }.joinToString("\n")
+
+    protected fun Path.ensureFileExists() = apply {
+        parent.createDirectories()
+        if (!exists()) {
+            createFile()
+        }
+    }
 }

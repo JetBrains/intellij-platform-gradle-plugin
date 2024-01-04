@@ -9,7 +9,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
@@ -19,6 +18,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -30,6 +30,7 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.toVersion
 import java.util.*
 import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 
 abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_BASE_ID) {
 
@@ -229,9 +230,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             applyBundledPluginsListTransformer()
             applyPluginVerifierIdeExtractorTransformer(
                 configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
-                providers.provider {
-                    project.the<IntelliJPlatformExtension>().pluginVerifier.downloadDirectory.get()
-                },
+                extensionProvider.flatMap { it.pluginVerifier.downloadDirectory },
             )
         }
 
@@ -271,7 +270,9 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                         }))
                         .orElse(project.layout.buildDirectory.dir("tmp/pluginVerifier"))
                 )
-                downloadDirectory.convention(homeDirectory.dir("ides"))
+                downloadDirectory.convention(homeDirectory.dir("ides").map {
+                    it.apply { asPath.createDirectories() }
+                })
                 failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
                 verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
                 verificationReportsFormats.convention(
@@ -294,13 +295,11 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                         jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())
                         androidStudio.set(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO.resolve())
                         channels.set(ProductRelease.Channel.values().toList())
+                        type.set(productInfoValueProvider.map { it.productCode.toIntelliJPlatformType() })
 
-                        val extension = project.the<IntelliJPlatformExtension>()
-                        extension.pluginConfiguration.ideaVersion.let { ideaVersion ->
-                            sinceBuild.set(ideaVersion.sinceBuild)
-                            untilBuild.set(ideaVersion.untilBuild)
-                            type.set(productInfoValueProvider.map { it.productCode.toIntelliJPlatformType() })
-                        }
+                        val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
+                        sinceBuild.set(ideaVersionProvider.flatMap { it.sinceBuild })
+                        untilBuild.set(ideaVersionProvider.flatMap { it.untilBuild })
                     }
                 }
 

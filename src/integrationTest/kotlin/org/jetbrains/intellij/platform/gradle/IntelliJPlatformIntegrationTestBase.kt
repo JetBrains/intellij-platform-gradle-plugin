@@ -3,13 +3,13 @@
 package org.jetbrains.intellij.platform.gradle
 
 import java.nio.file.FileSystems
-import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
+@OptIn(ExperimentalPathApi::class)
 open class IntelliJPlatformIntegrationTestBase(
     private val resourceName: String? = null,
 ) : IntelliJPlatformTestBase() {
@@ -36,11 +36,16 @@ open class IntelliJPlatformIntegrationTestBase(
             throw IllegalArgumentException("Integration tests resource '$resourceName' not found in: $resourcePath")
         }
 
-        Files.walk(resourcePath)
-            .forEach {
-                val destinationFile = dir.resolve(resourcePath.relativize(it))
-                it.copyTo(destinationFile, true)
-            }
+        resourcePath.copyToRecursively(
+            target = dir,
+            followLinks = true,
+            overwrite = true,
+        )
+//        Files.walk(resourcePath)
+//            .forEach {
+//                val destinationFile = dir.resolve(resourcePath.relativize(it))
+//                it.copyTo(destinationFile, true)
+//            }
     }
 //    /**
 //     * Shorthand for the setup method.
@@ -82,7 +87,7 @@ open class IntelliJPlatformIntegrationTestBase(
     val buildDirectory
         get() = dir.resolve("build")
             .also {
-                assert(Files.exists(it)) { "Build directory does not exist: $it" }
+                assert(it.exists()) { "Build directory does not exist: $it" }
             }
 
 //    /**
@@ -100,7 +105,7 @@ open class IntelliJPlatformIntegrationTestBase(
         get() = buildDirectory
             .resolve("patchedPluginXmlFiles/plugin.xml") // TODO: fix location
             .also {
-                assert(Files.exists(it)) { "plugin.xml file does not exist: $it" }
+                assert(it.exists()) { "plugin.xml file does not exist: $it" }
             }
 
 //    /**
@@ -119,7 +124,7 @@ open class IntelliJPlatformIntegrationTestBase(
         get() = buildDirectory
             .resolve("libs/test-1.0.0.jar")
             .also {
-                assert(Files.exists(it)) { "Plugin jar file does not exist: $it" }
+                assert(it.exists()) { "Plugin jar file does not exist: $it" }
             }
 
     /**
@@ -136,7 +141,7 @@ open class IntelliJPlatformIntegrationTestBase(
         get() = gradleUserHomeDirectory
             .resolve("caches/modules-2/files-2.1")
             .also {
-                assert(Files.exists(it)) { "Gradle cache directory does not exist: $it" }
+                assert(it.exists()) { "Gradle cache directory does not exist: $it" }
             }
 
     /**
@@ -147,7 +152,7 @@ open class IntelliJPlatformIntegrationTestBase(
         get() = gradleCacheDirectory
             .resolve("com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
             .also {
-                assert(Files.exists(it)) { "IDE Plugins cache directory does not exist: $it" }
+                assert(it.exists()) { "IDE Plugins cache directory does not exist: $it" }
             }
 
     infix fun String.containsText(string: String) {
@@ -159,7 +164,7 @@ open class IntelliJPlatformIntegrationTestBase(
     }
 
     infix fun Path.containsText(string: String) {
-        Files.readString(this).containsText(string)
+        readText().containsText(string)
     }
 
     infix fun String.matchesRegex(regex: String) {
@@ -171,16 +176,16 @@ open class IntelliJPlatformIntegrationTestBase(
     }
 
     infix fun Path.containsFile(path: String) {
-        assert(resolve(path).let(Files::exists)) { "expect '$this' contains file '$path'" }
+        assert(resolve(path).exists()) { "expect '$this' contains file '$path'" }
     }
 
     infix fun Path.notContainsFile(path: String) {
-        assert(resolve(path).let(Files::notExists)) { "expect '$this' not contains file '$path'" }
+        assert(resolve(path).notExists()) { "expect '$this' not contains file '$path'" }
     }
 
     infix fun Path.containsFileInArchive(path: String) {
         val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
-        assert(fs.getPath(path).let(Files::exists)) { "expect archive '$this' contains file '$path'" }
+        assert(fs.getPath(path).exists()) { "expect archive '$this' contains file '$path'" }
     }
 
     infix fun Path.readEntry(path: String) = ZipFile(pathString).use { zip ->
