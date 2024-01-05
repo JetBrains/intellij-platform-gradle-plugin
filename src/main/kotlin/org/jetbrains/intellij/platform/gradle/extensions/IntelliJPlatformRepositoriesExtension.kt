@@ -102,7 +102,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     // TODO: check if the bundled plugin hash matters — if it has to be different every time as always extract transformer is called, so previous dir may no longer exist
     fun ivy(action: RepositoryAction = {}) = repositories.ivy {
         ivyPattern(".gradle/intellijPlatform/ivy/[organization]-[module]-[revision].[ext]")
-        artifactPattern("/[artifact]")
+        artifactPattern("file://[artifact]")
     }.apply {
         repositories.exclusiveContent {
             forRepositories(this@apply)
