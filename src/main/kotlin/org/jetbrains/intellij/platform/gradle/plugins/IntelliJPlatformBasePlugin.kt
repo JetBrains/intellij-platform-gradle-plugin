@@ -8,8 +8,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.assign
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
@@ -18,7 +17,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
-import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -26,8 +24,6 @@ import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.toVersion
 import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -35,7 +31,6 @@ import kotlin.io.path.createDirectories
 abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_BASE_ID) {
 
     override fun Project.configure() {
-
         with(plugins) {
             apply(JavaPlugin::class)
         }

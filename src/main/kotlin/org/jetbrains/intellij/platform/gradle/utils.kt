@@ -15,6 +15,8 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.invocation.Gradle
@@ -235,3 +237,10 @@ val Gradle.projectCacheDir
 internal fun String.toVersion() = Version.parse(this)
 
 internal fun String.toIntelliJPlatformType() = IntelliJPlatformType.fromCode(this)
+
+/**
+ * TODO: Remove when [IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION] is `8.2` and replace with [org.gradle.kotlin.dsl.assign].
+ */
+fun ConfigurableFileCollection.assign(fileCollection: FileCollection) {
+    this.setFrom(fileCollection)
+}
