@@ -16,6 +16,7 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.debug
@@ -45,7 +46,7 @@ import kotlin.io.path.pathString
 abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, PluginVerifierAware {
 
     init {
-        group = IntelliJPluginConstants.PLUGIN_GROUP_NAME
+        group = PLUGIN_GROUP_NAME
         description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds."
 
         mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")

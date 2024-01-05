@@ -16,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.Version
 import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
@@ -257,12 +256,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
             }
             val path = artifactPath.pathString
-            val version = "${productInfo.version}:local+${path.hashCode().absoluteValue}"
+            val hash = path.hashCode().absoluteValue % 1000
 
             dependencies.create(
-                group = PLUGIN_GROUP_NAME,
-                name = "${type.dependency.group}:${type.dependency.name}",
-                version = version,
+                group = Configurations.Dependencies.LOCAL_IDE_GROUP,
+                name = type.dependency.name,
+                version = "${productInfo.version}+$hash",
             ).apply {
                 createIvyDependency(gradle, listOf(Publication(path, "directory", null, "default")))
             }
@@ -330,7 +329,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
 
             dependencies.create(
-                group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP_NAME,
+                group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
                 name = id,
                 version = "${productInfo.version}+$hash",
             ).apply {

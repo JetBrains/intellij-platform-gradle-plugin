@@ -10,9 +10,9 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.maven
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import java.net.URI
 import javax.inject.Inject
 
@@ -107,20 +107,8 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         repositories.exclusiveContent {
             forRepositories(this@apply)
             filter {
-                includeGroup(PLUGIN_GROUP_NAME)
-//                IntelliJPlatformType.values()
-//                    .forEach { type ->
-//                        type.dependency.let {
-//                            includeModule(it.group, it.name)
-//                            includeGroupByRegex("${it.group}-${it.name}".replace(".", "\\.") + ".*")
-//                        }
-//                        type.binary?.let {
-//                            if (type.dependency != it) {
-//                                includeModule(it.group, it.name)
-//                                includeGroupByRegex("${it.group}-${it.name}".replace(".", "\\.") + ".*")
-//                            }
-//                        }
-//                    }
+                includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
+                includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
             }
         }
         action()

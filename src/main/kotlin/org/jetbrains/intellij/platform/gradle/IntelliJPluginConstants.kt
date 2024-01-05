@@ -62,7 +62,8 @@ object IntelliJPluginConstants {
         }
 
         object Dependencies {
-            const val BUNDLED_PLUGIN_GROUP_NAME = "bundledPlugin"
+            const val LOCAL_IDE_GROUP = "localIde"
+            const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
         }
     }
 
