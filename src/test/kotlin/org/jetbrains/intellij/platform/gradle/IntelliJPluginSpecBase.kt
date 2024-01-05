@@ -8,10 +8,7 @@ import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import java.io.BufferedReader
 import java.io.FileOutputStream
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.Paths
-import java.nio.file.StandardOpenOption
+import java.nio.file.*
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
@@ -275,7 +272,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     protected fun ZipFile.extract(path: String) = Files.createTempFile("gradle-test", "").apply {
         Files.newOutputStream(this, StandardOpenOption.DELETE_ON_CLOSE)
-        Files.copy(getInputStream(getEntry(path)), this)
+        Files.copy(getInputStream(getEntry(path)), this, StandardCopyOption.REPLACE_EXISTING)
     }
 
     protected fun Path.toZip() = ZipFile(toFile())
