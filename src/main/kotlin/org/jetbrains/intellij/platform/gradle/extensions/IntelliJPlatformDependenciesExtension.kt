@@ -327,12 +327,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
             val artifactPath = Path(bundledPlugin.path)
             val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
-            val path = artifactPath.pathString
+            val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
 
             dependencies.create(
-                group = PLUGIN_GROUP_NAME,
-                name = "${type.dependency.group}:${type.dependency.name}:${productInfo.version}",
-                version = "$id:bundled+${path.hashCode().absoluteValue}",
+                group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP_NAME,
+                name = id,
+                version = "${productInfo.version}+$hash",
             ).apply {
                 createIvyDependency(gradle, jars.map { Publication(it.pathString, "jar", "jar", "default") })
             }

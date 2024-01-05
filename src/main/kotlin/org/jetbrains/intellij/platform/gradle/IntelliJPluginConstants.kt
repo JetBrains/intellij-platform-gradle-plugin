@@ -60,6 +60,10 @@ object IntelliJPluginConstants {
             val binaryReleaseExtracted = Attribute.of("intellijPlatformPluginVerifierIdeExtracted", Boolean::class.javaObjectType)
             val productInfo = Attribute.of("intellijPlatformProductInfo", Boolean::class.javaObjectType)
         }
+
+        object Dependencies {
+            const val BUNDLED_PLUGIN_GROUP_NAME = "bundledPlugin"
+        }
     }
 
     object Tasks {
