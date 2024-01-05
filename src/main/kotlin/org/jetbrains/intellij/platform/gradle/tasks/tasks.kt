@@ -44,10 +44,10 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         val suffix = UUID.randomUUID().toString().substring(0, 8)
 
         if (this is PlatformVersionAware) {
-            intelliJPlatform = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+            intelliJPlatform.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM))
 
             productInfo.set(providers.of(ProductInfoValueSource::class) {
-                parameters.productInfoConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                parameters.productInfoConfiguration.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO))
             })
         }
 
@@ -127,7 +127,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     extendsFrom(intellijPlatformConfiguration)
                 }
 
-            intelliJPlatform.setFrom(provider {
+            intelliJPlatform.from(provider {
                 when {
                     type.isSpecified() || version.isSpecified() -> intellijPlatformConfiguration
                     else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM)
@@ -135,10 +135,12 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             })
 
             productInfo.set(providers.of(ProductInfoValueSource::class) {
-                parameters.productInfoConfiguration = when {
-                    type.isSpecified() || version.isSpecified() -> intellijPlatformProductInfoConfiguration
-                    else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-                }
+                parameters.productInfoConfiguration.from(
+                    when {
+                        type.isSpecified() || version.isSpecified() -> intellijPlatformProductInfoConfiguration
+                        else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                    }
+                )
             })
         }
 

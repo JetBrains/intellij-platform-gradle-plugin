@@ -8,7 +8,7 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
-import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -24,6 +25,8 @@ import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.toVersion
 import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -121,8 +124,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             }
 
             val jetbrainsRuntimeLocalConfiguration = create(
-                name = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE,
-                description = "JetBrains Runtime local instance"
+                name = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE, description = "JetBrains Runtime local instance"
             ) {
                 attributes {
                     attribute(Attributes.extracted, true)
@@ -232,7 +234,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
             val productInfoValueProvider = providers.of(ProductInfoValueSource::class.java) {
                 with(parameters) {
-                    productInfoConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
+                    productInfoConfiguration.setFrom(configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO))
                 }
             }
 
@@ -255,15 +257,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
 
             configureExtension<IntelliJPlatformExtension.PluginVerifier>(Extensions.PLUGIN_VERIFIER) {
                 homeDirectory.convention(
-                    providers.systemProperty("plugin.verifier.home.dir")
-                        .flatMap { layout.dir(provider { Path(it).toFile() }) }
+                    providers.systemProperty("plugin.verifier.home.dir").flatMap { layout.dir(provider { Path(it).toFile() }) }
                         .orElse(layout.dir(providers.environmentVariable("XDG_CACHE_HOME").map {
                             Path(it, "pluginVerifier").toFile()
-                        }))
-                        .orElse(layout.dir(providers.systemProperty("user.home").map {
+                        })).orElse(layout.dir(providers.systemProperty("user.home").map {
                             Path(it, ".cache/pluginVerifier").toFile()
-                        }))
-                        .orElse(project.layout.buildDirectory.dir("tmp/pluginVerifier"))
+                        })).orElse(project.layout.buildDirectory.dir("tmp/pluginVerifier"))
                 )
                 downloadDirectory.convention(homeDirectory.dir("ides").map {
                     it.apply { asPath.createDirectories() }
@@ -280,11 +279,9 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 subsystemsToCheck.convention("all")
 
                 val productReleasesValueProvider = providers.of(ProductReleasesValueSource::class.java) {
-                    fun String.resolve() = resources.text
-                        .fromUri(this)
-                        .runCatching { asFile("UTF-8") }
-                        .onFailure { logger.error("Cannot resolve product releases", it) }
-                        .getOrThrow()
+                    fun String.resolve() =
+                        resources.text.fromUri(this).runCatching { asFile("UTF-8") }.onFailure { logger.error("Cannot resolve product releases", it) }
+                            .getOrThrow()
 
                     with(parameters) {
                         jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())
