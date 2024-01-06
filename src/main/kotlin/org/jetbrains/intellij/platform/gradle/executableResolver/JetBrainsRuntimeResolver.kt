@@ -103,7 +103,7 @@ class JetBrainsRuntimeResolver(
         return null
     }
 
-    private fun Path.getJbrRoot(): Path {
+    private fun Path.getJbrRoot(): Path? {
         val jbr = listDirectoryEntries().firstOrNull { it.name.startsWith("jbr") }?.takeIf { it.exists() }
 
         return when {
@@ -117,6 +117,6 @@ class JetBrainsRuntimeResolver(
                 jbr != null -> jbr
                 else -> this
             }
-        }
+        }.takeIf { it.exists() }
     }
 }
