@@ -55,12 +55,10 @@ class JetBrainsRuntimeResolver(
                 }
             },
             {
+                @Suppress("UnstableApiUsage")
                 javaToolchainSpec.vendor.orNull
                     ?.takeUnless { it == DefaultJvmVendorSpec.any() }
-                    ?.takeIf {
-                        @Suppress("UnstableApiUsage")
-                        it.matches(JETBRAINS_RUNTIME_VENDOR)
-                    }
+                    ?.takeIf { it.matches(JETBRAINS_RUNTIME_VENDOR) }
                     ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
                     ?.let { javaLauncher ->
                         javaLauncher.metadata.installationPath.asPath.getJbrRoot()
@@ -74,6 +72,15 @@ class JetBrainsRuntimeResolver(
                         .also { debug(context, "JetBrains Runtime bundled within IntelliJ Platform resolved as: $it") }
                         .ifNull { debug(context, "Cannot resolve JetBrains Runtime bundled within IntelliJ Platform: $file") }
                 }
+            },
+            {
+                javaToolchainSpec.languageVersion.orNull
+                    ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
+                    ?.let { javaLauncher ->
+                        javaLauncher.metadata.installationPath.asPath.getJbrRoot()
+                            .also { debug(context, "JetBrains Runtime specified with Java Toolchain resolved as: $it") }
+                            .ifNull { debug(context, "Cannot resolve JetBrains Runtime specified with Java Toolchain") }
+                    }
             },
             {
                 Jvm.current().javaHome.toPath().getJbrRoot()
