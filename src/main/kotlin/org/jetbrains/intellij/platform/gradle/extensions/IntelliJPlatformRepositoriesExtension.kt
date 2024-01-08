@@ -114,6 +114,16 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action()
     }
 
+    fun recommended() {
+        ivy()
+        releases()
+        snapshots()
+        marketplace()
+        jetbrainsRuntime()
+        binaryReleases()
+        binaryReleasesAndroidStudio()
+    }
+
     private fun createRepository(
         name: String,
         url: String,
