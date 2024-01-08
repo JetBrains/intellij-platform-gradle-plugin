@@ -41,7 +41,7 @@ abstract class TestIdeTask : Test(), RunnableIdeAware, CustomPlatformVersionAwar
         super.executeTests()
     }
 
-    override fun getExecutable() = jetbrainsRuntimeExecutable.asPath.absolutePathString()
+    override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 
     companion object {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache

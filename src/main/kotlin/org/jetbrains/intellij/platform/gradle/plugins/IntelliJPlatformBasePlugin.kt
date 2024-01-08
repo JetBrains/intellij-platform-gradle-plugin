@@ -16,7 +16,10 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVerifierIdeExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -98,17 +101,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             ) {
                 attributes {
                     attribute(Attributes.bundledPluginsList, true)
-                }
-
-                extendsFrom(intellijPlatformConfiguration)
-            }
-
-            create(
-                name = Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO,
-                description = "IntelliJ Platform product info",
-            ) {
-                attributes {
-                    attribute(Attributes.productInfo, true)
                 }
 
                 extendsFrom(intellijPlatformConfiguration)
@@ -210,7 +202,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 attribute(Attributes.bundledPluginsList)
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
-                attribute(Attributes.productInfo)
             }
 
             applyExtractorTransformer(
@@ -223,7 +214,6 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
                 configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
             )
-            applyProductInfoTransformer()
             applyBundledPluginsListTransformer()
             applyPluginVerifierIdeExtractorTransformer(
                 configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
@@ -234,7 +224,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
         configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
             val productInfoValueProvider = providers.of(ProductInfoValueSource::class.java) {
                 with(parameters) {
-                    productInfoConfiguration.setFrom(configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO))
+                    intelliJPlatformConfiguration.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM))
                 }
             }
 
@@ -279,9 +269,11 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 subsystemsToCheck.convention("all")
 
                 val productReleasesValueProvider = providers.of(ProductReleasesValueSource::class.java) {
-                    fun String.resolve() =
-                        resources.text.fromUri(this).runCatching { asFile("UTF-8") }.onFailure { logger.error("Cannot resolve product releases", it) }
-                            .getOrThrow()
+                    fun String.resolve() = resources.text
+                        .fromUri(this)
+                        .runCatching { asFile("UTF-8") }
+                        .onFailure { logger.error("Cannot resolve product releases", it) }
+                        .getOrThrow()
 
                     with(parameters) {
                         jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())

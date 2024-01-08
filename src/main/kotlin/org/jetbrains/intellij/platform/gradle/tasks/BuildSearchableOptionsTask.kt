@@ -6,17 +6,14 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.model.getBootClasspath
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
-import java.io.File
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.pathString
 
@@ -69,40 +66,14 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
         }
 
         assertPlatformVersion()
-        configureClasspath()
 
-        workingDir = intelliJPlatform.singleFile
+        workingDir = platformPath.toFile()
         args = args + listOf("traverseUI", outputDir.asPath.pathString, "true")
 
         super.exec()
     }
 
-    override fun getExecutable() = jetbrainsRuntimeExecutable.asPath.absolutePathString()
-
-    /**
-     * Prepares the classpath for the IDE based on the IDEA version.
-     */
-    private fun configureClasspath() {
-        classpath += objectFactory.fileCollection().from(
-            resolveToolsJar(executable)
-        )
-
-        classpath += objectFactory.fileCollection().from(
-            productInfo.get().getBootClasspath(intelliJPlatform.single().toPath())
-        )
-    }
-
-    /**
-     * Resolves the path to the `tools.jar` library.
-     */
-    private fun resolveToolsJar(javaExec: String): File {
-        val binDir = File(javaExec).parent
-        val path = when {
-            OperatingSystem.current().isMacOsX -> "../../lib/tools.jar"
-            else -> "../lib/tools.jar"
-        }
-        return File(binDir, path)
-    }
+    override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 
     companion object {
         fun register(project: Project) =

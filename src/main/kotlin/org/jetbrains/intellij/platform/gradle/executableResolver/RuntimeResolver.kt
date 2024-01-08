@@ -19,7 +19,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
-class JetBrainsRuntimeResolver(
+class RuntimeResolver(
     val jetbrainsRuntime: FileCollection,
     val intellijPlatform: FileCollection,
     val javaToolchainSpec: JavaToolchainSpec,
@@ -78,8 +78,8 @@ class JetBrainsRuntimeResolver(
                     ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
                     ?.let { javaLauncher ->
                         javaLauncher.metadata.installationPath.asPath.getJbrRoot()
-                            .also { debug(context, "JetBrains Runtime specified with Java Toolchain resolved as: $it") }
-                            .ifNull { debug(context, "Cannot resolve JetBrains Runtime specified with Java Toolchain") }
+                            .also { debug(context, "Java Runtime specified with Java Toolchain resolved as: $it") }
+                            .ifNull { debug(context, "Cannot resolve Java Runtime specified with Java Toolchain") }
                     }
             },
             {
@@ -91,7 +91,7 @@ class JetBrainsRuntimeResolver(
             .asSequence()
             .mapNotNull { it() }
             .firstOrNull()
-            ?.also { info(context, "Resolved JetBrains Runtime directory: $it") }
+            ?.also { info(context, "Resolved Runtime directory: $it") }
     }
 
     private fun getBuiltinJbrVersion(ideDirectory: File): String? {

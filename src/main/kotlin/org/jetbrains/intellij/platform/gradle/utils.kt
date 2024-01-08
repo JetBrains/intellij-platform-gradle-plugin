@@ -81,23 +81,6 @@ fun transformXml(document: Document, path: Path) {
     }
 }
 
-internal fun String.resolveIdeHomeVariable(ideDir: Path) =
-    ideDir.toAbsolutePath().toString().let { idePath ->
-        this
-            .replace("\$APP_PACKAGE", idePath)
-            .replace("\$IDE_HOME", idePath)
-            .replace("%IDE_HOME%", idePath)
-            .replace("Contents/Contents", "Contents")
-            .let { entry ->
-                val (_, value) = entry.split("=")
-                when {
-                    Path(value).exists() -> entry
-                    else -> entry.replace("/Contents", "")
-                }
-            }
-    }
-
-
 fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
     collectFiles(directory) { it.extension == "jar" && filter.test(it) }
 

@@ -10,11 +10,9 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.asPath
-import org.jetbrains.intellij.platform.gradle.model.getBootClasspath
 import org.jetbrains.intellij.platform.gradle.tasks.base.CustomPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
-import java.io.File
 import kotlin.io.path.absolutePathString
 
 /**
@@ -40,54 +38,19 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionA
     @TaskAction
     override fun exec() {
         assertPlatformVersion()
-        configureClasspath()
 
-        workingDir = intelliJPlatform.singleFile
+        workingDir = platformPath.toFile()
 
         super.exec()
     }
 
-    override fun getExecutable() = jetbrainsRuntimeExecutable.asPath.absolutePathString()
-
-    /**
-     * Prepares the classpath for the IDE based on the IDEA version.
-     */
-    private fun configureClasspath() {
-        classpath += objectFactory.fileCollection().from(
-            resolveToolsJar(executable)
-        )
-
-        classpath += objectFactory.fileCollection().from(
-            productInfo.get().getBootClasspath(intelliJPlatform.single().toPath())
-        )
-    }
-
-    /**
-     * Resolves the path to the `tools.jar` library.
-     */
-    private fun resolveToolsJar(javaExec: String): File {
-        val binDir = File(javaExec).parent
-        val path = when {
-            OperatingSystem.current().isMacOsX -> "../../lib/tools.jar"
-            else -> "../lib/tools.jar"
-        }
-        return File(binDir, path)
-    }
+    override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 
     companion object {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
         //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/prop  erty.html
         fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
-//            intelliJPlatform = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM)
-
-//            classpath += intelliJPlatform.map {
-//
-//            }
-//                .map {
-//                    project.files(productInfo.getBootClasspath(intellijPlatformDirectory.asPath))
-//                }
-
                 systemPropertyDefault("idea.auto.reload.plugins", true)
                 systemPropertyDefault("idea.classpath.index.enabled", false)
                 systemPropertyDefault("idea.is.internal", true)

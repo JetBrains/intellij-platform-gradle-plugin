@@ -321,8 +321,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = dependencies.addProvider(
         configurationName,
         idProvider.map { id ->
-            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO).single().toPath().productInfo()
-            val type = IntelliJPlatformType.fromCode(productInfo.productCode)
+            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
             val bundledPluginsList = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST).single().toPath().bundledPlugins()
             val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
             val artifactPath = Path(bundledPlugin.path)

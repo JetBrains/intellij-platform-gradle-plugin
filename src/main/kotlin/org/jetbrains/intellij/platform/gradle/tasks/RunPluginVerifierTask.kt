@@ -14,7 +14,6 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -22,8 +21,8 @@ import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.debug
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.logCategory
-import org.jetbrains.intellij.platform.gradle.tasks.base.JetBrainsRuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.base.PluginVerifierAware
+import org.jetbrains.intellij.platform.gradle.tasks.base.RuntimeAware
 import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.io.path.exists
@@ -43,7 +42,7 @@ import kotlin.io.path.pathString
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @UntrackedTask(because = "Should always run Plugin Verifier")
-abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, PluginVerifierAware {
+abstract class RunPluginVerifierTask : JavaExec(), RuntimeAware, PluginVerifierAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -205,7 +204,7 @@ abstract class RunPluginVerifierTask : JavaExec(), JetBrainsRuntimeAware, Plugin
     private fun getOptions(): List<String> {
         val args = mutableListOf(
             "-verification-reports-dir", verificationReportsDirectory.asPath.pathString,
-            "-runtime-dir", jetbrainsRuntimeDirectory.asPath.pathString,
+            "-runtime-dir", runtimeDirectory.asPath.pathString,
         )
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {

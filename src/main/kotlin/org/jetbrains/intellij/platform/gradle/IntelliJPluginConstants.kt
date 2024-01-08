@@ -42,7 +42,6 @@ object IntelliJPluginConstants {
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS = "intellijPlatformBundledPlugins"
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST = "intellijPlatformBundledPluginsList"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
-        const val INTELLIJ_PLATFORM_PRODUCT_INFO = "intellijPlatformProductInfo"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY = "intellijPluginVerifierIdesDependency"
@@ -58,7 +57,6 @@ object IntelliJPluginConstants {
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
             val binaryReleaseExtracted = Attribute.of("intellijPlatformPluginVerifierIdeExtracted", Boolean::class.javaObjectType)
-            val productInfo = Attribute.of("intellijPlatformProductInfo", Boolean::class.javaObjectType)
         }
 
         object Dependencies {

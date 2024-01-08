@@ -40,7 +40,7 @@ abstract class ListBundledPluginsTask : DefaultTask(), PlatformVersionAware {
     @TaskAction
     fun listBundledPlugins() {
         outputFile.asPath.writeText(
-            productInfo.get().bundledPlugins.joinToString(separator = "\n")
+            productInfo.bundledPlugins.joinToString(separator = "\n")
         )
     }
 

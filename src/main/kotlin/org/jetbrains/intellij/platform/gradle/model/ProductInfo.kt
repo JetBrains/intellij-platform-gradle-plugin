@@ -5,7 +5,10 @@ package org.jetbrains.intellij.platform.gradle.model
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.gradle.api.GradleException
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.intellij.platform.gradle.throwIfNull
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -26,32 +29,29 @@ data class ProductInfo(
     val bundledPlugins: List<String> = mutableListOf(),
     val fileExtensions: List<String> = mutableListOf(),
     val modules: List<String> = mutableListOf(),
-) {
-    val currentLaunch: Launch
-        get() = with(OperatingSystem.current()) {
-            val currentArchitecture = System.getProperty("os.arch")
-            val availableArchitectures = launch.mapNotNull { it.arch }.toSet()
+)
 
-            val arch = with(availableArchitectures) {
-                when {
-                    isEmpty() -> null// older SDKs or Maven releases don't provide architecture information, null is used in such a case
-                    contains(currentArchitecture) -> currentArchitecture
-                    contains("amd64") && currentArchitecture == "x86_64" -> "amd64"
-                    else -> throw GradleException("Unsupported JVM architecture was selected for running Gradle tasks: $currentArchitecture. Supported architectures: ${joinToString()}")
-                }
-            }
-
-            launch.find {
-                when {
-                    isLinux -> OS.Linux
-                    isWindows -> OS.Windows
-                    isMacOsX -> OS.macOS
-                    else -> OS.Linux
-                } == it.os && arch == it.arch
-            } ?: throw GradleException("Could not find launch information for the current OS: $name ($arch)")
-        }.run {
-            copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') })
+internal fun ProductInfo.launchFor(architecture: String): Launch = with(OperatingSystem.current()) {
+    val availableArchitectures = launch.mapNotNull { it.arch }.toSet()
+    val arch = with(availableArchitectures) {
+        when {
+            isEmpty() -> null // older SDKs or Maven releases don't provide architecture information, null is used in such a case
+            contains(architecture) -> architecture
+            contains("amd64") && architecture == "x86_64" -> "amd64"
+            else -> throw GradleException("Unsupported JVM architecture was selected for running Gradle tasks: $architecture. Supported architectures: ${joinToString()}")
         }
+    }
+
+    launch.find {
+        when {
+            isLinux -> OS.Linux
+            isWindows -> OS.Windows
+            isMacOsX -> OS.macOS
+            else -> OS.Linux
+        } == it.os && arch == it.arch
+    } ?: throw GradleException("Could not find launch information for the current OS: $name ($arch)")
+}.run {
+    copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') })
 }
 
 @Serializable
@@ -77,16 +77,19 @@ enum class OS {
     Linux, Windows, macOS
 }
 
-internal fun ProductInfo.getBootClasspath(ideDir: Path) =
-    currentLaunch
-        .bootClassPathJarNames
-        .map { "$ideDir/lib/$it" }
-
 internal fun Path.resolveProductInfoPath(name: String = "product-info.json") =
     listOf(this, resolve(name), resolve("Resources").resolve(name))
         .find { it.name == name && it.exists() }
         ?: throw GradleException("Could not resolve $name file in: $this")
 
 private val json = Json { ignoreUnknownKeys = true }
+
 fun Path.productInfo() = resolveProductInfoPath()
     .run { json.decodeFromString<ProductInfo>(readText()) }
+
+fun Configuration.productInfo() = single().toPath().productInfo()
+
+fun ConfigurableFileCollection.productInfo() = singleOrNull()
+    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
+    .toPath()
+    .productInfo()

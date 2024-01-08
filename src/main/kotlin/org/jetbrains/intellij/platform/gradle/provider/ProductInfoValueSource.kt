@@ -1,4 +1,4 @@
-// Copyright 2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2023-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.provider
 
@@ -11,8 +11,8 @@ import org.jetbrains.intellij.platform.gradle.model.productInfo
 abstract class ProductInfoValueSource : ValueSource<ProductInfo, ProductInfoValueSource.Parameters> {
 
     interface Parameters : ValueSourceParameters {
-        val productInfoConfiguration: ConfigurableFileCollection
+        val intelliJPlatformConfiguration: ConfigurableFileCollection
     }
 
-    override fun obtain() = parameters.productInfoConfiguration.single().toPath().productInfo()
+    override fun obtain() = parameters.intelliJPlatformConfiguration.productInfo()
 }

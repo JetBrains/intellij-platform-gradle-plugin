@@ -84,7 +84,6 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             kotlin {
                 jvmToolchain {
                     languageVersion = JavaLanguageVersion.of(17)
-                    vendor = JvmVendorSpec.JETBRAINS
                 }
             }
             
@@ -109,65 +108,23 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             """.trimIndent()
         )
 
+        if (Version.parse(gradleVersion) >= Version.parse("8.4")) {
+            buildFile.kotlin(
+                """
+                kotlin {
+                    jvmToolchain {
+                        vendor = JvmVendorSpec.JETBRAINS
+                    }
+                }
+                """.trimIndent()
+            )
+        }
+
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
             org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = false
-            """.trimIndent()
-        )
-    }
-
-    fun buildFile(
-        repositories: String =
-            """
-            mavenCentral()
-            
-            intellijPlatform {
-                releases()
-            }
-            """.trimIndent(),
-        dependencies: String =
-            """
-            intellijPlatform {
-                intellijIdeaCommunity("$intellijVersion")
-            }
-            """.trimIndent(),
-        tasks: String = "",
-        custom: String = "",
-    ) {
-        buildFile.writeText("")
-        buildFile.kotlin(
-            """
-            import java.util.*
-            import org.jetbrains.intellij.platform.gradle.*
-            import org.jetbrains.intellij.platform.gradle.tasks.*
-            
-            plugins {
-                id("java")
-                id("org.jetbrains.intellij.platform")
-                id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
-            }
-            
-            kotlin {
-                jvmToolchain {
-                    languageVersion = JavaLanguageVersion.of(17)
-                    vendor = JvmVendorSpec.JETBRAINS
-                }
-            }
-            
-            repositories {
-                $repositories
-            }
-            
-            dependencies {
-                $dependencies
-            }
-            
-            tasks {
-                $tasks
-            }
-            
-            $custom
+            systemProp.org.gradle.unsafe.kotlin.assignment = true
             """.trimIndent()
         )
     }

@@ -130,8 +130,8 @@ abstract class VerifyPluginConfigurationTask : DefaultTask(), PlatformVersionAwa
 
     @TaskAction
     fun verifyPluginConfiguration() {
-        val platformBuild = productInfo.map { it.buildNumber.toVersion() }.get()
-        val platformVersion = productInfo.map { it.version.toVersion() }.get()
+        val platformBuild = productInfo.buildNumber.toVersion()
+        val platformVersion = productInfo.version.toVersion()
         val platformJavaVersion = platformBuild.let(::getPlatformJavaVersion)
         val sourceCompatibilityJavaVersion = sourceCompatibility.get().let(JavaVersion::toVersion)
         val targetCompatibilityJavaVersion = targetCompatibility.get().let(JavaVersion::toVersion)

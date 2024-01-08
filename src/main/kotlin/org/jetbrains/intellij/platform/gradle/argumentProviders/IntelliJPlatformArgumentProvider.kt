@@ -2,8 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
@@ -12,39 +15,46 @@ import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.asPath
+import org.jetbrains.intellij.platform.gradle.model.ProductInfo
+import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.OpenedPackages
-import kotlin.io.path.exists
+import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.pathString
 import kotlin.io.path.readLines
 
 class IntelliJPlatformArgumentProvider(
-    @InputFiles @PathSensitive(RELATIVE) val intellijPlatform: ConfigurableFileCollection,
+    @InputFiles @PathSensitive(RELATIVE) val intellijPlatformConfiguration: ConfigurableFileCollection,
     @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
+    @Input val runtimeArchProvider: Provider<String>,
     private val options: JavaForkOptions,
 //    private val requirePluginIds: List<String> = emptyList(), TODO: see #87
 ) : CommandLineArgumentProvider {
 
-    private val intellijPlatformPath
-        get() = intellijPlatform.singleFile.toPath()
+    private val platformPath: Path
+        get() = intellijPlatformConfiguration.single().toPath()
 
-    private val productInfo by lazy {
-        intellijPlatformPath.productInfo()
+    private val productInfo: ProductInfo
+        get() = platformPath.productInfo()
+
+    private val launch = runtimeArchProvider.map {
+        productInfo.launchFor(it)
     }
 
     private val bootclasspath
-        get() = intellijPlatformPath
+        get() = platformPath
             .resolve("lib/boot.jar")
             .takeIf { it.exists() }
             ?.let { listOf("-Xbootclasspath/a:$it") }
             .orEmpty()
 
     private val vmOptions
-        get() = productInfo
-            .currentLaunch
+        get() = launch.get()
             .vmOptionsFilePath
             ?.removePrefix("../")
-            ?.let { intellijPlatformPath.resolve(it).readLines() }
+            ?.let { platformPath.resolve(it).readLines() }
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
 
@@ -56,21 +66,18 @@ class IntelliJPlatformArgumentProvider(
             )
         }
 
-    private val currentLaunchProperties
-        get() = intellijPlatformPath
-            .productInfo()
-            .currentLaunch
+    private val launchProperties
+        get() = launch.get()
             .additionalJvmArguments
             .filter { it.startsWith("-D") }
-            .map { it.resolveIdeHomeVariable(intellijPlatformPath) }
+            .map { it.resolveIdeHomeVariable() }
 
     private val additionalJvmArguments
-        get() = productInfo
-            .currentLaunch
+        get() = launch.get()
             .additionalJvmArguments
             .filterNot { it.startsWith("-D") }
             .takeIf { it.isNotEmpty() }
-            ?.map { it.resolveIdeHomeVariable(intellijPlatformPath) }
+            ?.map { it.resolveIdeHomeVariable() }
             ?: OpenedPackages
 
     private val defaultHeapSpace = listOf("-Xmx512m", "-Xms256m")
@@ -80,8 +87,24 @@ class IntelliJPlatformArgumentProvider(
             options.minHeapSize?.let { "-Xms${it}" },
         )
 
+    private fun String.resolveIdeHomeVariable() =
+        platformPath.pathString.let { idePath ->
+            this
+                .replace("\$APP_PACKAGE", idePath)
+                .replace("\$IDE_HOME", idePath)
+                .replace("%IDE_HOME%", idePath)
+                .replace("Contents/Contents", "Contents")
+                .let { entry ->
+                    val (_, value) = entry.split("=")
+                    when {
+                        Path(value).exists() -> entry
+                        else -> entry.replace("/Contents", "")
+                    }
+                }
+        }
+
     override fun asArguments() =
-        (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + currentLaunchProperties + additionalJvmArguments + heapSpace)
+        (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + launchProperties + additionalJvmArguments + heapSpace)
             .filterNot { it.isNullOrBlank() }
 
     // TODO: check if necessary:

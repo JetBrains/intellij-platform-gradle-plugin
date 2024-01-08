@@ -243,7 +243,11 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `report Kotlin stdlib bundling`() {
         // kotlin.stdlib.default.dependency gets unset
-        gradleProperties.writeText("")
+        gradleProperties.writeText(
+            """
+            systemProp.org.gradle.unsafe.kotlin.assignment = true
+            """.trimIndent()
+        )
 
         build(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
             assertContains(HEADER, output)
@@ -257,16 +261,18 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
             """
             kotlin.stdlib.default.dependency = true
             kotlin.incremental.useClasspathSnapshot = false
+            systemProp.org.gradle.unsafe.kotlin.assignment = true
             """.trimIndent()
         )
 
         build("clean", Tasks.VERIFY_PLUGIN_CONFIGURATION) {
-            assertNotContains(HEADER, output)
+            assertContains(HEADER, output)
         }
 
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
+            systemProp.org.gradle.unsafe.kotlin.assignment = true
             """.trimIndent()
         )
 

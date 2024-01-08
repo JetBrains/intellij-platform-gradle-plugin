@@ -4,4 +4,4 @@ package org.jetbrains.intellij.platform.gradle.tasks.base
 
 import org.gradle.process.JavaForkOptions
 
-interface RunnableIdeAware : CoroutinesJavaAgentAware, JetBrainsRuntimeAware, SandboxAware, JavaForkOptions
+interface RunnableIdeAware : CoroutinesJavaAgentAware, RuntimeAware, SandboxAware, JavaForkOptions

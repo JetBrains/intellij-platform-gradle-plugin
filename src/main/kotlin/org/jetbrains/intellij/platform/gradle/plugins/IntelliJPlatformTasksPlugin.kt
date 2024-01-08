@@ -86,9 +86,9 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
                 "Build-OS" to OperatingSystem.current(),
                 "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
                 "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion },
-                "Platform-Type" to verifyPluginConfigurationTaskProvider.flatMap { it.productInfo.map { productInfo -> productInfo.productCode.toIntelliJPlatformType() } },
-                "Platform-Version" to verifyPluginConfigurationTaskProvider.flatMap { it.productInfo.map { productInfo -> productInfo.version } },
-                "Platform-Build" to verifyPluginConfigurationTaskProvider.flatMap { it.productInfo.map { productInfo -> productInfo.buildNumber } },
+                "Platform-Type" to verifyPluginConfigurationTaskProvider.map { it.productInfo.productCode.toIntelliJPlatformType() },
+                "Platform-Version" to verifyPluginConfigurationTaskProvider.map { it.productInfo.version },
+                "Platform-Build" to verifyPluginConfigurationTaskProvider.map { it.productInfo.buildNumber },
                 "Kotlin-Stdlib-Bundled" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinStdlibDefaultDependency },
                 "Kotlin-Version" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinVersion },
             )
