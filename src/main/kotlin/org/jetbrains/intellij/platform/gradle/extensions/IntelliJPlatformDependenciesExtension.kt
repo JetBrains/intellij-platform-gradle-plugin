@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.throwIfNull
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import java.io.File
 import javax.inject.Inject
@@ -68,7 +69,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = addIntelliJPlatformDependency(providers.provider { IntelliJPlatformType.fromCode(type) }, version, configurationName, action)
+    ) = addIntelliJPlatformDependency(providers.provider { type.toIntelliJPlatformType() }, version, configurationName, action)
 
     fun create(
         type: IntelliJPlatformType,
@@ -82,7 +83,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: String,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = addIntelliJPlatformDependency(providers.provider { IntelliJPlatformType.fromCode(type) }, providers.provider { version }, configurationName, action)
+    ) = addIntelliJPlatformDependency(providers.provider { type.toIntelliJPlatformType() }, providers.provider { version }, configurationName, action)
 
     fun androidStudio(version: String) = create(IntelliJPlatformType.AndroidStudio, version)
     fun androidStudio(version: Provider<String>) = create(IntelliJPlatformType.AndroidStudio, version)
@@ -228,7 +229,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         typeProvider.map {
             when (it) {
                 is IntelliJPlatformType -> it
-                is String -> IntelliJPlatformType.fromCode(it)
+                is String -> it.toIntelliJPlatformType()
                 else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or IntelliJPlatformType")
             }
         }.zip(versionProvider) { type, version ->
@@ -251,7 +252,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val artifactPath = resolveArtifactPath(localPath)
             val productInfo = artifactPath.productInfo()
 
-            val type = IntelliJPlatformType.fromCode(productInfo.productCode)
+            val type = productInfo.productCode.toIntelliJPlatformType()
             if (Version.parse(productInfo.buildNumber) < Version.parse(MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION)) {
                 throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
             }

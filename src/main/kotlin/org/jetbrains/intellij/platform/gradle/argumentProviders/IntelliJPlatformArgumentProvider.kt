@@ -13,7 +13,7 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.resolveIdeHomeVariable
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.OpenedPackages
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
@@ -50,7 +50,7 @@ class IntelliJPlatformArgumentProvider(
 
     private val kotlinxCoroutinesJavaAgent
         get() = "-javaagent:${coroutinesJavaAgentFile.asPath}".takeIf {
-            IntelliJPlatformType.fromCode(productInfo.productCode) in listOf(
+            productInfo.productCode.toIntelliJPlatformType() in listOf(
                 IntelliJPlatformType.IntellijIdeaCommunity,
                 IntelliJPlatformType.IntellijIdeaUltimate,
             )

@@ -35,7 +35,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                         product.channels.forEach channel@{ channelEntry ->
                             channelEntry.builds.forEach { build ->
                                 product.codes.forEach codes@{ code ->
-                                    val type = runCatching { IntelliJPlatformType.fromCode(code) }.getOrElse { return@codes }
+                                    val type = runCatching { code.toIntelliJPlatformType() }.getOrElse { return@codes }
                                     val channel = runCatching { Channel.valueOf(channelEntry.status.uppercase()) }.getOrElse { return@channel }
 
                                     yield(
@@ -79,12 +79,6 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             }
             return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } ?: true)
         }
-
-        val a = (jetbrainsIdesReleases + androidStudioReleases)
-            .filter { it.type == type.get() }
-            .filter { it.channel in channels.get() }
-            .filter { it.testVersion() }
-
 
         (jetbrainsIdesReleases + androidStudioReleases)
             .filter { it.type == type.get() }

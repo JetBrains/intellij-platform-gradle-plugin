@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.io.File
 import javax.inject.Inject
 import kotlin.io.path.exists
@@ -331,7 +332,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     .map {
                         when (it) {
                             is IntelliJPlatformType -> it
-                            is String -> IntelliJPlatformType.fromCode(it)
+                            is String -> it.toIntelliJPlatformType()
                             else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or ${IntelliJPlatformType::class.java}")
                         }
                     }
@@ -359,7 +360,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
             fun ide(type: IntelliJPlatformType, version: String) = ide(providers.provider { type }, providers.provider { version })
 
-            fun ide(type: String, version: String) = ide(IntelliJPlatformType.fromCode(type), version)
+            fun ide(type: String, version: String) = ide(type.toIntelliJPlatformType(), version)
 
             fun ide(definition: String) = definition.split('-').let {
                 when {
@@ -374,7 +375,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     val artifactPath = resolveArtifactPath(it)
                     val productInfo = artifactPath.productInfo()
 
-                    val type = IntelliJPlatformType.fromCode(productInfo.productCode)
+                    val type = productInfo.productCode.toIntelliJPlatformType()
                     if (Version.parse(productInfo.buildNumber) < Version.parse(MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION)) {
                         throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
                     }

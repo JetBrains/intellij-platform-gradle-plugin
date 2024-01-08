@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.Directory
@@ -15,21 +14,25 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.executableResolver.IntelliJPluginVerifierResolver
-import org.jetbrains.intellij.platform.gradle.executableResolver.JetBrainsRuntimeResolver
 import org.jetbrains.intellij.platform.gradle.executableResolver.MarketplaceZipSignerResolver
+import org.jetbrains.intellij.platform.gradle.executableResolver.RuntimeResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.info
+import org.jetbrains.intellij.platform.gradle.isSpecified
+import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
+import org.jetbrains.intellij.platform.gradle.provider.ExecutableArchValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.base.*
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.util.*
 import kotlin.io.path.createDirectories
 
@@ -44,11 +47,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         val suffix = UUID.randomUUID().toString().substring(0, 8)
 
         if (this is PlatformVersionAware) {
-            intelliJPlatform.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM))
-
-            productInfo.set(providers.of(ProductInfoValueSource::class) {
-                parameters.productInfoConfiguration.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO))
-            })
+            intelliJPlatformConfiguration.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM))
         }
 
         if (this is CoroutinesJavaAgentAware) {
@@ -62,47 +61,26 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         }
 
         if (this is CustomPlatformVersionAware) {
+            val baseIntellijPlatformConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
             val defaultTypeProvider = provider {
-                val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-                    .singleOrNull()
-                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
-                    .toPath()
-                    .productInfo()
-                IntelliJPlatformType.fromCode(productInfo.productCode)
+                val productInfo = baseIntellijPlatformConfiguration.productInfo()
+                productInfo.productCode.toIntelliJPlatformType()
             }
             val defaultVersionProvider = provider {
-                val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-                    .singleOrNull()
-                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
-                    .toPath()
-                    .productInfo()
+                val productInfo = baseIntellijPlatformConfiguration.productInfo()
                 IdeVersion.createIdeVersion(productInfo.version).toString()
             }
-// TODO: test
-//            val productInfoProvider = provider {
-//                configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-//                    .singleOrNull()
-//                    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
-//                    .toPath()
-//                    .productInfo()
-//            }
-//            val defaultTypeProvider = productInfoProvider.map {
-//                IntelliJPlatformType.fromCode(it.productCode)
-//            }
-//            val defaultVersionProvider = productInfoProvider.map {
-//                IdeVersion.createIdeVersion(it.version).toString()
-//            }
-            val intellijPlatformDependencyConfiguration =
-                configurations.create("${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix") {
-                    // TODO: use ConfigurationContainer.create
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
 
-                    this@registerTask.dependencies
-                        .the<IntelliJPlatformDependenciesExtension>()
-                        .create(type.orElse(defaultTypeProvider), version.orElse(defaultVersionProvider), configurationName = name)
-                }
+            val intellijPlatformDependencyConfiguration = configurations.create("${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix") {
+                // TODO: use ConfigurationContainer.create
+                isVisible = false
+                isCanBeConsumed = false
+                isCanBeResolved = true
+
+                this@registerTask.dependencies
+                    .the<IntelliJPlatformDependenciesExtension>()
+                    .create(type.orElse(defaultTypeProvider), version.orElse(defaultVersionProvider), configurationName = name)
+            }
             val intellijPlatformConfiguration = configurations.create("${Configurations.INTELLIJ_PLATFORM}_$suffix") {
                 isVisible = false
                 isCanBeConsumed = false
@@ -114,43 +92,20 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
 
                 extendsFrom(intellijPlatformDependencyConfiguration)
             }
-            val intellijPlatformProductInfoConfiguration =
-                configurations.create("${Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO}_$suffix") {
-                    isVisible = false
-                    isCanBeConsumed = false
-                    isCanBeResolved = true
 
-                    attributes {
-                        attribute(Attributes.productInfo, true)
-                    }
-
-                    extendsFrom(intellijPlatformConfiguration)
-                }
-
-            intelliJPlatform.from(provider {
+            intelliJPlatformConfiguration.setFrom(provider {
                 when {
                     type.isSpecified() || version.isSpecified() -> intellijPlatformConfiguration
-                    else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+                    else -> baseIntellijPlatformConfiguration
                 }
-            })
-
-            productInfo.set(providers.of(ProductInfoValueSource::class) {
-                parameters.productInfoConfiguration.from(
-                    when {
-                        type.isSpecified() || version.isSpecified() -> intellijPlatformProductInfoConfiguration
-                        else -> configurations.getByName(Configurations.INTELLIJ_PLATFORM_PRODUCT_INFO)
-                    }
-                )
             })
         }
 
         if (this is SandboxAware) {
-            val sandboxDirectoryProvider = extension.sandboxContainer.flatMap { container ->
-                productInfo.map {
-                    container
-                        .dir("${it.productCode}-${it.version}")
-                        .apply { asPath.createDirectories() }
-                }
+            val sandboxDirectoryProvider = extension.sandboxContainer.map { container ->
+                container
+                    .dir("${productInfo.productCode}-${productInfo.version}")
+                    .apply { asPath.createDirectories() }
             }
 
             sandboxSuffix.convention(
@@ -198,24 +153,27 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             }
         }
 
-        if (this is JetBrainsRuntimeAware) {
-            val jbrResolver = JetBrainsRuntimeResolver(
+        if (this is RuntimeAware) {
+            val runtimeResolver = RuntimeResolver(
                 jetbrainsRuntime = configurations.getByName(Configurations.JETBRAINS_RUNTIME),
-                intellijPlatform = intelliJPlatform,
+                intellijPlatform = intelliJPlatformConfiguration,
                 javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
                 javaToolchainService = project.serviceOf<JavaToolchainService>(),
             )
 
-            jetbrainsRuntimeDirectory.convention(layout.dir(provider {
-                jbrResolver.resolveDirectory()?.toFile()
+            runtimeDirectory.convention(layout.dir(provider {
+                runtimeResolver.resolveDirectory()?.toFile()
             }))
-            jetbrainsRuntimeExecutable.convention(layout.file(provider {
-                jbrResolver.resolveExecutable()?.toFile()
+            runtimeExecutable.convention(layout.file(provider {
+                runtimeResolver.resolveExecutable()?.toFile()
             }))
+            runtimeArch.set(providers.of(ExecutableArchValueSource::class) {
+                parameters.executable.set(runtimeExecutable)
+            })
         }
 
         if (this is TestIdeTask) {
-            executable(jetbrainsRuntimeExecutable)
+            executable(runtimeExecutable)
         }
 
         if (this is PluginVerifierAware) {
@@ -251,8 +209,14 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         if (this is RunnableIdeAware) {
             enableAssertions = true
 
-            jvmArgumentProviders.add(IntelliJPlatformArgumentProvider(intelliJPlatform, coroutinesJavaAgentFile, this))
-
+            jvmArgumentProviders.add(
+                IntelliJPlatformArgumentProvider(
+                    intelliJPlatformConfiguration,
+                    coroutinesJavaAgentFile,
+                    runtimeArch,
+                    this,
+                )
+            )
             jvmArgumentProviders.add(
                 SandboxArgumentProvider(
                     sandboxConfigDirectory,
@@ -261,7 +225,6 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     sandboxLogDirectory,
                 )
             )
-
 
 //                outputs.dir(sandboxSystemDirectory)
 //                    .withPropertyName("System directory")
@@ -277,6 +240,19 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
 
             if (this is JavaExecSpec) {
                 mainClass.set("com.intellij.idea.Main")
+
+                classpath += files(
+                    provider {
+                        productInfo
+                            .launchFor(runtimeArch.get())
+                            .bootClassPathJarNames
+                            .map { platformPath.resolve("lib/$it") }
+                    }
+                )
+
+                classpath += files(
+                    runtimeDirectory.map { it.file("lib/tools") }
+                )
             }
         }
     }
