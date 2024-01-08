@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -18,8 +19,10 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.asPath
-import org.jetbrains.intellij.platform.gradle.collectIntelliJPlatformDependencyJars
+import org.jetbrains.intellij.platform.gradle.collectJars
+import java.nio.file.Path
 import kotlin.io.path.forEachDirectoryEntry
+import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
@@ -48,6 +51,14 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
             }
         }
     }
+}
+
+internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
+    val lib = parent.resolve("lib").takeIf { it.exists() && it.isDirectory() } ?: return emptyList()
+    val baseFiles = collectJars(lib) { it.name !in listOf("junit.jar") }.sorted()
+    val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
+
+    return (baseFiles + antFiles)
 }
 
 internal fun DependencyHandler.applyCollectorTransformer(

@@ -93,14 +93,6 @@ private fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
     .orEmpty()
     .filter { filter.test(it) }
 
-internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
-    val lib = parent.resolve("lib").takeIf { it.exists() && it.isDirectory() } ?: return emptyList()
-    val baseFiles = collectJars(lib) { it.name !in listOf("junit.jar") }.sorted()
-    val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
-
-    return (baseFiles + antFiles)
-}
-
 @Deprecated(message = "Use Logger")
 fun error(logCategory: String? = null, message: String, e: Throwable? = null) = log(LogLevel.ERROR, logCategory, message, e)
 
