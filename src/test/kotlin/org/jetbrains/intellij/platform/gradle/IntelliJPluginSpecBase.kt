@@ -108,7 +108,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             """.trimIndent()
         )
 
-        if (Version.parse(gradleVersion) >= Version.parse("8.4")) {
+        if (gradleVersion.toVersion() >= "8.4".toVersion()) {
             buildFile.kotlin(
                 """
                 kotlin {

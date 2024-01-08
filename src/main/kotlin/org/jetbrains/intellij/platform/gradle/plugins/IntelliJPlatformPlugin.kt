@@ -608,7 +608,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                         }
 
                         version == DEFAULT_IDEA_VERSION && types.contains(type) -> {
-                            val buildNumber = Version.parse(productInfo.buildNumber)
+                            val buildNumber = productInfo.buildNumber.toVersion()
                             "${buildNumber.major}.${buildNumber.minor}$RELEASE_SUFFIX_EAP_CANDIDATE"
                         }
 
@@ -630,7 +630,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                     it.classes.resolve("lib/javac2.jar")
                 })
                 compilerClassPathFromMaven.convention(compilerVersion.map { compilerVersion ->
-                    if (compilerVersion == DEFAULT_IDEA_VERSION || Version.parse(compilerVersion) >= Version(183, 3795, 13)) {
+                    if (compilerVersion == DEFAULT_IDEA_VERSION || compilerVersion.toVersion() >= Version(183, 3795, 13)) {
                         val downloadCompiler = { version: String ->
                             dependenciesDownloader.downloadFromMultipleRepositories(taskContext, {
                                 create(
@@ -682,7 +682,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
                                  * Get the list of available packages and pick the closest lower one.
                                  */
                                 val closestCompilerVersion = URL(JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA).openStream().use { inputStream ->
-                                    val version = Version.parse(compilerVersion)
+                                    val version = compilerVersion.toVersion()
                                     XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.versions
                                         ?.map(Version.Companion::parse)?.filter { it <= version }
                                         ?.maxOf { it }

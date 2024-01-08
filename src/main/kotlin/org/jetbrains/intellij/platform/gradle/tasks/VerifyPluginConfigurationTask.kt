@@ -143,13 +143,13 @@ abstract class VerifyPluginConfigurationTask : DefaultTask(), PlatformVersionAwa
         val kotlinStdlibDefaultDependency = kotlinStdlibDefaultDependency.orNull == null
         val kotlinVersion = kotlinVersion.orNull?.let(Version::parse)
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
-        val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
+        val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { "$major.$minor".toVersion() }
 
         sequence {
             pluginXmlFile.orNull?.let { parsePluginXml(it.asPath) }?.let {
                 val sinceBuild = it.ideaVersion.sinceBuild.let(Version::parse)
                 val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
-                val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { Version.parse("$major.$minor") }
+                val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { "$major.$minor".toVersion() }
 
                 if (sinceBuild.major < platformBuild.major) {
                     yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")

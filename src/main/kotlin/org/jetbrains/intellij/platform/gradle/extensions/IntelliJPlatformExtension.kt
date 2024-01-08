@@ -19,13 +19,13 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
-import org.jetbrains.intellij.platform.gradle.Version
 import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.toVersion
 import java.io.File
 import javax.inject.Inject
 import kotlin.io.path.exists
@@ -376,7 +376,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     val productInfo = artifactPath.productInfo()
 
                     val type = productInfo.productCode.toIntelliJPlatformType()
-                    if (Version.parse(productInfo.buildNumber) < Version.parse(MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION)) {
+                    if (productInfo.buildNumber.toVersion() < MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION.toVersion()) {
                         throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
                     }
                     val path = artifactPath.pathString
