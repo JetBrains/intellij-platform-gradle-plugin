@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
+import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
 import kotlin.test.*
@@ -326,8 +327,13 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.RUN_PLUGIN_VERIFIER) {
-            assertContains("Reading IDE", output)
-            assertContains("pluginVerifier/ides/IC-2022.3.3", output)
+            val message = "Reading IDE "
+            val line = output.lines().find { it.contains(message) }
+            assertNotNull(line)
+
+            val path = Path(line.substringAfter(message))
+            assertTrue(path.exists())
+            assertEquals("IC-2022.3.3", path.name)
         }
     }
 

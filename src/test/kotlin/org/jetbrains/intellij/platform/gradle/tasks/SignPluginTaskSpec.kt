@@ -5,10 +5,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
+import kotlin.io.path.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @Suppress("GroovyUnusedAssignment")
@@ -36,7 +36,14 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.SIGN_PLUGIN, "--info") {
-            assertContains("/org.jetbrains/marketplace-zip-signer/", output)
+            val message = "Resolved Marketplace ZIP Signer: "
+            val line = output.lines().find { it.contains(message) }
+            assertNotNull(line)
+
+            val path = Path(line.substringAfter(message))
+            assertTrue(path.exists())
+            assertTrue(path.name.startsWith("marketplace-zip-signer-"))
+            assertEquals("jar", path.extension)
         }
     }
 
