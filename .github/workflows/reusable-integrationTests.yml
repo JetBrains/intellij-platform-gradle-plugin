@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "8.0"
+          - "8.1"
           - "8.5"
         os:
           - windows-latest

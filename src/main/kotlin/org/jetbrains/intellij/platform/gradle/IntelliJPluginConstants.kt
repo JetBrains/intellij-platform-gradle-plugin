@@ -172,7 +172,7 @@ object IntelliJPluginConstants {
     const val INSTRUMENTED_JAR_PREFIX = "instrumented"
 
     const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-    const val MINIMAL_SUPPORTED_GRADLE_VERSION = "8.0"
+    const val MINIMAL_SUPPORTED_GRADLE_VERSION = "8.1"
     const val MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION = "223"
 
     const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"

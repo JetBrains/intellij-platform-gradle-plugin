@@ -15,7 +15,7 @@
 - New project ID: `org.jetbrains.intellij.platform`
 - New Maven coordinates: `org.jetbrains.intellij.platform:intellij-platform-gradle-plugin`
 - Move classes under the new package: `org.jetbrains.intellij.platform.gradle`
-- Update minimal supported Gradle version to `8.0`
+- Update minimal supported Gradle version to `8.1`
 
 ## [1.16.1] - 2023-12-01
 
