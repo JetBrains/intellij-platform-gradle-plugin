@@ -7,12 +7,14 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.maven
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.model.toPublication
 import java.net.URI
 import javax.inject.Inject
 
@@ -101,8 +103,22 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     //       see https://stackoverflow.com/questions/23023069/gradle-download-and-unzip-file-from-url/34327202#34327202 and exclusiveContent
     // TODO: check if the bundled plugin hash matters — if it has to be different every time as always extract transformer is called, so previous dir may no longer exist
     fun ivy(action: RepositoryAction = {}) = repositories.ivy {
+        // Location of Ivy files generated for the current project.
+        // TODO: Make it possible to parametrize this path.
         ivyPattern(".gradle/intellijPlatform/ivy/[organization]-[module]-[revision].[ext]")
-        artifactPattern("file://[artifact]")
+
+        // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
+        artifactPattern("/[artifact]")
+
+        /**
+         * Because artifact paths always start with `/` (see [toPublication] for details),
+         * on Windows, we have to guess to which drive letter the artifact path belongs to.
+         * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
+         * starting with `c` for the sake of micro-optimization.
+         */
+        if (OperatingSystem.current().isWindows) {
+            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
+        }
     }.apply {
         repositories.exclusiveContent {
             forRepositories(this@apply)

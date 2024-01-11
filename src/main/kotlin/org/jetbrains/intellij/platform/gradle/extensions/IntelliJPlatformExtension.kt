@@ -20,8 +20,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurat
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.asPath
-import org.jetbrains.intellij.platform.gradle.model.IvyModule.Publication
 import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -379,7 +379,6 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     if (productInfo.buildNumber.toVersion() < MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION.toVersion()) {
                         throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
                     }
-                    val path = artifactPath.pathString
                     val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
 
                     dependencies.create(
@@ -387,7 +386,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                         name = type.dependency.name,
                         version = "${productInfo.version}+$hash",
                     ).apply {
-                        createIvyDependency(gradle, listOf(Publication(path, "directory", null, "default")))
+                        createIvyDependency(gradle, listOf(artifactPath.toPublication()))
                     }
                 }
             )
