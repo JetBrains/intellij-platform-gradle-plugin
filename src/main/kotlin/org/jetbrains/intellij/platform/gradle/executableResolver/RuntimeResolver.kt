@@ -27,14 +27,7 @@ class RuntimeResolver(
     val context: String? = null,
 ) : ExecutableResolver {
 
-    override fun resolveExecutable() = directory?.getJbrRoot()?.let { root ->
-        root
-            .resolve("jre")
-            .takeIf { it.exists() }
-            .or(root)
-            .resolve("bin/java" + ".exe".takeIf { OperatingSystem.current().isWindows }.orEmpty())
-            .takeIf { it.exists() }
-    }
+    override fun resolveExecutable() = runtime
 
     override fun resolveDirectory() = directory
 
@@ -49,8 +42,9 @@ class RuntimeResolver(
              */
             {
                 jetbrainsRuntime.singleOrNull()?.let { file ->
-                    file.toPath().getJbrRoot()
+                    file.toPath().resolveRuntimeDirectory()
                         .also { debug(context, "JetBrains Runtime specified with dependencies resolved as: $it") }
+                        .ensureExecutableExists()
                         .ifNull { debug(context, "Cannot resolve JetBrains Runtime: $file") }
                 }
             },
@@ -61,15 +55,17 @@ class RuntimeResolver(
                     ?.takeIf { it.matches(JETBRAINS_RUNTIME_VENDOR) }
                     ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
                     ?.let { javaLauncher ->
-                        javaLauncher.metadata.installationPath.asPath.getJbrRoot()
+                        javaLauncher.metadata.installationPath.asPath.resolveRuntimeDirectory()
                             .also { debug(context, "JetBrains Runtime specified with Java Toolchain resolved as: $it") }
+                            .ensureExecutableExists()
                             .ifNull { debug(context, "Cannot resolve JetBrains Runtime specified with Java Toolchain") }
                     }
             },
             {
                 intellijPlatform.singleOrNull()?.let { file ->
-                    file.toPath().getJbrRoot()
+                    file.toPath().resolveRuntimeDirectory()
                         .also { debug(context, "JetBrains Runtime bundled within IntelliJ Platform resolved as: $it") }
+                        .ensureExecutableExists()
                         .ifNull { debug(context, "Cannot resolve JetBrains Runtime bundled within IntelliJ Platform: $file") }
                 }
             },
@@ -77,14 +73,16 @@ class RuntimeResolver(
                 javaToolchainSpec.languageVersion.orNull
                     ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
                     ?.let { javaLauncher ->
-                        javaLauncher.metadata.installationPath.asPath.getJbrRoot()
+                        javaLauncher.metadata.installationPath.asPath.resolveRuntimeDirectory()
                             .also { debug(context, "Java Runtime specified with Java Toolchain resolved as: $it") }
+                            .ensureExecutableExists()
                             .ifNull { debug(context, "Cannot resolve Java Runtime specified with Java Toolchain") }
                     }
             },
             {
-                Jvm.current().javaHome.toPath().getJbrRoot()
+                Jvm.current().javaHome.toPath().resolveRuntimeDirectory()
                     .also { debug(context, "Using current JVM: $it") }
+                    .ensureExecutableExists()
                     .ifNull { debug(context, "Cannot resolve current JVM") }
             },
         )
@@ -92,6 +90,10 @@ class RuntimeResolver(
             .mapNotNull { it() }
             .firstOrNull()
             ?.also { info(context, "Resolved Runtime directory: $it") }
+    }
+
+    val runtime by lazy {
+        directory?.resolveRuntimeExecutable()
     }
 
     private fun getBuiltinJbrVersion(ideDirectory: File): String? {
@@ -110,7 +112,7 @@ class RuntimeResolver(
         return null
     }
 
-    private fun Path.getJbrRoot(): Path? {
+    private fun Path.resolveRuntimeDirectory(): Path? {
         val jbr = listDirectoryEntries().firstOrNull { it.name.startsWith("jbr") }?.takeIf { it.exists() }
 
         return when {
@@ -126,4 +128,15 @@ class RuntimeResolver(
             }
         }.takeIf { it.exists() }
     }
+
+    private fun Path.resolveRuntimeExecutable(): Path? {
+        val base = resolve("jre").takeIf { it.exists() }.or(this)
+        val extension = ".exe".takeIf { OperatingSystem.current().isWindows }.orEmpty()
+        return base.resolve("bin/java$extension").takeIf { it.exists() }
+    }
+
+    private fun Path?.ensureExecutableExists() = this
+        ?.resolveRuntimeExecutable()
+        .ifNull { debug(context, "Java Runtime Executable not found in: $this") }
+        ?.let { this }
 }
