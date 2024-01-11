@@ -22,7 +22,7 @@ fun createLocalIdeIfNotExists(localIdesPath: Path, releasePath: String): String 
     val localIdeZipPath = localIdesPath.resolve(fileName).apply {
         parent.createDirectories()
     }
-    val localIdeDirPathString = localIdeZipPath.toString().removeSuffix(".zip")
+    val localIdeDirPathString = localIdeZipPath.invariantSeparatorsPathString.removeSuffix(".zip")
     if (Path(localIdeDirPathString).exists()) {
         return localIdeDirPathString
     }

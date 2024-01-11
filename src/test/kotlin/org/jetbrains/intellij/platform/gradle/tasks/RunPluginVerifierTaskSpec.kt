@@ -218,13 +218,12 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         val lines = listOf("projectName:1.0.0:Reference to a missing property.*")
         val ignoredProblems = createTempFile("ignored-problems", ".txt").writeLines(lines)
-        val ignoredProblemsFilePath = adjustWindowsPath(ignoredProblems.pathString)
 
         buildFile.kotlin(
             """
             intellijPlatform {
                 pluginVerifier {
-                    ignoredProblemsFile = file("$ignoredProblemsFilePath")
+                    ignoredProblemsFile = file("${ignoredProblems.invariantSeparatorsPathString}")
                 }
             }
             """.trimIndent()

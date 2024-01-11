@@ -211,9 +211,6 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    // TODO: Use Path.invariantSeparatorsPathString instead?
-    fun adjustWindowsPath(s: String) = s.replace("\\", "/")
-
     protected fun assertContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertTrue(
@@ -244,12 +241,12 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
     protected fun collectPaths(directory: Path) = directory
         .walk()
         .filterNot { it.isDirectory() }
-        .map { it.relativeTo(directory).pathString }
+        .map { it.relativeTo(directory).invariantSeparatorsPathString }
         .toSet()
 
     protected fun resource(path: String) = path.let {
         javaClass.classLoader.getResource(it)?.let { url ->
-            Paths.get(url.toURI()).toAbsolutePath().toString().replace('\\', '/')
+            Paths.get(url.toURI()).invariantSeparatorsPathString
         }
     }
 

@@ -413,7 +413,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellij {
-                plugins = ['${adjustWindowsPath(plugin.pathString)}']
+                plugins = ['${plugin.invariantSeparatorsPathString}']
                 pluginName = 'myPluginName'
             }
             """.trimIndent()
@@ -470,7 +470,6 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         )
 
         val customSandbox = dir.resolve("customSandbox")
-        val sandboxPath = adjustWindowsPath(customSandbox.pathString)
         buildFile.kotlin(
             """
             dependencies {
@@ -480,7 +479,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 }
             }
             intellijPlatform {
-                sandboxContainer = file("$sandboxPath")
+                sandboxContainer = file("${customSandbox.invariantSeparatorsPathString}")
             }
             """.trimIndent()
         )

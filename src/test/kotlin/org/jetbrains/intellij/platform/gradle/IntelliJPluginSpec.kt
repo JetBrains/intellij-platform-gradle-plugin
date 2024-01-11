@@ -65,7 +65,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         writeTestFile()
 
         build(TEST_TASK_NAME, "--info") {
-            val sandboxPath = adjustWindowsPath("${buildDirectory.pathString}/idea-sandbox")
+            val sandboxPath = buildDirectory.resolve("idea-sandbox").invariantSeparatorsPathString
             val testCommand = parseCommand(output)
 
             assertPathParameters(testCommand, sandboxPath)
@@ -113,11 +113,13 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add local plugin to compile only classpath`() {
         val repositoryInstance = PluginRepositoryFactory.create(Locations.MARKETPLACE, null)
-        val plugin = repositoryInstance.downloader.download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null)
+        val plugin = repositoryInstance.downloader
+            .download("org.jetbrains.postfixCompletion", "0.8-beta", dir.toFile(), null)
+            ?.toPath()
 
         buildFile.kotlin(
             """
-            intellij.plugins = ['copyright', "${adjustWindowsPath(plugin?.canonicalPath.orEmpty())}"]
+            intellij.plugins = ['copyright', "${plugin?.invariantSeparatorsPathString.orEmpty()}"]
             """.trimIndent()
         )
 
@@ -323,7 +325,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-                localPath = '${adjustWindowsPath(localPath)}'
+                localPath = '$localPath'
                 plugins = ['org.jetbrains.plugins.go']
             }
             """.trimIndent()
@@ -359,7 +361,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-                localPath = '${adjustWindowsPath(localPath)}'
+                localPath = '$localPath'
                 plugins = ['org.jetbrains.plugins.go:221.6008.13']
             }
             """.trimIndent()
@@ -437,7 +439,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
                 id 'org.jetbrains.kotlin.jvm' version '$kotlinPluginVersion'
             }
             intellij {
-                localPath = '${adjustWindowsPath(localPath)}'
+                localPath = '$localPath'
                 plugins = ['com.intellij.spring']
             }
             """.trimIndent()
@@ -524,7 +526,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `custom sandbox directory`() {
         writeTestFile()
 
-        val sandboxPath = adjustWindowsPath("${dir.pathString}/customSandbox")
+        val sandboxPath = dir.resolve("customSandbox").invariantSeparatorsPathString
         buildFile.xml(
             """
             intellij {
@@ -569,9 +571,9 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
 
     @SuppressWarnings("GrEqualsBetweenInconvertibleTypes")
     fun assertPathParameters(testCommand: ProcessProperties, sandboxPath: String) {
-        assertEquals("$sandboxPath/config-test", adjustWindowsPath(testCommand.properties["idea.config.path"].orEmpty()))
-        assertEquals("$sandboxPath/system-test", adjustWindowsPath(testCommand.properties["idea.system.path"].orEmpty()))
-        assertEquals("$sandboxPath/plugins-test", adjustWindowsPath(testCommand.properties["idea.plugins.path"].orEmpty()))
+        assertEquals("$sandboxPath/config-test", testCommand.properties["idea.config.path"].orEmpty())
+        assertEquals("$sandboxPath/system-test", testCommand.properties["idea.system.path"].orEmpty())
+        assertEquals("$sandboxPath/plugins-test", testCommand.properties["idea.plugins.path"].orEmpty())
     }
 
     private fun collectMainClassPaths(): Pair<String, String> {

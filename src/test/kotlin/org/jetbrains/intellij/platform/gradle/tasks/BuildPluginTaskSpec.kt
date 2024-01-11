@@ -9,6 +9,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import java.util.jar.Manifest
 import kotlin.io.path.exists
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.pathString
 import kotlin.test.*
 
@@ -170,7 +171,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        val sandboxPath = adjustWindowsPath("${dir.pathString}/customSandbox")
+        val sandboxPath = dir.resolve("customSandbox").invariantSeparatorsPathString
         buildFile.kotlin(
             """
             dependencies {
