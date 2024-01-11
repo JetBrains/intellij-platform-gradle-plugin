@@ -1,31 +1,20 @@
-// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.named
+import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.asPath
-import kotlin.io.path.readText
+import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 
 /**
- * Prints the output produced by the [ListBundledPluginsTask] task.
- *
- * @see [ListBundledPluginsTask]
+ * Prints bundled plugins within the currently targeted IntelliJ-based IDE release.
  */
-@UntrackedTask(because = "Prints the output produced by the listBundledPlugins task")
-abstract class PrintBundledPluginsTask : DefaultTask() {
-
-    /**
-     * Input from the [ListBundledPluginsTask].
-     */
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val inputFile: RegularFileProperty
+@UntrackedTask(because = "Prints output")
+abstract class PrintBundledPluginsTask : DefaultTask(), PlatformVersionAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -33,18 +22,12 @@ abstract class PrintBundledPluginsTask : DefaultTask() {
     }
 
     @TaskAction
-    fun printBundledPlugins() = println(inputFile.asPath.readText())
+    fun printBundledPlugins() = productInfo.bundledPlugins.forEach {
+        println(it)
+    }
 
     companion object {
         fun register(project: Project) =
-            project.registerTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS) {
-                val listBundledPluginsTaskProvider = project.tasks.named<ListBundledPluginsTask>(Tasks.LIST_BUNDLED_PLUGINS)
-
-                inputFile.convention(listBundledPluginsTaskProvider.flatMap {
-                    it.outputFile
-                })
-
-                dependsOn(listBundledPluginsTaskProvider)
-            }
+            project.registerTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS)
     }
 }

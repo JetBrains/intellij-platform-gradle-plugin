@@ -71,7 +71,6 @@ object IntelliJPluginConstants {
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
-        const val LIST_BUNDLED_PLUGINS = "listBundledPlugins"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
         const val PREPARE_SANDBOX = "prepareSandbox" // TODO: check
         const val PREPARE_TESTING_SANDBOX = "prepareTestingSandbox" // TODO: check
@@ -131,7 +130,6 @@ object IntelliJPluginConstants {
         Tasks.INSTRUMENTED_JAR,
 //        INSTRUMENT_TEST_CODE_TASK_NAME,
 //        JAR_SEARCHABLE_OPTIONS_TASK_NAME,
-        Tasks.LIST_BUNDLED_PLUGINS,
         Tasks.PATCH_PLUGIN_XML,
         Tasks.PREPARE_SANDBOX,
         Tasks.PREPARE_TESTING_SANDBOX,

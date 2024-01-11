@@ -31,7 +31,6 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             SetupDependenciesTask::register,
             PatchPluginXmlTask::register,
             VerifyPluginConfigurationTask::register,
-            ListBundledPluginsTask::register,
             PrintBundledPluginsTask::register,
             ::configureProcessResourcesTask,
             ::configureJarTask,
