@@ -177,6 +177,10 @@ abstract class RunIdeBase : JavaExec() {
         Version.parse("221.0")
     }
 
+    private val build223 by lazy {
+        Version.parse("223.0")
+    }
+
     init {
         mainClass.set("com.intellij.idea.Main")
         enableAssertions = true
@@ -249,7 +253,7 @@ abstract class RunIdeBase : JavaExec() {
             systemProperty("idea.auto.reload.plugins", "true")
         }
 
-        if (!systemProperties.containsKey("idea.platform.prefix")) {
+        if (buildNumber < build223 && !systemProperties.containsKey("idea.platform.prefix")) {
             val prefix = findIdePrefix()
             if (prefix == null && !ideBuildNumber(ideDir.get().toPath()).startsWith("$PLATFORM_TYPE_INTELLIJ_ULTIMATE-")) {
                 throw TaskExecutionException(
