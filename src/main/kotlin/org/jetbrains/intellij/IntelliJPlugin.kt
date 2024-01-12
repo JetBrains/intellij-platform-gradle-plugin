@@ -1685,6 +1685,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 val ideVersion = IdeVersion.createIdeVersion(buildNumberProvider.get())
                 ideVersion.baselineVersion >= 221
             }
+
+            val compileTestKotlinTaskProvider = project.tasks.matching { it.name == "compileTestKotlin" }
+            dependsOn(compileTestKotlinTaskProvider)
         }
     }
 
