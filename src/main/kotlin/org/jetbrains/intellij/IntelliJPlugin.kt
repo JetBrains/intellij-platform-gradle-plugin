@@ -520,6 +520,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                     null
                 }
             })
+            useCDATA.convention(true)
         }
     }
 

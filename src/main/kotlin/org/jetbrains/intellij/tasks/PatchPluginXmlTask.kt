@@ -11,13 +11,11 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.jdom2.CDATA
 import org.jdom2.Document
 import org.jdom2.Element
+import org.jetbrains.intellij.*
 import org.jetbrains.intellij.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.asPath
-import org.jetbrains.intellij.logCategory
-import org.jetbrains.intellij.transformXml
-import org.jetbrains.intellij.warn
 import java.io.File
 
 /**
@@ -96,6 +94,15 @@ abstract class PatchPluginXmlTask : DefaultTask() {
     abstract val changeNotes: Property<String>
 
     /**
+     * Wrap the content passed to `<change-notes>` and `<description>` elements with `<![CDATA[ ... ]]>`
+     *
+     * Default value: `true`
+     */
+    @get:Input
+    @get:Optional
+    abstract val useCDATA: Property<Boolean>
+
+    /**
      * The ID of the plugin – will be set for the `<id>` tag.
      */
     @get:Input
@@ -149,15 +156,25 @@ abstract class PatchPluginXmlTask : DefaultTask() {
         val pluginXml = document.rootElement.takeIf { it.name == "idea-plugin" } ?: return
 
         val tag = pluginXml.getChild(name)
-        if (tag != null) {
-            val existingValue = tag.text
-            if (existingValue.isNotEmpty()) {
-                warn(context, "Patching plugin.xml: value of '$name[$existingValue]' tag will be set to '$content'")
+            ?.also {
+                val existingValue = it.text
+                if (existingValue.isNotEmpty()) {
+                    warn(context, "Patching plugin.xml: value of '$name[$existingValue]' tag will be set to '$content'")
+                }
             }
-            tag.text = content
-        } else {
-            pluginXml.addContent(0, Element(name).apply { text = content })
-        }
+            .or {
+                val tag = Element(name)
+                pluginXml.addContent(0, tag)
+
+                tag
+            }
+            .let {
+                if (useCDATA.get() && name in listOf("change-notes", "description")) {
+                    it.setContent(CDATA(content))
+                } else {
+                    it.text = content
+                }
+            }
     }
 
     /**

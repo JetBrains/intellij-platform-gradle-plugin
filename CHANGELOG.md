@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- PatchPluginXmlTask: Wrap the content passed to `<change-notes>` and `<description>` elements with `<![CDATA[ ... ]]>` [#1498](../../issues/1498)
+
 ### Fixed
 
 - Do not discover `idea.platform.prefix` by scanning shell scripts for `223+` [#1525](../../issues/1525)
