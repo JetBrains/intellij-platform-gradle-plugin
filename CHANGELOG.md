@@ -4,6 +4,7 @@
 
 ### Added
 
+- Publish the plugin update and mark it as hidden to prevent public release after approval, using the `publishPlugin.hidden` property.
 - PatchPluginXmlTask: Wrap the content passed to `<change-notes>` and `<description>` elements with `<![CDATA[ ... ]]>` [#1498](../../issues/1498)
 
 ### Fixed

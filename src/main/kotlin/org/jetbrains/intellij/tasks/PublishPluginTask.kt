@@ -70,6 +70,14 @@ abstract class PublishPluginTask : DefaultTask() {
     abstract val channels: ListProperty<String>
 
     /**
+     * Publish the plugin update and mark it as hidden to prevent public release after approval.
+     * See: https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html
+     */
+    @get:Input
+    @get:Optional
+    abstract val hidden: Property<Boolean>
+
+    /**
      * Specifies if the Toolbox Enterprise plugin repository service should be used.
      *
      * Default value: `false`
@@ -110,7 +118,13 @@ abstract class PublishPluginTask : DefaultTask() {
 
                             false -> PluginRepositoryFactory.create(host.get(), token.get())
                         }
-                        repositoryClient.uploader.upload(pluginId as StringPluginId, path.toFile(), channel.takeIf { it != "default" }, null)
+                        repositoryClient.uploader.upload(
+                            id = pluginId as StringPluginId,
+                            file = path.toFile(),
+                            channel = channel.takeIf { it != "default" },
+                            notes = null,
+                            isHidden = hidden.get(),
+                        )
                         info(context, "Uploaded successfully")
                     } catch (exception: Exception) {
                         throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))

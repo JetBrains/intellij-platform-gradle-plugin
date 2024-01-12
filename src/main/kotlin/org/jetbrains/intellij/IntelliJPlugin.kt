@@ -1457,6 +1457,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             host.convention(MARKETPLACE_HOST)
             toolboxEnterprise.convention(false)
             channels.convention(listOf("default"))
+            hidden.convention(false)
 
             distributionFile.convention(
                 signPluginTaskProvider
