@@ -34,6 +34,7 @@ import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformPlugin
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import java.io.File
 import java.io.StringWriter
 import java.net.HttpURLConnection

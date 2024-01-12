@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

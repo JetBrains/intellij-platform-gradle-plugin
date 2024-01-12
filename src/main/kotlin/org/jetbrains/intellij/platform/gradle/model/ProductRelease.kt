@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.model
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.Version
+import org.jetbrains.intellij.platform.gradle.utils.Version
 
 data class ProductRelease(
 

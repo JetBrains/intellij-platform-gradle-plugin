@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.test.createLocalIdeIfNotExists
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.AfterClass
 import org.junit.Assume.assumeFalse

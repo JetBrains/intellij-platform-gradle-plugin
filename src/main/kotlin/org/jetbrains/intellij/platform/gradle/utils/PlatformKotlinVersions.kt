@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
-import org.jetbrains.intellij.platform.gradle.Version
-
 // Bundled Kotlin versions list synchronized with:
 // https://plugins.jetbrains.com/docs/intellij/kotlin.html#kotlin-standard-library
 val PlatformKotlinVersions = mapOf(

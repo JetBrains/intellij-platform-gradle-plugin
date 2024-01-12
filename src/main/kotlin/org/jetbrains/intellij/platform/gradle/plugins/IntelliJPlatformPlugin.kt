@@ -47,6 +47,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.mavenRepository
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File

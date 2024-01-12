@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.utils
 
 import org.gradle.api.JavaVersion
-import org.jetbrains.intellij.platform.gradle.Version
 
 // Java versions list used in IntelliJ Platform synchronized with:
 // https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html#intellij-platform-based-products-of-recent-ide-versions
