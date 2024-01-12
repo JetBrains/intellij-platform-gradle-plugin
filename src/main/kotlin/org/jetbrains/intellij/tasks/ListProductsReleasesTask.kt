@@ -143,7 +143,7 @@ abstract class ListProductsReleasesTask : DefaultTask() {
                 untilBuild.orNull
                     .takeUnless { it.isNullOrBlank() || sinceVersion.isPresent }
             }
-            ?.replace("*", "9999")
+            ?.replace("*", "99999")
             ?.run(Version::parse)
 
         val types = types.get()
@@ -151,11 +151,11 @@ abstract class ListProductsReleasesTask : DefaultTask() {
 
         fun testVersion(version: Version?, build: Version?): Boolean {
             val a = when (since.major) {
-                in 100..999 -> build
+                in 100..99999 -> build
                 else -> version
             }
             val b = when (until?.major) {
-                in 100..999 -> build
+                in 100..99999 -> build
                 else -> version
             }
 

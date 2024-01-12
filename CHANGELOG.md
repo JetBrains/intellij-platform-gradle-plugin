@@ -6,7 +6,8 @@
 
 - Do not discover `idea.platform.prefix` by scanning shell scripts for `223+` [#1525](../../issues/1525)
 - MemoizedProvider incompatible with Gradle 8.6 RC1 [#1517](../../issues/1517)
-- Tasks :classpathIndexCleanup and :compileTestKotlin don't have a declared dependency causing build to fail [#1515](../../issues/1515)
+- Tasks `:classpathIndexCleanup` and `:compileTestKotlin` don't have a declared dependency causing build to fail [#1515](../../issues/1515)
+- ListProductsReleases empty for `2023.3` [#1505](../../issues/1505)
 
 ## [1.16.1] - 2023-12-01
 
