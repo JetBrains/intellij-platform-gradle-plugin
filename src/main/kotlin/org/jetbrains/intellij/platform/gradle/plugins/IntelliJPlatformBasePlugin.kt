@@ -304,6 +304,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 host.convention(Locations.MARKETPLACE)
                 toolboxEnterprise.convention(false)
                 channel.convention("default")
+                hidden.convention(false)
             }
         }
 

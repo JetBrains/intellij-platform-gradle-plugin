@@ -333,7 +333,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
             val path = Path(line.substringAfter(message))
             assertTrue(path.exists())
-            assertEquals("IC-2022.3.3", path.name)
+            assertEquals("IC-223.8836.26", path.name)
         }
     }
 

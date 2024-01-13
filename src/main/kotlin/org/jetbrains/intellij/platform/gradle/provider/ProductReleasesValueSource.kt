@@ -7,9 +7,9 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
+import org.jetbrains.intellij.model.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
-import org.jetbrains.intellij.platform.gradle.model.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor

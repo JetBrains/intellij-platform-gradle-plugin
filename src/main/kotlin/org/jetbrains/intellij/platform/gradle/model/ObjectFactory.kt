@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.model
 
+import org.jetbrains.intellij.model.JetBrainsIdesReleases
 import javax.xml.bind.annotation.XmlRegistry
 
 @Suppress("unused")

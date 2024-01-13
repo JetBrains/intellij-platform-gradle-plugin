@@ -40,7 +40,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             """
             intellijPlatform {
                 pluginConfiguration {
-                    description = "Plugin pluginDescription"
+                    description = "<p>Plugin pluginDescription</p>"
                 }
             }
             """.trimIndent()
@@ -52,7 +52,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
-                  <description>Plugin pluginDescription</description>
+                  <description><![CDATA[<p>Plugin pluginDescription</p>]]></description>
                   <version>1.0.0</version>
                   <name>projectName</name>
                 </idea-plugin>
@@ -103,7 +103,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
-                  <change-notes>change notes</change-notes>
+                  <change-notes><![CDATA[change notes]]></change-notes>
                   <version>1.0.0</version>
                   <name>projectName</name>
                 </idea-plugin>

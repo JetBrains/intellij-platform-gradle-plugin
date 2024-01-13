@@ -10,6 +10,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.the
+import org.jdom2.CDATA
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.*
@@ -152,8 +153,8 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                 patch(pluginId, "id")
                 patch(pluginName, "name")
                 patch(pluginVersion.takeIf { it.get() != Project.DEFAULT_VERSION }, "version")
-                patch(pluginDescription, "description")
-                patch(changeNotes, "change-notes")
+                patch(pluginDescription, "description", isCDATA = true)
+                patch(changeNotes, "change-notes", isCDATA = true)
 
                 patch(productDescriptorCode, "product-descriptor", "code")
                 patch(productDescriptorReleaseDate, "product-descriptor", "release-date")
@@ -175,15 +176,15 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
     /**
      * Sets the [provider] value for the given [tagName] or [attributeName] of [tagName].
      */
-    private fun Document.patch(provider: Provider<String>?, tagName: String, attributeName: String? = null) {
+    private fun Document.patch(provider: Provider<String>?, tagName: String, attributeName: String? = null, isCDATA: Boolean = false) {
         val value = provider?.orNull ?: return
-        patch(value, tagName, attributeName)
+        patch(value, tagName, attributeName, isCDATA)
     }
 
     /**
      * Sets the [value] for the given [tagName] or [attributeName] of [tagName].
      */
-    private fun Document.patch(value: String, tagName: String, attributeName: String? = null) {
+    private fun Document.patch(value: String, tagName: String, attributeName: String? = null, isCDATA: Boolean = false) {
         val pluginXml = rootElement.takeIf { it.name == "idea-plugin" } ?: return
         val element = pluginXml.getChild(tagName) ?: Element(tagName).apply {
             pluginXml.addContent(0, this)
@@ -195,7 +196,10 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                 if (existingValue.isNotEmpty() && existingValue != value) {
                     warn(context, "Patching plugin.xml: value of '$tagName[$existingValue]' tag will be set to '$value'")
                 }
-                element.text = value
+                when {
+                    isCDATA -> element.addContent(CDATA(value))
+                    else -> element.text = value
+                }
             }
 
             else -> {

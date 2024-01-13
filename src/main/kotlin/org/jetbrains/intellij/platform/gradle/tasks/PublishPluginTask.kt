@@ -163,6 +163,7 @@ abstract class PublishPluginTask : DefaultTask() {
                 host.convention(extension.publishing.host)
                 toolboxEnterprise.convention(extension.publishing.toolboxEnterprise)
                 channels.convention(extension.publishing.channel.map { listOf(it) })
+                hidden.convention(extension.publishing.hidden)
 
                 archiveFile.convention(
                     signPluginTaskProvider

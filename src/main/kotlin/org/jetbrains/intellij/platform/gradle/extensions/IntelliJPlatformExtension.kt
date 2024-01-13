@@ -409,6 +409,8 @@ interface IntelliJPlatformExtension : ExtensionAware {
         val channel: Property<String>
 
         val toolboxEnterprise: Property<Boolean>
+
+        val hidden: Property<Boolean>
     }
 
     @IntelliJPlatform
