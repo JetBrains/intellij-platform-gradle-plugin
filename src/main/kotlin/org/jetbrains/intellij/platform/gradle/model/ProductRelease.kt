@@ -12,6 +12,7 @@ data class ProductRelease(
     val channel: Channel,
     val build: Version,
     val version: Version,
+    val id: String,
 ) {
 
     enum class Channel {

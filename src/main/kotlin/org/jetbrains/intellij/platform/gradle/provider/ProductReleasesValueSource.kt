@@ -22,6 +22,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val androidStudio: RegularFileProperty
         val sinceBuild: Property<String>
         val untilBuild: Property<String>
+
+        // TODO: make it a list!!!
         val type: Property<IntelliJPlatformType>
         val channels: ListProperty<Channel>
     }
@@ -46,6 +48,12 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                                             channel = channel,
                                             build = build.fullNumber.toVersion(),
                                             version = build.version.toVersion(),
+                                            id = when (channel) {
+                                                Channel.RELEASE -> with(build.version.toVersion()) {
+                                                    "$major.$minor" + (".$patch".takeIf { patch > 0 }.orEmpty())
+                                                }
+                                                else -> build.fullNumber
+                                            }
                                         )
                                     )
                                 }
@@ -68,6 +76,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                     channel = channel,
                     build = item.platformBuild.toVersion(),
                     version = item.platformVersion.toVersion(),
+                    id = item.version,
                 )
             }
 
@@ -75,7 +84,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val until = untilBuild.map { it.replace("*", "99999").toVersion() }.orNull
         fun ProductRelease.testVersion(): Boolean {
             fun getComparativeVersion(version: Version) = when (version.major) {
-                in 100..99999 -> build
+                in 100..999 -> build
                 else -> this.version
             }
             return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } ?: true)
@@ -87,22 +96,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .filter { it.testVersion() }
             .groupBy { "${it.type.code}-${it.version.major}.${it.version.minor}" }
             .values
-            .map { releases ->
-                releases.maxBy {
-                    when (it.channel) {
-                        Channel.RELEASE -> Int.MAX_VALUE// promote release
-                        else -> it.version.patch
-                    }
-                }
-            }
-            .map {
-                "${it.type.code}-" + when (it.channel) {
-                    Channel.RELEASE -> with(it.version) {
-                        "$major.$minor" + (".$patch".takeIf { patch > 0 }.orEmpty())
-                    }
-
-                    else -> it.build
-                }
-            }
+            .map { it.maxBy { release -> release.version } }
+            .map { "${it.type.code}-${it.id}" }
     }
 }

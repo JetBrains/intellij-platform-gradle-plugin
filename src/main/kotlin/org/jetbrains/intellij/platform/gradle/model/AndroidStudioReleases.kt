@@ -42,16 +42,17 @@ data class Item(
 
     @set:XmlElement(name = "download")
     var downloads: List<Download> = mutableListOf(),
-) : Serializable
+) : Serializable {
 
-data class Download(
+    data class Download(
 
-    @set:XmlElement
-    var link: String = "",
+        @set:XmlElement
+        var link: String = "",
 
-    @set:XmlElement
-    var size: Long = 0,
+        @set:XmlElement
+        var size: Long = 0,
 
-    @set:XmlElement
-    var checksum: String = "",
-) : Serializable
+        @set:XmlElement
+        var checksum: String = "",
+    ) : Serializable
+}
