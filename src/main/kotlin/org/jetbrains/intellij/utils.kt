@@ -320,3 +320,5 @@ internal val <T> Property<T>.isSpecified: Boolean
         is RegularFile -> value.asFile.exists()
         else -> true
     }
+
+internal fun String.toVersion() = Version.parse(this)

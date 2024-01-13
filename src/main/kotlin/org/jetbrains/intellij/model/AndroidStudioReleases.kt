@@ -15,43 +15,45 @@ data class AndroidStudioReleases(
 
     @set:XmlElement(name = "item")
     var items: List<Item> = mutableListOf(),
-) : Serializable
+) : Serializable {
 
-data class Item(
+    data class Item(
 
-    @set:XmlElement
-    var name: String = "",
+        @set:XmlElement
+        var name: String = "",
 
-    @set:XmlElement
-    var build: String = "",
+        @set:XmlElement
+        var build: String = "",
 
-    @set:XmlElement
-    var version: String = "",
+        @set:XmlElement
+        var version: String = "",
 
-    @set:XmlElement
-    var channel: String = "",
+        @set:XmlElement
+        var channel: String = "",
 
-    @set:XmlElement
-    var platformBuild: String? = null,
+        @set:XmlElement
+        var platformBuild: String = "",
 
-    @set:XmlElement
-    var platformVersion: String? = null,
+        @set:XmlElement
+        var platformVersion: String = "",
 
-    @set:XmlElement
-    var date: String = "",
+        @set:XmlElement
+        var date: String = "",
 
-    @set:XmlElement(name = "download")
-    var downloads: List<Download> = mutableListOf(),
-) : Serializable
+        @set:XmlElement(name = "download")
+        var downloads: List<Download> = mutableListOf(),
+    ) : Serializable {
 
-data class Download(
+        data class Download(
 
-    @set:XmlElement
-    var link: String = "",
+            @set:XmlElement
+            var link: String = "",
 
-    @set:XmlElement
-    var size: Long = 0,
+            @set:XmlElement
+            var size: Long = 0,
 
-    @set:XmlElement
-    var checksum: String = "",
-) : Serializable
+            @set:XmlElement
+            var checksum: String = "",
+        ) : Serializable
+    }
+}

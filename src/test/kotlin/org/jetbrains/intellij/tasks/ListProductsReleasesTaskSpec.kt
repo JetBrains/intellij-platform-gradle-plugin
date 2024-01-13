@@ -59,9 +59,9 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME)
         assertEquals(
             """
-            IC-2021.2.2
-            IC-2021.1.3
-            IC-2020.3.4
+            IC-212.5284.31
+            IC-211.7628.15
+            IC-203.8084.17
             IC-2020.2.4
             IC-2020.1.4
             """.trimIndent(),
@@ -84,8 +84,8 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         assertEquals(
             """
             IC-2021.2.1
-            IC-2021.1.3
-            IC-2020.3.4
+            IC-211.7628.15
+            IC-203.8084.17
             """.trimIndent(),
             outputFile.readText(),
         )
@@ -105,9 +105,9 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME)
         assertEquals(
             """
-            IC-2021.2.2
-            IC-2021.1.3
-            IC-2020.3.4
+            IC-212.5284.31
+            IC-211.7628.15
+            IC-203.8084.17
             """.trimIndent(),
             outputFile.readText(),
         )
@@ -130,9 +130,9 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME)
         assertEquals(
             """
-            IC-2021.2.2
-            IC-2021.1.3
-            IC-2020.3.4
+            IC-212.5284.31
+            IC-211.7628.15
+            IC-203.8084.17
             """.trimIndent(),
             outputFile.readText(),
         )
@@ -152,7 +152,7 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME)
         assertEquals(
             """
-            PY-2021.1.3
+            PY-211.7628.8
             """.trimIndent(),
             outputFile.readText(),
         )
@@ -195,12 +195,12 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME)
         assertEquals(
             """
-            IU-2021.2.2
-            IU-2021.1.3
-            PS-2021.2.2
+            IU-212.5284.31
+            IU-211.7628.15
+            PS-212.5284.22
             PS-2021.1.4
-            PY-2021.2.2
-            PY-2021.1.3
+            PY-212.5284.18
+            PY-211.7628.8
             """.trimIndent(),
             outputFile.readText(),
         )
@@ -228,12 +228,12 @@ class ListProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
         build(LIST_PRODUCTS_RELEASES_TASK_NAME)
         assertEquals(
             """
-            IU-2021.2.2
-            IU-2021.1.3
-            PS-2021.2.2
+            IU-212.5284.31
+            IU-211.7628.15
+            PS-212.5284.22
             PS-2021.1.4
-            PY-2021.2.2
-            PY-2021.1.3
+            PY-212.5284.18
+            PY-211.7628.8
             """.trimIndent(),
             outputFile.readText(),
         )
