@@ -18,6 +18,7 @@ jobs:
         gradleVersion:
           - "8.1"
           - "8.5"
+          - "8.6-rc-1"
         os:
           - windows-latest
           - ubuntu-latest
@@ -61,7 +62,7 @@ jobs:
 
       - name: Collect Test Results
         if: ${{ always() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: integration-tests-${{ matrix.gradleVersion }}-${{ runner.os }}
           path: |

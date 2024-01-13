@@ -12,7 +12,7 @@ class ObjectFactory {
 
     fun createPluginVerifierRepository() = MavenMetadata()
 
-    fun createProductsReleases() = JetBrainsIdesReleases()
+    fun createJetBrainsIdesReleases() = JetBrainsIdesReleases()
 
     fun createAndroidStudioReleases() = AndroidStudioReleases()
 

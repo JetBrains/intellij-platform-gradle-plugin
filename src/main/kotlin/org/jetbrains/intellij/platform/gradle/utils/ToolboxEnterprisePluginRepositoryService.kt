@@ -19,6 +19,7 @@ interface ToolboxEnterprisePluginRepositoryService : PluginRepositoryService {
         @Part("pluginId") pluginId: Int,
         @Part("channel") channel: RequestBody?,
         @Part("notes") notes: RequestBody?,
+        @Part("isHidden") isHidden: Boolean,
         @Part file: MultipartBody.Part,
     ): Call<PluginUpdateBean>
 
@@ -28,6 +29,7 @@ interface ToolboxEnterprisePluginRepositoryService : PluginRepositoryService {
         @Part("xmlId") pluginXmlId: RequestBody,
         @Part("channel") channel: RequestBody?,
         @Part("notes") notes: RequestBody?,
+        @Part("isHidden") isHidden: Boolean,
         @Part file: MultipartBody.Part,
     ): Call<PluginUpdateBean>
 }
