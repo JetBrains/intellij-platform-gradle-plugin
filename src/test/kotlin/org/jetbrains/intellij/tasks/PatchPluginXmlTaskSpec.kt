@@ -73,7 +73,67 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 """
                 <idea-plugin>
                   <version>0.42.123</version>
-                  <description>Plugin pluginDescription</description>
+                  <description><![CDATA[Plugin pluginDescription]]></description>
+                  <idea-version since-build="141.1532" until-build="141.*" />
+                </idea-plugin>
+                """.trimIndent()
+            )
+
+            assertNotContains("will be overwritten", it.output)
+        }
+    }
+
+    @Test
+    fun `patch description without CDATA`() {
+        pluginXml.xml(
+            """
+            <idea-plugin />
+            """.trimIndent()
+        )
+
+        buildFile.groovy(
+            """
+            version = '0.42.123'
+            
+            intellij {
+                version = '14.1.4'
+            }
+            patchPluginXml {
+                pluginDescription = '<p>Description</p>'
+            }
+            """.trimIndent()
+        )
+
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+            assertFileContent(
+                patchedPluginXml.value,
+                """
+                <idea-plugin>
+                  <version>0.42.123</version>
+                  <description><![CDATA[<p>Description</p>]]></description>
+                  <idea-version since-build="141.1532" until-build="141.*" />
+                </idea-plugin>
+                """.trimIndent()
+            )
+
+            assertNotContains("will be overwritten", it.output)
+        }
+
+        buildFile.groovy(
+            """
+            patchPluginXml {
+                useCDATA = false
+            }
+            """.trimIndent()
+        )
+
+        build(PATCH_PLUGIN_XML_TASK_NAME).let {
+            assertFileContent(
+                patchedPluginXml.value,
+                """
+                <idea-plugin>
+                  <version>0.42.123</version>
+                  <description>&lt;p&gt;Description&lt;/p&gt;</description>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
                 """.trimIndent()
@@ -141,7 +201,7 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 """
                 <idea-plugin>
                   <version>0.42.123</version>
-                  <change-notes>change notes</change-notes>
+                  <change-notes><![CDATA[change notes]]></change-notes>
                   <idea-version since-build="141.1532" until-build="141.*" />
                 </idea-plugin>
                 """.trimIndent()
