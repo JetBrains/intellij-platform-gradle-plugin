@@ -76,6 +76,7 @@ object IntelliJPluginConstants {
         const val PREPARE_TESTING_SANDBOX = "prepareTestingSandbox" // TODO: check
         const val PREPARE_UI_TESTING_SANDBOX = "prepareUiTestingSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
+        const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"
         const val RUN_IDE = "runIde" // TODO: check
         const val RUN_PLUGIN_VERIFIER = "runPluginVerifier" // TODO: check

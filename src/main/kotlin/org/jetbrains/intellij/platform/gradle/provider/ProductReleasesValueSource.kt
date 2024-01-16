@@ -3,13 +3,14 @@
 package org.jetbrains.intellij.platform.gradle.provider
 
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.ListProperty
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.ValueSource
-import org.gradle.api.provider.ValueSourceParameters
+import org.gradle.api.provider.*
+import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.model.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
+import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
@@ -23,8 +24,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val sinceBuild: Property<String>
         val untilBuild: Property<String>
 
-        // TODO: make it a list!!!
-        val type: Property<IntelliJPlatformType>
+        val types: ListProperty<IntelliJPlatformType>
         val channels: ListProperty<Channel>
     }
 
@@ -52,6 +52,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                                                 Channel.RELEASE -> with(build.version.toVersion()) {
                                                     "$major.$minor" + (".$patch".takeIf { patch > 0 }.orEmpty())
                                                 }
+
                                                 else -> build.fullNumber
                                             }
                                         )
@@ -90,9 +91,12 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } ?: true)
         }
 
+        val types = types.get()
+        val channels = channels.get()
+
         (jetbrainsIdesReleases + androidStudioReleases)
-            .filter { it.type == type.get() }
-            .filter { it.channel in channels.get() }
+            .filter { it.type in types }
+            .filter { it.channel in channels }
             .filter { it.testVersion() }
             .groupBy { "${it.type.code}-${it.version.major}.${it.version.minor}" }
             .values
@@ -100,3 +104,39 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .map { "${it.type.code}-${it.id}" }
     }
 }
+
+fun ProductReleasesValueSource(
+    providers: ProviderFactory,
+    resources: ResourceHandler,
+    extensionProvider: Provider<IntelliJPlatformExtension>,
+    productInfoProvider: Provider<ProductInfo>,
+    configure: ProductReleasesValueSource.Parameters.() -> Unit = {},
+) = providers.of(ProductReleasesValueSource::class.java) {
+    fun String.resolve() = resources.text
+        .fromUri(this)
+        .runCatching { asFile("UTF-8") }
+        // TODO handle failure with a good logger
+//                        .onFailure { logger.error("Cannot resolve product releases", it) }
+        .getOrThrow()
+
+    val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
+
+    with(parameters) {
+        jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())
+        androidStudio.set(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO.resolve())
+        channels.convention(providers.provider { ProductRelease.Channel.values().toList() })
+        types.convention(productInfoProvider.map { it.productCode.toIntelliJPlatformType() }.map { listOf(it) })
+        sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
+        untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
+        configure()
+    }
+}
+
+fun IntelliJPlatformExtension.PluginVerifier.Ides.ProductReleasesValueSource(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) =
+    ProductReleasesValueSource(
+        providers,
+        resources,
+        extension,
+        productInfo,
+        configure,
+    )

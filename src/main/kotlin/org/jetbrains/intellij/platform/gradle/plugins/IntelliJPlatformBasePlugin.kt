@@ -24,11 +24,8 @@ import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
-import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.toVersion
 import java.util.*
 import kotlin.io.path.Path
@@ -268,33 +265,15 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 teamCityOutputFormat.convention(false)
                 subsystemsToCheck.convention("all")
 
-                val productReleasesValueProvider = providers.of(ProductReleasesValueSource::class.java) {
-                    fun String.resolve() = resources.text
-                        .fromUri(this)
-                        .runCatching { asFile("UTF-8") }
-                        .onFailure { logger.error("Cannot resolve product releases", it) }
-                        .getOrThrow()
-
-                    with(parameters) {
-                        jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())
-                        androidStudio.set(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO.resolve())
-                        channels.set(ProductRelease.Channel.values().toList())
-                        type.set(productInfoValueProvider.map { it.productCode.toIntelliJPlatformType() })
-
-                        val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
-                        sinceBuild.set(ideaVersionProvider.flatMap { it.sinceBuild })
-                        untilBuild.set(ideaVersionProvider.flatMap { it.untilBuild })
-                    }
-                }
-
                 configureExtension<IntelliJPlatformExtension.PluginVerifier.Ides>(
                     Extensions.IDES,
                     dependencies,
-                    providers,
-                    tasks,
-                    gradle,
                     downloadDirectory,
-                    productReleasesValueProvider,
+                    extensionProvider,
+                    gradle,
+                    productInfoValueProvider,
+                    providers,
+                    resources,
                 )
             }
 

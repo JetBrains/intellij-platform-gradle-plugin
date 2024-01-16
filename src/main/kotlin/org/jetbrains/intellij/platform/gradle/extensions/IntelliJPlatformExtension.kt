@@ -12,7 +12,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.tasks.TaskContainer
+import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -20,8 +20,10 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurat
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.asPath
+import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
+import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -318,12 +320,13 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
         @IntelliJPlatform
         abstract class Ides @Inject constructor(
-            private val dependencies: DependencyHandler,
-            private val providers: ProviderFactory,
-            private val tasks: TaskContainer,
-            private val gradle: Gradle,
-            private val downloadDirectory: DirectoryProperty,
-            private val productReleases: Provider<List<String>>,
+            internal val dependencies: DependencyHandler,
+            internal val downloadDirectory: DirectoryProperty,
+            internal val extension: Provider<IntelliJPlatformExtension>,
+            internal val gradle: Gradle,
+            internal val productInfo: Provider<ProductInfo>,
+            internal val providers: ProviderFactory,
+            internal val resources: ResourceHandler,
         ) {
 
             fun ide(type: Provider<*>, version: Provider<String>) = dependencies.addProvider(
@@ -395,7 +398,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
             fun localIde(localPath: File) = localIde(providers.provider { localPath.absolutePath })
 
-            fun recommended() = productReleases.get().map { ide(it) }
+            fun listProductReleases(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) = ProductReleasesValueSource(configure)
+
+            fun recommended() = listProductReleases().get().map { ide(it) }
         }
     }
 
