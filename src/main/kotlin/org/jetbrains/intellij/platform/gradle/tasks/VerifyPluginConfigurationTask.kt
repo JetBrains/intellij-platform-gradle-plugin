@@ -191,12 +191,12 @@ abstract class VerifyPluginConfigurationTask : DefaultTask(), PlatformVersionAwa
                 yield("The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.")
             }
         }
-            .joinToString("\n") { "- $it" }
+            .joinToString(System.lineSeparator()) { "- $it" }
             .takeIf(String::isNotEmpty)
             ?.also {
                 warn(
                     context,
-                    listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString("\n")
+                    listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString(System.lineSeparator())
                 )
             }
             .also {

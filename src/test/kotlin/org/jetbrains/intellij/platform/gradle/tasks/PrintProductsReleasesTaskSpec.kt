@@ -12,10 +12,10 @@ class PrintProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
     fun `print product releases`() {
         build(Tasks.PRINT_PRODUCTS_RELEASES) {
             assertContains(
-                """
-                > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
-                IC-223.8836.26
-                """.trimIndent(),
+                listOf(
+                    "> Task :${Tasks.PRINT_PRODUCTS_RELEASES}",
+                    "IC-223.8836.26",
+                ).joinToString(System.lineSeparator()),
                 output,
             )
         }
