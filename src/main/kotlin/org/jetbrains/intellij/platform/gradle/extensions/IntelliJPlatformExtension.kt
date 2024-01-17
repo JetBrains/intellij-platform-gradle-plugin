@@ -26,7 +26,7 @@ import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.toVersion
 import java.io.File
 import javax.inject.Inject

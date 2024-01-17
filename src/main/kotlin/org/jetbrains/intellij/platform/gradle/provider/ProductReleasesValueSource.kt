@@ -6,15 +6,19 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
 import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.model.JetBrainsIdesReleases
-import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.or
+import org.jetbrains.intellij.platform.gradle.toVersion
 import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 
 abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductReleasesValueSource.Parameters> {
 

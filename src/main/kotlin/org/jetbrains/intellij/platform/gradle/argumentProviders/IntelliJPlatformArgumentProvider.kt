@@ -18,7 +18,7 @@ import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.OpenedPackages
 import java.nio.file.Path
 import kotlin.io.path.Path

@@ -32,7 +32,7 @@ import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.provider.ExecutableArchValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.base.*
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import java.util.*
 import kotlin.io.path.createDirectories
 

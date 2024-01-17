@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TAS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.*
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 
 abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_TASKS_ID) {
 
