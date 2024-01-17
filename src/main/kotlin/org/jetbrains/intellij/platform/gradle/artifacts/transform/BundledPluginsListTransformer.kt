@@ -71,12 +71,12 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
             is PluginCreationSuccess -> creationResult.plugin
             is PluginCreationFail -> {
                 val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-//                warn(context, "Cannot create plugin from file '$artifact': $problems")
+//                warn("Cannot create plugin from file '$artifact': $problems")
                 null
             }
 
             else -> {
-//                warn(context, "Cannot create plugin from file '$artifact'. $creationResult")
+//                warn("Cannot create plugin from file '$artifact'. $creationResult")
                 null
             }
         }

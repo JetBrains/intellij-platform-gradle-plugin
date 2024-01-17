@@ -20,7 +20,6 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
@@ -125,7 +124,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVer
     @get:Internal
     abstract val kotlinxCoroutinesLibraryPresent: Property<Boolean>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -197,9 +196,12 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVer
             .joinToString(System.lineSeparator()) { "- $it" }
             .takeIf(String::isNotEmpty)
             ?.also {
-                warn(
-                    context,
-                    listOf("The following plugin configuration issues were found:", it, "See: https://jb.gg/intellij-platform-versions").joinToString(System.lineSeparator())
+                log.warn(
+                    listOf(
+                        "The following plugin configuration issues were found:",
+                        it,
+                        "See: https://jb.gg/intellij-platform-versions"
+                    ).joinToString(System.lineSeparator())
                 )
             }
             .also {
@@ -218,7 +220,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVer
     companion object {
         fun register(project: Project) =
             project.registerTask<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
-                info(context, "Configuring plugin configuration verification task")
+                log.info("Configuring plugin configuration verification task")
 
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
@@ -287,18 +289,18 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVer
     }
 
     // TODO: check it
-    private fun verifyJavaPluginDependency(project: Project, ideaDependency: IdeaDependency, plugins: List<Any>) {
-        val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
-        if (!hasJavaPluginDependency && File(ideaDependency.classes, "plugins/java").exists()) {
-            sourcePluginXmlFiles(project).forEach { path ->
-                parsePluginXml(path)?.dependencies?.forEach {
-                    if (it.dependencyId == "com.intellij.modules.java") {
-                        throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add Java plugin to Gradle dependencies (https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html#java)")
-                    }
-                }
-            }
-        }
-    }
+//    private fun verifyJavaPluginDependency(project: Project, ideaDependency: IdeaDependency, plugins: List<Any>) {
+//        val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
+//        if (!hasJavaPluginDependency && File(ideaDependency.classes, "plugins/java").exists()) {
+//            sourcePluginXmlFiles(project).forEach { path ->
+//                parsePluginXml(path)?.dependencies?.forEach {
+//                    if (it.dependencyId == "com.intellij.modules.java") {
+//                        throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add Java plugin to Gradle dependencies (https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html#java)")
+//                    }
+//                }
+//            }
+//        }
+//    }
 
     internal fun sourcePluginXmlFiles(project: Project) = project
         .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.

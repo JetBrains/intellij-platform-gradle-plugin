@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.provider.ProviderFactory
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID as prefix
 
 /**
@@ -31,7 +32,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
         .let { "$prefix.buildFeature.$it" }
 }
 
-fun Project.isBuildFeatureEnabled(feature: BuildFeature, context: String = logCategory()) =
+fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
     feature
         .getValue(providers)
         .map { value ->
@@ -39,6 +40,7 @@ fun Project.isBuildFeatureEnabled(feature: BuildFeature, context: String = logCa
                 when (value) {
                     true -> "Build feature is enabled: $feature"
                     false -> "Build feature is disabled: $feature"
-                }.also { info(context, value.toString()) }
+                }
+                    .also { Logger(BuildFeature::class.java).info(value.toString()) }
             }
         }

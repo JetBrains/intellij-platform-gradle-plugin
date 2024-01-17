@@ -14,11 +14,13 @@ class Logger(cls: Class<*>) {
 
     fun debug(message: String) = logger.debug("[$PLUGIN_ID] $message")
     fun error(message: String) = logger.error("[$PLUGIN_ID] $message")
+    fun error(message: String, e: Throwable) = logger.error("[$PLUGIN_ID] $message", e)
     fun info(message: String) = logger.info("[$PLUGIN_ID] $message")
     fun lifecycle(message: String) = logger.lifecycle("[$PLUGIN_ID] $message")
     fun trace(message: String) = logger.trace("[$PLUGIN_ID] $message")
     fun quiet(message: String) = logger.quiet("[$PLUGIN_ID] $message")
     fun warn(message: String) = logger.warn("[$PLUGIN_ID] $message")
+    fun warn(message: String, e: Throwable) = logger.warn("[$PLUGIN_ID] $message", e)
 
     operator fun getValue(intelliJPlatformSettingsPlugin: IntelliJPlatformSettingsPlugin, property: KProperty<*>): Any {
         TODO("Not yet implemented")

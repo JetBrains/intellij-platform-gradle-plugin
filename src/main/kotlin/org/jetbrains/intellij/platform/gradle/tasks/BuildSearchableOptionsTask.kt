@@ -12,8 +12,8 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.parsePluginXml
 import kotlin.io.path.absolutePathString
@@ -32,11 +32,6 @@ import kotlin.io.path.pathString
 @CacheableTask
 abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
-    init {
-        group = PLUGIN_GROUP_NAME
-        description = "Builds an index of UI components (searchable options) for the plugin."
-    }
-
     /**
      * The directory where the searchable options will be generated.
      */
@@ -50,7 +45,12 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     @get:Internal
     abstract val showPaidPluginWarning: Property<Boolean>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Builds an index of UI components (searchable options) for the plugin."
+    }
 
     /**
      * Executes the task, configures and runs the IDE.
@@ -58,8 +58,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     @TaskAction
     override fun exec() {
         if (showPaidPluginWarning.get()) {
-            warn(
-                context,
+            log.warn(
                 "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for " +
                         "a paid plugin. As paid plugins require providing a valid license and presenting a UI dialog, it is impossible " +
                         "to handle such a case, and the task will fail. Please consider disabling the task in the Gradle configuration. " +

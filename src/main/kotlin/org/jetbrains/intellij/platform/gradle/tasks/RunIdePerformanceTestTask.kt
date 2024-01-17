@@ -10,17 +10,14 @@ import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PerformanceTestArgumentProvider
-import org.jetbrains.intellij.platform.gradle.error
-import org.jetbrains.intellij.platform.gradle.info
-import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.model.PerformanceTestResult
 import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPerformanceParser
 import org.jetbrains.intellij.platform.gradle.tasks.base.CustomPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Files
 import kotlin.io.path.createDirectories
@@ -71,7 +68,7 @@ abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomP
     @get:Input
     abstract val profilerName: Property<ProfilerName>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -106,7 +103,7 @@ abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomP
                 IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toAbsolutePath().toString())
                     .getTestStatistic()
                     .let { testResults ->
-                        info(context, "Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
+                        log.info("Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
 
                         if (testScript.assertionTimeout != null && testResults.totalTime!! > testScript.assertionTimeout) {
                             testExecutionResults.add(PerformanceTestResult(testName, testResults, testScript))
@@ -116,8 +113,8 @@ abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomP
 
         if (testExecutionResults.isNotEmpty()) {
             testExecutionResults.forEach {
-                error(context, "TEST `${it.testName}` FAILED")
-                error(context, "Expected time of execution `${it.script.assertionTimeout}ms`, but was ${it.statistic.totalTime}ms")
+                log.error("TEST `${it.testName}` FAILED")
+                log.error("Expected time of execution `${it.script.assertionTimeout}ms`, but was ${it.statistic.totalTime}ms")
             }
             throw TestExecutionFailException("${testExecutionResults.size} test(s) failed")
         }
@@ -168,7 +165,7 @@ abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomP
 //            ?.let { PluginDependencyNotation(it.pluginXmlId, it.version, it.channel) }
 
     //    private fun configureDownloadRobotServerPluginTask(project: Project) {
-//        info(context, "Configuring robot-server download Task")
+//        info("Configuring robot-server download Task")
 //
 //        project.tasks.register<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 //        project.tasks.withType<DownloadRobotServerPluginTask> {

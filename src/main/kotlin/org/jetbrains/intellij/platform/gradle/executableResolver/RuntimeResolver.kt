@@ -10,6 +10,7 @@ import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.gradle.jvm.toolchain.internal.DefaultJvmVendorSpec
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_RUNTIME_VENDOR
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.ifNull
 import org.jetbrains.intellij.platform.gradle.utils.or
@@ -30,12 +31,14 @@ class RuntimeResolver(
     val context: String? = null,
 ) : ExecutableResolver {
 
+    private val log = Logger(javaClass)
+    
     override fun resolveExecutable() = runtime
 
     override fun resolveDirectory() = directory
 
     private val directory by lazy {
-        debug(context, "Resolving runtime directory.")
+        log.debug("Resolving runtime directory.")
 
         listOf(
             /**
@@ -46,9 +49,9 @@ class RuntimeResolver(
             {
                 jetbrainsRuntime.singleOrNull()?.let { file ->
                     file.toPath().resolveRuntimeDirectory()
-                        .also { debug(context, "JetBrains Runtime specified with dependencies resolved as: $it") }
+                        .also { log.debug("JetBrains Runtime specified with dependencies resolved as: $it") }
                         .ensureExecutableExists()
-                        .ifNull { debug(context, "Cannot resolve JetBrains Runtime: $file") }
+                        .ifNull { log.debug("Cannot resolve JetBrains Runtime: $file") }
                 }
             },
             {
@@ -59,17 +62,17 @@ class RuntimeResolver(
                     ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
                     ?.let { javaLauncher ->
                         javaLauncher.metadata.installationPath.asPath.resolveRuntimeDirectory()
-                            .also { debug(context, "JetBrains Runtime specified with Java Toolchain resolved as: $it") }
+                            .also { log.debug("JetBrains Runtime specified with Java Toolchain resolved as: $it") }
                             .ensureExecutableExists()
-                            .ifNull { debug(context, "Cannot resolve JetBrains Runtime specified with Java Toolchain") }
+                            .ifNull { log.debug("Cannot resolve JetBrains Runtime specified with Java Toolchain") }
                     }
             },
             {
                 intellijPlatform.singleOrNull()?.let { file ->
                     file.toPath().resolveRuntimeDirectory()
-                        .also { debug(context, "JetBrains Runtime bundled within IntelliJ Platform resolved as: $it") }
+                        .also { log.debug("JetBrains Runtime bundled within IntelliJ Platform resolved as: $it") }
                         .ensureExecutableExists()
-                        .ifNull { debug(context, "Cannot resolve JetBrains Runtime bundled within IntelliJ Platform: $file") }
+                        .ifNull { log.debug("Cannot resolve JetBrains Runtime bundled within IntelliJ Platform: $file") }
                 }
             },
             {
@@ -77,22 +80,22 @@ class RuntimeResolver(
                     ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
                     ?.let { javaLauncher ->
                         javaLauncher.metadata.installationPath.asPath.resolveRuntimeDirectory()
-                            .also { debug(context, "Java Runtime specified with Java Toolchain resolved as: $it") }
+                            .also { log.debug("Java Runtime specified with Java Toolchain resolved as: $it") }
                             .ensureExecutableExists()
-                            .ifNull { debug(context, "Cannot resolve Java Runtime specified with Java Toolchain") }
+                            .ifNull { log.debug("Cannot resolve Java Runtime specified with Java Toolchain") }
                     }
             },
             {
                 Jvm.current().javaHome.toPath().resolveRuntimeDirectory()
-                    .also { debug(context, "Using current JVM: $it") }
+                    .also { log.debug("Using current JVM: $it") }
                     .ensureExecutableExists()
-                    .ifNull { debug(context, "Cannot resolve current JVM") }
+                    .ifNull { log.debug("Cannot resolve current JVM") }
             },
         )
             .asSequence()
             .mapNotNull { it() }
             .firstOrNull()
-            ?.also { info(context, "Resolved Runtime directory: $it") }
+            ?.also { log.info("Resolved Runtime directory: $it") }
     }
 
     val runtime by lazy {
@@ -140,6 +143,6 @@ class RuntimeResolver(
 
     private fun Path?.ensureExecutableExists() = this
         ?.resolveRuntimeExecutable()
-        .ifNull { debug(context, "Java Runtime Executable not found in: $this") }
+        .ifNull { log.debug("Java Runtime Executable not found in: $this") }
         ?.let { this }
 }

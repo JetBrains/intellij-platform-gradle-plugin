@@ -11,8 +11,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.info
-import org.jetbrains.intellij.platform.gradle.logCategory
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 /**
  * Remove `classpath.index` files that are created by the `PathClassLoader`.
@@ -32,7 +31,7 @@ abstract class ClasspathIndexCleanupTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val classpathIndexFiles: ConfigurableFileCollection
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -43,12 +42,12 @@ abstract class ClasspathIndexCleanupTask : DefaultTask() {
     fun classpathIndexCleanup() {
         classpathIndexFiles.forEach {
             it.toPath().deleteQuietly()
-            info(context, "Removed classpath.index file: $it")
+            log.info("Removed classpath.index file: $it")
         }
     }
 
 //    {
-//        info(context, "Configuring classpath.index cleanup task")
+//        info("Configuring classpath.index cleanup task")
 //
 //        project.tasks.register<ClasspathIndexCleanupTask>(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 //        project.tasks.withType<ClasspathIndexCleanupTask> {

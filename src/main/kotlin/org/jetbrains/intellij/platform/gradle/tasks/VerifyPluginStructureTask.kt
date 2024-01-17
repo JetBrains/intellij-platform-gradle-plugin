@@ -15,12 +15,10 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.warn
 
 /**
  * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.
@@ -64,7 +62,7 @@ abstract class VerifyPluginStructureTask : DefaultTask(), SandboxAware {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginDirectory: DirectoryProperty
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -78,22 +76,22 @@ abstract class VerifyPluginStructureTask : DefaultTask(), SandboxAware {
         when (creationResult) {
             is PluginCreationSuccess -> {
                 creationResult.warnings.forEach {
-                    warn(context, it.message)
+                    log.warn(it.message)
                 }
                 creationResult.unacceptableWarnings.forEach {
-                    error(context, it.message)
+                    log.error(it.message)
                 }
             }
 
             is PluginCreationFail -> creationResult.errorsAndWarnings.forEach {
                 if (it.level == PluginProblem.Level.ERROR) {
-                    error(context, it.message)
+                    log.error(it.message)
                 } else {
-                    warn(context, it.message)
+                    log.warn(it.message)
                 }
             }
 
-            else -> error(context, creationResult.toString())
+            else -> log.error(creationResult.toString())
         }
         val failBuild = creationResult !is PluginCreationSuccess
                 || (!ignoreUnacceptableWarnings.get() && creationResult.unacceptableWarnings.isNotEmpty())

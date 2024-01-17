@@ -11,10 +11,9 @@ import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.debug
-import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.SigningAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.util.*
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
@@ -29,14 +28,6 @@ import kotlin.io.path.exists
  */
 @CacheableTask
 abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
-
-    init {
-        group = PLUGIN_GROUP_NAME
-        description = "Verifies signed ZIP archive with the provided key using marketplace-zip-signer library."
-
-        mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
-        args = listOf("verify")
-    }
 
     /**
      * Input, unsigned ZIP archive file.
@@ -66,13 +57,21 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val certificateChainFile: RegularFileProperty
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Verifies signed ZIP archive with the provided key using marketplace-zip-signer library."
+
+        mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
+        args = listOf("verify")
+    }
 
     @TaskAction
     override fun exec() {
         val cliPath = zipSignerExecutable.asPath
 
-        debug(context, "Marketplace ZIP Signer CLI path: $cliPath")
+        log.debug("Marketplace ZIP Signer CLI path: $cliPath")
 
         classpath = objectFactory.fileCollection().from(cliPath)
         args(arguments.toList())
@@ -93,7 +92,7 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
                     ?: throw InvalidUserDataException("Plugin file does not exist: $this")
             } ?: throw InvalidUserDataException("Input archive file is not provided.")
 
-        debug(context, "Distribution file: $file")
+        log.debug("Distribution file: $file")
 
         yield("-in")
         yield(file.absolutePathString())
@@ -108,12 +107,12 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
                     .getOrDefault(it)
             )
 
-            debug(context, "Using certificate chain passed as content")
+            log.debug("Using certificate chain passed as content")
         }
             ?: certificateChainFile.orNull?.let {
                 yield("-cert")
                 yield(it.asPath.absolutePathString())
-                debug(context, "Using certificate chain passed as file")
+                log.debug("Using certificate chain passed as file")
             }
             ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
     }

@@ -17,11 +17,10 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.info
-import org.jetbrains.intellij.platform.gradle.logCategory
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.ToolboxEnterprisePluginRepositoryService
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 
@@ -91,7 +90,7 @@ abstract class PublishPluginTask : DefaultTask() {
     @get:Optional
     abstract val toolboxEnterprise: Property<Boolean>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -113,7 +112,7 @@ abstract class PublishPluginTask : DefaultTask() {
                 }
                 val pluginId = creationResult.plugin.pluginId
                 channels.get().forEach { channel ->
-                    info(context, "Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
+                    log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
                     try {
                         val repositoryClient = when (toolboxEnterprise.get()) {
                             true -> PluginRepositoryFactory.createWithImplementationClass(
@@ -132,7 +131,7 @@ abstract class PublishPluginTask : DefaultTask() {
                             notes = null,
                             isHidden = hidden.get(),
                         )
-                        info(context, "Uploaded successfully")
+                        log.info("Uploaded successfully")
                     } catch (exception: Exception) {
                         throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
                     }

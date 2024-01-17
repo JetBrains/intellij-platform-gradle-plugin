@@ -15,12 +15,11 @@ import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.logCategory
-import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.model.transformXml
-import org.jetbrains.intellij.platform.gradle.warn
+import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.inputStream
 import kotlin.io.path.name
 
@@ -140,7 +139,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
     @get:Optional
     abstract val vendorUrl: Property<String>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -197,7 +196,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
             attributeName == null -> {
                 val existingValue = element.text
                 if (existingValue.isNotEmpty() && existingValue != value) {
-                    warn(context, "Patching plugin.xml: value of '$tagName[$existingValue]' tag will be set to '$value'")
+                    log.warn("Patching plugin.xml: value of '$tagName[$existingValue]' tag will be set to '$value'")
                 }
                 when {
                     isCDATA -> element.addContent(CDATA(value))
@@ -208,7 +207,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
             else -> {
                 val existingValue = element.getAttribute(attributeName)?.value
                 if (!existingValue.isNullOrEmpty()) {
-                    warn(context, "Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$value'")
+                    log.warn("Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$value'")
                 }
                 element.setAttribute(attributeName, value)
             }

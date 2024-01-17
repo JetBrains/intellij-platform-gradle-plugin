@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.utils
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
-import org.jetbrains.intellij.platform.gradle.debug
 import org.jetbrains.intellij.platform.gradle.model.MavenMetadata
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import java.net.HttpURLConnection
@@ -14,6 +13,8 @@ import java.net.URL
 class LatestVersionResolver {
 
     companion object {
+        private val log = Logger(LatestVersionResolver::class.java)
+
         fun pluginVerifier() = fromMaven(
             "IntelliJ Plugin Verifier",
             "${Locations.MAVEN_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml",
@@ -37,7 +38,7 @@ class LatestVersionResolver {
         fun plugin() = fromGitHub(IntelliJPluginConstants.PLUGIN_NAME, Locations.GITHUB_REPOSITORY)
 
         fun fromMaven(subject: String, url: String): String {
-            debug(message = "Resolving latest $subject version")
+            log.debug(message = "Resolving latest $subject version")
             return URL(url).openStream().use {
                 XmlExtractor<MavenMetadata>().unmarshal(it).versioning?.latest
                     ?: throw GradleException("Cannot resolve the latest $subject version")
@@ -45,7 +46,7 @@ class LatestVersionResolver {
         }
 
         fun fromGitHub(subject: String, url: String): String {
-            debug(message = "Resolving latest $subject version")
+            log.debug(message = "Resolving latest $subject version")
             try {
                 return URL("$url/releases/latest").openConnection().run {
                     (this as HttpURLConnection).instanceFollowRedirects = false

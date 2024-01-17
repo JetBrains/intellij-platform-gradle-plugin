@@ -13,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.createDirectories
 import kotlin.io.path.listDirectoryEntries
@@ -49,7 +50,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
     @get:Internal
     abstract val noSearchableOptionsWarning: Property<Boolean>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -67,8 +68,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                 it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX)
             }
             if (noSearchableOptions) {
-                warn(
-                    context,
+                log.warn(
                     "No searchable options found. If plugin is not supposed to provide custom settings exposed in UI, " +
                             "disable building searchable options to decrease the build time. " +
                             "See: https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options"

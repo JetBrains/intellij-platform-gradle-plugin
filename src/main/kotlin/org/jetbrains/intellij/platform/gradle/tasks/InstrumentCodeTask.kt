@@ -19,7 +19,6 @@ import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Files
@@ -42,15 +41,6 @@ abstract class InstrumentCodeTask : DefaultTask() {
      */
     @get:Internal
     abstract val sourceSetCompileClasspath: ConfigurableFileCollection
-
-    /**
-     * The dependency on IntelliJ IDEA.
-     *
-     * Default value: [SetupDependenciesTask.idea]
-     */
-    @get:Input
-    @get:Optional
-    abstract val ideaDependency: Property<IdeaDependency>
 
     /**
      * Path to the `javac2.jar` file of the IntelliJ IDEA.
@@ -112,7 +102,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
     @get:Input
     abstract val compilerClassPathFromMaven: ListProperty<File>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -121,20 +111,20 @@ abstract class InstrumentCodeTask : DefaultTask() {
 
     @TaskAction
     fun intelliJInstrumentCode(inputChanges: InputChanges) {
-        val classpath = compilerClassPath()
+//        val classpath = compilerClassPath()
+//
+//        ant.invokeMethod(
+//            "taskdef",
+//            mapOf(
+//                "name" to "instrumentIdeaExtensions",
+//                "classpath" to classpath.joinToString(":"),
+//                "loaderref" to LOADER_REF,
+//                "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
+//            ),
+//        )
 
-        ant.invokeMethod(
-            "taskdef",
-            mapOf(
-                "name" to "instrumentIdeaExtensions",
-                "classpath" to classpath.joinToString(":"),
-                "loaderref" to LOADER_REF,
-                "classname" to "com.intellij.ant.InstrumentIdeaExtensions",
-            ),
-        )
-
-        info(context, "Compiling forms and instrumenting code with nullability preconditions")
-        val instrumentNotNull = prepareNotNullInstrumenting(classpath)
+//        log.info("Compiling forms and instrumenting code with nullability preconditions")
+//        val instrumentNotNull = prepareNotNullInstrumenting(classpath)
 
         val outputDirPath = outputDir.asPath
         val temporaryDirPath = temporaryDir
@@ -191,38 +181,38 @@ abstract class InstrumentCodeTask : DefaultTask() {
             }
         }
 
-        instrumentCode(instrumentNotNull) {
-            Files.walk(temporaryDirPath)
-                .filter { !it.isDirectory() }
-                .forEach { path ->
-                    val relativePath = temporaryDirPath.relativize(path)
-                    outputDirPath.resolve(relativePath).apply {
-                        parent.createDirectories()
-                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
-                    }
-                }
-        }
+//        instrumentCode(instrumentNotNull) {
+//            Files.walk(temporaryDirPath)
+//                .filter { !it.isDirectory() }
+//                .forEach { path ->
+//                    val relativePath = temporaryDirPath.relativize(path)
+//                    outputDirPath.resolve(relativePath).apply {
+//                        parent.createDirectories()
+//                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
+//                    }
+//                }
+//        }
     }
 
     // local compiler
-    private fun compilerClassPath() = javac2.orNull
-        ?.let(File::toPath)
-        ?.takeIf(Path::exists)
-        ?.let { path ->
-            ideaDependency.get().classes.toPath().resolve("lib").listDirectoryEntries().filter {
-                listOf(
-                    "jdom.jar",
-                    "asm-all.jar",
-                    "asm-all-*.jar",
-                    "jgoodies-forms.jar",
-                    "forms-*.jar",
-                ).any { pattern ->
-                    val (first, last) = pattern.split('*') + listOf("")
-                    it.name.startsWith(first) && (last.isEmpty() || it.name.endsWith(last))
-                }
-            } + listOf(path)
-        }
-        .or { compilerClassPathFromMaven.get().map(File::toPath) }
+//    private fun compilerClassPath() = javac2.orNull
+//        ?.let(File::toPath)
+//        ?.takeIf(Path::exists)
+//        ?.let { path ->
+//            ideaDependency.get().classes.toPath().resolve("lib").listDirectoryEntries().filter {
+//                listOf(
+//                    "jdom.jar",
+//                    "asm-all.jar",
+//                    "asm-all-*.jar",
+//                    "jgoodies-forms.jar",
+//                    "forms-*.jar",
+//                ).any { pattern ->
+//                    val (first, last) = pattern.split('*') + listOf("")
+//                    it.name.startsWith(first) && (last.isEmpty() || it.name.endsWith(last))
+//                }
+//            } + listOf(path)
+//        }
+//        .or { compilerClassPathFromMaven.get().map(File::toPath) }
 
     private fun prepareNotNullInstrumenting(classpath: List<Path>): Boolean {
         try {
@@ -238,7 +228,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
         } catch (e: BuildException) {
             val cause = e.cause
             if (cause is ClassNotFoundException && FILTER_ANNOTATION_REGEXP_CLASS == cause.message) {
-                info(context, "Old version of Javac2 is used, instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
+                log.info("Old version of Javac2 is used, instrumenting code with nullability will be skipped. Use IDEA >14 SDK (139.*) to fix this")
                 return false
             } else {
                 throw e
@@ -301,7 +291,7 @@ abstract class InstrumentCodeTask : DefaultTask() {
     }
 
 //    {
-//        info(context, "Configuring compile tasks")
+//        info("Configuring compile tasks")
 //
 //        val instrumentedJar = project.configurations.create(IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME)
 //            .apply {

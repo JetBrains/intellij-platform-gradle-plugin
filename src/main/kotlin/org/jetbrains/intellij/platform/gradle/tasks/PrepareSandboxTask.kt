@@ -18,8 +18,6 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency
-import org.jetbrains.intellij.platform.gradle.dependency.PluginProjectDependency
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
@@ -100,26 +98,26 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
     override fun configure(closure: Closure<*>) = super.configure(closure)
 
-    fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
-        from(pluginDependency.artifact) {
-            into(pluginDependency.artifact.name)
-        }
-    }
+//    fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
+//        from(pluginDependency.artifact) {
+//            into(pluginDependency.artifact.name)
+//        }
+//    }
 
-    fun configureExternalPlugin(pluginDependency: PluginDependency) {
-        if (pluginDependency.builtin) {
-            return
-        }
-        pluginDependency.artifact.run {
-            if (isDirectory) {
-                from(this) {
-                    into(name)
-                }
-            } else {
-                from(this)
-            }
-        }
-    }
+//    fun configureExternalPlugin(pluginDependency: PluginDependency) {
+//        if (pluginDependency.builtin) {
+//            return
+//        }
+//        pluginDependency.artifact.run {
+//            if (isDirectory) {
+//                from(this) {
+//                    into(name)
+//                }
+//            } else {
+//                from(this)
+//            }
+//        }
+//    }
 
     private fun disableIdeUpdate() {
         val updatesConfig = sandboxConfigDirectory

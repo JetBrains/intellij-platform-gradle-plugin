@@ -8,8 +8,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.error
-import org.jetbrains.intellij.platform.gradle.logCategory
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 /**
  * TODO: Provide valid URL
@@ -30,7 +29,7 @@ private const val message = "Task is scheduled for removal, see: [SDK Docs link]
 @Deprecated(message = message)
 abstract class SetupDependenciesTask : DefaultTask() {
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -39,7 +38,7 @@ abstract class SetupDependenciesTask : DefaultTask() {
 
     @TaskAction
     fun setupDependencies() {
-        error(context, message)
+        log.error(message)
     }
 
     companion object {

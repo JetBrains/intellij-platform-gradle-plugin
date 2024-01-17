@@ -4,10 +4,9 @@ package org.jetbrains.intellij.platform.gradle.executableResolver
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.debug
 import org.jetbrains.intellij.platform.gradle.utils.ifNull
-import org.jetbrains.intellij.platform.gradle.info
 import kotlin.io.path.exists
 
 class MarketplaceZipSignerResolver(
@@ -16,27 +15,29 @@ class MarketplaceZipSignerResolver(
     val context: String? = null,
 ) : ExecutableResolver {
 
+    private val log = Logger(javaClass)
+
     override fun resolveExecutable() = listOf(
         {
             localPath.orNull?.let { file ->
                 file.asPath
                     .takeIf { it.exists() }
-                    .also { debug(context, "Marketplace ZIP Signer specified with a local path: $file") }
-                    .ifNull { debug(context, "Cannot resolve Marketplace ZIP Signer: $file") }
+                    .also { log.debug("Marketplace ZIP Signer specified with a local path: $file") }
+                    .ifNull { log.debug("Cannot resolve Marketplace ZIP Signer: $file") }
             }
         },
         {
             marketplaceZipSigner.singleOrNull()?.toPath().let { file ->
                 file
-                    .also { debug(context, "Marketplace ZIP Signer specified with dependencies resolved as: $file") }
-                    .ifNull { debug(context, "Cannot resolve Marketplace ZIP Signer: $file") }
+                    .also { log.debug("Marketplace ZIP Signer specified with dependencies resolved as: $file") }
+                    .ifNull { log.debug("Cannot resolve Marketplace ZIP Signer: $file") }
             }
         },
     )
         .asSequence()
         .mapNotNull { it() }
         .firstOrNull()
-        ?.also { info(context, "Resolved Marketplace ZIP Signer: $it") }
+        ?.also { log.info("Resolved Marketplace ZIP Signer: $it") }
 
     override fun resolveDirectory() = resolveExecutable()?.parent
 }

@@ -17,11 +17,10 @@ import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.debug
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.base.RuntimeAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.ByteArrayOutputStream
 import java.util.*
@@ -43,13 +42,6 @@ import kotlin.io.path.pathString
  */
 @UntrackedTask(because = "Should always run Plugin Verifier")
 abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
-
-    init {
-        group = PLUGIN_GROUP_NAME
-        description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds."
-
-        mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
-    }
 
     @get:InputFiles
     @get:Classpath
@@ -160,7 +152,14 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     @get:Internal
     abstract val offline: Property<Boolean>
 
-    private val context = logCategory()
+    private val log = Logger(javaClass)
+
+    init {
+        group = PLUGIN_GROUP_NAME
+        description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds."
+
+        mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
+    }
 
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
@@ -184,8 +183,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             })
         }
 
-        debug(context, "Distribution file: $file")
-        debug(context, "Verifier path: $pluginVerifierExecutable")
+        log.debug("Distribution file: $file")
+        log.debug("Verifier path: $pluginVerifierExecutable")
 
         classpath = objectFactory.fileCollection().from(pluginVerifierExecutable)
 
@@ -239,11 +238,11 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     }
 
     private fun verifyOutput(os: ByteArrayOutputStream) {
-        debug(context, "Current failure levels: ${FailureLevel.values().joinToString(", ")}")
+        log.debug("Current failure levels: ${FailureLevel.values().joinToString(", ")}")
 
         FailureLevel.values().forEach { level ->
             if (failureLevel.get().contains(level) && os.toString().contains(level.sectionHeading)) {
-                debug(context, "Failing task on '$failureLevel' failure level")
+                log.debug("Failing task on '$failureLevel' failure level")
                 throw GradleException(
                     "$level: ${level.message} Check Plugin Verifier report for more details.\n" +
                             "Incompatible API Changes: https://jb.gg/intellij-api-changes"

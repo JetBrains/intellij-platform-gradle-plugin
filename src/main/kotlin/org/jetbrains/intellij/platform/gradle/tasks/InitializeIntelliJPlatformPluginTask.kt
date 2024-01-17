@@ -9,13 +9,15 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
-import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.net.URL
@@ -48,13 +50,13 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), PlatformVer
     @get:Internal
     abstract val pluginVersion: Property<String>
 
+    private val log = Logger(javaClass)
+    
     init {
         group = PLUGIN_GROUP_NAME
         description = "Initializes the IntelliJ Platform Gradle Plugin"
     }
-
-    private val context = logCategory()
-
+    
     @TaskAction
     fun initialize() {
         checkPluginVersion()
@@ -73,7 +75,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), PlatformVer
             val version = Version.parse(pluginVersion.get())
             val latestVersion = LatestVersionResolver.plugin()
             if (version < Version.parse(latestVersion)) {
-                warn(context, "$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
+                log.warn("$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
 
             with(selfUpdateLock.asPath) {
@@ -83,7 +85,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), PlatformVer
                 }
             }
         } catch (e: Exception) {
-            error(context, e.message.orEmpty(), e)
+            log.error(e.message.orEmpty(), e)
         }
     }
 
@@ -136,7 +138,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), PlatformVer
                                 }
                             }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
 
-                            info(null, "Resolving $PLUGIN_NAME version with: $manifestPath")
+                            log.info("Resolving $PLUGIN_NAME version with: $manifestPath")
                             URL(manifestPath).openStream().use {
                                 Manifest(it).mainAttributes.getValue("Version")
                             }
