@@ -9,11 +9,11 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.newInstance
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType.IntellijIdeaCommunity
 import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradle.dependency.PluginsRepositoryConfiguration
 import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType.IntellijIdeaCommunity
 import javax.inject.Inject
 
 /**
@@ -236,15 +236,6 @@ abstract class IntelliJPluginExtension @Inject constructor(
     fun getUnresolvedPluginDependencies(): Set<PluginDependency> {
         if (pluginDependenciesConfigured) {
             return emptySet()
-        }
-        return pluginDependencies.orNull?.toSet().orEmpty()
-    }
-
-    fun getPluginDependenciesList(project: Project): Set<PluginDependency> {
-        if (!pluginDependenciesConfigured) {
-            debug(project.logCategory(), "Plugin dependencies are resolved")
-            project.configurations.getByName(IDEA_PLUGINS_CONFIGURATION_NAME).resolve()
-            pluginDependenciesConfigured = true
         }
         return pluginDependencies.orNull?.toSet().orEmpty()
     }
