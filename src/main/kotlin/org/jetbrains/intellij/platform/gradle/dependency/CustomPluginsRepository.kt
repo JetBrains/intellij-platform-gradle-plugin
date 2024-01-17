@@ -7,10 +7,10 @@ import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepository
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.debug
-import org.jetbrains.intellij.platform.gradle.resolveRedirection
 import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
 import org.jetbrains.intellij.platform.gradle.utils.ivyRepository
 import java.io.File
+import java.net.HttpURLConnection
 import java.net.URL
 
 class CustomPluginsRepository(
@@ -49,4 +49,14 @@ class CustomPluginsRepository(
 
     override fun postResolve(project: Project, context: String?) {
     }
+}
+
+internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnection) {
+    instanceFollowRedirects = false
+    inputStream.use {
+        when (responseCode) {
+            HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP -> URL(this@resolveRedirection, getHeaderField("Location"))
+            else -> this@resolveRedirection
+        }
+    }.also { disconnect() }
 }

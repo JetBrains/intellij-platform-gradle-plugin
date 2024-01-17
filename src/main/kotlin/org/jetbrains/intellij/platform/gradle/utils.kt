@@ -1,75 +1,25 @@
 // Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 @file:JvmName("Utils")
-@file:Suppress("BooleanMethodIsAlwaysInverted")
 
 package org.jetbrains.intellij.platform.gradle
 
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.problems.PluginProblem
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
-import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.tasks.SourceSet
-import org.gradle.kotlin.dsl.getByName
-import org.jdom2.Document
-import org.jdom2.output.Format
-import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformPlugin
-import java.io.File
-import java.io.StringWriter
-import java.net.HttpURLConnection
-import java.net.URL
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeFormatterBuilder
-import java.time.temporal.ChronoField
 import java.util.function.Predicate
-import kotlin.io.path.*
-
-internal fun sourcePluginXmlFiles(project: Project) = project
-    .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
-    .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) // TODO: iterate over all sourceSets?
-    .resources
-    .srcDirs
-    .filterNotNull()
-    .map(File::toPath)
-    .map { it.resolve("META-INF/plugin.xml") }
-    .filter { it.exists() && it.fileSize() > 0 }
-
-internal fun parsePluginXml(pluginXml: Path) = runCatching {
-    pluginXml.inputStream().use {
-        val document = JDOMUtil.loadDocument(it)
-        PluginBeanExtractor.extractPluginBean(document)
-    }
-}.getOrElse {
-    logger.warn("Cannot read: $pluginXml. Skipping", it)
-    null
-}
-
-fun transformXml(document: Document, path: Path) {
-    val xmlOutput = XMLOutputter()
-    xmlOutput.format.apply {
-        indent = "  "
-        omitDeclaration = true
-        textMode = Format.TextMode.TRIM
-    }
-
-    StringWriter().use {
-        xmlOutput.output(document, it)
-        path.writeText(it.toString())
-    }
-}
+import kotlin.io.path.extension
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
 
 fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
     collectFiles(directory) { it.extension == "jar" && filter.test(it) }
@@ -135,22 +85,3 @@ fun isKotlinRuntime(name: String) =
             name == "kotlin-reflect" || name.startsWith("kotlin-reflect-") ||
             name == "kotlin-stdlib" || name.startsWith("kotlin-stdlib-") ||
             name == "kotlin-test" || name.startsWith("kotlin-test-")
-
-val repositoryVersion: String by lazy {
-    LocalDateTime.now().format(
-        DateTimeFormatterBuilder()
-            .append(DateTimeFormatter.BASIC_ISO_DATE)
-            .appendValue(ChronoField.HOUR_OF_DAY, 2)
-            .toFormatter()
-    )
-}
-
-internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnection) {
-    instanceFollowRedirects = false
-    inputStream.use {
-        when (responseCode) {
-            HttpURLConnection.HTTP_MOVED_PERM, HttpURLConnection.HTTP_MOVED_TEMP -> URL(this@resolveRedirection, getHeaderField("Location"))
-            else -> this@resolveRedirection
-        }
-    }.also { disconnect() }
-}

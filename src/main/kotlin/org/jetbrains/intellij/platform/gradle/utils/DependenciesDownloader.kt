@@ -11,11 +11,8 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.internal.artifacts.dsl.DefaultRepositoryHandler
-import org.gradle.kotlin.dsl.create
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.info
-import org.jetbrains.intellij.platform.gradle.repositoryVersion
 import java.io.File
 import java.net.URI
 import java.net.URL
@@ -119,14 +116,3 @@ internal fun RepositoryHandler.mavenRepository(repositoryUrl: String, block: (Ma
         url = URI(repositoryUrl)
         block?.invoke(this)
     }
-
-internal fun DependenciesDownloader.getAndroidStudioReleases(context: String?) = downloadFromRepository(context, {
-    create(
-        group = "org.jetbrains",
-        name = "android-studio-products-releases",
-        version = repositoryVersion,
-        ext = "xml",
-    )
-}, {
-    ivyRepository(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
-}).firstOrNull()?.toPath()

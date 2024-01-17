@@ -3,14 +3,18 @@
 package org.jetbrains.intellij.platform.gradle.model
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
-import org.jetbrains.intellij.platform.gradle.transformXml
+import org.jdom2.Document
+import org.jdom2.output.Format
+import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.platform.gradle.warn
 import java.io.InputStream
+import java.io.StringWriter
 import java.nio.file.Path
 import javax.xml.bind.JAXBContext
 import javax.xml.bind.JAXBException
 import kotlin.io.path.inputStream
 import kotlin.io.path.outputStream
+import kotlin.io.path.writeText
 
 class XmlExtractor<T>(private val context: String? = null) {
 
@@ -39,4 +43,18 @@ class XmlExtractor<T>(private val context: String? = null) {
         runCatching { unmarshal(path) }
             .onFailure { warn(context, "Failed to get products releases list: ${it.message}", it) }
             .getOrNull()
+}
+
+internal fun transformXml(document: Document, path: Path) {
+    val xmlOutput = XMLOutputter()
+    xmlOutput.format.apply {
+        indent = "  "
+        omitDeclaration = true
+        textMode = Format.TextMode.TRIM
+    }
+
+    StringWriter().use {
+        xmlOutput.output(document, it)
+        path.writeText(it.toString())
+    }
 }

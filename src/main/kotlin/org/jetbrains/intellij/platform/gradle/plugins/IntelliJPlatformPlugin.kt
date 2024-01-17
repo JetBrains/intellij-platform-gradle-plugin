@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
@@ -14,6 +15,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.JAR_TASK_NAME
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.api.tasks.bundling.Zip
@@ -51,6 +53,7 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
 import java.net.URL
 import kotlin.io.path.extension
+import kotlin.io.path.fileSize
 
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
@@ -831,3 +834,13 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         .joinToString(prefix = "$productCode-", separator = ".")
         .let(IdeVersion::createIdeVersion)
 }
+
+internal fun sourcePluginXmlFiles(project: Project) = project
+    .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
+    .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) // TODO: iterate over all sourceSets?
+    .resources
+    .srcDirs
+    .filterNotNull()
+    .map(File::toPath)
+    .map { it.resolve("META-INF/plugin.xml") }
+    .filter { it.exists() && it.fileSize() > 0 }

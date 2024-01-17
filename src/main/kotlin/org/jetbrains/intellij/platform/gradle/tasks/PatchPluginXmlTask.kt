@@ -19,7 +19,7 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.transformXml
+import org.jetbrains.intellij.platform.gradle.model.transformXml
 import org.jetbrains.intellij.platform.gradle.warn
 import kotlin.io.path.inputStream
 import kotlin.io.path.name
