@@ -322,7 +322,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.PREPARE_UI_TESTING_SANDBOX)
+        build(Tasks.PREPARE_UI_TEST_SANDBOX)
 
         assertEquals(
             setOf(
@@ -787,7 +787,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             tasks {
-                ${Tasks.PREPARE_TESTING_SANDBOX} {
+                ${Tasks.PREPARE_TEST_SANDBOX} {
                     from("additional")
                 }
             }

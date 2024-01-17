@@ -23,9 +23,10 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     override fun toString() = name
         .lowercase()
         .split('_')
-        .joinToString("", transform = {
-            it.replaceFirstChar(Char::uppercase)
-        })
+        .joinToString(
+            separator = "",
+            transform = { it.replaceFirstChar(Char::uppercase) },
+        )
         .replaceFirstChar(Char::lowercase)
         .let { "$prefix.buildFeature.$it" }
 }

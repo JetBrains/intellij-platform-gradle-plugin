@@ -2,23 +2,28 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.*
+import java.io.File
 import kotlin.io.path.*
 
 /**
@@ -280,4 +285,28 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVer
                 dependsOn(patchPluginXmlTaskProvider)
             }
     }
+
+    // TODO: check it
+    private fun verifyJavaPluginDependency(project: Project, ideaDependency: IdeaDependency, plugins: List<Any>) {
+        val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
+        if (!hasJavaPluginDependency && File(ideaDependency.classes, "plugins/java").exists()) {
+            sourcePluginXmlFiles(project).forEach { path ->
+                parsePluginXml(path)?.dependencies?.forEach {
+                    if (it.dependencyId == "com.intellij.modules.java") {
+                        throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add Java plugin to Gradle dependencies (https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html#java)")
+                    }
+                }
+            }
+        }
+    }
+
+    internal fun sourcePluginXmlFiles(project: Project) = project
+        .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
+        .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) // TODO: iterate over all sourceSets?
+        .resources
+        .srcDirs
+        .filterNotNull()
+        .map(File::toPath)
+        .map { it.resolve("META-INF/plugin.xml") }
+        .filter { it.exists() && it.fileSize() > 0 }
 }

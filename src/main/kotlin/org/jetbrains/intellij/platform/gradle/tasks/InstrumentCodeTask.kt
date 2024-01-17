@@ -20,8 +20,7 @@ import org.gradle.work.InputChanges
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.or
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
@@ -300,4 +299,203 @@ abstract class InstrumentCodeTask : DefaultTask() {
         const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
         const val LOADER_REF = "java2.loader"
     }
+
+//    {
+//        info(context, "Configuring compile tasks")
+//
+//        val instrumentedJar = project.configurations.create(IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME)
+//            .apply {
+//                isCanBeConsumed = true
+//                isCanBeResolved = false
+//
+//                extendsFrom(project.configurations["implementation"], project.configurations["runtimeOnly"])
+//            }
+//
+//        val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+//        val instrumentCodeProvider = project.provider { extension.instrumentCode.get() }
+//
+//        val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
+//        sourceSets.forEach { sourceSet ->
+//            val name = sourceSet.getTaskName("instrument", "code")
+//            val instrumentTaskProvider = project.tasks.register<InstrumentCodeTask>(name) {
+//                val taskContext = logCategory()
+//
+//                sourceDirs.from(project.provider {
+//                    sourceSet.allJava.srcDirs
+//                })
+//                formsDirs.from(project.provider {
+//                    sourceDirs.asFileTree.filter {
+//                        it.toPath().extension == "form"
+//                    }
+//                })
+//                classesDirs.from(project.provider {
+//                    (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
+//                        project.files(this).filter { it.exists() }
+//                    }
+//                })
+//                sourceSetCompileClasspath.from(project.provider {
+//                    sourceSet.compileClasspath
+//                })
+//                compilerVersion.convention(ideaDependencyProvider.map {
+//                    val productInfo = it.classes.toPath().productInfo()
+//
+//                    val version = extension.getVersionNumber().orNull.orEmpty()
+//                    val type = extension.getVersionType().orNull.orEmpty().let {
+//                        IntelliJPlatformType.fromCode(it)
+//                    }
+//                    val localPath = extension.localPath.orNull.orEmpty()
+//                    val types = listOf(
+//                        IntelliJPlatformType.CLion,
+//                        IntelliJPlatformType.Rider,
+//                        IntelliJPlatformType.PyCharmProfessional,
+//                        IntelliJPlatformType.PhpStorm,
+//                        IntelliJPlatformType.RustRover
+//                    )
+//
+//                    when {
+//                        localPath.isNotBlank() || !version.endsWith(IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT) -> {
+//                            val eapSuffix = IntelliJPluginConstants.RELEASE_SUFFIX_EAP.takeIf { productInfo.versionSuffix == "EAP" }.orEmpty()
+//                            IdeVersion.createIdeVersion(it.buildNumber).stripExcessComponents().asStringWithoutProductCode() + eapSuffix
+//                        }
+//
+//                        version == IntelliJPluginConstants.DEFAULT_IDEA_VERSION && types.contains(type) -> {
+//                            val buildNumber = productInfo.buildNumber.toVersion()
+//                            "${buildNumber.major}.${buildNumber.minor}${IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE}"
+//                        }
+//
+//                        else -> {
+//                            val prefix = when (type) {
+//                                IntelliJPlatformType.CLion -> "CLION-"
+//                                IntelliJPlatformType.Rider -> "RIDER-"
+//                                IntelliJPlatformType.PyCharmProfessional -> "PYCHARM-"
+//                                IntelliJPlatformType.PhpStorm -> "PHPSTORM-"
+//                                IntelliJPlatformType.RustRover -> "RUSTROVER-"
+//                                else -> ""
+//                            }
+//                            prefix + version
+//                        }
+//                    }
+//                })
+//                ideaDependency.convention(ideaDependencyProvider)
+//                javac2.convention(ideaDependencyProvider.map {
+//                    it.classes.resolve("lib/javac2.jar")
+//                })
+//                compilerClassPathFromMaven.convention(compilerVersion.map { compilerVersion ->
+//                    if (compilerVersion == IntelliJPluginConstants.DEFAULT_IDEA_VERSION || compilerVersion.toVersion() >= Version(183, 3795, 13)) {
+//                        val downloadCompiler = { version: String ->
+//                            dependenciesDownloader.downloadFromMultipleRepositories(taskContext, {
+//                                create(
+//                                    group = "com.jetbrains.intellij.java",
+//                                    name = "java-compiler-ant-tasks",
+//                                    version = version,
+//                                )
+//                            }, {
+//                                setOf(
+//                                    IntelliJPluginConstants.Locations.INTELLIJ_DEPENDENCIES_REPOSITORY,
+//                                ).map(::mavenRepository)
+//                            }, true).takeIf { it.isNotEmpty() }
+//                        }
+//
+//                        listOf(
+//                            {
+//                                runCatching { downloadCompiler(compilerVersion) }.fold(
+//                                    onSuccess = { it },
+//                                    onFailure = {
+//                                        warn(taskContext, "Cannot resolve java-compiler-ant-tasks in version: $compilerVersion")
+//                                        null
+//                                    },
+//                                )
+//                            },
+//                            {
+//                                /**
+//                                 * Try falling back on the version without the -EAP-SNAPSHOT suffix if the download
+//                                 * for it fails - not all versions have a corresponding -EAP-SNAPSHOT version present
+//                                 * in the snapshot repository.
+//                                 */
+//                                if (compilerVersion.endsWith(IntelliJPluginConstants.RELEASE_SUFFIX_EAP)) {
+//                                    val nonEapVersion = compilerVersion.replace(IntelliJPluginConstants.RELEASE_SUFFIX_EAP, "")
+//                                    runCatching { downloadCompiler(nonEapVersion) }.fold(
+//                                        onSuccess = {
+//                                            warn(taskContext, "Resolved non-EAP java-compiler-ant-tasks version: $nonEapVersion")
+//                                            it
+//                                        },
+//                                        onFailure = {
+//                                            warn(taskContext, "Cannot resolve java-compiler-ant-tasks in version: $nonEapVersion")
+//                                            null
+//                                        },
+//                                    )
+//                                } else {
+//                                    null
+//                                }
+//                            },
+//                            {
+//                                /**
+//                                 * Get the list of available packages and pick the closest lower one.
+//                                 */
+//                                val closestCompilerVersion = URL(IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA).openStream().use { inputStream ->
+//                                    val version = compilerVersion.toVersion()
+//                                    XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.versions
+//                                        ?.map(Version.Companion::parse)?.filter { it <= version }
+//                                        ?.maxOf { it }
+//                                        ?.version
+//                                }
+//
+//                                if (closestCompilerVersion == null) {
+//                                    warn(taskContext, "Cannot resolve java-compiler-ant-tasks Maven metadata")
+//                                    null
+//                                } else {
+//                                    runCatching { downloadCompiler(closestCompilerVersion) }.fold(
+//                                        onSuccess = {
+//                                            warn(taskContext, "Resolved closest lower java-compiler-ant-tasks version: $closestCompilerVersion")
+//                                            it
+//                                        },
+//                                        onFailure = {
+//                                            warn(taskContext, "Cannot resolve java-compiler-ant-tasks in version: $closestCompilerVersion")
+//                                            null
+//                                        },
+//                                    )
+//                                }
+//                            },
+//                        ).asSequence().mapNotNull { it() }.firstOrNull().orEmpty()
+//                    } else {
+//                        warn(
+//                            taskContext,
+//                            "Compiler in '$compilerVersion' version can't be resolved from Maven. Minimal version supported: 2018.3+. Use higher 'intellij.version' or specify the 'compilerVersion' property manually.",
+//                        )
+//                        emptyList()
+//                    }
+//                })
+//
+//                outputDir.convention(project.layout.buildDirectory.map { it.dir("instrumented").dir(name) })
+//                instrumentationLogs.convention(project.gradle.startParameter.logLevel == LogLevel.INFO)
+//
+//                dependsOn(sourceSet.classesTaskName)
+//                finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+//                onlyIf { instrumentCodeProvider.get() }
+//            }
+//
+//            // Ensure that our task is invoked when the source set is built
+//            sourceSet.compiledBy(instrumentTaskProvider)
+//        }
+//
+//        val instrumentTaskProvider = project.tasks.named<InstrumentCodeTask>(IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME)
+//        val instrumentedJarTaskProvider = project.tasks.register<InstrumentedJarTask>(IntelliJPluginConstants.Tasks.INSTRUMENTED_JAR) {
+//            duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//
+//            archiveBaseName.convention(jarTaskProvider.flatMap { jarTask ->
+//                jarTask.archiveBaseName.map {
+//                    "${IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX}-$it"
+//                }
+//            })
+//
+//            from(instrumentTaskProvider)
+//            with(jarTaskProvider.get())
+//
+//            dependsOn(instrumentTaskProvider)
+//
+//            onlyIf { instrumentCodeProvider.get() }
+//        }
+//
+//        project.artifacts.add(instrumentedJar.name, instrumentedJarTaskProvider)
+//    }
 }

@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
@@ -20,12 +19,13 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPl
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVerifierIdeExtractorTransformer
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.util.*
 import kotlin.io.path.Path
@@ -70,7 +70,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     val identifiers = IntelliJPlatformType.values().map { it.dependency }.map { "${it.group}:${it.name}" }
                     val matched = dependencies.filter { identifiers.contains("${it.group}:${it.name}") }
                     if (matched.size > 1) {
-                        throw GradleException("Conflicting dependencies detected: \n${matched.joinToString("\n")}")
+                        throw GradleException(
+                            matched.joinToString(
+                                prefix = "Conflicting dependencies detected: \n",
+                                separator = "\n",
+                            )
+                        )
                     }
                 }
             }

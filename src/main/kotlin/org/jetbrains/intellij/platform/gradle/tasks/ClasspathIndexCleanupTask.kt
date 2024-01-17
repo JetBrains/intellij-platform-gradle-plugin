@@ -47,4 +47,25 @@ abstract class ClasspathIndexCleanupTask : DefaultTask() {
             info(context, "Removed classpath.index file: $it")
         }
     }
+
+//    {
+//        info(context, "Configuring classpath.index cleanup task")
+//
+//        project.tasks.register<ClasspathIndexCleanupTask>(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+//        project.tasks.withType<ClasspathIndexCleanupTask> {
+//            classpathIndexFiles.from(project.provider {
+//                (project.extensions.findByName("sourceSets") as SourceSetContainer)
+//                    .flatMap {
+//                        it.output.classesDirs + it.output.generatedSourcesDirs + project.files(
+//                            it.output.resourcesDir
+//                        )
+//                    }
+//                    .mapNotNull { dir ->
+//                        dir
+//                            .resolve("classpath.index")
+//                            .takeIf { it.exists() }
+//                    }
+//            })
+//        }
+//    }
 }

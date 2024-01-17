@@ -3,12 +3,13 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Incubating
+import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PerformanceTestArgumentProvider
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.logCategory
@@ -17,7 +18,10 @@ import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPerformanceParser
+import org.jetbrains.intellij.platform.gradle.tasks.base.CustomPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
+import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Files
 import kotlin.io.path.createDirectories
 import kotlin.io.path.extension
@@ -38,7 +42,7 @@ import kotlin.io.path.nameWithoutExtension
 @Deprecated(message = "CHECK")
 @Incubating
 @UntrackedTask(because = "Should always run IDE for performance tests")
-abstract class RunIdePerformanceTestTask : RunIdeBase() {
+abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionAware {
 
     /**
      * Path to directory with test projects and '.ijperf' files.
@@ -118,4 +122,75 @@ abstract class RunIdePerformanceTestTask : RunIdeBase() {
             throw TestExecutionFailException("${testExecutionResults.size} test(s) failed")
         }
     }
+
+    companion object {
+
+        fun register(project: Project) =
+            project.registerTask<RunIdePerformanceTestTask>(Tasks.TEST_IDE_PERFORMANCE) {
+//                artifactsDirectory.convention(extension.type.flatMap { type ->
+//                    extension.version.flatMap { version ->
+//                        project.layout.buildDirectory.dir(
+//                            "reports/performance-test/$type$version-${project.version}-${
+//                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd-HHmm"))
+//                            }"
+//                        ).map { it.toString() }
+//                    }
+//                })
+//                profilerName.convention(ProfilerName.ASYNC)
+
+                // Check that the `runIdePerformanceTest` task was launched
+                // Check that `performanceTesting.jar` is absent (that means it's a community version)
+                // Check that user didn't pass a custom version of the performance plugin
+//                if (
+//                    RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
+//                    && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
+//                ) {
+//                    val bundledPlugins = BuiltinPluginsRegistry.resolveBundledPlugins(ideaDependencyProvider.get().classes.toPath(), context)
+//                    if (!bundledPlugins.contains(PERFORMANCE_PLUGIN_ID)) {
+//                        val buildNumber = ideaDependencyProvider.get().buildNumber
+//                        val resolvedPlugin = resolveLatestPluginUpdate(PERFORMANCE_PLUGIN_ID, buildNumber)
+//                            ?: throw BuildException("No suitable plugin update found for $PERFORMANCE_PLUGIN_ID:$buildNumber")
+//
+//                        val plugin = resolver.resolve(project, resolvedPlugin)
+//                            ?: throw BuildException(with(resolvedPlugin) { "Failed to resolve plugin $id:$version@$channel" })
+//
+//                        configurePluginDependency(project, plugin, extension, this, resolver)
+//                    }
+//                }
+            }
+    }
+
+//    private fun resolveLatestPluginUpdate(pluginId: String, buildNumber: String, channel: String = "") =
+//        PluginRepositoryFactory.create(IntelliJPluginConstants.Locations.MARKETPLACE)
+//            .pluginManager
+//            .searchCompatibleUpdates(listOf(pluginId), buildNumber, channel)
+//            .firstOrNull()
+//            ?.let { PluginDependencyNotation(it.pluginXmlId, it.version, it.channel) }
+
+    //    private fun configureDownloadRobotServerPluginTask(project: Project) {
+//        info(context, "Configuring robot-server download Task")
+//
+//        project.tasks.register<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
+//        project.tasks.withType<DownloadRobotServerPluginTask> {
+//            val taskContext = logCategory()
+//
+//            version.convention(VERSION_LATEST)
+//            outputDir.convention(project.layout.buildDirectory.dir("robotServerPlugin"))
+//            pluginArchive.convention(project.provider {
+//                val resolvedVersion = resolveRobotServerPluginVersion(version.orNull)
+//                val (group, name) = getDependency(resolvedVersion).split(':')
+//                dependenciesDownloader.downloadFromRepository(taskContext, {
+//                    create(
+//                        group = group,
+//                        name = name,
+//                        version = resolvedVersion,
+//                    )
+//                }, {
+//                    mavenRepository(INTELLIJ_DEPENDENCIES) {
+//                        content { includeGroup(group) }
+//                    }
+//                }).first()
+//            })
+//        }
+//    }
 }

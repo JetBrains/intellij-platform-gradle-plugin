@@ -75,8 +75,8 @@ object IntelliJPluginConstants {
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
         const val PREPARE_SANDBOX = "prepareSandbox" // TODO: check
-        const val PREPARE_TESTING_SANDBOX = "prepareTestingSandbox" // TODO: check
-        const val PREPARE_UI_TESTING_SANDBOX = "prepareUiTestingSandbox" // TODO: check
+        const val PREPARE_TEST_SANDBOX = "prepareTestingSandbox" // TODO: check
+        const val PREPARE_UI_TEST_SANDBOX = "prepareUiTestingSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"
@@ -136,8 +136,8 @@ object IntelliJPluginConstants {
 //        JAR_SEARCHABLE_OPTIONS_TASK_NAME,
         Tasks.PATCH_PLUGIN_XML,
         Tasks.PREPARE_SANDBOX,
-        Tasks.PREPARE_TESTING_SANDBOX,
-        Tasks.PREPARE_UI_TESTING_SANDBOX,
+        Tasks.PREPARE_TEST_SANDBOX,
+        Tasks.PREPARE_UI_TEST_SANDBOX,
 //        PRINT_BUNDLED_PLUGINS_TASK_NAME,
 //        PRINT_PRODUCTS_RELEASES_TASK_NAME,
 //        PUBLISH_PLUGIN_TASK_NAME,
