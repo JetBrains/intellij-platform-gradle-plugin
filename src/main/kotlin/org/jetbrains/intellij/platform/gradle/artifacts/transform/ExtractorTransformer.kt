@@ -14,9 +14,9 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.registerTransform
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File.separator
 import javax.inject.Inject
@@ -129,3 +129,23 @@ internal fun DependencyHandler.applyExtractorTransformer(
         }
     }
 }
+
+//if (type == Rider && !OperatingSystem.current().isWindows) {
+//    for (file in cacheDirectory.walkTopDown()) {
+//        if (file.isFile
+//            && (file.extension == "dylib"
+//                    || file.extension == "py"
+//                    || file.extension == "sh"
+//                    || file.extension.startsWith("so")
+//                    || file.name == "dotnet"
+//                    || file.name == "env-wrapper"
+//                    || file.name == "mono-sgen"
+//                    || file.name == "BridgeService"
+//                    || file.name == "JetBrains.Profiler.PdbServer"
+//                    || file.name == "JBDeviceService"
+//                    || file.name == "Rider.Backend")
+//        ) {
+//            setExecutable(cacheDirectory, file.relativeTo(cacheDirectory).toString(), context)
+//        }
+//    }
+//}

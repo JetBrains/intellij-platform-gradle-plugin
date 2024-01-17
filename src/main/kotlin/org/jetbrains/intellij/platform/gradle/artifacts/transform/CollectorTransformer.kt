@@ -18,13 +18,11 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.collectJars
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
-import kotlin.io.path.forEachDirectoryEntry
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
+import java.util.function.Predicate
+import kotlin.io.path.*
 
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class CollectorTransformer : TransformAction<TransformParameters.None> {
@@ -60,6 +58,15 @@ internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
 
     return (baseFiles + antFiles)
 }
+
+internal fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
+    collectFiles(directory) { it.extension == "jar" && filter.test(it) }
+
+internal fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
+    .takeIf { it.isDirectory() }
+    ?.listDirectoryEntries()
+    .orEmpty()
+    .filter { filter.test(it) }
 
 internal fun DependencyHandler.applyCollectorTransformer(
     compileClasspathConfiguration: Configuration,
