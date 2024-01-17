@@ -8,7 +8,6 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
 import org.jetbrains.intellij.platform.gradle.model.IvyModule
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
-import org.jetbrains.intellij.platform.gradle.projectCacheDir
 import org.jetbrains.intellij.platform.gradle.throwIfNull
 import java.io.File
 import java.time.LocalDateTime
@@ -19,7 +18,8 @@ import kotlin.io.path.*
 annotation class IntelliJPlatform
 
 internal fun ExternalModuleDependency.createIvyDependency(gradle: Gradle, publications: List<IvyModule.Publication>) {
-    val ivyDirectory = gradle.projectCacheDir.resolve("intellijPlatform/ivy").toPath()
+    val projectCacheDir = gradle.startParameter.projectCacheDir ?: gradle.rootProject.projectDir.resolve(".gradle")
+    val ivyDirectory = projectCacheDir.resolve("intellijPlatform/ivy").toPath()
     val ivyFileName = "$group-$name-$version.xml"
     val ivyFile = ivyDirectory.resolve(ivyFileName).takeUnless { it.exists() } ?: return
 
