@@ -24,8 +24,8 @@ import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
-import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.VerificationReportsFormats
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File

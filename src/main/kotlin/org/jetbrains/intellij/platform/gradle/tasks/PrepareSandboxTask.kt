@@ -64,8 +64,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
     /**
      * List of dependencies on external plugins.
-     *
-     * Default value: [IntelliJPluginExtension.getPluginDependenciesList]
      */
     @get:InputFiles
     @get:Classpath

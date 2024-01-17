@@ -25,7 +25,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.util.*
 import kotlin.io.path.Path
@@ -257,12 +257,12 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 downloadDirectory.convention(homeDirectory.dir("ides").map {
                     it.apply { asPath.createDirectories() }
                 })
-                failureLevel.convention(EnumSet.of(RunPluginVerifierTask.FailureLevel.COMPATIBILITY_PROBLEMS))
+                failureLevel.convention(EnumSet.of(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
                 verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
                 verificationReportsFormats.convention(
                     EnumSet.of(
-                        RunPluginVerifierTask.VerificationReportsFormats.PLAIN,
-                        RunPluginVerifierTask.VerificationReportsFormats.HTML,
+                        VerifyPluginTask.VerificationReportsFormats.PLAIN,
+                        VerifyPluginTask.VerificationReportsFormats.HTML,
                     )
                 )
                 teamCityOutputFormat.convention(false)

@@ -23,12 +23,10 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions.INTELLIJ_PLATFORM
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_CONFIGURATION_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENTED_JAR_PREFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT_CODE_TASK_NAME
@@ -49,6 +47,7 @@ import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
 import org.jetbrains.intellij.platform.gradle.utils.*
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType.*
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
 import java.net.URL
@@ -200,16 +199,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
     }
 
     private fun Project.applyConfigurations() {
-        val ideaPlugins = project.configurations.create(IDEA_PLUGINS_CONFIGURATION_NAME)
-            .setVisible(false)
-            .withDependencies {
-//                configurePluginDependencies(project, ideaDependencyProvider, extension, this)
-            }
-            .apply {
-                isCanBeConsumed = false
-                isCanBeResolved = true
-            }
-
         val performanceTest = project.configurations.create(PERFORMANCE_TEST_CONFIGURATION_NAME)
             .setVisible(false)
             .withDependencies {

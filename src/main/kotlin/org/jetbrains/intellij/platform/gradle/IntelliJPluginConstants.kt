@@ -81,13 +81,14 @@ object IntelliJPluginConstants {
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"
         const val RUN_IDE = "runIde" // TODO: check
-        const val RUN_PLUGIN_VERIFIER = "runPluginVerifier" // TODO: check
         const val SETUP_DEPENDENCIES = "setupDependencies"
         const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE = "testIde" // TODO: check
-        const val TEST_UI_IDE = "testUiIde" // TODO: check
+        const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check
+        const val TEST_IDE_UI = "testIdeUi" // TODO: check
         const val VERIFY_PLUGIN = "verifyPlugin" // TODO: check
-        const val VERIFY_PLUGIN_CONFIGURATION = "verifyPluginConfiguration" // TODO: check
+        const val VERIFY_PLUGIN_STRUCTURE = "verifyPluginStructure" // TODO: check
+        const val VERIFY_PLUGIN_PROJECT_CONFIGURATION = "verifyPluginProjectConfiguration" // TODO: check
         const val VERIFY_PLUGIN_SIGNATURE = "verifyPluginSignature"
     }
 
@@ -143,12 +144,12 @@ object IntelliJPluginConstants {
         Tasks.RUN_IDE,
 //        RUN_IDE_FOR_UI_TESTS_TASK_NAME,
 //        RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
-        Tasks.RUN_PLUGIN_VERIFIER,
+        Tasks.VERIFY_PLUGIN,
         Tasks.SETUP_DEPENDENCIES,
         Tasks.SIGN_PLUGIN,
         Tasks.TEST_IDE,
-        Tasks.VERIFY_PLUGIN,
-        Tasks.VERIFY_PLUGIN_CONFIGURATION,
+        Tasks.VERIFY_PLUGIN_STRUCTURE,
+        Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
         Tasks.VERIFY_PLUGIN_SIGNATURE,
     )
 
@@ -162,9 +163,6 @@ object IntelliJPluginConstants {
 
     @Deprecated("Deprecated in 2.0")
     const val PERFORMANCE_TEST_CONFIGURATION_NAME = "z20_performanceTest"
-
-    @Deprecated("Deprecated in 2.0")
-    const val IDEA_PLUGINS_CONFIGURATION_NAME = "z50_ideaPlugins"
 
     @Deprecated("Deprecated in 2.0")
     const val IDEA_CONFIGURATION_NAME = "z90_intellij"

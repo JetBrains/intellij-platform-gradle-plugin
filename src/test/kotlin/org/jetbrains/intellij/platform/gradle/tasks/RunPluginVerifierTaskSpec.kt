@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
-import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
 import kotlin.test.*
@@ -16,7 +15,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
     fun `warn about no IDE picked for verification`() {
         writePluginVerifierDependency()
 
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("No IDE selected for verification with the IntelliJ Plugin Verifier", output)
         }
     }
@@ -27,7 +26,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierDependency("1.307")
         writePluginVerifierIde()
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertContains("Starting the IntelliJ Plugin Verifier 1.307", output)
         }
     }
@@ -42,7 +41,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             gradleVersion = gradleVersion,
             fail = true,
             assertValidConfigurationCache = false,
-            Tasks.RUN_PLUGIN_VERIFIER,
+            Tasks.VERIFY_PLUGIN,
         ) {
             assertContains("Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254", output)
         }
@@ -54,7 +53,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             val version = LatestVersionResolver.pluginVerifier()
             assertContains("Starting the IntelliJ Plugin Verifier $version", output)
         }
@@ -68,7 +67,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierIde()
         writePluginVerifierIde("PS", "2022.3")
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertContains("Plugin projectName:1.0.0 against IC-223.8836.41: Compatible", output)
             assertContains("Plugin projectName:1.0.0 against PS-223.7571.212: Compatible", output)
         }
@@ -91,7 +90,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertContains("Plugin projectName:1.0.0 against AI-223.8836.35.2231.10406996: Compatible", output)
         }
     }
@@ -113,7 +112,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             val directory = buildDirectory.resolve("foo")
             assertContains("Verification reports directory: ${directory.toRealPath()}", output)
         }
@@ -139,7 +138,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         println("buildFile = ${buildFile}")
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
             assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
@@ -169,7 +168,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
             assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
@@ -198,7 +197,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
             assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
@@ -230,7 +229,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertContains("Compatible. 1 usage of scheduled for removal API and 1 usage of deprecated API. 1 usage of internal API", output)
             assertNotContains("Reference to a missing property", output)
         }
@@ -244,7 +243,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
 
         pluginXml.deleteIfExists()
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertContains("The plugin descriptor 'plugin.xml' is not found.", output)
         }
     }
@@ -266,7 +265,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
             assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
         }
@@ -279,7 +278,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
             assertNotContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
         }
@@ -303,7 +302,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Could not find idea:ideaIC:foo.", output)
         }
     }
@@ -326,7 +325,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             val message = "Reading IDE "
             val line = output.lines().find { it.contains(message) }
             assertNotNull(line)
@@ -354,7 +353,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER) {
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
             assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
         }
@@ -377,7 +376,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
             assertNotContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
         }
@@ -392,7 +391,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde(version = "2022.3.1")
 
-        buildAndFail(Tasks.RUN_PLUGIN_VERIFIER, "--offline") {
+        buildAndFail(Tasks.VERIFY_PLUGIN, "--offline") {
             assertContains("Could not resolve idea:ideaIC:2022.3.1", output)
             assertContains("No cached version of idea:ideaIC:2022.3.1 available for offline mode.", output)
         }
@@ -417,7 +416,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
             assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
 
@@ -446,7 +445,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.RUN_PLUGIN_VERIFIER) {
+        build(Tasks.VERIFY_PLUGIN) {
             assertNotContains("Internal API usages (2):", output)
         }
     }

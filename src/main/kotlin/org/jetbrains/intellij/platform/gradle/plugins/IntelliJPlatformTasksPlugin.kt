@@ -30,7 +30,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             InitializeIntelliJPlatformPluginTask::register,
             SetupDependenciesTask::register,
             PatchPluginXmlTask::register,
-            VerifyPluginConfigurationTask::register,
+            VerifyPluginProjectConfigurationTask::register,
             PrintBundledPluginsTask::register,
             PrintProductsReleasesTask::register,
             ::configureProcessResourcesTask,
@@ -40,9 +40,9 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             JarSearchableOptionsTask::register,
             BuildPluginTask::register,
             SignPluginTask::register,
-            RunPluginVerifierTask::register,
-            VerifyPluginSignatureTask::register,
             VerifyPluginTask::register,
+            VerifyPluginSignatureTask::register,
+            VerifyPluginStructureTask::register,
             PublishPluginTask::register,
             RunIdeTask::register,
             TestIdeTask::register,
@@ -73,7 +73,7 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
             val initializeIntelliJPlatformPluginTaskProvider =
                 project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
             val verifyPluginConfigurationTaskProvider =
-                project.tasks.named<VerifyPluginConfigurationTask>(Tasks.VERIFY_PLUGIN_CONFIGURATION)
+                project.tasks.named<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
             val gradleVersionProvider = project.provider { project.gradle.gradleVersion }
             val versionProvider = project.provider { project.version }
 

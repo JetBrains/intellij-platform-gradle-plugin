@@ -17,10 +17,8 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.*
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.io.path.*
 
 /**
@@ -39,7 +37,7 @@ import kotlin.io.path.*
  *
  * Read more about controlling this behavior on [Kotlin Standard Library](https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library).
  *
- * An old default [RunPluginVerifierTask.downloadDirectory] path contains downloaded IDEs but another default is in use. Links to the [FAQ section](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#the-plugin-verifier-download-directory-is-set-to-but-downloaded-ides-were-also-found-in)
+ * An old default [VerifyPluginTask.downloadDirectory] path contains downloaded IDEs but another default is in use. Links to the [FAQ section](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#the-plugin-verifier-download-directory-is-set-to-but-downloaded-ides-were-also-found-in)
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
@@ -47,7 +45,7 @@ import kotlin.io.path.*
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @CacheableTask
-abstract class VerifyPluginConfigurationTask : DefaultTask(), PlatformVersionAware {
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVersionAware {
 
     /**
      * The location of the built plugin file which will be used for verification.
@@ -214,7 +212,7 @@ abstract class VerifyPluginConfigurationTask : DefaultTask(), PlatformVersionAwa
 
     companion object {
         fun register(project: Project) =
-            project.registerTask<VerifyPluginConfigurationTask>(Tasks.VERIFY_PLUGIN_CONFIGURATION) {
+            project.registerTask<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
                 info(context, "Configuring plugin configuration verification task")
 
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
