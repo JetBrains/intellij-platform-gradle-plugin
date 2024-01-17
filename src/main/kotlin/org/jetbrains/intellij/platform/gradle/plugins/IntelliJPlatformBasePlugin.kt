@@ -222,7 +222,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
             applyBundledPluginsListTransformer()
             applyPluginVerifierIdeExtractorTransformer(
                 configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
-                extensionProvider.flatMap { it.pluginVerifier.downloadDirectory },
+                extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
             )
         }
 
@@ -250,7 +250,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(Extensions.VENDOR)
             }
 
-            configureExtension<IntelliJPlatformExtension.PluginVerifier>(Extensions.PLUGIN_VERIFIER) {
+            configureExtension<IntelliJPlatformExtension.VerifyPlugin>(Extensions.VERIFY_PLUGIN) {
                 homeDirectory.convention(
                     providers.systemProperty("plugin.verifier.home.dir").flatMap { layout.dir(provider { Path(it).toFile() }) }
                         .orElse(layout.dir(providers.environmentVariable("XDG_CACHE_HOME").map {
@@ -273,7 +273,7 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                 teamCityOutputFormat.convention(false)
                 subsystemsToCheck.convention("all")
 
-                configureExtension<IntelliJPlatformExtension.PluginVerifier.Ides>(
+                configureExtension<IntelliJPlatformExtension.VerifyPlugin.Ides>(
                     Extensions.IDES,
                     dependencies,
                     downloadDirectory,

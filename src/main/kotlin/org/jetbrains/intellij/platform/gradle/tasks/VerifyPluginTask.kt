@@ -260,21 +260,21 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()
 
-                extension.pluginVerifier.let {
+                extension.verifyPlugin.let {
                     ides.from(intellijPluginVerifierIdesConfiguration)
                     downloadDirectory.convention(it.downloadDirectory)
                     freeArgs.convention(it.freeArgs)
                 }
 
-                failureLevel.convention(extension.pluginVerifier.failureLevel)
+                failureLevel.convention(extension.verifyPlugin.failureLevel)
                 distributionFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-                verificationReportsDirectory.convention(extension.pluginVerifier.verificationReportsDirectory)
-                verificationReportsFormats.convention(extension.pluginVerifier.verificationReportsFormats)
-                externalPrefixes.convention(extension.pluginVerifier.externalPrefixes)
-                teamCityOutputFormat.convention(extension.pluginVerifier.teamCityOutputFormat)
-                subsystemsToCheck.convention(extension.pluginVerifier.subsystemsToCheck)
+                verificationReportsDirectory.convention(extension.verifyPlugin.verificationReportsDirectory)
+                verificationReportsFormats.convention(extension.verifyPlugin.verificationReportsFormats)
+                externalPrefixes.convention(extension.verifyPlugin.externalPrefixes)
+                teamCityOutputFormat.convention(extension.verifyPlugin.teamCityOutputFormat)
+                subsystemsToCheck.convention(extension.verifyPlugin.subsystemsToCheck)
 
-                ignoredProblemsFile.convention(extension.pluginVerifier.ignoredProblemsFile)
+                ignoredProblemsFile.convention(extension.verifyPlugin.ignoredProblemsFile)
                 offline.convention(project.gradle.startParameter.isOffline)
 
                 dependsOn(buildPluginTaskProvider)

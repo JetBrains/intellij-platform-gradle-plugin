@@ -180,7 +180,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             // TODO: test if no PV dependency is added to the project
             val pluginVerifierResolver = IntelliJPluginVerifierResolver(
                 intellijPluginVerifier = configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER),
-                localPath = extension.pluginVerifier.cliPath,
+                localPath = extension.verifyPlugin.cliPath,
             )
 
             pluginVerifierDirectory.convention(layout.dir(provider {

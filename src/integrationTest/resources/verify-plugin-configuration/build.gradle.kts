@@ -37,7 +37,7 @@ intellijPlatform {
         }
     }
 
-    pluginVerifier {
+    verifyPlugin {
         downloadDirectory = downloadDirectoryProperty
     }
 }

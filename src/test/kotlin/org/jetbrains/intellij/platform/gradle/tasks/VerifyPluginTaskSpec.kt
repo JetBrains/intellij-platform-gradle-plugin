@@ -47,7 +47,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             }
             
             tasks {
-                verifyPlugin {
+                verifyPluginStructure {
                     ignoreWarnings = false
                 }
             }
@@ -90,7 +90,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             tasks {
-                verifyPlugin {
+                verifyPluginStructure {
                     ignoreUnacceptableWarnings = true
                 }
             }
@@ -125,7 +125,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             tasks {
-                verifyPlugin {
+                verifyPluginStructure {
                     ignoreFailures = true
                 }
             }
@@ -149,7 +149,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             }
             
             tasks {
-                verifyPlugin {
+                verifyPluginStructure {
                     ignoreUnacceptableWarnings = true
                 }
             }
@@ -176,7 +176,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             tasks {
-                verifyPlugin {
+                verifyPluginStructure {
                     ignoreFailures = true
                 }
             }
@@ -203,7 +203,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             tasks {
-                verifyPlugin { 
+                verifyPluginStructure { 
                     ignoreWarnings = false 
                 }
             }

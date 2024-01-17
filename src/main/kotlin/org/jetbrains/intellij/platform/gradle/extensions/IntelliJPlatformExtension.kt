@@ -15,17 +15,17 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.VerificationReportsFormats
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
@@ -52,14 +52,14 @@ interface IntelliJPlatformExtension : ExtensionAware {
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)
 
-    val pluginVerifier
-        get() = extensions.getByName<PluginVerifier>(Extensions.PLUGIN_VERIFIER)
-
     val publishing
         get() = extensions.getByName<Publishing>(Extensions.PUBLISHING)
 
     val signing
         get() = extensions.getByName<Signing>(Extensions.SIGNING)
+
+    val verifyPlugin
+        get() = extensions.getByName<VerifyPlugin>(Extensions.VERIFY_PLUGIN)
 
     @IntelliJPlatform
     interface PluginConfiguration : ExtensionAware {
@@ -222,7 +222,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
     }
 
     @IntelliJPlatform
-    interface PluginVerifier : ExtensionAware {
+    interface VerifyPlugin : ExtensionAware {
 
         val ides
             get() = extensions.getByName<Ides>(Extensions.IDES)

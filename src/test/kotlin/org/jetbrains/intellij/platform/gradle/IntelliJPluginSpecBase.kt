@@ -72,7 +72,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             import java.util.*
             import org.jetbrains.intellij.platform.gradle.*
             import org.jetbrains.intellij.platform.gradle.tasks.*
-            import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.*
+            import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
             
             version = "1.0.0"
             

@@ -105,7 +105,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                 }
             }
@@ -128,7 +128,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                     verificationReportsFormats = listOf(VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN)
                 }
@@ -160,7 +160,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     verificationReportsFormats.empty()
                     verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                 }
@@ -190,7 +190,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                 }
             }
@@ -222,7 +222,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     ignoredProblemsFile = file("${ignoredProblems.invariantSeparatorsPathString}")
                 }
             }
@@ -258,7 +258,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     failureLevel = listOf(FailureLevel.DEPRECATED_API_USAGES)
                 }
             }
@@ -293,7 +293,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     ides {
                         ide("foo")
                     }
@@ -316,7 +316,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     ides {
                         recommended()
                     }
@@ -346,7 +346,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """            
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     failureLevel = FailureLevel.ALL
                 }
             }
@@ -369,8 +369,8 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             tasks {
-                runPluginVerifier {
-                    failureLevel = RunPluginVerifierTask.FailureLevel.NONE
+                verifyPlugin {
+                    failureLevel = VerifyPluginTask.FailureLevel.NONE
                 }
             }
             """.trimIndent()
@@ -408,7 +408,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                     freeArgs = listOf("-verification-reports-formats", "plain") 
                 }
@@ -438,7 +438,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins") 
                 }
             }
@@ -471,7 +471,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         buildFile.kotlin(
             """
             intellijPlatform {
-                pluginVerifier {
+                verifyPlugin {
                     ides {
                         ide("$type", "$version")
                     }

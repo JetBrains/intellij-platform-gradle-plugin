@@ -131,7 +131,7 @@ fun ProductReleasesValueSource(
     }
 }
 
-fun IntelliJPlatformExtension.PluginVerifier.Ides.ProductReleasesValueSource(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) =
+fun IntelliJPlatformExtension.VerifyPlugin.Ides.ProductReleasesValueSource(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) =
     ProductReleasesValueSource(
         providers,
         resources,
