@@ -8,7 +8,9 @@ object IntelliJPluginConstants {
     const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij.platform"
     const val PLUGIN_BASE_ID = "$PLUGIN_ID.base"
+    const val PLUGIN_SETTINGS_ID = "$PLUGIN_ID.settings"
     const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
+    const val LOG_PREFIX = "[$PLUGIN_ID]"
 
     const val PLUGIN_GROUP_NAME = "intellijPlatform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"

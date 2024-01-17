@@ -16,6 +16,7 @@ import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.LOG_PREFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
@@ -26,7 +27,6 @@ import org.jetbrains.intellij.platform.gradle.executableResolver.MarketplaceZipS
 import org.jetbrains.intellij.platform.gradle.executableResolver.RuntimeResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.info
 import org.jetbrains.intellij.platform.gradle.isSpecified
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
@@ -38,7 +38,7 @@ import kotlin.io.path.createDirectories
 
 internal inline fun <reified T : Task> Project.registerTask(vararg names: String, noinline configuration: T.() -> Unit = {}) {
     names.forEach { name ->
-        info(null, "Configuring task: $name")
+        project.logger.info("$LOG_PREFIX Configuring task: $name")
         tasks.maybeCreate<T>(name)
     }
 

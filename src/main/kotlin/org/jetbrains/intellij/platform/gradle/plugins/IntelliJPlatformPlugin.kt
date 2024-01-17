@@ -33,6 +33,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.INSTRUMENT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PERFORMANCE_TEST_CONFIGURATION_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_EAP_CANDIDATE
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
@@ -45,10 +46,7 @@ import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.base.RunIdeBase
-import org.jetbrains.intellij.platform.gradle.utils.ArchiveUtils
-import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
-import org.jetbrains.intellij.platform.gradle.utils.Version
-import org.jetbrains.intellij.platform.gradle.utils.mavenRepository
+import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
 import java.net.URL
@@ -56,11 +54,15 @@ import kotlin.io.path.extension
 
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
+    private val log = Logger(javaClass)
+
     private lateinit var archiveUtils: ArchiveUtils
     private lateinit var dependenciesDownloader: DependenciesDownloader
     private lateinit var context: String
 
     override fun apply(project: Project) {
+        log.info("Configuring plugin: $PLUGIN_ID")
+
         context = project.logCategory()
 
         info(context, "Configuring plugin: org.jetbrains.intellij.platform")

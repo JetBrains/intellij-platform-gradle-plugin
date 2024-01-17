@@ -7,22 +7,19 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.info
-import org.jetbrains.intellij.platform.gradle.logCategory
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 abstract class IntelliJPlatformAbstractProjectPlugin(val pluginId: String) : Plugin<Project> {
 
-    protected lateinit var context: String
+    private val log = Logger(javaClass)
 
     protected val Project.extensionProvider
         get() = project.provider { project.the<IntelliJPlatformExtension>() }
 
     final override fun apply(project: Project) {
-        context = project.logCategory()
+        log.info("Configuring plugin: $pluginId")
 
-        info(context, "Configuring plugin: $pluginId")
         checkGradleVersion()
-
         project.configure()
     }
 
