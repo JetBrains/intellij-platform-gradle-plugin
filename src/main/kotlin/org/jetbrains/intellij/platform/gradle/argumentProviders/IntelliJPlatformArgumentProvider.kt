@@ -13,13 +13,12 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.OpenedPackages
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
@@ -76,9 +75,7 @@ class IntelliJPlatformArgumentProvider(
         get() = launch.get()
             .additionalJvmArguments
             .filterNot { it.startsWith("-D") }
-            .takeIf { it.isNotEmpty() }
-            ?.map { it.resolveIdeHomeVariable() }
-            ?: OpenedPackages
+            .map { it.resolveIdeHomeVariable() }
 
     private val defaultHeapSpace = listOf("-Xmx512m", "-Xms256m")
     private val heapSpace
