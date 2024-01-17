@@ -9,7 +9,7 @@ import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
-import org.jetbrains.intellij.platform.gradle.asPath
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File
 import kotlin.io.path.listDirectoryEntries
 

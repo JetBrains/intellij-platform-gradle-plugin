@@ -17,10 +17,9 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.utils.PlatformJavaVersions
-import org.jetbrains.intellij.platform.gradle.utils.PlatformKotlinVersions
-import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.io.path.*
 

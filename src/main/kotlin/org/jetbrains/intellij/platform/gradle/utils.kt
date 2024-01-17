@@ -15,22 +15,14 @@ import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.file.FileSystemLocation
-import org.gradle.api.file.RegularFile
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.logging.Logging
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.plugins.PluginInstantiationException
-import org.gradle.api.provider.Property
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.kotlin.dsl.getByName
-import org.gradle.util.GradleVersion
 import org.jdom2.Document
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformPlugin
 import java.io.File
 import java.io.StringWriter
@@ -153,14 +145,6 @@ val repositoryVersion: String by lazy {
     )
 }
 
-fun <T> T?.or(other: T): T = this ?: other
-
-fun <T> T?.or(block: () -> T): T = this ?: block()
-
-fun <T> T?.ifNull(block: () -> Unit): T? = this ?: block().let { null }
-
-fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
-
 internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnection) {
     instanceFollowRedirects = false
     inputStream.use {
@@ -170,31 +154,3 @@ internal fun URL.resolveRedirection() = with(openConnection() as HttpURLConnecti
         }
     }.also { disconnect() }
 }
-
-internal fun checkGradleVersion() {
-    if (GradleVersion.current() < GradleVersion.version(MINIMAL_SUPPORTED_GRADLE_VERSION)) {
-        throw PluginInstantiationException("$PLUGIN_NAME requires Gradle $MINIMAL_SUPPORTED_GRADLE_VERSION and higher")
-    }
-}
-
-fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
-    null -> false
-    is String -> value.isNotEmpty()
-    is RegularFile -> value.asFile.exists()
-    else -> true
-}
-
-internal val FileSystemLocation.asPath
-    get() = asFile.toPath().absolute()
-
-internal val <T : FileSystemLocation> Provider<T>.asFile
-    get() = get().asFile
-
-internal val <T : FileSystemLocation> Provider<T>.asPath
-    get() = get().asFile.toPath().absolute()
-
-internal val <T : FileSystemLocation> Provider<T>.asFileOrNull
-    get() = orNull?.asFile
-
-internal val <T : FileSystemLocation> Provider<T>.asPathOrNull
-    get() = orNull?.asFile?.toPath()?.absolute()

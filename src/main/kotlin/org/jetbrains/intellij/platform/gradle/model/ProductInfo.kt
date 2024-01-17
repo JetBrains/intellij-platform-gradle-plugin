@@ -8,7 +8,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.throwIfNull
+import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.name

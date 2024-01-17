@@ -5,6 +5,9 @@ package org.jetbrains.intellij.platform.gradle.executableResolver
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.ifNull
+import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
 import kotlin.io.path.exists
 

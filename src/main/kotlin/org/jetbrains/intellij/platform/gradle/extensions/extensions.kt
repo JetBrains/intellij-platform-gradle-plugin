@@ -8,7 +8,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
 import org.jetbrains.intellij.platform.gradle.model.IvyModule
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
-import org.jetbrains.intellij.platform.gradle.throwIfNull
+import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.io.File
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter

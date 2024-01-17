@@ -20,7 +20,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LA
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
-import org.jetbrains.intellij.platform.gradle.throwIfNull
+import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver

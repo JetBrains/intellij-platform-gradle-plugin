@@ -10,6 +10,9 @@ import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.gradle.jvm.toolchain.internal.DefaultJvmVendorSpec
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_RUNTIME_VENDOR
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.ifNull
+import org.jetbrains.intellij.platform.gradle.utils.or
 import java.io.File
 import java.io.FileReader
 import java.io.IOException

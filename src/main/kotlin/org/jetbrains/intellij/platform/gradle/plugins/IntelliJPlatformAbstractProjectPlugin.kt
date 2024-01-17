@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.the
-import org.jetbrains.intellij.platform.gradle.checkGradleVersion
+import org.jetbrains.intellij.platform.gradle.utils.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 

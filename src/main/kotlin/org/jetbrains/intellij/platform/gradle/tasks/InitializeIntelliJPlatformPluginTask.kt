@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.net.URL
 import java.time.LocalDate
 import java.util.jar.JarOutputStream

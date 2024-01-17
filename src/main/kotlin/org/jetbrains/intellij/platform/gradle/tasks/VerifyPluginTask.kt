@@ -15,13 +15,12 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.asPath
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.error
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
 import org.jetbrains.intellij.platform.gradle.warn
-import kotlin.io.path.exists
 
 /**
  * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.

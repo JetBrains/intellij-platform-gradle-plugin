@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency
 import org.jetbrains.intellij.platform.gradle.dependency.PluginProjectDependency
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.base.SandboxAware
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.*
 

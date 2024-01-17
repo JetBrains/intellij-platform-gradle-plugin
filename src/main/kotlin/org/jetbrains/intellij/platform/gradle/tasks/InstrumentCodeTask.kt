@@ -20,6 +20,8 @@ import org.gradle.work.InputChanges
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.or
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
