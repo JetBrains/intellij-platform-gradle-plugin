@@ -13,11 +13,14 @@ import org.gradle.kotlin.dsl.the
 import org.jdom2.CDATA
 import org.jdom2.Document
 import org.jdom2.Element
-import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.logCategory
 import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.transformXml
+import org.jetbrains.intellij.platform.gradle.warn
 import kotlin.io.path.inputStream
 import kotlin.io.path.name
 
@@ -218,7 +221,9 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 inputFile.convention(project.layout.file(project.provider {
-                    project.sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                    val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
+
+                    sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                         .resources
                         .srcDirs
                         .map { it.resolve("META-INF/plugin.xml") }

@@ -24,7 +24,6 @@ import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
-import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.util.GradleVersion
 import org.jdom2.Document
@@ -199,6 +198,3 @@ internal val <T : FileSystemLocation> Provider<T>.asFileOrNull
 
 internal val <T : FileSystemLocation> Provider<T>.asPathOrNull
     get() = orNull?.asFile?.toPath()?.absolute()
-
-internal val Project.sourceSets
-    get() = extensions.getByName("sourceSets") as SourceSetContainer
