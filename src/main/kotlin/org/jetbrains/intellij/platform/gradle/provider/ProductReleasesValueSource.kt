@@ -16,9 +16,9 @@ import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.or
-import org.jetbrains.intellij.platform.gradle.toVersion
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductReleasesValueSource.Parameters> {
 

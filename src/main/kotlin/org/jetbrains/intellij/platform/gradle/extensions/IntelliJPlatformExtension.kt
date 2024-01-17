@@ -27,7 +27,7 @@ import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSourc
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask.VerificationReportsFormats
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
 import javax.inject.Inject
 import kotlin.io.path.exists

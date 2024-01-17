@@ -26,7 +26,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.RunPluginVerifierTask
-import org.jetbrains.intellij.platform.gradle.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories

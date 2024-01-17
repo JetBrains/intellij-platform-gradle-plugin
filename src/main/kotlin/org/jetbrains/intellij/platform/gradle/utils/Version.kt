@@ -59,3 +59,5 @@ class Version(
                 .let { (major, minor, patch) -> Version(major, minor, patch, versionString) }
     }
 }
+
+internal fun String.toVersion() = Version.parse(this)

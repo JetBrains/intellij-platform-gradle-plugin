@@ -10,7 +10,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 
 interface PlatformVersionAware {
