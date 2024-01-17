@@ -11,11 +11,12 @@ import org.gradle.api.publish.ivy.internal.publication.DefaultIvyConfiguration
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.RELEASE_SUFFIX_SNAPSHOT
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.utils.ArchiveUtils
 import org.jetbrains.intellij.platform.gradle.utils.DependenciesDownloader
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path

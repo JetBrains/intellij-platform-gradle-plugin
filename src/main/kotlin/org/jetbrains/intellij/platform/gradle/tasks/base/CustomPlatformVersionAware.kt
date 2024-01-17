@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.base
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 
 interface CustomPlatformVersionAware : PlatformVersionAware {
 

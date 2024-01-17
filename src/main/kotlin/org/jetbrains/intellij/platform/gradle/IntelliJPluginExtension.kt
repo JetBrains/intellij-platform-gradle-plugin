@@ -9,7 +9,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.newInstance
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType.IntellijIdeaCommunity
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.IDEA_PLUGINS_CONFIGURATION_NAME
 import org.jetbrains.intellij.platform.gradle.dependency.IdeaDependency
 import org.jetbrains.intellij.platform.gradle.dependency.PluginDependency

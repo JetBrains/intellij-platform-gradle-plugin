@@ -21,7 +21,7 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.*
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_IDEA_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions.INTELLIJ_PLATFORM
