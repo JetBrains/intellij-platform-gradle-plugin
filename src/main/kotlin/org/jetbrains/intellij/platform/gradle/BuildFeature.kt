@@ -6,6 +6,9 @@ import org.gradle.api.Project
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID as prefix
 
+/**
+ * Switch to [org.gradle.api.configuration.BuildFeatures] when supporting Gradle 8.5+.
+ */
 enum class BuildFeature(private val defaultValue: Boolean) {
     NO_SEARCHABLE_OPTIONS_WARNING(true),
     PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING(true),

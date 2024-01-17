@@ -31,6 +31,9 @@ import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
+/**
+ * TODO: Rename to IntelliJPlatformPlugin
+ */
 abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_BASE_ID) {
 
     override fun Project.configure() {
