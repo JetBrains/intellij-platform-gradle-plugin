@@ -24,7 +24,7 @@ jobs:
         gradleVersion:
           - "8.1"
           - "8.5"
-          - "8.6-rc-1"
+          - "8.6-rc-2"
         os:
           - windows-latest
           - ubuntu-latest
