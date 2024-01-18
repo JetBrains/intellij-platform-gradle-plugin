@@ -2,27 +2,19 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
-import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
-import org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformSettingsPlugin
-import kotlin.reflect.KProperty
 
 class Logger(cls: Class<*>) {
 
-    private val logger: Logger = Logging.getLogger(cls)
+    private val logger = Logging.getLogger(cls)
+    private val prefix = "[$PLUGIN_ID]"
 
-    fun debug(message: String) = logger.debug("[$PLUGIN_ID] $message")
-    fun error(message: String) = logger.error("[$PLUGIN_ID] $message")
-    fun error(message: String, e: Throwable) = logger.error("[$PLUGIN_ID] $message", e)
-    fun info(message: String) = logger.info("[$PLUGIN_ID] $message")
-    fun lifecycle(message: String) = logger.lifecycle("[$PLUGIN_ID] $message")
-    fun trace(message: String) = logger.trace("[$PLUGIN_ID] $message")
-    fun quiet(message: String) = logger.quiet("[$PLUGIN_ID] $message")
-    fun warn(message: String) = logger.warn("[$PLUGIN_ID] $message")
-    fun warn(message: String, e: Throwable) = logger.warn("[$PLUGIN_ID] $message", e)
-
-    operator fun getValue(intelliJPlatformSettingsPlugin: IntelliJPlatformSettingsPlugin, property: KProperty<*>): Any {
-        TODO("Not yet implemented")
-    }
+    fun debug(message: String, e: Throwable? = null) = logger.debug("$prefix $message", e)
+    fun error(message: String, e: Throwable? = null) = logger.error("$prefix $message", e)
+    fun info(message: String, e: Throwable? = null) = logger.info("$prefix $message", e)
+    fun lifecycle(message: String, e: Throwable? = null) = logger.lifecycle("$prefix $message", e)
+    fun trace(message: String, e: Throwable? = null) = logger.trace("$prefix $message", e)
+    fun quiet(message: String, e: Throwable? = null) = logger.quiet("$prefix $message", e)
+    fun warn(message: String, e: Throwable? = null) = logger.warn("$prefix $message", e)
 }
