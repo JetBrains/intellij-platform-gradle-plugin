@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.17.0] - 2024-01-18
+
 ### Added
 
 - Publish the plugin update and mark it as hidden to prevent public release after approval, using the `publishPlugin.hidden` property.
@@ -863,7 +865,7 @@
 - added JPS-type for intellij dependency (fixes [#106](../../issues/106))
 - patchXml action is reimplemented, now it's possible to freely customize input files, destination directory, since/until builds, plugin description and version
 - publishTask is reimplemented, now it's possible to set several channels to upload (fixes [#117](../../issues/117))
--
+- 
     - it's possible to reuse reimplemented tasks in client's code
     - it's allowed to run tasks without plugin.xml
     - tasks are configured before project evaluation, `project.afterEvaluate` is not require anymore
@@ -951,252 +953,130 @@
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.1...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.0...HEAD
+[1.17.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.1...v1.17.0
 [1.16.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.15.0...v1.16.0
-
 [1.15.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.2...v1.15.0
-
 [1.14.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.1...v1.14.2
-
 [1.14.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.14.0...v1.14.1
-
 [1.14.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.3...v1.14.0
-
 [1.13.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.2...v1.13.3
-
 [1.13.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.1...v1.13.2
-
 [1.13.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.13.0...v1.13.1
-
 [1.13.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.12.0...v1.13.0
-
 [1.12.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.11.0...v1.12.0
-
 [1.11.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.10.2...v1.11.0
-
 [1.10.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.10.1...v1.10.2
-
 [1.10.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.10.0...v1.10.1
-
 [1.10.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.9.0...v1.10.0
-
 [1.9.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.8.1...v1.9.0
-
 [1.8.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.8.0...v1.8.1
-
 [1.8.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.7.0...v1.8.0
-
 [1.7.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.6.0...v1.7.0
-
 [1.6.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.5.3...v1.6.0
-
 [1.5.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.5.2...v1.5.3
-
 [1.5.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.5.1...v1.5.2
-
 [1.5.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.5.0...v1.5.1
-
 [1.5.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.4.0...v1.5.0
-
 [1.4.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.3.1...v1.4.0
-
 [1.3.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.3.0...v1.3.1
-
 [1.3.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.2.1...v1.3.0
-
 [1.2.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.2.0...v1.2.1
-
 [1.2.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.1.6...v1.2.0
-
 [1.1.6]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.1.5...v1.1.6
-
 [1.1.5]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.1.4...v1.1.5
-
 [1.1.4]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.1.3...v1.1.4
-
 [1.1.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.1.2...v1.1.3
-
 [1.1.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.0.0...v1.1.2
-
 [1.0.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.7.3...v1.0.0
-
 [0.7.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.7.2...v0.7.3
-
 [0.7.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.7.1...v0.7.2
-
 [0.7.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.7.0...v0.7.1
-
 [0.7.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.6.5...v0.7.0
-
 [0.6.5]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.6.4...v0.6.5
-
 [0.6.4]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.6.3...v0.6.4
-
 [0.6.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.6.2...v0.6.3
-
 [0.6.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.6.1...v0.6.2
-
 [0.6.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.6.0...v0.6.1
-
 [0.6.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.5.1...v0.6.0
-
 [0.5.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.5.0...v0.5.1
-
 [0.5.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.26...v0.5.0
-
 [0.4.26]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.25...v0.4.26
-
 [0.4.25]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.24...v0.4.25
-
 [0.4.24]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.23...v0.4.24
-
 [0.4.23]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.22...v0.4.23
-
 [0.4.22]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.21...v0.4.22
-
 [0.4.21]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.20...v0.4.21
-
 [0.4.20]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.19...v0.4.20
-
 [0.4.19]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.18...v0.4.19
-
 [0.4.18]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.17...v0.4.18
-
 [0.4.17]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.16...v0.4.17
-
 [0.4.16]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.15...v0.4.16
-
 [0.4.15]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.14...v0.4.15
-
 [0.4.14]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.13...v0.4.14
-
 [0.4.13]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.12...v0.4.13
-
 [0.4.12]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.11...v0.4.12
-
 [0.4.11]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.10...v0.4.11
-
 [0.4.10]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.9...v0.4.10
-
 [0.4.9]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.8...v0.4.9
-
 [0.4.8]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.7...v0.4.8
-
 [0.4.7]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.6...v0.4.7
-
 [0.4.6]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.5...v0.4.6
-
 [0.4.5]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.4...v0.4.5
-
 [0.4.4]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v0.4.3...v0.4.4
-
 [0.4.3]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.4.2]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.4.1]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.4.0]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.12]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.11]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.10]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.7]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.6]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.5]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.4]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.3]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.2]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.1]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.3.0]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.20]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.19]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.18]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.17]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.16]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.15]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.14]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.13]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.12]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.11]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.10]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.9]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.8]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.7]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.6]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.5]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.4]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.3]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.2]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.1]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.2.0]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.1.10]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.1.9]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.1.6]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.1.4]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.1.0]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.41]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.39]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.37]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.35]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.34]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.33]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.32]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.30]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.29]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.28]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.27]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.25]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.21]: https://github.com/JetBrains/gradle-intellij-plugin/commits
-
 [0.0.10]: https://github.com/JetBrains/gradle-intellij-plugin/commits
