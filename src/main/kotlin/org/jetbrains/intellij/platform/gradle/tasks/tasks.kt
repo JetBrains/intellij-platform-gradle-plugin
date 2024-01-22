@@ -29,7 +29,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.provider.ExecutableArchValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.base.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.isSpecified
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType

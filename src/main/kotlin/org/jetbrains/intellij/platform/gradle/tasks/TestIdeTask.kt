@@ -12,8 +12,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.tasks.base.CustomPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.base.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import kotlin.io.path.absolutePathString
 
 /**

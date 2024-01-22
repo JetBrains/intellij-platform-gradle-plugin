@@ -13,7 +13,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.base.PlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.PlatformVersionAware
 
 @UntrackedTask(because = "Prints the output produced by the listProductsReleases task")
 abstract class PrintProductsReleasesTask : DefaultTask(), PlatformVersionAware {
