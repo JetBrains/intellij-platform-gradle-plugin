@@ -77,8 +77,8 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
         }
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)

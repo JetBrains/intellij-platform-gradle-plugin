@@ -251,8 +251,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         }
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
                 val intellijPluginVerifierIdesConfiguration = project.configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES)
 

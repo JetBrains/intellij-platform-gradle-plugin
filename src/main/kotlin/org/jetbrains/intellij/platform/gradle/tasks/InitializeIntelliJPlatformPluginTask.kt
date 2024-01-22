@@ -51,12 +51,12 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), PlatformVer
     abstract val pluginVersion: Property<String>
 
     private val log = Logger(javaClass)
-    
+
     init {
         group = PLUGIN_GROUP_NAME
         description = "Initializes the IntelliJ Platform Gradle Plugin"
     }
-    
+
     @TaskAction
     fun initialize() {
         checkPluginVersion()
@@ -110,8 +110,8 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), PlatformVer
         JarOutputStream(coroutinesJavaAgent.asPath.outputStream(), manifest).close()
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
                 offline.convention(project.gradle.startParameter.isOffline)
                 selfUpdateCheck.convention(project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK))

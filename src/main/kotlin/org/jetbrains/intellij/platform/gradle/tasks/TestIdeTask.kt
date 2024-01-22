@@ -11,9 +11,9 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
 
 /**
@@ -42,10 +42,10 @@ abstract class TestIdeTask : Test(), RunnableIdeAware, CustomPlatformVersionAwar
 
     override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 
-    companion object {
+    companion object : Registrable {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
         //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
-        fun register(project: Project) =
+        override fun register(project: Project) =
             project.registerTask<TestIdeTask>(Tasks.TEST_IDE) {
 
 //            systemProperty("idea.use.core.classloader.for.plugin.path", "true")

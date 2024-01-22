@@ -217,8 +217,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVer
 
     private operator fun Version?.compareTo(other: Version?) = other?.let { this?.compareTo(it) } ?: 0
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
                 log.info("Configuring plugin configuration verification task")
 

@@ -31,8 +31,8 @@ abstract class PrintProductsReleasesTask : DefaultTask(), PlatformVersionAware {
         println(it)
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
                 productsReleases.convention(
                     ProductReleasesValueSource(

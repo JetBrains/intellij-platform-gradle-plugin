@@ -76,8 +76,8 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
     override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
                 val pluginXmlProvider = patchPluginXmlTaskProvider.flatMap { it.outputFile }

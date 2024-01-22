@@ -9,9 +9,9 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
 
 /**
@@ -45,10 +45,10 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionA
 
     override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 
-    companion object {
+    companion object : Registrable {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
         //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/prop  erty.html
-        fun register(project: Project) =
+        override fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
                 systemPropertyDefault("idea.auto.reload.plugins", true)
                 systemPropertyDefault("idea.classpath.index.enabled", false)

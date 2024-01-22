@@ -26,8 +26,8 @@ abstract class PrintBundledPluginsTask : DefaultTask(), PlatformVersionAware {
         println(it)
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS)
     }
 }

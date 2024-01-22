@@ -122,8 +122,8 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
             .also { it.writeText(content) }
             .toPath()
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<VerifyPluginSignatureTask>(Tasks.VERIFY_PLUGIN_SIGNATURE) {
                 val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
 

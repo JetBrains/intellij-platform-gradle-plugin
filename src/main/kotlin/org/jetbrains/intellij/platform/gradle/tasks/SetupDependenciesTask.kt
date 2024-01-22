@@ -41,8 +41,8 @@ abstract class SetupDependenciesTask : DefaultTask() {
         log.error(message)
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<SetupDependenciesTask>(Tasks.SETUP_DEPENDENCIES)
     }
 }

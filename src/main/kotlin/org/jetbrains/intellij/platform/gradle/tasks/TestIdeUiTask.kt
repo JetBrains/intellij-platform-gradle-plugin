@@ -44,9 +44,8 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomPlatformVersi
 
     override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 
-    companion object {
-
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI) {
             }
     }

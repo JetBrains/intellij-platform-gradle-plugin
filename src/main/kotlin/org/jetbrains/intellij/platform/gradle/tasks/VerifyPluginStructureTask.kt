@@ -101,8 +101,8 @@ abstract class VerifyPluginStructureTask : DefaultTask(), SandboxAware {
         }
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<VerifyPluginStructureTask>(Tasks.VERIFY_PLUGIN_STRUCTURE) {
                 val extension = project.the<IntelliJPlatformExtension>()
 

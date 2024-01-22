@@ -120,9 +120,8 @@ abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomP
         }
     }
 
-    companion object {
-
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<RunIdePerformanceTestTask>(Tasks.TEST_IDE_PERFORMANCE) {
 //                artifactsDirectory.convention(extension.type.flatMap { type ->
 //                    extension.version.flatMap { version ->

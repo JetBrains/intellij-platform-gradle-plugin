@@ -282,3 +282,8 @@ internal fun DirectoryProperty.configureSandbox(directory: DirectoryProperty, su
         container.dir(path + sfx).apply { asPath.createDirectories() }
     })
 }
+
+internal interface Registrable {
+
+    fun register(project: Project)
+}

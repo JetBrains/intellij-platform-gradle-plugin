@@ -27,26 +27,28 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         }
 
         listOf(
-            InitializeIntelliJPlatformPluginTask::register,
-            SetupDependenciesTask::register,
-            PatchPluginXmlTask::register,
-            VerifyPluginProjectConfigurationTask::register,
-            PrintBundledPluginsTask::register,
-            PrintProductsReleasesTask::register,
-            ::configureProcessResourcesTask,
-            ::configureJarTask,
-            PrepareSandboxTask::register,
-            BuildSearchableOptionsTask::register,
-            JarSearchableOptionsTask::register,
-            BuildPluginTask::register,
-            SignPluginTask::register,
-            VerifyPluginTask::register,
-            VerifyPluginSignatureTask::register,
-            VerifyPluginStructureTask::register,
-            PublishPluginTask::register,
-            RunIdeTask::register,
-            TestIdeTask::register,
-        ).forEach { it.invoke(project) }
+            InitializeIntelliJPlatformPluginTask,
+            SetupDependenciesTask,
+            PatchPluginXmlTask,
+            VerifyPluginProjectConfigurationTask,
+            PrintBundledPluginsTask,
+            PrintProductsReleasesTask,
+            ProcessResourcesCompanion,
+            JarCompanion,
+            PrepareSandboxTask,
+            BuildSearchableOptionsTask,
+            JarSearchableOptionsTask,
+            BuildPluginTask,
+            SignPluginTask,
+            VerifyPluginTask,
+            VerifyPluginSignatureTask,
+            VerifyPluginStructureTask,
+            PublishPluginTask,
+            RunIdeTask,
+            TestIdeTask,
+        ).forEach {
+            it.register(project)
+        }
 
         with(tasks) {
             // Make all tasks depend on [INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME]
@@ -56,44 +58,52 @@ abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlug
         }
     }
 
-    private fun configureProcessResourcesTask(project: Project) =
-        project.registerTask<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
-            val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+    class ProcessResourcesCompanion {
+        companion object : Registrable {
+            override fun register(project: Project) =
+                project.registerTask<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
+                    val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
 
-            from(patchPluginXmlTaskProvider) {
-                duplicatesStrategy = DuplicatesStrategy.INCLUDE
-                into("META-INF")
-            }
+                    from(patchPluginXmlTaskProvider) {
+                        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+                        into("META-INF")
+                    }
 
-            dependsOn(patchPluginXmlTaskProvider)
+                    dependsOn(patchPluginXmlTaskProvider)
+                }
         }
+    }
 
-    private fun configureJarTask(project: Project) =
-        project.registerTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {
-            val initializeIntelliJPlatformPluginTaskProvider =
-                project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-            val verifyPluginConfigurationTaskProvider =
-                project.tasks.named<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
-            val gradleVersionProvider = project.provider { project.gradle.gradleVersion }
-            val versionProvider = project.provider { project.version }
+    class JarCompanion {
+        companion object : Registrable {
+            override fun register(project: Project) =
+                project.registerTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {
+                    val initializeIntelliJPlatformPluginTaskProvider =
+                        project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
+                    val verifyPluginConfigurationTaskProvider =
+                        project.tasks.named<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
+                    val gradleVersionProvider = project.provider { project.gradle.gradleVersion }
+                    val versionProvider = project.provider { project.version }
 
-            exclude("**/classpath.index")
+                    exclude("**/classpath.index")
 
-            manifest.attributes(
-                "Created-By" to gradleVersionProvider.map { "Gradle $it" },
-                "Version" to versionProvider,
-                "Build-JVM" to Jvm.current(),
-                "Build-OS" to OperatingSystem.current(),
-                "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
-                "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion },
-                "Platform-Type" to verifyPluginConfigurationTaskProvider.map { it.productInfo.productCode.toIntelliJPlatformType() },
-                "Platform-Version" to verifyPluginConfigurationTaskProvider.map { it.productInfo.version },
-                "Platform-Build" to verifyPluginConfigurationTaskProvider.map { it.productInfo.buildNumber },
-                "Kotlin-Stdlib-Bundled" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinStdlibDefaultDependency },
-                "Kotlin-Version" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinVersion },
-            )
+                    manifest.attributes(
+                        "Created-By" to gradleVersionProvider.map { "Gradle $it" },
+                        "Version" to versionProvider,
+                        "Build-JVM" to Jvm.current(),
+                        "Build-OS" to OperatingSystem.current(),
+                        "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
+                        "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion },
+                        "Platform-Type" to verifyPluginConfigurationTaskProvider.map { it.productInfo.productCode.toIntelliJPlatformType() },
+                        "Platform-Version" to verifyPluginConfigurationTaskProvider.map { it.productInfo.version },
+                        "Platform-Build" to verifyPluginConfigurationTaskProvider.map { it.productInfo.buildNumber },
+                        "Kotlin-Stdlib-Bundled" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinStdlibDefaultDependency },
+                        "Kotlin-Version" to verifyPluginConfigurationTaskProvider.flatMap { it.kotlinVersion },
+                    )
 
-            dependsOn(initializeIntelliJPlatformPluginTaskProvider)
-            dependsOn(verifyPluginConfigurationTaskProvider)
+                    dependsOn(initializeIntelliJPlatformPluginTaskProvider)
+                    dependsOn(verifyPluginConfigurationTaskProvider)
+                }
         }
+    }
 }

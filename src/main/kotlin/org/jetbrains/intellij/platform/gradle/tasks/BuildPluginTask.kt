@@ -10,9 +10,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 
 /**
- * Assembles a plugin and prepares ZIP archive for deployment.
- *
- * @see [Zip]
+ * This class represents a task for building a plugin and preparing a ZIP archive for deployment.
  */
 @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
 abstract class BuildPluginTask : Zip() {
@@ -22,8 +20,8 @@ abstract class BuildPluginTask : Zip() {
         description = "Assembles plugin and prepares ZIP archive for deployment."
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<BuildPluginTask>(Tasks.BUILD_PLUGIN) {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)

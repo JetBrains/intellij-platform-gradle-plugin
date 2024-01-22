@@ -13,11 +13,11 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.utils.isSpecified
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.isSpecified
 import java.util.*
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
@@ -246,8 +246,8 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         }
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<SignPluginTask>(Tasks.SIGN_PLUGIN) {
                 val buildPluginTaskProvider = project.tasks.named<Zip>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()

@@ -149,8 +149,8 @@ abstract class PublishPluginTask : DefaultTask() {
         }
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<PublishPluginTask>(Tasks.PUBLISH_PLUGIN) {
                 val extension = project.the<IntelliJPlatformExtension>()
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)

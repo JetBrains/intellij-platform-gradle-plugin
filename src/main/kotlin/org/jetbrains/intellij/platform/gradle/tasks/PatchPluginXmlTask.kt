@@ -214,8 +214,8 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
         }
     }
 
-    companion object {
-        fun register(project: Project) =
+    companion object : Registrable {
+        override fun register(project: Project) =
             project.registerTask<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML) {
                 val extension = project.the<IntelliJPlatformExtension>()
 
