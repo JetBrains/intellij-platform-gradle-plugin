@@ -12,7 +12,7 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
  * By default, the project with the IntelliJ Platform Gradle Plugin applied required the presence of the IntelliJ Platform, referred to later by various tasks,
  * configurations, and extensions.
  * The Custom IntelliJ Platform concept allows using another version, i.e., to run a guest IDE or tests against it.
- * When applying the [CustomIntelliJPlatformVersionAware] to the task, custom configurations to hold new dependencies defined by [type] and [version]
+ * When applying this interface to the task, custom configurations to hold new dependencies defined by [type] and [version]
  * (or [localPath], if referring to the local IntelliJ Platform instance) are created, as well as a dedicated [PrepareSandboxTask] task.
  * Configurations, as well as the task preparing sandbox for running and testing the custom IntelliJ Platform (if required), have a random suffix applied
  * to avoid collisions.

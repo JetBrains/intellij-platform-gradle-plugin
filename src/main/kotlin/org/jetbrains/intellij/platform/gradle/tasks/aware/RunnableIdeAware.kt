@@ -4,4 +4,12 @@ package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.process.JavaForkOptions
 
+/**
+ * The interface which utilizes a set of various interfaces required for running a guest IDE.
+ *
+ * @see CoroutinesJavaAgentAware
+ * @see RuntimeAware
+ * @see SandboxAware
+ * @see JavaForkOptions
+ */
 interface RunnableIdeAware : CoroutinesJavaAgentAware, RuntimeAware, SandboxAware, JavaForkOptions

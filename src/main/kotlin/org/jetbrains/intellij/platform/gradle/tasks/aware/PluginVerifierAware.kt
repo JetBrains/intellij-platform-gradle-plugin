@@ -2,19 +2,23 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 
+/**
+ * The interface provides the path to the IntelliJ Plugin Verifier executable.
+ * It is required to have a dependency on the IntelliJ Plugin Verifier added to the project with [IntelliJPlatformDependenciesExtension.pluginVerifier].
+ *
+ * @see IntelliJPlatformDependenciesExtension.pluginVerifier
+ */
 interface PluginVerifierAware {
 
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    val pluginVerifierDirectory: DirectoryProperty
-
+    /**
+     * Path to the IntelliJ Plugin Verifier executable.
+     */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     val pluginVerifierExecutable: RegularFileProperty

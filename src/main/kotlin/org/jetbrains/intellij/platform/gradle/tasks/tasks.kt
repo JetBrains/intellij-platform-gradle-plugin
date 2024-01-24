@@ -39,7 +39,7 @@ import kotlin.io.path.createDirectories
 
 /**
  * Registers a task of type T with the given names and configures its extra capabilities based on the [org.jetbrains.intellij.platform.gradle.tasks.aware]
- * interfaces it utizes.
+ * interfaces it utilizes.
  * Every new task is supposed to be registered using this method to get extra configuration utilized.
  *
  * @param T the type of task to register
@@ -200,11 +200,11 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     else -> ""
                 }
             )
-            sandboxDirectory.convention(sandboxDirectoryProvider)
-            sandboxConfigDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.CONFIG)
-            sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
-            sandboxSystemDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.SYSTEM)
-            sandboxLogDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.LOG)
+            sandboxContainerDirectory.convention(sandboxDirectoryProvider)
+            sandboxConfigDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.CONFIG)
+            sandboxPluginsDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.PLUGINS)
+            sandboxSystemDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.SYSTEM)
+            sandboxLogDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.LOG)
 
             /**
              * Some tasks are designed to work with the sandbox, so we explicitly make them depend on the [PrepareSandboxTask] task.
@@ -262,9 +262,6 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 localPath = extension.verifyPlugin.cliPath,
             )
 
-            pluginVerifierDirectory.convention(layout.dir(provider {
-                pluginVerifierResolver.resolveDirectory().toFile()
-            }))
             pluginVerifierExecutable.convention(layout.file(provider {
                 pluginVerifierResolver.resolveExecutable().toFile()
             }))
@@ -280,9 +277,6 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 localPath = extension.signing.cliPath,
             )
 
-            zipSignerDirectory.convention(layout.dir(provider {
-                marketplaceZipSignerResolver.resolveDirectory()?.toFile()
-            }))
             zipSignerExecutable.convention(layout.file(provider {
                 marketplaceZipSignerResolver.resolveExecutable()?.toFile()
             }))

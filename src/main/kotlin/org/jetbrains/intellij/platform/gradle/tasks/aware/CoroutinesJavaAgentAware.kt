@@ -5,10 +5,13 @@ package org.jetbrains.intellij.platform.gradle.tasks.aware
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Internal
 
+/**
+ * The interface provides the path to the Java Agent file for the Coroutines library required to enable coroutines debugging.
+ */
 interface CoroutinesJavaAgentAware {
 
     /**
-     * Represents the path to the coroutines Java agent file.
+     * The path to the coroutines Java Agent file.
      */
     @get:Internal
     val coroutinesJavaAgentFile: RegularFileProperty
