@@ -6,7 +6,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 
-interface SandboxAware : PlatformVersionAware {
+interface SandboxAware : IntelliJPlatformVersionAware {
 
     /**
      * Represents the suffix used for test-related configuration.

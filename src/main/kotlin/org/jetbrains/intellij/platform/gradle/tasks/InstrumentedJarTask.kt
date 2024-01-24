@@ -9,7 +9,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 /**
  * Creates a JAR file with instrumented classes.
  *
- * @see [InstrumentCodeTask]
+ * @see InstrumentCodeTask
  */
 @Deprecated(message = "CHECK")
 @CacheableTask

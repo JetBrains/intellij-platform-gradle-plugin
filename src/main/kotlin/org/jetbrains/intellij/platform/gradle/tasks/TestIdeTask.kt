@@ -11,7 +11,7 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
@@ -21,12 +21,12 @@ import kotlin.io.path.absolutePathString
  *
  * `runIde` task extends the [JavaExec] Gradle task – all properties available in the [JavaExec] as well as the following ones can be used to configure the [TestIdeTask] task.
  *
- * @see [RunIdeBase]
- * @see [JavaExec]
+ * @see RunIdeBase
+ * @see JavaExec
  */
 @Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run guest IDE")
-abstract class TestIdeTask : Test(), RunnableIdeAware, CustomPlatformVersionAware {
+abstract class TestIdeTask : Test(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -35,7 +35,7 @@ abstract class TestIdeTask : Test(), RunnableIdeAware, CustomPlatformVersionAwar
 
     @TaskAction
     override fun executeTests() {
-        assertPlatformVersion()
+        assertIntelliJPlatformSupportedVersion()
 
         super.executeTests()
     }

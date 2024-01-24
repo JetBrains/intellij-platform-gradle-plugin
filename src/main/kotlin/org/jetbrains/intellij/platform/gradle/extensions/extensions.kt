@@ -3,11 +3,13 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.ExternalModuleDependency
+import org.gradle.api.file.Directory
 import org.gradle.api.invocation.Gradle
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
 import org.jetbrains.intellij.platform.gradle.model.IvyModule
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.io.File
 import java.time.LocalDateTime
@@ -48,7 +50,8 @@ internal fun ExternalModuleDependency.createIvyDependency(gradle: Gradle, public
 internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
     is String -> localPath
     is File -> localPath.absolutePath
-    else -> throw IllegalArgumentException("Invalid argument type: ${localPath.javaClass}. Supported types: String or File")
+    is Directory -> localPath.asPath.absolutePathString()
+    else -> throw IllegalArgumentException("Invalid argument type: ${localPath.javaClass}. Supported types: String, File, or Directory")
 }
     .let { Path(it) }
     .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }

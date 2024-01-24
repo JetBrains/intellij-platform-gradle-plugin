@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.attributes.Attribute
+import org.gradle.util.GradleVersion
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 object IntelliJPluginConstants {
     const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
@@ -22,6 +24,12 @@ object IntelliJPluginConstants {
     const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
     const val TEST_TASK_NAME = "test"
     const val VERSION_LATEST = "latest"
+
+    object Constraints {
+        val MINIMAL_GRADLE_VERSION: GradleVersion = GradleVersion.version("8.1")
+        val MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER = "223".toVersion()
+        val MINIMAL_INTELLIJ_PLATFORM_VERSION = "2022.3".toVersion()
+    }
 
     object Extensions {
         const val IDES = "ides"
@@ -157,29 +165,6 @@ object IntelliJPluginConstants {
     const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
     const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
 
-    // see https://github.com/JetBrains/gradle-intellij-plugin/issues/1060
-    @Deprecated("Deprecated in 2.0")
-    const val INTELLIJ_DEFAULT_DEPENDENCIES_CONFIGURATION_NAME = "z10_intellijDefaultDependencies"
-
-    @Deprecated("Deprecated in 2.0")
-    const val PERFORMANCE_TEST_CONFIGURATION_NAME = "z20_performanceTest"
-
-    @Deprecated("Deprecated in 2.0")
-    const val IDEA_CONFIGURATION_NAME = "z90_intellij"
-
-    const val INSTRUMENTED_JAR_CONFIGURATION_NAME = "instrumentedJar"
-    const val INSTRUMENTED_JAR_PREFIX = "instrumented"
-
-    const val DEFAULT_IDEA_VERSION = "LATEST-EAP-SNAPSHOT"
-    const val MINIMAL_SUPPORTED_GRADLE_VERSION = "8.1"
-    const val MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION = "223"
-
-    const val RELEASE_SUFFIX_EAP = "-EAP-SNAPSHOT"
-    const val RELEASE_SUFFIX_EAP_CANDIDATE = "-EAP-CANDIDATE-SNAPSHOT"
-    const val RELEASE_SUFFIX_SNAPSHOT = "-SNAPSHOT"
-    const val RELEASE_SUFFIX_CUSTOM_SNAPSHOT = "-CUSTOM-SNAPSHOT"
-
-    const val MARKETPLACE_HOST = "https://plugins.jetbrains.com"
     const val DEFAULT_INTELLIJ_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository"
     const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven"
     const val JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA =

@@ -7,9 +7,10 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
@@ -19,12 +20,11 @@ import kotlin.io.path.absolutePathString
  *
  * `runIde` task extends the [JavaExec] Gradle task – all properties available in the [JavaExec] as well as the following ones can be used to configure the [RunIdeTask] task.
  *
- * @see [RunIdeBase]
- * @see [JavaExec]
+ * @see JavaExec
  */
 @Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run guest IDE")
-abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionAware {
+abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -36,7 +36,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionA
      */
     @TaskAction
     override fun exec() {
-        assertPlatformVersion()
+        assertIntelliJPlatformSupportedVersion()
 
         workingDir = platformPath.toFile()
 
@@ -73,5 +73,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionA
 
 //            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
             }
+    }
+}
+
+internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
+    if (!systemProperties.containsKey(name)) {
+        systemProperty(name, defaultValue)
     }
 }

@@ -7,13 +7,12 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
+import org.jetbrains.intellij.platform.gradle.model.assertSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 
-interface PlatformVersionAware {
+interface IntelliJPlatformVersionAware {
 
     @get:InputFiles
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -28,12 +27,5 @@ interface PlatformVersionAware {
         get() = platformPath.productInfo()
 
     @Throws(IllegalArgumentException::class)
-    fun assertPlatformVersion() {
-        val build = productInfo.buildNumber.toVersion()
-        val version = productInfo.version.toVersion()
-
-        if (build < Version(223)) {
-            throw IllegalArgumentException("The minimal supported IntelliJ Platform version is 2022.3 (223.0), which is higher than provided: $version ($build)")
-        }
-    }
+    fun assertIntelliJPlatformSupportedVersion() = productInfo.assertSupportedVersion()
 }

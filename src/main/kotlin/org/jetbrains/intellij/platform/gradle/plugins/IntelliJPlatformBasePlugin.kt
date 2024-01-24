@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.util.*
 import kotlin.io.path.Path
@@ -60,7 +61,10 @@ abstract class IntelliJPlatformBasePlugin : IntelliJPlatformAbstractProjectPlugi
                     attribute(Attributes.extracted, true)
                 }
 
-                extendsFrom(intellijPlatformDependencyConfiguration, intellijPlatformLocalConfiguration)
+                extendsFrom(
+                    intellijPlatformDependencyConfiguration,
+                    intellijPlatformLocalConfiguration,
+                )
 
                 incoming.beforeResolve {
                     if (dependencies.isEmpty()) {

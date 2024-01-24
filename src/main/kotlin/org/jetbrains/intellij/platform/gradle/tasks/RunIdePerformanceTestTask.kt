@@ -15,7 +15,7 @@ import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPerformanceParser
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -32,14 +32,13 @@ import kotlin.io.path.nameWithoutExtension
  *
  * Currently, the task is under adaptation; more documentation will be added in the future.
  *
- * @see [RunIdeTask]
- * @see [RunIdeBase]
- * @see [JavaExec]
+ * @see RunIdeTask
+ * @see JavaExec
  */
 @Deprecated(message = "CHECK")
 @Incubating
 @UntrackedTask(because = "Should always run IDE for performance tests")
-abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionAware {
+abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     /**
      * Path to directory with test projects and '.ijperf' files.

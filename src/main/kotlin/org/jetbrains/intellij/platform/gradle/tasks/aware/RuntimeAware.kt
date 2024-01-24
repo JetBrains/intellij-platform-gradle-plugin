@@ -7,7 +7,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 
-interface RuntimeAware : PlatformVersionAware {
+interface RuntimeAware : IntelliJPlatformVersionAware {
 
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)

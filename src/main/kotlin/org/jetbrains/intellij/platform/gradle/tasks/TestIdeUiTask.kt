@@ -8,7 +8,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
@@ -18,12 +18,12 @@ import kotlin.io.path.absolutePathString
  *
  * @see <a href="https://github.com/JetBrains/intellij-ui-test-robot>IntelliJ UI Test Robot</a>
  *
- * @see [RunIdeBase]
- * @see [JavaExec]
+ * @see RunIdeBase
+ * @see JavaExec
  */
 @Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run IDE for UI tests")
-abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomPlatformVersionAware {
+abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -35,7 +35,7 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomPlatformVersi
      */
     @TaskAction
     override fun exec() {
-        assertPlatformVersion()
+        assertIntelliJPlatformSupportedVersion()
 
         workingDir = platformPath.toFile()
 

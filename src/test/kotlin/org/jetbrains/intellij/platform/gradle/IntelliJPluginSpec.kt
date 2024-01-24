@@ -5,8 +5,8 @@ package org.jetbrains.intellij.platform.gradle
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_GRADLE_VERSION
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
@@ -560,7 +560,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     )
     fun `expect successful build using minimal supported Gradle version`() {
         val buildResult = build(
-            gradleVersion = MINIMAL_SUPPORTED_GRADLE_VERSION,
+            gradleVersion = Constraints.MINIMAL_GRADLE_VERSION.toString(),
             fail = false,
             assertValidConfigurationCache = true,
             "help",

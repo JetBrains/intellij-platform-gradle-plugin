@@ -8,13 +8,13 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 
 /**
  * Prints bundled plugins within the currently targeted IntelliJ-based IDE release.
  */
 @UntrackedTask(because = "Prints output")
-abstract class PrintBundledPluginsTask : DefaultTask(), PlatformVersionAware {
+abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionAware {
 
     init {
         group = PLUGIN_GROUP_NAME

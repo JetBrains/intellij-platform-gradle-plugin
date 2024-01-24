@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import org.gradle.api.GradleException
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -17,8 +16,8 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
+import org.jetbrains.intellij.platform.gradle.model.assertSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
@@ -27,7 +26,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.Verificatio
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
 import javax.inject.Inject
 import kotlin.io.path.exists
@@ -378,10 +376,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     val artifactPath = resolveArtifactPath(it)
                     val productInfo = artifactPath.productInfo()
 
+                    productInfo.assertSupportedVersion()
+
                     val type = productInfo.productCode.toIntelliJPlatformType()
-                    if (productInfo.buildNumber.toVersion() < MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION.toVersion()) {
-                        throw GradleException("The minimal supported IDE version is $MINIMAL_SUPPORTED_INTELLIJ_PLATFORM_VERSION+, the provided version is too low: ${productInfo.version} (${productInfo.buildNumber})")
-                    }
                     val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
 
                     dependencies.create(

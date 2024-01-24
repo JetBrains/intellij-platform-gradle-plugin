@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins
 
-import org.gradle.api.artifacts.Configuration
-import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.kotlin.dsl.create
 
@@ -13,13 +11,3 @@ internal inline fun <reified T : Any> Any.configureExtension(name: String, varar
         extension.configuration()
     }
 }
-
-internal fun ConfigurationContainer.create(name: String, description: String, configuration: Configuration.() -> Unit = {}) =
-    maybeCreate(name).apply {
-        isVisible = false
-        isCanBeConsumed = false
-        isCanBeResolved = true
-
-        this.description = description
-        configuration()
-    }

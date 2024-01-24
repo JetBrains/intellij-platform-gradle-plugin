@@ -111,6 +111,7 @@ fun ProductReleasesValueSource(
     productInfoProvider: Provider<ProductInfo>,
     configure: ProductReleasesValueSource.Parameters.() -> Unit = {},
 ) = providers.of(ProductReleasesValueSource::class.java) {
+    // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
     fun String.resolve() = resources.text
         .fromUri(this)
         .runCatching { asFile("UTF-8") }

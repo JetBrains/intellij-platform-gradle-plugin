@@ -20,7 +20,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import kotlin.io.path.*
@@ -49,7 +49,7 @@ import kotlin.io.path.*
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @CacheableTask
-abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), PlatformVersionAware {
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware {
 
     /**
      * The location of the built plugin file which will be used for verification.

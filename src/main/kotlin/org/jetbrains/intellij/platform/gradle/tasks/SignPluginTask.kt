@@ -33,7 +33,7 @@ import kotlin.io.path.nameWithoutExtension
  *
  * For more details, see [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html) article.
  *
- * @see [PublishPluginTask]
+ * @see PublishPluginTask
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-signing.html">Plugin Signing</a>
  * @see <a href="https://github.com/JetBrains/marketplace-zip-signer">Marketplace ZIP Signer</a>
  */

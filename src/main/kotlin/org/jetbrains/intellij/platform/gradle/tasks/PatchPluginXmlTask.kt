@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.transformXml
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.inputStream
@@ -31,7 +31,7 @@ import kotlin.io.path.name
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html">Plugin Configuration File</a>
  */
 @CacheableTask
-abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
+abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware {
 
     @get:InputFile
     @get:SkipWhenEmpty
@@ -42,98 +42,98 @@ abstract class PatchPluginXmlTask : DefaultTask(), PlatformVersionAware {
     abstract val outputFile: RegularFileProperty
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.id]
+     * @see IntelliJPlatformExtension.PluginConfiguration.id
      */
     @get:Input
     @get:Optional
     abstract val pluginId: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.name]
+     * @see IntelliJPlatformExtension.PluginConfiguration.name
      */
     @get:Input
     @get:Optional
     abstract val pluginName: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.version]
+     * @see IntelliJPlatformExtension.PluginConfiguration.version
      */
     @get:Input
     @get:Optional
     abstract val pluginVersion: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.description]
+     * @see IntelliJPlatformExtension.PluginConfiguration.description
      */
     @get:Input
     @get:Optional
     abstract val pluginDescription: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.changeNotes]
+     * @see IntelliJPlatformExtension.PluginConfiguration.changeNotes
      */
     @get:Input
     @get:Optional
     abstract val changeNotes: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.code]
+     * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.code
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorCode: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseDate]
+     * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseDate
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorReleaseDate: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseVersion]
+     * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseVersion
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorReleaseVersion: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.optional]
+     * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.optional
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorOptional: Property<Boolean>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
+     * @see IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild
      */
     @get:Input
     @get:Optional
     abstract val sinceBuild: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild]
+     * @see IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild
      */
     @get:Input
     @get:Optional
     abstract val untilBuild: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.Vendor.name]
+     * @see IntelliJPlatformExtension.PluginConfiguration.Vendor.name
      */
     @get:Input
     @get:Optional
     abstract val vendorName: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.Vendor.email]
+     * @see IntelliJPlatformExtension.PluginConfiguration.Vendor.email
      */
     @get:Input
     @get:Optional
     abstract val vendorEmail: Property<String>
 
     /**
-     * @see [IntelliJPlatformExtension.PluginConfiguration.Vendor.url]
+     * @see IntelliJPlatformExtension.PluginConfiguration.Vendor.url
      */
     @get:Input
     @get:Optional

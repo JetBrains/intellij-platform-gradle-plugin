@@ -26,8 +26,7 @@ import kotlin.io.path.pathString
  *
  * If your plugin doesn't implement custom settings, it is recommended to disable it.
  *
- * @see [RunIdeBase]
- * @see [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING]
+ * @see BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
  */
 @CacheableTask
 abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
@@ -66,7 +65,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
             )
         }
 
-        assertPlatformVersion()
+        assertIntelliJPlatformSupportedVersion()
 
         workingDir = platformPath.toFile()
         args = args + listOf("traverseUI", outputDir.asPath.pathString, "true")
