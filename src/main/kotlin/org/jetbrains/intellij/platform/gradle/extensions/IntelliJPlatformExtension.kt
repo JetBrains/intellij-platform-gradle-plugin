@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.invocation.Gradle
@@ -16,14 +17,17 @@ import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.assertSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
+import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.VerificationReportsFormats
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.ToolboxEnterprisePluginRepositoryService
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import java.io.File
@@ -32,19 +36,36 @@ import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
+/**
+ * The IntelliJ Platform Gradle Plugin extension.
+ */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 interface IntelliJPlatformExtension : ExtensionAware {
 
     /**
-     * Instrument Java classes with nullability assertions and compile forms created by IntelliJ GUI Designer.
+     * Enables the compiled classes instrumentation.
+     * The compiled code will be enhanced with:
+     * - nullability assertions
+     * - post-processing of forms created by IntelliJ GUI Designer
      *
      * Default value: `true`
      */
     val instrumentCode: Property<Boolean>
 
+    /**
+     * Builds an index of UI components (searchable options) for the plugin.
+     * Controls the execution of the [BuildSearchableOptionsTask] task.
+     *
+     * Default value: `true`
+     */
     val buildSearchableOptions: Property<Boolean>
 
+    /**
+     * The path to the sandbox container where tests and IDE instances read and write data.
+     *
+     * Default value: `build/[Sandbox.CONTAINER]/`
+     */
     val sandboxContainer: DirectoryProperty
 
     val pluginConfiguration
@@ -59,6 +80,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
     val verifyPlugin
         get() = extensions.getByName<VerifyPlugin>(Extensions.VERIFY_PLUGIN)
 
+    /**
+     * Configures the plugin definition and stores in the `plugin.xml` file.
+     */
     @IntelliJPlatform
     interface PluginConfiguration : ExtensionAware {
 
@@ -122,6 +146,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
          */
         val changeNotes: Property<String>
 
+        /**
+         * Configures the `product-descriptor` section of the plugin.
+         */
         @IntelliJPlatform
         interface ProductDescriptor {
 
@@ -164,6 +191,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
             val optional: Property<Boolean>
         }
 
+        /**
+         * Configures the `idea-version` section of the plugin.
+         */
         @IntelliJPlatform
         interface IdeaVersion {
 
@@ -187,6 +217,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
             val untilBuild: Property<String>
         }
 
+        /**
+         * Configures the `vendor` section of the plugin.
+         */
         @IntelliJPlatform
         interface Vendor {
 
@@ -219,6 +252,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
         }
     }
 
+    /**
+     * IntelliJ Plugin Verifier CLI tool configuration.
+     */
     @IntelliJPlatform
     interface VerifyPlugin : ExtensionAware {
 
@@ -230,20 +266,10 @@ interface IntelliJPlatformExtension : ExtensionAware {
          */
         val cliPath: RegularFileProperty
 
+        /**
+         * The list of free arguments passed directly to the IntelliJ Plugin Verifier CLI tool.
+         */
         val freeArgs: ListProperty<String>
-
-//        /**
-//         * IDEs to check, in `intellij.version` format, i.e.: `["IC-2019.3.5", "PS-2019.3.2"]`.
-//         * Check the available build versions on [IntelliJ Platform Builds list](https://jb.gg/intellij-platform-builds-list).
-//         *
-//         * Default value: output of the [ListProductsReleasesTask] task
-//         */
-//        val ideVersions: ListProperty<String>
-//
-//        /**
-//         * A list of the paths to locally installed IDE distributions that should be used for verification in addition to those specified in [ideVersions].
-//         */
-//        val idePaths: ConfigurableFileCollection
 
         /**
          * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
@@ -316,6 +342,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
          */
         val ignoredProblemsFile: RegularFileProperty
 
+        /**
+         * Defines the IDEs to be used along with the IntelliJ Plugin Verifier CLI tool.
+         */
         @IntelliJPlatform
         abstract class Ides @Inject constructor(
             internal val dependencies: DependencyHandler,
@@ -327,6 +356,12 @@ interface IntelliJPlatformExtension : ExtensionAware {
             internal val resources: ResourceHandler,
         ) {
 
+            /**
+             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+             * @param version The provider for the version of the IntelliJ Platform dependency.
+             */
             fun ide(type: Provider<*>, version: Provider<String>) = dependencies.addProvider(
                 Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
                 type
@@ -359,10 +394,27 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     }
             )
 
+            /**
+             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param type The IntelliJ Platform dependency.
+             * @param version The version of the IntelliJ Platform dependency.
+             */
             fun ide(type: IntelliJPlatformType, version: String) = ide(providers.provider { type }, providers.provider { version })
 
+            /**
+             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param type The IntelliJ Platform dependency.
+             * @param version The version of the IntelliJ Platform dependency.
+             */
             fun ide(type: String, version: String) = ide(type.toIntelliJPlatformType(), version)
 
+            /**
+             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param definition The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
+             */
             fun ide(definition: String) = definition.split('-').let {
                 when {
                     it.size == 2 -> ide(it.first(), it.last())
@@ -370,7 +422,12 @@ interface IntelliJPlatformExtension : ExtensionAware {
                 }
             }
 
-            fun localIde(localPath: Provider<String>) = dependencies.addProvider(
+            /**
+             * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param localPath The provider for the type of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
+             */
+            fun localIde(localPath: Provider<*>) = dependencies.addProvider(
                 Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
                 localPath.map {
                     val artifactPath = resolveArtifactPath(it)
@@ -391,30 +448,84 @@ interface IntelliJPlatformExtension : ExtensionAware {
                 }
             )
 
+            /**
+             * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param localPath The IntelliJ Platform dependency.
+             */
             fun localIde(localPath: String) = localIde(providers.provider { localPath })
 
-            fun localIde(localPath: File) = localIde(providers.provider { localPath.absolutePath })
+            /**
+             * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param localPath The IntelliJ Platform dependency.
+             */
+            fun localIde(localPath: File) = localIde(providers.provider { localPath })
 
+            /**
+             * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param localPath The IntelliJ Platform dependency.
+             */
+            fun localIde(localPath: Directory) = localIde(providers.provider { localPath })
+
+            /**
+             * Prepares a [ProductReleasesValueSource] instance for the further usage, so it's possible to retrieve and filter IDEs based on the currently
+             * used platform or given criteria.
+             *
+             * @param configure The lambda function to configure the parameters for obtaining the product releases. Defaults to an empty action.
+             * @see ProductReleasesValueSource
+             */
             fun listProductReleases(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) = ProductReleasesValueSource(configure)
 
+            /**
+             * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
+             * for IntelliJ Platform Verifier using the [ide] helper method.
+             *
+             * @see ide
+             * @see listProductReleases
+             * @see ProductReleasesValueSource
+             */
             fun recommended() = listProductReleases().get().map { ide(it) }
         }
     }
 
+    /**
+     * Plugin publishing configuration.
+     */
     @IntelliJPlatform
     interface Publishing {
 
+        /**
+         * The hostname used for publishing the plugin.
+         */
         val host: Property<String>
 
+        /**
+         * Authorization token.
+         */
         val token: Property<String>
 
+        /**
+         * Publishing channel.
+         */
         val channel: Property<String>
 
+        /**
+         * Defines if [ToolboxEnterprisePluginRepositoryService] should be used instead of the default one.
+         */
         val toolboxEnterprise: Property<Boolean>
 
+        /**
+         * Publish the plugin update and mark it as hidden to prevent public release after approval.
+         * See: https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html
+         */
         val hidden: Property<Boolean>
     }
 
+    /**
+     * Plugin signing configuration
+     */
     @IntelliJPlatform
     interface Signing {
 

@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.file.Directory
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
@@ -26,8 +27,19 @@ import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
-internal typealias DependencyAction = (Dependency.() -> Unit)
-
+/**
+ * Extension class for managing IntelliJ Platform dependencies in a Gradle build script applied to the [DependencyHandler].
+ *
+ * This class provides methods for adding dependencies to different IntelliJ Platform products and managing local dependencies.
+ * It also includes methods for adding JetBrains Runtime, IntelliJ Platform plugins, IntelliJ Platform bundled plugins, IntelliJ Plugin Verifier,
+ * and Marketplace ZIP Signer.
+ *
+ * @param configurations The Gradle [ConfigurationContainer] to manage configurations.
+ * @param repositories The Gradle [RepositoryHandler] to manage repositories.
+ * @param dependencies The Gradle [DependencyHandler] to manage dependencies.
+ * @param providers The Gradle [ProviderFactory] to create providers.
+ * @param gradle The [Gradle] instance.
+ */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
@@ -38,6 +50,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val gradle: Gradle,
 ) {
 
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+     * @param version The provider for the version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun create(
         type: Provider<*>,
         version: Provider<String>,
@@ -45,6 +65,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = addIntelliJPlatformDependency(type, version, configurationName, action)
 
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+     * @param version The version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun create(
         type: Provider<*>,
         version: String,
@@ -52,6 +80,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = addIntelliJPlatformDependency(type, providers.provider { version }, configurationName, action)
 
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The type of the IntelliJ Platform dependency.
+     * @param version The provider for the version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun create(
         type: IntelliJPlatformType,
         version: Provider<String>,
@@ -59,6 +95,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = addIntelliJPlatformDependency(providers.provider { type }, version, configurationName, action)
 
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The type of the IntelliJ Platform dependency.
+     * @param version The provider for the version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun create(
         type: String,
         version: Provider<String>,
@@ -66,6 +110,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = addIntelliJPlatformDependency(providers.provider { type.toIntelliJPlatformType() }, version, configurationName, action)
 
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The type of the IntelliJ Platform dependency.
+     * @param version The version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun create(
         type: IntelliJPlatformType,
         version: String,
@@ -73,6 +125,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = addIntelliJPlatformDependency(providers.provider { type }, providers.provider { version }, configurationName, action)
 
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The type of the IntelliJ Platform dependency.
+     * @param version The version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun create(
         type: String,
         version: String,
@@ -80,66 +140,275 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = addIntelliJPlatformDependency(providers.provider { type.toIntelliJPlatformType() }, providers.provider { version }, configurationName, action)
 
+    /**
+     * Adds a dependency on Android Studio.
+     *
+     * @param version The version of Android Studio.
+     */
     fun androidStudio(version: String) = create(IntelliJPlatformType.AndroidStudio, version)
+
+    /**
+     * Adds a dependency on Android Studio.
+     *
+     * @param version The provider for the version of Android Studio.
+     */
     fun androidStudio(version: Provider<String>) = create(IntelliJPlatformType.AndroidStudio, version)
 
+    /**
+     * Adds a dependency on CLion.
+     *
+     * @param version The version of CLion.
+     */
     fun clion(version: String) = create(IntelliJPlatformType.CLion, version)
+
+    /**
+     * Adds a dependency on CLion.
+     *
+     * @param version The provider for the version of CLion.
+     */
     fun clion(version: Provider<String>) = create(IntelliJPlatformType.CLion, version)
 
+    /**
+     * Adds a dependency on Fleet Backend.
+     *
+     * @param version The version of Fleet Backend.
+     */
+    fun fleetBackend(version: String) = create(IntelliJPlatformType.Fleet, version)
+
+    /**
+     * Adds a dependency on Fleet Backend.
+     *
+     * @param version The provider for the version of Fleet Backend.
+     */
+    fun fleetBackend(version: Provider<String>) = create(IntelliJPlatformType.Fleet, version)
+
+    /**
+     * Adds a dependency on Gateway.
+     *
+     * @param version The version of Gateway.
+     */
     fun gateway(version: String) = create(IntelliJPlatformType.Gateway, version)
+
+    /**
+     * Adds a dependency on Gateway.
+     *
+     * @param version The provider for the version of Gateway.
+     */
     fun gateway(version: Provider<String>) = create(IntelliJPlatformType.Gateway, version)
 
+    /**
+     * Adds a dependency on GoLand.
+     *
+     * @param version The version of GoLand.
+     */
     fun goland(version: String) = create(IntelliJPlatformType.GoLand, version)
+
+    /**
+     * Adds a dependency on GoLand.
+     *
+     * @param version The provider for the version of GoLand.
+     */
     fun goland(version: Provider<String>) = create(IntelliJPlatformType.GoLand, version)
 
+    /**
+     * Adds a dependency on IntelliJ IDEA Community.
+     *
+     * @param version The version of IntelliJ IDEA Community.
+     */
     fun intellijIdeaCommunity(version: String) = create(IntelliJPlatformType.IntellijIdeaCommunity, version)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Community.
+     *
+     * @param version The provider for the version of IntelliJ IDEA Community.
+     */
     fun intellijIdeaCommunity(version: Provider<String>) = create(IntelliJPlatformType.IntellijIdeaCommunity, version)
 
+    /**
+     * Adds a dependency on IntelliJ IDEA Ultimate.
+     *
+     * @param version The version of IntelliJ IDEA Ultimate.
+     */
     fun intellijIdeaUltimate(version: String) = create(IntelliJPlatformType.IntellijIdeaUltimate, version)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Ultimate.
+     *
+     * @param version The provider for the version of IntelliJ IDEA Ultimate.
+     */
     fun intellijIdeaUltimate(version: Provider<String>) = create(IntelliJPlatformType.IntellijIdeaUltimate, version)
 
+    /**
+     * Adds a dependency on PhpStorm.
+     *
+     * @param version The version of PhpStorm.
+     */
     fun phpstorm(version: String) = create(IntelliJPlatformType.PhpStorm, version)
+
+    /**
+     * Adds a dependency on PhpStorm.
+     *
+     * @param version The provider for the version of PhpStorm.
+     */
     fun phpstorm(version: Provider<String>) = create(IntelliJPlatformType.PhpStorm, version)
 
+    /**
+     * Adds a dependency on PyCharm Professional.
+     *
+     * @param version The version of PyCharm Professional.
+     */
     fun pycharmProfessional(version: String) = create(IntelliJPlatformType.PyCharmProfessional, version)
+
+    /**
+     * Adds a dependency on PyCharm Professional.
+     *
+     * @param version The provider for the version of PyCharm Professional.
+     */
     fun pycharmProfessional(version: Provider<String>) = create(IntelliJPlatformType.PyCharmProfessional, version)
 
+    /**
+     * Adds a dependency on PyCharm Community.
+     *
+     * @param version The version of PyCharm Community.
+     */
     fun pycharmCommunity(version: String) = create(IntelliJPlatformType.PyCharmCommunity, version)
+
+    /**
+     * Adds a dependency on PyCharm Community.
+     *
+     * @param version The provider for the version of PyCharm Community.
+     */
     fun pycharmCommunity(version: Provider<String>) = create(IntelliJPlatformType.PyCharmCommunity, version)
 
+    /**
+     * Adds a dependency on Rider.
+     *
+     * @param version The version of Rider.
+     */
     fun rider(version: String) = create(IntelliJPlatformType.Rider, version)
+
+    /**
+     * Adds a dependency on Rider.
+     *
+     * @param version The provider for the version of Rider.
+     */
     fun rider(version: Provider<String>) = create(IntelliJPlatformType.Rider, version)
 
+    /**
+     * Adds a dependency on Rust Rover.
+     *
+     * @param version The version of Rust Rover.
+     */
+    fun rustRover(version: String) = create(IntelliJPlatformType.RustRover, version)
+
+    /**
+     * Adds a dependency on Rust Rover.
+     *
+     * @param version The provider for the version of Rust Rover.
+     */
+    fun rustRover(version: Provider<String>) = create(IntelliJPlatformType.RustRover, version)
+
+    /**
+     * Adds a dependency on Writerside.
+     *
+     * @param version The version of Writerside.
+     */
+    fun writerside(version: String) = create(IntelliJPlatformType.Writerside, version)
+
+    /**
+     * Adds a dependency on Writerside.
+     *
+     * @param version The provider for the version of Writerside.
+     */
+    fun writerside(version: Provider<String>) = create(IntelliJPlatformType.Writerside, version)
+
+    /**
+     * Adds a local dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun local(
         localPath: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
         action: DependencyAction = {},
     ) = addIntelliJPlatformLocalDependency(localPath, configurationName, action)
 
+    /**
+     * Adds a local dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath The local path of the IntelliJ Platform dependency
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun local(
         localPath: String,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
         action: DependencyAction = {},
     ) = local(providers.provider { localPath }, configurationName, action)
 
+    /**
+     * Adds a local dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath The local path of the IntelliJ Platform dependency
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun local(
         localPath: File,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
         action: DependencyAction = {},
-    ) = local(providers.provider { localPath.absolutePath }, configurationName, action)
+    ) = local(providers.provider { localPath }, configurationName, action)
 
+    /**
+     * Adds a local dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath The local path of the IntelliJ Platform dependency
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    fun local(
+        localPath: Directory,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
+        action: DependencyAction = {},
+    ) = local(providers.provider { localPath }, configurationName, action)
+
+    /**
+     * Adds a dependency on JetBrains Runtime.
+     *
+     * @param explicitVersion The provider for the explicit version of the JetBrains Runtime.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.JETBRAINS_RUNTIME_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun jetbrainsRuntime(
         explicitVersion: Provider<String>,
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         action: DependencyAction = {},
     ) = addJbrDependency(explicitVersion, configurationName, action)
 
+    /**
+     * Adds a dependency on JetBrains Runtime.
+     *
+     * @param explicitVersion The explicit version of the JetBrains Runtime.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.JETBRAINS_RUNTIME_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun jetbrainsRuntime(
         explicitVersion: String,
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         action: DependencyAction = {},
     ) = addJbrDependency(providers.provider { explicitVersion }, configurationName, action)
 
+    /**
+     * Adds a local dependency on JetBrains Runtime.
+     *
+     * @param version The provider of the JetBrains Runtime version.
+     * @param variant The provider of the JetBrains Runtime variant.
+     * @param architecture The provider of the JetBrains Runtime architecture.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.JETBRAINS_RUNTIME_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun jetbrainsRuntime(
         version: Provider<String>,
         variant: Provider<String>,
@@ -148,6 +417,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = jetbrainsRuntime(providers.provider { from(version.get(), variant.orNull, architecture.orNull) }, configurationName, action)
 
+    /**
+     * Adds a local dependency on JetBrains Runtime.
+     *
+     * @param version The JetBrains Runtime version.
+     * @param variant The JetBrains Runtime variant.
+     * @param architecture The JetBrains Runtime architecture.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.JETBRAINS_RUNTIME_DEPENDENCY].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun jetbrainsRuntime(
         version: String,
         variant: String,
@@ -156,12 +434,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = jetbrainsRuntime(providers.provider { from(version, variant, architecture) }, configurationName, action)
 
-    fun jetbrainsRuntime(
-        version: String,
-        variant: String,
-        architecture: String,
-    ) = jetbrainsRuntime(from(version, variant, architecture))
-
+    /**
+     * Adds a dependency on a plugin for IntelliJ Platform.
+     *
+     * @param id The provider of the plugin identifier.
+     * @param version The provider of the plugin version.
+     * @param channel The provider of the plugin distribution channel.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_PLUGINS].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun plugin(
         id: Provider<String>,
         version: Provider<String>,
@@ -170,6 +451,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = addIntelliJPlatformPlugin(id, version, channel, configurationName, action)
 
+    /**
+     * Adds a dependency on a plugin for IntelliJ Platform.
+     *
+     * @param id The plugin identifier.
+     * @param version The plugin version.
+     * @param channel The plugin distribution channel.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_PLUGINS].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun plugin(
         id: String,
         version: String,
@@ -178,42 +468,92 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = plugin(providers.provider { id }, providers.provider { version }, providers.provider { channel }, configurationName, action)
 
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform plugin.
+     *
+     * @param id The provider of the bundled plugin identifier.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun bundledPlugin(
         id: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
     ) = addIntelliJPlatformBundledPlugin(id, configurationName, action)
 
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform plugin.
+     *
+     * @param id The bundled plugin identifier.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun bundledPlugin(
         id: String,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
     ) = bundledPlugin(providers.provider { id }, configurationName, action)
 
+    /**
+     * Adds a dependency on IntelliJ Plugin Verifier.
+     *
+     * @param version The provider of the IntelliJ Plugin Verifier version.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLUGIN_VERIFIER].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun pluginVerifier(
         version: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
     ) = addPluginVerifier(version, configurationName, action)
 
+    /**
+     * Adds a dependency on IntelliJ Plugin Verifier.
+     *
+     * @param version The IntelliJ Plugin Verifier version.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLUGIN_VERIFIER].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun pluginVerifier(
         version: String = VERSION_LATEST,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
     ) = pluginVerifier(providers.provider { version }, configurationName, action)
 
+    /**
+     * Adds a dependency on Marketplace ZIP Signer.
+     *
+     * @param version The provider of the Marketplace ZIP Signer version.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.MARKETPLACE_ZIP_SIGNER].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun zipSigner(
         version: Provider<String>,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
     ) = addZipSigner(version, configurationName, action)
 
+    /**
+     * Adds a dependency on Marketplace ZIP Signer.
+     *
+     * @param version The Marketplace ZIP Signer version.
+     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.MARKETPLACE_ZIP_SIGNER].
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     fun zipSigner(
         version: String = VERSION_LATEST,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
     ) = zipSigner(providers.provider { version }, configurationName, action)
 
+    /**
+     * A base method for adding a dependency on IntelliJ Platform.
+     *
+     * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+     * @param versionProvider The provider for the version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action An optional action to be performed on the created dependency.
+     */
     private fun addIntelliJPlatformDependency(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
@@ -237,6 +577,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action,
     )
 
+    /**
+     * A base method for adding a dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action An optional action to be performed on the created dependency.
+     */
     private fun addIntelliJPlatformLocalDependency(
         localPathProvider: Provider<*>,
         configurationName: String,
@@ -263,6 +610,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action,
     )
 
+    /**
+     * A base method for adding a dependency on JetBrains Runtime.
+     *
+     * @param explicitVersionProvider The provider for the explicit version of the JetBrains Runtime.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     private fun addJbrDependency(
         explicitVersionProvider: Provider<String>,
         configurationName: String,
@@ -280,6 +634,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action,
     )
 
+    /**
+     * A base method for adding a dependency on a plugin for IntelliJ Platform.
+     *
+     * @param idProvider The provider of the plugin identifier.
+     * @param versionProvider The provider of the plugin version.
+     * @param channelProvider The provider of the plugin distribution channel.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     private fun addIntelliJPlatformPlugin(
         idProvider: Provider<String>,
         versionProvider: Provider<String>,
@@ -307,6 +670,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action,
     )
 
+    /**
+     * A base method for adding  a dependency on a bundled IntelliJ Platform plugin.
+     *
+     * @param idProvider The provider of the bundled plugin identifier.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     private fun addIntelliJPlatformBundledPlugin(
         idProvider: Provider<String>,
         configurationName: String,
@@ -332,6 +702,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action,
     )
 
+    /**
+     * A base method for adding  a dependency on IntelliJ Plugin Verifier.
+     *
+     * @param versionProvider The provider of the IntelliJ Plugin Verifier version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     private fun addPluginVerifier(
         versionProvider: Provider<String>,
         configurationName: String,
@@ -353,6 +730,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action,
     )
 
+    /**
+     * A base method for adding  a dependency on Marketplace ZIP Signer.
+     *
+     * @param versionProvider The provider of the Marketplace ZIP Signer version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
     private fun addZipSigner(
         versionProvider: Provider<String>,
         configurationName: String,
@@ -430,13 +814,13 @@ private fun getPrefix(version: String, variant: String?) = when {
     else -> ""
 }
 
-internal fun platform(operatingSystem: OperatingSystem) = when {
+private fun platform(operatingSystem: OperatingSystem) = when {
     operatingSystem.isWindows -> "windows"
     operatingSystem.isMacOsX -> "osx"
     else -> "linux"
 }
 
-internal fun arch(newFormat: Boolean): String {
+private fun arch(newFormat: Boolean): String {
     val arch = System.getProperty("os.arch")
     if ("aarch64" == arch || "arm64" == arch) {
         return "aarch64"
@@ -453,3 +837,8 @@ internal fun arch(newFormat: Boolean): String {
         false -> "x86"
     }
 }
+
+/**
+ * Type alias for a lambda function that takes a [Dependency] and performs some actions on it.
+ */
+internal typealias DependencyAction = (Dependency.() -> Unit)

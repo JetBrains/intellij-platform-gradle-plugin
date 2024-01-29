@@ -9,7 +9,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 
 /**
- * The interface provides a quick access to the sandbox container and specific directories located within it.
+ * The interface provides quick access to the sandbox container and specific directories located within it.
  * The path to the sandbox container is obtained using the [IntelliJPlatformExtension.sandboxContainer] extension property and the type and version
  * of the IntelliJ Platform applied to the project.
  * Paths respect custom IntelliJ Platform when combined with [CustomIntelliJPlatformVersionAware].

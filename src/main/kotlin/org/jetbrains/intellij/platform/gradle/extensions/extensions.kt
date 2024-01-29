@@ -16,10 +16,20 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.*
 
+/**
+ * Represents an annotation to mark DSL elements related to the IntelliJ Platform.
+ */
 @DslMarker
 annotation class IntelliJPlatform
 
+/**
+ * Creates an Ivy dependency XML file for an external module.
+ *
+ * @param gradle The [Gradle] instance.
+ * @param publications The list of [IvyModule.Publication] objects to be included in the Ivy file.
+ */
 internal fun ExternalModuleDependency.createIvyDependency(gradle: Gradle, publications: List<IvyModule.Publication>) {
+    // TODO: make configurable with Gradle properties
     val projectCacheDir = gradle.startParameter.projectCacheDir ?: gradle.rootProject.projectDir.resolve(".gradle")
     val ivyDirectory = projectCacheDir.resolve("intellijPlatform/ivy").toPath()
     val ivyFileName = "$group-$name-$version.xml"
@@ -47,6 +57,15 @@ internal fun ExternalModuleDependency.createIvyDependency(gradle: Gradle, public
     extractor.marshal(ivyModule, ivyFile)
 }
 
+/**
+ * Resolves the artifact path for the given [localPath] as it may accept different data types.
+ *
+ * @param localPath The local path of the artifact. Accepts either [String], [File], or [Directory].
+ * @return The resolved artifact path as a Path object.
+ * @throws IllegalArgumentException if the [localPath] is not of supported types.
+ * @throws BuildException if the resolved path doesn't exist or is not a directory.
+ */
+@Throws(IllegalArgumentException::class, BuildException::class)
 internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
     is String -> localPath
     is File -> localPath.absolutePath
