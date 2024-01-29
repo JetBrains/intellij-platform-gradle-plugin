@@ -226,7 +226,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         }
 
         /**
-         * The [RuntimeAware] adjusts task for the running a guest IDE purposes.
+         * The [RuntimeAware] adjusts tasks for the running a guest IDE purpose.
          * This configuration picks relevant Java Runtime using the [RuntimeResolver] and [RuntimeAware.runtimeArch].
          */
         if (this is RuntimeAware) {
@@ -238,10 +238,10 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             )
 
             runtimeDirectory.convention(layout.dir(provider {
-                runtimeResolver.resolveDirectory()?.toFile()
+                runtimeResolver.resolve().toFile()
             }))
             runtimeExecutable.convention(layout.file(provider {
-                runtimeResolver.resolveExecutable()?.toFile()
+                runtimeResolver.resolveExecutable().toFile()
             }))
             runtimeArch.set(providers.of(ExecutableArchValueSource::class) {
                 parameters.executable.set(runtimeExecutable)
@@ -263,7 +263,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             )
 
             pluginVerifierExecutable.convention(layout.file(provider {
-                pluginVerifierResolver.resolveExecutable().toFile()
+                pluginVerifierResolver.resolve().toFile()
             }))
         }
 
@@ -278,13 +278,13 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
             )
 
             zipSignerExecutable.convention(layout.file(provider {
-                marketplaceZipSignerResolver.resolveExecutable()?.toFile()
+                marketplaceZipSignerResolver.resolve().toFile()
             }))
         }
 
         /**
-         * The [RunnableIdeAware] is more comples one than [RuntimeAware] as it preconfigures also the [JavaForkOptions]-based tasks
-         * by setting JVM Arguments providers and classpaths.
+         * The [RunnableIdeAware] is more complex one than [RuntimeAware] as it preconfigures also the [JavaForkOptions]-based tasks
+         * by setting JVM Arguments providers and classpath.
          */
         if (this is RunnableIdeAware) {
             enableAssertions = true

@@ -2,11 +2,20 @@
 
 package org.jetbrains.intellij.platform.gradle.executableResolver
 
+import org.gradle.api.GradleException
 import java.nio.file.Path
 
+/**
+ * Interface for resolving a [Path] to the executable of any kind.
+ */
 interface ExecutableResolver {
 
-    fun resolveExecutable(): Path?
-
-    fun resolveDirectory(): Path?
+    /**
+     * Resolves the path.
+     *
+     * @return the resolved path, or null if resolution failed.
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
+    fun resolve(): Path
 }
