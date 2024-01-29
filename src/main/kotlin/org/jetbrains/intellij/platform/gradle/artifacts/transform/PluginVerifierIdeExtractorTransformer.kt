@@ -15,8 +15,8 @@ import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File.separator
 import javax.inject.Inject
@@ -24,6 +24,9 @@ import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 
+/**
+ * A transformer used for extracting IDEs used by the IntelliJ Plugin Verifier.
+ */
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
     private val archiveOperations: ArchiveOperations,

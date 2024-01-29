@@ -8,10 +8,12 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -37,15 +39,13 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
 
     /**
      * The name of the plugin.
-     *
-     * Default value: [org.jetbrains.intellij.platform.gradle.IntelliJPluginExtension.pluginName]
      */
     @get:Internal
     abstract val pluginName: Property<String>
 
     /**
      * Emit warning if no searchable options are found.
-     * Can be disabled with [org.jetbrains.intellij.BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING].
+     * Can be disabled with [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING].
      */
     @get:Internal
     abstract val noSearchableOptionsWarning: Property<Boolean>

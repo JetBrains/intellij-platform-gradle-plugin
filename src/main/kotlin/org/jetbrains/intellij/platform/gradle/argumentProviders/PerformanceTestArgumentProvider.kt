@@ -9,9 +9,16 @@ import org.gradle.process.CommandLineArgumentProvider
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 
+/**
+ * Provides command line arguments for running performance tests.
+ *
+ * @property scriptPath The path to the performance test script.
+ * @property testArtifactsDirectory The path to the directory where test artifacts will be stored.
+ * @property profilerName The name of the profiler to be used.
+ */
 class PerformanceTestArgumentProvider(
     @InputDirectory @PathSensitive(RELATIVE) val scriptPath: Path,
-    @InputDirectory @PathSensitive(RELATIVE) val testArtifactsDirPath: Path,
+    @InputDirectory @PathSensitive(RELATIVE) val testArtifactsDirectory: Path,
     private val profilerName: String,
 ) : CommandLineArgumentProvider {
 
@@ -25,9 +32,9 @@ class PerformanceTestArgumentProvider(
         "-Didea.fatal.error.notification=true",
         "-Dtestscript.filename=${scriptPath.absolutePathString()}",
         "-DintegrationTests.profiler=$profilerName",
-        "-Dide.performance.screenshot.before.kill=${testArtifactsDirPath.absolutePathString()}",
-        "-Didea.log.path=${testArtifactsDirPath.absolutePathString()}",
-        "-Dsnapshots.path=${testArtifactsDirPath.absolutePathString()}",
-        "-Dmemory.snapshots.path=${testArtifactsDirPath.absolutePathString()}",
+        "-Dide.performance.screenshot.before.kill=${testArtifactsDirectory.absolutePathString()}",
+        "-Didea.log.path=${testArtifactsDirectory.absolutePathString()}",
+        "-Dsnapshots.path=${testArtifactsDirectory.absolutePathString()}",
+        "-Dmemory.snapshots.path=${testArtifactsDirectory.absolutePathString()}",
     )
 }

@@ -24,6 +24,14 @@ import kotlin.io.path.Path
 import kotlin.io.path.pathString
 import kotlin.io.path.readLines
 
+/**
+ * Provides command line arguments for launching IntelliJ Platform locally.
+ *
+ * @property intellijPlatformConfiguration IntelliJ Platform configuration files.
+ * @property coroutinesJavaAgentFile Coroutines Java agent file.
+ * @property runtimeArchProvider The provider for the Java Runtime architecture.
+ * @property options The Java fork options.
+ */
 class IntelliJPlatformArgumentProvider(
     @InputFiles @PathSensitive(RELATIVE) val intellijPlatformConfiguration: ConfigurableFileCollection,
     @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
@@ -42,6 +50,9 @@ class IntelliJPlatformArgumentProvider(
         productInfo.launchFor(it)
     }
 
+    /**
+     * Adds the `lib/boot.jar` present in the IntelliJ Platform SDK to be included in the JVM boot classpath.
+     */
     private val bootclasspath
         get() = platformPath
             .resolve("lib/boot.jar")
@@ -49,6 +60,11 @@ class IntelliJPlatformArgumentProvider(
             ?.let { listOf("-Xbootclasspath/a:$it") }
             .orEmpty()
 
+    /**
+     * Retrieves VM options from A dedicated file delivered with the IntelliJ Platform.
+     * The file path is retrieved from the [ProductInfo.Launch.vmOptionsFilePath] property.
+     * If present, the `kotlinx.coroutines.debug=off` is dropped.
+     */
     private val vmOptions
         get() = launch.get()
             .vmOptionsFilePath
@@ -57,6 +73,9 @@ class IntelliJPlatformArgumentProvider(
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
 
+    /**
+     * Applies the Java Agent pointing at the KotlinX Coroutines to enable coroutines debugging.
+     */
     private val kotlinxCoroutinesJavaAgent
         get() = "-javaagent:${coroutinesJavaAgentFile.asPath}".takeIf {
             productInfo.productCode.toIntelliJPlatformType() in listOf(
@@ -65,31 +84,32 @@ class IntelliJPlatformArgumentProvider(
             )
         }
 
-    private val launchProperties
-        get() = launch.get()
-            .additionalJvmArguments
-            .filter { it.startsWith("-D") }
-            .map { it.resolveIdeHomeVariable() }
-
+    /**
+     * Retrieves the additional JVM arguments from [ProductInfo.Launch.additionalJvmArguments].
+     */
     private val additionalJvmArguments
         get() = launch.get()
             .additionalJvmArguments
-            .filterNot { it.startsWith("-D") }
             .map { it.resolveIdeHomeVariable() }
 
-    private val defaultHeapSpace = listOf("-Xmx512m", "-Xms256m")
+    /**
+     * Allows overriding default [vmOptions] heap size with values provided with [options].
+     */
     private val heapSpace
         get() = listOfNotNull(
             options.maxHeapSize?.let { "-Xmx${it}" },
             options.minHeapSize?.let { "-Xms${it}" },
         )
 
+    /**
+     * Resolves the IDE home variable in the given string by replacing placeholders.
+     */
     private fun String.resolveIdeHomeVariable() =
-        platformPath.pathString.let { idePath ->
+        platformPath.pathString.let {
             this
-                .replace("\$APP_PACKAGE", idePath)
-                .replace("\$IDE_HOME", idePath)
-                .replace("%IDE_HOME%", idePath)
+                .replace("\$APP_PACKAGE", it)
+                .replace("\$IDE_HOME", it)
+                .replace("%IDE_HOME%", it)
                 .replace("Contents/Contents", "Contents")
                 .let { entry ->
                     val (_, value) = entry.split("=")
@@ -100,9 +120,12 @@ class IntelliJPlatformArgumentProvider(
                 }
         }
 
-    override fun asArguments() =
-        (defaultHeapSpace + bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + launchProperties + additionalJvmArguments + heapSpace)
-            .filterNot { it.isNullOrBlank() }
+    /**
+     * Combines various arguments related to the IntelliJ Platform configuration to create a list of arguments to be passed to the platform.
+     *
+     * @return The list of arguments to be passed to the platform.
+     */
+    override fun asArguments() = (bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace).filterNot { it.isNullOrBlank() }
 
     // TODO: check if necessary:
     //       + listOf("-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}",)

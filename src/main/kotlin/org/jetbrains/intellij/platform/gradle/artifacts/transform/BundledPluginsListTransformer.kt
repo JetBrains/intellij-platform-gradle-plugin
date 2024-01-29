@@ -21,16 +21,25 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.model.BundledPlugin
 import org.jetbrains.intellij.platform.gradle.model.BundledPlugins
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.pathString
 
+/**
+ * Resolves bundled plugins from the IntelliJ Platform dependency.
+ * It scans for all plugins located withing the `INTELLIJ_PLATFORM/plugins` directory and loads them with [IdePluginManager] to collect plugin details.
+ *
+ * Transformer outputs the `bundled-plugins.json` file containing all data, which becomes available within
+ * the [Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST] configuration.
+ */
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class BundledPluginsListTransformer : TransformAction<TransformParameters.None> {
 
@@ -39,6 +48,8 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     private val manager = IdePluginManager.createManager(createTempDirectory())
+
+    private val log = Logger(javaClass)
 
     override fun transform(outputs: TransformOutputs) {
         val input = inputArtifact.asPath
@@ -71,12 +82,12 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
             is PluginCreationSuccess -> creationResult.plugin
             is PluginCreationFail -> {
                 val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-//                warn("Cannot create plugin from file '$artifact': $problems")
+                log.warn("Cannot create plugin from file '$this': $problems")
                 null
             }
 
             else -> {
-//                warn("Cannot create plugin from file '$artifact'. $creationResult")
+                log.warn("Cannot create plugin from file '$this'. $creationResult")
                 null
             }
         }

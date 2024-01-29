@@ -8,10 +8,12 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
-import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -22,9 +24,8 @@ import kotlin.io.path.pathString
 /**
  * Builds an index of UI components (searchable options) for the plugin.
  * This task runs a headless IDE instance to collect all the available options provided by the plugin's [Settings](https://plugins.jetbrains.com/docs/intellij/settings.html).
- * Note, that this is a [RunIdeBase]-based task with predefined arguments and all properties of the [RunIdeBase] task are also applied to [BuildSearchableOptionsTask] tasks.
  *
- * If your plugin doesn't implement custom settings, it is recommended to disable it.
+ * If your plugin doesn't implement custom settings, it is recommended to disable it with [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING].
  *
  * @see BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING
  */

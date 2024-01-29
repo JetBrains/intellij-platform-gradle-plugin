@@ -20,9 +20,11 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurat
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
-import java.util.function.Predicate
 import kotlin.io.path.*
 
+/**
+ * The artifact transformer collecting JAR files located within the IntelliJ Platform or Marketplace Plugin archives.
+ */
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class CollectorTransformer : TransformAction<TransformParameters.None> {
 
@@ -43,29 +45,20 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
         } else {
             // TODO: check if the given directory is IDEA — i.e. by checking if there's product-info.json file
             // IntelliJ Platform SDK dependency
-            collectIntelliJPlatformDependencyJars(input).forEach {
-                outputs.file(it)
+            val lib = input.resolve("lib")
+            if (lib.exists() && lib.isDirectory()) {
+                val jarFilter = { path: Path -> path.name != "junit.jar" && path.extension == "jar" }
+
+                lib.listDirectoryEntries().filter(jarFilter).forEach {
+                    outputs.file(it)
+                }
+                lib.resolve("ant/lib").listDirectoryEntries().filter(jarFilter).forEach {
+                    outputs.file(it)
+                }
             }
         }
     }
 }
-
-internal fun collectIntelliJPlatformDependencyJars(parent: Path): List<Path> {
-    val lib = parent.resolve("lib").takeIf { it.exists() && it.isDirectory() } ?: return emptyList()
-    val baseFiles = collectJars(lib) { it.name !in listOf("junit.jar") }.sorted()
-    val antFiles = collectJars(lib.resolve("ant/lib")).sorted()
-
-    return (baseFiles + antFiles)
-}
-
-internal fun collectJars(directory: Path, filter: Predicate<Path> = Predicate { true }) =
-    collectFiles(directory) { it.extension == "jar" && filter.test(it) }
-
-internal fun collectFiles(directory: Path, filter: Predicate<Path>) = directory
-    .takeIf { it.isDirectory() }
-    ?.listDirectoryEntries()
-    .orEmpty()
-    .filter { filter.test(it) }
 
 internal fun DependencyHandler.applyCollectorTransformer(
     compileClasspathConfiguration: Configuration,

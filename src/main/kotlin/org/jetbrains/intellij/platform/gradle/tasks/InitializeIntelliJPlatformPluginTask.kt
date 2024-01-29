@@ -90,7 +90,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     }
 
     /**
-     * Creates a Java Agent file for the Coroutines library required to enable coroutines debugging.
+     * Creates the Java Agent file for the Coroutines library required to enable coroutines debugging.
      */
     private fun createCoroutinesJavaAgentFile() {
         if (coroutinesJavaAgent.asPath.exists()) {
