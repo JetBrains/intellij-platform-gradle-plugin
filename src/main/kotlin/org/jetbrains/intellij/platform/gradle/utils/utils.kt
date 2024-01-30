@@ -8,12 +8,8 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
-import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.util.GradleVersion
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.inputStream
@@ -34,12 +30,6 @@ internal val <T : FileSystemLocation> Provider<T>.asFile
 
 internal val <T : FileSystemLocation> Provider<T>.asPath
     get() = get().asFile.toPath().absolute()
-
-internal fun checkGradleVersion() {
-    if (GradleVersion.current() < Constraints.MINIMAL_GRADLE_VERSION) {
-        throw PluginInstantiationException("$PLUGIN_NAME requires Gradle ${Constraints.MINIMAL_GRADLE_VERSION} and higher")
-    }
-}
 
 internal fun ConfigurationContainer.create(name: String, description: String, configuration: Configuration.() -> Unit = {}) =
     maybeCreate(name).apply {

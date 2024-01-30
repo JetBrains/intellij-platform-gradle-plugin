@@ -9,7 +9,7 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 object IntelliJPluginConstants {
     const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij.platform"
-    const val PLUGIN_BASE_ID = "$PLUGIN_ID.base"
+    const val PLUGIN_CORE_ID = "$PLUGIN_ID.core"
     const val PLUGIN_SETTINGS_ID = "$PLUGIN_ID.settings"
     const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
     const val LOG_PREFIX = "[$PLUGIN_ID]"

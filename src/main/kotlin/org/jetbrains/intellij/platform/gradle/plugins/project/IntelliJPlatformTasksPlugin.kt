@@ -1,7 +1,8 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.plugins
+package org.jetbrains.intellij.platform.gradle.plugins.project
 
+import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.plugins.JavaPlugin
@@ -17,43 +18,48 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TAS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.*
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 
-abstract class IntelliJPlatformTasksPlugin : IntelliJPlatformAbstractProjectPlugin(PLUGIN_TASKS_ID) {
+abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
 
-    override fun Project.configure() {
-        with(plugins) {
-            apply(IntelliJPlatformBasePlugin::class)
-        }
+    private val log = Logger(javaClass)
 
-        listOf(
-            InitializeIntelliJPlatformPluginTask,
-            SetupDependenciesTask,
-            PatchPluginXmlTask,
-            VerifyPluginProjectConfigurationTask,
-            PrintBundledPluginsTask,
-            PrintProductsReleasesTask,
-            ProcessResourcesCompanion,
-            JarCompanion,
-            PrepareSandboxTask,
-            BuildSearchableOptionsTask,
-            JarSearchableOptionsTask,
-            BuildPluginTask,
-            SignPluginTask,
-            VerifyPluginTask,
-            VerifyPluginSignatureTask,
-            VerifyPluginStructureTask,
-            PublishPluginTask,
-            RunIdeTask,
-            TestIdeTask,
-        ).forEach {
-            it.register(project)
-        }
+    override fun apply(project: Project) {
+        log.info("Configuring plugin: $PLUGIN_TASKS_ID")
 
-        with(tasks) {
-            // Make all tasks depend on [INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME]
-            (TASKS - Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN).forEach {
-                named(it) { dependsOn(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) }
+        with(project) {
+            plugins.apply(IntelliJPlatformCorePlugin::class)
+
+            listOf(
+                InitializeIntelliJPlatformPluginTask,
+                SetupDependenciesTask,
+                PatchPluginXmlTask,
+                VerifyPluginProjectConfigurationTask,
+                PrintBundledPluginsTask,
+                PrintProductsReleasesTask,
+                ProcessResourcesCompanion,
+                JarCompanion,
+                PrepareSandboxTask,
+                BuildSearchableOptionsTask,
+                JarSearchableOptionsTask,
+                BuildPluginTask,
+                SignPluginTask,
+                VerifyPluginTask,
+                VerifyPluginSignatureTask,
+                VerifyPluginStructureTask,
+                PublishPluginTask,
+                RunIdeTask,
+                TestIdeTask,
+            ).forEach {
+                it.register(project)
+            }
+
+            with(tasks) {
+                // Make all tasks depend on [INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME]
+                (TASKS - Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN).forEach {
+                    named(it) { dependsOn(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) }
+                }
             }
         }
     }

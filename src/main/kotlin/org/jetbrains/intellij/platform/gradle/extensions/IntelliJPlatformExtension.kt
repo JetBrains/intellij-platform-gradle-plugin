@@ -349,9 +349,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
         abstract class Ides @Inject constructor(
             internal val dependencies: DependencyHandler,
             internal val downloadDirectory: DirectoryProperty,
-            internal val extension: Provider<IntelliJPlatformExtension>,
+            internal val extensionProvider: Provider<IntelliJPlatformExtension>,
             internal val gradle: Gradle,
-            internal val productInfo: Provider<ProductInfo>,
+            internal val productInfoProvider: Provider<ProductInfo>,
             internal val providers: ProviderFactory,
             internal val resources: ResourceHandler,
         ) {

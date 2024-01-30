@@ -139,7 +139,7 @@ fun IntelliJPlatformExtension.VerifyPlugin.Ides.ProductReleasesValueSource(confi
     ProductReleasesValueSource(
         providers,
         resources,
-        extension,
-        productInfo,
+        extensionProvider,
+        productInfoProvider,
         configure,
     )

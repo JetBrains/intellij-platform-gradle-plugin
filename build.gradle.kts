@@ -207,34 +207,34 @@ gradlePlugin {
     website.set(properties("website"))
     vcsUrl.set(properties("vcsUrl"))
 
-    plugins.create("intellijPlugin") {
+    plugins.create("intellijPlatform") {
         id = "org.jetbrains.intellij.platform"
         displayName = "IntelliJ Platform Gradle Plugin"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformPlugin"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformPlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
 
-    plugins.create("intellijPluginBase") {
-        id = "org.jetbrains.intellij.platform.base"
-        displayName = "IntelliJ Platform Gradle Plugin (base)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformBasePlugin"
+    plugins.create("intellijPlatformCore") {
+        id = "org.jetbrains.intellij.platform.core"
+        displayName = "IntelliJ Platform Gradle Plugin (core)"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformCorePlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
 
-    plugins.create("intellijPluginSettings") {
-        id = "org.jetbrains.intellij.platform.settings"
-        displayName = "IntelliJ Platform Gradle Plugin (settings)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformSettingsPlugin"
-        description = project.description
-        tags.set(properties("tags").map { it.split(',') })
-    }
-
-    plugins.create("intellijPluginTasks") {
+    plugins.create("intellijPlatformTasks") {
         id = "org.jetbrains.intellij.platform.tasks"
         displayName = "IntelliJ Platform Gradle Plugin (tasks)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.IntelliJPlatformTasksPlugin"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformTasksPlugin"
+        description = project.description
+        tags.set(properties("tags").map { it.split(',') })
+    }
+
+    plugins.create("intellijPlatformSettings") {
+        id = "org.jetbrains.intellij.platform.settings"
+        displayName = "IntelliJ Platform Gradle Plugin (settings)"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.settings.IntelliJPlatformSettingsPlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }
