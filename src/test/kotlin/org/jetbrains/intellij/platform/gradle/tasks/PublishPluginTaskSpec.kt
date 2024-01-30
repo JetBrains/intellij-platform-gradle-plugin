@@ -29,9 +29,30 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    fun `fail publishing if ZIP Signer dependency is missing`() {
+        buildFile.kotlin(
+            """
+            intellijPlatform {
+                publishing {}
+            }
+            """.trimIndent()
+        )
+
+        buildAndFail(Tasks.PUBLISH_PLUGIN) {
+            assertContains("No Marketplace ZIP Signer executable found", output)
+        }
+    }
+
+    @Test
     fun `fail publishing if token is missing`() {
         buildFile.kotlin(
             """
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }
+            }
+            
             intellijPlatform {
                 publishing {}
             }
@@ -47,6 +68,12 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `fail publishing when token is not valid`() {
         buildFile.kotlin(
             """
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }
+            }
+            
             intellijPlatform {
                 publishing {
                     token = "foo"
@@ -69,6 +96,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
                     zipSigner()
                 }
             }
+            
             intellijPlatform {
                 signing {
                     certificateChainFile = file("${resource("certificates/cert.crt")}")
@@ -91,6 +119,12 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
     fun `use unsigned artifact for publication if no signing is configured`() {
         buildFile.kotlin(
             """
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }
+            }
+            
             intellijPlatform {
                 publishing {
                     token = "foo"
