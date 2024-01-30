@@ -259,6 +259,7 @@ abstract class JbrResolver @Inject constructor(
                 val buildNumber = Version.parse(buildNumberString)
                 val isJava8 = majorVersion.startsWith("8")
                 val isJava17 = majorVersion.startsWith("17")
+                val isJava21 = majorVersion.startsWith("21")
 
                 val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < Version.parse("1483.24")
                 if (oldFormat) {
@@ -271,7 +272,7 @@ abstract class JbrResolver @Inject constructor(
                 val arch = jbrArch ?: arch(isJava8)
                 if (prefix.isEmpty()) {
                     prefix = when {
-                        isJava17 -> "jbr_jcef-"
+                        isJava17 || isJava21 -> "jbr_jcef-"
                         isJava8 -> "jbrx-"
                         operatingSystem.isMacOsX && arch == "aarch64" -> "jbr_jcef-"
                         buildNumber < Version.parse("1319.6") -> "jbr-"
