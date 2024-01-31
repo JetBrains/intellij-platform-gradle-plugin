@@ -4,11 +4,13 @@ package org.jetbrains.intellij.dependency
 
 import org.gradle.api.Action
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.model.ObjectFactory
 import org.jetbrains.intellij.IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import org.jetbrains.intellij.utils.DependenciesDownloader
 import javax.inject.Inject
 
 abstract class PluginsRepositoryConfiguration @Inject constructor(
+    private val objects: ObjectFactory,
     private val dependenciesDownloader: DependenciesDownloader,
 ) {
 
@@ -39,7 +41,22 @@ abstract class PluginsRepositoryConfiguration @Inject constructor(
      * Use custom plugin repository. The URL should point to the `plugins.xml` or `updatePlugins.xml` file.
      */
     fun custom(url: String) {
-        pluginsRepositories.add(CustomPluginsRepository(url, dependenciesDownloader))
+        pluginsRepositories.add(newCustomPluginRepository { this.url.set(url) })
+    }
+
+    /**
+     * Use a custom plugin repository by action.
+     */
+    fun custom(action: Action<in CustomPluginsRepository.Configuration>) {
+        pluginsRepositories.add(newCustomPluginRepository(action))
+    }
+
+    private fun newCustomPluginRepository(
+        configure: Action<in CustomPluginsRepository.Configuration>
+    ) : CustomPluginsRepository {
+        val config = objects.newInstance(CustomPluginsRepository.Configuration::class.java)
+        configure.execute(config)
+        return objects.newInstance(CustomPluginsRepository::class.java, config, dependenciesDownloader)
     }
 
     fun getRepositories() = pluginsRepositories.toList()
