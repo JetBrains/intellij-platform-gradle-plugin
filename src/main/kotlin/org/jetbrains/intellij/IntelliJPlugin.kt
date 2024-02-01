@@ -1273,7 +1273,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 .withNormalizer(ClasspathNormalizer::class)
 
             dependsOn(PREPARE_TESTING_SANDBOX_TASK_NAME)
-            finalizedBy(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
+            dependsOn(CLASSPATH_INDEX_CLEANUP_TASK_NAME)
 
             if (GradleVersion.current() >= GradleVersion.version("8.0")) { // TODO: remove in 2.0 as Gradle 8 will become the minimum supported version
                 jbrResolver.resolveRuntime(
@@ -1688,8 +1688,9 @@ abstract class IntelliJPlugin : Plugin<Project> {
                 ideVersion.baselineVersion >= 221
             }
 
-            val compileTestKotlinTaskProvider = project.tasks.matching { it.name == "compileTestKotlin" }
-            dependsOn(compileTestKotlinTaskProvider)
+            project.tasks
+                .runCatching { named("compileTestKotlin") }
+                .onSuccess { dependsOn(it) }
         }
     }
 
