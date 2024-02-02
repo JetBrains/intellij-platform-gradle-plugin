@@ -23,4 +23,4 @@ jobs:
           gradle-home-cache-cleanup: true
 
       - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v1.1.0
+        uses: gradle/wrapper-validation-action@v2.0.0
