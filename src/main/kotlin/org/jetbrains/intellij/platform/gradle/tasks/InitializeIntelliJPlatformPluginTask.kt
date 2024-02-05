@@ -15,6 +15,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -35,18 +36,38 @@ import kotlin.io.path.outputStream
 @UntrackedTask(because = "Should always be run to initialize the plugin")
 abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPlatformVersionAware {
 
+    /**
+     * Indicates whether Gradle is run in offline mode.
+     */
     @get:Internal
     abstract val offline: Property<Boolean>
 
+    /**
+     * Represents the property for checking if self-update is enabled.
+     *
+     * Default value: [BuildFeature.SELF_UPDATE_CHECK]
+     */
     @get:Internal
     abstract val selfUpdateCheck: Property<Boolean>
 
+    /**
+     * Represents a lock file used to limit the plugin version checks in time.
+     * If a file is absent, and other conditions are met, the version check is performed.
+     */
     @get:Internal
     abstract val selfUpdateLock: RegularFileProperty
 
+    /**
+     * Java Agent file for the Coroutines library, which is required to enable coroutines debugging.
+     *
+     * @see [CoroutinesJavaAgentAware]
+     */
     @get:Internal
     abstract val coroutinesJavaAgent: RegularFileProperty
 
+    /**
+     * Represents the current version of the plugin.
+     */
     @get:Internal
     abstract val pluginVersion: Property<String>
 

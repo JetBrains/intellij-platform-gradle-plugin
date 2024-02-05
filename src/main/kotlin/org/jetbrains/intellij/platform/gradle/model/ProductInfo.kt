@@ -22,7 +22,7 @@ import kotlin.io.path.readText
  * The information is retrieved from the `product-info.json` file in the IntelliJ Platform directory.
  *
  * @property name The product's name, like "IntelliJ IDEA".
- * @property version The marketing marketing version of the product, like "2023.2".
+ * @property version The marketing version of the product, like "2023.2".
  * @property versionSuffix The suffix of the version, like "EAP".
  * @property buildNumber The build number of the product, like "232.8660.185".
  * @property productCode The product code, like "IU".
@@ -100,16 +100,16 @@ data class ProductInfo(
 
 /**
  * Asserts that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.
- * If the provided version is lower, a [GradleException] is thrown with an appropriate message.
+ * If the provided version is lower, a [IllegalArgumentException] is thrown with an appropriate message.
  *
- * @throws GradleException if the provided version is lower than the minimum supported version.
+ * @throws IllegalArgumentException if the provided version is lower than the minimum supported version.
  * @see Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
  * @see Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
  */
-@Throws(GradleException::class)
+@Throws(IllegalArgumentException::class)
 fun ProductInfo.assertSupportedVersion() {
     if (buildNumber.toVersion() < Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
-        throw GradleException("The minimal supported IDE version is ${Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION} (${Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER}), the provided version is too low: $version ($buildNumber)")
+        throw IllegalArgumentException("The minimal supported IDE version is ${Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION} (${Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER}), the provided version is too low: $version ($buildNumber)")
     }
 }
 

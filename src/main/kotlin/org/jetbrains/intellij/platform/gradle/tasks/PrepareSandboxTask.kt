@@ -6,7 +6,10 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.file.*
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -14,10 +17,11 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jdom2.Element
-import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
@@ -26,30 +30,77 @@ import java.nio.file.Path
 import kotlin.io.path.*
 
 /**
- * Prepares sandbox directory with installed plugin and its dependencies.
+ * Prepares a sandbox environment with the installed plugin and its dependencies.
+ * The sandbox directory is required to run a guest IDE and tests in isolation from other instances, like when multiple IntelliJ Platforms are used for
+ * testing with [RunIdeTask], [TestIdeTask], [TestIdeUiTask], or [TestIdePerformanceTask] tasks.
+ *
+ * To fully utilize the sandbox capabilities in a task, make it extend the [SandboxAware] interface.
+ *
+ * @see SandboxAware
+ * @see IntelliJPlatformExtension.sandboxContainer
+ * @see IntelliJPluginConstants.Sandbox
  */
 @Deprecated(message = "CHECK")
 @CacheableTask
 abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
     /**
+     * Default sandbox destination directory to where the plugin files will be copied into.
+     *
+     * Default value: [SandboxAware.sandboxPluginsDirectory]
+     *
+     * @see SandboxAware.sandboxPluginsDirectory
+     */
+    @get:Internal
+    abstract val defaultDestinationDirectory: DirectoryProperty
+
+    /**
      * The name of the plugin.
      *
-     * Default value: [IntelliJPluginExtension.pluginName]
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.name]
+     *
+     * @see IntelliJPlatformExtension.PluginConfiguration.name
      */
     @get:Input
     abstract val pluginName: Property<String>
 
     /**
-     * The input plugin JAR file used to prepare the sandbox.
+     * The output of [Jar] task.
+     * The proper [Jar.archiveFile] is picked depending on if code instrumentation is enabled.
      *
-     * Default value: `jar` task output
+     * Default value: [Jar.archiveFile]
+     *
+     * @see JavaPlugin.JAR_TASK_NAME
+     * @see Tasks.INSTRUMENTED_JAR
+     * @see IntelliJPlatformExtension.instrumentCode
      */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginJar: RegularFileProperty
 
-//    /**
+    /**
+     * List of dependencies on external plugins resolved from the [Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED] configuration.
+     *
+     * @see Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED
+     * @see IntelliJPlatformDependenciesExtension.plugin
+     * @see IntelliJPlatformDependenciesExtension.bundledPlugin
+     */
+    @get:InputFiles
+    @get:Classpath
+    abstract val pluginsClasspath: ConfigurableFileCollection
+
+    /**
+     * Dependencies removed with the [JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME] configuration.
+     *
+     * @see JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+     */
+    @get:InputFiles
+    @get:Classpath
+    abstract val runtimeClasspath: ConfigurableFileCollection
+
+    private val usedNames = mutableMapOf<String, Path>()
+
+    //    /**
 //     * Libraries that will be ignored when preparing the sandbox.
 //     * By default, excludes all libraries that are a part of the [SetupDependenciesTask.idea] dependency.
 //     *
@@ -59,25 +110,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 //    @get:Optional
 //    @get:PathSensitive(PathSensitivity.RELATIVE)
 //    abstract val librariesToIgnore: ConfigurableFileCollection
-
-    /**
-     * List of dependencies on external plugins.
-     */
-    @get:InputFiles
-    @get:Classpath
-    abstract val pluginsClasspath: ConfigurableFileCollection
-
-    /**
-     * Default sandbox destination directory.
-     */
-    @get:Internal
-    abstract val defaultDestinationDir: DirectoryProperty
-
-    @get:InputFiles
-    @get:Classpath
-    abstract val runtimeClasspath: ConfigurableFileCollection
-
-    private val usedNames = mutableMapOf<String, Path>()
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -94,30 +126,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
     fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
 
-    override fun getDestinationDir() = defaultDestinationDir.asFile.get()
+    override fun getDestinationDir() = defaultDestinationDirectory.asFile.get()
 
     override fun configure(closure: Closure<*>) = super.configure(closure)
-
-//    fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
-//        from(pluginDependency.artifact) {
-//            into(pluginDependency.artifact.name)
-//        }
-//    }
-
-//    fun configureExternalPlugin(pluginDependency: PluginDependency) {
-//        if (pluginDependency.builtin) {
-//            return
-//        }
-//        pluginDependency.artifact.run {
-//            if (isDirectory) {
-//                from(this) {
-//                    into(name)
-//                }
-//            } else {
-//                from(this)
-//            }
-//        }
-//    }
 
     private fun disableIdeUpdate() {
         val updatesConfig = sandboxConfigDirectory
@@ -176,6 +187,27 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
         return name
     }
 
+//    fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
+//        from(pluginDependency.artifact) {
+//            into(pluginDependency.artifact.name)
+//        }
+//    }
+
+//    fun configureExternalPlugin(pluginDependency: PluginDependency) {
+//        if (pluginDependency.builtin) {
+//            return
+//        }
+//        pluginDependency.artifact.run {
+//            if (isDirectory) {
+//                from(this) {
+//                    into(name)
+//                }
+//            } else {
+//                from(this)
+//            }
+//        }
+//    }
+
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
@@ -208,7 +240,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
                 pluginName.convention(extension.pluginConfiguration.name)
                 pluginJar.convention(pluginJarProvider)
-                defaultDestinationDir.convention(sandboxPluginsDirectory)
+                defaultDestinationDirectory.convention(sandboxPluginsDirectory)
 //                librariesToIgnore.convention(ideaDependencyJarFiles)
                 pluginsClasspath.from(intellijPlatformPluginsConfiguration)
                 runtimeClasspath.from(runtimeConfiguration)

@@ -45,9 +45,9 @@ interface IntelliJPlatformVersionAware {
 
     /**
      * Provides information about the IntelliJ Platform product.
-     *  The information is retrieved from the `product-info.json` file in the IntelliJ Platform directory.
+     * The information is retrieved from the `product-info.json` file in the IntelliJ Platform directory.
      *
-     *  @see ProductInfo
+     * @see ProductInfo
      */
     @get:Internal
     val productInfo: ProductInfo

@@ -26,10 +26,7 @@ import org.jetbrains.intellij.platform.gradle.model.assertSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
-import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
-import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
@@ -120,6 +117,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
          * The inputted value will be used to populate the `<name>` element.
          *
          * @see PatchPluginXmlTask.pluginName
+         * @see PrepareSandboxTask.pluginName
          * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__name">Plugin Configuration File: `name`</a>
          */
         val name: Property<String>

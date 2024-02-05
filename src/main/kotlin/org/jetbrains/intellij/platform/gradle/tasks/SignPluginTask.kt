@@ -27,13 +27,13 @@ import kotlin.io.path.nameWithoutExtension
 /**
  * Signs the ZIP archive with the provided key using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
  *
- * To sign the plugin before publishing to [JetBrains Marketplace](https://plugins.jetbrains.com) with the [SignPluginTask] task, it is required to provide a certificate chain and a private key with its password using `signPlugin { ... }` Plugin Signing DSL.
+ * To sign the plugin before publishing to [JetBrains Marketplace](https://plugins.jetbrains.com) with the [SignPluginTask] task,
+ * it is required to provide a certificate chain and a private key with its password using [IntelliJPlatformExtension.Signing] extension.
  *
  * As soon as [privateKey] (or [privateKeyFile]) and [certificateChain] (or [certificateChainFile]) properties are specified, the task will be executed automatically right before the [PublishPluginTask] task.
  *
  * For more details, see [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html) article.
  *
- * @see PublishPluginTask
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-signing.html">Plugin Signing</a>
  * @see <a href="https://github.com/JetBrains/marketplace-zip-signer">Marketplace ZIP Signer</a>
  */

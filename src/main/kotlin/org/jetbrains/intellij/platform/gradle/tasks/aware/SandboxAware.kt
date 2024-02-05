@@ -20,14 +20,14 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 interface SandboxAware : IntelliJPlatformVersionAware {
 
     /**
-     * Represents the suffix used i.e. for test-related tasks.
+     * Represents the suffix used i.e., for test-related tasks.
      */
     @get:Internal
     val sandboxSuffix: Property<String>
 
     /**
      * The container for all sandbox-related directories.
-     * The directory name deoends on the platform type and version currently used for running task.
+     * The directory name depends on the platform type and version currently used for running a task.
      */
     @get:Internal
     val sandboxContainerDirectory: DirectoryProperty

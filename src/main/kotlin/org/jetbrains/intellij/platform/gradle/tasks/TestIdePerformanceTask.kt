@@ -27,7 +27,7 @@ import kotlin.io.path.nameWithoutExtension
 /**
  * Runs performance tests on the IDE with the developed plugin installed.
  *
- * The [RunIdePerformanceTestTask] task extends the [RunIdeBase] task, so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [RunIdePerformanceTestTask] as well.
+ * The [TestIdePerformanceTask] task extends the [RunIdeBase] task, so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [TestIdePerformanceTask] as well.
  * See [RunIdeTask] task for more details.
  *
  * Currently, the task is under adaptation; more documentation will be added in the future.
@@ -38,7 +38,7 @@ import kotlin.io.path.nameWithoutExtension
 @Deprecated(message = "CHECK")
 @Incubating
 @UntrackedTask(because = "Should always run IDE for performance tests")
-abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
+abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     /**
      * Path to directory with test projects and '.ijperf' files.
@@ -121,7 +121,7 @@ abstract class RunIdePerformanceTestTask : JavaExec(), RunnableIdeAware, CustomI
 
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<RunIdePerformanceTestTask>(Tasks.TEST_IDE_PERFORMANCE) {
+            project.registerTask<TestIdePerformanceTask>(Tasks.TEST_IDE_PERFORMANCE) {
 //                artifactsDirectory.convention(extension.type.flatMap { type ->
 //                    extension.version.flatMap { version ->
 //                        project.layout.buildDirectory.dir(

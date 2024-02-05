@@ -10,9 +10,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 
 /**
  * The interface provides the path to the IntelliJ Plugin Verifier executable.
- * It is required to have a dependency on the IntelliJ Plugin Verifier added to the project with [IntelliJPlatformDependenciesExtension.pluginVerifier].
- *
- * @see IntelliJPlatformDependenciesExtension.pluginVerifier
+ * It is required to have a dependency on the IntelliJ Plugin Verifier added to the project with
+ * [IntelliJPlatformDependenciesExtension.pluginVerifier] dependencies extension.
  */
 interface PluginVerifierAware {
 
