@@ -33,7 +33,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.isSpecified
-import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.util.*
 import kotlin.io.path.createDirectories
 

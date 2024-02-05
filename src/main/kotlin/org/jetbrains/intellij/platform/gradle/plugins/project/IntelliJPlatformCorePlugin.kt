@@ -10,6 +10,7 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.the
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
@@ -29,7 +30,6 @@ import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.provider.ProductInfoValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.*
-import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
@@ -283,16 +283,16 @@ abstract class IntelliJPlatformCorePlugin : Plugin<Project> {
                     downloadDirectory.convention(homeDirectory.dir("ides").map {
                         it.apply { asPath.createDirectories() }
                     })
-                    failureLevel.convention(EnumSet.of(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
+                    failureLevel.convention(listOf(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
                     verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
                     verificationReportsFormats.convention(
-                        EnumSet.of(
+                        listOf(
                             VerifyPluginTask.VerificationReportsFormats.PLAIN,
                             VerifyPluginTask.VerificationReportsFormats.HTML,
                         )
                     )
                     teamCityOutputFormat.convention(false)
-                    subsystemsToCheck.convention("all")
+                    subsystemsToCheck.convention(VerifyPluginTask.Subsystems.ALL)
 
                     configureExtension<IntelliJPlatformExtension.VerifyPlugin.Ides>(
                         Extensions.IDES,

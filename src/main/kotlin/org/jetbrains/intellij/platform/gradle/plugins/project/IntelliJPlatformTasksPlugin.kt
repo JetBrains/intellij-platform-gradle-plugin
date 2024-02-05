@@ -19,7 +19,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 
 abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
 

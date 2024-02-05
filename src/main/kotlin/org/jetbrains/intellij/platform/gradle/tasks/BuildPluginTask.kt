@@ -11,6 +11,8 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 
 /**
  * This class represents a task for building a plugin and preparing a ZIP archive for deployment.
+ *
+ * It uses the content produced by [PrepareSandboxTask] and [JarSearchableOptionsTask] tasks as an input.
  */
 @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
 abstract class BuildPluginTask : Zip() {

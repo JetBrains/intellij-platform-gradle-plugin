@@ -12,6 +12,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
@@ -19,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.model.assertSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import javax.inject.Inject
@@ -253,20 +255,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun phpstorm(version: Provider<String>) = create(IntelliJPlatformType.PhpStorm, version)
 
     /**
-     * Adds a dependency on PyCharm Professional.
-     *
-     * @param version The version of PyCharm Professional.
-     */
-    fun pycharmProfessional(version: String) = create(IntelliJPlatformType.PyCharmProfessional, version)
-
-    /**
-     * Adds a dependency on PyCharm Professional.
-     *
-     * @param version The provider for the version of PyCharm Professional.
-     */
-    fun pycharmProfessional(version: Provider<String>) = create(IntelliJPlatformType.PyCharmProfessional, version)
-
-    /**
      * Adds a dependency on PyCharm Community.
      *
      * @param version The version of PyCharm Community.
@@ -279,6 +267,20 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of PyCharm Community.
      */
     fun pycharmCommunity(version: Provider<String>) = create(IntelliJPlatformType.PyCharmCommunity, version)
+
+    /**
+     * Adds a dependency on PyCharm Professional.
+     *
+     * @param version The version of PyCharm Professional.
+     */
+    fun pycharmProfessional(version: String) = create(IntelliJPlatformType.PyCharmProfessional, version)
+
+    /**
+     * Adds a dependency on PyCharm Professional.
+     *
+     * @param version The provider for the version of PyCharm Professional.
+     */
+    fun pycharmProfessional(version: Provider<String>) = create(IntelliJPlatformType.PyCharmProfessional, version)
 
     /**
      * Adds a dependency on Rider.

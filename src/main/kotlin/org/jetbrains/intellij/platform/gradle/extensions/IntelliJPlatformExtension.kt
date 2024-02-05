@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.ExtensionAware
@@ -15,8 +16,10 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.assertSupportedVersion
@@ -24,12 +27,14 @@ import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
-import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
-import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.VerificationReportsFormats
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.ToolboxEnterprisePluginRepositoryService
+import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
 import java.io.File
 import javax.inject.Inject
 import kotlin.io.path.exists
@@ -64,7 +69,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
     /**
      * The path to the sandbox container where tests and IDE instances read and write data.
      *
-     * Default value: `build/[Sandbox.CONTAINER]/`
+     * Default value: [ProjectLayout.getBuildDirectory]/[Sandbox.CONTAINER]/
      */
     val sandboxContainer: DirectoryProperty
 
@@ -96,97 +101,115 @@ interface IntelliJPlatformExtension : ExtensionAware {
             get() = extensions.getByName<Vendor>(Extensions.VENDOR)
 
         /**
-         * A unique identifier of the plugin.
-         * It should be a fully qualified name similar to Java packages and must not collide with the ID of existing plugins.
-         * The ID is a technical value used to identify the plugin in the IDE and [JetBrains Marketplace](https://plugins.jetbrains.com/).
-         * Please use characters, numbers, and `.`/`-`/`_` symbols only and keep it reasonably short.
+         * The plugin's unique identifier.
+         * This should mirror the structure of fully qualified Java packages and must remain distinct from the IDs of existing plugins.
+         * This ID is a technical descriptor used not only within the IDE, but also on [JetBrains Marketplace](https://plugins.jetbrains.com/).
          *
-         * The provided value will be set as a value of the `<id>` element.
+         * Please restrict input to characters, numbers, and `.`/`-`/`_` symbols , and aim for a concise length.
          *
-         * See [Plugin Configuration File: `id`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__id) documentation for more details.
+         * The entered value will populate the `<id>` element.
+         *
+         * @see PatchPluginXmlTask.pluginId
+         * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__id">Plugin Configuration File: `id`</a>
          */
         val id: Property<String>
 
         /**
-         * The user-visible plugin display name (Title Case).
+         * The plugin display name, visible to users (Title Case).
          *
-         * The provided value will be set as a value of the `<name>` element.
+         * The inputted value will be used to populate the `<name>` element.
          *
-         * See [Plugin Configuration File: `name`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__name) documentation for more details.
+         * @see PatchPluginXmlTask.pluginName
+         * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__name">Plugin Configuration File: `name`</a>
          */
         val name: Property<String>
 
         /**
-         * The plugin version displayed in the Plugins settings dialog and in the JetBrains Marketplace plugin page.
-         * Plugins uploaded to the JetBrains Marketplace must follow semantic versioning.
+         * The plugin version, presented in the Plugins settings dialog and on its JetBrains Marketplace page.
          *
-         * The provided value will be set as a value of the `<version>` element.
+         * For plugins uploaded to the JetBrains Marketplace, semantic versioning must be adhered to.
          *
-         * See [Plugin Configuration File: `version`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__version) documentation for more details.
+         * The specified value will be used as an `<version>` element.
+         *
+         * @see PatchPluginXmlTask.pluginVersion
+         * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__version">Plugin Configuration File: `version`</a>
          */
         val version: Property<String>
 
         /**
-         * The plugin description displayed on the JetBrains Marketplace plugin page and in the Plugins settings dialog.
-         * Simple HTML elements, like text formatting, paragraphs, lists, etc., are allowed and must be wrapped into `<![CDATA[... ]]>` section.
+         * The plugin description, which is presented on the JetBrains Marketplace plugin page and in the Plugins settings dialog.
+         * Basic HTML elements such as text formatting, paragraphs, and lists are permitted.
          *
-         * The provided value will be set as a value of the `<description>` element.
+         * The description content is automatically enclosed by `<![CDATA[... ]]>`.
          *
-         * See [Plugin Configuration File: `description`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__description) documentation for more details.
+         * The supplied value will populate the `<description>` element.
+         *
+         * @see PatchPluginXmlTask.pluginDescription
+         * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__description">Plugin Configuration File: `description`</a>
          */
         val description: Property<String>
 
         /**
-         * A short summary of new features, bugfixes, and changes provided with the latest plugin version. Change notes are displayed on the JetBrains Marketplace plugin page and in the Plugins settings dialog.
-         * Simple HTML elements, like text formatting, paragraphs, lists, etc., are allowed and must be wrapped into `<![CDATA[... ]]>` section.
+         * A concise summary of new features, bug fixes, and alterations provided in the latest plugin version.
+         * These change notes will be displayed on the JetBrains Marketplace plugin page and in the Plugins settings dialog.
+         * Basic HTML elements such as text formatting, paragraphs, and lists are permitted.
          *
-         * The provided value will be set as a value of the `<change-notes>` element.
+         * The change notes content is automatically encapsulated in `<![CDATA[... ]]>`.
          *
-         * See [Plugin Configuration File: `description`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__change-notes) documentation for more details.
+         * The inputted value will populate the `<change-notes>` element.
+         *
+         * @see PatchPluginXmlTask.changeNotes
+         * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__change-notes">Plugin Configuration File: `change-notes`</a>
          */
         val changeNotes: Property<String>
 
         /**
          * Configures the `product-descriptor` section of the plugin.
+         *
+         * @see <a href="https://plugins.jetbrains.com/docs/marketplace/add-required-parameters.html">How to add required parameters for paid plugins</a>
          */
         @IntelliJPlatform
         interface ProductDescriptor {
 
             /**
-             * The plugin product code used in the JetBrains Sales System.
-             * The code must be agreed with JetBrains in advance and follow [the requirements](https://plugins.jetbrains.com/docs/marketplace/obtain-a-product-code-from-jetbrains.html).
+             * The product code for the plugin, used in the JetBrains Sales System, needs to be pre-approved by JetBrains and must adhere to [specified requirements](https://plugins.jetbrains.com/docs/marketplace/obtain-a-product-code-from-jetbrains.html).
              *
-             * The provided value will be set as a value of the `<product-descriptor code="">` element attribute.
+             * The given value will be utilized as a `<product-descriptor code="">` element attribute.
              *
-             * See [Plugin Configuration File: `product-descriptor`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor) documentation for more details.
+             * @see PatchPluginXmlTask.productDescriptorCode
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
              */
             val code: Property<String>
 
             /**
-             * Date of the major version release in the `YYYYMMDD` format.
+             * The release date of the major version, formatted as `YYYYMMDD`.
              *
-             * The provided value will be set as a value of the `<product-descriptor release-date="">` element attribute.
+             * The supplied value will be used to populate the `<product-descriptor release-date="">` element attribute.
              *
-             * See [Plugin Configuration File: `product-descriptor`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor) documentation for more details.
+             * @see PatchPluginXmlTask.productDescriptorReleaseDate
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
              */
             val releaseDate: Property<String>
 
             /**
-             * A major version in a special number format.
+             * The major version, represented in a specific numerical format.
              *
-             * The provided value will be set as a value of the `<product-descriptor release-version="">` element attribute.
+             * The given value will be used as the `<product-descriptor release-version="">` element attribute.
              *
-             * See [Plugin Configuration File: `product-descriptor`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor) documentation for more details.
+             * @see PatchPluginXmlTask.productDescriptorReleaseVersion
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
              */
             val releaseVersion: Property<String>
 
             /**
-             * The boolean value determining whether the plugin is a [Freemium](https://plugins.jetbrains.com/docs/marketplace/freemium.html) plugin.
+             * The boolean value that indicates if the plugin is a [Freemium](https://plugins.jetbrains.com/docs/marketplace/freemium.html) plugin.
+             *
+             * The inputted value will be used for the `<product-descriptor optional="">` element attribute.
+             *
              * Default value: `false`.
              *
-             * The provided value will be set as a value of the `<product-descriptor optional="">` element attribute.
-             *
-             * See [Plugin Configuration File: `product-descriptor`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor) documentation for more details.
+             * @see PatchPluginXmlTask.productDescriptorOptional
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
              */
             val optional: Property<Boolean>
         }
@@ -198,21 +221,26 @@ interface IntelliJPlatformExtension : ExtensionAware {
         interface IdeaVersion {
 
             /**
-             * The lowest IDE version compatible with the plugin.
+             * The earliest IDE version that is compatible with the plugin.
              *
-             * The provided value will be set as a value of the `<idea-version since-build=""/>` element attribute.
+             * The supplied value will be utilized as the `<idea-version since-build=""/>` element attribute.
              *
-             * See [Plugin Configuration File: `idea-version`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version) documentation for more details.
+             * The default value is set to the `MAJOR.MINOR` version based on the currently selected IntelliJ Platform, like `233.12345`.
+             *
+             * @see PatchPluginXmlTask.sinceBuild
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
              */
             val sinceBuild: Property<String>
 
             /**
-             * The highest IDE version compatible with the plugin.
-             * Undefined value declares compatibility with all the IDEs since the version specified by the since-build (also with the future builds what may cause incompatibility errors).
+             * The latest IDE version that is compatible with the plugin. An undefined value signifies compatibility with all IDEs starting from the version mentioned in `since-build`, including potential future builds that may cause compatibility issues.
              *
-             * The provided value will be set as a value of the `<idea-version since-build=""/>` element attribute.
+             * The given value will be assigned to the `<idea-version until-build=""/>` element attribute.
              *
-             * See [Plugin Configuration File: `idea-version`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version) documentation for more details.
+             * The default value is set to the `MAJOR.*` version based on the currently selected IntelliJ Platform, such as `233.*`.
+             *
+             * @see PatchPluginXmlTask.untilBuild
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
              */
             val untilBuild: Property<String>
         }
@@ -224,126 +252,313 @@ interface IntelliJPlatformExtension : ExtensionAware {
         interface Vendor {
 
             /**
-             * The vendor name or organization ID (if created) in the Plugins settings dialog and in the JetBrains Marketplace plugin page.
+             * The name of the vendor or the organization ID (if created), as displayed in the Plugins settings dialog and on the JetBrains Marketplace plugin page.
              *
-             * The provided value will be set as a value of the `<vendor>` element.
+             * The supplied value will be used as the value for the `<vendor>` element.
              *
-             * See [Plugin Configuration File: `vendor`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor) documentation for more details.
+             * @see PatchPluginXmlTask.vendorName
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor">Plugin Configuration File: `vendor`</a>
              */
             val name: Property<String>
 
             /**
-             * The vendor's email address.
+             * The email address of the vendor.
              *
-             * The provided value will be set as a value of the `<vendor email="">` element attribute.
+             * The given value will be utilized as the `<vendor email="">` element attribute.
              *
-             * See [Plugin Configuration File](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor) documentation for more details.
+             * @see PatchPluginXmlTask.vendorEmail
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor">Plugin Configuration File</a>
              */
             val email: Property<String>
 
             /**
-             * The link to the vendor's homepage.
+             * The URL to the vendor's homepage.
              *
-             * The provided value will be set as a value of the `<vendor url="">` element attribute.
+             * The supplied value will be assigned to the `<vendor url="">` element attribute.
              *
-             * See [Plugin Configuration File](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor) documentation for more details.
+             * @see PatchPluginXmlTask.vendorUrl
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor">Plugin Configuration File</a>
              */
             val url: Property<String>
         }
     }
 
     /**
+     * Plugin publishing configuration.
+     */
+    @IntelliJPlatform
+    interface Publishing {
+
+        /**
+         * The hostname used for publishing the plugin.
+         *
+         * Default value: [Locations.MARKETPLACE]
+         *
+         * @see PublishPluginTask.host
+         */
+        val host: Property<String>
+
+        /**
+         * Authorization token.
+         *
+         * @see PublishPluginTask.token
+         */
+        val token: Property<String>
+
+        /**
+         * A channel name to upload plugin to.
+         *
+         * Default value: `"default"`
+         *
+         * @see PublishPluginTask.channel
+         */
+        val channel: Property<String>
+
+        /**
+         * Specifies if the Toolbox Enterprise plugin repository service should be used.
+         *
+         * Default value: `false`
+         *
+         * @see PublishPluginTask.toolboxEnterprise
+         */
+        val toolboxEnterprise: Property<Boolean>
+
+        /**
+         * Publish the plugin update and mark it as hidden to prevent public release after approval.
+         *
+         * Default value: `false`
+         *
+         * @see PublishPluginTask.hidden
+         * @see <a href="https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html">Hidden release</a>
+         */
+        val hidden: Property<Boolean>
+    }
+
+    /**
+     * Plugin signing configuration.
+     *
+     * @see SignPluginTask
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-signing.html">Plugin Signing</a>
+     */
+    @IntelliJPlatform
+    interface Signing {
+
+        /**
+         * A path to the local Marketplace ZIP Signer CLI tool to be used.
+         *
+         * @see SigningAware
+         */
+        val cliPath: RegularFileProperty
+
+        /**
+         * KeyStore file.
+         * Refers to `ks` CLI option.
+         *
+         * @see SignPluginTask.keyStore
+         */
+        val keyStore: RegularFileProperty
+
+        /**
+         * KeyStore password.
+         * Refers to `ks-pass` CLI option.
+         *
+         * @see SignPluginTask.keyStorePassword
+         */
+        val keyStorePassword: Property<String>
+
+        /**
+         * KeyStore key alias.
+         * Refers to `ks-key-alias` CLI option.
+         *
+         * @see SignPluginTask.keyStoreKeyAlias
+         */
+        val keyStoreKeyAlias: Property<String>
+
+        /**
+         * KeyStore type.
+         * Refers to `ks-type` CLI option.
+         *
+         * @see SignPluginTask.keyStoreType
+         */
+        val keyStoreType: Property<String>
+
+        /**
+         * JCA KeyStore Provider name.
+         * Refers to `ks-provider-name` CLI option.
+         *
+         * @see SignPluginTask.keyStoreProviderName
+         */
+        val keyStoreProviderName: Property<String>
+
+        /**
+         * Encoded private key in the PEM format.
+         * Refers to `key` CLI option.
+         *
+         * Takes precedence over the [privateKeyFile] property.
+         *
+         * @see SignPluginTask.privateKey
+         */
+        val privateKey: Property<String>
+
+        /**
+         * A file with an encoded private key in the PEM format.
+         * Refers to `key-file` CLI option.
+         *
+         * @see SignPluginTask.privateKeyFile
+         */
+        val privateKeyFile: RegularFileProperty
+
+        /**
+         * Password required to decrypt the private key.
+         * Refers to `key-pass` CLI option.
+         *
+         * @see SignPluginTask.password
+         */
+        val password: Property<String>
+
+        /**
+         * A string containing X509 certificates.
+         * The first certificate from the chain will be used as a certificate authority (CA).
+         * Refers to `cert` CLI option.
+         *
+         * Takes precedence over the [certificateChainFile] property.
+         *
+         * @see SignPluginTask.certificateChain
+         */
+        val certificateChain: Property<String>
+
+        /**
+         * Path to the file containing X509 certificates.
+         * The first certificate from the chain will be used as a certificate authority (CA).
+         * Refers to `cert-file` CLI option.
+         *
+         * @see SignPluginTask.certificateChainFile
+         */
+        val certificateChainFile: RegularFileProperty
+    }
+
+    /**
      * IntelliJ Plugin Verifier CLI tool configuration.
+     *
+     * @see PluginVerifierAware
      */
     @IntelliJPlatform
     interface VerifyPlugin : ExtensionAware {
 
+        /**
+         * The extension to define the IDEs to be used along with the IntelliJ Plugin Verifier CLI tool for the binary plugin verification.
+         *
+         * @see Ides
+         */
         val ides
             get() = extensions.getByName<Ides>(Extensions.IDES)
 
         /**
          * A path to the local IntelliJ Plugin Verifier CLI tool to be used.
+         *
+         * @see PluginVerifierAware
          */
         val cliPath: RegularFileProperty
 
         /**
-         * The list of free arguments passed directly to the IntelliJ Plugin Verifier CLI tool.
+         * The path to the directory where IDEs used for the verification will be downloaded.
+         *
+         * Default value: [homeDirectory]/ides
+         *
+         * @see VerifyPlugin.downloadDirectory
+         */
+        val downloadDirectory: DirectoryProperty
+
+        /**
+         * The list of class prefixes from the external libraries.
+         * The Plugin Verifier will not report `No such class` for classes of these packages.
+         *
+         * @see VerifyPlugin.externalPrefixes
+         */
+        val externalPrefixes: ListProperty<String>
+
+        /**
+         * Defines the verification level at which the task should fail if any reported issue matches.
+         *
+         * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
+         *
+         * @see FailureLevel
+         * @see VerifyPlugin.failureLevel
+         */
+        val failureLevel: ListProperty<FailureLevel>
+
+        /**
+         * The list of free arguments is passed directly to the IntelliJ Plugin Verifier CLI tool.
+         *
+         * They can be used in addition to the arguments that are provided by dedicated options.
+         *
+         * @see VerifyPlugin.freeArgs
          */
         val freeArgs: ListProperty<String>
 
         /**
          * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
          * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
+         *
+         * Default value:
+         * - Directory specified with `plugin.verifier.home.dir` system property
+         * - Directory specified with `XDG_CACHE_HOME` environment variable
+         * - ~/.cache/pluginVerifier
+         * - [ProjectLayout.getBuildDirectory]/tmp/pluginVerifier
+         *
+         * @see VerifyPlugin.homeDirectory
          */
         val homeDirectory: DirectoryProperty
 
         /**
-         * The path to the directory where IDEs used for the verification will be downloaded.
+         * A file that contains a list of problems that will be ignored in a report.
          *
-         * Default value: `System.getProperty("plugin.verifier.home.dir")/ides`, `System.getenv("XDG_CACHE_HOME")/pluginVerifier/ides`,
-         * `System.getProperty("user.home")/.cache/pluginVerifier/ides` or system temporary directory.
+         * @see VerifyPlugin.ignoredProblemsFile
          */
-        val downloadDirectory: DirectoryProperty
+        val ignoredProblemsFile: RegularFileProperty
 
         /**
-         * Defines the verification level at which the task should fail if any reported issue matches.
-         * Can be set as [FailureLevel] enum or [EnumSet<FailureLevel>].
+         * Specifies which subsystems of IDE should be checked.
          *
-         * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
+         * Default value: [Subsystems.ALL]
+         *
+         * @see Subsystems
+         * @see VerifyPlugin.subsystemsToCheck
          */
-        val failureLevel: ListProperty<FailureLevel>
+        val subsystemsToCheck: Property<Subsystems>
+
+        /**
+         * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
+         *
+         * Default value: `false`
+         *
+         * @see VerifyPlugin.teamCityOutputFormat
+         */
+        val teamCityOutputFormat: Property<Boolean>
 
         /**
          * The path to the directory where verification reports will be saved.
          *
-         * Default value: `${project.buildDir}/reports/pluginVerifier`
+         * Default value: [ProjectLayout.getBuildDirectory]/reports/pluginVerifier
+         *
+         * @see VerifyPlugin.verificationReportsDirectory
          */
         val verificationReportsDirectory: DirectoryProperty
 
         /**
          * The output formats of the verification reports.
          *
-         * Accepted values:
-         * - `plain` for console output
-         * - `html`
-         * ` `markdown`
+         * Default value: ([VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML])
          *
-         * Default value: [VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML]
+         * @see VerificationReportsFormats
+         * @see VerifyPlugin.verificationReportsFormats
          */
         val verificationReportsFormats: ListProperty<VerificationReportsFormats>
 
         /**
-         * The list of classes prefixes from the external libraries.
-         * The Plugin Verifier will not report `No such class` for classes of these packages.
-         */
-        val externalPrefixes: ListProperty<String>
-
-        /**
-         * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
+         * The extension to define the IDEs to be used along with the IntelliJ Plugin Verifier CLI tool for the binary plugin verification.
          *
-         * Default value: `false`
-         */
-        val teamCityOutputFormat: Property<Boolean>
-
-        /**
-         * Specifies which subsystems of IDE should be checked.
-         *
-         * Default value: `all`
-         *
-         * Acceptable values:**
-         * - `all`
-         * - `android-only`
-         * - `without-android`
-         */
-        val subsystemsToCheck: Property<String>
-
-        /**
-         * A file that contains a list of problems that will be ignored in a report.
-         */
-        val ignoredProblemsFile: RegularFileProperty
-
-        /**
-         * Defines the IDEs to be used along with the IntelliJ Plugin Verifier CLI tool.
+         * It provides a set of helpers which add relevant entries to the configuration, which later is used to resolve IntelliJ-based IDE binary releases.
          */
         @IntelliJPlatform
         abstract class Ides @Inject constructor(
@@ -357,7 +572,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
         ) {
 
             /**
-             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
              * @param version The provider for the version of the IntelliJ Platform dependency.
@@ -395,7 +610,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
             )
 
             /**
-             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param type The IntelliJ Platform dependency.
              * @param version The version of the IntelliJ Platform dependency.
@@ -403,7 +618,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
             fun ide(type: IntelliJPlatformType, version: String) = ide(providers.provider { type }, providers.provider { version })
 
             /**
-             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param type The IntelliJ Platform dependency.
              * @param version The version of the IntelliJ Platform dependency.
@@ -411,7 +626,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
             fun ide(type: String, version: String) = ide(type.toIntelliJPlatformType(), version)
 
             /**
-             * Adds the specific IDE to be used for testing with the IntelliJ Plugin Verifier.
+             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param definition The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
@@ -470,13 +685,14 @@ interface IntelliJPlatformExtension : ExtensionAware {
             fun localIde(localPath: Directory) = localIde(providers.provider { localPath })
 
             /**
-             * Prepares a [ProductReleasesValueSource] instance for the further usage, so it's possible to retrieve and filter IDEs based on the currently
-             * used platform or given criteria.
+             * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
+             * for IntelliJ Platform Verifier using the [ide] helper method.
              *
-             * @param configure The lambda function to configure the parameters for obtaining the product releases. Defaults to an empty action.
+             * @see ide
+             * @see listProductReleases
              * @see ProductReleasesValueSource
              */
-            fun listProductReleases(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) = ProductReleasesValueSource(configure)
+            fun recommended() = listProductReleases().get().map { ide(it) }
 
             /**
              * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
@@ -486,114 +702,16 @@ interface IntelliJPlatformExtension : ExtensionAware {
              * @see listProductReleases
              * @see ProductReleasesValueSource
              */
-            fun recommended() = listProductReleases().get().map { ide(it) }
+            fun select(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) = listProductReleases(configure).get().map { ide(it) }
+
+            /**
+             * Prepares a [ProductReleasesValueSource] instance for the further usage, so it's possible to retrieve and filter IDEs based on the currently
+             * used platform or given criteria.
+             *
+             * @param configure The lambda function to configure the parameters for obtaining the product releases. Defaults to an empty action.
+             * @see ProductReleasesValueSource
+             */
+            private fun listProductReleases(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) = ProductReleasesValueSource(configure)
         }
-    }
-
-    /**
-     * Plugin publishing configuration.
-     */
-    @IntelliJPlatform
-    interface Publishing {
-
-        /**
-         * The hostname used for publishing the plugin.
-         */
-        val host: Property<String>
-
-        /**
-         * Authorization token.
-         */
-        val token: Property<String>
-
-        /**
-         * Publishing channel.
-         */
-        val channel: Property<String>
-
-        /**
-         * Defines if [ToolboxEnterprisePluginRepositoryService] should be used instead of the default one.
-         */
-        val toolboxEnterprise: Property<Boolean>
-
-        /**
-         * Publish the plugin update and mark it as hidden to prevent public release after approval.
-         * See: https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html
-         */
-        val hidden: Property<Boolean>
-    }
-
-    /**
-     * Plugin signing configuration
-     */
-    @IntelliJPlatform
-    interface Signing {
-
-        /**
-         * A path to the local Marketplace ZIP Signer CLI tool to be used.
-         */
-        val cliPath: RegularFileProperty
-
-        /**
-         * KeyStore file path.
-         * Refers to `ks` CLI option.
-         */
-        val keyStore: Property<String>
-
-        /**
-         * KeyStore password.
-         * Refers to `ks-pass` CLI option.
-         */
-        val keyStorePassword: Property<String>
-
-        /**
-         * KeyStore key alias.
-         * Refers to `ks-key-alias` CLI option.
-         */
-        val keyStoreKeyAlias: Property<String>
-
-        /**
-         * KeyStore type.
-         * Refers to `ks-type` CLI option.
-         */
-        val keyStoreType: Property<String>
-
-        /**
-         * JCA KeyStore Provider name.
-         * Refers to `ks-provider-name` CLI option.
-         */
-        val keyStoreProviderName: Property<String>
-
-        /**
-         * Encoded private key in the PEM format.
-         * Refers to `key` CLI option.
-         */
-        val privateKey: Property<String>
-
-        /**
-         * A file with an encoded private key in the PEM format.
-         * Refers to `key-file` CLI option.
-         */
-        val privateKeyFile: RegularFileProperty
-
-        /**
-         * Password required to decrypt the private key.
-         * Refers to `key-pass` CLI option.
-         */
-        val password: Property<String>
-
-        /**
-         * A string containing X509 certificates.
-         * The first certificate from the chain will be used as a certificate authority (CA).
-         * Refers to `cert` CLI option.
-         */
-        val certificateChain: Property<String>
-
-        /**
-         * Path to the file containing X509 certificates.
-         * The first certificate from the chain will be used as a certificate authority (CA).
-         * Refers to `cert-file` CLI option.
-         */
-        val certificateChainFile: RegularFileProperty
     }
 }

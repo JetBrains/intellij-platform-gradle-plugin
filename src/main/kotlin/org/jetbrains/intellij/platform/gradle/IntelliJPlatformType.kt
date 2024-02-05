@@ -1,14 +1,18 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.utils
+package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.GradleException
 
+/**
+ * Describes all IntelliJ Platform types available to be used for plugin development, dependency resolution, and plugin verification.
+ *
+ * Each entry is composed of a product code name and coordinates used for dependency and binary release resolution.
+ */
 enum class IntelliJPlatformType(
     val code: String,
     val dependency: Coordinates,
     val binary: Coordinates?,
-    val unavailable: Boolean = false,
 ) {
     AndroidStudio(
         code = "AI",
@@ -80,7 +84,6 @@ enum class IntelliJPlatformType(
         code = "WRS",
         dependency = Coordinates("com.jetbrains.intellij.idea", "writerside"),
         binary = null,
-        unavailable = true,
     ),
     ;
 

@@ -59,12 +59,12 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     abstract val signedArchiveFile: RegularFileProperty
 
     /**
-     * KeyStore file path.
+     * KeyStore file.
      * Refers to `ks` CLI option.
      */
     @get:Input
     @get:Optional
-    abstract val keyStore: Property<String>
+    abstract val keyStore: RegularFileProperty
 
     /**
      * KeyStore password.
@@ -101,6 +101,8 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     /**
      * Encoded private key in the PEM format.
      * Refers to `key` CLI option.
+     *
+     * Takes precedence over the [privateKeyFile] property.
      */
     @get:Input
     @get:Optional
@@ -127,6 +129,8 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
      * A string containing X509 certificates.
      * The first certificate from the chain will be used as a certificate authority (CA).
      * Refers to `cert` CLI option.
+     *
+     * Takes precedence over the [certificateChainFile] property.
      */
     @get:Input
     @get:Optional
@@ -226,7 +230,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         }
         keyStore.orNull?.let {
             yield("-ks")
-            yield(it)
+            yield(it.asPath.absolutePathString())
         }
         keyStorePassword.orNull?.let {
             yield("-ks-pass")
@@ -255,11 +259,10 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 signedArchiveFile.convention(
                     project.layout.file(
-                        buildPluginTaskProvider.flatMap { buildPluginTask ->
-                            buildPluginTask.archiveFile
-                                .map { it.asPath }
-                                .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
-                        })
+                        archiveFile
+                            .map { it.asPath }
+                            .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
+                    )
                 )
                 extension.signing.let {
                     keyStore.convention(it.keyStore)

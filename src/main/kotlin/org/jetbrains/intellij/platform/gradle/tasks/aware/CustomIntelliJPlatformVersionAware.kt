@@ -6,7 +6,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 
 /**
  * By default, the project with the IntelliJ Platform Gradle Plugin applied required the presence of the IntelliJ Platform, referred to later by various tasks,

@@ -24,62 +24,133 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.ByteArrayOutputStream
 import java.util.*
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
 /**
- * Runs the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) tool to check the binary compatibility with specified IDE builds (see also [Verifying Plugin Compatibility](https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html)).
+ * Runs the IntelliJ Plugin Verifier CLI tool to check the binary compatibility with specified IDE builds.
  *
- * Plugin Verifier DSL `runPluginVerifier { ... }` allows to define the list of IDEs used for the verification, as well as explicit tool version and any of the available [options](https://github.com/JetBrains/intellij-plugin-verifier#common-options) by proxifying them to the Verifier CLI.
- *
- * For more details, examples or issues reporting, go to the [IntelliJ Plugin Verifier](https://github.com/JetBrains/intellij-plugin-verifier) repository.
- *
- * To run Plugin Verifier in [`-offline`](https://github.com/JetBrains/intellij-plugin-verifier/pull/58) mode, set the Gradle [`offline` start parameter](https://docs.gradle.org/current/javadoc/org/gradle/StartParameter.html#setOffline-boolean-).
- *
- * @see <a href="https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html">Verifying Plugin Compatibility</a>
+ * @see PluginVerifierAware
+ * @see IntelliJPlatformExtension.VerifyPlugin
  * @see <a href="https://github.com/JetBrains/intellij-plugin-verifier">IntelliJ Plugin Verifier</a>
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html">Verifying Plugin Compatibility</a>
+ *
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @UntrackedTask(because = "Should always run Plugin Verifier")
 abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
 
+    /**
+     * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.
+     *
+     * The list of IDEs is controlled with the [IntelliJPlatformExtension.VerifyPlugin.Ides] extension.
+     *
+     * @see [IntelliJPlatformExtension.VerifyPlugin.Ides]
+     */
     @get:InputFiles
     @get:Classpath
     abstract val ides: ConfigurableFileCollection
 
     /**
-     * Defines the verification level at which the task should fail if any reported issue matches.
-     * Can be set as [FailureLevel] enum or [EnumSet<FailureLevel>].
+     * Input ZIP archive file of the plugin to verify.
+     * If empty, the task will be skipped.
      *
-     * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
+     * Default value: [BuildPluginTask.archiveFile]
+     */
+    @get:InputFile
+    @get:SkipWhenEmpty
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val archiveFile: RegularFileProperty
+
+    /**
+     * The list of class prefixes from the external libraries.
+     * The Plugin Verifier will not report `No such class` for classes of these packages.
+     *
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.externalPrefixes]
+     *
+     * @see IntelliJPlatformExtension.VerifyPlugin.externalPrefixes
+     */
+    @get:Input
+    @get:Optional
+    abstract val externalPrefixes: ListProperty<String>
+
+    /**
+     * Defines the verification level at which the task should fail if any reported issue matches.
+     *
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.failureLevel]
+     *
+     * @see FailureLevel
+     * @see IntelliJPlatformExtension.VerifyPlugin.failureLevel
      */
     @get:Input
     abstract val failureLevel: ListProperty<FailureLevel>
 
     /**
-     * Free arguments passed to the IntelliJ Plugin Verifier exactly as specified.
+     * The list of free arguments is passed directly to the IntelliJ Plugin Verifier CLI tool.
      *
      * They can be used in addition to the arguments that are provided by dedicated options.
+     *
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.freeArgs]
+     *
+     * @see IntelliJPlatformExtension.VerifyPlugin.freeArgs
      */
     @get:Input
     @get:Optional
     abstract val freeArgs: ListProperty<String>
 
     /**
-     * JAR or ZIP file of the plugin to verify.
-     * If empty, the task will be skipped.
+     * A file that contains a list of problems that will be ignored in a report.
      *
-     * Default value: output of the `buildPlugin` task
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.ignoredProblemsFile]
+     *
+     * @see IntelliJPlatformExtension.VerifyPlugin.ignoredProblemsFile
      */
     @get:InputFile
-    @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val distributionFile: RegularFileProperty
+    @get:Optional
+    abstract val ignoredProblemsFile: RegularFileProperty
+
+    /**
+     * Determines if the operation is running in offline mode.
+     *
+     * Default value: [StartParameter.offline]
+     *
+     * @see StartParameter
+     * @see <a href="https://docs.gradle.org/current/userguide/command_line_interface.html#sec:command_line_execution_options">Command Line Execution options</a>
+     */
+    @get:Internal
+    abstract val offline: Property<Boolean>
+
+    /**
+     * Specifies which subsystems of IDE should be checked.
+     *
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.subsystemsToCheck]
+     *
+     * @see Subsystems
+     * @see IntelliJPlatformExtension.VerifyPlugin.subsystemsToCheck
+     */
+    @get:Input
+    @get:Optional
+    abstract val subsystemsToCheck: Property<Subsystems>
+
+    /**
+     * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
+     *
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.teamCityOutputFormat]
+     *
+     * @see IntelliJPlatformExtension.VerifyPlugin.teamCityOutputFormat
+     */
+    @get:Input
+    @get:Optional
+    abstract val teamCityOutputFormat: Property<Boolean>
 
     /**
      * The path to the directory where verification reports will be saved.
      *
-     * Default value: `${project.buildDir}/reports/pluginVerifier`
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.verificationReportsDirectory]
+     *
+     * @see IntelliJPlatformExtension.VerifyPlugin.verificationReportsDirectory
      */
     @get:OutputDirectory
     @get:Optional
@@ -88,69 +159,14 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * The output formats of the verification reports.
      *
-     * Accepted values:
-     * - `plain` for console output
-     * - `html`
-     * ` `markdown`
+     * Default value: [IntelliJPlatformExtension.VerifyPlugin.verificationReportsFormats]
      *
-     * Default value: [VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML]
+     * @see VerificationReportsFormats
+     * @see IntelliJPlatformExtension.VerifyPlugin.verificationReportsFormats
      */
     @get:Input
     @get:Optional
     abstract val verificationReportsFormats: ListProperty<VerificationReportsFormats>
-
-    /**
-     * The path to the directory where IDEs used for the verification will be downloaded.
-     *
-     * Default value: `System.getProperty("plugin.verifier.home.dir")/ides`, `System.getenv("XDG_CACHE_HOME")/pluginVerifier/ides`,
-     * `System.getProperty("user.home")/.cache/pluginVerifier/ides` or system temporary directory.
-     */
-    @get:InputDirectory
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val downloadDirectory: DirectoryProperty
-
-    /**
-     * The list of classes prefixes from the external libraries.
-     * The Plugin Verifier will not report `No such class` for classes of these packages.
-     */
-    @get:Input
-    @get:Optional
-    abstract val externalPrefixes: ListProperty<String>
-
-    /**
-     * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
-     *
-     * Default value: `false`
-     */
-    @get:Input
-    @get:Optional
-    abstract val teamCityOutputFormat: Property<Boolean>
-
-    /**
-     * Specifies which subsystems of IDE should be checked.
-     *
-     * Default value: `all`
-     *
-     * Acceptable values:**
-     * - `all`
-     * - `android-only`
-     * - `without-android`
-     */
-    @get:Input
-    @get:Optional
-    abstract val subsystemsToCheck: Property<String>
-
-    /**
-     * A file that contains a list of problems that will be ignored in a report.
-     */
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:Optional
-    abstract val ignoredProblemsFile: RegularFileProperty
-
-    @get:Internal
-    abstract val offline: Property<Boolean>
 
     private val log = Logger(javaClass)
 
@@ -166,7 +182,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      */
     @TaskAction
     override fun exec() {
-        val file = distributionFile.orNull?.asPath
+        val file = archiveFile.orNull?.asPath
         if (file == null || !file.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
         }
@@ -175,9 +191,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             if (isEmpty()) {
                 throw GradleException("No IDE selected for verification with the IntelliJ Plugin Verifier")
             }
-            args(listOf("check-plugin") + getOptions() + file.toString() + map {
+            args(listOf("check-plugin") + getOptions() + file.absolutePathString() + map {
                 when {
-                    it.isDirectory -> it.path
+                    it.isDirectory -> it.absolutePath
                     else -> it.readText()
                 }
             })
@@ -215,7 +231,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         }
         if (subsystemsToCheck.orNull != null) {
             args.add("-subsystems-to-check")
-            args.add(subsystemsToCheck.get())
+            args.add(subsystemsToCheck.get().toString())
         }
         if (offline.get()) {
             args.add("-offline")
@@ -261,12 +277,11 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
                 extension.verifyPlugin.let {
                     ides.from(intellijPluginVerifierIdesConfiguration)
-                    downloadDirectory.convention(it.downloadDirectory)
                     freeArgs.convention(it.freeArgs)
                 }
 
                 failureLevel.convention(extension.verifyPlugin.failureLevel)
-                distributionFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+                archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 verificationReportsDirectory.convention(extension.verifyPlugin.verificationReportsDirectory)
                 verificationReportsFormats.convention(extension.verifyPlugin.verificationReportsFormats)
                 externalPrefixes.convention(extension.verifyPlugin.externalPrefixes)
@@ -305,7 +320,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         ),
         INTERNAL_API_USAGES(
             "Internal API usages",
-            "Plugin uses API marked as internal (ApiStatus.@get:Internal)."
+            "Plugin uses API marked as internal (ApiStatus.@Internal)."
         ),
         OVERRIDE_ONLY_API_USAGES(
             "Override-only API usages",
@@ -356,5 +371,14 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         }
 
         override fun toString() = name.lowercase()
+    }
+
+    @Suppress("unused")
+    enum class Subsystems {
+        ALL,
+        ANDROID_ONLY,
+        WITHOUT_ANDROID;
+
+        override fun toString() = name.lowercase().replace('_', '-')
     }
 }

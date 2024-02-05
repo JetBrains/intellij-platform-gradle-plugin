@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurat
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.model.toPublication
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import java.net.URI
 import javax.inject.Inject
 

@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -33,107 +34,229 @@ import kotlin.io.path.name
 @CacheableTask
 abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware {
 
+    /**
+     * Represents an input `plugin.xml` file.
+     *
+     * By default, a `plugin.xml` file is picked from the main resources location, like: `src/main/kotlin/resources/META-INF/plugin.xml`.
+     */
     @get:InputFile
     @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputFile: RegularFileProperty
 
+    /**
+     * Represents the output `plugin.xml` file property for a task.
+     *
+     * By default, the file is written to a temporary task directory, like: [ProjectLayout.getBuildDirectory]/tmp/patchPluginXml/plugin.xml
+     */
     @get:OutputFile
     abstract val outputFile: RegularFileProperty
 
     /**
+     * A unique identifier of the plugin.
+     * It should be a fully qualified name similar to Java packages and must not collide with the ID of existing plugins.
+     * The ID is a technical value used to identify the plugin in the IDE and [JetBrains Marketplace](https://plugins.jetbrains.com/).
+     * Please use characters, numbers, and `.`/`-`/`_` symbols only and keep it reasonably short.
+     *
+     * The provided value will be set as a value of the `<id>` element.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.id]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.id
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__id">Plugin Configuration File: `id`</a>
      */
     @get:Input
     @get:Optional
     abstract val pluginId: Property<String>
 
     /**
+     * The user-visible plugin display name (Title Case).
+     *
+     * The provided value will be set as a value of the `<name>` element.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.name]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.name
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__name">Plugin Configuration File: `name`</a>
      */
     @get:Input
     @get:Optional
     abstract val pluginName: Property<String>
 
     /**
+     * The plugin version is displayed in the Plugins settings dialog and on the JetBrains Marketplace plugin page.
+     * Plugins uploaded to the JetBrains Marketplace must follow semantic versioning.
+     *
+     * The provided value will be set as a value of the `<version>` element.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.version]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.version
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__version">Plugin Configuration File: `version`</a>
      */
     @get:Input
     @get:Optional
     abstract val pluginVersion: Property<String>
 
     /**
+     * The plugin description is displayed on the JetBrains Marketplace plugin page and in the Plugins settings dialog.
+     * Simple HTML elements, like text formatting, paragraphs, lists, etc., are allowed.
+     *
+     * The description content is automatically wrapped with `<![CDATA[... ]]>`.
+     *
+     * The provided value will be set as a value of the `<description>` element.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.description]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.description
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__description">Plugin Configuration File: `description`</a>
      */
     @get:Input
     @get:Optional
     abstract val pluginDescription: Property<String>
 
     /**
+     * A short summary of new features, bugfixes, and changes provided with the latest plugin version.
+     * Change notes are displayed on the JetBrains Marketplace plugin page and in the Plugins settings dialog.
+     * Simple HTML elements, like text formatting, paragraphs, lists, etc., are allowed.
+     *
+     * The change notes content is automatically wrapped with `<![CDATA[... ]]>`.
+     *
+     * The provided value will be set as a value of the `<change-notes>` element.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.changeNotes]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.changeNotes
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__change-notes">Plugin Configuration File: `change-notes`</a>
      */
     @get:Input
     @get:Optional
     abstract val changeNotes: Property<String>
 
     /**
+     * The plugin product code used in the JetBrains Sales System.
+     * The code must be agreed with JetBrains in advance and follow [the requirements](https://plugins.jetbrains.com/docs/marketplace/obtain-a-product-code-from-jetbrains.html).
+     *
+     * The provided value will be set as a value of the `<product-descriptor code="">` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.code]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.code
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorCode: Property<String>
 
     /**
+     * Date of the major version release in the `YYYYMMDD` format.
+     *
+     * The provided value will be set as a value of the `<product-descriptor release-date="">` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseDate]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseDate
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorReleaseDate: Property<String>
 
     /**
+     * A major version in a special number format.
+     *
+     * The provided value will be set as a value of the `<product-descriptor release-version="">` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseVersion]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.releaseVersion
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorReleaseVersion: Property<String>
 
     /**
+     * The boolean value determining whether the plugin is a [Freemium](https://plugins.jetbrains.com/docs/marketplace/freemium.html) plugin.
+     * Default value: `false`.
+     *
+     * The provided value will be set as a value of the `<product-descriptor optional="">` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.optional]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.optional
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
      */
     @get:Input
     @get:Optional
     abstract val productDescriptorOptional: Property<Boolean>
 
     /**
+     * The lowest IDE version compatible with the plugin.
+     *
+     * The provided value will be set as a value of the `<idea-version since-build=""/>` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
      */
     @get:Input
     @get:Optional
     abstract val sinceBuild: Property<String>
 
     /**
+     * The highest IDE version compatible with the plugin.
+     * Undefined value declares compatibility with all the IDEs since the version specified by the `since-build` (also with the future builds that may cause incompatibility errors).
+     *
+     * The provided value will be set as a value of the `<idea-version until-build=""/>` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
      */
     @get:Input
     @get:Optional
     abstract val untilBuild: Property<String>
 
     /**
+     * The vendor name or organization ID (if created) in the Plugins settings dialog and on the JetBrains Marketplace plugin page.
+     *
+     * The provided value will be set as a value of the `<vendor>` element.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.Vendor.name]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.Vendor.name
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor">Plugin Configuration File: `vendor`</a>
      */
     @get:Input
     @get:Optional
     abstract val vendorName: Property<String>
 
     /**
+     * The vendor's email address.
+     *
+     * The provided value will be set as a value of the `<vendor email="">` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.Vendor.email]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.Vendor.email
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor">Plugin Configuration File</a>
      */
     @get:Input
     @get:Optional
     abstract val vendorEmail: Property<String>
 
     /**
+     * The link to the vendor's homepage.
+     *
+     * The provided value will be set as a value of the `<vendor url="">` element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.Vendor.url]
+     *
      * @see IntelliJPlatformExtension.PluginConfiguration.Vendor.url
+     * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor">Plugin Configuration File</a>
      */
     @get:Input
     @get:Optional
@@ -143,7 +266,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
 
     init {
         group = PLUGIN_GROUP_NAME
-        description = "Patches `plugin.xml` files with values provided to the task."
+        description = "Patches `plugin.xml` file with values provided to the task."
     }
 
     @TaskAction

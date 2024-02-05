@@ -10,7 +10,6 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
@@ -25,22 +24,23 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 
 /**
- * Publishes plugin to the remote [JetBrains Marketplace](https://plugins.jetbrains.com) repository.
+ * The task for publishing plugin to the remote plugins repository, such as [JetBrains Marketplace](https://plugins.jetbrains.com).
  *
- * The following attributes are a part of the Publishing DSL `publishPlugin { ... }` in which allows Gradle to upload plugin to [JetBrains Marketplace](https://plugins.jetbrains.com).
- * Note that you need to [upload the plugin](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#uploading-a-plugin-to-jetbrains-marketplace) to the repository at least once manually (to specify options like the license, repository URL etc.) before uploads through Gradle can be used.
- *
- * See the instruction on [how to generate authentication token](https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html).
- *
- * See [Publishing Plugin With Gradle](https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#publishing-plugin-with-gradle) tutorial for step-by-step instructions.
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#uploading-a-plugin-to-jetbrains-marketplace">Uploading a Plugin to JetBrains Marketplace</a>
+ * @see <a href="https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html">Plugin upload API</a>
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#publishing-plugin-with-gradle">Publishing Plugin With Gradle</a>
  */
 @UntrackedTask(because = "Output is stored remotely")
 abstract class PublishPluginTask : DefaultTask() {
 
     /**
-     * Jar or Zip file of plugin to upload.
+     * ZIP archive to be published to the remote repository.
      *
-     * Default value: output of the `buildPlugin` task
+     * Default value: [SignPluginTask.archiveFile] if plugin signing is configured, otherwise [BuildPluginTask.archiveFile].
+     *
+     * @see SignPluginTask.archiveFile
+     * @see BuildPluginTask.archiveFile
+     * @see IntelliJPlatformExtension.Signing
      */
     @get:InputFile
     @get:Optional
@@ -50,32 +50,42 @@ abstract class PublishPluginTask : DefaultTask() {
     /**
      * URL host of a plugin repository.
      *
-     * Default value: `https://plugins.jetbrains.com`
+     * Default value: [IntelliJPlatformExtension.Publishing.host]
+     *
+     * @see IntelliJPlatformExtension.Publishing.host
      */
     @get:Input
     @get:Optional
     abstract val host: Property<String>
 
     /**
+     * Authorization token.
      * Required.
-     * Authentication token.
+     *
+     * Default value: [IntelliJPlatformExtension.Publishing.token]
+     *
+     * @see IntelliJPlatformExtension.Publishing.token
      */
     @get:Input
     @get:Optional
     abstract val token: Property<String>
 
     /**
-     * List of channel names to upload plugin to.
+     * A channel name to upload plugin to.
      *
-     * Default value: `["default"]`
+     * Default value: [IntelliJPlatformExtension.Publishing.channel]
+     *
+     * @see IntelliJPlatformExtension.Publishing.channel
      */
     @get:Input
     @get:Optional
-    abstract val channels: ListProperty<String>
+    abstract val channel: Property<String>
 
     /**
      * Publish the plugin update and mark it as hidden to prevent public release after approval.
-     * See: https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html
+     *
+     * @see IntelliJPlatformExtension.Publishing.hidden
+     * @see <a href="https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html">Hidden release</a>
      */
     @get:Input
     @get:Optional
@@ -111,30 +121,29 @@ abstract class PublishPluginTask : DefaultTask() {
                     throw TaskExecutionException(this, GradleException("Cannot upload plugin: $problems"))
                 }
                 val pluginId = creationResult.plugin.pluginId
-                channels.get().forEach { channel ->
-                    log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
-                    try {
-                        val repositoryClient = when (toolboxEnterprise.get()) {
-                            true -> PluginRepositoryFactory.createWithImplementationClass(
-                                host.get(),
-                                token.get(),
-                                "Automation",
-                                ToolboxEnterprisePluginRepositoryService::class.java,
-                            )
-
-                            false -> PluginRepositoryFactory.create(host.get(), token.get())
-                        }
-                        repositoryClient.uploader.upload(
-                            id = pluginId as StringPluginId,
-                            file = path.toFile(),
-                            channel = channel.takeIf { it != "default" },
-                            notes = null,
-                            isHidden = hidden.get(),
+                val channel = channel.get()
+                log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
+                try {
+                    val repositoryClient = when (toolboxEnterprise.get()) {
+                        true -> PluginRepositoryFactory.createWithImplementationClass(
+                            host.get(),
+                            token.get(),
+                            "Automation",
+                            ToolboxEnterprisePluginRepositoryService::class.java,
                         )
-                        log.info("Uploaded successfully")
-                    } catch (exception: Exception) {
-                        throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
+
+                        false -> PluginRepositoryFactory.create(host.get(), token.get())
                     }
+                    repositoryClient.uploader.upload(
+                        id = pluginId as StringPluginId,
+                        file = path.toFile(),
+                        channel = channel.takeIf { it != "default" },
+                        notes = null,
+                        isHidden = hidden.get(),
+                    )
+                    log.info("Uploaded successfully")
+                } catch (exception: Exception) {
+                    throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
                 }
             }
 
@@ -161,7 +170,7 @@ abstract class PublishPluginTask : DefaultTask() {
                 token.convention(extension.publishing.token)
                 host.convention(extension.publishing.host)
                 toolboxEnterprise.convention(extension.publishing.toolboxEnterprise)
-                channels.convention(extension.publishing.channel.map { listOf(it) })
+                channel.convention(extension.publishing.channel)
                 hidden.convention(extension.publishing.hidden)
 
                 archiveFile.convention(

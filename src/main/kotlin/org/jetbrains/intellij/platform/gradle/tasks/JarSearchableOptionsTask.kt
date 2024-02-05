@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
@@ -30,7 +31,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
     /**
      * The output directory where the JAR file will be created.
      *
-     * Default value: `build/searchableOptions`
+     * Default value: [ProjectLayout.getBuildDirectory]/searchableOptions
      */
     @get:InputDirectory
     @get:Optional

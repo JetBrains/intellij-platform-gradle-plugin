@@ -16,9 +16,9 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
