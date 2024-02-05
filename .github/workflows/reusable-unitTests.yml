@@ -23,8 +23,7 @@ jobs:
       matrix:
         gradleVersion:
           - "8.1"
-          - "8.5"
-          - "8.6-rc-2"
+          - "8.6"
         os:
           - windows-latest
           - ubuntu-latest

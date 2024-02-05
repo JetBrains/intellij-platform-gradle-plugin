@@ -25,7 +25,7 @@ jobs:
           java-version: 11
 
       - name: Setup Gradle
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           gradle-home-cache-cleanup: true
 

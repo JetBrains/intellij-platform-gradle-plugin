@@ -21,6 +21,15 @@ class JbrResolverTest : IntelliJPluginSpecBase() {
     fun `resolve 11_0_11b1536_2`() = testJbrResolving("11_0_11b1536.2", "jbr_jcef-11_0_11-$platform-$arch-b1536.2")
 
     @Test
+    fun `resolve 17_0_10b1087_17`() = testJbrResolving("17.0.10b1087.17", "jbr_jcef-17.0.10-$platform-$arch-b1087.17")
+
+    @Test
+    fun `resolve 21_0_2b346_3`() = testJbrResolving("21.0.2b346.3", "jbr_jcef-21.0.2-$platform-$arch-b346.3")
+
+    @Test
+    fun `resolve 21_0_2b341_4`() = testJbrResolving("21.0.2b341.4", "jbr_jcef-21.0.2-$platform-$arch-b341.4")
+
+    @Test
     fun `resolve jbrsdk-11_0_13b1751_16`() = testJbrResolving("jbrsdk-11_0_13b1751.16", "jbrsdk-11_0_13-$platform-$arch-b1751.16")
 
     @Test
