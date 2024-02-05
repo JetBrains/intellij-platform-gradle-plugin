@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.17.1] - 2024-02-05
+
 ### Fixed
 
 - Fix for running `classpathIndexCleanup` task in the proper order
@@ -958,7 +960,8 @@
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.0...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.1...HEAD
+[1.17.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.1...v1.17.0
 [1.16.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.0...v1.16.1
 [1.16.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.15.0...v1.16.0
