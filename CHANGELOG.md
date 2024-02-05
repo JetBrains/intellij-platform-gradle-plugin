@@ -2,6 +2,11 @@
 
 ## [next]
 
+### Fixed
+
+- Fix for running `classpathIndexCleanup` task in the proper order
+- Resolve JetBrains Runtime (JBR) 21 to JCEF variant
+
 ## [1.17.0] - 2024-01-18
 
 ### Added
