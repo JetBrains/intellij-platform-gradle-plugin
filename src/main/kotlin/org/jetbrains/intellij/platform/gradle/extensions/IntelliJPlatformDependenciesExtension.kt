@@ -779,6 +779,7 @@ private fun from(jbrVersion: String, jbrVariant: String?, jbrArch: String?, oper
     val buildNumber = buildNumberString.toVersion()
     val isJava8 = majorVersion.startsWith("8")
     val isJava17 = majorVersion.startsWith("17")
+    val isJava21 = majorVersion.startsWith("21")
 
     val oldFormat = prefix == "jbrex" || isJava8 && buildNumber < "1483.24".toVersion()
     if (oldFormat) {
@@ -788,7 +789,7 @@ private fun from(jbrVersion: String, jbrVariant: String?, jbrArch: String?, oper
     val arch = jbrArch ?: arch(isJava8)
     if (prefix.isEmpty()) {
         prefix = when {
-            isJava17 -> "jbr_jcef-"
+            isJava17 || isJava21 -> "jbr_jcef-"
             isJava8 -> "jbrx-"
             operatingSystem.isMacOsX && arch == "aarch64" -> "jbr_jcef-"
             buildNumber < "1319.6".toVersion() -> "jbr-"
