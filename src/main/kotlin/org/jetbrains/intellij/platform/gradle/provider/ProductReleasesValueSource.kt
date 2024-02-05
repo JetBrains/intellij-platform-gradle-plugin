@@ -14,20 +14,59 @@ import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource.FilterParameters
+import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 
+/**
+ * Provides a complete list of binary IntelliJ Platform product releases matching the given [FilterParameters] criteria.
+ *
+ * Its main purpose is to feed the IntelliJ Plugin Verifier with a list of all compatible IDEs for the binary plugin verification.
+ *
+ * @see PrintProductsReleasesTask
+ * @see VerifyPluginTask
+ * @see Locations.PRODUCTS_RELEASES_JETBRAINS_IDES
+ * @see Locations.PRODUCTS_RELEASES_ANDROID_STUDIO
+ */
 abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductReleasesValueSource.Parameters> {
 
     interface Parameters : FilterParameters {
+        /**
+         * A file containing the XML with all available JetBrains IDEs releases.
+         *
+         * @see Locations.PRODUCTS_RELEASES_JETBRAINS_IDES
+         */
         val jetbrainsIdes: RegularFileProperty
+
+        /**
+         * A file containing the XML with all available Android Studio releases.
+         *
+         * @see Locations.PRODUCTS_RELEASES_ANDROID_STUDIO
+         */
         val androidStudio: RegularFileProperty
     }
 
     interface FilterParameters : ValueSourceParameters {
+        /**
+         * Build number from which the binary IDE releases will be matched.
+         */
         val sinceBuild: Property<String>
+
+        /**
+         * Build number until which the binary IDE releases will be matched.
+         */
         val untilBuild: Property<String>
+
+        /**
+         * A list of [IntelliJPlatformType] types to match.
+         */
         val types: ListProperty<IntelliJPlatformType>
+
+        /**
+         * A list of [Channel] types of binary releases to search in.
+         */
         val channels: ListProperty<Channel>
     }
 
@@ -108,13 +147,16 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     }
 }
 
+/**
+ * Factory for creating the [ProductReleasesValueSource] instance to simplify providing product releases XML files and default [FilterParameters] filter values.
+ */
 @Suppress("FunctionName")
 fun ProductReleasesValueSource(
     providers: ProviderFactory,
     resources: ResourceHandler,
     extensionProvider: Provider<IntelliJPlatformExtension>,
     productInfoProvider: Provider<ProductInfo>,
-    configure: ProductReleasesValueSource.Parameters.() -> Unit = {},
+    configure: FilterParameters.() -> Unit = {},
 ) = providers.of(ProductReleasesValueSource::class.java) {
     val log = Logger(ProductReleasesValueSource::class.java)
 
@@ -138,8 +180,11 @@ fun ProductReleasesValueSource(
     }
 }
 
+/**
+ * Extension function for the [IntelliJPlatformExtension.VerifyPlugin.Ides] extension to let filter IDE binary releases just using [FilterParameters].
+ */
 @Suppress("FunctionName")
-fun IntelliJPlatformExtension.VerifyPlugin.Ides.ProductReleasesValueSource(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) =
+fun IntelliJPlatformExtension.VerifyPlugin.Ides.ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) =
     ProductReleasesValueSource(
         providers,
         resources,

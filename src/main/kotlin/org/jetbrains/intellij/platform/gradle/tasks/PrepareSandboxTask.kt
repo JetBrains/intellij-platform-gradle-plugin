@@ -49,16 +49,16 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginJar: RegularFileProperty
 
-    /**
-     * Libraries that will be ignored when preparing the sandbox.
-     * By default, excludes all libraries that are a part of the [SetupDependenciesTask.idea] dependency.
-     *
-     * Default value: [org.jetbrains.intellij.dependency.IdeaDependency.jarFiles] of [SetupDependenciesTask.idea]
-     */
-    @get:InputFiles
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val librariesToIgnore: ConfigurableFileCollection
+//    /**
+//     * Libraries that will be ignored when preparing the sandbox.
+//     * By default, excludes all libraries that are a part of the [SetupDependenciesTask.idea] dependency.
+//     *
+//     * Default value: [org.jetbrains.intellij.dependency.IdeaDependency.jarFiles] of [SetupDependenciesTask.idea]
+//     */
+//    @get:InputFiles
+//    @get:Optional
+//    @get:PathSensitive(PathSensitivity.RELATIVE)
+//    abstract val librariesToIgnore: ConfigurableFileCollection
 
     /**
      * List of dependencies on external plugins.

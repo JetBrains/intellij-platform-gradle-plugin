@@ -695,8 +695,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
             fun recommended() = listProductReleases().get().map { ide(it) }
 
             /**
-             * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
-             * for IntelliJ Platform Verifier using the [ide] helper method.
+             * Retrieves matching IDEs using custom filter parameters.
              *
              * @see ide
              * @see listProductReleases
@@ -711,7 +710,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
              * @param configure The lambda function to configure the parameters for obtaining the product releases. Defaults to an empty action.
              * @see ProductReleasesValueSource
              */
-            private fun listProductReleases(configure: ProductReleasesValueSource.Parameters.() -> Unit = {}) = ProductReleasesValueSource(configure)
+            private fun listProductReleases(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) = ProductReleasesValueSource(configure)
         }
     }
 }
