@@ -170,6 +170,16 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `skip Marketplace ZIP Signer task if no key and certificateChain were provided`() {
+        buildFile.kotlin(
+            """
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
+            """.trimIndent()
+        )
+
         build(Tasks.SIGN_PLUGIN) {
             assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
         }

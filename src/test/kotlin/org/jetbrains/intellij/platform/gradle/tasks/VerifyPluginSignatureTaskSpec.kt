@@ -14,6 +14,16 @@ class VerifyPluginSignatureTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `skip plugin signature verification task if plugin signing is not configured`() {
+        buildFile.kotlin(
+            """
+            dependencies {
+                intellijPlatform {
+                    zipSigner()
+                }            
+            }
+            """.trimIndent()
+        )
+
         build(Tasks.VERIFY_PLUGIN_SIGNATURE) {
             assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
             assertEquals(TaskOutcome.NO_SOURCE, task(":${Tasks.VERIFY_PLUGIN_SIGNATURE}")?.outcome)

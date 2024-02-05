@@ -62,8 +62,9 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
      * KeyStore file.
      * Refers to `ks` CLI option.
      */
-    @get:Input
+    @get:InputFile
     @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val keyStore: RegularFileProperty
 
     /**
