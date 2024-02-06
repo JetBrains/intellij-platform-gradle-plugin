@@ -9,7 +9,6 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TEST_TASK_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
@@ -52,7 +51,7 @@ abstract class TestIdeTask : Test(), RunnableIdeAware, CustomIntelliJPlatformVer
 //            systemProperty("idea.force.use.core.classloader", "true")
 //            systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-                project.tasks.named<Test>(TEST_TASK_NAME).configure {
+                project.tasks.named<Test>("test").configure {
                     finalizedBy(this@registerTask)
                 }
 //            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)

@@ -18,7 +18,6 @@ import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.createDirectories
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
@@ -36,7 +35,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
     @get:InputDirectory
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val inputDir: DirectoryProperty
+    abstract val inputDirectory: DirectoryProperty
 
     /**
      * The name of the plugin.
@@ -85,12 +84,9 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsDidWork = buildSearchableOptionsTaskProvider.map { it.didWork }
 
-                inputDir.convention(project.layout.buildDirectory.dir(IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME).map {
-                    it.asPath.createDirectories()
-                    it
-                })
+                inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
                 pluginName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
-                archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME}")
+                archiveBaseName.convention("lib/${IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIRECTORY}")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions")) // TODO: check if necessary, if so — use temp
                 noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))
 
@@ -116,7 +112,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                             }
                         }
                     }
-                    inputDir.asPath
+                    inputDirectory.asPath
                 })
 
                 eachFile { path = "search/$name" }
@@ -125,7 +121,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
 //                    buildSearchableOptionsDidWork.get() && inputDir.asPath.isDirectory()
 //                }
 
-                inputs.dir(buildSearchableOptionsTaskProvider.map { it.outputDir })
+                inputs.dir(buildSearchableOptionsTaskProvider.map { it.outputDirectory })
                 outputs.dir(destinationDirectory)
 
                 dependsOn(prepareSandboxTaskProvider)

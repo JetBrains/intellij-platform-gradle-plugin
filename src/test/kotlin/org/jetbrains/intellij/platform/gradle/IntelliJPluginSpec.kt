@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.test.createLocalIdeIfNotExists
+import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.junit.AfterClass
@@ -48,7 +49,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     fun `intellij-specific tasks`() {
         assumeFalse(Version.parse(gradleVersion) < Version.parse("6.9"))
         assertEquals(
-            TASKS.joinToString("\n"),
+            ALL_TASKS.joinToString("\n"),
             tasks(PLUGIN_GROUP_NAME).joinToString("\n"),
         )
     }

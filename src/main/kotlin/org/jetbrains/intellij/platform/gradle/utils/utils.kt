@@ -10,6 +10,7 @@ import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.inputStream
@@ -47,6 +48,12 @@ internal fun parsePluginXml(pluginXml: Path) = runCatching {
         PluginBeanExtractor.extractPluginBean(document)
     }
 }.getOrNull()
+
+internal val ALL_TASKS
+    get() = IntelliJPluginConstants.Tasks::class.java.declaredFields
+        .filter { it.name != "INSTANCE" }
+        .map { it.get(null).toString() }
+        .minus("INSTANCE")
 
 fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     null -> false

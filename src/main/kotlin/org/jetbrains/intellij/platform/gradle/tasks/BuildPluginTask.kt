@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.named
 import org.gradle.work.DisableCachingByDefault
@@ -10,9 +11,14 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 
 /**
- * This class represents a task for building a plugin and preparing a ZIP archive for deployment.
+ * A task responsible for building plugin and preparing a ZIP archive for testing and deployment.
  *
- * It uses the content produced by [PrepareSandboxTask] and [JarSearchableOptionsTask] tasks as an input.
+ * It takes the output of the [PrepareSandboxTask] task containing the built project with all its modules and dependencies,
+ * and the output of [JarSearchableOptionsTask] task.
+ *
+ * The produced archive is stored in the [ProjectLayout.getBuildDirectory]/distributions/[archiveFile] file.
+ * The [archiveFile] name and location can be controlled with properties provided with the [Zip] base task.
+ * By default, the [archiveBaseName] is set to the value of [PrepareSandboxTask.pluginName].
  */
 @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
 abstract class BuildPluginTask : Zip() {
@@ -38,7 +44,7 @@ abstract class BuildPluginTask : Zip() {
                 from(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }) {
                     into("lib")
                 }
-                into(prepareSandboxTaskProvider.flatMap { it.pluginName })
+                into(archiveBaseName)
 
                 dependsOn(jarSearchableOptionsTaskProvider)
                 dependsOn(prepareSandboxTaskProvider)

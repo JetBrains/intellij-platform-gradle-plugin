@@ -25,6 +25,11 @@ import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import kotlin.io.path.*
 
+private const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
+private const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
+private const val KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT = "kotlin.incremental.useClasspathSnapshot"
+private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
+
 /**
  * Validates the plugin project configuration:
  *
@@ -245,10 +250,10 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 })
 
                 kotlinPluginAvailable.convention(project.provider {
-                    project.pluginManager.hasPlugin(IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID)
+                    project.pluginManager.hasPlugin(KOTLIN_GRADLE_PLUGIN_ID)
                 })
-                project.pluginManager.withPlugin(IntelliJPluginConstants.KOTLIN_GRADLE_PLUGIN_ID) {
-                    val kotlinOptionsProvider = project.tasks.named(IntelliJPluginConstants.COMPILE_KOTLIN_TASK_NAME).apply {
+                project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
+                    val kotlinOptionsProvider = project.tasks.named(COMPILE_KOTLIN_TASK_NAME).apply {
                         configure {
                             dependsOn(this@registerTask)
                         }
@@ -275,9 +280,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         project.extensions.getByName("kotlin").withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
                     })
                     kotlinStdlibDefaultDependency.convention(
-                        project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME).map { it.toBoolean() })
+                        project.providers.gradleProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME).map { it.toBoolean() })
                     kotlinIncrementalUseClasspathSnapshot.convention(
-                        project.providers.gradleProperty(IntelliJPluginConstants.KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT).map { it.toBoolean() })
+                        project.providers.gradleProperty(KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT).map { it.toBoolean() })
                 }
 
                 project.tasks.withType<JavaCompile> {

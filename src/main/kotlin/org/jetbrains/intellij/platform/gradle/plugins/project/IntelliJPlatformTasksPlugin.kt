@@ -15,11 +15,11 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TASKS_ID
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.*
-import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
 
@@ -51,15 +51,17 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
                 PublishPluginTask,
                 RunIdeTask,
                 TestIdeTask,
+                TestIdePerformanceTask,
+                TestIdeUiTask,
             ).forEach {
                 it.register(project)
             }
 
-            with(tasks) {
-                // Make all tasks depend on [INITIALIZE_INTELLIJ_PLUGIN_TASK_NAME]
-                (TASKS - Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN).forEach {
-                    named(it) { dependsOn(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) }
-                }
+            /**
+             * Make all tasks depend on [Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN]
+             */
+            ALL_TASKS.minus(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN).forEach {
+                tasks.named(it) { dependsOn(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) }
             }
         }
     }

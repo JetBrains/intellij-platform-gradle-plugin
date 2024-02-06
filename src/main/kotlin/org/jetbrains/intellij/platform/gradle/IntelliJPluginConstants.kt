@@ -18,11 +18,8 @@ object IntelliJPluginConstants {
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
     const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
-    const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
-    const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
-    const val KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT = "kotlin.incremental.useClasspathSnapshot"
-    const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
-    const val TEST_TASK_NAME = "test"
+    const val SEARCHABLE_OPTIONS_DIRECTORY = "searchableOptions"
+    const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
     const val VERSION_LATEST = "latest"
 
     object Constraints {
@@ -129,41 +126,6 @@ object IntelliJPluginConstants {
 
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
-
-    val TASKS = listOf(
-        Tasks.BUILD_PLUGIN,
-//        BUILD_SEARCHABLE_OPTIONS_TASK_NAME,
-//        CLASSPATH_INDEX_CLEANUP_TASK_NAME,
-//        DOWNLOAD_ANDROID_STUDIO_PRODUCT_RELEASES_XML_TASK_NAME,
-//        DOWNLOAD_IDE_PRODUCT_RELEASES_XML_TASK_NAME,
-//        DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME,
-        Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN,
-//        INSTRUMENT_CODE_TASK_NAME,
-        Tasks.INSTRUMENTED_JAR,
-//        INSTRUMENT_TEST_CODE_TASK_NAME,
-//        JAR_SEARCHABLE_OPTIONS_TASK_NAME,
-        Tasks.PATCH_PLUGIN_XML,
-        Tasks.PREPARE_SANDBOX,
-        Tasks.PREPARE_TEST_SANDBOX,
-        Tasks.PREPARE_UI_TEST_SANDBOX,
-//        PRINT_BUNDLED_PLUGINS_TASK_NAME,
-//        PRINT_PRODUCTS_RELEASES_TASK_NAME,
-//        PUBLISH_PLUGIN_TASK_NAME,
-        Tasks.RUN_IDE,
-//        RUN_IDE_FOR_UI_TESTS_TASK_NAME,
-//        RUN_IDE_PERFORMANCE_TEST_TASK_NAME,
-        Tasks.VERIFY_PLUGIN,
-        Tasks.SETUP_DEPENDENCIES,
-        Tasks.SIGN_PLUGIN,
-        Tasks.TEST_IDE,
-        Tasks.VERIFY_PLUGIN_STRUCTURE,
-        Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
-        Tasks.VERIFY_PLUGIN_SIGNATURE,
-    )
-
-
-    const val SEARCHABLE_OPTIONS_DIR_NAME = "searchableOptions"
-    const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
 
     const val DEFAULT_INTELLIJ_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository"
     const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven"

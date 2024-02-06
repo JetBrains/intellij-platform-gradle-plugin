@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.intellij.lang.annotations.Language
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIR_NAME
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_SUFFIX
 
 abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
@@ -65,5 +65,5 @@ abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
 
     fun getSearchableOptionsXml(jar: String) = getSearchableOptions().resolve("$jar.jar/search/$jar.jar$SEARCHABLE_OPTIONS_SUFFIX")
 
-    private fun getSearchableOptions() = buildDirectory.resolve(SEARCHABLE_OPTIONS_DIR_NAME)
+    private fun getSearchableOptions() = buildDirectory.resolve(SEARCHABLE_OPTIONS_DIRECTORY)
 }

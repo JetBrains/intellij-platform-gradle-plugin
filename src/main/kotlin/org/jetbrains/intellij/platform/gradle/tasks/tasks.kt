@@ -30,10 +30,11 @@ import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.provider.ExecutableArchValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.isSpecified
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.util.*
 import kotlin.io.path.createDirectories
 
@@ -212,7 +213,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
              * No suffix is used if a task is a base task provided with the IntelliJ Platform Gradle Plugin as a default.
              */
             if (this !is PrepareSandboxTask) {
-                val isBuiltInTask = Tasks::class.java.declaredFields.any { it.get(null) == name }
+                val isBuiltInTask = ALL_TASKS.contains(name)
                 val prepareSandboxTaskName = when (this) {
                     is RunIdeTask -> Tasks.PREPARE_SANDBOX
                     is TestIdeTask -> Tasks.PREPARE_TEST_SANDBOX
