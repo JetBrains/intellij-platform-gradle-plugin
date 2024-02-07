@@ -16,7 +16,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         super.setup()
 
         gradleArguments.add("-Duser.home=$gradleHome")
-        Path(gradleHome).resolve(".pluginVerifier/ides").run {
+        gradleHome.resolve(".pluginVerifier/ides").run {
             deleteRecursively()
             createDirectories()
         }

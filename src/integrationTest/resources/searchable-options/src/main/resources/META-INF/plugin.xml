@@ -1,0 +1,9 @@
+<idea-plugin>
+    <id>org.jetbrains.plugins.integration-tests.searchable-options</id>
+    <name>Searchable Options</name>
+    <vendor>JetBrains</vendor>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectConfigurable instance="TestSearchableConfigurable"/>
+    </extensions>
+</idea-plugin>

@@ -21,12 +21,6 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
 
-    val intellijType = System.getProperty("test.intellij.type")
-        .takeUnless { it.isNullOrEmpty() }
-        ?: throw GradleException("'test.intellij.type' isn't provided")
-    val intellijVersion = System.getProperty("test.intellij.version")
-        .takeUnless { it.isNullOrEmpty() }
-        ?: throw GradleException("'test.intellij.version' isn't provided")
     val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version")
         .takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
@@ -99,7 +93,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
             
             dependencies {
                 intellijPlatform {
-                    create("$intellijType", "$intellijVersion")
+                    create("$intellijPlatformType", "$intellijPlatformVersion")
                 }
             }
                         

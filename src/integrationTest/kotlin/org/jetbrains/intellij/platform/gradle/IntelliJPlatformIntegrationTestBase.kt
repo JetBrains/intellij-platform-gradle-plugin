@@ -24,7 +24,6 @@ open class IntelliJPlatformIntegrationTestBase(
     }
 
     @AfterTest
-    @OptIn(ExperimentalPathApi::class)
     fun cleanup() {
         dir.deleteRecursively()
     }
@@ -102,14 +101,13 @@ open class IntelliJPlatformIntegrationTestBase(
      * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml`.
      */
     val patchedPluginXml
-        get() = buildDirectory
-            .resolve("patchedPluginXmlFiles/plugin.xml") // TODO: fix location
+        get() = buildDirectory.resolve("patchedPluginXmlFiles/plugin.xml") // TODO: fix location
             .also {
                 assert(it.exists()) { "plugin.xml file does not exist: $it" }
             }
 
 //    /**
-//     * Path to the generated plugin ZIP achive located in build/distrubutions directory,
+//     * Path to the generated plugin ZIP archive located in build/distributions directory,
 //     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/distributions/plugin-xml-patching-1.0.0.zip`.
 //     */
 //    val Path.pluginArchive
@@ -117,40 +115,29 @@ open class IntelliJPlatformIntegrationTestBase(
 //            .resolve("distributions/$projectName-1.0.0.zip")
 
     /**
-     * Path to the generated plugin JAR achive located in build/libs directory,
+     * Path to the generated plugin JAR archive located in build/libs directory,
      * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/libs/plugin-xml-patching-1.0.0.jar`.
      */
     val pluginJar
-        get() = buildDirectory
-            .resolve("libs/test-1.0.0.jar")
+        get() = buildDirectory.resolve("libs/test-1.0.0.jar")
             .also {
                 assert(it.exists()) { "Plugin jar file does not exist: $it" }
             }
 
     /**
-     * Path to the Gradle user home directory., e.g., `/Users/hsz/.gradle`.
-     */
-    val gradleUserHomeDirectory
-        get() = Path(System.getProperty("test.gradle.home"))
-
-    /**
-     * Path to the Gradle cache directory.,
-     * e.g., `/Users/hsz/.gradle/caches/modules-2/files-2.1`
+     * Path to the Gradle cache directory., e.g., `/Users/hsz/.gradle/caches/modules-2/files-2.1`
      */
     val gradleCacheDirectory
-        get() = gradleUserHomeDirectory
-            .resolve("caches/modules-2/files-2.1")
+        get() = gradleHome.resolve("caches/modules-2/files-2.1")
             .also {
                 assert(it.exists()) { "Gradle cache directory does not exist: $it" }
             }
 
     /**
-     * Path to the IDE plugins cache directory.,
-     * e.g., `/Users/hsz/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins`.
+     * Path to the IDE plugins cache directory., e.g., `/Users/hsz/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins`.
      */
     val pluginsCacheDirectory
-        get() = gradleCacheDirectory
-            .resolve("com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
+        get() = gradleCacheDirectory.resolve("com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
             .also {
                 assert(it.exists()) { "IDE Plugins cache directory does not exist: $it" }
             }

@@ -315,7 +315,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add bundled zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
-            Path(gradleHome).parent.resolve("local-ides"),
+            gradleHome.parent.resolve("local-ides"),
             "com/jetbrains/intellij/goland/goland/2022.1/goland-2022.1.zip"
         )
         buildFile.writeText("")
@@ -350,7 +350,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add external zip plugin source artifacts from src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
-            Path(gradleHome).parent.resolve("local-ides"),
+            gradleHome.parent.resolve("local-ides"),
             "com/jetbrains/intellij/idea/ideaIC/2022.1.4/ideaIC-2022.1.4.zip"
         )
 
@@ -429,7 +429,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
     @Test
     fun `add bundled zip plugin source artifacts from IDE_ROOT-lib-src directory when localPath used`() {
         val localPath = createLocalIdeIfNotExists(
-            Path(gradleHome).parent.resolve("local-ides"),
+            gradleHome.parent.resolve("local-ides"),
             "com/jetbrains/intellij/idea/ideaIU/2022.1.4/ideaIU-2022.1.4.zip"
         )
         buildFile.writeText("")

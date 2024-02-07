@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.intellij.lang.annotations.Language
@@ -19,11 +20,16 @@ abstract class IntelliJPlatformTestBase {
     val gradleDefault = System.getProperty("test.gradle.default")
     val gradleScan = System.getProperty("test.gradle.scan").toBoolean()
     val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
-    val kotlinPluginVersion: String = System.getProperty("test.kotlin.version")
-    val gradleVersion: String = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
+    val kotlinPluginVersion = System.getProperty("test.kotlin.version")
+    val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
+    val gradleHome = Path(System.getProperty("test.gradle.home"))
     val isCI get() = System.getProperty("test.ci").toBoolean()
 
-    val gradleHome: String = System.getProperty("test.gradle.home")
+    val intellijPlatformType = System.getProperty("test.intellijPlatform.type").takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.intellijPlatform.type' isn't provided")
+    val intellijPlatformVersion = System.getProperty("test.intellijPlatform.version").takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.intellijPlatform.version' isn't provided")
+
     var dir = createTempDirectory("tmp")
 
     @BeforeTest
@@ -102,7 +108,7 @@ abstract class IntelliJPlatformTestBase {
             .forwardOutput()
             .withPluginClasspath()
             .withDebug(debugEnabled)
-            .withTestKitDir(Path(gradleHome).toFile())
+            .withTestKitDir(gradleHome.toFile())
             .withArguments(
                 "-Dorg.gradle.kotlin.dsl.scriptCompilationAvoidance=false", // workaround for https://github.com/gradle/gradle/issues/25412
                 *projectProperties

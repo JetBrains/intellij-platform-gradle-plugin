@@ -12,7 +12,7 @@ import kotlin.test.assertEquals
 
 class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
 
-    private val sandbox get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijType-$intellijVersion")
+    private val sandbox get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
 
     @Test
     @Ignore
@@ -66,7 +66,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
             
             dependencies {
                 intellijPlatform {
-                    create("$intellijType", "$intellijVersion")
+                    create("$intellijPlatformType", "$intellijPlatformVersion")
                 }
             }
             
@@ -492,7 +492,7 @@ class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
                 "plugins/projectName/lib/joda-time-2.8.1.jar",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
             ),
-            collectPaths(customSandbox.resolve("$intellijType-$intellijVersion")),
+            collectPaths(customSandbox.resolve("$intellijPlatformType-$intellijPlatformVersion")),
         )
     }
 

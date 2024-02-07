@@ -10,7 +10,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import java.util.jar.Manifest
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
-import kotlin.io.path.pathString
 import kotlin.test.*
 
 class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
@@ -433,8 +432,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
             assertEquals(PLUGIN_NAME, it.getValue("Build-Plugin"))
             assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
-            assertEquals(intellijType, it.getValue("Platform-Type"))
-            assertEquals(intellijVersion, it.getValue("Platform-Version"))
+            assertEquals(intellijPlatformType, it.getValue("Platform-Type"))
+            assertEquals(intellijPlatformVersion, it.getValue("Platform-Version"))
             assertEquals("223.8836.41", it.getValue("Platform-Build"))
             assertEquals("false", it.getValue("Kotlin-Stdlib-Bundled"))
             assertEquals(null, it.getValue("Kotlin-Version"))

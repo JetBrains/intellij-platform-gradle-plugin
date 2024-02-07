@@ -467,7 +467,7 @@ class RunPluginVerifierTaskSpec : IntelliJPluginSpecBase() {
         )
     }
 
-    private fun writePluginVerifierIde(type: String = intellijType, version: String = intellijVersion) {
+    private fun writePluginVerifierIde(type: String = intellijPlatformType, version: String = intellijPlatformVersion) {
         buildFile.kotlin(
             """
             intellijPlatform {

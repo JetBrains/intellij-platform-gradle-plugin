@@ -37,7 +37,7 @@ class LatestVersionResolver {
 //        )
         fun plugin() = fromGitHub(IntelliJPluginConstants.PLUGIN_NAME, Locations.GITHUB_REPOSITORY)
 
-        fun fromMaven(subject: String, url: String): String {
+        private fun fromMaven(subject: String, url: String): String {
             log.debug(message = "Resolving latest $subject version")
             return URL(url).openStream().use {
                 XmlExtractor<MavenMetadata>().unmarshal(it).versioning?.latest
@@ -45,7 +45,8 @@ class LatestVersionResolver {
             }
         }
 
-        fun fromGitHub(subject: String, url: String): String {
+        @Suppress("SameParameterValue")
+        private fun fromGitHub(subject: String, url: String): String {
             log.debug(message = "Resolving latest $subject version")
             try {
                 return URL("$url/releases/latest").openConnection().run {
