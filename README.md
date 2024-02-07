@@ -2,7 +2,7 @@
 [![Gradle Plugin Portal](https://img.shields.io/gradle-plugin-portal/v/org.jetbrains.intellij?color=green&label=Gradle%20Plugin%20Portal&logo=gradle)][gradle-plugin-page]
 [![Build Status](https://github.com/JetBrains/gradle-intellij-plugin/workflows/Build/badge.svg)][gh:build]
 [![TeamCity Build Status](https://teamcity.jetbrains.com/app/rest/builds/buildType:(id:OpenSourceProjects_GradleIntellijPlugin_UnitTests),branch:%3Cdefault%3E/statusIcon)][tc:build]
-[![Twitter Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=twitter)][jb:twitter]
+[![X Follow](https://img.shields.io/badge/follow-%40JBPlatform-1DA1F2?logo=x)][jb:x]
 [![Slack](https://img.shields.io/badge/Slack-%23gradle--intellij--plugin-blue?style=flat-square&logo=Slack)][jb:slack]
 
 ![Gradle IntelliJ Plugin](.github/readme/gradle-intellij-plugin-dark.svg#gh-dark-mode-only)
@@ -35,6 +35,6 @@ Licensed under the Apache License, Version 2.0 (the "License"), see [LICENCE](./
 [gh:build]: https://github.com/JetBrains/gradle-intellij-plugin/actions/workflows/build.yml
 [jb:github]: https://github.com/JetBrains/.github/blob/main/profile/README.md
 [jb:slack]: https://plugins.jetbrains.com/slack
-[jb:twitter]: https://twitter.com/JBPlatform
+[jb:x]: https://twitter.com/JBPlatform
 [tc:build]: https://teamcity.jetbrains.com/project/OpenSourceProjects_GradleIntellijPlugin?mode=builds
 [gradle-plugin-page]: https://plugins.gradle.org/plugin/org.jetbrains.intellij
