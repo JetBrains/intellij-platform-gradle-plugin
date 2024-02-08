@@ -42,8 +42,8 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
         val binaryReleaseDependencies: ConfigurableFileCollection
     }
 
-    @get:Classpath
     @get:InputArtifact
+    @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {

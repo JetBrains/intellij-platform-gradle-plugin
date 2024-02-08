@@ -43,8 +43,8 @@ import kotlin.io.path.pathString
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class BundledPluginsListTransformer : TransformAction<TransformParameters.None> {
 
-    @get:Classpath
     @get:InputArtifact
+    @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     private val manager = IdePluginManager.createManager(createTempDirectory())

@@ -28,8 +28,8 @@ import kotlin.io.path.*
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class CollectorTransformer : TransformAction<TransformParameters.None> {
 
-    @get:Classpath
     @get:InputArtifact
+    @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {

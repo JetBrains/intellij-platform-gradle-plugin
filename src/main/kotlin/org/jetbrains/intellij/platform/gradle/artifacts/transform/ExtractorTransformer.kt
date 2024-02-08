@@ -46,8 +46,8 @@ abstract class ExtractorTransformer @Inject constructor(
         val jetbrainsRuntime: ConfigurableFileCollection
     }
 
-    @get:Classpath
     @get:InputArtifact
+    @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     override fun transform(outputs: TransformOutputs) {
