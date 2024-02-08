@@ -6,7 +6,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.platform.gradle.executableResolver.RuntimeResolver
+import org.jetbrains.intellij.platform.gradle.pathResolver.RuntimeResolver
 
 /**
  * This interface provides access to the Java Runtime (i.e., JetBrains Runtime) resolved with [RuntimeResolver].

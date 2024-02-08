@@ -20,9 +20,9 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.executableResolver.IntelliJPluginVerifierResolver
-import org.jetbrains.intellij.platform.gradle.executableResolver.MarketplaceZipSignerResolver
-import org.jetbrains.intellij.platform.gradle.executableResolver.RuntimeResolver
+import org.jetbrains.intellij.platform.gradle.pathResolver.IntelliJPluginVerifierResolver
+import org.jetbrains.intellij.platform.gradle.pathResolver.MarketplaceZipSignerResolver
+import org.jetbrains.intellij.platform.gradle.pathResolver.RuntimeResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo

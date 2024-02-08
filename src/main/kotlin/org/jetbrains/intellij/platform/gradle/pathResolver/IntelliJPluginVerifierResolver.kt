@@ -1,6 +1,6 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.executableResolver
+package org.jetbrains.intellij.platform.gradle.pathResolver
 
 import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
@@ -21,7 +21,7 @@ import kotlin.io.path.exists
 class IntelliJPluginVerifierResolver(
     val intellijPluginVerifier: FileCollection,
     val localPath: RegularFileProperty,
-) : ExecutableResolver {
+) : PathResolver {
 
     private val log = Logger(javaClass)
 

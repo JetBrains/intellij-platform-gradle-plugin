@@ -1,6 +1,6 @@
 // Copyright 2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.executableResolver
+package org.jetbrains.intellij.platform.gradle.pathResolver
 
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -18,7 +18,7 @@ private const val PRODUCT_INFO_NAME = "product-info.json"
  */
 class ProductInfoResolver(
     private val intellijPlatformDirectory: Path,
-) : ExecutableResolver {
+) : PathResolver {
 
     private val log = Logger(javaClass)
 

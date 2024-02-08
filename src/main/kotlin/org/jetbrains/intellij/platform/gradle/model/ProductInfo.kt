@@ -10,7 +10,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
-import org.jetbrains.intellij.platform.gradle.executableResolver.ProductInfoResolver
+import org.jetbrains.intellij.platform.gradle.pathResolver.ProductInfoResolver
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
