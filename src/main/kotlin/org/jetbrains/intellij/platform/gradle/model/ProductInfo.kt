@@ -169,8 +169,9 @@ private val json = Json { ignoreUnknownKeys = true }
  * @receiver The [Path] representing the IntelliJ Platform root directory.
  * @return The [ProductInfo] object containing the product information.
  */
-fun Path.productInfo() = resolveProductInfoPath()
-    .run { json.decodeFromString<ProductInfo>(readText()) }
+fun Path.productInfo() = json.decodeFromString<ProductInfo>(
+    resolveProductInfoPath().readText()
+)
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.

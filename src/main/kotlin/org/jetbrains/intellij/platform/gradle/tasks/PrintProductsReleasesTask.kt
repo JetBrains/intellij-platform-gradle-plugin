@@ -39,7 +39,6 @@ abstract class PrintProductsReleasesTask : DefaultTask(), IntelliJPlatformVersio
                         project.providers,
                         project.resources,
                         project.provider { project.the<IntelliJPlatformExtension>() },
-                        project.provider { productInfo },
                     )
                 )
             }

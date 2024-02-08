@@ -46,6 +46,14 @@ import kotlin.math.absoluteValue
 interface IntelliJPlatformExtension : ExtensionAware {
 
     /**
+     * Builds an index of UI components (searchable options) for the plugin.
+     * Controls the execution of the [BuildSearchableOptionsTask] task.
+     *
+     * Default value: `true`
+     */
+    val buildSearchableOptions: Property<Boolean>
+
+    /**
      * Enables the compiled classes instrumentation.
      * The compiled code will be enhanced with:
      * - nullability assertions
@@ -56,12 +64,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
     val instrumentCode: Property<Boolean>
 
     /**
-     * Builds an index of UI components (searchable options) for the plugin.
-     * Controls the execution of the [BuildSearchableOptionsTask] task.
-     *
-     * Default value: `true`
+     * Provides read access for the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
      */
-    val buildSearchableOptions: Property<Boolean>
+    val productInfo: Property<ProductInfo>
 
     /**
      * The path to the sandbox container where tests and IDE instances read and write data.
@@ -564,7 +569,6 @@ interface IntelliJPlatformExtension : ExtensionAware {
             internal val downloadDirectory: DirectoryProperty,
             internal val extensionProvider: Provider<IntelliJPlatformExtension>,
             internal val gradle: Gradle,
-            internal val productInfoProvider: Provider<ProductInfo>,
             internal val providers: ProviderFactory,
             internal val resources: ResourceHandler,
         ) {
