@@ -286,4 +286,98 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
             )
         }
     }
+
+    @Test
+    fun `unset the until-build attribute with null-provider passed to extension`() {
+        pluginXml.xml("<idea-plugin />")
+
+        buildFile.kotlin(
+            """
+            intellijPlatform {
+                pluginConfiguration {
+                    ideaVersion {
+                        untilBuild = provider { null }
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.PATCH_PLUGIN_XML) {
+            assertFileContent(
+                patchedPluginXml.value,
+                """
+                <idea-plugin>
+                  <idea-version since-build="223.8836" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
+                </idea-plugin>
+                """.trimIndent(),
+            )
+
+            assertNotContains("will be overwritten", output)
+        }
+    }
+
+    @Test
+    fun `unset the until-build attribute with null-provider passed to task`() {
+        pluginXml.xml("<idea-plugin />")
+
+        buildFile.kotlin(
+            """
+            tasks {
+                patchPluginXml {
+                    untilBuild = provider { null }
+                }
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.PATCH_PLUGIN_XML) {
+            assertFileContent(
+                patchedPluginXml.value,
+                """
+                <idea-plugin>
+                  <idea-version since-build="223.8836" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
+                </idea-plugin>
+                """.trimIndent(),
+            )
+
+            assertNotContains("will be overwritten", output)
+        }
+    }
+
+    @Test
+    fun `ignore unseting the until-build with null passed to extension`() {
+        pluginXml.xml("<idea-plugin />")
+
+        buildFile.kotlin(
+            """
+            intellijPlatform {
+                pluginConfiguration {
+                    ideaVersion {
+                        untilBuild = null
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.PATCH_PLUGIN_XML) {
+            assertFileContent(
+                patchedPluginXml.value,
+                """
+                <idea-plugin>
+                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <version>1.0.0</version>
+                  <name>projectName</name>
+                </idea-plugin>
+                """.trimIndent(),
+            )
+
+            assertNotContains("will be overwritten", output)
+        }
+    }
 }

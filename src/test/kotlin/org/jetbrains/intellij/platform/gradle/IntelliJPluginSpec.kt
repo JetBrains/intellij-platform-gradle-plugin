@@ -8,7 +8,6 @@ import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.TASKS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.test.createLocalIdeIfNotExists
 import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS

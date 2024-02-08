@@ -194,7 +194,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
     /**
      * The lowest IDE version compatible with the plugin.
      *
-     * The provided value will be set as a value of the `<idea-version since-build=""/>` element attribute.
+     * The provided value will be set as a value of the `<idea-version since-build="..."/>` element attribute.
      *
      * Default value: [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
      *
@@ -209,7 +209,10 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
      * The highest IDE version compatible with the plugin.
      * Undefined value declares compatibility with all the IDEs since the version specified by the `since-build` (also with the future builds that may cause incompatibility errors).
      *
-     * The provided value will be set as a value of the `<idea-version until-build=""/>` element attribute.
+     * The provided value will be set as a value of the `<idea-version until-build="..."/>` element attribute.
+     *
+     * The `until-build` attribute can be unset by setting `provider { null }` as a value.
+     * Note that passing only `null` will make Gradle use a default value instead.
      *
      * Default value: [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild]
      *
@@ -287,7 +290,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                 patch(productDescriptorOptional.map { it.toString() }, "product-descriptor", "optional")
 
                 patch(sinceBuild, "idea-version", "since-build")
-                patch(untilBuild, "idea-version", "until-build")
+                patch(untilBuild, "idea-version", "until-build", acceptNull = true)
 
                 patch(vendorName, "vendor")
                 patch(vendorEmail, "vendor", "email")
@@ -301,13 +304,24 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
     /**
      * Sets the [provider] value for the given [tagName] or [attributeName] of [tagName].
      */
-    private fun Document.patch(provider: Provider<String>?, tagName: String, attributeName: String? = null, isCDATA: Boolean = false) {
-        val value = provider?.orNull ?: return
-        patch(value, tagName, attributeName, isCDATA)
+    private fun Document.patch(
+        provider: Provider<String?>?,
+        tagName: String,
+        attributeName: String? = null,
+        isCDATA: Boolean = false,
+        acceptNull: Boolean = false,
+    ) {
+        val value = provider?.orNull
+
+        when {
+            value != null -> patch(value, tagName, attributeName, isCDATA)
+            acceptNull -> remove(tagName, attributeName)
+        }
     }
 
     /**
      * Sets the [value] for the given [tagName] or [attributeName] of [tagName].
+     * If [value] is `null` but the relevant attribute or element exists, unset it.
      */
     private fun Document.patch(value: String, tagName: String, attributeName: String? = null, isCDATA: Boolean = false) {
         val pluginXml = rootElement.takeIf { it.name == "idea-plugin" } ?: return
@@ -333,6 +347,18 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                     log.warn("Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$value'")
                 }
                 element.setAttribute(attributeName, value)
+            }
+        }
+    }
+
+    private fun Document.remove(tagName: String, attributeName: String? = null) {
+        val pluginXml = rootElement.takeIf { it.name == "idea-plugin" } ?: return
+
+        when {
+            attributeName == null -> rootElement.removeChild(tagName)
+            else -> {
+                val element = pluginXml.getChild(tagName) ?: return
+                element.removeAttribute(attributeName)
             }
         }
     }

@@ -242,6 +242,9 @@ interface IntelliJPlatformExtension : ExtensionAware {
              *
              * The default value is set to the `MAJOR.*` version based on the currently selected IntelliJ Platform, such as `233.*`.
              *
+             * The `until-build` attribute can be unset by setting `provider { null }` as a value.
+             * Note that passing only `null` will make Gradle use a default value instead.
+             *
              * @see PatchPluginXmlTask.untilBuild
              * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
              */
