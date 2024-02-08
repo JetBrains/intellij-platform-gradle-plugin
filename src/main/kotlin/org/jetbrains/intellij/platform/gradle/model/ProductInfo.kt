@@ -10,11 +10,10 @@ import org.gradle.api.file.FileCollection
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
+import org.jetbrains.intellij.platform.gradle.executableResolver.ProductInfoResolver
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
-import kotlin.io.path.exists
-import kotlin.io.path.name
 import kotlin.io.path.readText
 
 /**
@@ -146,18 +145,6 @@ internal fun ProductInfo.launchFor(architecture: String, os: OperatingSystem = O
 }
 
 /**
- * Resolves the path to the `product-info.json` file for the given [Path].
- *
- * @param name The name of the Product Info file. The default value is `product-info.json`.
- * @return The resolved path to the Product Info file.
- * @throws GradleException if the file cannot be resolved.
- */
-internal fun Path.resolveProductInfoPath(name: String = "product-info.json") =
-    listOf(this, resolve(name), resolve("Resources").resolve(name))
-        .find { it.name == name && it.exists() }
-        ?: throw GradleException("Could not resolve '$name' file in: $this")
-
-/**
  * JSON object used for parsing and serializing JSON data.
  * The `ignoreUnknownKeys` property is set to `true` to ignore unknown keys during deserialization.
  */
@@ -170,7 +157,7 @@ private val json = Json { ignoreUnknownKeys = true }
  * @return The [ProductInfo] object containing the product information.
  */
 fun Path.productInfo() = json.decodeFromString<ProductInfo>(
-    resolveProductInfoPath().readText()
+    ProductInfoResolver(this).resolve().readText()
 )
 
 /**
