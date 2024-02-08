@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
@@ -93,24 +94,26 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
 
                 from(inputDirectory)
 
-                include { element ->
-                    element
+                include {
+                    it
                         .takeIf { it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) }
-                        ?.let {
+                        ?.run {
                             sandboxPluginsDirectory.asPath
                                 .resolve(pluginName.get())
                                 .resolve("lib")
-                                .resolve(it.name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX))
+                                .resolve(name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX))
                         }
                         ?.exists()
-                        ?: element.isDirectory
+                        ?: it.isDirectory
                 }
 
-                eachFile { path = "search/$name" }
+                eachFile {
+                    path = "search/$name"
+                }
 
-//                onlyIf {
-//                    buildSearchableOptionsDidWork.get() && inputDir.asPath.isDirectory()
-//                }
+                onlyIf {
+                    buildSearchableOptionsDidWork.get() && inputDirectory.asPath.isDirectory()
+                }
 
                 outputs.dir(destinationDirectory)
 
