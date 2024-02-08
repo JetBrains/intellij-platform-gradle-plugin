@@ -519,11 +519,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         notations: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGINS,
         action: DependencyAction = {},
-    ) = notations.map {
-        it.forEach { notation ->
-            notation.parsePluginNotation().let { (id, version, channel) ->
-                plugin(id, version, channel, configurationName, action)
-            }
+    ) {
+        configurations.getByName(configurationName).withDependencies {
+            addAllLater(notations.map {
+                it.map { notation ->
+                    notation.parsePluginNotation().let { (id, version, channel) ->
+                        createIntelliJPlatformPluginDependency(id, version, channel).apply(action)
+                    }
+                }
+            })
         }
     }
 
@@ -540,11 +544,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         notations: List<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGINS,
         action: DependencyAction = {},
-    ) = notations.forEach {
-        it.parsePluginNotation().let { (id, version, channel) ->
-            plugin(id, version, channel, configurationName, action)
-        }
-    }
+    ) = plugins(providers.provider { notations }, configurationName, action)
 
     /**
      * Adds dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -559,11 +559,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         vararg notations: String,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGINS,
         action: DependencyAction = {},
-    ) = notations.forEach {
-        it.parsePluginNotation().let { (id, version, channel) ->
-            plugin(id, version, channel, configurationName, action)
-        }
-    }
+    ) = plugins(providers.provider { notations.asList() }, configurationName, action)
 
     /**
      * Adds a dependency on a bundled IntelliJ Platform plugin.
@@ -602,9 +598,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         ids: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
-    ) = ids.map {
-        it.forEach { id ->
-            bundledPlugin(id, configurationName, action)
+    ) {
+        configurations.getByName(configurationName).withDependencies {
+            addAllLater(ids.map {
+                it.map { id ->
+                    createIntelliJPlatformBundledPluginDependency(id).apply(action)
+                }
+            })
         }
     }
 
@@ -619,9 +619,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         vararg ids: String,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
-    ) = ids.forEach { id ->
-        bundledPlugin(providers.provider { id }, configurationName, action)
+    ) {
+        bundledPlugins(providers.provider { ids.asList() }, configurationName, action)
     }
+
 
     /**
      * Adds dependencies on bundled IntelliJ Platform plugins.
@@ -634,8 +635,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         ids: List<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
-    ) = ids.forEach { id ->
-        bundledPlugin(providers.provider { id }, configurationName, action)
+    ) {
+        bundledPlugins(providers.provider { ids }, configurationName, action)
     }
 
     /**
@@ -796,26 +797,37 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = dependencies.addProvider(
         configurationName,
         providers.provider {
-            val channel = channelProvider.orNull?.trim()
             val id = idProvider.get().trim()
             val version = versionProvider.get()
+            val channel = channelProvider.orNull?.trim()
 
-            val group = when (channel) {
-                "default", "", null -> JETBRAINS_MARKETPLACE_MAVEN_GROUP
-                else -> "$channel.$JETBRAINS_MARKETPLACE_MAVEN_GROUP"
-            }
-
-            dependencies.create(
-                group = group,
-                name = id,
-                version = version,
-            )
+            createIntelliJPlatformPluginDependency(id, version, channel)
         },
         action,
     )
 
     /**
-     * A base method for adding  a dependency on a bundled IntelliJ Platform plugin.
+     * Creates a dependency for an IntelliJ platform plugin.
+     *
+     * @param id the ID of the plugin
+     * @param version the version of the plugin
+     * @param channel the channel of the plugin. Can be null or empty for the default channel.
+     */
+    private fun createIntelliJPlatformPluginDependency(id: String, version: String, channel: String?): Dependency {
+        val group = when (channel) {
+            "default", "", null -> JETBRAINS_MARKETPLACE_MAVEN_GROUP
+            else -> "$channel.$JETBRAINS_MARKETPLACE_MAVEN_GROUP"
+        }
+
+        return dependencies.create(
+            group = group,
+            name = id.trim(),
+            version = version,
+        )
+    }
+
+    /**
+     * A base method for adding a dependency on a bundled IntelliJ Platform plugin.
      *
      * @param idProvider The provider of the bundled plugin identifier.
      * @param configurationName The name of the configuration to add the dependency to.
@@ -827,24 +839,32 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = dependencies.addProvider(
         configurationName,
-        idProvider.map { it.trim() }.map { id ->
-            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
-            val bundledPluginsList = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST).single().toPath().bundledPlugins()
-            val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
-            val artifactPath = Path(bundledPlugin.path)
-            val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
-            val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
-
-            dependencies.create(
-                group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
-                name = id,
-                version = "${productInfo.version}+$hash",
-            ).apply {
-                createIvyDependency(gradle, jars.map { it.toPublication() })
-            }
-        },
+        idProvider.map { id -> createIntelliJPlatformBundledPluginDependency(id) },
         action,
     )
+
+    /**
+     * Creates a dependency for an IntelliJ platform bundled plugin.
+     *
+     * @param bundledPluginId The ID of the bundled plugin.
+     */
+    private fun createIntelliJPlatformBundledPluginDependency(bundledPluginId: String): Dependency {
+        val id = bundledPluginId.trim()
+        val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
+        val bundledPluginsList = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST).single().toPath().bundledPlugins()
+        val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Bundled plugin '$id' does not exist") }
+        val artifactPath = Path(bundledPlugin.path)
+        val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+        val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
+
+        return dependencies.create(
+            group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+            name = id,
+            version = "${productInfo.version}+$hash",
+        ).apply {
+            createIvyDependency(gradle, jars.map { it.toPublication() })
+        }
+    }
 
     /**
      * A base method for adding  a dependency on IntelliJ Plugin Verifier.
@@ -903,6 +923,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 }
 
+/**
+ * Parses a string in plugin notation and returns a triple containing the plugin ID, version, and channel.
+ */
 private fun String.parsePluginNotation() = Triple(
     substringBefore(':'), // pluginId
     substringAfter(':').substringBefore('@'), // version
