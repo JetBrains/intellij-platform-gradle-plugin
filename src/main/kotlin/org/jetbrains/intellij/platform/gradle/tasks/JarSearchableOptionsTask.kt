@@ -20,8 +20,8 @@ import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
-import kotlin.io.path.isDirectory
 
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
@@ -84,9 +84,11 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
                 val extension = project.the<IntelliJPlatformExtension>()
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
-                val buildSearchableOptionsDidWork = buildSearchableOptionsTaskProvider.map { it.didWork }
+                val buildSearchableOptionsEnabled = extension.buildSearchableOptions.zip(buildSearchableOptionsTaskProvider) { enabled, task ->
+                    enabled && task.enabled
+                }
 
-                inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
+                inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory.apply { asPath.createDirectories() } })
                 pluginName.convention(extension.pluginConfiguration.name)
                 archiveBaseName.convention("lib/$SEARCHABLE_OPTIONS_DIRECTORY")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions")) // TODO: check if necessary, if so — use temp
@@ -112,7 +114,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware {
                 }
 
                 onlyIf {
-                    buildSearchableOptionsDidWork.get() && inputDirectory.asPath.isDirectory()
+                    buildSearchableOptionsEnabled.get()
                 }
 
                 outputs.dir(destinationDirectory)

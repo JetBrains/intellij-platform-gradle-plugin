@@ -20,10 +20,8 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
 
         buildFile.kotlin(
             """
-            tasks {
-                buildSearchableOptions {
-                    enabled = true
-                }
+            intellijPlatform {
+                buildSearchableOptions = true
             }
             """.trimIndent()
         )
