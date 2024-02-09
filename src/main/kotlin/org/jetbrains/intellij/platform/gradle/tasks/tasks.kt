@@ -118,7 +118,11 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     name = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix",
                     description = "Custom IntelliJ Platform dependency archive",
                 ) {
-                    dependenciesExtension.create(type.orElse(defaultTypeProvider), version.orElse(defaultVersionProvider), configurationName = name)
+                    dependenciesExtension.create(
+                        type = type.orElse(defaultTypeProvider),
+                        version = version.orElse(defaultVersionProvider),
+                        configurationName = name,
+                    )
                 }
 
                 /**
@@ -128,7 +132,10 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                     name = "${Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE}_$suffix",
                     description = "Custom IntelliJ Platform local instance",
                 ) {
-                    dependenciesExtension.local(localPath, configurationName = name)
+                    dependenciesExtension.local(
+                        localPath = localPath,
+                        configurationName = name,
+                    )
                 }
 
                 /**
