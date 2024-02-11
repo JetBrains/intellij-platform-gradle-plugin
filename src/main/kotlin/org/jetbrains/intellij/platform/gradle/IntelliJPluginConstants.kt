@@ -14,7 +14,7 @@ object IntelliJPluginConstants {
     const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
     const val LOG_PREFIX = "[$PLUGIN_ID]"
 
-    const val PLUGIN_GROUP_NAME = "intellijPlatform"
+    const val PLUGIN_GROUP_NAME = "intellij platform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
     const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
