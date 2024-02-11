@@ -86,7 +86,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                 mavenCentral()
                 
                 intellijPlatform {
-                    ivy()
+                    localPlatformArtifacts()
                     releases()
                 }
             }

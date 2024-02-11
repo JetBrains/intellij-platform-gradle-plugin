@@ -154,12 +154,15 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     // TODO: check if the bundled plugin hash matters — if it has to be different every time as always extract transformer is called, so previous dir may no longer exist
 
     /**
-     * Adds a local Ivy repository for resolving local Ivy XML files used for describing artifacts like local IntelliJ Platform instance, bundled plugins,
-     * and other dependencies that utilize [createIvyDependency].
+     * Certain dependencies, such as the IntelliJ Platform and bundled IDE plugins, need extra pre-processing before
+     * they can be correctly used by the IntelliJ Platform Gradle Plugin and loaded by Gradle.
+     *
+     * This pre-processing involves generating XML files that detail these specific artifacts.
+     * Once created, these XMLs are stored in a unique custom Ivy repository directory.
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun ivy(action: RepositoryAction = {}) = repositories.ivy {
+    fun localPlatformArtifacts(action: RepositoryAction = {}) = repositories.ivy {
         // Location of Ivy files generated for the current project.
         // TODO: make configurable with Gradle properties and align with [createIvyDependency]
         ivyPattern(".gradle/intellijPlatform/ivy/[organization]-[module]-[revision].[ext]")
@@ -188,10 +191,14 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     }
 
     /**
-     * Applies a set of recommended repositories.
+     * Applies a set of recommended repositories required for running the most common tasks provided by the IntelliJ Platform Gradle Plugin:
+     * - [localPlatformArtifacts] — required to use plugins bundled with IntelliJ Platform or refer to the local IDE
+     * - [releases] and [snapshots] — IntelliJ Platform releases channels
+     * - [marketplace] — JetBrains Marketplace plugins repository
+     * - [binaryReleases] — JetBrains IDEs releases required for running the IntelliJ Plugin Verifier
      */
     fun defaultRepositories() {
-        ivy()
+        localPlatformArtifacts()
         releases()
         snapshots()
         marketplace()
