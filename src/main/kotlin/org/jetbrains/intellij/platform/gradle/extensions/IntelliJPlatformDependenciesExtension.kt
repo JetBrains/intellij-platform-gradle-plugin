@@ -586,8 +586,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds dependencies on bundled IntelliJ Platform plugins.
      *
      * @param ids The bundled plugin identifiers.
-     * @param configurationName The name of the configuration to add the dependency to. Defaults to [Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS].
-     * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     fun bundledPlugins(vararg ids: String) = addIntelliJPlatformBundledPluginDependencies(
         bundledPlugins = providers.provider { ids.asList() }
@@ -688,7 +686,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * A base method for adding a dependency on a local IntelliJ Platform instance.
      *
-     * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
+     * @param localPathProvider The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action An optional action to be performed on the created dependency.
      */
@@ -848,7 +846,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
-     * A base method for adding  a dependency on Marketplace ZIP Signer.
+     * A base method for adding a dependency on Marketplace ZIP Signer.
      *
      * @param versionProvider The provider of the Marketplace ZIP Signer version.
      * @param configurationName The name of the configuration to add the dependency to.
