@@ -13,11 +13,18 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 
-@UntrackedTask(because = "Prints the output produced by the listProductsReleases task")
-abstract class PrintProductsReleasesTask : DefaultTask(), IntelliJPlatformVersionAware {
+/**
+ * Prints the list of binary product releases that, by default, match the currently selected IntelliJ Platform along
+ * with [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
+ * and [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild] properties.
+ */
+@UntrackedTask(because = "Prints output")
+abstract class PrintProductsReleasesTask : DefaultTask() {
 
+    /**
+     * Property holds the list of product releases to print.
+     */
     @get:Input
     abstract val productsReleases: ListProperty<String>
 

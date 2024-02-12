@@ -98,7 +98,8 @@ data class ProductInfo(
 }
 
 /**
- * Asserts that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.
+ * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.
+ *
  * If the provided version is lower, a [IllegalArgumentException] is thrown with an appropriate message.
  *
  * @throws IllegalArgumentException if the provided version is lower than the minimum supported version.
@@ -106,7 +107,7 @@ data class ProductInfo(
  * @see Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
  */
 @Throws(IllegalArgumentException::class)
-fun ProductInfo.assertSupportedVersion() {
+fun ProductInfo.validateSupportedVersion() {
     if (buildNumber.toVersion() < Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
         throw IllegalArgumentException("The minimal supported IDE version is ${Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION} (${Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER}), the provided version is too low: $version ($buildNumber)")
     }

@@ -68,7 +68,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
             )
         }
 
-        assertIntelliJPlatformSupportedVersion()
+        validateIntelliJPlatformVersion()
 
         workingDir = platformPath.toFile()
         args = args + listOf("traverseUI", outputDirectory.asPath.absolutePathString(), "true")

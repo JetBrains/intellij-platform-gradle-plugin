@@ -16,14 +16,29 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
 
 /**
- * Runs the IDE instance with the developed plugin installed.
+ * Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded.
+ * It directly extends the [JavaExec] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
  *
- * `runIde` task extends the [JavaExec] Gradle task – all properties available in the [JavaExec] as well as the following ones can be used to configure the [RunIdeTask] task.
+ * This task class also inherits from [CustomIntelliJPlatformVersionAware],
+ * which makes it possible to create `runIde`-like tasks using custom IntelliJ Platform versions:
  *
- * @see JavaExec
+ * ```
+ * import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+ * import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
+ *
+ * tasks {
+ *   val runPhpStorm by registering(RunIdeTask::class) {
+ *     type = IntelliJPlatformType.PhpStorm
+ *     version = "2023.2.2"
+ *   }
+ *
+ *   val runLocalIde by registering(RunIdeTask::class) {
+ *     localPath = file("/Users/hsz/Applications/Android Studio.app")
+ *   }
+ * }
+ * ```
  */
-@Deprecated(message = "CHECK")
-@UntrackedTask(because = "Should always run guest IDE")
+@UntrackedTask(because = "Should always run")
 abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     init {
@@ -36,7 +51,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
      */
     @TaskAction
     override fun exec() {
-        assertIntelliJPlatformSupportedVersion()
+        validateIntelliJPlatformVersion()
 
         workingDir = platformPath.toFile()
 

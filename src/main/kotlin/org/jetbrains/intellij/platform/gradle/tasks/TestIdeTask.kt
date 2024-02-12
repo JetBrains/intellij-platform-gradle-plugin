@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
-import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
@@ -16,15 +15,29 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
 
 /**
- * Runs the IDE instance with the developed plugin installed.
+ * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
+ * It directly extends the [Test] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
  *
- * `runIde` task extends the [JavaExec] Gradle task – all properties available in the [JavaExec] as well as the following ones can be used to configure the [TestIdeTask] task.
+ * This task class also inherits from [CustomIntelliJPlatformVersionAware],
+ * which makes it possible to create `testIde`-like tasks using custom IntelliJ Platform versions:
  *
- * @see RunIdeBase
- * @see JavaExec
+ * ```
+ * import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+ * import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
+ *
+ * tasks {
+ *   val testPhpStorm by registering(TestIdeTask::class) {
+ *     type = IntelliJPlatformType.PhpStorm
+ *     version = "2023.2.2"
+ *   }
+ *
+ *   val testLocalIde by registering(TestIdeTask::class) {
+ *     localPath = file("/Users/hsz/Applications/Android Studio.app")
+ *   }
+ * }
+ * ```
  */
-@Deprecated(message = "CHECK")
-@UntrackedTask(because = "Should always run guest IDE")
+@UntrackedTask(because = "Should always run")
 abstract class TestIdeTask : Test(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     init {
@@ -34,7 +47,7 @@ abstract class TestIdeTask : Test(), RunnableIdeAware, CustomIntelliJPlatformVer
 
     @TaskAction
     override fun executeTests() {
-        assertIntelliJPlatformSupportedVersion()
+        validateIntelliJPlatformVersion()
 
         super.executeTests()
     }

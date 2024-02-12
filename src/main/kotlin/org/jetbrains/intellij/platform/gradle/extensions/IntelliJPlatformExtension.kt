@@ -22,7 +22,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
-import org.jetbrains.intellij.platform.gradle.model.assertSupportedVersion
+import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
@@ -653,7 +653,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     val artifactPath = resolveArtifactPath(it)
                     val productInfo = artifactPath.productInfo()
 
-                    productInfo.assertSupportedVersion()
+                    productInfo.validateSupportedVersion()
 
                     val type = productInfo.productCode.toIntelliJPlatformType()
                     val hash = artifactPath.pathString.hashCode().absoluteValue % 1000

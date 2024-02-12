@@ -35,7 +35,7 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatf
      */
     @TaskAction
     override fun exec() {
-        assertIntelliJPlatformSupportedVersion()
+        validateIntelliJPlatformVersion()
 
         workingDir = platformPath.toFile()
 

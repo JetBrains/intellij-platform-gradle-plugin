@@ -11,7 +11,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 
 /**
- * Prints bundled plugins within the currently targeted IntelliJ-based IDE release.
+ * Prints the list of bundled plugins available within the currently targeted IntelliJ Platform.
  */
 @UntrackedTask(because = "Prints output")
 abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionAware {

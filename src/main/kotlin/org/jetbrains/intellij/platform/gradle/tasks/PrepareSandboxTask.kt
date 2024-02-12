@@ -90,7 +90,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     abstract val pluginsClasspath: ConfigurableFileCollection
 
     /**
-     * Dependencies removed with the [JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME] configuration.
+     * Dependencies defined with the [JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME] configuration.
      *
      * @see JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
      */
@@ -263,9 +263,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                 from(pluginsClasspath)
 
                 dependsOn(intellijPlatformPluginsConfiguration)
+                dependsOn(runtimeConfiguration)
                 dependsOn(jarTaskProvider)
 //                dependsOn(instrumentedJarTaskProvider)
-                dependsOn(runtimeConfiguration)
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
 //                inputs.file(jarTaskProvider.map { it.archiveFile })
