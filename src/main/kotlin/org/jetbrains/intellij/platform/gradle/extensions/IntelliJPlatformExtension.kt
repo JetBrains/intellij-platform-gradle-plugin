@@ -312,13 +312,13 @@ interface IntelliJPlatformExtension : ExtensionAware {
         val token: Property<String>
 
         /**
-         * A channel name to upload plugin to.
+         * A list of channel names to upload plugin to.
          *
-         * Default value: `"default"`
+         * Default value: `listOf("default")`
          *
-         * @see PublishPluginTask.channel
+         * @see PublishPluginTask.channels
          */
-        val channel: Property<String>
+        val channels: ListProperty<String>
 
         /**
          * Specifies if the Toolbox Enterprise plugin repository service should be used.

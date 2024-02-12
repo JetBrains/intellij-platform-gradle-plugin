@@ -10,6 +10,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
@@ -71,15 +72,15 @@ abstract class PublishPluginTask : DefaultTask() {
     abstract val token: Property<String>
 
     /**
-     * A channel name to upload plugin to.
+     * A list of channel names to upload plugin to.
      *
-     * Default value: [IntelliJPlatformExtension.Publishing.channel]
+     * Default value: [IntelliJPlatformExtension.Publishing.channels]
      *
-     * @see IntelliJPlatformExtension.Publishing.channel
+     * @see IntelliJPlatformExtension.Publishing.channels
      */
     @get:Input
     @get:Optional
-    abstract val channel: Property<String>
+    abstract val channels: ListProperty<String>
 
     /**
      * Publish the plugin update and mark it as hidden to prevent public release after approval.
@@ -121,29 +122,30 @@ abstract class PublishPluginTask : DefaultTask() {
                     throw TaskExecutionException(this, GradleException("Cannot upload plugin: $problems"))
                 }
                 val pluginId = creationResult.plugin.pluginId
-                val channel = channel.get()
-                log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
-                try {
-                    val repositoryClient = when (toolboxEnterprise.get()) {
-                        true -> PluginRepositoryFactory.createWithImplementationClass(
-                            host.get(),
-                            token.get(),
-                            "Automation",
-                            ToolboxEnterprisePluginRepositoryService::class.java,
-                        )
+                channels.get().forEach { channel ->
+                    log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
+                    try {
+                        val repositoryClient = when (toolboxEnterprise.get()) {
+                            true -> PluginRepositoryFactory.createWithImplementationClass(
+                                host.get(),
+                                token.get(),
+                                "Automation",
+                                ToolboxEnterprisePluginRepositoryService::class.java,
+                            )
 
-                        false -> PluginRepositoryFactory.create(host.get(), token.get())
+                            false -> PluginRepositoryFactory.create(host.get(), token.get())
+                        }
+                        repositoryClient.uploader.upload(
+                            id = pluginId as StringPluginId,
+                            file = path.toFile(),
+                            channel = channel.takeIf { it != "default" },
+                            notes = null,
+                            isHidden = hidden.get(),
+                        )
+                        log.info("Uploaded successfully")
+                    } catch (exception: Exception) {
+                        throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
                     }
-                    repositoryClient.uploader.upload(
-                        id = pluginId as StringPluginId,
-                        file = path.toFile(),
-                        channel = channel.takeIf { it != "default" },
-                        notes = null,
-                        isHidden = hidden.get(),
-                    )
-                    log.info("Uploaded successfully")
-                } catch (exception: Exception) {
-                    throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
                 }
             }
 
@@ -170,7 +172,7 @@ abstract class PublishPluginTask : DefaultTask() {
                 token.convention(extension.publishing.token)
                 host.convention(extension.publishing.host)
                 toolboxEnterprise.convention(extension.publishing.toolboxEnterprise)
-                channel.convention(extension.publishing.channel)
+                channels.convention(extension.publishing.channels)
                 hidden.convention(extension.publishing.hidden)
 
                 archiveFile.convention(

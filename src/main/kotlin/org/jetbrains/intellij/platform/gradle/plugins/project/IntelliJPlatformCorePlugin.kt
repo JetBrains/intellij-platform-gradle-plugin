@@ -312,7 +312,7 @@ abstract class IntelliJPlatformCorePlugin : Plugin<Project> {
                 configureExtension<IntelliJPlatformExtension.Publishing>(Extensions.PUBLISHING) {
                     host.convention(Locations.MARKETPLACE)
                     toolboxEnterprise.convention(false)
-                    channel.convention("default")
+                    channels.convention(listOf("default"))
                     hidden.convention(false)
                 }
             }
