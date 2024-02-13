@@ -37,7 +37,7 @@ import kotlin.io.path.nameWithoutExtension
  */
 @Deprecated(message = "CHECK")
 @Incubating
-@UntrackedTask(because = "Should always run IDE for performance tests")
+@UntrackedTask(because = "Should always run")
 abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     /**

@@ -2,28 +2,23 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.*
-import java.io.File
-import kotlin.io.path.*
+import kotlin.io.path.writeText
 
 private const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
 private const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
@@ -33,23 +28,17 @@ private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 /**
  * Validates the plugin project configuration:
  *
- * - The [PatchPluginXmlTask.sinceBuild] property can't be lower than the major version of the currently used IntelliJ SDK set with the [IntelliJPluginExtension.version].
- * - The [sourceCompatibility] property of the Java configuration can't be lower than the Java version used for assembling the IntelliJ SDK specified by the [IntelliJPluginExtension.version].
- * - The [targetCompatibility] property of the Java configuration can't be higher than the Java version required for running IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
- * - The [kotlinJvmTarget] property of the Kotlin configuration (if used) can't be higher than the Java version required for running IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
- * - The [kotlinLanguageVersion] property of the Kotlin configuration (if used) can't be lower than the Kotlin bundled with IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
- * - The [kotlinApiVersion] property of the Kotlin configuration (if used) can't be higher than the Kotlin bundled with IDE in the version specified by the [IntelliJPluginExtension.version] or [PatchPluginXmlTask.sinceBuild] properties.
- *
- * For more details regarding the Java version used in the specific IntelliJ SDK, see [Build Number Ranges](https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html).
- *
- * The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform.
- *
- * Read more about controlling this behavior on [Kotlin Standard Library](https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library).
- *
- * An old default [VerifyPluginTask.downloadDirectory] path contains downloaded IDEs but another default is in use. Links to the [FAQ section](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#the-plugin-verifier-download-directory-is-set-to-but-downloaded-ides-were-also-found-in)
+ * - The [PatchPluginXmlTask.sinceBuild] property can't be lower than the target IntelliJ Platform major version.
+ * - The Java/Kotlin `sourceCompatibility` and `targetCompatibility` properties should align Java versions required by [PatchPluginXmlTask.sinceBuild] and the currently used IntelliJ Platform.
+ * - The Kotlin API version should align the version required by [PatchPluginXmlTask.sinceBuild] and the currently used IntelliJ Platform.
+ * - The used IntelliJ Platform version should be higher than `2022.3` (`223.0`).
+ * - The dependency on the <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a> should be excluded.
+ * - The Kotlin plugin in version `1.8.20` is not used with IntelliJ Platform Gradle Plugin due to the 'java.lang.OutOfMemoryError: Java heap space' exception.
+ * - The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
+ * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#incremental-compilation">Kotlin Incremental Compilation</a>
  *
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
@@ -59,13 +48,16 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     /**
      * The location of the built plugin file which will be used for verification.
      *
-     * Default value: `${prepareSandboxTask.destinationDir}/${prepareSandboxTask.pluginName}``
+     * Default value: [PatchPluginXmlTask.outputFile]
      */
     @get:Optional
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginXmlFile: RegularFileProperty
 
+    /**
+     * Report directory where the verification result will be stored.
+     */
     @get:OutputDirectory
     abstract val reportDirectory: DirectoryProperty
 
@@ -82,19 +74,19 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     abstract val targetCompatibility: Property<String>
 
     /**
-     * The Gradle Kotlin plugin is loaded.
+     * Indicates that the Kotlin Gradle Plugin is loaded and available.
      */
     @get:Internal
     abstract val kotlinPluginAvailable: Property<Boolean>
 
     /**
-     * The `apiVersion` property of [KotlinCompile.kotlinOptions] defined in the build script
+     * The `apiVersion` property value of `compileKotlin.kotlinOptions` defined in the build script.
      */
     @get:Internal
     abstract val kotlinApiVersion: Property<String?>
 
     /**
-     * The `languageVersion` property of [KotlinCompile.kotlinOptions] defined in the build script
+     * The `languageVersion` property value of `compileKotlin.kotlinOptions` defined in the build script.
      */
     @get:Internal
     abstract val kotlinLanguageVersion: Property<String?>
@@ -106,7 +98,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     abstract val kotlinVersion: Property<String?>
 
     /**
-     * The `jvmTarget` property of [KotlinCompile.kotlinOptions] defined in the build script.
+     * The `jvmTarget` property value of `compileKotlin.kotlinOptions` defined in the build script.
      */
     @get:Internal
     abstract val kotlinJvmTarget: Property<String?>
@@ -280,9 +272,11 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         project.extensions.getByName("kotlin").withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
                     })
                     kotlinStdlibDefaultDependency.convention(
-                        project.providers.gradleProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME).map { it.toBoolean() })
+                        project.providers.gradleProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME).map { it.toBoolean() }
+                    )
                     kotlinIncrementalUseClasspathSnapshot.convention(
-                        project.providers.gradleProperty(KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT).map { it.toBoolean() })
+                        project.providers.gradleProperty(KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT).map { it.toBoolean() }
+                    )
                 }
 
                 project.tasks.withType<JavaCompile> {
@@ -306,14 +300,4 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 //            }
 //        }
 //    }
-
-    internal fun sourcePluginXmlFiles(project: Project) = project
-        .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
-        .sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME) // TODO: iterate over all sourceSets?
-        .resources
-        .srcDirs
-        .filterNotNull()
-        .map(File::toPath)
-        .map { it.resolve("META-INF/plugin.xml") }
-        .filter { it.exists() && it.fileSize() > 0 }
 }

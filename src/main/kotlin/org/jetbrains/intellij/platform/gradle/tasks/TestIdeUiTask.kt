@@ -22,7 +22,7 @@ import kotlin.io.path.absolutePathString
  * @see JavaExec
  */
 @Deprecated(message = "CHECK")
-@UntrackedTask(because = "Should always run IDE for UI tests")
+@UntrackedTask(because = "Should always run")
 abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     init {

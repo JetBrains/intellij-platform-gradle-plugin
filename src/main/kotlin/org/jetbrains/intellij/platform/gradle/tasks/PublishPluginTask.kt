@@ -31,7 +31,7 @@ import org.jetbrains.intellij.pluginRepository.model.StringPluginId
  * @see <a href="https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html">Plugin upload API</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#publishing-plugin-with-gradle">Publishing Plugin With Gradle</a>
  */
-@UntrackedTask(because = "Output is stored remotely")
+@UntrackedTask(because = "Output stored remotely")
 abstract class PublishPluginTask : DefaultTask() {
 
     /**

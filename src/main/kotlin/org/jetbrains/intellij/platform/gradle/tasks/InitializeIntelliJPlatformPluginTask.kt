@@ -33,7 +33,7 @@ import kotlin.io.path.outputStream
 /**
  * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up-to-date.
  */
-@UntrackedTask(because = "Should always be run to initialize the plugin")
+@UntrackedTask(because = "Should always run")
 abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPlatformVersionAware {
 
     /**

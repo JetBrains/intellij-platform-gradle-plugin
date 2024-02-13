@@ -19,7 +19,7 @@ import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 
 /**
- * Validates the signature of the plugin archive file using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
+ * Validates the signature of the plugin archive file using the [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
  *
  * For more details, see [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html) article.
  *
@@ -42,6 +42,9 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
      * A string containing X509 certificates.
      * The first certificate from the chain will be used as a certificate authority (CA).
      * Refers to `cert` CLI option.
+     *
+    Takes precedence over the [certificateChainFile] property.
+     *
      */
     @get:Input
     @get:Optional

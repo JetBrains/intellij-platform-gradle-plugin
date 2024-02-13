@@ -20,14 +20,14 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.pathResolver.IntelliJPluginVerifierResolver
-import org.jetbrains.intellij.platform.gradle.pathResolver.MarketplaceZipSignerResolver
-import org.jetbrains.intellij.platform.gradle.pathResolver.RuntimeResolver
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.pathResolver.IntelliJPluginVerifierResolver
+import org.jetbrains.intellij.platform.gradle.pathResolver.MarketplaceZipSignerResolver
+import org.jetbrains.intellij.platform.gradle.pathResolver.RuntimeResolver
 import org.jetbrains.intellij.platform.gradle.provider.ExecutableArchValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -139,7 +139,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 }
 
                 /**
-                 * A high level configuration to extract the configuration defined with `intellijPlatformDependencyConfiguration`.
+                 * A high-level configuration to extract the configuration defined with `intellijPlatformDependencyConfiguration`.
                  */
                 val intellijPlatformConfiguration = create(
                     name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
@@ -153,7 +153,7 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 }
 
                 /**
-                 * A high level configuration to extract the configuration defined with `intellijPlatformLocalInstanceConfiguration`.
+                 * A high-level configuration to extract the configuration defined with `intellijPlatformLocalInstanceConfiguration`.
                  */
                 val intellijPlatformForLocalInstanceConfiguration = create(
                     name = "${Configurations.INTELLIJ_PLATFORM}_forLocalInstance_$suffix",
