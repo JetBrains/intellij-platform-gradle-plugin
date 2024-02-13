@@ -239,6 +239,14 @@ gradlePlugin {
         tags.set(properties("tags").map { it.split(',') })
     }
 
+    plugins.create("intellijPlatformMigration") {
+        id = "org.jetbrains.intellij.platform.migration"
+        displayName = "IntelliJ Platform Gradle Plugin (migration helper)"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformMigrationPlugin"
+        description = project.description
+        tags.set(properties("tags").map { it.split(',') })
+    }
+
     testSourceSets.add(sourceSets["integrationTest"])
 }
 
