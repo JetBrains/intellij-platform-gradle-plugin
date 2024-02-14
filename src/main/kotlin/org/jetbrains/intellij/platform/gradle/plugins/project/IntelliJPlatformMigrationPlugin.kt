@@ -29,6 +29,7 @@ private object Messages {
 abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
 
     private val log = Logger(javaClass)
+
     override fun apply(project: Project) {
         log.info("Configuring plugin: $PLUGIN_MIGRATION_ID")
         log.error(Messages.MIGRATION_PLUGIN_ENABLED)
@@ -50,5 +51,4 @@ interface IntelliJExtension {
 
     @Deprecated(Messages.DEPRECATED_INTELLIJ_PLUGINS, level = DeprecationLevel.ERROR)
     val plugins: ListProperty<Any>
-
 }

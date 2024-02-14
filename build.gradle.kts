@@ -215,10 +215,10 @@ gradlePlugin {
         tags.set(properties("tags").map { it.split(',') })
     }
 
-    plugins.create("intellijPlatformCore") {
-        id = "org.jetbrains.intellij.platform.core"
-        displayName = "IntelliJ Platform Gradle Plugin (core)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformCorePlugin"
+    plugins.create("intellijPlatformBase") {
+        id = "org.jetbrains.intellij.platform.base"
+        displayName = "IntelliJ Platform Gradle Plugin (base)"
+        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin"
         description = project.description
         tags.set(properties("tags").map { it.split(',') })
     }

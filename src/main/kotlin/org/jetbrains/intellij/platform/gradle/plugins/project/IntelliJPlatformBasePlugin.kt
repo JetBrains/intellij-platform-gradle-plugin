@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurat
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_CORE_ID
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
@@ -36,12 +36,12 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
-abstract class IntelliJPlatformCorePlugin : Plugin<Project> {
+abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
     private val log = Logger(javaClass)
 
     override fun apply(project: Project) {
-        log.info("Configuring plugin: $PLUGIN_CORE_ID")
+        log.info("Configuring plugin: $PLUGIN_BASE_ID")
 
         checkGradleVersion()
 

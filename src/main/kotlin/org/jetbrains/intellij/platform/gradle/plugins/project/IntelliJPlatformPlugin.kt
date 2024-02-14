@@ -17,7 +17,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
         log.info("Configuring plugin: $PLUGIN_ID")
 
         with(project.plugins) {
-            apply(IntelliJPlatformCorePlugin::class)
+            apply(IntelliJPlatformBasePlugin::class)
             apply(IntelliJPlatformTasksPlugin::class)
         }
     }

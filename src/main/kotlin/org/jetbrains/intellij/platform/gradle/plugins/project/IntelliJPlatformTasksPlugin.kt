@@ -29,7 +29,7 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
         log.info("Configuring plugin: $PLUGIN_TASKS_ID")
 
         with(project) {
-            plugins.apply(IntelliJPlatformCorePlugin::class)
+            plugins.apply(IntelliJPlatformBasePlugin::class)
 
             listOf(
                 InitializeIntelliJPlatformPluginTask,
