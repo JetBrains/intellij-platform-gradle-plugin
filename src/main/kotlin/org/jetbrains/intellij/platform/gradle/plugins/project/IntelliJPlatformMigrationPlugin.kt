@@ -30,7 +30,7 @@ private object Docs {
 private object Messages {
     object IntelliJ {
         const val plugins =
-            "Define dependencies on plugins or bundled plugins in `dependencies {}` block instead:\n\nrepositories {\n    mavenCentral()\n    intellijPlatform {\n        defaultRepositories()\n    }\n}\n\ndependencies {\n    intellijPlatform {\n        plugins(properties(\"platformPlugins\").map { it.split(',') })\n        bundledPlugins(properties(\"platformBundledPlugins\").map { it.split(',') })\n    }\n}\n\nNote that bundled plugins are now separated from plugins available in JetBrains Marketplace.\n\n${Docs.extension}\n${Docs.migration}"
+            "Define dependencies on plugins or bundled plugins in `dependencies {}` block instead:\n\nrepositories {\n    mavenCentral()\n    intellijPlatform {\n        defaultRepositories()\n    }\n}\n\ndependencies {\n    intellijPlatform {\n        plugins(providers.gradleProperty(\"platformPlugins\").map { it.split(',') })\n        bundledPlugins(providers.gradleProperty(\"platformBundledPlugins\").map { it.split(',') })\n    }\n}\n\nNote that bundled plugins are now separated from plugins available in JetBrains Marketplace.\n\n${Docs.extension}\n${Docs.migration}"
 
         const val localPath =
             "Define dependencies on local IDE instance in `dependencies {}` block instead:\n\nrepositories {\n    mavenCentral()\n    intellijPlatform {\n        defaultRepositories()\n    }\n}\n\ndependencies {\n    intellijPlatform {\n        local(...)\n    }\n}\n\n${Docs.dependencies}\n${Docs.migration}"
