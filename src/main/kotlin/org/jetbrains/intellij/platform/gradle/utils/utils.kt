@@ -13,11 +13,11 @@ import kotlin.io.path.absolute
 
 fun <T> T?.or(other: T): T = this ?: other
 
-fun <T> T?.or(block: () -> T): T = this ?: block()
+inline fun <T> T?.or(block: () -> T): T = this ?: block()
 
-fun <T> T?.ifNull(block: () -> Unit): T? = this ?: block().let { null }
+inline fun <T> T?.ifNull(block: () -> Unit): T? = this ?: block().let { null }
 
-fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
+inline fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
 
 internal val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()

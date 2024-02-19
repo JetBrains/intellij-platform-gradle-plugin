@@ -11,7 +11,6 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
 import org.jetbrains.intellij.platform.gradle.pathResolver.ProductInfoResolver
-import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 import kotlin.io.path.readText
@@ -175,6 +174,12 @@ fun FileCollection.productInfo() = platformPath().productInfo()
  * @receiver The [Configuration] to retrieve the product information from.
  * @return The [Path] of the IntelliJ Platform
  */
-fun FileCollection.platformPath() = singleOrNull()
-    .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
-    .toPath()
+fun FileCollection.platformPath() = runCatching {
+    single().toPath()
+}.onFailure {
+    throw GradleException("""
+        The dependency on the IntelliJ Platform couldn't be resolved. 
+        Please ensure that this dependency is defined in your project and that the necessary repositories, where it can be located, are added.
+        See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+    """.trimIndent())
+}.getOrThrow()

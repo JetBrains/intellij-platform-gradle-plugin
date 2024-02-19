@@ -125,36 +125,42 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     fun verifyPluginConfiguration() {
         val platformBuild = productInfo.buildNumber.toVersion()
         val platformVersion = productInfo.version.toVersion()
-        val platformJavaVersion = platformBuild.let(::getPlatformJavaVersion)
-        val sourceCompatibilityJavaVersion = sourceCompatibility.get().let(JavaVersion::toVersion)
-        val targetCompatibilityJavaVersion = targetCompatibility.get().let(JavaVersion::toVersion)
-        val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.let(JavaVersion::toVersion)
-        val kotlinApiVersion = kotlinApiVersion.orNull?.let(Version::parse)
+        val platformJavaVersion = getPlatformJavaVersion(platformBuild)
+        val sourceCompatibilityJavaVersion = JavaVersion.toVersion(sourceCompatibility.get())
+        val targetCompatibilityJavaVersion = JavaVersion.toVersion(targetCompatibility.get())
+        val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.let { JavaVersion.toVersion(it) }
+        val kotlinApiVersion = kotlinApiVersion.orNull?.toVersion()
         val kotlinIncrementalUseClasspathSnapshot = kotlinIncrementalUseClasspathSnapshot.orNull == null
-        val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.let(Version::parse)
+        val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.toVersion()
         val kotlinPluginAvailable = kotlinPluginAvailable.get()
         val kotlinStdlibDefaultDependency = kotlinStdlibDefaultDependency.orNull == null
-        val kotlinVersion = kotlinVersion.orNull?.let(Version::parse)
+        val kotlinVersion = kotlinVersion.orNull?.toVersion()
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
-        val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { "$major.$minor".toVersion() }
+        val platformKotlinLanguageVersion = getPlatformKotlinVersion(platformBuild)?.run { "$major.$minor".toVersion() }
 
         sequence {
-            val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
-            val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
-            val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { "$major.$minor".toVersion() }
+            plugin
+                ?.let { plugin ->
+                    val sinceBuild = plugin.ideaVersion.sinceBuild.toVersion()
+                    val sinceBuildJavaVersion = getPlatformJavaVersion(sinceBuild)
+                    val sinceBuildKotlinApiVersion = getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
-            if (sinceBuild.major < platformBuild.major) {
-                yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
-            }
-            if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
-            }
-            if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
-            }
-            if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
-            }
+                    if (sinceBuild.major < platformBuild.major) {
+                        yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
+                    }
+                    if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
+                        yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
+                    }
+                    if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
+                        yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
+                    }
+                    if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
+                        yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
+                    }
+                }
+                .ifNull {
+                    yield("The plugin.xml file not found.")
+                }
 
             if (platformBuild < Version(223)) {
                 yield("The minimal supported IntelliJ Platform version is 2022.3 (223.0), which is higher than provided: $platformVersion ($platformBuild)")
@@ -182,7 +188,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             }
         }
             .joinToString(System.lineSeparator()) { "- $it" }
-            .takeIf(String::isNotEmpty)
+            .takeIf { it.isNotEmpty() }
             ?.also {
                 log.warn(
                     listOf(

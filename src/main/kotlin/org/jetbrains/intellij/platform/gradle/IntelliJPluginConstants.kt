@@ -117,7 +117,6 @@ object IntelliJPluginConstants {
         const val MARKETPLACE = "https://plugins.jetbrains.com"
         const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
-        const val DOCS = "https://plugins.jetbrains.com/docs/intellij"
     }
 
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"

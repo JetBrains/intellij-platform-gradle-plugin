@@ -10,7 +10,6 @@ import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.register
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations.DOCS
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -20,10 +19,10 @@ private const val PLUGIN_MIGRATION_ID = "$PLUGIN_ID.migration"
 
 // language=TEXT
 private object Docs {
-    const val migration = "Migration guide: $DOCS/tools-intellij-platform-gradle-plugin-migration.html"
-    const val extension = "IntelliJ Platform Extension: $DOCS/tools-intellij-platform-gradle-plugin-extension.html"
-    const val dependencies = "IntelliJ Platform Extension: $DOCS/tools-intellij-platform-gradle-plugin-dependencies-extension.html"
-    const val repositories = "IntelliJ Platform Repositories Extension: $DOCS/tools-intellij-platform-gradle-plugin-repositories-extension.html"
+    const val migration = "Migration guide: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html"
+    const val extension = "IntelliJ Platform Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html"
+    const val dependencies = "IntelliJ Platform Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html"
+    const val repositories = "IntelliJ Platform Repositories Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html"
 }
 
 // language=TEXT

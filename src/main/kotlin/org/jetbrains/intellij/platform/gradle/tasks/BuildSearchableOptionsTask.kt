@@ -86,7 +86,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                 )
                 showPaidPluginWarning.convention(
                     project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
-                        it && plugin.productDescriptor != null
+                        it && plugin?.productDescriptor != null
                     }
                 )
 

@@ -6,10 +6,7 @@ import com.jetbrains.plugin.structure.intellij.beans.PluginBean
 import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.inputStream
@@ -25,14 +22,17 @@ interface PluginAware {
      */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
     val pluginXml: RegularFileProperty
 
     /**
      * Provides a parsed `plugin.xml` file as a [PluginBean] object.
      */
     @get:Internal
-    val plugin: PluginBean
-        get() = pluginXml.asPath.pluginBean()
+    val plugin: PluginBean?
+        get() = pluginXml.orNull
+            ?.asPath
+            ?.pluginBean()
 }
 
 /**

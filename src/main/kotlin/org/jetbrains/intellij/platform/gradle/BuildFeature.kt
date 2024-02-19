@@ -63,9 +63,9 @@ enum class BuildFeature(private val defaultValue: Boolean) {
         .split('_')
         .joinToString(
             separator = "",
-            transform = { it.replaceFirstChar(Char::uppercase) },
+            transform = { it.replaceFirstChar { c -> c.uppercase() } },
         )
-        .replaceFirstChar(Char::lowercase)
+        .replaceFirstChar { c -> c.lowercase() }
         .let { "$prefix.buildFeature.$it" }
 }
 

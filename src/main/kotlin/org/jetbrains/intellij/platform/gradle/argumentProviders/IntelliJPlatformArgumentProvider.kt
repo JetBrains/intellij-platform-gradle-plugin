@@ -6,10 +6,7 @@ import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.InputFiles
-import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
@@ -34,10 +31,22 @@ import kotlin.io.path.readLines
  * @property options The Java fork options.
  */
 class IntelliJPlatformArgumentProvider(
-    @InputFiles @PathSensitive(RELATIVE) val intellijPlatformConfiguration: ConfigurableFileCollection,
-    @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
-    @InputFile @PathSensitive(RELATIVE) val pluginXml: RegularFileProperty,
-    @Input val runtimeArchProvider: Provider<String>,
+    @InputFiles
+    @PathSensitive(RELATIVE)
+    val intellijPlatformConfiguration: ConfigurableFileCollection,
+
+    @InputFile
+    @PathSensitive(RELATIVE)
+    val coroutinesJavaAgentFile: RegularFileProperty,
+
+    @InputFile
+    @PathSensitive(RELATIVE)
+    @Optional
+    val pluginXml: RegularFileProperty,
+
+    @Input
+    val runtimeArchProvider: Provider<String>,
+
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
@@ -86,7 +95,9 @@ class IntelliJPlatformArgumentProvider(
         }
 
     private val requiredPlugins
-        get() = "-Didea.required.plugins.id=${pluginXml.asPath.pluginBean().id}"
+        get() = pluginXml.orNull?.let {
+            "-Didea.required.plugins.id=${it.asPath.pluginBean().id}"
+        }
 
     /**
      * Retrieves the additional JVM arguments from [ProductInfo.Launch.additionalJvmArguments].
