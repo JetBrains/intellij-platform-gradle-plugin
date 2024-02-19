@@ -234,6 +234,17 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         }
 
         /**
+         * The [PluginAware] resolves and parses the `plugin.xml` file for easy access in other tasks.
+         */
+        if (this is PluginAware) {
+            val patchPluginXmlTaskProvider = tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+
+            pluginXml.convention(patchPluginXmlTaskProvider.flatMap { it.outputFile })
+
+            dependsOn(patchPluginXmlTaskProvider)
+        }
+
+        /**
          * The [RuntimeAware] adjusts tasks for the running a guest IDE purpose.
          * This configuration picks relevant Java Runtime using the [RuntimeResolver] and [RuntimeAware.runtimeArch].
          */
@@ -299,10 +310,11 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
 
             jvmArgumentProviders.add(
                 IntelliJPlatformArgumentProvider(
-                    intelliJPlatformConfiguration,
-                    coroutinesJavaAgentFile,
-                    runtimeArch,
-                    this,
+                    intellijPlatformConfiguration = intelliJPlatformConfiguration,
+                    coroutinesJavaAgentFile = coroutinesJavaAgentFile,
+                    runtimeArchProvider = runtimeArch,
+                    options = this,
+                    requirePluginIds = listOf(plugin.id),
                 )
             )
             jvmArgumentProviders.add(

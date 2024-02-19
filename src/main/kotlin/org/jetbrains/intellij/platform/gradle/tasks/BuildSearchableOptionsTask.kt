@@ -6,7 +6,6 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
@@ -17,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.parsePluginXml
 import kotlin.io.path.absolutePathString
 
 /**
@@ -81,20 +79,16 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-                val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-                val pluginXmlProvider = patchPluginXmlTaskProvider.flatMap { it.outputFile }
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 outputDirectory.convention(
                     project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIRECTORY)
                 )
                 showPaidPluginWarning.convention(
-                    project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).zip(pluginXmlProvider) { enabled, file ->
-                        enabled && parsePluginXml(file.asPath)?.productDescriptor != null
+                    project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
+                        it && plugin.productDescriptor != null
                     }
                 )
-
-                dependsOn(patchPluginXmlTaskProvider)
 
                 inputs.property("intellijPlatform.buildSearchableOptions", extension.buildSearchableOptions)
 

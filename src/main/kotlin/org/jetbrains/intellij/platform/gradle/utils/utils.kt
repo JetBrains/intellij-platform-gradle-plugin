@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
-import com.jetbrains.plugin.structure.intellij.extractor.PluginBeanExtractor
-import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.FileSystemLocation
@@ -11,9 +9,7 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
-import java.nio.file.Path
 import kotlin.io.path.absolute
-import kotlin.io.path.inputStream
 
 fun <T> T?.or(other: T): T = this ?: other
 
@@ -41,13 +37,6 @@ internal fun ConfigurationContainer.create(name: String, description: String, co
         this.description = description
         configuration()
     }
-
-internal fun parsePluginXml(pluginXml: Path) = runCatching {
-    pluginXml.inputStream().use {
-        val document = JDOMUtil.loadDocument(it)
-        PluginBeanExtractor.extractPluginBean(document)
-    }
-}.getOrNull()
 
 internal val ALL_TASKS
     get() = IntelliJPluginConstants.Tasks::class.java.declaredFields

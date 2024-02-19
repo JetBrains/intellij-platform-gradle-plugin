@@ -13,12 +13,12 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
@@ -37,7 +37,7 @@ class IntelliJPlatformArgumentProvider(
     @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
     @Input val runtimeArchProvider: Provider<String>,
     private val options: JavaForkOptions,
-//    private val requirePluginIds: List<String> = emptyList(), TODO: see #87
+    private val requirePluginIds: List<String> = emptyList(),
 ) : CommandLineArgumentProvider {
 
     private val platformPath: Path
@@ -84,6 +84,9 @@ class IntelliJPlatformArgumentProvider(
             )
         }
 
+    private val requiredPlugins
+        get() = "-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}"
+
     /**
      * Retrieves the additional JVM arguments from [ProductInfo.Launch.additionalJvmArguments].
      */
@@ -125,8 +128,7 @@ class IntelliJPlatformArgumentProvider(
      *
      * @return The list of arguments to be passed to the platform.
      */
-    override fun asArguments() = (bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace).filterNot { it.isNullOrBlank() }
-
-    // TODO: check if necessary:
-    //       + listOf("-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}",)
+    override fun asArguments() = (
+            bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + requiredPlugins + additionalJvmArguments + heapSpace
+            ).filterNot { it.isNullOrBlank() }
 }

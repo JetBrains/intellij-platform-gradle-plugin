@@ -6,10 +6,12 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputDirectory
+import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
@@ -17,6 +19,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.writeText
 
@@ -43,17 +46,7 @@ private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @CacheableTask
-abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware {
-
-    /**
-     * The location of the built plugin file which will be used for verification.
-     *
-     * Default value: [PatchPluginXmlTask.outputFile]
-     */
-    @get:Optional
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val pluginXmlFile: RegularFileProperty
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, PluginAware {
 
     /**
      * Report directory where the verification result will be stored.
@@ -146,23 +139,21 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val platformKotlinLanguageVersion = platformBuild.let(::getPlatformKotlinVersion)?.run { "$major.$minor".toVersion() }
 
         sequence {
-            pluginXmlFile.orNull?.let { parsePluginXml(it.asPath) }?.let {
-                val sinceBuild = it.ideaVersion.sinceBuild.let(Version::parse)
-                val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
-                val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { "$major.$minor".toVersion() }
+            val sinceBuild = plugin.ideaVersion.sinceBuild.let(Version::parse)
+            val sinceBuildJavaVersion = sinceBuild.let(::getPlatformJavaVersion)
+            val sinceBuildKotlinApiVersion = sinceBuild.let(::getPlatformKotlinVersion)?.run { "$major.$minor".toVersion() }
 
-                if (sinceBuild.major < platformBuild.major) {
-                    yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
-                }
-                if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                    yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
-                }
-                if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                    yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
-                }
-                if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                    yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
-                }
+            if (sinceBuild.major < platformBuild.major) {
+                yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
+            }
+            if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
+                yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
+            }
+            if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
+                yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
+            }
+            if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
+                yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
             }
 
             if (platformBuild < Version(223)) {
@@ -219,13 +210,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             project.registerTask<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
                 log.info("Configuring plugin configuration verification task")
 
-                val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
-                pluginXmlFile.convention(patchPluginXmlTaskProvider.flatMap {
-                    it.outputFile
-                })
 
                 sourceCompatibility.convention(compileJavaTaskProvider.map {
                     it.sourceCompatibility
@@ -282,8 +269,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 project.tasks.withType<JavaCompile> {
                     dependsOn(this@registerTask)
                 }
-
-                dependsOn(patchPluginXmlTaskProvider)
             }
     }
 
