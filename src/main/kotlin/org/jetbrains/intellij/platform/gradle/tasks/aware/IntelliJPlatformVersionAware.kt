@@ -10,6 +10,7 @@ import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
+import org.jetbrains.intellij.platform.gradle.model.platformPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
 import java.nio.file.Path
@@ -41,7 +42,7 @@ interface IntelliJPlatformVersionAware {
      */
     @get:Internal
     val platformPath: Path
-        get() = intelliJPlatformConfiguration.single().toPath()
+        get() = intelliJPlatformConfiguration.platformPath()
 
     /**
      * Provides information about the IntelliJ Platform product.
@@ -51,7 +52,7 @@ interface IntelliJPlatformVersionAware {
      */
     @get:Internal
     val productInfo: ProductInfo
-        get() = platformPath.productInfo()
+        get() = intelliJPlatformConfiguration.productInfo()
 
     /**
      * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.

@@ -167,7 +167,14 @@ fun Path.productInfo() = json.decodeFromString<ProductInfo>(
  * @receiver The [Configuration] to retrieve the product information from.
  * @return The [ProductInfo] object containing the product information.
  */
-fun FileCollection.productInfo() = singleOrNull()
+fun FileCollection.productInfo() = platformPath().productInfo()
+
+/**
+ * Retrieves the [Path] of the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.
+ *
+ * @receiver The [Configuration] to retrieve the product information from.
+ * @return The [Path] of the IntelliJ Platform
+ */
+fun FileCollection.platformPath() = singleOrNull()
     .throwIfNull { GradleException("IntelliJ Platform is not specified.") }
     .toPath()
-    .productInfo()

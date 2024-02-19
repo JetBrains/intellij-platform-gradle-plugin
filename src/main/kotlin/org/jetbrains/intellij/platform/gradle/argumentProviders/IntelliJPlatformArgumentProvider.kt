@@ -16,11 +16,11 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
+import org.jetbrains.intellij.platform.gradle.model.platformPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.pluginBean
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.pathString
 import kotlin.io.path.readLines
@@ -41,10 +41,10 @@ class IntelliJPlatformArgumentProvider(
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
-    private val platformPath: Path
-        get() = intellijPlatformConfiguration.single().toPath()
+    private val platformPath
+        get() = intellijPlatformConfiguration.platformPath()
 
-    private val productInfo: ProductInfo
+    private val productInfo
         get() = platformPath.productInfo()
 
     private val launch = runtimeArchProvider.map {
