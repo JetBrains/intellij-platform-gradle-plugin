@@ -198,6 +198,17 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `do not report too low patch number in Kotlin languageVersion`() {
+        pluginXml.xml(
+            """
+            <idea-plugin>
+                <name>PluginName</name>
+                <description>Lorem ipsum.</description>
+                <vendor>JetBrains</vendor>
+                <idea-version since-build="212" until-build='212.*' />
+            </idea-plugin>
+            """.trimIndent()
+        )
+
         gradleProperties.properties(
             """
             kotlin.incremental.useClasspathSnapshot = false
@@ -242,6 +253,17 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
     fun `report Kotlin stdlib bundling`() {
+        pluginXml.xml(
+            """
+            <idea-plugin>
+                <name>PluginName</name>
+                <description>Lorem ipsum.</description>
+                <vendor>JetBrains</vendor>
+                <idea-version since-build="212" until-build='212.*' />
+            </idea-plugin>
+            """.trimIndent()
+        )
+
         // kotlin.stdlib.default.dependency gets unset
         gradleProperties.writeText(
             """
