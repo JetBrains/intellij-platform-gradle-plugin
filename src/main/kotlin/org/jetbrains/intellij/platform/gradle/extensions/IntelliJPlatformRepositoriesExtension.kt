@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.initialization.resolve.DependencyResolutionManagement
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
@@ -19,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import java.net.URI
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
 
 /**
  * This is an extension class for managing IntelliJ Platform repositories in a Gradle build script. It's applied to the [RepositoryHandler].
@@ -40,6 +42,7 @@ import javax.inject.Inject
 abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     private val repositories: RepositoryHandler,
     private val providers: ProviderFactory,
+    private val gradle: Gradle,
 ) {
 
     /**
@@ -164,8 +167,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     fun localPlatformArtifacts(action: RepositoryAction = {}) = repositories.ivy {
         // Location of Ivy files generated for the current project.
-        // TODO: make configurable with Gradle properties and align with [createIvyDependency]
-        ivyPattern(".gradle/intellijPlatform/ivy/[organization]-[module]-[revision].[ext]")
+        ivyPattern("${gradle.localPlatformArtifacts.absolutePathString()}/[organization]-[module]-[revision].[ext]")
 
         // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
         artifactPattern("/[artifact]")

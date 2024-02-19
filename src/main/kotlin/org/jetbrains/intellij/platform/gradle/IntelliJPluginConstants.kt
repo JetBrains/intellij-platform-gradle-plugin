@@ -119,6 +119,10 @@ object IntelliJPluginConstants {
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
     }
 
+    object GradleProperties {
+        const val LOCAL_PLATFORM_ARTIFACTS = "$PLUGIN_ID.localPlatformArtifacts"
+    }
+
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"

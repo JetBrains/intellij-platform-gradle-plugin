@@ -27,7 +27,12 @@ abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
 
         @Suppress("UnstableApiUsage")
         with(settings.dependencyResolutionManagement.repositories) {
-            configureExtension<IntelliJPlatformRepositoriesExtension>(Extensions.INTELLIJ_PLATFORM, this, providers)
+            configureExtension<IntelliJPlatformRepositoriesExtension>(
+                Extensions.INTELLIJ_PLATFORM,
+                this,
+                providers,
+                settings.gradle,
+            )
         }
     }
 }

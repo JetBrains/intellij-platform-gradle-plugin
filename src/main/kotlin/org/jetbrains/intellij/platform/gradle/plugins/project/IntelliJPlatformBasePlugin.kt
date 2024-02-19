@@ -330,6 +330,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 Extensions.INTELLIJ_PLATFORM,
                 repositories,
                 providers,
+                gradle,
             )
         }
     }

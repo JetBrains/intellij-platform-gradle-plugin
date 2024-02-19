@@ -7,6 +7,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.invocation.Gradle
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.model.IvyModule
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -29,11 +30,10 @@ annotation class IntelliJPlatform
  * @param publications The list of [IvyModule.Publication] objects to be included in the Ivy file.
  */
 internal fun ExternalModuleDependency.createIvyDependency(gradle: Gradle, publications: List<IvyModule.Publication>) {
-    // TODO: make configurable with Gradle properties
-    val projectCacheDir = gradle.startParameter.projectCacheDir ?: gradle.rootProject.projectDir.resolve(".gradle")
-    val ivyDirectory = projectCacheDir.resolve("intellijPlatform/ivy").toPath()
-    val ivyFileName = "$group-$name-$version.xml"
-    val ivyFile = ivyDirectory.resolve(ivyFileName).takeUnless { it.exists() } ?: return
+    val ivyFile = gradle.localPlatformArtifacts
+        .resolve("$group-$name-$version.xml")
+        .takeUnless { it.exists() }
+        ?: return
 
     val extractor = XmlExtractor<IvyModule>()
     val ivyModule = IvyModule(
@@ -76,3 +76,23 @@ internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
     .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
     .takeIf { it.exists() && it.isDirectory() }
     .throwIfNull { BuildException("Specified localPath '$localPath' doesn't exist or is not a directory") }
+
+/**
+ * Returns the Gradle project cache directory.
+ */
+private val Gradle.projectCacheDirectory
+    get() = (startParameter.projectCacheDir ?: this.rootProject.projectDir).toPath().resolve(".gradle")
+
+/**
+ * Represents the local platform artifacts directory path which contains Ivy XML files.
+ *
+ * @see [createIvyDependency]
+ * @see [IntelliJPlatformRepositoriesExtension.localPlatformArtifacts]
+ * @see [GradleProperties.LOCAL_PLATFORM_ARTIFACTS]
+ */
+internal val Gradle.localPlatformArtifacts
+    get() = runCatching { rootProject.findProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS)?.toString() }
+        .getOrNull()
+        .takeUnless { it.isNullOrEmpty() }
+        ?.let { Path(it) }
+        ?: projectCacheDirectory.resolve("intellijPlatform/ivy")
