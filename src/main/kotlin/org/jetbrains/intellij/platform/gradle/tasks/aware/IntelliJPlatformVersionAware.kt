@@ -38,7 +38,7 @@ interface IntelliJPlatformVersionAware {
     val intelliJPlatformConfiguration: ConfigurableFileCollection
 
     /**
-     * Provides a direct path to the IntelliJ Platform dependency artifact.
+     * Provides access to the IntelliJ Platform dependency artifact path.
      */
     @get:Internal
     val platformPath: Path

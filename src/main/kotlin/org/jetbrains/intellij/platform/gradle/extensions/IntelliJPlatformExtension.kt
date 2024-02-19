@@ -22,9 +22,9 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
-import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
+import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
@@ -62,6 +62,11 @@ interface IntelliJPlatformExtension : ExtensionAware {
      * Default value: `true`
      */
     val instrumentCode: Property<Boolean>
+
+    /**
+     * Provides access to the IntelliJ Platform dependency artifact path.
+     */
+    val platformPath: DirectoryProperty
 
     /**
      * Provides read access for the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.

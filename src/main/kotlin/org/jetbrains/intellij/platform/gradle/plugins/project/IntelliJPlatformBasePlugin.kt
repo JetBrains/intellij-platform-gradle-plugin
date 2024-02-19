@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.model.platformPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -243,6 +244,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
                 buildSearchableOptions.convention(true)
                 instrumentCode.convention(true)
+                platformPath.convention(layout.dir(project.provider {
+                    configurations.getByName(Configurations.INTELLIJ_PLATFORM).platformPath().toFile()
+                }))
                 productInfo.convention(project.provider {
                     configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
                 })
