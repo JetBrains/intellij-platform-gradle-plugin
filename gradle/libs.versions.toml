@@ -7,7 +7,7 @@ intellijStructure = "3.267"
 intellijPluginRepositoryRestClient = "2.0.39"
 jacksonDatabind = "2.16.0" # freeze because of: https://github.com/FasterXML/jackson-databind/issues/4315
 jaxbApi = "2.4.0-b180830.0359"
-kotlinxSerializationJson = "1.6.2"
+kotlinxSerializationJson = "1.6.3"
 retrofit = "2.9.0"
 
 # plugins
