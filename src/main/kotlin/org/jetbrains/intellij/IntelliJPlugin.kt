@@ -184,6 +184,14 @@ abstract class IntelliJPlugin : Plugin<Project> {
             type.convention(PLATFORM_TYPE_INTELLIJ_COMMUNITY)
         }
 
+        project.pluginManager.withPlugin("idea") {
+            project.idea {
+                this.module {
+                    this.isDownloadSources = extension.downloadSources.get()
+                }
+            }
+        }
+
         val gradleProjectJavaToolchainSpec = project.extensions.getByType<JavaPluginExtension>().toolchain
         val gradleProjectJavaService = project.serviceOf<JavaToolchainService>()
 
