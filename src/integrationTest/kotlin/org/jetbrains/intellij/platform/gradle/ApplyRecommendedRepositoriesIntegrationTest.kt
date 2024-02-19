@@ -10,7 +10,10 @@ class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationT
 
     @Test
     fun `attach bundled plugin sources`() {
-        build("buildPlugin") {
+        build("buildPlugin", projectProperties = mapOf(
+            "intellijPlatform.version" to intellijPlatformVersion,
+            "intellijPlatform.type" to intellijPlatformType,
+        )) {
             val goPluginIvyFileName = "go-goland-GO-212.5457.54-withSources-3.xml"
 
             pluginsCacheDirectory containsFile goPluginIvyFileName

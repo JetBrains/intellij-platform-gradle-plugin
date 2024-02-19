@@ -1,6 +1,3 @@
-package `apply-recommended-repositories`
-
-val intellijVersionProperty = providers.gradleProperty("intellijVersion")
 val sinceBuildProperty = providers.gradleProperty("sinceBuild")
 val languageVersionProperty = providers.gradleProperty("languageVersion").map { JavaLanguageVersion.of(it) }
 val downloadDirectoryProperty = providers.gradleProperty("downloadDirectory").map { file(it) }
@@ -20,7 +17,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity(intellijVersionProperty)
+        create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version"))
     }
 }
 
