@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.tasks.aware.pluginBean
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
@@ -35,9 +36,9 @@ import kotlin.io.path.readLines
 class IntelliJPlatformArgumentProvider(
     @InputFiles @PathSensitive(RELATIVE) val intellijPlatformConfiguration: ConfigurableFileCollection,
     @InputFile @PathSensitive(RELATIVE) val coroutinesJavaAgentFile: RegularFileProperty,
+    @InputFile @PathSensitive(RELATIVE) val pluginXml: RegularFileProperty,
     @Input val runtimeArchProvider: Provider<String>,
     private val options: JavaForkOptions,
-    private val requirePluginIds: List<String> = emptyList(),
 ) : CommandLineArgumentProvider {
 
     private val platformPath: Path
@@ -85,7 +86,7 @@ class IntelliJPlatformArgumentProvider(
         }
 
     private val requiredPlugins
-        get() = "-Didea.required.plugins.id=${requirePluginIds.joinToString(",")}"
+        get() = "-Didea.required.plugins.id=${pluginXml.asPath.pluginBean().id}"
 
     /**
      * Retrieves the additional JVM arguments from [ProductInfo.Launch.additionalJvmArguments].

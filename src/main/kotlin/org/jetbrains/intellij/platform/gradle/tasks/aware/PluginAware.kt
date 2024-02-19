@@ -11,6 +11,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import java.nio.file.Path
 import kotlin.io.path.inputStream
 
 /**
@@ -31,8 +32,13 @@ interface PluginAware {
      */
     @get:Internal
     val plugin: PluginBean
-        get() = pluginXml.asPath.inputStream().use {
-            val document = JDOMUtil.loadDocument(it)
-            PluginBeanExtractor.extractPluginBean(document)
-        }
+        get() = pluginXml.asPath.pluginBean()
+}
+
+/**
+ * Parses the plugin.xml file and provides the [PluginBean] instance.
+ */
+fun Path.pluginBean() = inputStream().use {
+    val document = JDOMUtil.loadDocument(it)
+    PluginBeanExtractor.extractPluginBean(document)
 }

@@ -312,9 +312,9 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 IntelliJPlatformArgumentProvider(
                     intellijPlatformConfiguration = intelliJPlatformConfiguration,
                     coroutinesJavaAgentFile = coroutinesJavaAgentFile,
+                    pluginXml = pluginXml,
                     runtimeArchProvider = runtimeArch,
                     options = this,
-                    requirePluginIds = listOf(plugin.id),
                 )
             )
             jvmArgumentProviders.add(
