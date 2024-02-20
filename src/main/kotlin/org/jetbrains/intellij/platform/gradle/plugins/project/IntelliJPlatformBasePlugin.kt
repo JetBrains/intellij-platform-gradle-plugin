@@ -10,6 +10,9 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.the
+import org.gradle.plugins.ide.idea.IdeaPlugin
+import org.gradle.plugins.ide.idea.model.IdeaModel
+import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
@@ -25,6 +28,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.model.platformPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
@@ -49,6 +53,17 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         with(project) {
             with(plugins) {
                 apply(JavaPlugin::class)
+                apply(IdeaPlugin::class)
+            }
+
+            /**
+             * Configure the [IdeaPlugin] and set the `idea.module.downloadSources` flag to `true`
+             * to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin.
+             */
+            pluginManager.withPlugin("idea") {
+                project.extensions.configure<IdeaModel>("idea") {
+                    module.isDownloadSources = isBuildFeatureEnabled(BuildFeature.DOWNLOAD_SOURCES).get()
+                }
             }
 
             val extensionProvider = provider { project.the<IntelliJPlatformExtension>() }
