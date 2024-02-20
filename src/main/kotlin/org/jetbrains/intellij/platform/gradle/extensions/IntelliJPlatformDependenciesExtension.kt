@@ -510,7 +510,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugin(notation: Provider<String>) = addIntelliJPlatformPluginDependencies(
-        plugins = notation.map { listOf(it.parsePluginNotation()) }
+        plugins = notation.map { listOfNotNull(it.parsePluginNotation()) }
     )
 
     /**
@@ -521,7 +521,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugins(notations: Provider<List<String>>) = addIntelliJPlatformPluginDependencies(
-        plugins = notations.map { it.map { notation -> notation.parsePluginNotation() } }
+        plugins = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } }
     )
 
     /**
@@ -532,7 +532,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugin(notation: String) = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { listOf(notation.parsePluginNotation()) }
+        plugins = providers.provider { listOfNotNull(notation.parsePluginNotation()) }
     )
 
     /**
@@ -543,7 +543,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugins(vararg notations: String) = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { notations.map { it.parsePluginNotation() } }
+        plugins = providers.provider { notations.mapNotNull { it.parsePluginNotation() } }
     )
 
     /**
@@ -554,7 +554,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugins(notations: List<String>) = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { notations.map { it.parsePluginNotation() } }
+        plugins = providers.provider { notations.mapNotNull { it.parsePluginNotation() } }
     )
 
     /**
@@ -792,7 +792,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = configurations.getByName(configurationName).dependencies.addAllLater(
         bundledPlugins.map {
-            it.map { id -> createIntelliJPlatformBundledPluginDependency(id).apply(action) }
+            it
+                .filter { id -> id.isNotBlank() }
+                .map { id -> createIntelliJPlatformBundledPluginDependency(id).apply(action) }
         }
     )
 
@@ -876,14 +878,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 }
 
-/**
- * Parses a string in plugin notation and returns a triple containing the plugin ID, version, and channel.
- */
-private fun String.parsePluginNotation() = Triple(
-    substringBefore(':'), // pluginId
-    substringAfter(':').substringBefore('@'), // version
-    substringAfter('@'), // channel
-)
+private fun String.parsePluginNotation() = trim()
+    .takeIf { it.isNotEmpty() }
+    ?.split(":", "@")
+    ?.run { Triple(getOrNull(0).orEmpty(), getOrNull(1).orEmpty(), getOrNull(2).orEmpty()) }
 
 // TODO: cleanup JBR helper functions:
 private fun from(jbrVersion: String, jbrVariant: String?, jbrArch: String?, operatingSystem: OperatingSystem = OperatingSystem.current()): String {
