@@ -13,7 +13,7 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 /**
  * TODO: Provide valid URL
  */
-private const val message = "Task is scheduled for removal, see: [SDK Docs link]"
+private const val message = "The setupDependencies task is scheduled for removal, see: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html#setupdependencies"
 
 /**
  * A deprecated method for setting up IntelliJ Platform dependencies.

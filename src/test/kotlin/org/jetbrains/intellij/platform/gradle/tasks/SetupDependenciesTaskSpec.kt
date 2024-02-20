@@ -11,7 +11,7 @@ class SetupDependenciesTaskSpec : IntelliJPluginSpecBase() {
     @Test
     fun `throw error when called`() {
         build(Tasks.SETUP_DEPENDENCIES) {
-            assertContains("Task is scheduled for removal, see: [SDK Docs link]", output)
+            assertContains("The setupDependencies task is scheduled for removal, see: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html#setupdependencies", output)
         }
     }
 }
