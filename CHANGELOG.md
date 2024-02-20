@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.17.2] - 2024-02-20
+
 ### Added
 
 - Set the `idea.module.downloadSources` flag with `intellij.downloadSources` value
@@ -964,7 +966,8 @@
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.1...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.2...HEAD
+[1.17.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.1...v1.17.0
 [1.16.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.0...v1.16.1
