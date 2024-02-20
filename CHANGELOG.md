@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Set the `idea.module.downloadSources` flag with `intellij.downloadSources` value
+
 ## [1.17.1] - 2024-02-05
 
 ### Fixed
