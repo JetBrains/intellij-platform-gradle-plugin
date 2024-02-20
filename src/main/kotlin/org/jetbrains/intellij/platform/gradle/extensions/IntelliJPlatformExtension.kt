@@ -64,12 +64,12 @@ interface IntelliJPlatformExtension : ExtensionAware {
     val instrumentCode: Property<Boolean>
 
     /**
-     * Provides access to the IntelliJ Platform dependency artifact path.
+     * Provides read-only access to the IntelliJ Platform dependency artifact path.
      */
     val platformPath: DirectoryProperty
 
     /**
-     * Provides read access for the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
+     * Provides read-only access to the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
      */
     val productInfo: Property<ProductInfo>
 

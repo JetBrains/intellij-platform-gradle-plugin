@@ -70,8 +70,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     }
 
     override fun obtain(): List<String>? = with(parameters) {
-        val jetbrainsIdesReleases = XmlExtractor<JetBrainsIdesReleases>()
-            .fetch(jetbrainsIdes.asPath)
+        val jetbrainsIdesReleases = jetbrainsIdes.orNull
+            ?.let { XmlExtractor<JetBrainsIdesReleases>().fetch(it.asPath) }
             .or { JetBrainsIdesReleases() }
             .let {
                 sequence {
@@ -106,8 +106,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             }
             .toList()
 
-        val androidStudioReleases = XmlExtractor<AndroidStudioReleases>()
-            .fetch(androidStudio.asPath)
+        val androidStudioReleases = androidStudio.orNull
+            ?.let { XmlExtractor<AndroidStudioReleases>().fetch(it.asPath) }
             .or { AndroidStudioReleases() }
             .items.mapNotNull { item ->
                 val channel = runCatching { Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null
@@ -163,7 +163,7 @@ fun ProductReleasesValueSource(
         .fromUri(this)
         .runCatching { asFile("UTF-8") }
         .onFailure { log.error("Cannot resolve product releases", it) }
-        .getOrThrow()
+        .getOrNull()
 
     val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
