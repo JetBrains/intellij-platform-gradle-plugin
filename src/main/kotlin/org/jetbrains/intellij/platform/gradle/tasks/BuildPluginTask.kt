@@ -9,6 +9,8 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 
 /**
  * A task responsible for building plugin and preparing a ZIP archive for testing and deployment.
@@ -21,7 +23,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
  * By default, the [archiveBaseName] is set to the value of [PrepareSandboxTask.pluginName].
  */
 @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
-abstract class BuildPluginTask : Zip() {
+abstract class BuildPluginTask : Zip(), PluginAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -34,12 +36,10 @@ abstract class BuildPluginTask : Zip() {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
 
-                archiveBaseName.convention(prepareSandboxTaskProvider.flatMap { it.pluginName })
+                archiveBaseName.convention(pluginXml.parse { name })
 
-                from(prepareSandboxTaskProvider.flatMap {
-                    it.pluginName.map { pluginName ->
-                        it.destinationDir.resolve(pluginName)
-                    }
+                from(prepareSandboxTaskProvider.zip(pluginXml.parse { name }) { prepareSandboxTask, pluginName ->
+                    prepareSandboxTask.destinationDir.resolve(pluginName)
                 })
                 from(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }) {
                     into("lib")

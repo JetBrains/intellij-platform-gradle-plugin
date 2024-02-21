@@ -11,7 +11,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.named
@@ -53,16 +52,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
      */
     @get:Internal
     abstract val defaultDestinationDirectory: DirectoryProperty
-
-    /**
-     * The name of the plugin.
-     *
-     * Default value: [IntelliJPlatformExtension.PluginConfiguration.name]
-     *
-     * @see IntelliJPlatformExtension.PluginConfiguration.name
-     */
-    @get:Input
-    abstract val pluginName: Property<String>
 
     /**
      * The output of [Jar] task.
@@ -238,14 +227,13 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 //                dependsOn(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
 //            }
 
-                pluginName.convention(extension.pluginConfiguration.name)
                 pluginJar.convention(pluginJarProvider)
                 defaultDestinationDirectory.convention(sandboxPluginsDirectory)
 //                librariesToIgnore.convention(ideaDependencyJarFiles)
                 pluginsClasspath.from(intellijPlatformPluginsConfiguration)
                 runtimeClasspath.from(runtimeConfiguration)
 
-                intoChild(pluginName.map { "$it/lib" })
+                intoChild("${project.name}/lib")
 //                    .from(runtimeClasspath.filter { file ->
 //                        val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
 //                        val pluginDirectories = pluginDependencies.files
