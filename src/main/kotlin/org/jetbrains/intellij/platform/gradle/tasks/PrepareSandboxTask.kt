@@ -74,7 +74,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
      * @see IntelliJPlatformDependenciesExtension.plugin
      * @see IntelliJPlatformDependenciesExtension.bundledPlugin
      */
-    @get:InputFiles
     @get:Classpath
     abstract val pluginsClasspath: ConfigurableFileCollection
 
@@ -83,7 +82,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
      *
      * @see JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
      */
-    @get:InputFiles
     @get:Classpath
     abstract val runtimeClasspath: ConfigurableFileCollection
 

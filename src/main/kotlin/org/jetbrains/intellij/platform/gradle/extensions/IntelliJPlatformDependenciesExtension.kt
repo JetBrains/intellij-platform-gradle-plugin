@@ -607,21 +607,21 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider of the IntelliJ Plugin Verifier version.
      */
-    fun pluginVerifier(version: Provider<String>) = addPluginVerifier(version)
+    fun pluginVerifier(version: Provider<String>) = addPluginVerifierDependency(version)
 
     /**
      * Adds a dependency on IntelliJ Plugin Verifier.
      *
      * @param version The IntelliJ Plugin Verifier version.
      */
-    fun pluginVerifier(version: String = VERSION_LATEST) = addPluginVerifier(providers.provider { version })
+    fun pluginVerifier(version: String = VERSION_LATEST) = addPluginVerifierDependency(providers.provider { version })
 
     /**
      * Adds a dependency on Marketplace ZIP Signer.
      *
      * @param version The provider of the Marketplace ZIP Signer version.
      */
-    fun zipSigner(version: Provider<String>) = addZipSigner(version)
+    fun zipSigner(version: Provider<String>) = addZipSignerDependency(version)
 
     /**
      * Adds a dependency on Marketplace ZIP Signer.
@@ -629,6 +629,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The Marketplace ZIP Signer version.
      */
     fun zipSigner(version: String = VERSION_LATEST) = addZipSigner(providers.provider { version })
+    fun zipSigner(version: String = VERSION_LATEST) = addZipSignerDependency(providers.provider { version })
 
     /**
      * A base method for adding a dependency on IntelliJ Platform.
@@ -804,7 +805,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
-    private fun addPluginVerifier(
+    private fun addPluginVerifierDependency(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
@@ -832,7 +833,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
-    private fun addZipSigner(
+    private fun addZipSignerDependency(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},

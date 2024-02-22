@@ -47,7 +47,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      *
      * @see [IntelliJPlatformExtension.VerifyPlugin.Ides]
      */
-    @get:InputFiles
     @get:Classpath
     abstract val ides: ConfigurableFileCollection
 
