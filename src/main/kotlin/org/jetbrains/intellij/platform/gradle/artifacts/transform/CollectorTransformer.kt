@@ -49,12 +49,17 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
             if (lib.exists() && lib.isDirectory()) {
                 val jarFilter = { path: Path -> path.name != "junit.jar" && path.extension == "jar" }
 
-                lib.listDirectoryEntries().filter(jarFilter).forEach {
-                    outputs.file(it)
-                }
-                lib.resolve("ant/lib").listDirectoryEntries().filter(jarFilter).forEach {
-                    outputs.file(it)
-                }
+                lib
+                    .listDirectoryEntries()
+                    .filter(jarFilter)
+                    .forEach { outputs.file(it) }
+
+                lib
+                    .resolve("ant/lib")
+                    .takeIf { it.exists() }
+                    ?.listDirectoryEntries()
+                    ?.filter(jarFilter)
+                    ?.forEach { outputs.file(it) }
             }
         }
     }
