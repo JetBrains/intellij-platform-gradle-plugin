@@ -138,9 +138,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of Android Studio.
      */
-    fun androidStudio(version: String) = create(
-        type = IntelliJPlatformType.AndroidStudio,
-        version = version,
+    fun androidStudio(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.AndroidStudio },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -148,9 +148,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of Android Studio.
      */
-    fun androidStudio(version: Provider<String>) = create(
-        type = IntelliJPlatformType.AndroidStudio,
-        version = version
+    fun androidStudio(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.AndroidStudio },
+        versionProvider = version,
     )
 
     /**
@@ -158,9 +158,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of CLion.
      */
-    fun clion(version: String) = create(
-        type = IntelliJPlatformType.CLion,
-        version = version,
+    fun clion(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.CLion },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -168,9 +168,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of CLion.
      */
-    fun clion(version: Provider<String>) = create(
-        type = IntelliJPlatformType.CLion,
-        version = version,
+    fun clion(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.CLion },
+        versionProvider = version,
     )
 
     /**
@@ -178,9 +178,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of Fleet Backend.
      */
-    fun fleetBackend(version: String) = create(
-        type = IntelliJPlatformType.Fleet,
-        version = version,
+    fun fleetBackend(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Fleet },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -188,9 +188,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of Fleet Backend.
      */
-    fun fleetBackend(version: Provider<String>) = create(
-        type = IntelliJPlatformType.Fleet,
-        version = version,
+    fun fleetBackend(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Fleet },
+        versionProvider = version,
     )
 
     /**
@@ -198,9 +198,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of Gateway.
      */
-    fun gateway(version: String) = create(
-        type = IntelliJPlatformType.Gateway,
-        version = version,
+    fun gateway(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Gateway },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -208,9 +208,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of Gateway.
      */
-    fun gateway(version: Provider<String>) = create(
-        type = IntelliJPlatformType.Gateway,
-        version = version,
+    fun gateway(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Gateway },
+        versionProvider = version,
     )
 
     /**
@@ -218,9 +218,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of GoLand.
      */
-    fun goland(version: String) = create(
-        type = IntelliJPlatformType.GoLand,
-        version = version,
+    fun goland(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.GoLand },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -228,9 +228,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of GoLand.
      */
-    fun goland(version: Provider<String>) = create(
-        type = IntelliJPlatformType.GoLand,
-        version = version,
+    fun goland(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.GoLand },
+        versionProvider = version,
     )
 
     /**
@@ -238,9 +238,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of IntelliJ IDEA Community.
      */
-    fun intellijIdeaCommunity(version: String) = create(
-        type = IntelliJPlatformType.IntellijIdeaCommunity,
-        version = version,
+    fun intellijIdeaCommunity(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.IntellijIdeaCommunity },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -248,9 +248,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of IntelliJ IDEA Community.
      */
-    fun intellijIdeaCommunity(version: Provider<String>) = create(
-        type = IntelliJPlatformType.IntellijIdeaCommunity,
-        version = version,
+    fun intellijIdeaCommunity(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.IntellijIdeaCommunity },
+        versionProvider = version,
     )
 
     /**
@@ -258,9 +258,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of IntelliJ IDEA Ultimate.
      */
-    fun intellijIdeaUltimate(version: String) = create(
-        type = IntelliJPlatformType.IntellijIdeaUltimate,
-        version = version,
+    fun intellijIdeaUltimate(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.IntellijIdeaUltimate },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -268,9 +268,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of IntelliJ IDEA Ultimate.
      */
-    fun intellijIdeaUltimate(version: Provider<String>) = create(
-        type = IntelliJPlatformType.IntellijIdeaUltimate,
-        version = version,
+    fun intellijIdeaUltimate(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.IntellijIdeaUltimate },
+        versionProvider = version,
     )
 
     /**
@@ -278,9 +278,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of PhpStorm.
      */
-    fun phpstorm(version: String) = create(
-        type = IntelliJPlatformType.PhpStorm,
-        version = version,
+    fun phpstorm(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.PhpStorm },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -288,9 +288,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of PhpStorm.
      */
-    fun phpstorm(version: Provider<String>) = create(
-        type = IntelliJPlatformType.PhpStorm,
-        version = version,
+    fun phpstorm(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.PhpStorm },
+        versionProvider = version,
     )
 
     /**
@@ -298,9 +298,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of PyCharm Community.
      */
-    fun pycharmCommunity(version: String) = create(
-        type = IntelliJPlatformType.PyCharmCommunity,
-        version = version,
+    fun pycharmCommunity(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.PyCharmCommunity },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -308,9 +308,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of PyCharm Community.
      */
-    fun pycharmCommunity(version: Provider<String>) = create(
-        type = IntelliJPlatformType.PyCharmCommunity,
-        version = version,
+    fun pycharmCommunity(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.PyCharmCommunity },
+        versionProvider = version,
     )
 
     /**
@@ -318,9 +318,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of PyCharm Professional.
      */
-    fun pycharmProfessional(version: String) = create(
-        type = IntelliJPlatformType.PyCharmProfessional,
-        version = version,
+    fun pycharmProfessional(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.PyCharmProfessional },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -328,9 +328,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of PyCharm Professional.
      */
-    fun pycharmProfessional(version: Provider<String>) = create(
-        type = IntelliJPlatformType.PyCharmProfessional,
-        version = version,
+    fun pycharmProfessional(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.PyCharmProfessional },
+        versionProvider = version,
     )
 
     /**
@@ -338,9 +338,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of Rider.
      */
-    fun rider(version: String) = create(
-        type = IntelliJPlatformType.Rider,
-        version = version,
+    fun rider(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Rider },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -348,9 +348,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of Rider.
      */
-    fun rider(version: Provider<String>) = create(
-        type = IntelliJPlatformType.Rider,
-        version = version,
+    fun rider(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Rider },
+        versionProvider = version,
     )
 
     /**
@@ -358,9 +358,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of Rust Rover.
      */
-    fun rustRover(version: String) = create(
-        type = IntelliJPlatformType.RustRover,
-        version = version,
+    fun rustRover(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.RustRover },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -368,9 +368,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of Rust Rover.
      */
-    fun rustRover(version: Provider<String>) = create(
-        type = IntelliJPlatformType.RustRover,
-        version = version,
+    fun rustRover(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.RustRover },
+        versionProvider = version,
     )
 
     /**
@@ -378,9 +378,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of Writerside.
      */
-    fun writerside(version: String) = create(
-        type = IntelliJPlatformType.Writerside,
-        version = version,
+    fun writerside(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Writerside },
+        versionProvider = providers.provider { version },
     )
 
     /**
@@ -388,9 +388,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider for the version of Writerside.
      */
-    fun writerside(version: Provider<String>) = create(
-        type = IntelliJPlatformType.Writerside,
-        version = version,
+    fun writerside(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Writerside },
+        versionProvider = version,
     )
 
     /**
@@ -614,7 +614,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The IntelliJ Plugin Verifier version.
      */
-    fun pluginVerifier(version: String = VERSION_LATEST) = pluginVerifier(providers.provider { version })
+    fun pluginVerifier(version: String = VERSION_LATEST) = addPluginVerifier(providers.provider { version })
 
     /**
      * Adds a dependency on Marketplace ZIP Signer.
@@ -628,7 +628,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The Marketplace ZIP Signer version.
      */
-    fun zipSigner(version: String = VERSION_LATEST) = zipSigner(providers.provider { version })
+    fun zipSigner(version: String = VERSION_LATEST) = addZipSigner(providers.provider { version })
 
     /**
      * A base method for adding a dependency on IntelliJ Platform.
