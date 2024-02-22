@@ -82,6 +82,18 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     )
 
     /**
+     * Adds a repository for accessing IntelliJ Platform dependencies.
+     *
+     * @param action The action to be performed on the repository. Defaults to an empty action.
+     */
+    fun intellijDependencies(action: RepositoryAction = {}) = createRepository(
+        name = "IntelliJ Platform Dependencies Repository",
+        url = "https://cache-redirector.jetbrains.com/intellij-dependencies",
+        urlWithCacheRedirector = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies",
+        action = action,
+    )
+
+    /**
      * Adds a repository for accessing plugins hosted on JetBrains Marketplace.
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
@@ -195,12 +207,14 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     /**
      * Applies a set of recommended repositories required for running the most common tasks provided by the IntelliJ Platform Gradle Plugin:
      * - [localPlatformArtifacts] — required to use plugins bundled with IntelliJ Platform or refer to the local IDE
+     * - [intellijDependencies] — required for resolving extra IntelliJ Platform dependencies used for running specific tasks
      * - [releases] and [snapshots] — IntelliJ Platform releases channels
      * - [marketplace] — JetBrains Marketplace plugins repository
      * - [binaryReleases] — JetBrains IDEs releases required for running the IntelliJ Plugin Verifier
      */
     fun defaultRepositories() {
         localPlatformArtifacts()
+        intellijDependencies()
         releases()
         snapshots()
         marketplace()
