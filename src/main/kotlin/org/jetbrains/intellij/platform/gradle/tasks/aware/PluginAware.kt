@@ -8,9 +8,11 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.nio.file.Path
 import kotlin.io.path.inputStream
 
 /**
@@ -27,24 +29,17 @@ interface PluginAware {
     @get:Optional
     val pluginXml: RegularFileProperty
 
-    /**
-     * Provides a parsed `plugin.xml` file as a [PluginBean] object.
-     */
-    @get:Internal
-    val plugin: PluginBean?
-        get() = pluginXml.orNull
-            ?.asPath
-            ?.pluginBean()
 }
 
 /**
- * Parses the plugin.xml file and provides the [PluginBean] instance.
+ * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].
  */
-internal fun Path.pluginBean() = inputStream().use {
+fun <T : Any> RegularFile.parse(block: PluginBean.() -> T) = asPath.inputStream().use {
     val document = JDOMUtil.loadDocument(it)
     PluginBeanExtractor.extractPluginBean(document)
-}
+}.block()
 
-internal fun <T : Any> Provider<RegularFile>.parse(block: PluginBean.() -> T) = map {
-    it.asPath.pluginBean().block()
-}
+/**
+ * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].
+ */
+fun <T : Any> Provider<RegularFile>.parse(block: PluginBean.() -> T) = map { it.parse(block) }

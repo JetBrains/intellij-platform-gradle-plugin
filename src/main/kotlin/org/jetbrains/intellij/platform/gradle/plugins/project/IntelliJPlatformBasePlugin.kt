@@ -265,6 +265,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 productInfo.convention(project.provider {
                     configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
                 })
+                projectName.convention(project.name)
                 sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
 
                 configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {

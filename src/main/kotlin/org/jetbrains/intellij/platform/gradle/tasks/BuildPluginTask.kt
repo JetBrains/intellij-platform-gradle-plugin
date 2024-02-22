@@ -6,24 +6,24 @@ import org.gradle.api.Project
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 
 /**
- * A task responsible for building plugin and preparing a ZIP archive for testing and deployment.
+ * Builds the plugin and prepares the ZIP archive for testing and deployment.
  *
  * It takes the output of the [PrepareSandboxTask] task containing the built project with all its modules and dependencies,
  * and the output of [JarSearchableOptionsTask] task.
  *
  * The produced archive is stored in the [ProjectLayout.getBuildDirectory]/distributions/[archiveFile] file.
  * The [archiveFile] name and location can be controlled with properties provided with the [Zip] base task.
- * By default, the [archiveBaseName] is set to the value of [PrepareSandboxTask.pluginName].
+ * By default, the [archiveBaseName] is set to the plugin name specified in the `plugin.xml` file, after it gets patched with the [PatchPluginXmlTask] task.
  */
 @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")
-abstract class BuildPluginTask : Zip(), PluginAware {
+abstract class BuildPluginTask : Zip() {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -35,11 +35,12 @@ abstract class BuildPluginTask : Zip(), PluginAware {
             project.registerTask<BuildPluginTask>(Tasks.BUILD_PLUGIN) {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
+                val extension = project.the<IntelliJPlatformExtension>()
 
-                archiveBaseName.convention(pluginXml.parse { name })
+                archiveBaseName.convention(extension.projectName)
 
-                from(prepareSandboxTaskProvider.zip(pluginXml.parse { name }) { prepareSandboxTask, pluginName ->
-                    prepareSandboxTask.destinationDir.resolve(pluginName)
+                from(prepareSandboxTaskProvider.zip(extension.projectName) { task, name ->
+                    task.destinationDir.resolve(name)
                 })
                 from(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }) {
                     into("lib")

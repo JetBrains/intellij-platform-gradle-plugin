@@ -112,7 +112,7 @@ abstract class VerifyPluginStructureTask : DefaultTask(), SandboxAware {
                 ignoreWarnings.convention(true)
 
                 pluginDirectory.convention(sandboxPluginsDirectory.flatMap {
-                    it.dir(extension.pluginConfiguration.name)
+                    it.dir(extension.projectName)
                 })
             }
     }

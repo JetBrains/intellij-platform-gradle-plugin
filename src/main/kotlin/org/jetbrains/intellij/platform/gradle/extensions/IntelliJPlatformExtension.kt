@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -72,6 +73,13 @@ interface IntelliJPlatformExtension : ExtensionAware {
      * Provides read-only access to the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
      */
     val productInfo: Property<ProductInfo>
+
+    /**
+     * Defines the project name, which is used for creating file structure and the build archive.
+     *
+     * Default value: [Project.getName]
+     */
+    val projectName: Property<String>
 
     /**
      * The path to the sandbox container where tests and IDE instances read and write data.

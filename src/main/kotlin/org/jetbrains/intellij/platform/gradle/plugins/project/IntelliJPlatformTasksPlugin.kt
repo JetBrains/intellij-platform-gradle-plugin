@@ -12,10 +12,12 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.attributes
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
 import org.gradle.language.jvm.tasks.ProcessResources
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TASKS_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS
@@ -86,6 +88,7 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
         companion object : Registrable {
             override fun register(project: Project) =
                 project.registerTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {
+                    val extension = project.the<IntelliJPlatformExtension>()
                     val initializeIntelliJPlatformPluginTaskProvider =
                         project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
                     val verifyPluginConfigurationTaskProvider =
@@ -94,6 +97,8 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
                     val versionProvider = project.provider { project.version }
 
                     exclude("**/classpath.index")
+
+                    archiveBaseName.convention(extension.projectName)
 
                     manifest.attributes(
                         "Created-By" to gradleVersionProvider.map { "Gradle $it" },

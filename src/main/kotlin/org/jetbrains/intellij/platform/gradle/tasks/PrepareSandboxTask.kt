@@ -233,7 +233,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                 pluginsClasspath.from(intellijPlatformPluginsConfiguration)
                 runtimeClasspath.from(runtimeConfiguration)
 
-                intoChild("${project.name}/lib")
+                intoChild(extension.projectName.map { "$it/lib" })
 //                    .from(runtimeClasspath.filter { file ->
 //                        val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
 //                        val pluginDirectories = pluginDependencies.files

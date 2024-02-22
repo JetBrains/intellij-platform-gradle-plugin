@@ -14,6 +14,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
@@ -86,7 +87,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                 )
                 showPaidPluginWarning.convention(
                     project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {
-                        it && plugin?.productDescriptor != null
+                        it && pluginXml.orNull?.parse { productDescriptor } != null
                     }
                 )
 

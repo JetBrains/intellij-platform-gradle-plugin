@@ -91,7 +91,7 @@ class BuildPluginTaskSpec : IntelliJPluginSpecBase() {
             <idea-plugin>
               <idea-version since-build="223.8836" until-build="223.*" />
               <version>1.0.0</version>
-              <name>projectName</name>
+              <name>MyPluginName</name>
               <vendor>JetBrains</vendor>
               <depends config-file="other.xml" />
             </idea-plugin>

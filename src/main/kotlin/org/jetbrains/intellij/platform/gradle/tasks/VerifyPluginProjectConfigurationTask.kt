@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GRO
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.writeText
 
@@ -139,9 +140,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val platformKotlinLanguageVersion = getPlatformKotlinVersion(platformBuild)?.run { "$major.$minor".toVersion() }
 
         sequence {
-            plugin
-                ?.let { plugin ->
-                    val sinceBuild = plugin.ideaVersion.sinceBuild.toVersion()
+            pluginXml.orNull
+                ?.let { file ->
+                    val sinceBuild = file.parse { ideaVersion.sinceBuild.toVersion() }
                     val sinceBuildJavaVersion = getPlatformJavaVersion(sinceBuild)
                     val sinceBuildKotlinApiVersion = getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 

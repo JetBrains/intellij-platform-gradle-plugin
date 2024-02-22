@@ -23,7 +23,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )
@@ -54,7 +53,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <description><![CDATA[<p>Plugin pluginDescription</p>]]></description>
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )
@@ -74,7 +72,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin someattr="\u2202">
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )
@@ -105,7 +102,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <change-notes><![CDATA[change notes]]></change-notes>
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )
@@ -135,7 +131,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                   <id>my.plugin.id</id>
                 </idea-plugin>
                 """.trimIndent(),
@@ -163,7 +158,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                   <id>my.plugin.id</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
@@ -179,7 +173,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
         pluginXml.xml(
             """
             <idea-plugin>
-              <name>projectName</name>
               <id>org.jetbrains.erlang</id>
               <vendor>JetBrains</vendor>
             </idea-plugin>
@@ -193,7 +186,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                   <id>org.jetbrains.erlang</id>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
@@ -221,7 +213,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 patchedPluginXml.value,
                 """
                 <idea-plugin>
-                  <name>projectName</name>
                   <version>1.0.0</version>
                   <idea-version since-build="223.8836" until-build="223.*">my_version</idea-version>
                   <vendor>JetBrains</vendor>
@@ -257,7 +248,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
-                  <name>projectName</name>
                   <version>0.10.0</version>
                 </idea-plugin>
                 """.trimIndent(),
@@ -280,7 +270,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )
@@ -310,7 +299,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )
@@ -340,7 +328,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )
@@ -372,7 +359,6 @@ class PatchPluginXmlTaskSpec : IntelliJPluginSpecBase() {
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
                   <version>1.0.0</version>
-                  <name>projectName</name>
                 </idea-plugin>
                 """.trimIndent(),
             )

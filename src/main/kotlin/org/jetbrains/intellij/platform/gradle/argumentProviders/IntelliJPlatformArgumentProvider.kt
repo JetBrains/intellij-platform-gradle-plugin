@@ -15,7 +15,7 @@ import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.platformPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.tasks.aware.pluginBean
+import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.Path
@@ -96,7 +96,7 @@ class IntelliJPlatformArgumentProvider(
 
     private val requiredPlugins
         get() = pluginXml.orNull?.let {
-            "-Didea.required.plugins.id=${it.asPath.pluginBean().id}"
+            "-Didea.required.plugins.id=${it.parse { id }}"
         }
 
     /**
