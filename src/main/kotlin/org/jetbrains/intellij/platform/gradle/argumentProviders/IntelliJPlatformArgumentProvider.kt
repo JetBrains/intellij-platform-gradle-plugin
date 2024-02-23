@@ -37,6 +37,7 @@ class IntelliJPlatformArgumentProvider(
 
     @InputFile
     @PathSensitive(RELATIVE)
+    @Optional
     val coroutinesJavaAgentFile: RegularFileProperty,
 
     @InputFile
@@ -71,7 +72,7 @@ class IntelliJPlatformArgumentProvider(
             .orEmpty()
 
     /**
-     * Retrieves VM options from A dedicated file delivered with the IntelliJ Platform.
+     * Retrieves VM options from a dedicated file delivered with the IntelliJ Platform.
      * The file path is retrieved from the [ProductInfo.Launch.vmOptionsFilePath] property.
      * If present, the `kotlinx.coroutines.debug=off` is dropped.
      */
@@ -87,17 +88,23 @@ class IntelliJPlatformArgumentProvider(
      * Applies the Java Agent pointing at the KotlinX Coroutines to enable coroutines debugging.
      */
     private val kotlinxCoroutinesJavaAgent
-        get() = "-javaagent:${coroutinesJavaAgentFile.asPath}".takeIf {
-            productInfo.productCode.toIntelliJPlatformType() in listOf(
-                IntelliJPlatformType.IntellijIdeaCommunity,
-                IntelliJPlatformType.IntellijIdeaUltimate,
-            )
-        }
+        get() = coroutinesJavaAgentFile.orNull
+            ?.takeIf { it.asPath.exists() }
+            ?.takeIf {
+                productInfo.productCode.toIntelliJPlatformType() in listOf(
+                    IntelliJPlatformType.IntellijIdeaCommunity,
+                    IntelliJPlatformType.IntellijIdeaUltimate,
+                )
+            }
+            ?.let { "-javaagent:${coroutinesJavaAgentFile.asPath}" }
 
+    /**
+     * Defines the plugin required to be present when IDE is started.
+     */
     private val requiredPlugins
-        get() = pluginXml.orNull?.let {
-            "-Didea.required.plugins.id=${it.parse { id }}"
-        }
+        get() = pluginXml.orNull
+            ?.takeIf { it.asPath.exists() }
+            ?.let { "-Didea.required.plugins.id=${it.parse { id }}" }
 
     /**
      * Retrieves the additional JVM arguments from [ProductInfo.Launch.additionalJvmArguments].

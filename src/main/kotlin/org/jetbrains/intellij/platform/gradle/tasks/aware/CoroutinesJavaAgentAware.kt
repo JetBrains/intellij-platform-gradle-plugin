@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 
 /**
@@ -18,5 +19,6 @@ interface CoroutinesJavaAgentAware {
      * @see IntelliJPlatformArgumentProvider
      */
     @get:Internal
+    @get:Optional
     val coroutinesJavaAgentFile: RegularFileProperty
 }

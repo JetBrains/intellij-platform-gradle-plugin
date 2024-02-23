@@ -628,7 +628,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The Marketplace ZIP Signer version.
      */
-    fun zipSigner(version: String = VERSION_LATEST) = addZipSigner(providers.provider { version })
     fun zipSigner(version: String = VERSION_LATEST) = addZipSignerDependency(providers.provider { version })
 
     /**

@@ -169,6 +169,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                 onlyIf {
                     !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
                 }
+                mustRunAfter("clean")
             }
     }
 }
