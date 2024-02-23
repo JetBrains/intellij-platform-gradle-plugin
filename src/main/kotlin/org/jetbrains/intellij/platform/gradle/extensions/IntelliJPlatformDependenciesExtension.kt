@@ -374,6 +374,26 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on WebStorm.
+     *
+     * @param version The version of WebStorm.
+     */
+    fun webstorm(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.WebStorm },
+        versionProvider = providers.provider { version },
+    )
+
+    /**
+     * Adds a dependency on WebStorm.
+     *
+     * @param version The provider for the version of WebStorm.
+     */
+    fun webstorm(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.WebStorm },
+        versionProvider = version,
+    )
+
+    /**
      * Adds a dependency on Writerside.
      *
      * @param version The version of Writerside.
