@@ -389,11 +389,11 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.BUILD_PLUGIN)
 
         writePluginVerifierDependency()
-        writePluginVerifierIde(version = "2022.3.1")
+        writePluginVerifierIde(version = "9999.88.7") // version that will never exist in cache
 
         buildAndFail(Tasks.VERIFY_PLUGIN, "--offline") {
-            assertContains("Could not resolve idea:ideaIC:2022.3.1", output)
-            assertContains("No cached version of idea:ideaIC:2022.3.1 available for offline mode.", output)
+            assertContains("Could not resolve idea:ideaIC:9999.88.7", output)
+            assertContains("No cached version of idea:ideaIC:9999.88.7 available for offline mode.", output)
         }
     }
 
