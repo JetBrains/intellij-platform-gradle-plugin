@@ -39,7 +39,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertContains("No Marketplace ZIP Signer executable found", output)
+            assertContains("Cannot resolve 'Marketplace ZIP Signer'.", output)
         }
     }
 

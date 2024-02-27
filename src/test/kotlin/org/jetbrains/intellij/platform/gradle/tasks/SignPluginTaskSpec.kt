@@ -36,7 +36,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.SIGN_PLUGIN, "--info") {
-            val message = "Resolved Marketplace ZIP Signer: "
+            val message = "Resolved 'Marketplace ZIP Signer': "
             val line = output.lines().find { it.contains(message) }
             assertNotNull(line)
 
