@@ -15,6 +15,7 @@ import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
@@ -534,17 +535,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
-     * Adds dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
-     * - `pluginId:version`
-     * - `pluginId:version@channel`
-     *
-     * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
-     */
-    fun plugins(notations: Provider<List<String>>) = addIntelliJPlatformPluginDependencies(
-        plugins = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } }
-    )
-
-    /**
      * Adds a dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
      * - `pluginId:version`
      * - `pluginId:version@channel`
@@ -578,21 +568,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
-     * Adds a dependency on a bundled IntelliJ Platform plugin.
+     * Adds dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
+     * - `pluginId:version`
+     * - `pluginId:version@channel`
      *
-     * @param id The provider of the bundled plugin identifier.
+     * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun bundledPlugin(id: Provider<String>) = addIntelliJPlatformBundledPluginDependencies(
-        bundledPlugins = id.map { listOf(it) }
-    )
-
-    /**
-     * Adds dependencies on bundled IntelliJ Platform plugins.
-     *
-     * @param ids The bundled plugin identifiers.
-     */
-    fun bundledPlugins(ids: Provider<List<String>>) = addIntelliJPlatformBundledPluginDependencies(
-        bundledPlugins = ids
+    fun plugins(notations: Provider<List<String>>) = addIntelliJPlatformPluginDependencies(
+        plugins = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } }
     )
 
     /**
@@ -602,6 +585,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     fun bundledPlugin(id: String) = addIntelliJPlatformBundledPluginDependencies(
         bundledPlugins = providers.provider { listOf(id) }
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform plugin.
+     *
+     * @param id The provider of the bundled plugin identifier.
+     */
+    fun bundledPlugin(id: Provider<String>) = addIntelliJPlatformBundledPluginDependencies(
+        bundledPlugins = id.map { listOf(it) }
     )
 
     /**
@@ -623,11 +615,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
-     * Adds a dependency on IntelliJ Plugin Verifier.
+     * Adds dependencies on bundled IntelliJ Platform plugins.
      *
-     * @param version The provider of the IntelliJ Plugin Verifier version.
+     * @param ids The bundled plugin identifiers.
      */
-    fun pluginVerifier(version: Provider<String>) = addPluginVerifierDependency(version)
+    fun bundledPlugins(ids: Provider<List<String>>) = addIntelliJPlatformBundledPluginDependencies(
+        bundledPlugins = ids
+    )
 
     /**
      * Adds a dependency on IntelliJ Plugin Verifier.
@@ -637,11 +631,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun pluginVerifier(version: String = VERSION_LATEST) = addPluginVerifierDependency(providers.provider { version })
 
     /**
-     * Adds a dependency on Marketplace ZIP Signer.
+     * Adds a dependency on IntelliJ Plugin Verifier.
      *
-     * @param version The provider of the Marketplace ZIP Signer version.
+     * @param version The provider of the IntelliJ Plugin Verifier version.
      */
-    fun zipSigner(version: Provider<String>) = addZipSignerDependency(version)
+    fun pluginVerifier(version: Provider<String>) = addPluginVerifierDependency(version)
 
     /**
      * Adds a dependency on Marketplace ZIP Signer.
@@ -649,6 +643,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The Marketplace ZIP Signer version.
      */
     fun zipSigner(version: String = VERSION_LATEST) = addZipSignerDependency(providers.provider { version })
+
+    /**
+     * Adds a dependency on Marketplace ZIP Signer.
+     *
+     * @param version The provider of the Marketplace ZIP Signer version.
+     */
+    fun zipSigner(version: Provider<String>) = addZipSignerDependency(version)
 
     /**
      * A base method for adding a dependency on IntelliJ Platform.
