@@ -60,7 +60,7 @@ class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertContains("token property must be specified for plugin publishing", output)
+            assertContains("'token' property must be specified for plugin publishing", output)
         }
     }
 
