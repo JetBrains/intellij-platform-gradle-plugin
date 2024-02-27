@@ -9,6 +9,7 @@ import java.util.*
 import kotlin.io.path.*
 import kotlin.test.*
 
+// todo must use test-local PV directory for storing downloaded IDEs instead of default one (machine)
 class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
 
     @Test
