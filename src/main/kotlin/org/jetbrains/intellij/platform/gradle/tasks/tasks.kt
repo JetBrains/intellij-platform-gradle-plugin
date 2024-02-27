@@ -25,9 +25,9 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.launchFor
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.pathResolver.IntelliJPluginVerifierResolver
-import org.jetbrains.intellij.platform.gradle.pathResolver.MarketplaceZipSignerResolver
-import org.jetbrains.intellij.platform.gradle.pathResolver.RuntimeResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.path.RuntimeResolver
 import org.jetbrains.intellij.platform.gradle.provider.ExecutableArchValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
