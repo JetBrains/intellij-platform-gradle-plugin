@@ -185,7 +185,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 yield("The Kotlin plugin in version $kotlinVersion used with the IntelliJ Platform Gradle Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
             }
             if (kotlinxCoroutinesLibraryPresent) {
-                yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform.")
+                yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
             }
         }
             .joinToString(System.lineSeparator()) { "- $it" }
