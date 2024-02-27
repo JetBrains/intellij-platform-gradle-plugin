@@ -99,6 +99,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
                         
             intellijPlatform {
                 buildSearchableOptions = false
+                instrumentCode = false
             }
             """.trimIndent()
         )
