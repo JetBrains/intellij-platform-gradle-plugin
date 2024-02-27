@@ -9,7 +9,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.register
+import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -138,89 +140,117 @@ interface IntelliJExtension : IntelliJPlatformExtension {
     val ideaDependency: Property<Any>
 }
 
+@DisableCachingByDefault
 abstract class DownloadRobotServerPluginTask : DefaultTask() {
 
     @Deprecated(Messages.Tasks.downloadRobotServerPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val version: Property<String>
 }
 
+@DisableCachingByDefault
 abstract class RunIdeForUiTestsTask : DefaultTask() {
 
     @Deprecated(Messages.Tasks.runIdeForUiTests, level = DeprecationLevel.ERROR)
     fun systemProperty(vararg arguments: Any) = Unit
 }
 
+@DisableCachingByDefault
 abstract class RunPluginVerifierTask : DefaultTask() {
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val failureLevel: ListProperty<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val productsReleasesFile: Property<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val ideVersions: ListProperty<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val localPaths: ListProperty<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val verifierVersion: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val verifierPath: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val freeArgs: ListProperty<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val distributionFile: Property<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val verificationReportsDir: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val verificationReportsFormats: ListProperty<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val downloadDir: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val downloadPath: Property<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val jbrVersion: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val jbrVariant: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val jbrArch: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val jreRepository: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val runtimeDir: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val resolvedRuntimeDir: Property<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val externalPrefixes: ListProperty<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val teamCityOutputFormat: Property<Boolean>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val subsystemsToCheck: Property<String>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val ignoredProblems: Property<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val ideDir: Property<Any>
 
     @Deprecated(Messages.verifyPlugin, level = DeprecationLevel.ERROR)
+    @get:Internal
     abstract val offline: Property<Boolean>
 }
