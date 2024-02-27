@@ -322,6 +322,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                     configureExtension<IntelliJPlatformExtension.VerifyPlugin.Ides>(
                         Extensions.IDES,
+                        configurations,
                         dependencies,
                         downloadDirectory,
                         extensionProvider,

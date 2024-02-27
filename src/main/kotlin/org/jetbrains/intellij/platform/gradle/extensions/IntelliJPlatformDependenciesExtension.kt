@@ -698,22 +698,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = dependencies.addProvider(
-        configurationName,
-        typeProvider.map {
-            when (it) {
-                is IntelliJPlatformType -> it
-                is String -> it.toIntelliJPlatformType()
-                else -> throw IllegalArgumentException("Invalid argument type: '${it.javaClass}'. Supported types: String or ${IntelliJPlatformType::class.java}")
-            }
-        }.zip(versionProvider) { type, version ->
+    ) = configurations.getByName(configurationName).dependencies.addLater(
+        typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
             dependencies.create(
                 group = type.dependency.group,
                 name = type.dependency.name,
                 version = version,
-            )
+            ).apply(action)
         },
-        action,
     )
 
     /**
@@ -727,8 +719,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
         action: DependencyAction = {},
-    ) = dependencies.addProvider(
-        configurationName,
+    ) = configurations.getByName(configurationName).dependencies.addLater(
         localPathProvider.map { localPath ->
             val artifactPath = resolveArtifactPath(localPath)
             val productInfo = artifactPath.productInfo()
@@ -744,9 +735,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 version = "${productInfo.version}+$hash",
             ).apply {
                 createIvyDependency(gradle, listOf(artifactPath.toPublication()))
-            }
+            }.apply(action)
         },
-        action,
     )
 
     /**
@@ -760,17 +750,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         explicitVersionProvider: Provider<String>,
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         action: DependencyAction = {},
-    ) = dependencies.addProvider(
-        configurationName,
+    ) = configurations.getByName(configurationName).dependencies.addLater(
         explicitVersionProvider.map {
             dependencies.create(
                 group = "com.jetbrains",
                 name = "jbr",
                 version = it,
                 ext = "tar.gz",
-            )
+            ).apply(action)
         },
-        action,
     )
 
     /**
@@ -863,8 +851,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
-    ) = dependencies.addProvider(
-        configurationName,
+    ) = configurations.getByName(configurationName).dependencies.addLater(
         versionProvider.map { version ->
             dependencies.create(
                 group = "org.jetbrains.intellij.plugins",
@@ -875,9 +862,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 },
                 classifier = "all",
                 ext = "jar",
-            )
+            ).apply(action)
         },
-        action,
     )
 
     /**
@@ -891,8 +877,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
-    ) = dependencies.addProvider(
-        configurationName,
+    ) = configurations.getByName(configurationName).dependencies.addLater(
         versionProvider.map { version ->
             dependencies.create(
                 group = "org.jetbrains",
@@ -903,9 +888,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 },
                 classifier = "cli",
                 ext = "jar",
-            )
+            ).apply(action)
         },
-        action,
     )
 
     /**
@@ -919,14 +903,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
         action: DependencyAction = {},
-    ) = dependencies.addProvider(
-        configurationName,
+    ) = configurations.getByName(configurationName).dependencies.addLater(
         versionProvider.map { version ->
             dependencies.create(
                 group = "com.jetbrains.intellij.java",
                 name = "java-compiler-ant-tasks",
                 version = version,
-            )
+            ).apply(action)
         }
     )
 }

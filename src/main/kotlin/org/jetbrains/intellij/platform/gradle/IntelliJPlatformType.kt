@@ -105,4 +105,8 @@ enum class IntelliJPlatformType(
     data class Coordinates(val group: String, val name: String)
 }
 
-internal fun String.toIntelliJPlatformType() = IntelliJPlatformType.fromCode(this)
+internal fun Any.toIntelliJPlatformType() = when (this) {
+    is IntelliJPlatformType -> this
+    is String -> IntelliJPlatformType.fromCode(this)
+    else -> throw IllegalArgumentException("Invalid argument type: '$javaClass'. Supported types: String or ${IntelliJPlatformType::class.java}")
+}
