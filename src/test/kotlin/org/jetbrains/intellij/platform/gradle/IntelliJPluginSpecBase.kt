@@ -142,7 +142,7 @@ abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
 
     @Suppress("SameParameterValue")
     protected fun disableDebug(reason: String) {
-        println("Debugging is disable for test with the following reason: $reason")
+        println("Debugging is disabled for test with the following reason: $reason")
         debugEnabled = false
     }
 
