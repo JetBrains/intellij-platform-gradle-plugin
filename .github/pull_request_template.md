@@ -39,7 +39,7 @@
 
 - [ ] I have read the [**CONTRIBUTING**](https://github.com/JetBrains/gradle-intellij-plugin/blob/master/CONTRIBUTING.md) document.
 - [ ] My code follows the code style of this project.
-- [ ] My change requires a change to the [documentation](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html).
+- [ ] My change requires a change to the [documentation](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html).
 - [ ] I have updated the documentation accordingly.
 - [ ] I have included my change in the [**CHANGELOG**](https://github.com/JetBrains/gradle-intellij-plugin/blob/master/CHANGELOG.md).
 - [ ] I have added tests to cover my changes.

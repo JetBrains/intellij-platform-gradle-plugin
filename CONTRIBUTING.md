@@ -4,7 +4,7 @@ There are many ways to contribute to the IntelliJ Platform Gradle Plugin project
 Every submitted feedback, issue, or pull request is highly appreciated.
 
 ## Issue Tracker
-Before reporting an issue, please update your configuration to use always the [latest release](https://github.com/JetBrains/gradle-intellij-plugin/releases), or try with the [snapshot release](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#snapshot-release), which contains not-yet publicly available changes.
+Before reporting an issue, please update your configuration to use always the [latest release](https://github.com/JetBrains/gradle-intellij-plugin/releases), or try with the [snapshot release](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), which contains not-yet publicly available changes.
 
 If you find your problem unique, and it wasn't yet reported to us, [file an issue](https://github.com/JetBrains/gradle-intellij-plugin/issues/new) using the provided issue template.
 
