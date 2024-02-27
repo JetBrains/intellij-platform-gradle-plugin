@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import java.util.*
 import kotlin.io.path.*
 import kotlin.test.*
@@ -55,7 +55,7 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
         writePluginVerifierIde()
 
         build(Tasks.VERIFY_PLUGIN) {
-            val version = LatestVersionResolver.pluginVerifier()
+            val version = IntelliJPluginVerifierLatestVersionResolver().resolve()
             assertContains("Starting the IntelliJ Plugin Verifier $version", output)
         }
     }

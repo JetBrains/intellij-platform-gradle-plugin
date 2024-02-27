@@ -15,9 +15,9 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -94,8 +94,8 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
 
         try {
             val version = Version.parse(pluginVersion.get())
-            val latestVersion = LatestVersionResolver.plugin()
-            if (version < Version.parse(latestVersion)) {
+            val latestVersion = IntelliJPlatformGradlePluginLatestVersionResolver().resolve()
+            if (version < latestVersion) {
                 log.warn("$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
             }
 

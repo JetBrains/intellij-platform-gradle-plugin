@@ -6,7 +6,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
-import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -25,7 +25,7 @@ class InitializeIntelliJPlatformPluginTaskSpec : IntelliJPluginSpecBase() {
         )
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-            val latestVersion = LatestVersionResolver.plugin()
+            val latestVersion = IntelliJPlatformGradlePluginLatestVersionResolver().resolve()
 
             assertContains("$PLUGIN_NAME is outdated: 0.0.0. Update `$PLUGIN_ID` to: $latestVersion", output)
         }

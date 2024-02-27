@@ -6,12 +6,12 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.platform.gradle.resolvers.path.RuntimeResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
 
 /**
- * This interface provides access to the Java Runtime (i.e., JetBrains Runtime) resolved with [RuntimeResolver].
+ * This interface provides access to the Java Runtime (i.e., JetBrains Runtime) resolved with [JavaRuntimePathResolver].
  *
- * @see RuntimeResolver
+ * @see JavaRuntimePathResolver
  */
 interface RuntimeAware : IntelliJPlatformVersionAware {
 

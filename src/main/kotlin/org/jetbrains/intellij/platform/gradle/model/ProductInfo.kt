@@ -10,7 +10,7 @@ import org.gradle.api.file.FileCollection
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
-import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 import kotlin.io.path.readText
@@ -157,7 +157,7 @@ private val json = Json { ignoreUnknownKeys = true }
  * @return The [ProductInfo] object containing the product information.
  */
 fun Path.productInfo() = json.decodeFromString<ProductInfo>(
-    ProductInfoResolver(this).resolve().readText()
+    ProductInfoPathResolver(this).resolve().readText()
 )
 
 /**
