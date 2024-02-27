@@ -108,7 +108,7 @@ data class ProductInfo(
 @Throws(IllegalArgumentException::class)
 fun ProductInfo.validateSupportedVersion() {
     if (buildNumber.toVersion() < Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
-        throw IllegalArgumentException("The minimal supported IDE version is ${Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION} (${Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER}), the provided version is too low: $version ($buildNumber)")
+        throw IllegalArgumentException("The minimal supported IDE version is ${Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION} (${Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER}), the provided version is too low: '$version' ('$buildNumber')")
     }
 }
 
@@ -128,7 +128,7 @@ internal fun ProductInfo.launchFor(architecture: String, os: OperatingSystem = O
             isEmpty() -> null // older SDKs or Maven releases don't provide architecture information, null is used in such a case
             contains(architecture) -> architecture
             contains("amd64") && architecture == "x86_64" -> "amd64"
-            else -> throw GradleException("Unsupported JVM architecture for running Gradle tasks: $architecture. Supported architectures: ${joinToString()}")
+            else -> throw GradleException("Unsupported JVM architecture for running Gradle tasks: '$architecture'. Supported architectures: ${joinToString()}")
         }
     }
 

@@ -45,7 +45,7 @@ private fun String.convertToMillis() = when {
     )
 
     else -> takeIf { it.isNotBlank() }?.trim()?.toLong()
-} ?: throw RuntimeException("Value $this can't be converted to milliseconds")
+} ?: throw RuntimeException("Value '$this' can't be converted to milliseconds")
 
 private class Keywords {
 

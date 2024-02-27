@@ -111,7 +111,7 @@ abstract class PublishPluginTask : DefaultTask() {
     @TaskAction
     fun publishPlugin() {
         if (token.orNull.isNullOrEmpty()) {
-            throw TaskExecutionException(this, GradleException("token property must be specified for plugin publishing"))
+            throw TaskExecutionException(this, GradleException("'token' property must be specified for plugin publishing"))
         }
 
         val path = archiveFile.asPath

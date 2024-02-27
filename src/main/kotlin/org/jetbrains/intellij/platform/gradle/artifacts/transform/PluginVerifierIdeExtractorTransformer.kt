@@ -78,7 +78,7 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
                 }
             }
 
-            else -> throw IllegalArgumentException("Unknown type archive type: $extension")
+            else -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
         }
     }
 }

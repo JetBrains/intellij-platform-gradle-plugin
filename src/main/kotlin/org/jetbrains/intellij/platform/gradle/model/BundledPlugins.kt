@@ -27,7 +27,7 @@ data class BundledPlugin(
 internal fun Path.resolveBundledPluginsPath(name: String = "bundled-plugins.json") =
     listOf(this, resolve(name), resolve("Resources").resolve(name))
         .find { it.name == name && it.exists() }
-        ?: throw GradleException("Could not resolve $name file in: $this")
+        ?: throw GradleException("Could not resolve '$name' file in: $this")
 
 private val json = Json { ignoreUnknownKeys = true }
 fun Path.bundledPlugins() = json.decodeFromString<BundledPlugins>(readText())

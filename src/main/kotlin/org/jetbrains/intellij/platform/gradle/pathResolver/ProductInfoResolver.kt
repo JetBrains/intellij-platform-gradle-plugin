@@ -43,5 +43,5 @@ class ProductInfoResolver(
         .mapNotNull { it() }
         .firstOrNull()
         ?.also { log.info("Resolved $PRODUCT_INFO_NAME file: $it") }
-        .throwIfNull { GradleException("No $PRODUCT_INFO_NAME file found") }
+        .throwIfNull { GradleException("No $PRODUCT_INFO_NAME file found in $intellijPlatformDirectory") }
 }

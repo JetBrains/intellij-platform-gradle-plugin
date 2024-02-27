@@ -48,7 +48,7 @@ class LatestVersionResolver {
             log.debug(message = "Resolving the latest $subject version")
             return URL(url).openStream().use { inputStream ->
                 XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.latest
-                    ?: throw GradleException("Cannot resolve the latest $subject version")
+                    ?: throw GradleException("Cannot resolve the latest $subject version using $url")
             }
         }
 
@@ -74,7 +74,7 @@ class LatestVersionResolver {
                     getHeaderField("Location").split('/').last().removePrefix("v")
                 }
             } catch (e: Exception) {
-                throw GradleException("Cannot resolve the latest $subject version", e)
+                throw GradleException("Cannot resolve the latest $subject version using $url", e)
             }
         }
     }
