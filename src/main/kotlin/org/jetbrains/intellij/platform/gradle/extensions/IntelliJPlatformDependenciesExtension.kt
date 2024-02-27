@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
+import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
@@ -675,6 +676,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on Java Compiler used for running the code instrumentation.
      */
     fun javaCompiler(version: Provider<String>) = addJavaCompilerDependency(version)
+
+    /**
+     * Applies a set of dependencies required for running the [InstrumentCodeTask] task.
+     * - [javaCompiler] — Java Compiler dependency used for running Ant tasks
+     */
+    fun instrumentationTools() {
+        javaCompiler()
+    }
 
     /**
      * A base method for adding a dependency on IntelliJ Platform.
