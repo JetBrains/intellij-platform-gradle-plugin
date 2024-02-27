@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.utils
 
 import org.gradle.api.logging.Logging
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
 
 class Logger(cls: Class<*>) {
 

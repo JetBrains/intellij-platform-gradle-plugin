@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
 import kotlin.io.path.readText
 import kotlin.test.Test

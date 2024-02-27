@@ -5,10 +5,10 @@ package org.jetbrains.intellij.platform.gradle
 import com.jetbrains.plugin.structure.base.utils.forceDeleteIfExists
 import org.gradle.api.plugins.JavaPlugin.TEST_TASK_NAME
 import org.gradle.testkit.runner.BuildResult
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.test.createLocalIdeIfNotExists
 import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS
 import org.jetbrains.intellij.platform.gradle.utils.Version
@@ -667,7 +667,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         this.kotlin(
             """
                 import org.gradle.api.artifacts.result.UnresolvedArtifactResult
-                import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+                import org.jetbrains.intellij.platform.gradle.Constants.Tasks
                 
                 task printPluginSourceArtifacts {
                     dependsOn(Tasks.SETUP_DEPENDENCIES)

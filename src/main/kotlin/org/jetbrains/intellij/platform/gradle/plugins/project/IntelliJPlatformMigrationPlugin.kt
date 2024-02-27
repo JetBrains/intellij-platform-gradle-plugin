@@ -12,7 +12,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger

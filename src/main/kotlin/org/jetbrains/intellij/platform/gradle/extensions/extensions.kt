@@ -7,7 +7,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.invocation.Gradle
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.GradleProperties
+import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.model.IvyModule
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.utils.asPath

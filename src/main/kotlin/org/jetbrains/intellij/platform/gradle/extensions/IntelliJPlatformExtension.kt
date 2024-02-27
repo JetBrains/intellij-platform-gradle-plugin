@@ -19,10 +19,10 @@ import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Extensions
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication

@@ -21,8 +21,8 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.model.BundledPlugin
 import org.jetbrains.intellij.platform.gradle.model.BundledPlugins
 import org.jetbrains.intellij.platform.gradle.utils.Logger

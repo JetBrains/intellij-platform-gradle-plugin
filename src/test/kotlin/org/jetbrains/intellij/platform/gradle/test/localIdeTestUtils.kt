@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.test
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import java.io.File
 import java.net.URL
 import java.nio.file.Files

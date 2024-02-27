@@ -2,8 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.io.path.*
 import kotlin.test.Ignore

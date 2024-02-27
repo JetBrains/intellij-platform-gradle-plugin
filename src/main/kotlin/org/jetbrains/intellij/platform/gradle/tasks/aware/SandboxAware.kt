@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.aware
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 
 /**
@@ -35,7 +35,7 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     /**
      * A configuration directory located within the [sandboxContainerDirectory].
      *
-     * @see IntelliJPluginConstants.Sandbox.CONFIG
+     * @see Constants.Sandbox.CONFIG
      */
     @get:Internal
     val sandboxConfigDirectory: DirectoryProperty
@@ -43,7 +43,7 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     /**
      * A plugins directory located within the [sandboxContainerDirectory].
      *
-     * @see IntelliJPluginConstants.Sandbox.PLUGINS
+     * @see Constants.Sandbox.PLUGINS
      */
     @get:Internal
     val sandboxPluginsDirectory: DirectoryProperty
@@ -51,7 +51,7 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     /**
      * A system directory located within the [sandboxContainerDirectory].
      *
-     * @see IntelliJPluginConstants.Sandbox.SYSTEM
+     * @see Constants.Sandbox.SYSTEM
      */
     @get:Internal
     val sandboxSystemDirectory: DirectoryProperty
@@ -59,7 +59,7 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     /**
      * A log directory located within the [sandboxContainerDirectory].
      *
-     * @see IntelliJPluginConstants.Sandbox.LOG
+     * @see Constants.Sandbox.LOG
      */
     @get:Internal
     val sandboxLogDirectory: DirectoryProperty

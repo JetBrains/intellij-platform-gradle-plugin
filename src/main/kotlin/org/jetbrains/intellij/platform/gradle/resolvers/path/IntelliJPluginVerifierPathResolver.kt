@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.exists

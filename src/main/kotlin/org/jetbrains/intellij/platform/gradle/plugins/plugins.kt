@@ -6,8 +6,8 @@ import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.kotlin.dsl.create
 import org.gradle.util.GradleVersion
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
 
 internal inline fun <reified T : Any> Any.configureExtension(name: String, vararg constructionArguments: Any, noinline configuration: T.() -> Unit = {}) {
     with((this as ExtensionAware).extensions) {

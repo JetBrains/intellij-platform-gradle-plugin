@@ -14,9 +14,9 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.maven
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Extensions
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import java.net.URI
 import javax.inject.Inject

@@ -2,11 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 
 class IntelliJPlatformGradlePluginLatestVersionResolver : LatestVersionResolver(
-    subject = IntelliJPluginConstants.PLUGIN_NAME,
+    subject = Constants.PLUGIN_NAME,
     url = Locations.GITHUB_REPOSITORY,
 ) {
 

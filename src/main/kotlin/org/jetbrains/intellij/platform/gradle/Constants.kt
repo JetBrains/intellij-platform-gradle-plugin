@@ -6,7 +6,7 @@ import org.gradle.api.attributes.Attribute
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
-object IntelliJPluginConstants {
+object Constants {
     const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
     const val PLUGIN_ID = "org.jetbrains.intellij.platform"
     const val PLUGIN_BASE_ID = "$PLUGIN_ID.base"

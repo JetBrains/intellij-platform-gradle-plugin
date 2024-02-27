@@ -4,8 +4,8 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import java.util.jar.Manifest
 import kotlin.io.path.exists

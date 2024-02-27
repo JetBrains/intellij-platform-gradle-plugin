@@ -7,7 +7,7 @@ import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.platformPath

@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 @Suppress("unused")

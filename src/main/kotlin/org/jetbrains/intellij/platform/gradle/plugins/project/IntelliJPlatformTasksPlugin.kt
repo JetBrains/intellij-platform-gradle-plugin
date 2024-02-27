@@ -14,9 +14,9 @@ import org.gradle.kotlin.dsl.attributes
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.language.jvm.tasks.ProcessResources
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_TASKS_ID
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_TASKS_ID
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -106,7 +106,7 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
                         "Version" to versionProvider,
                         "Build-JVM" to Jvm.current(),
                         "Build-OS" to OperatingSystem.current(),
-                        "Build-Plugin" to IntelliJPluginConstants.PLUGIN_NAME,
+                        "Build-Plugin" to Constants.PLUGIN_NAME,
                         "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion },
                         "Platform-Type" to verifyPluginConfigurationTaskProvider.map { it.productInfo.productCode.toIntelliJPlatformType() },
                         "Platform-Version" to verifyPluginConfigurationTaskProvider.map { it.productInfo.version },

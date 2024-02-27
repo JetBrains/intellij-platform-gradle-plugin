@@ -16,8 +16,8 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse

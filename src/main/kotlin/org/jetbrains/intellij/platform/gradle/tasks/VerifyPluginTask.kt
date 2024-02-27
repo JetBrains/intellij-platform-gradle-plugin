@@ -14,9 +14,9 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware

@@ -7,7 +7,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID as prefix
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID as prefix
 
 /**
  * The IntelliJ Platform Gradle Plugin build features dedicated to control some of the low-level Gradle plugin behaviors.

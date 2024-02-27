@@ -6,8 +6,8 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath

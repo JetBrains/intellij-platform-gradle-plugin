@@ -10,10 +10,10 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_ID
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware

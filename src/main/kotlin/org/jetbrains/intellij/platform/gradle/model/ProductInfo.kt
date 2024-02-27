@@ -8,8 +8,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Constraints
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path

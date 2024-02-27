@@ -5,8 +5,8 @@ package org.jetbrains.intellij.platform.gradle.plugins.settings
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.api.provider.ProviderFactory
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Extensions
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_SETTINGS_ID
+import org.jetbrains.intellij.platform.gradle.Constants.Extensions
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_SETTINGS_ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension

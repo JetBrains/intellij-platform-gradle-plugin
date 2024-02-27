@@ -8,8 +8,8 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 
 /**

@@ -10,7 +10,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 /**

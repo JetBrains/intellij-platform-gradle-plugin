@@ -8,9 +8,9 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.SEARCHABLE_OPTIONS_DIRECTORY
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware

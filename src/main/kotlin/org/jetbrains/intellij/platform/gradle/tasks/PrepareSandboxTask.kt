@@ -16,10 +16,10 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jdom2.Element
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.transformXml
@@ -37,7 +37,7 @@ import kotlin.io.path.*
  *
  * @see SandboxAware
  * @see IntelliJPlatformExtension.sandboxContainer
- * @see IntelliJPluginConstants.Sandbox
+ * @see Constants.Sandbox
  */
 @Deprecated(message = "CHECK")
 @CacheableTask

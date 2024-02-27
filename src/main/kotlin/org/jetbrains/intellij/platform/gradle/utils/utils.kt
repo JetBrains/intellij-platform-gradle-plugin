@@ -8,7 +8,7 @@ import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants
+import org.jetbrains.intellij.platform.gradle.Constants
 import kotlin.io.path.absolute
 
 fun <T> T?.or(other: T): T = this ?: other
@@ -39,7 +39,7 @@ internal fun ConfigurationContainer.create(name: String, description: String, co
     }
 
 internal val ALL_TASKS
-    get() = IntelliJPluginConstants.Tasks::class.java.declaredFields
+    get() = Constants.Tasks::class.java.declaredFields
         .filter { it.name != "INSTANCE" }
         .map { it.get(null).toString() }
         .minus("INSTANCE")

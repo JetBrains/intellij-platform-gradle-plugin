@@ -16,8 +16,8 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.*

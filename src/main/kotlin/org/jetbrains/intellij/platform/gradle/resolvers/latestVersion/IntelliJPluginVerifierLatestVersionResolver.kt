@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 
 class IntelliJPluginVerifierLatestVersionResolver : LatestVersionResolver(
     subject = "IntelliJ Plugin Verifier",

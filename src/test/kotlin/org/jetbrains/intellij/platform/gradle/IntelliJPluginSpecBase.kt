@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.GradleException
 import org.gradle.api.internal.project.ProjectInternal
 import org.intellij.lang.annotations.Language
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
+import org.jetbrains.intellij.platform.gradle.Constants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.BufferedReader
 import java.io.FileOutputStream

@@ -14,9 +14,9 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication

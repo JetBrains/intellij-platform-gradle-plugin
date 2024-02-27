@@ -13,11 +13,11 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.LOG_PREFIX
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Sandbox
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Tasks
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.LOG_PREFIX
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
