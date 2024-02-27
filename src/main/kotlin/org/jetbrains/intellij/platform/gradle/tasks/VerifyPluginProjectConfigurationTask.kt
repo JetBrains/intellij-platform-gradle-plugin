@@ -38,7 +38,7 @@ private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
  * - The used IntelliJ Platform version should be higher than `2022.3` (`223.0`).
  * - The dependency on the <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a> should be excluded.
  * - The Kotlin plugin in version `1.8.20` is not used with IntelliJ Platform Gradle Plugin due to the 'java.lang.OutOfMemoryError: Java heap space' exception.
- * - The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.
+ * - The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform.
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
@@ -185,7 +185,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 yield("The Kotlin plugin in version $kotlinVersion used with the IntelliJ Platform Gradle Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
             }
             if (kotlinxCoroutinesLibraryPresent) {
-                yield("The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.")
+                yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform.")
             }
         }
             .joinToString(System.lineSeparator()) { "- $it" }

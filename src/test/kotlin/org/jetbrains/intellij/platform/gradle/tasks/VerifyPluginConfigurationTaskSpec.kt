@@ -316,7 +316,7 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin Coroutines library should not be added explicitly to the project as it is already provided with the IntelliJ Platform.",
+                "- The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform.",
                 output
             )
         }
