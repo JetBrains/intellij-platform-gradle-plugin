@@ -51,7 +51,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
     fun releases(action: RepositoryAction = {}) = createRepository(
-        name = "IntelliJ Repository",
+        name = "IntelliJ Repository (Releases)",
         url = "https://www.jetbrains.com/intellij-repository/releases",
         urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/releases",
         action = action,
