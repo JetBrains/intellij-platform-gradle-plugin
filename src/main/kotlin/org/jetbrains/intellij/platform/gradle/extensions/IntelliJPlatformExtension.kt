@@ -602,7 +602,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                         when (it) {
                             is IntelliJPlatformType -> it
                             is String -> it.toIntelliJPlatformType()
-                            else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or ${IntelliJPlatformType::class.java}")
+                            else -> throw IllegalArgumentException("Invalid argument type: '${it.javaClass}'. Supported types: String or ${IntelliJPlatformType::class.java}")
                         }
                     }
                     .zip(version) { typeValue, versionValue ->

@@ -695,7 +695,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             when (it) {
                 is IntelliJPlatformType -> it
                 is String -> it.toIntelliJPlatformType()
-                else -> throw IllegalArgumentException("Invalid argument type: ${it.javaClass}. Supported types: String or ${IntelliJPlatformType::class.java}")
+                else -> throw IllegalArgumentException("Invalid argument type: '${it.javaClass}'. Supported types: String or ${IntelliJPlatformType::class.java}")
             }
         }.zip(versionProvider) { type, version ->
             dependencies.create(
@@ -829,7 +829,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         val id = bundledPluginId.trim()
         val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
         val bundledPluginsList = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST).single().toPath().bundledPlugins()
-        val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Could not find bundled plugin: $id") }
+        val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Could not find bundled plugin with ID: '$id'") }
         val artifactPath = Path(bundledPlugin.path)
         val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
         val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
