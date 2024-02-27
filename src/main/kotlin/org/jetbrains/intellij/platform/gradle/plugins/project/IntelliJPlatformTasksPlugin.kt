@@ -42,6 +42,7 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
                 PrintProductsReleasesTask,
                 ProcessResourcesCompanion,
                 JarCompanion,
+                InstrumentCodeTask,
                 PrepareSandboxTask,
                 BuildSearchableOptionsTask,
                 JarSearchableOptionsTask,

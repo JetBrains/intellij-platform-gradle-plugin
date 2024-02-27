@@ -220,6 +220,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     )
                 }
 
+                create(
+                    name = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
+                    description = "Java Compiler used by Ant tasks",
+                )
+
                 fun Configuration.extend() = extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,

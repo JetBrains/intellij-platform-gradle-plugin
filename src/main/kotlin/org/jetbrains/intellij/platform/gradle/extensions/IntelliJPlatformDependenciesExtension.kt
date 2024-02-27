@@ -12,10 +12,10 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
+import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginConstants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
@@ -652,6 +652,31 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun zipSigner(version: Provider<String>) = addZipSignerDependency(version)
 
     /**
+     * Adds a Java Compiler dependency for code instrumentation.
+     * The version is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, the closest one is used, found by scanning all releases.
+     */
+    fun javaCompiler() = addJavaCompilerDependency(providers.provider {
+        val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
+        val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
+
+        when (resolveClosest) {
+            true -> LatestVersionResolver.closestJavaCompiler(productInfo.buildNumber)
+            false -> productInfo.buildNumber
+        }
+    })
+
+    /**
+     * Adds a dependency on Java Compiler used for running the code instrumentation.
+     */
+    fun javaCompiler(version: String) = addJavaCompilerDependency(providers.provider { version })
+
+    /**
+     * Adds a dependency on Java Compiler used for running the code instrumentation.
+     */
+    fun javaCompiler(version: Provider<String>) = addJavaCompilerDependency(version)
+
+    /**
      * A base method for adding a dependency on IntelliJ Platform.
      *
      * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
@@ -872,6 +897,28 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             )
         },
         action,
+    )
+
+    /**
+     * Adds a dependency on a Java Compiler used, i.e., for running code instrumentation.
+     *
+     * @param versionProvider The provider of the Java Compiler version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    private fun addJavaCompilerDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
+        action: DependencyAction = {},
+    ) = dependencies.addProvider(
+        configurationName,
+        versionProvider.map { version ->
+            dependencies.create(
+                group = "com.jetbrains.intellij.java",
+                name = "java-compiler-ant-tasks",
+                version = version,
+            )
+        }
     )
 }
 

@@ -10,6 +10,7 @@ import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import java.net.HttpURLConnection
 import java.net.URL
 
+@Suppress("SameParameterValue")
 class LatestVersionResolver {
 
     companion object {
@@ -37,17 +38,36 @@ class LatestVersionResolver {
 //        )
         fun plugin() = fromGitHub(IntelliJPluginConstants.PLUGIN_NAME, Locations.GITHUB_REPOSITORY)
 
+        fun closestJavaCompiler(version: String) = closestInMaven(
+            "Java Compiler",
+            "${Locations.INTELLIJ_REPOSITORY}/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml",
+            version.toVersion(),
+        )
+
         private fun fromMaven(subject: String, url: String): String {
-            log.debug(message = "Resolving latest $subject version")
-            return URL(url).openStream().use {
-                XmlExtractor<MavenMetadata>().unmarshal(it).versioning?.latest
+            log.debug(message = "Resolving the latest $subject version")
+            return URL(url).openStream().use { inputStream ->
+                XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.latest
                     ?: throw GradleException("Cannot resolve the latest $subject version")
             }
         }
 
-        @Suppress("SameParameterValue")
+        private fun closestInMaven(subject: String, url: String, version: Version): String {
+            log.debug(message = "Resolving the $subject version closest to $version")
+            return URL(url).openStream().use { inputStream ->
+                XmlExtractor<MavenMetadata>().unmarshal(inputStream)
+                    .versioning
+                    ?.versions
+                    .throwIfNull { GradleException("Cannot resolve the $subject version closest to $version") }
+                    .map { it.toVersion() }
+                    .filter { it <= version }
+                    .maxOf { it }
+                    .version
+            }
+        }
+
         private fun fromGitHub(subject: String, url: String): String {
-            log.debug(message = "Resolving latest $subject version")
+            log.debug(message = "Resolving the latest $subject version")
             try {
                 return URL("$url/releases/latest").openConnection().run {
                     (this as HttpURLConnection).instanceFollowRedirects = false

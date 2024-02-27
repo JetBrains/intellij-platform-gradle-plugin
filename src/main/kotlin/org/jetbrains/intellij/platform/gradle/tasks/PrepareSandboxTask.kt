@@ -202,7 +202,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 //            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
                 val runtimeConfiguration = project.configurations.getByName(JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME)
                 val intellijPlatformPluginsConfiguration = project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED)
-//                val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
+                val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
                 val extension = project.the<IntelliJPlatformExtension>()
 
@@ -211,7 +211,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 //            }
                 val pluginJarProvider = extension.instrumentCode.flatMap {
                     when (it) {
-                        true -> project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
+                        true -> instrumentedJarTaskProvider
                         false -> jarTaskProvider
                     }
                 }.flatMap { it.archiveFile }
@@ -251,7 +251,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                 dependsOn(intellijPlatformPluginsConfiguration)
                 dependsOn(runtimeConfiguration)
                 dependsOn(jarTaskProvider)
-//                dependsOn(instrumentedJarTaskProvider)
+                dependsOn(instrumentedJarTaskProvider)
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
 //                inputs.file(jarTaskProvider.map { it.archiveFile })

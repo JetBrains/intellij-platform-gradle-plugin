@@ -49,6 +49,7 @@ object IntelliJPluginConstants {
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS = "intellijPlatformBundledPlugins"
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST = "intellijPlatformBundledPluginsList"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
+        const val INTELLIJ_PLATFORM_JAVA_COMPILER = "intellijPlatformJavaCompiler"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY = "intellijPluginVerifierIdesDependency"
@@ -76,6 +77,7 @@ object IntelliJPluginConstants {
         const val BUILD_PLUGIN = "buildPlugin" // TODO: check
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
+//        const val INSTRUMENT_CODE = "instrumentCode"
         const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
@@ -110,6 +112,7 @@ object IntelliJPluginConstants {
         const val DOWNLOAD = "https://download.jetbrains.com"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
+        const val INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/intellij-repository"
         const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY = "https://plugins.gradle.org/m2"
@@ -125,16 +128,12 @@ object IntelliJPluginConstants {
 
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
-    const val INSTRUMENT_CODE_TASK_NAME = "instrumentCode"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
 
     const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
     const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
 
-    const val DEFAULT_INTELLIJ_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository"
     const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven"
-    const val JAVA_COMPILER_ANT_TASKS_MAVEN_METADATA =
-        "$DEFAULT_INTELLIJ_REPOSITORY/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml"
 
     const val PERFORMANCE_PLUGIN_ID = "com.jetbrains.performancePlugin"
 }

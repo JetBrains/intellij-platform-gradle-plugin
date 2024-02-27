@@ -44,10 +44,15 @@ import kotlin.io.path.createDirectories
  * Every new task is supposed to be registered using this method to get extra configuration utilized.
  *
  * @param T the type of task to register
- * @param names the names of the task to register
- * @param configuration the configuration function for the task, default is an empty function
+ * @param names names of tasks to be registered.
+ * @param configureWithType if `true`, apply the provided [configuration] to all tasks of [T] type, otherwise — only to tasks defined with [names]
+ * @param configuration a function used to configure tasks
  */
-internal inline fun <reified T : Task> Project.registerTask(vararg names: String, noinline configuration: T.() -> Unit = {}) {
+internal inline fun <reified T : Task> Project.registerTask(
+    vararg names: String,
+    configureWithType: Boolean = true,
+    noinline configuration: T.() -> Unit = {},
+) {
 
     // Register new tasks of T type if do not exist yet
     names.forEach { name ->
@@ -300,6 +305,13 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
                 marketplaceZipSignerResolver.resolve().toFile()
             }))
         }
+        /**
+         * The [JavaCompilerAware] resolves and provides the Java Compiler dependency.
+         */
+        if (this is JavaCompilerAware) {
+            // TODO: test if no Java Compiler dependency is added to the project
+            javaCompilerConfiguration.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER))
+        }
 
         /**
          * The [RunnableIdeAware] is more complex one than [RuntimeAware] as it preconfigures also the [JavaForkOptions]-based tasks
@@ -357,7 +369,10 @@ internal inline fun <reified T : Task> Project.registerTask(vararg names: String
         }
     }
 
-    tasks.withType<T>(configuration)
+    when (configureWithType) {
+        true -> tasks.withType<T>(configuration)
+        false -> names.forEach { tasks.named<T>(it).configure(configuration) }
+    }
 }
 
 /**
