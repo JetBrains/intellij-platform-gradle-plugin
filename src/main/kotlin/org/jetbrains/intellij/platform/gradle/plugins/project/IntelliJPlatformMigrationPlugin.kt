@@ -47,7 +47,7 @@ private object Messages {
             "Use the `intellijPlatform.sandboxContainer`.\n\n${Docs.extension}\n${Docs.migration}"
 
         const val downloadSources =
-            "Downloading sources is managed with the DevKit Plugin in version 2024.1+.\n\n${Docs.migration}"
+            "Downloading sources is managed with the Plugin DevKit plugin in version 2024.1+.\n\n${Docs.migration}"
 
         const val ideaDependency =
             "Access now the `ProductInfo` object using the `intellijPlatform.productInfo` property.\n\n${Docs.migration}"
@@ -62,7 +62,7 @@ private object Messages {
     }
 
     const val enabled =
-        "You are currently using the $PLUGIN_MIGRATION_ID which is dedicated only to help with the migration process from the Gradle IntelliJ Plugin 1.x to IntelliJ Platform Gradle Plugin 2.0.\nAs soon as you'll handle all configuration problems, remember to remove this plugin from your `plugins {}` block and eventially rename the `intellij {}` extension to `intellijPlatform {}`.\n\nNote: We encourage avoiding configuring tasks directly, like: patchPluginXml { ... }, publishPlugin { ... }, signPlugin { ... }, ...\n      Use the `intellijPlatform { }` extension instead:\n      \nintellijPlatform {\n    ...\n    \n    pluginConfiguration { ... }\n    publishing { ... }\n    signing { ... }\n    ...\n}\n\n${Docs.extension}\n${Docs.migration}"
+        "You are currently using the $PLUGIN_MIGRATION_ID which is dedicated only to help with the migration process from the Gradle IntelliJ Plugin 1.x to IntelliJ Platform Gradle Plugin 2.0.\nAs soon as you'll handle all configuration problems, remember to remove this plugin from your `plugins {}` block and eventually rename the `intellij {}` extension to `intellijPlatform {}`.\n\nNote: We encourage avoiding configuring tasks directly, like: patchPluginXml { ... }, publishPlugin { ... }, signPlugin { ... }, ...\n      Use the `intellijPlatform { }` extension instead:\n      \nintellijPlatform {\n    ...\n    \n    pluginConfiguration { ... }\n    publishing { ... }\n    signing { ... }\n    ...\n}\n\n${Docs.extension}\n${Docs.migration}"
 
     const val sinceUntilBuild =
         "The `plugin.xml` file is now fully managed by the `intellijPlatform` extension`.\n\n${Docs.extension}#intellijPlatform-pluginConfiguration-ideaVersion\n${Docs.migration}"
