@@ -13,17 +13,19 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
+import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
@@ -662,7 +664,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
 
         when (resolveClosest) {
-            true -> LatestVersionResolver.closestJavaCompiler(productInfo.buildNumber)
+            true -> JavaCompilerClosestVersionResolver(productInfo).resolve().version
             false -> productInfo.buildNumber
         }
     })
@@ -857,7 +859,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 group = "org.jetbrains.intellij.plugins",
                 name = "verifier-cli",
                 version = when (version) {
-                    VERSION_LATEST -> LatestVersionResolver.pluginVerifier()
+                    VERSION_LATEST -> IntelliJPluginVerifierLatestVersionResolver().resolve().version
                     else -> version
                 },
                 classifier = "all",
@@ -883,7 +885,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 group = "org.jetbrains",
                 name = "marketplace-zip-signer",
                 version = when (version) {
-                    VERSION_LATEST -> LatestVersionResolver.zipSigner()
+                    VERSION_LATEST -> MarketplaceZipSignerLatestVersionResolver().resolve().version
                     else -> version
                 },
                 classifier = "cli",
