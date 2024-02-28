@@ -11,7 +11,7 @@ If you find your problem unique, and it wasn't yet reported to us, [file an issu
 ## Run Integration Tests
 The project provides Unit Tests and Integration Tests to verify if nothing is broken with the real-life project examples.
 [Integration Tests](https://github.com/JetBrains/gradle-intellij-plugin/tree/master/integration-tests) provide various different test cases with a dedicated verification scenarios available in `verify.main.kts` files.
-Read the [IntelliJ Platform Gradle Plugin Integration Tests](https://github.com/JetBrains/gradle-intellij-plugin/tree/master/integration-tests) document to find more about this kind of test and find out how to create new scenarios.
+Read the [IntelliJ Platform Gradle Plugin Integration Tests](INTEGRATION_TESTS.md) document to find more about this kind of test and find out how to create new scenarios.
 
 ## Link With Your Project
 It is possible to link your plugin project with the IntelliJ Platform Gradle Plugin project, so it'll be loaded and built as a module.
