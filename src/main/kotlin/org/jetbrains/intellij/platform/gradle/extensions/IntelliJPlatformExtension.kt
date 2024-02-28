@@ -18,11 +18,11 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByName
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
@@ -39,8 +39,8 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
-import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
 /**
@@ -733,7 +733,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
                         downloadDirectory.dir("${type}-${value}").asPath.takeIf { it.exists() }?.let {
                             // IDE is already present in the [downloadDirectory], use as [localIde]
-                            localIde(it.pathString)
+                            localIde(it.absolutePathString())
                             return@mapNotNull null
                         }
 
@@ -757,7 +757,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
                     productInfo.validateSupportedVersion()
 
                     val type = productInfo.productCode.toIntelliJPlatformType()
-                    val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
+                    val hash = artifactPath.absolutePathString().hashCode().absoluteValue % 1000
 
                     dependencies.create(
                         group = Configurations.Dependencies.LOCAL_IDE_GROUP,

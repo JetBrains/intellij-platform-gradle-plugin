@@ -28,10 +28,7 @@ import org.jetbrains.intellij.platform.gradle.model.BundledPlugins
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.pathString
+import kotlin.io.path.*
 
 /**
  * Resolves bundled plugins from the IntelliJ Platform dependency.
@@ -63,7 +60,7 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
                         id = pluginId ?: "",
                         name = pluginName ?: "",
                         version = pluginVersion ?: "",
-                        path = pluginDirectory.pathString,
+                        path = pluginDirectory.absolutePathString(),
                         dependencies = dependencies.filterNot { it.isOptional }.map { it.id },
                     )
                 }

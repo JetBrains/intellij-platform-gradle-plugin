@@ -20,9 +20,9 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File.separator
 import javax.inject.Inject
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.pathString
 
 /**
  * A transformer used for extracting IDEs used by the IntelliJ Plugin Verifier.
@@ -49,7 +49,7 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
     override fun transform(outputs: TransformOutputs) {
         val path = inputArtifact.asPath
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
-        val (groupId, artifactId, version) = path.pathString.split(separator).dropLast(2).takeLast(3)
+        val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
         // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
 
         val type = IntelliJPlatformType.values().find {
@@ -57,7 +57,7 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
         } ?: return
 
         val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath
-        outputs.file("path.txt").writeText(targetDirectory.pathString)
+        outputs.file("path.txt").writeText(targetDirectory.absolutePathString())
 
         when (extension) {
             ".zip", ".sit" -> {

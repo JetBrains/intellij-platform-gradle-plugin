@@ -31,8 +31,8 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
 import javax.inject.Inject
 import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
 /**
@@ -729,7 +729,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             productInfo.validateSupportedVersion()
 
             val type = productInfo.productCode.toIntelliJPlatformType()
-            val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
+            val hash = artifactPath.absolutePathString().hashCode().absoluteValue % 1000
 
             dependencies.create(
                 group = Configurations.Dependencies.LOCAL_IDE_GROUP,
@@ -831,7 +831,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Could not find bundled plugin with ID: '$id'") }
         val artifactPath = Path(bundledPlugin.path)
         val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
-        val hash = artifactPath.pathString.hashCode().absoluteValue % 1000
+        val hash = artifactPath.absolutePathString().hashCode().absoluteValue % 1000
 
         return dependencies.create(
             group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,

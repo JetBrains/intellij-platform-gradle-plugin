@@ -19,7 +19,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.Path
-import kotlin.io.path.pathString
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.readLines
 
 /**
@@ -127,7 +127,7 @@ class IntelliJPlatformArgumentProvider(
      * Resolves the IDE home variable in the given string by replacing placeholders.
      */
     private fun String.resolveIdeHomeVariable() =
-        platformPath.pathString.let {
+        platformPath.absolutePathString().let {
             this
                 .replace("\$APP_PACKAGE", it)
                 .replace("\$IDE_HOME", it)
