@@ -35,6 +35,7 @@ abstract class IntelliJPlatformTestBase {
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
+        println("Build directory: $dir")
     }
 
     protected fun build(
