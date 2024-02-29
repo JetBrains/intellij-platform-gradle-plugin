@@ -39,9 +39,10 @@ import java.util.*
 import kotlin.io.path.createDirectories
 
 /**
- * Registers a task of type T with the given names and configures its extra capabilities based on the [org.jetbrains.intellij.platform.gradle.tasks.aware]
- * interfaces it utilizes.
- * Every new task is supposed to be registered using this method to get extra configuration utilized.
+ * Registers a task of type [T] with the given names
+ * and configures its extra capabilities based on the [org.jetbrains.intellij.platform.gradle.tasks.aware]
+ * interfaces it uses.
+ * Every new task is supposed to be registered using this method to get extra configuration used.
  *
  * @param T the type of task to register
  * @param names names of tasks to be registered.
@@ -54,7 +55,7 @@ internal inline fun <reified T : Task> Project.registerTask(
     noinline configuration: T.() -> Unit = {},
 ) {
 
-    // Register new tasks of T type if do not exist yet
+    // Register new tasks of T type if it does not exist yet
     names.forEach { name ->
         project.logger.info("$LOG_PREFIX Configuring task: $name")
         tasks.maybeCreate<T>(name)
@@ -86,7 +87,8 @@ internal inline fun <reified T : Task> Project.registerTask(
          * @see CoroutinesJavaAgentAware
          */
         if (this is CoroutinesJavaAgentAware) {
-            val initializeIntelliJPlatformPluginTaskProvider = tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
+            val initializeIntelliJPlatformPluginTaskProvider =
+                tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
 
             coroutinesJavaAgentFile.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap {
                 it.coroutinesJavaAgent
@@ -96,7 +98,8 @@ internal inline fun <reified T : Task> Project.registerTask(
         }
 
         /**
-         * The concept of [CustomIntelliJPlatformVersionAware] allows to let task accept and utilize a custom IntelliJ Platform other than the one used to build the project
+         * The concept of [CustomIntelliJPlatformVersionAware] lets a task accept and use a custom
+         * IntelliJ Platform other than the one used to build the project
          *
          * @see CustomIntelliJPlatformVersionAware
          */
@@ -114,9 +117,11 @@ internal inline fun <reified T : Task> Project.registerTask(
 
             with(configurations) {
                 /**
-                 * A custom IntelliJ Platform Dependency configuration to which we add a new artifact using [CustomIntelliJPlatformVersionAware.type]
+                 * A custom IntelliJ Platform Dependency configuration to which we add a new artifact
+                 * using [CustomIntelliJPlatformVersionAware.type]
                  * and [CustomIntelliJPlatformVersionAware.version].
-                 * As both parameters default to the base IntelliJ Platform values, this configuration always holds some dependency.
+                 * As both parameters default to the base IntelliJ Platform values, this configuration
+                 * always holds some dependency.
                  * This configuration is ignored if [CustomIntelliJPlatformVersionAware.localPath] is set.
                  */
                 val intellijPlatformDependencyConfiguration = create(
@@ -131,7 +136,8 @@ internal inline fun <reified T : Task> Project.registerTask(
                 }
 
                 /**
-                 * A custom IntelliJ Platform Local Instance configuration to which we add a new artifact using [CustomIntelliJPlatformVersionAware.localPath].
+                 * A custom IntelliJ Platform Local Instance configuration to which we add a
+                 * new artifact using [CustomIntelliJPlatformVersionAware.localPath].
                  */
                 val intellijPlatformLocalInstanceConfiguration = create(
                     name = "${Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE}_$suffix",
@@ -144,7 +150,8 @@ internal inline fun <reified T : Task> Project.registerTask(
                 }
 
                 /**
-                 * A high-level configuration to extract the configuration defined with `intellijPlatformDependencyConfiguration`.
+                 * A high-level configuration to extract the configuration defined with
+                 * `intellijPlatformDependencyConfiguration`.
                  */
                 val intellijPlatformConfiguration = create(
                     name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
@@ -158,7 +165,8 @@ internal inline fun <reified T : Task> Project.registerTask(
                 }
 
                 /**
-                 * A high-level configuration to extract the configuration defined with `intellijPlatformLocalInstanceConfiguration`.
+                 * A high-level configuration to extract the configuration defined with
+                 * `intellijPlatformLocalInstanceConfiguration`.
                  */
                 val intellijPlatformForLocalInstanceConfiguration = create(
                     name = "${Configurations.INTELLIJ_PLATFORM}_forLocalInstance_$suffix",
@@ -172,10 +180,14 @@ internal inline fun <reified T : Task> Project.registerTask(
                 }
 
                 /**
-                 * Override the default [intelliJPlatformConfiguration] with a custom IntelliJ Platform configuration so the current task can refer to it.
-                 * Depending on whether [CustomIntelliJPlatformVersionAware.localPath] or any of [CustomIntelliJPlatformVersionAware.type] and
-                 * [CustomIntelliJPlatformVersionAware.version] is set, and a custom configuration is picked as a replacement.
-                 * Otherwise, refer to the base IntelliJ Platform — useful, i.e., when we want to execute a regular [RunIdeTask] using defaults.
+                 * Override the default [intelliJPlatformConfiguration] with a custom IntelliJ Platform configuration
+                 * so the current task can refer to it.
+                 * Depending on whether [CustomIntelliJPlatformVersionAware.localPath] or any of
+                 * [CustomIntelliJPlatformVersionAware.type] and
+                 * [CustomIntelliJPlatformVersionAware.version] is set,
+                 * a custom configuration is picked as a replacement.
+                 * Otherwise, refer to the base IntelliJ Platform — useful, i.e., when we want to execute
+                 * a regular [RunIdeTask] using defaults.
                  */
                 intelliJPlatformConfiguration.setFrom(provider {
                     when {
@@ -314,8 +326,8 @@ internal inline fun <reified T : Task> Project.registerTask(
         }
 
         /**
-         * The [RunnableIdeAware] is more complex one than [RuntimeAware] as it preconfigures also the [JavaForkOptions]-based tasks
-         * by setting JVM Arguments providers and classpath.
+         * The [RunnableIdeAware] is more complex one than [RuntimeAware] as it preconfigures also the
+         * [JavaForkOptions]-based tasks by setting JVM Arguments providers and classpath.
          */
         if (this is RunnableIdeAware) {
             enableAssertions = true
@@ -376,7 +388,8 @@ internal inline fun <reified T : Task> Project.registerTask(
 }
 
 /**
- * Creates a specific sandbox directory using the [suffixProvider] and [name] within the [sandboxContainer] container directory.
+ * Creates a specific sandbox directory using the [suffixProvider] and [name]
+ * within the [sandboxContainer] container directory.
  *
  * @param sandboxContainer The sandbox container directory.
  * @param suffixProvider The suffix for the sandbox directory.
@@ -385,7 +398,11 @@ internal inline fun <reified T : Task> Project.registerTask(
  * @see Sandbox
  * @see SandboxAware
  */
-internal fun DirectoryProperty.configureSandbox(sandboxContainer: DirectoryProperty, suffixProvider: Provider<String>, name: String) {
+internal fun DirectoryProperty.configureSandbox(
+    sandboxContainer: DirectoryProperty,
+    suffixProvider: Provider<String>,
+    name: String
+) {
     convention(sandboxContainer.zip(suffixProvider) { container, suffix ->
         container.dir(name + suffix).apply { asPath.createDirectories() }
     })
