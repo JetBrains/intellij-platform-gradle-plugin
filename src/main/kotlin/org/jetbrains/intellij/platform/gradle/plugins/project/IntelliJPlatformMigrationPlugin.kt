@@ -21,10 +21,14 @@ private const val PLUGIN_MIGRATION_ID = "$PLUGIN_ID.migration"
 
 // language=TEXT
 private object Docs {
-    const val migration = "Migration guide: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html"
-    const val extension = "IntelliJ Platform Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html"
-    const val dependencies = "IntelliJ Platform Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html"
-    const val repositories = "IntelliJ Platform Repositories Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html"
+    const val migration =
+        "Migration guide: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html"
+    const val extension =
+        "IntelliJ Platform Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html"
+    const val dependencies =
+        "IntelliJ Platform Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html"
+    const val repositories =
+        "IntelliJ Platform Repositories Extension: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html"
 }
 
 // language=TEXT
@@ -121,12 +125,17 @@ interface IntelliJExtension : IntelliJPlatformExtension {
     @Deprecated(Messages.sinceUntilBuild, level = DeprecationLevel.ERROR)
     val sameSinceUntilBuild: Property<Boolean>
 
-    @Deprecated(Messages.IntelliJ.sandboxDir, level = DeprecationLevel.ERROR, replaceWith = ReplaceWith("sandboxContainer"))
+    @Deprecated(
+        Messages.IntelliJ.sandboxDir,
+        level = DeprecationLevel.ERROR,
+        replaceWith = ReplaceWith("sandboxContainer")
+    )
     val sandboxDir: Property<String>
 
     @Deprecated(Messages.repositoryManagement, level = DeprecationLevel.ERROR)
     val intellijRepository: Property<String>
 
+    @Suppress("IdentifierGrammar")
     @Deprecated(Messages.repositoryManagement, level = DeprecationLevel.ERROR)
     val pluginsRepositories: Property<String>
 
@@ -136,7 +145,11 @@ interface IntelliJExtension : IntelliJPlatformExtension {
     @Deprecated(Messages.IntelliJ.downloadSources, level = DeprecationLevel.ERROR)
     val downloadSources: Property<Boolean>
 
-    @Deprecated(Messages.IntelliJ.ideaDependency, level = DeprecationLevel.ERROR, replaceWith = ReplaceWith("productInfo"))
+    @Deprecated(
+        Messages.IntelliJ.ideaDependency,
+        level = DeprecationLevel.ERROR,
+        replaceWith = ReplaceWith("productInfo")
+    )
     val ideaDependency: Property<Any>
 }
 
