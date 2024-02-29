@@ -12,6 +12,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.exclude
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
@@ -657,17 +658,32 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun zipSigner(version: Provider<String>) = addZipSignerDependency(version)
 
     /**
-     * Adds a dependency on the `test-framework` library required for testing plugins.
+     * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
      *
-     * By default, the version is determined by the IntelliJ Platform build number.
+     * There are multiple variants available next to the [TestFrameworkType.Default], which provide additional classes for testing specific modules, like:
+     * Maven, JavaScript, Go, Jave, ReSharper, etc.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
      * If the exact version is unavailable, the closest one is used, found by scanning all releases.
-     * */
-    fun testFramework(version: String = VERSION_CURRENT) = addTestFrameworkDependency(providers.provider { version })
+     *
+     * @param type test framework variant type
+     * @param version library version
+     */
+    fun testFramework(type: TestFrameworkType = TestFrameworkType.Default, version: String = VERSION_CURRENT) =
+        addTestFrameworkDependency(providers.provider { type }, providers.provider { version })
 
     /**
      * Adds a dependency on the `test-framework` library required for testing plugins.
+     *
+     * There are multiple variants available next to the [TestFrameworkType.Default], which provide additional classes for testing specific modules, like:
+     * Maven, JavaScript, Go, Jave, ReSharper, etc.
+     *
+     * If the exact version is unavailable, the closest one is used, found by scanning all releases.
+     *
+     * @param type test framework variant type
+     * @param version library version
      */
-    fun testFramework(version: Provider<String>) = addTestFrameworkDependency(version)
+    fun testFramework(type: Provider<TestFrameworkType>, version: Provider<String>) = addTestFrameworkDependency(type, version)
 
     /**
      * Adds a Java Compiler dependency for code instrumentation.
@@ -934,29 +950,34 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * This dependency belongs to IntelliJ Platform repositories.
      */
     private fun addTestFrameworkDependency(
+        typeProvider: Provider<TestFrameworkType>,
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = dependencies.addProvider(
-        configurationName,
-        versionProvider.map { version ->
+    ) = configurations.getByName(configurationName).dependencies.addLater(
+        typeProvider.zip(versionProvider) { type, version ->
             val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
             val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
 
             dependencies.create(
-                group = "com.jetbrains.intellij.platform",
-                name = "test-framework",
+                group = type.groupId,
+                name = type.artifactId,
                 version = when (version) {
                     VERSION_CURRENT -> when {
-                        resolveClosest -> TestFrameworkClosestVersionResolver(productInfo).resolve().version
+                        resolveClosest -> TestFrameworkClosestVersionResolver(productInfo, type).resolve().version
                         else -> productInfo.buildNumber
                     }
 
                     else -> version
-                },
-            )
+                }
+            ).apply {
+                exclude("org.jetbrains.teamcity")
+                exclude("ai.grazie.utils")
+                exclude("ai.grazie.spell")
+                exclude("ai.grazie.nlp")
+                exclude("ai.grazie.model")
+            }.apply(action)
         },
-        action,
     )
 }
 
@@ -1043,6 +1064,23 @@ private fun arch(newFormat: Boolean): String {
         true -> "i586"
         false -> "x86"
     }
+}
+
+enum class TestFrameworkType(
+    val groupId: String,
+    val artifactId: String,
+) {
+    Common("com.jetbrains.intellij.platform", "test-framework-common"),
+    Core("com.jetbrains.intellij.platform", "test-framework-core"),
+    Default("com.jetbrains.intellij.platform", "test-framework"),
+    Go("com.jetbrains.intellij.go", "go-test-framework"),
+    Ruby("com.jetbrains.intellij.idea", "ruby-test-framework"),
+    Java("com.jetbrains.intellij.java", "java-test-framework"),
+    JavaScript("com.jetbrains.intellij.javascript", "javascript-test-framework"),
+    JUnit5("com.jetbrains.intellij.platform", "test-framework-junit5"),
+    Maven("com.jetbrains.intellij.maven", "maven-test-framework"),
+    ReSharper("com.jetbrains.intellij.resharper", "resharper-test-framework"),
+    ;
 }
 
 /**

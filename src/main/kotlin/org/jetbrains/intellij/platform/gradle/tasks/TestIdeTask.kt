@@ -7,8 +7,6 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.absolutePathString
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
@@ -34,7 +32,7 @@ import kotlin.io.path.absolutePathString
  * ```
  */
 @UntrackedTask(because = "Should always run")
-abstract class TestIdeTask : Test(), CustomIntelliJPlatformVersionAware, SandboxAware, CoroutinesJavaAgentAware, PluginAware, RuntimeAware {
+abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomIntelliJPlatformVersionAware, PluginAware, RuntimeAware, SandboxAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -47,6 +45,4 @@ abstract class TestIdeTask : Test(), CustomIntelliJPlatformVersionAware, Sandbox
 
         super.executeTests()
     }
-
-    override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
 }
