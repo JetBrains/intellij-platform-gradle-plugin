@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -14,13 +13,18 @@ import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.model.ProductInfo
+import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.exists
+import kotlin.io.path.forEachDirectoryEntry
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 
 /**
  * The artifact transformer collecting JAR files located within the IntelliJ Platform or Marketplace Plugin archives.
@@ -43,24 +47,22 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                     .forEach { outputs.file(it) }
             }
         } else {
-            // TODO: check if the given directory is IDEA — i.e. by checking if there's product-info.json file
             // IntelliJ Platform SDK dependency
-            val lib = input.resolve("lib")
-            if (lib.exists() && lib.isDirectory()) {
-                val jarFilter = { path: Path -> path.name != "junit.jar" && path.extension == "jar" }
-
-                lib
-                    .listDirectoryEntries()
-                    .filter(jarFilter)
-                    .forEach { outputs.file(it) }
-
-                lib
-                    .resolve("ant/lib")
-                    .takeIf { it.exists() }
-                    ?.listDirectoryEntries()
-                    ?.filter(jarFilter)
-                    ?.forEach { outputs.file(it) }
+            val productInfo = input.productInfo()
+            val os = with(OperatingSystem.current()) {
+                when {
+                    isLinux -> ProductInfo.Launch.OS.Linux
+                    isWindows -> ProductInfo.Launch.OS.Windows
+                    isMacOsX -> ProductInfo.Launch.OS.macOS
+                    else -> ProductInfo.Launch.OS.Linux
+                }
             }
+
+            productInfo.launch
+                .filter { it.os == os }
+                .flatMap { it.bootClassPathJarNames }
+                .mapNotNull { name -> input.resolve("lib/$name").takeIf { it.exists() } }
+                .forEach { outputs.file(it) }
         }
     }
 }
